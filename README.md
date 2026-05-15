@@ -1,6 +1,6 @@
 # AInimation Studio
 
-Static website for `ainimation.studio`.
+Static website for `www.ainimation.studio`.
 
 ## Local preview
 
