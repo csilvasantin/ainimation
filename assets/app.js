@@ -34,7 +34,7 @@ function roundedRect(x, y, w, h, radius) {
 function draw() {
   frame += reduceMotion.matches ? 0 : 1;
   context.clearRect(0, 0, width, height);
-  context.fillStyle = "#171615";
+  context.fillStyle = "#17120f";
   context.fillRect(0, 0, width, height);
 
   const columns = Math.max(4, Math.ceil(width / 180));
@@ -54,7 +54,7 @@ function draw() {
       const rectH = cellH - pad * 2;
 
       context.globalAlpha = 0.68;
-      context.fillStyle = index % 4 === 0 ? "#b9ff4a" : index % 4 === 1 ? "#ff6b55" : index % 4 === 2 ? "#2ccbd3" : "#fffaf0";
+      context.fillStyle = index % 4 === 0 ? "#c8ff5f" : index % 4 === 1 ? "#ff654f" : index % 4 === 2 ? "#31bed1" : "#7c5cff";
       roundedRect(rectX, rectY, rectW, rectH, 8);
       context.fill();
 

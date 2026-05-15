@@ -1,8 +1,8 @@
 {
-  "name": "Ainimation Studio",
-  "short_name": "Ainimation",
+  "name": "AInimation Studio",
+  "short_name": "AInimation",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#f7f2e8",
-  "theme_color": "#f7f2e8"
+  "background_color": "#14110f",
+  "theme_color": "#14110f"
 }
