@@ -1131,6 +1131,273 @@ h2 {
   margin: 0;
 }
 
+.director-shell.retro-director {
+  background: #b9bec8;
+  border: 1px solid #11151b;
+  border-radius: 8px;
+  box-shadow: var(--shadow);
+  color: #11151b;
+  display: grid;
+  grid-template-columns: 1fr;
+  min-height: 920px;
+  overflow: hidden;
+}
+
+.director-menubar {
+  align-items: center;
+  background: linear-gradient(180deg, #f8fafc, #cfd5df);
+  border-bottom: 1px solid #8a94a4;
+  display: flex;
+  gap: 18px;
+  min-height: 38px;
+  overflow-x: auto;
+  padding: 0 12px;
+  white-space: nowrap;
+}
+
+.director-menubar strong {
+  background: #11151b;
+  color: #c8ff5f;
+  font-size: 0.76rem;
+  margin-right: 6px;
+  padding: 5px 7px;
+  text-transform: uppercase;
+}
+
+.director-menubar span {
+  color: #2d333d;
+  font-size: 0.82rem;
+  font-weight: 820;
+}
+
+.director-workbench {
+  background:
+    linear-gradient(90deg, rgba(255, 255, 255, 0.22) 1px, transparent 1px),
+    linear-gradient(0deg, rgba(255, 255, 255, 0.18) 1px, transparent 1px),
+    #aeb5c0;
+  background-size: 18px 18px;
+  display: grid;
+  gap: 10px;
+  grid-template-columns: 46px minmax(250px, 0.36fr) minmax(360px, 0.78fr) minmax(260px, 0.36fr);
+  grid-template-rows: 360px 210px 260px;
+  height: 860px;
+  min-height: 0;
+  padding: 10px;
+}
+
+.tool-palette {
+  align-content: start;
+  background: #dfe4ec;
+  border: 1px solid #778292;
+  border-radius: 6px;
+  box-shadow: inset 0 1px 0 #fff;
+  display: grid;
+  gap: 6px;
+  grid-row: 1 / -1;
+  padding: 8px;
+}
+
+.tool-palette button {
+  align-items: center;
+  background: #fff;
+  border: 1px solid #929cac;
+  border-radius: 4px;
+  color: #11151b;
+  display: flex;
+  font: 800 0.76rem/1 ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  height: 30px;
+  justify-content: center;
+  padding: 0;
+  width: 30px;
+}
+
+.tool-palette button:nth-child(5) {
+  background: #c8ff5f;
+}
+
+.director-window {
+  background: #f8fafc;
+  border: 1px solid #596272;
+  border-radius: 6px;
+  box-shadow:
+    0 18px 40px rgba(17, 21, 27, 0.18),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  color: #11151b;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.window-titlebar {
+  align-items: center;
+  background: linear-gradient(180deg, #f9fbff, #d4dae5);
+  border-bottom: 1px solid #8b96a8;
+  display: flex;
+  gap: 10px;
+  min-height: 34px;
+  padding: 7px 10px;
+}
+
+.window-titlebar strong {
+  font-size: 0.84rem;
+  line-height: 1;
+  min-width: 0;
+}
+
+.window-titlebar em {
+  font-style: normal;
+}
+
+.window-titlebar small,
+.window-titlebar > span:last-child {
+  color: #596272;
+  font-size: 0.72rem;
+  font-weight: 850;
+  margin-left: auto;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.window-controls {
+  display: inline-flex;
+  gap: 4px;
+}
+
+.window-controls i {
+  background: #9ba5b5;
+  border-radius: 999px;
+  display: block;
+  height: 9px;
+  width: 9px;
+}
+
+.director-stage-window {
+  display: grid;
+  grid-column: 3;
+  grid-row: 1;
+  grid-template-rows: auto 1fr;
+}
+
+.director-stage-window .stage-window {
+  border: 12px solid #eef2f7;
+  min-height: 320px;
+}
+
+.director-cast-window {
+  display: grid;
+  grid-column: 4;
+  grid-row: 1 / span 2;
+  grid-template-rows: auto 1fr;
+}
+
+.director-cast-window .cast-bin {
+  align-content: start;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  max-height: none;
+  overflow: auto;
+}
+
+.director-cast-window .cast-member {
+  align-content: start;
+  aspect-ratio: 1;
+  display: grid;
+  grid-template-columns: 1fr;
+  min-height: 0;
+  padding: 10px;
+}
+
+.director-cast-window .cast-member span {
+  height: 34px;
+  width: 34px;
+}
+
+.director-cast-window .cast-member strong {
+  font-size: 0.82rem;
+}
+
+.intent-window {
+  display: grid;
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  grid-template-rows: auto 1fr;
+}
+
+.intent-window .film-form {
+  border: 0;
+  border-radius: 0;
+  max-height: none;
+  overflow: auto;
+}
+
+.script-window {
+  display: grid;
+  grid-column: 2;
+  grid-row: 3;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+}
+
+.script-window .stage-script {
+  border-top: 0;
+  max-height: none;
+  overflow: auto;
+}
+
+.script-window .ai-cue-list {
+  border-top: 1px solid #dde3ee;
+  margin: 0;
+  max-height: 124px;
+  overflow: auto;
+  padding: 10px;
+}
+
+.script-window .ai-cue-list article {
+  border-radius: 5px;
+  padding: 10px;
+}
+
+.director-score-window {
+  display: grid;
+  grid-column: 3 / -1;
+  grid-row: 2;
+  grid-template-rows: auto 1fr;
+}
+
+.director-score-window .score-grid {
+  max-height: none;
+  min-height: 0;
+}
+
+.property-window {
+  display: block;
+  grid-column: 3 / -1;
+  grid-row: 3;
+  max-height: none;
+  min-height: 0;
+  overflow: auto;
+  padding: 0;
+}
+
+.property-window .treatment,
+.property-window .pipeline-grid,
+.property-window .scene-board {
+  margin-left: 12px;
+  margin-right: 12px;
+}
+
+.property-window .pipeline-grid {
+  grid-template-columns: repeat(4, minmax(160px, 1fr));
+  overflow-x: auto;
+}
+
+.property-window .scene-row {
+  grid-template-columns: 58px minmax(0, 1fr) minmax(160px, 0.34fr);
+}
+
+.retro-director .studio-status {
+  background: #dfe4ec;
+  border-top: 1px solid #8a94a4;
+}
+
 .site-footer {
   align-items: center;
   background: var(--ink);
@@ -1751,6 +2018,7 @@ h2 {
   .home-hero,
   .home-block-grid,
   .home-next,
+  .director-workbench,
   .studio-hero,
   .production-grid,
   .studio-features,
@@ -1805,10 +2073,41 @@ h2 {
   }
 
   .director-board .film-form,
+  .director-stage-window,
+  .director-cast-window,
+  .intent-window,
+  .script-window,
   .score-panel,
+  .director-score-window,
   .inspector-panel {
     grid-column: auto;
     grid-row: auto;
+  }
+
+  .director-shell.retro-director {
+    min-height: auto;
+  }
+
+  .director-workbench {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto;
+    height: auto;
+    min-height: auto;
+  }
+
+  .tool-palette {
+    display: flex;
+    grid-row: auto;
+    overflow-x: auto;
+  }
+
+  .director-cast-window .cast-bin {
+    grid-template-columns: repeat(2, minmax(140px, 1fr));
+  }
+
+  .property-window .scene-row,
+  .scene-row {
+    grid-template-columns: 1fr;
   }
 
   .score-grid {
