@@ -1,0 +1,313 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>AInimation Studio | AI authoring environment</title>
+    <meta
+      name="description"
+      content="AInimation Studio is an AI authoring environment for building animated worlds with cast members, stages, scores, scripts, scenes, sound, and video."
+    />
+    <meta name="theme-color" content="#0f1115" />
+    <meta property="og:title" content="AInimation Studio" />
+    <meta
+      property="og:description"
+      content="Create AI-assisted animations with classic stage, cast, score, and script metaphors upgraded for generative media."
+    />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://ainimation.studio/studio.html" />
+    <link rel="canonical" href="https://ainimation.studio/studio.html" />
+    <link rel="manifest" href="site.webmanifest" />
+    <link rel="stylesheet" href="assets/styles.css" />
+  </head>
+  <body class="studio-page">
+    <header class="site-header studio-site-header" aria-label="Primary">
+      <a class="brand" href="index.html" aria-label="AInimation Studio home">
+        <span class="brand-mark">AI</span>
+        <span>AInimation Studio</span>
+      </a>
+      <nav class="nav-links" aria-label="Site">
+        <a href="index.html#blocks">Blocks</a>
+        <a href="index.html#work">Formats</a>
+        <a href="index.html#process">Process</a>
+        <a href="studio.html" aria-current="page">Studio</a>
+        <a href="mailto:hello@ainimation.studio">Contact</a>
+      </nav>
+    </header>
+
+    <main>
+      <section class="studio-hero" aria-labelledby="studio-hero-title">
+        <div class="studio-hero-copy">
+          <p class="eyebrow">AInimation Studio</p>
+          <h1 id="studio-hero-title">Director-style authoring, rebuilt with AI.</h1>
+          <p>
+            Cast members, stage, score, scripts, sound, and video in one
+            authoring surface. Describe the behavior you want; the AI turns it
+            into editable assets, timing, prompts, and production logic.
+          </p>
+          <div class="hero-actions" aria-label="Studio actions">
+            <a class="button primary" href="#workspace">Start new project</a>
+            <a class="button secondary" href="#workflow">See model</a>
+          </div>
+        </div>
+
+        <div class="studio-hero-visual" aria-label="AInimation production preview">
+          <div class="preview-topbar">
+            <span></span><span></span><span></span>
+            <strong>Score 04 · Frame the signal</strong>
+          </div>
+          <div class="preview-frame">
+            <span class="frame-chip">Cast: Archivist</span>
+            <span class="frame-chip">Stage: Radio coast</span>
+            <span class="frame-chip">Behavior: listenForTomorrow()</span>
+          </div>
+          <div class="preview-timeline">
+            <span></span><span></span><span></span><span></span><span></span>
+          </div>
+        </div>
+      </section>
+
+      <section id="workflow" class="studio-story-section" aria-labelledby="workflow-title">
+        <div class="section-kicker">Authoring model</div>
+        <h2 id="workflow-title">The old mental model still works. AI makes it alive.</h2>
+        <div class="production-grid">
+          <article>
+            <span>01</span>
+            <h3>Cast</h3>
+            <p>Characters, props, backgrounds, voices, loops, references, and generated media live as reusable cast members.</p>
+          </article>
+          <article>
+            <span>02</span>
+            <h3>Stage</h3>
+            <p>Compose scenes visually, place generated actors, control camera, lighting, motion paths, and continuity rules.</p>
+          </article>
+          <article>
+            <span>03</span>
+            <h3>Score</h3>
+            <p>Time-based channels organize shots, dialogue, music cues, transitions, behaviors, and AI generation passes.</p>
+          </article>
+          <article>
+            <span>04</span>
+            <h3>Script</h3>
+            <p>Write behaviors in natural language or code. The assistant drafts, explains, tests, and keeps them editable.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="studio-features" aria-labelledby="features-title">
+        <div>
+          <div class="section-kicker">Studio features</div>
+          <h2 id="features-title">An authoring tool, not a slot machine.</h2>
+        </div>
+        <div class="feature-list">
+          <article>
+            <h3>Reusable media objects</h3>
+            <p>Every generation becomes a cast member with memory, variants, voice, usage history, and export metadata.</p>
+          </article>
+          <article>
+            <h3>Behavior-first AI</h3>
+            <p>Prompt for what objects do over time: react, loop, speak, transform, branch, collide, wait, and transition.</p>
+          </article>
+          <article>
+            <h3>Score-aware generation</h3>
+            <p>The AI reads timing, channels, dependencies, and scene context before creating images, video, music, or voice.</p>
+          </article>
+          <article>
+            <h3>Inspectable outputs</h3>
+            <p>No hidden magic blob: export project briefs, JSON, prompts, timing maps, assets, and behavior notes.</p>
+          </article>
+        </div>
+      </section>
+
+      <section id="workspace" class="studio-section studio-workspace" aria-labelledby="workspace-title">
+        <div class="workspace-heading">
+          <div>
+            <div class="section-kicker">Workspace</div>
+            <h2 id="workspace-title">Build a living animation from one intent.</h2>
+          </div>
+          <p>
+            This first prototype turns a story seed into cast members, staged
+            moments, a score, AI behaviors, media prompts, and exportable briefs.
+          </p>
+        </div>
+
+        <div class="director-shell" aria-label="AI animation authoring tool">
+          <aside class="studio-rail" aria-label="Studio navigation">
+            <a class="rail-brand" href="#workspace" aria-label="AInimation Studio">
+              <span class="brand-mark">AI</span>
+              <span>AInimation</span>
+            </a>
+            <nav class="rail-nav" aria-label="Creation modes">
+              <a class="active" href="#workspace">Director Board</a>
+              <a href="#workflow">Cast</a>
+              <a href="#workflow">Stage</a>
+              <a href="#workflow">Score</a>
+              <a href="#workflow">Scripts</a>
+            </nav>
+            <div class="rail-projects">
+              <span>Recent worlds</span>
+              <button type="button">The Last Signal</button>
+              <button type="button">Mallorca 2099</button>
+              <button type="button">Launch Worlds</button>
+            </div>
+          </aside>
+
+          <div class="studio-console">
+            <div class="studio-toolbar">
+              <div>
+                <div class="section-kicker">Studio</div>
+                <h2>AI Director Board</h2>
+              </div>
+              <div class="mode-tabs" role="list" aria-label="Studio modes">
+                <span class="active" role="listitem">Author</span>
+                <span role="listitem">Generate</span>
+                <span role="listitem">Inspect</span>
+                <span role="listitem">Export</span>
+              </div>
+            </div>
+
+            <div class="director-board">
+              <form class="film-form" id="filmForm">
+                <div class="prompt-card field full">
+                  <label for="film-logline">Authoring intent</label>
+                  <textarea id="film-logline" name="logline" rows="5">When a forbidden transmission predicts tomorrow's emotions, an archivist must decide whether to preserve the city as it is or let everyone hear the truth.</textarea>
+                  <div class="prompt-actions">
+                    <button class="button primary" type="submit">Generate director board</button>
+                    <button class="button light" type="button" id="addScene">Add score row</button>
+                  </div>
+                </div>
+
+                <div class="field full">
+                  <label for="film-title">Working title</label>
+                  <input id="film-title" name="title" type="text" value="The Last Signal" />
+                </div>
+
+                <div class="field">
+                  <label for="film-format">Format</label>
+                  <select id="film-format" name="format">
+                    <option>Short film</option>
+                    <option>Music video</option>
+                    <option>Launch film</option>
+                    <option>Series pilot</option>
+                    <option>Feature treatment</option>
+                  </select>
+                </div>
+
+                <div class="field">
+                  <label for="film-duration">Target length</label>
+                  <select id="film-duration" name="duration">
+                    <option>60 seconds</option>
+                    <option selected>3 minutes</option>
+                    <option>8 minutes</option>
+                    <option>22 minutes</option>
+                    <option>90 minutes</option>
+                  </select>
+                </div>
+
+                <div class="field">
+                  <label for="film-genre">Genre</label>
+                  <select id="film-genre" name="genre">
+                    <option selected>Sci-fi fable</option>
+                    <option>Neo-noir</option>
+                    <option>Documentary poem</option>
+                    <option>Surreal comedy</option>
+                    <option>Mythic adventure</option>
+                    <option>Brand manifesto</option>
+                  </select>
+                </div>
+
+                <div class="field">
+                  <label for="film-tone">Tone</label>
+                  <select id="film-tone" name="tone">
+                    <option selected>Wonder with tension</option>
+                    <option>Elegant and minimal</option>
+                    <option>Dark and electric</option>
+                    <option>Warm and human</option>
+                    <option>Fast, comic, kinetic</option>
+                  </select>
+                </div>
+
+                <div class="field">
+                  <label for="film-protagonist">Protagonist</label>
+                  <input id="film-protagonist" name="protagonist" type="text" value="a young signal archivist" />
+                </div>
+
+                <div class="field">
+                  <label for="film-world">World</label>
+                  <input id="film-world" name="world" type="text" value="a coastal city where memories arrive as radio weather" />
+                </div>
+
+                <div class="film-actions">
+                  <button class="button light" type="button" id="copyMarkdown">Copy Markdown</button>
+                  <button class="button light" type="button" id="downloadJson">Download JSON</button>
+                </div>
+              </form>
+
+              <section class="stage-panel" aria-label="Stage preview">
+                <div class="panel-head">
+                  <div>
+                    <span class="section-kicker">Stage</span>
+                    <h3 id="outputTitle">The Last Signal</h3>
+                  </div>
+                  <span id="sceneCount">5 score rows</span>
+                </div>
+                <div class="stage-window" aria-label="Generated stage composition">
+                  <div class="stage-grid" aria-hidden="true"></div>
+                  <div class="stage-actor primary-actor">Archivist</div>
+                  <div class="stage-actor signal-actor">Signal</div>
+                  <div class="stage-actor city-actor">City</div>
+                  <div class="camera-frame" aria-hidden="true"></div>
+                </div>
+                <div class="stage-script" id="stageScript"></div>
+              </section>
+
+              <aside class="cast-panel" aria-label="Cast members">
+                <div class="panel-head compact">
+                  <span class="section-kicker">Cast</span>
+                  <strong>Reusable members</strong>
+                </div>
+                <div class="cast-bin" id="castBin"></div>
+              </aside>
+
+              <section class="score-panel" aria-label="Score timeline">
+                <div class="panel-head compact">
+                  <span class="section-kicker">Score</span>
+                  <strong>Channels and timing</strong>
+                </div>
+                <div class="score-grid" id="scoreGrid"></div>
+              </section>
+
+              <aside class="inspector-panel film-output" aria-live="polite">
+                <div class="output-head">
+                  <div>
+                    <span class="section-kicker">Inspector</span>
+                    <h3>AI Behaviors</h3>
+                  </div>
+                  <span>Editable</span>
+                </div>
+                <div class="treatment" id="filmTreatment"></div>
+                <div class="pipeline-grid" id="pipelineGrid"></div>
+                <div class="ai-cue-list" id="aiCueList"></div>
+                <div class="scene-board" id="sceneBoard"></div>
+              </aside>
+            </div>
+
+            <div class="studio-status" aria-label="Studio status">
+              <span>Model: AInimation Director Board</span>
+              <span>Context: Cast + Stage + Score + Script</span>
+              <span>Export: Markdown · JSON · Prompts · Timing map</span>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <span>AInimation Studio</span>
+      <span>AI film production platform</span>
+      <a href="mailto:hello@ainimation.studio">hello@ainimation.studio</a>
+    </footer>
+
+    <script src="assets/app.js" defer></script>
+  </body>
+</html>
