@@ -3,16 +3,16 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>AInimation Studio | AI animation for bold stories</title>
+    <title>AInimation Studio | Macromedia Director for the AI era</title>
     <meta
       name="description"
-      content="AInimation Studio creates AI-assisted animated films, launch visuals, music videos, social campaigns, and cinematic prototypes."
+      content="AInimation Studio is a Director-style AI authoring environment for building animated worlds with cast, stage, score, script, video, music, and voice."
     />
     <meta name="theme-color" content="#14110f" />
     <meta property="og:title" content="AInimation Studio" />
     <meta
       property="og:description"
-      content="AI animation studio for cinematic ideas, launch films, and character-driven visual stories."
+      content="A modern Macromedia Director powered by AI: cast, stage, score, script, video, music, voice, and generated media in one authoring surface."
     />
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://ainimation.studio/" />
@@ -20,156 +20,107 @@
     <link rel="manifest" href="site.webmanifest" />
     <link rel="stylesheet" href="assets/styles.css" />
   </head>
-  <body>
+  <body class="home-page">
     <header class="site-header" aria-label="Primary">
       <a class="brand" href="#top" aria-label="AInimation Studio home">
         <span class="brand-mark">AI</span>
         <span>AInimation Studio</span>
       </a>
       <nav class="nav-links" aria-label="Site">
+        <a href="#idea">Idea</a>
+        <a href="#film">Film</a>
         <a href="#blocks">Blocks</a>
-        <a href="#work">Formats</a>
-        <a href="#process">Process</a>
         <a href="studio.html">Studio</a>
         <a href="mailto:hello@ainimation.studio">Contact</a>
       </nav>
     </header>
 
     <main id="top">
-      <section class="hero" aria-labelledby="hero-title">
-        <canvas id="hero-canvas" class="hero-canvas" aria-hidden="true"></canvas>
-        <div class="hero-shade" aria-hidden="true"></div>
-        <div class="hero-inner">
-          <p class="eyebrow">AI animation studio</p>
-          <h1 id="hero-title">AInimation Studio</h1>
+      <section id="idea" class="home-hero" aria-labelledby="hero-title">
+        <div class="home-copy">
+          <p class="eyebrow">AInimation Studio</p>
+          <h1 id="hero-title">Macromedia Director, powered by AI.</h1>
           <p class="hero-copy">
-            A cinematic creation layer for AI Image, AI Video, AI Music, and
-            AI Voiceover. Same production engine underneath; a different world
-            on the surface.
+            Cast, stage, score, script, image, video, music, and voice in one
+            authoring environment. The classic multimedia metaphor, rebuilt for
+            generative production.
           </p>
           <div class="hero-actions" aria-label="Primary actions">
             <a class="button primary" href="studio.html">Open Studio</a>
-            <a class="button secondary" href="#blocks">Explore blocks</a>
+            <a class="button secondary" href="#film">Watch the idea</a>
+          </div>
+        </div>
+
+        <div id="film" class="hero-film" aria-label="AInimation Studio concept film">
+          <div class="film-topbar">
+            <span></span><span></span><span></span>
+            <strong>AInimation concept reel</strong>
+          </div>
+          <div class="film-stage">
+            <div class="film-caption caption-one">Cast becomes memory</div>
+            <div class="film-caption caption-two">Stage becomes world</div>
+            <div class="film-caption caption-three">Score becomes intent</div>
+            <div class="film-object film-cast">CAST</div>
+            <div class="film-object film-stage-object">STAGE</div>
+            <div class="film-object film-ai">AI</div>
+            <div class="film-frame"></div>
+            <div class="film-playhead"></div>
+          </div>
+          <div class="film-score" aria-hidden="true">
+            <span class="score-label">Score</span>
+            <span></span><span></span><span></span><span></span><span></span>
           </div>
         </div>
       </section>
 
-      <section class="ticker" aria-label="Studio focus">
-        <span>AI Image</span>
-        <span>AI Video</span>
-        <span>AI Music</span>
-        <span>AI Voiceover</span>
-        <span>Launch films</span>
-        <span>Story worlds</span>
+      <section class="home-statement" aria-label="Product statement">
+        <p>
+          Not another prompt box. A timeline-based authoring tool where generated
+          media becomes editable objects with behavior.
+        </p>
       </section>
 
-      <section id="blocks" class="section blocks-section" aria-labelledby="blocks-title">
-        <div class="section-kicker">Creation Blocks</div>
-        <div class="section-heading">
-          <h2 id="blocks-title">Four doors into the same production brain.</h2>
+      <section id="blocks" class="home-blocks" aria-labelledby="blocks-title">
+        <div class="home-section-head">
+          <p class="section-kicker">Start in blocks</p>
+          <h2 id="blocks-title">Three doors. One production brain.</h2>
+        </div>
+        <div class="home-block-grid">
+          <a class="home-block" href="studio.html">
+            <span>01</span>
+            <h3>Author</h3>
+            <p>Build with cast, stage, score, script, and AI media objects.</p>
+          </a>
+          <a class="home-block" href="studio.html#workspace">
+            <span>02</span>
+            <h3>Generate</h3>
+            <p>Turn intent into image, video, music, voice, timing, and behaviors.</p>
+          </a>
+          <a class="home-block" href="studio.html#workflow">
+            <span>03</span>
+            <h3>Control</h3>
+            <p>Inspect every prompt, scene, channel, asset, and export.</p>
+          </a>
+        </div>
+      </section>
+
+      <section class="home-next" aria-label="Next action">
+        <div>
+          <p class="section-kicker">Next</p>
+          <h2>The full interface lives in Studio.</h2>
           <p>
-            Each block has its own creative surface, but they share project
-            memory, delivery logic, and output routing behind the scenes.
+            The home introduces the promise. The Studio page contains the
+            authoring surface, generated director board, score, cast bin, and
+            export logic.
           </p>
         </div>
-        <div class="blocks-grid">
-          <article class="block-card image">
-            <span class="block-index">01</span>
-            <h3>AI Image</h3>
-            <p>Style frames, campaign visuals, characters, environments, covers, and reusable visual assets.</p>
-            <small>Prompt systems · Art direction · Asset packs</small>
-          </article>
-          <article class="block-card video">
-            <span class="block-index">02</span>
-            <h3>AI Video</h3>
-            <p>Launch films, reels, animated scenes, product moments, and social cuts built for motion.</p>
-            <small>Story beats · Shot logic · Edit-ready clips</small>
-          </article>
-          <article class="block-card music">
-            <span class="block-index">03</span>
-            <h3>AI Music</h3>
-            <p>Loops, beds, stingers, identity motifs, and song-driven visual worlds with timing baked in.</p>
-            <small>Emotion maps · Rhythm · Versions</small>
-          </article>
-          <article class="block-card voice">
-            <span class="block-index">04</span>
-            <h3>AI Voiceover</h3>
-            <p>Narration, guides, character voices, campaign reads, and spoken scripts ready for final polish.</p>
-            <small>Voice casting · Scripts · Localization</small>
-          </article>
-        </div>
+        <a class="button primary" href="studio.html">Enter Studio</a>
       </section>
-
-      <section id="work" class="section work-section" aria-labelledby="work-title">
-        <div class="section-kicker">Formats</div>
-        <div class="section-heading">
-          <h2 id="work-title">From first spark to finished motion.</h2>
-          <p>
-            We combine direction, AI generation, editing, sound timing, and
-            delivery discipline so experiments become usable films.
-          </p>
-        </div>
-        <div class="work-grid">
-          <article class="work-card">
-            <div class="work-visual film-strip" aria-hidden="true">
-              <span></span><span></span><span></span><span></span>
-            </div>
-            <h3>Brand Films</h3>
-            <p>Short cinematic pieces for product launches, campaigns, and identity systems.</p>
-          </article>
-          <article class="work-card">
-            <div class="work-visual pulse-grid" aria-hidden="true">
-              <span></span><span></span><span></span><span></span><span></span><span></span>
-            </div>
-            <h3>Music Videos</h3>
-            <p>Rhythmic visual worlds built around lyrics, mood, characters, and release assets.</p>
-          </article>
-          <article class="work-card">
-            <div class="work-visual frame-stack" aria-hidden="true">
-              <span></span><span></span><span></span>
-            </div>
-            <h3>Concept Pilots</h3>
-            <p>Fast narrative prototypes for pitches, decks, pilots, and animation tests.</p>
-          </article>
-        </div>
-      </section>
-
-      <section id="process" class="section process-section" aria-labelledby="process-title">
-        <div class="section-kicker">Process</div>
-        <div class="process-layout">
-          <div>
-            <h2 id="process-title">A studio pipeline for AI-era motion.</h2>
-            <p>
-              Every project starts with creative direction and ends with
-              production-ready files. The AI layer accelerates exploration; the
-              studio layer protects taste, clarity, and continuity.
-            </p>
-          </div>
-          <ol class="steps">
-            <li>
-              <span>01</span>
-              <strong>Direction</strong>
-              <p>Define story, references, aspect ratios, characters, rhythm, and constraints.</p>
-            </li>
-            <li>
-              <span>02</span>
-              <strong>Generation</strong>
-              <p>Create shots, motion tests, transitions, style frames, and alternate routes.</p>
-            </li>
-            <li>
-              <span>03</span>
-              <strong>Finish</strong>
-              <p>Edit, grade, sound-time, caption, and package final versions for each channel.</p>
-            </li>
-          </ol>
-        </div>
-      </section>
-
     </main>
 
     <footer class="site-footer">
       <span>AInimation Studio</span>
-      <span>AI-assisted animation and cinematic content</span>
+      <span>Director-style AI authoring environment</span>
       <a href="mailto:hello@ainimation.studio">hello@ainimation.studio</a>
     </footer>
 
