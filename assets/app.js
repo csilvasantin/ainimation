@@ -109,6 +109,27 @@ reduceMotion.addEventListener("change", () => {
   }
 });
 
+const enterStudio = new URLSearchParams(window.location.search).get("enter") === "1";
+
+if (enterStudio) {
+  document.body.classList.add("studio-entering");
+  const jumpToWorkspace = () => {
+    const workspace = document.querySelector("#workspace");
+    if (!workspace) return;
+    const top = workspace.offsetTop - 76;
+    document.documentElement.scrollTop = Math.max(0, top);
+    document.body.scrollTop = Math.max(0, top);
+  };
+  window.addEventListener("load", jumpToWorkspace);
+  window.setTimeout(jumpToWorkspace, 80);
+  window.setTimeout(jumpToWorkspace, 420);
+  window.setTimeout(jumpToWorkspace, 900);
+  window.setTimeout(jumpToWorkspace, 1600);
+  window.setTimeout(() => {
+    document.body.classList.add("studio-entered");
+  }, 3600);
+}
+
 const filmForm = document.querySelector("#filmForm");
 const outputTitle = document.querySelector("#outputTitle");
 const filmTreatment = document.querySelector("#filmTreatment");

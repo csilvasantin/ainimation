@@ -1141,6 +1141,111 @@ h2 {
   grid-template-columns: 1fr;
   min-height: 920px;
   overflow: hidden;
+  position: relative;
+}
+
+.studio-boot {
+  align-items: center;
+  background:
+    linear-gradient(135deg, rgba(17, 21, 27, 0.92), rgba(40, 48, 62, 0.86)),
+    #11151b;
+  color: #f8f7f2;
+  display: none;
+  inset: 0;
+  justify-content: center;
+  padding: 22px;
+  position: absolute;
+  z-index: 8;
+}
+
+.boot-card {
+  background: #f8fafc;
+  border: 1px solid #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 28px 90px rgba(0, 0, 0, 0.42);
+  color: #11151b;
+  display: grid;
+  gap: 12px;
+  justify-items: start;
+  max-width: 420px;
+  padding: 24px;
+  width: min(100%, 420px);
+}
+
+.boot-card strong {
+  font-size: clamp(2.2rem, 5vw, 4.2rem);
+  letter-spacing: 0;
+  line-height: 0.9;
+  text-transform: uppercase;
+}
+
+.boot-card p {
+  color: #596272;
+  font-weight: 800;
+  margin: 0;
+}
+
+.boot-steps {
+  display: grid;
+  gap: 8px;
+  margin-top: 8px;
+  width: 100%;
+}
+
+.boot-steps span {
+  background: #e6ebf3;
+  border: 1px solid #c6cedb;
+  border-radius: 5px;
+  color: #11151b;
+  font-size: 0.78rem;
+  font-weight: 900;
+  padding: 9px 10px;
+  text-transform: uppercase;
+}
+
+.studio-entering .studio-boot {
+  animation: bootExit 3.7s ease forwards;
+  display: flex;
+}
+
+.studio-entering .boot-card {
+  animation: bootCard 3.2s ease forwards;
+}
+
+.studio-entering .boot-steps span {
+  animation: bootStep 2.8s ease forwards;
+  opacity: 0.32;
+}
+
+.studio-entering .boot-steps span:nth-child(2) { animation-delay: 0.35s; }
+.studio-entering .boot-steps span:nth-child(3) { animation-delay: 0.7s; }
+.studio-entering .boot-steps span:nth-child(4) { animation-delay: 1.05s; }
+
+.studio-entering .director-menubar,
+.studio-entering .tool-palette,
+.studio-entering .director-window,
+.studio-entering .studio-status {
+  animation: windowEnter 0.72s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.studio-entering .director-menubar { animation-delay: 2.85s; }
+.studio-entering .tool-palette { animation-delay: 3s; }
+.studio-entering .director-stage-window { animation-delay: 3.08s; }
+.studio-entering .director-cast-window { animation-delay: 3.18s; }
+.studio-entering .intent-window { animation-delay: 3.28s; }
+.studio-entering .director-score-window { animation-delay: 3.38s; }
+.studio-entering .script-window { animation-delay: 3.48s; }
+.studio-entering .property-window { animation-delay: 3.58s; }
+.studio-entering .studio-status { animation-delay: 3.68s; }
+
+.studio-entered .studio-boot {
+  display: none;
+}
+
+.studio-entering .studio-hero,
+.studio-entering .studio-story-section,
+.studio-entering .studio-features {
+  display: none;
 }
 
 .director-menubar {
@@ -1762,6 +1867,33 @@ h2 {
   50% { transform: scaleY(1); }
 }
 
+@keyframes bootExit {
+  0%, 78% { opacity: 1; visibility: visible; }
+  100% { opacity: 0; visibility: hidden; }
+}
+
+@keyframes bootCard {
+  0% { transform: translateY(18px) scale(0.96); }
+  16%, 72% { transform: translateY(0) scale(1); }
+  100% { transform: translateY(-12px) scale(0.98); }
+}
+
+@keyframes bootStep {
+  0% { background: #e6ebf3; opacity: 0.32; }
+  42%, 100% { background: #c8ff5f; opacity: 1; }
+}
+
+@keyframes windowEnter {
+  from {
+    opacity: 0;
+    transform: translateY(18px) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .film-cast,
   .film-stage-object,
@@ -1775,6 +1907,20 @@ h2 {
 
   .caption-one {
     opacity: 1;
+  }
+
+  .studio-entering .studio-boot,
+  .studio-entering .director-menubar,
+  .studio-entering .tool-palette,
+  .studio-entering .director-window,
+  .studio-entering .studio-status,
+  .studio-entering .boot-card,
+  .studio-entering .boot-steps span {
+    animation: none;
+  }
+
+  .studio-entering .studio-boot {
+    display: none;
   }
 }
 
