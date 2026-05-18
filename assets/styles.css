@@ -3442,6 +3442,7 @@ body.studio-entered {
   grid-column: 2;
   grid-row: 1 / 3;
   position: relative;
+  touch-action: none;
 }
 
 .score-ruler span {
@@ -3460,11 +3461,50 @@ body.studio-entered {
   border-right: 1px solid rgba(70, 10, 30, 0.65);
   bottom: -210px;
   box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.5), 0 0 18px rgba(215, 66, 113, 0.36);
-  pointer-events: none;
+  cursor: ew-resize;
+  display: block;
   position: absolute;
   top: 26px;
+  touch-action: none;
+  transform: translateX(-50%);
   width: 6px;
   z-index: 8;
+}
+
+.score-playhead::before {
+  background: #d74271;
+  border: 1px solid rgba(70, 10, 30, 0.65);
+  content: "";
+  height: 16px;
+  left: 50%;
+  position: absolute;
+  top: -18px;
+  transform: translateX(-50%);
+  width: 12px;
+}
+
+.score-playhead::after {
+  background: rgba(23, 32, 45, 0.92);
+  border: 1px solid rgba(215, 66, 113, 0.55);
+  border-radius: 3px;
+  color: #fff;
+  content: "F" attr(data-frame);
+  font-size: 0.62rem;
+  font-style: normal;
+  font-weight: 850;
+  left: 12px;
+  line-height: 1;
+  opacity: 0;
+  padding: 4px 5px;
+  position: absolute;
+  top: -20px;
+  transition: opacity 0.12s ease;
+  white-space: nowrap;
+}
+
+.score-playhead:hover::after,
+.score-playhead.is-dragging::after {
+  opacity: 1;
 }
 
 .score-row-label {
@@ -3643,4 +3683,27 @@ body.studio-entered {
   cursor: nwse-resize;
   left: -3px;
   top: -3px;
+}
+
+.studio-entering .director-shell.retro-director,
+.studio-entered .director-shell.retro-director {
+  height: 100dvh;
+  max-height: 100dvh;
+  min-height: 100dvh;
+}
+
+.studio-entering .director-shell.retro-director:has(.studio-collab-bar.is-hidden),
+.studio-entered .director-shell.retro-director:has(.studio-collab-bar.is-hidden) {
+  grid-template-rows: auto minmax(0, 1fr) auto;
+}
+
+.studio-entering .director-workbench,
+.studio-entered .director-workbench {
+  min-height: 0;
+}
+
+.studio-entering .studio-status,
+.studio-entered .studio-status {
+  align-self: end;
+  flex: 0 0 auto;
 }

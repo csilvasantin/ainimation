@@ -155,8 +155,15 @@ function initDirectorWindowManager() {
     const bounds = workbench.getBoundingClientRect();
     const width = clamp(rect.width, 220, Math.max(240, bounds.width));
     const height = clamp(rect.height, 36, Math.max(120, bounds.height));
-    const left = clamp(rect.left, 0, Math.max(0, bounds.width - width));
-    const top = clamp(rect.top, 0, Math.max(0, bounds.height - height));
+    const maxLeft = Math.max(0, bounds.width - width);
+    const maxTop = Math.max(0, bounds.height - height);
+    let left = clamp(rect.left, 0, maxLeft);
+    let top = clamp(rect.top, 0, maxTop);
+    const snap = 54;
+    if (left <= snap) left = 0;
+    if (maxLeft - left <= snap) left = maxLeft;
+    if (top <= snap) top = 0;
+    if (maxTop - top <= snap) top = maxTop;
     win.style.left = `${left}px`;
     win.style.top = `${top}px`;
     win.style.width = `${width}px`;
@@ -193,6 +200,13 @@ function initDirectorWindowManager() {
       height: rectValue(win.style.height, win.offsetHeight),
     };
   }
+
+  function refreshWindowBounds() {
+    if (isStackedLayout()) return;
+    windows.forEach((win) => applyRect(win, currentRect(win)));
+  }
+
+  window.refreshDirectorWindows = refreshWindowBounds;
 
   function openWindow(id) {
     const win = windows.find((item) => item.dataset.window === id);
@@ -362,7 +376,7 @@ function initDirectorWindowManager() {
   });
 
   window.addEventListener("resize", () => {
-    windows.forEach((win) => applyRect(win, currentRect(win)));
+    refreshWindowBounds();
   });
 }
 
@@ -375,14 +389,21 @@ function initStudioCollabBar() {
   const openButton = shell?.querySelector("[data-collab-open]");
   if (!shell || !collabBar || !closeButton) return;
 
+  const refreshWorkspace = () => {
+    requestAnimationFrame(() => {
+      window.refreshDirectorWindows?.();
+      requestAnimationFrame(() => window.refreshDirectorWindows?.());
+    });
+  };
+
   closeButton.addEventListener("click", () => {
     collabBar.classList.add("is-hidden");
-    window.dispatchEvent(new Event("resize"));
+    refreshWorkspace();
   });
 
   openButton?.addEventListener("click", () => {
     collabBar.classList.remove("is-hidden");
-    window.dispatchEvent(new Event("resize"));
+    refreshWorkspace();
   });
 }
 
@@ -411,6 +432,52 @@ function initImportMenu() {
 }
 
 initImportMenu();
+
+function initScorePlayhead(totalFrames) {
+  const ruler = document.querySelector(".score-ruler");
+  const playhead = ruler?.querySelector(".score-playhead");
+  if (!ruler || !playhead) return;
+
+  const clampFrame = (frame) => Math.min(Math.max(frame, 1), totalFrames);
+  const setFrame = (frame) => {
+    const currentFrame = clampFrame(frame);
+    const left = totalFrames <= 1 ? 0 : ((currentFrame - 1) / (totalFrames - 1)) * 100;
+    playhead.style.left = `${left}%`;
+    playhead.dataset.frame = String(currentFrame);
+    playhead.setAttribute("aria-valuenow", String(currentFrame));
+  };
+  const frameFromPointer = (event) => {
+    const rect = ruler.getBoundingClientRect();
+    const ratio = rect.width ? (event.clientX - rect.left) / rect.width : 0;
+    return Math.round(ratio * (totalFrames - 1)) + 1;
+  };
+  const moveToPointer = (event) => setFrame(frameFromPointer(event));
+
+  setFrame(Number(playhead.dataset.frame || 1));
+  playhead.addEventListener("pointerdown", (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    playhead.setPointerCapture(event.pointerId);
+    playhead.classList.add("is-dragging");
+    moveToPointer(event);
+
+    const move = (moveEvent) => moveToPointer(moveEvent);
+    const up = () => {
+      playhead.classList.remove("is-dragging");
+      playhead.removeEventListener("pointermove", move);
+      playhead.removeEventListener("pointerup", up);
+      playhead.removeEventListener("pointercancel", up);
+    };
+
+    playhead.addEventListener("pointermove", move);
+    playhead.addEventListener("pointerup", up);
+    playhead.addEventListener("pointercancel", up);
+  });
+  ruler.addEventListener("pointerdown", (event) => {
+    if (event.target === playhead) return;
+    moveToPointer(event);
+  });
+}
 
 const filmForm = document.querySelector("#filmForm");
 const outputTitle = document.querySelector("#outputTitle");
@@ -634,7 +701,7 @@ function renderFilmPlan(plan) {
         <div class="score-member-title">Member</div>
         <div class="score-ruler">
           ${frameMarks.map((frame) => `<span style="left:${((frame - 1) / (totalFrames - 1)) * 100}%">${frame}</span>`).join("")}
-          <i class="score-playhead" style="left:${((plan.scenes[0]?.startFrame || 1) + 9) / totalFrames * 100}%"></i>
+          <i class="score-playhead" role="slider" aria-label="Timeline playhead" aria-valuemin="1" aria-valuemax="${totalFrames}" aria-valuenow="${plan.scenes[0]?.startFrame || 1}" data-frame="${plan.scenes[0]?.startFrame || 1}"></i>
         </div>
         ${scoreChannels.map((channel, channelIndex) => `
           <div class="score-row-label">${channel.name}</div>
@@ -654,6 +721,7 @@ function renderFilmPlan(plan) {
         `).join("")}
       </div>
     `;
+    initScorePlayhead(totalFrames);
   }
 
   if (stageScript) {
