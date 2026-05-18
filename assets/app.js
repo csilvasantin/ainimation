@@ -582,19 +582,46 @@ function renderFilmPlan(plan) {
   }
 
   if (scoreGrid) {
-    const channels = ["Stage", "Cast", "Behavior", "Voice", "Music", "Video"];
-    scoreGrid.style.setProperty("--scene-count", plan.scenes.length);
+    const totalFrames = Math.max(...plan.scenes.map((scene) => scene.startFrame + scene.length), 240);
+    const frameMarks = Array.from({ length: 9 }, (_, index) => Math.round(1 + (totalFrames - 1) * (index / 8)));
+    const castNames = (plan.cast || makeCast(plan)).map((member) => member.name);
+    const scoreChannels = [
+      { name: "Member", lane: "stage", label: (scene) => scene.beat },
+      { name: "1", lane: "cast", label: (scene, index) => castNames[index % Math.max(castNames.length, 1)] || scene.beat },
+      { name: "2", lane: "cast", label: (scene, index) => castNames[(index + 1) % Math.max(castNames.length, 1)] || scene.beat },
+      { name: "3", lane: "behavior", label: (scene) => scene.behavior },
+      { name: "Voice", lane: "voice", label: (scene) => scene.beat },
+      { name: "Music", lane: "music", label: (scene) => `${scene.act} motif` },
+      { name: "Video", lane: "video", label: (scene) => scene.beat },
+    ];
+    scoreGrid.style.setProperty("--total-frames", totalFrames);
     scoreGrid.innerHTML = `
-      <div class="score-header"></div>
-      ${plan.scenes.map((scene) => `<div class="score-header">F${scene.startFrame}</div>`).join("")}
-      ${channels.map((channel, channelIndex) => `
-        <div class="score-channel">${channel}</div>
-        ${plan.scenes.map((scene, sceneIndex) => `
-          <button class="score-cell ${channel.toLowerCase()}" type="button" style="--span:${sceneIndex % 3 + 1}">
-            ${channelIndex === 2 ? scene.behavior : sceneIndex % 2 === channelIndex % 2 ? scene.beat : ""}
-          </button>
+      <div class="director-score">
+        <div class="score-tools" aria-hidden="true">
+          <span></span><span></span><span></span>
+        </div>
+        <div class="score-member-title">Member</div>
+        <div class="score-ruler">
+          ${frameMarks.map((frame) => `<span style="left:${((frame - 1) / (totalFrames - 1)) * 100}%">${frame}</span>`).join("")}
+          <i class="score-playhead" style="left:${((plan.scenes[0]?.startFrame || 1) + 9) / totalFrames * 100}%"></i>
+        </div>
+        ${scoreChannels.map((channel, channelIndex) => `
+          <div class="score-row-label">${channel.name}</div>
+          <div class="score-track ${channel.lane}">
+            ${plan.scenes.map((scene, sceneIndex) => {
+              const stagger = channelIndex < 3 ? channelIndex * 8 : 0;
+              const start = Math.min(totalFrames - 8, Math.max(1, scene.startFrame + stagger));
+              const length = Math.max(18, Math.min(totalFrames - start, scene.length - stagger));
+              return `
+                <button class="score-sprite ${channel.lane}" type="button" style="left:${((start - 1) / totalFrames) * 100}%;width:${(length / totalFrames) * 100}%">
+                  <span>${channel.label(scene, sceneIndex)}</span>
+                  <small>${start}-${start + length}</small>
+                </button>
+              `;
+            }).join("")}
+          </div>
         `).join("")}
-      `).join("")}
+      </div>
     `;
   }
 
