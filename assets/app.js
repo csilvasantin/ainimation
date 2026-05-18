@@ -153,14 +153,31 @@ function initDirectorWindowManager() {
   function applyRect(win, rect) {
     if (isStackedLayout()) return;
     const bounds = workbench.getBoundingClientRect();
-    const width = clamp(rect.width, 220, Math.max(240, bounds.width - 20));
-    const height = clamp(rect.height, 36, Math.max(120, bounds.height - 20));
-    const left = clamp(rect.left, 0, Math.max(0, bounds.width - width - 10));
-    const top = clamp(rect.top, 0, Math.max(0, bounds.height - height - 10));
+    const width = clamp(rect.width, 220, Math.max(240, bounds.width));
+    const height = clamp(rect.height, 36, Math.max(120, bounds.height));
+    const left = clamp(rect.left, 0, Math.max(0, bounds.width - width));
+    const top = clamp(rect.top, 0, Math.max(0, bounds.height - height));
     win.style.left = `${left}px`;
     win.style.top = `${top}px`;
     win.style.width = `${width}px`;
     win.style.height = `${height}px`;
+  }
+
+  function addResizeHandles(win) {
+    const directions = ["n", "e", "s", "w", "ne", "se", "sw", "nw"];
+    const cornerHandle = win.querySelector(".resize-handle:not([data-resize-direction])");
+    if (cornerHandle) {
+      cornerHandle.classList.add("resize-se");
+      cornerHandle.dataset.resizeDirection = "se";
+    }
+    for (const direction of directions) {
+      if (win.querySelector(`[data-resize-direction="${direction}"]`)) continue;
+      const handle = document.createElement("span");
+      handle.className = `resize-handle resize-${direction}`;
+      handle.dataset.resizeDirection = direction;
+      handle.setAttribute("aria-hidden", "true");
+      win.append(handle);
+    }
   }
 
   function rectValue(value, fallback) {
@@ -240,6 +257,7 @@ function initDirectorWindowManager() {
     };
     applyRect(win, rect);
     bringToFront(win);
+    addResizeHandles(win);
 
     win.addEventListener("pointerdown", () => bringToFront(win));
 
@@ -272,21 +290,34 @@ function initDirectorWindowManager() {
       titlebar.addEventListener("pointercancel", up);
     });
 
-    win.querySelector(".resize-handle")?.addEventListener("pointerdown", (event) => {
+    win.querySelectorAll(".resize-handle").forEach((resizeHandle) => resizeHandle.addEventListener("pointerdown", (event) => {
       if (isStackedLayout() || win.classList.contains("is-maximized")) return;
       event.preventDefault();
+      event.stopPropagation();
       bringToFront(win);
       const handle = event.currentTarget;
+      const direction = handle.dataset.resizeDirection || "se";
       const startX = event.clientX;
       const startY = event.clientY;
       const start = currentRect(win);
       handle.setPointerCapture(event.pointerId);
 
       const move = (moveEvent) => {
+        const deltaX = moveEvent.clientX - startX;
+        const deltaY = moveEvent.clientY - startY;
+        const next = { ...start };
+        if (direction.includes("e")) next.width = start.width + deltaX;
+        if (direction.includes("s")) next.height = start.height + deltaY;
+        if (direction.includes("w")) {
+          next.left = start.left + deltaX;
+          next.width = start.width - deltaX;
+        }
+        if (direction.includes("n")) {
+          next.top = start.top + deltaY;
+          next.height = start.height - deltaY;
+        }
         applyRect(win, {
-          ...start,
-          width: start.width + moveEvent.clientX - startX,
-          height: start.height + moveEvent.clientY - startY,
+          ...next,
         });
       };
       const up = () => {
@@ -297,7 +328,7 @@ function initDirectorWindowManager() {
       handle.addEventListener("pointermove", move);
       handle.addEventListener("pointerup", up);
       handle.addEventListener("pointercancel", up);
-    });
+    }));
 
     win.querySelectorAll("[data-window-action]").forEach((button) => {
       button.addEventListener("click", (event) => {
