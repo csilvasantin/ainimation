@@ -18,7 +18,7 @@
     <meta property="og:url" content="https://ainimation.studio/studio.html" />
     <link rel="canonical" href="https://ainimation.studio/studio.html" />
     <link rel="manifest" href="site.webmanifest" />
-    <link rel="stylesheet" href="assets/styles.css?v=enter-studio-1" />
+    <link rel="stylesheet" href="assets/styles.css?v=window-manager-1" />
   </head>
   <body class="studio-page">
     <header class="site-header studio-site-header" aria-label="Primary">
@@ -155,7 +155,17 @@
             <span>Control</span>
             <span>Xtras</span>
             <span>AI</span>
-            <span>Window</span>
+            <span class="window-menu">
+              <button class="menu-button" type="button" aria-expanded="false">Window</button>
+              <span class="window-menu-list" aria-label="Open windows">
+                <button type="button" data-open-window="stage">Stage</button>
+                <button type="button" data-open-window="cast">Cast</button>
+                <button type="button" data-open-window="prompt">AI Prompt</button>
+                <button type="button" data-open-window="script">Script</button>
+                <button type="button" data-open-window="score">Score</button>
+                <button type="button" data-open-window="inspector">Inspector</button>
+              </span>
+            </span>
           </div>
 
           <div class="director-workbench">
@@ -168,9 +178,13 @@
               <button type="button" title="Behavior">fx</button>
             </aside>
 
-            <section class="director-window stage-panel director-stage-window" aria-label="Stage preview">
+            <section class="director-window stage-panel director-stage-window" aria-label="Stage preview" data-window="stage" data-window-title="Stage" data-x="318" data-y="12" data-w="500" data-h="360">
               <div class="window-titlebar">
-                <span class="window-controls"><i></i><i></i><i></i></span>
+                <span class="window-controls">
+                  <button type="button" data-window-action="close" aria-label="Close Stage"></button>
+                  <button type="button" data-window-action="minimize" aria-label="Minimize Stage"></button>
+                  <button type="button" data-window-action="maximize" aria-label="Maximize Stage"></button>
+                </span>
                 <strong>Stage: <em id="outputTitle">The Last Signal</em></strong>
                 <span id="sceneCount">5 score rows</span>
               </div>
@@ -181,20 +195,30 @@
                 <div class="stage-actor city-actor">City</div>
                 <div class="camera-frame" aria-hidden="true"></div>
               </div>
+              <span class="resize-handle" aria-hidden="true"></span>
             </section>
 
-            <aside class="director-window cast-panel director-cast-window" aria-label="Cast members">
+            <aside class="director-window cast-panel director-cast-window" aria-label="Cast members" data-window="cast" data-window-title="Cast" data-x="830" data-y="12" data-w="300" data-h="580">
               <div class="window-titlebar">
-                <span class="window-controls"><i></i><i></i><i></i></span>
+                <span class="window-controls">
+                  <button type="button" data-window-action="close" aria-label="Close Cast"></button>
+                  <button type="button" data-window-action="minimize" aria-label="Minimize Cast"></button>
+                  <button type="button" data-window-action="maximize" aria-label="Maximize Cast"></button>
+                </span>
                 <strong>Cast</strong>
                 <small>Internal</small>
               </div>
               <div class="cast-bin" id="castBin"></div>
+              <span class="resize-handle" aria-hidden="true"></span>
             </aside>
 
-            <section class="director-window intent-window" aria-label="AI authoring intent">
+            <section class="director-window intent-window" aria-label="AI authoring intent" data-window="prompt" data-window-title="AI Prompt" data-x="58" data-y="12" data-w="250" data-h="580">
               <div class="window-titlebar">
-                <span class="window-controls"><i></i><i></i><i></i></span>
+                <span class="window-controls">
+                  <button type="button" data-window-action="close" aria-label="Close AI Prompt"></button>
+                  <button type="button" data-window-action="minimize" aria-label="Minimize AI Prompt"></button>
+                  <button type="button" data-window-action="maximize" aria-label="Maximize AI Prompt"></button>
+                </span>
                 <strong>AI Prompt Window</strong>
                 <small>Generative Cast</small>
               </div>
@@ -273,37 +297,55 @@
                   <button class="button light" type="button" id="downloadJson">Download JSON</button>
                 </div>
               </form>
+              <span class="resize-handle" aria-hidden="true"></span>
             </section>
 
-            <section class="director-window script-window" aria-label="Script and behavior window">
+            <section class="director-window script-window" aria-label="Script and behavior window" data-window="script" data-window-title="Script" data-x="58" data-y="604" data-w="250" data-h="236">
               <div class="window-titlebar">
-                <span class="window-controls"><i></i><i></i><i></i></span>
+                <span class="window-controls">
+                  <button type="button" data-window-action="close" aria-label="Close Script"></button>
+                  <button type="button" data-window-action="minimize" aria-label="Minimize Script"></button>
+                  <button type="button" data-window-action="maximize" aria-label="Maximize Script"></button>
+                </span>
                 <strong>Script: AI Behaviors</strong>
                 <small>Lingo + prompt</small>
               </div>
               <div class="stage-script" id="stageScript"></div>
               <div class="ai-cue-list" id="aiCueList"></div>
+              <span class="resize-handle" aria-hidden="true"></span>
             </section>
 
-            <section class="director-window score-panel director-score-window" aria-label="Score timeline">
+            <section class="director-window score-panel director-score-window" aria-label="Score timeline" data-window="score" data-window-title="Score" data-x="318" data-y="384" data-w="812" data-h="210">
               <div class="window-titlebar">
-                <span class="window-controls"><i></i><i></i><i></i></span>
+                <span class="window-controls">
+                  <button type="button" data-window-action="close" aria-label="Close Score"></button>
+                  <button type="button" data-window-action="minimize" aria-label="Minimize Score"></button>
+                  <button type="button" data-window-action="maximize" aria-label="Maximize Score"></button>
+                </span>
                 <strong>Score</strong>
                 <small>Channels / frames / AI passes</small>
               </div>
               <div class="score-grid" id="scoreGrid"></div>
+              <span class="resize-handle" aria-hidden="true"></span>
             </section>
 
-            <aside class="director-window inspector-panel film-output property-window" aria-live="polite">
+            <aside class="director-window inspector-panel film-output property-window" aria-live="polite" data-window="inspector" data-window-title="Inspector" data-x="318" data-y="606" data-w="812" data-h="234">
               <div class="window-titlebar">
-                <span class="window-controls"><i></i><i></i><i></i></span>
+                <span class="window-controls">
+                  <button type="button" data-window-action="close" aria-label="Close Inspector"></button>
+                  <button type="button" data-window-action="minimize" aria-label="Minimize Inspector"></button>
+                  <button type="button" data-window-action="maximize" aria-label="Maximize Inspector"></button>
+                </span>
                 <strong>Property Inspector</strong>
                 <small>Editable output</small>
               </div>
               <div class="treatment" id="filmTreatment"></div>
               <div class="pipeline-grid" id="pipelineGrid"></div>
               <div class="scene-board" id="sceneBoard"></div>
+              <span class="resize-handle" aria-hidden="true"></span>
             </aside>
+
+            <div class="window-taskbar" aria-label="Minimized windows"></div>
           </div>
 
           <div class="studio-status" aria-label="Studio status">
@@ -321,6 +363,6 @@
       <a href="mailto:hello@ainimation.studio">hello@ainimation.studio</a>
     </footer>
 
-    <script src="assets/app.js?v=enter-studio-1" defer></script>
+    <script src="assets/app.js?v=window-manager-1" defer></script>
   </body>
 </html>
