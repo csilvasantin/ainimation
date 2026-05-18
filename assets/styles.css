@@ -3217,13 +3217,69 @@ h2 {
   margin-left: auto;
   overflow: visible;
   padding: 5px;
-  position: static;
+  position: relative;
   z-index: auto;
+}
+
+.menubar-action {
+  background: transparent;
+  border: 0;
+  color: rgba(239, 246, 255, 0.72);
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 760;
+  padding: 0;
+}
+
+.menubar-action:hover {
+  color: #fff;
 }
 
 .director-menubar .tool-palette button {
   height: 28px;
   width: 30px;
+}
+
+.import-menu {
+  background: rgba(9, 13, 21, 0.98);
+  border: 1px solid rgba(218, 233, 255, 0.18);
+  border-radius: 12px;
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.44);
+  display: none;
+  gap: 4px;
+  min-width: 210px;
+  padding: 7px;
+  position: absolute;
+  right: 0;
+  top: calc(100% + 8px);
+  z-index: 40;
+}
+
+.tool-palette.open .import-menu {
+  display: grid;
+}
+
+.director-menubar .tool-palette .import-menu button {
+  background: transparent;
+  border: 0;
+  border-radius: 8px;
+  color: rgba(239, 246, 255, 0.78);
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 760;
+  height: auto;
+  justify-content: flex-start;
+  min-height: 34px;
+  padding: 8px 10px;
+  text-align: left;
+  width: 100%;
+}
+
+.director-menubar .tool-palette .import-menu button:hover {
+  background: rgba(166, 255, 101, 0.16);
+  color: #fff;
 }
 
 .studio-entering .director-workbench,

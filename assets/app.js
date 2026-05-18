@@ -341,15 +341,45 @@ function initStudioCollabBar() {
   const shell = document.querySelector(".director-shell");
   const collabBar = shell?.querySelector(".studio-collab-bar");
   const closeButton = collabBar?.querySelector(".collab-close");
+  const openButton = shell?.querySelector("[data-collab-open]");
   if (!shell || !collabBar || !closeButton) return;
 
   closeButton.addEventListener("click", () => {
     collabBar.classList.add("is-hidden");
     window.dispatchEvent(new Event("resize"));
   });
+
+  openButton?.addEventListener("click", () => {
+    collabBar.classList.remove("is-hidden");
+    window.dispatchEvent(new Event("resize"));
+  });
 }
 
 initStudioCollabBar();
+
+function initImportMenu() {
+  const palette = document.querySelector(".tool-palette");
+  const menu = palette?.querySelector(".import-menu");
+  if (!palette || !menu) return;
+
+  palette.querySelectorAll("[data-import-trigger]").forEach((button) => {
+    button.addEventListener("click", (event) => {
+      event.stopPropagation();
+      palette.dataset.importMode = button.dataset.importTrigger;
+      palette.classList.toggle("open", palette.dataset.openFor !== button.dataset.importTrigger);
+      palette.dataset.openFor = palette.classList.contains("open") ? button.dataset.importTrigger : "";
+    });
+  });
+
+  document.addEventListener("click", (event) => {
+    if (!palette.contains(event.target)) {
+      palette.classList.remove("open");
+      palette.dataset.openFor = "";
+    }
+  });
+}
+
+initImportMenu();
 
 const filmForm = document.querySelector("#filmForm");
 const outputTitle = document.querySelector("#outputTitle");
@@ -633,6 +663,21 @@ function currentPlan() {
   return normalizeFilmPlan(loadFilmPlan()) || buildFilmPlan();
 }
 
+function importCastAsset(name, kind) {
+  const plan = currentPlan();
+  const mode = document.querySelector(".tool-palette")?.dataset.importMode || "asset";
+  const imported = {
+    role: "Imported",
+    name: `${name} ${String((plan.cast?.length || 0) + 1).padStart(2, "0")}`,
+    type: kind,
+    prompt: `Imported via ${mode.toUpperCase()} tool. Store as reusable ${kind.toLowerCase()} inside Cast & Assets for stage, score, and AI Director workflows.`,
+  };
+  plan.cast = [...(plan.cast || makeCast(plan)), imported];
+  saveFilmPlan(plan);
+  renderFilmPlan(plan);
+  document.querySelector(".tool-palette")?.classList.remove("open");
+}
+
 if (filmForm) {
   const initialPlan = currentPlan();
   hydrateFilmForm(initialPlan);
@@ -649,6 +694,12 @@ if (filmForm) {
     const plan = buildFilmPlan(true);
     saveFilmPlan(plan);
     renderFilmPlan(plan);
+  });
+
+  document.querySelectorAll("[data-import-asset]").forEach((button) => {
+    button.addEventListener("click", () => {
+      importCastAsset(button.dataset.importAsset, button.dataset.importKind || "Asset");
+    });
   });
 
   copyMarkdownButton?.addEventListener("click", async () => {
