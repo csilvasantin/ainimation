@@ -3384,16 +3384,22 @@ body.studio-entered {
   background: #edf1f7;
   color: #17202d;
   display: block;
+  height: 100%;
+  max-width: 100%;
   overflow: hidden;
   padding: 0;
+  width: 100%;
 }
 
 .director-score {
+  contain: layout paint;
   display: grid;
   grid-template-columns: 92px minmax(0, 1fr);
   grid-template-rows: 28px 26px repeat(7, minmax(30px, 1fr));
+  height: 100%;
   min-height: 100%;
   min-width: 0;
+  overflow: hidden;
   position: relative;
   width: 100%;
 }
@@ -3557,6 +3563,7 @@ body.studio-entered {
   gap: 5px;
   height: 19px;
   justify-content: space-between;
+  min-width: 0;
   overflow: hidden;
   padding: 0 5px;
   position: absolute;
@@ -3725,4 +3732,18 @@ body.studio-entered {
 .studio-entered .studio-status {
   align-self: end;
   flex: 0 0 auto;
+}
+
+.director-score-window {
+  box-sizing: border-box;
+  contain: layout paint;
+  max-width: 100%;
+  min-width: 220px;
+  overflow: hidden;
+}
+
+.director-score-window .window-titlebar,
+.director-score-window .score-grid {
+  box-sizing: border-box;
+  min-width: 0;
 }
