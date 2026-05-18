@@ -210,11 +210,29 @@ function initDirectorWindowManager() {
     };
   }
 
+  function restoreAbsoluteWindow(win) {
+    if (win.style.position !== "fixed") return;
+    const bounds = workbench.getBoundingClientRect();
+    const rect = win.getBoundingClientRect();
+    win.style.position = "absolute";
+    applyRect(win, {
+      left: rect.left - bounds.left,
+      top: rect.top - bounds.top,
+      width: rect.width,
+      height: rect.height,
+    });
+  }
+
   function dockTimeline(win) {
     if (isStackedLayout()) return;
+    const bounds = workbench.getBoundingClientRect();
     win.classList.remove("is-minimized", "is-hidden");
-    win.classList.add("is-docked");
-    applyRect(win, fullWorkbenchRect());
+    win.classList.add("is-maximized", "is-docked");
+    win.style.position = "fixed";
+    win.style.left = `${bounds.left}px`;
+    win.style.top = `${bounds.top}px`;
+    win.style.width = `${bounds.width}px`;
+    win.style.height = `${bounds.height}px`;
   }
 
   function refreshWindowBounds() {
@@ -252,6 +270,7 @@ function initDirectorWindowManager() {
     if (isStackedLayout()) return;
     if (win.classList.contains("is-maximized")) {
       win.classList.remove("is-maximized", "is-docked");
+      restoreAbsoluteWindow(win);
       if (win._restoreRect) applyRect(win, win._restoreRect);
       return;
     }
@@ -299,6 +318,11 @@ function initDirectorWindowManager() {
     win.addEventListener("pointerdown", () => bringToFront(win));
 
     const titlebar = win.querySelector(".window-titlebar");
+    titlebar?.addEventListener("dblclick", (event) => {
+      if (event.target.closest("button") || isStackedLayout()) return;
+      event.preventDefault();
+      toggleMaximize(win);
+    });
     titlebar?.addEventListener("pointerdown", (event) => {
       if (event.target.closest("button") || isStackedLayout() || win.classList.contains("is-maximized")) return;
       event.preventDefault();
@@ -342,6 +366,7 @@ function initDirectorWindowManager() {
       bringToFront(win);
       if (win.classList.contains("is-maximized")) {
         win.classList.remove("is-maximized", "is-docked");
+        restoreAbsoluteWindow(win);
       }
       const handle = event.currentTarget;
       const direction = handle.dataset.resizeDirection || "se";
