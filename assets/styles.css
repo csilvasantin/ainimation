@@ -3657,7 +3657,7 @@ body.studio-entered {
 }
 
 .director-window .resize-s {
-  bottom: -4px;
+  bottom: 0;
 }
 
 .director-window .resize-e,
@@ -3670,11 +3670,11 @@ body.studio-entered {
 }
 
 .director-window .resize-e {
-  right: -4px;
+  right: 0;
 }
 
 .director-window .resize-w {
-  left: -4px;
+  left: 0;
 }
 
 .director-window .resize-ne,
@@ -3687,8 +3687,8 @@ body.studio-entered {
 
 .director-window .resize-ne {
   cursor: nesw-resize;
-  right: -3px;
-  top: -3px;
+  right: 0;
+  top: 0;
 }
 
 .director-window .resize-se {
@@ -3700,15 +3700,15 @@ body.studio-entered {
 }
 
 .director-window .resize-sw {
-  bottom: -3px;
+  bottom: 0;
   cursor: nesw-resize;
-  left: -3px;
+  left: 0;
 }
 
 .director-window .resize-nw {
   cursor: nwse-resize;
-  left: -3px;
-  top: -3px;
+  left: 0;
+  top: 0;
 }
 
 .studio-entering .director-shell.retro-director,
@@ -3740,6 +3740,15 @@ body.studio-entered {
   max-width: 100%;
   min-width: 220px;
   overflow: hidden;
+}
+
+.director-score-window.is-docked {
+  height: 100% !important;
+  left: 0 !important;
+  max-height: 100% !important;
+  max-width: 100% !important;
+  top: 0 !important;
+  width: 100% !important;
 }
 
 .director-score-window .window-titlebar,

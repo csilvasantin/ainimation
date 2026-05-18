@@ -201,6 +201,22 @@ function initDirectorWindowManager() {
     };
   }
 
+  function fullWorkbenchRect() {
+    return {
+      left: 0,
+      top: 0,
+      width: workbench.clientWidth,
+      height: workbench.clientHeight,
+    };
+  }
+
+  function dockTimeline(win) {
+    if (isStackedLayout()) return;
+    win.classList.remove("is-minimized", "is-hidden");
+    win.classList.add("is-docked");
+    applyRect(win, fullWorkbenchRect());
+  }
+
   function refreshWindowBounds() {
     if (isStackedLayout()) return;
     windows.forEach((win) => applyRect(win, currentRect(win)));
@@ -213,11 +229,7 @@ function initDirectorWindowManager() {
     if (!win) return;
     win.classList.remove("is-hidden", "is-minimized");
     if (id === "score" && !isStackedLayout()) {
-      applyRect(win, {
-        ...currentRect(win),
-        left: 0,
-        width: workbench.getBoundingClientRect().width,
-      });
+      dockTimeline(win);
     }
     bringToFront(win);
     updateTaskbar();
@@ -225,12 +237,12 @@ function initDirectorWindowManager() {
 
   function closeWindow(win) {
     win.classList.add("is-hidden");
-    win.classList.remove("is-minimized", "is-maximized");
+    win.classList.remove("is-minimized", "is-maximized", "is-docked");
     updateTaskbar();
   }
 
   function minimizeWindow(win) {
-    win.classList.remove("is-hidden", "is-maximized");
+    win.classList.remove("is-hidden", "is-maximized", "is-docked");
     win.classList.add("is-minimized");
     bringToFront(win);
     updateTaskbar();
@@ -239,19 +251,23 @@ function initDirectorWindowManager() {
   function toggleMaximize(win) {
     if (isStackedLayout()) return;
     if (win.classList.contains("is-maximized")) {
-      win.classList.remove("is-maximized");
+      win.classList.remove("is-maximized", "is-docked");
       if (win._restoreRect) applyRect(win, win._restoreRect);
       return;
     }
     win._restoreRect = currentRect(win);
     win.classList.remove("is-minimized", "is-hidden");
     win.classList.add("is-maximized");
-    applyRect(win, {
-      left: 10,
-      top: 10,
-      width: workbench.clientWidth - 20,
-      height: workbench.clientHeight - 56,
-    });
+    if (win.dataset.window === "score") {
+      dockTimeline(win);
+    } else {
+      applyRect(win, {
+      left: 0,
+      top: 0,
+      width: workbench.clientWidth,
+      height: workbench.clientHeight,
+      });
+    }
     bringToFront(win);
     updateTaskbar();
   }
@@ -320,10 +336,13 @@ function initDirectorWindowManager() {
     });
 
     win.querySelectorAll(".resize-handle").forEach((resizeHandle) => resizeHandle.addEventListener("pointerdown", (event) => {
-      if (isStackedLayout() || win.classList.contains("is-maximized")) return;
+      if (isStackedLayout()) return;
       event.preventDefault();
       event.stopPropagation();
       bringToFront(win);
+      if (win.classList.contains("is-maximized")) {
+        win.classList.remove("is-maximized", "is-docked");
+      }
       const handle = event.currentTarget;
       const direction = handle.dataset.resizeDirection || "se";
       const startX = event.clientX;
@@ -344,6 +363,13 @@ function initDirectorWindowManager() {
         if (direction.includes("n")) {
           next.top = start.top + deltaY;
           next.height = start.height - deltaY;
+        }
+        const bounds = workbench.getBoundingClientRect();
+        if (direction === "s" || direction === "se" || direction === "sw") {
+          next.height = Math.min(next.height, bounds.height - next.top);
+        }
+        if (direction === "e" || direction === "ne" || direction === "se") {
+          next.width = Math.min(next.width, bounds.width - next.left);
         }
         applyRect(win, {
           ...next,
