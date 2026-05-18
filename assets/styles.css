@@ -1414,6 +1414,10 @@ h2 {
   font-style: normal;
 }
 
+.window-hidden-value {
+  display: none;
+}
+
 .window-titlebar small,
 .window-titlebar > span:last-child {
   color: #596272;
@@ -1829,6 +1833,25 @@ h2 {
   letter-spacing: 0;
   margin-right: 4px;
   padding: 0;
+}
+
+.director-brand-link {
+  color: #f7fbff;
+  font-size: 1rem;
+  font-weight: 850;
+  letter-spacing: 0;
+  margin-right: 4px;
+  white-space: nowrap;
+}
+
+.director-brand-link::before {
+  color: #a6ff65;
+  content: "◆";
+  margin-right: 8px;
+}
+
+.director-brand-link:hover {
+  color: #a6ff65;
 }
 
 .director-menubar strong::before {

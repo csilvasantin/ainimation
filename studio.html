@@ -18,7 +18,7 @@
     <meta property="og:url" content="https://ainimation.studio/studio.html" />
     <link rel="canonical" href="https://ainimation.studio/studio.html" />
     <link rel="manifest" href="site.webmanifest" />
-    <link rel="stylesheet" href="assets/styles.css?v=import-menu-1" />
+    <link rel="stylesheet" href="assets/styles.css?v=director-names-1" />
   </head>
   <body class="studio-page">
     <header class="site-header studio-site-header" aria-label="Primary">
@@ -160,7 +160,7 @@
           </div>
 
           <div class="director-menubar" aria-label="Application menu">
-            <strong>NEON SHADOWS</strong>
+            <a class="director-brand-link" href="index.html">ADMIRA Director v.1.0</a>
             <span>Projects</span>
             <span>Timeline</span>
             <span>Stage</span>
@@ -174,10 +174,10 @@
               <span class="window-menu-list" aria-label="Open windows">
                 <button type="button" data-open-window="stage">Stage</button>
                 <button type="button" data-open-window="cast">Cast</button>
-                <button type="button" data-open-window="prompt">AI Prompt</button>
-                <button type="button" data-open-window="script">Script</button>
-                <button type="button" data-open-window="score">Score</button>
-                <button type="button" data-open-window="inspector">Inspector</button>
+                <button type="button" data-open-window="score">Timeline</button>
+                <button type="button" data-open-window="script">Behaviour</button>
+                <button type="button" data-open-window="inspector">Score</button>
+                <button type="button" data-open-window="prompt">AI Director</button>
               </span>
             </span>
             <aside class="tool-palette" aria-label="Import tools">
@@ -206,7 +206,7 @@
                   <button type="button" data-window-action="minimize" aria-label="Minimize Stage"></button>
                   <button type="button" data-window-action="maximize" aria-label="Maximize Stage"></button>
                 </span>
-                <strong>Stage / Viewport <em id="outputTitle">The Last Signal</em></strong>
+                <strong>Stage <em id="outputTitle" class="window-hidden-value">The Last Signal</em></strong>
                 <span id="sceneCount">5 score rows</span>
               </div>
               <div class="stage-window" aria-label="Generated stage composition">
@@ -226,19 +226,19 @@
                   <button type="button" data-window-action="minimize" aria-label="Minimize Cast"></button>
                   <button type="button" data-window-action="maximize" aria-label="Maximize Cast"></button>
                 </span>
-                <strong>Cast & Assets</strong>
+                <strong>Cast</strong>
                 <small>15%</small>
               </div>
               <div class="cast-bin" id="castBin"></div>
               <span class="resize-handle" aria-hidden="true"></span>
             </aside>
 
-            <section class="director-window intent-window" aria-label="AI authoring intent" data-window="prompt" data-window-title="AI Prompt" data-x="380" data-y="540" data-w="500" data-h="130">
+            <section class="director-window intent-window" aria-label="AI authoring intent" data-window="prompt" data-window-title="AI Director" data-x="380" data-y="540" data-w="500" data-h="130">
               <div class="window-titlebar">
                 <span class="window-controls">
-                  <button type="button" data-window-action="close" aria-label="Close AI Prompt"></button>
-                  <button type="button" data-window-action="minimize" aria-label="Minimize AI Prompt"></button>
-                  <button type="button" data-window-action="maximize" aria-label="Maximize AI Prompt"></button>
+                  <button type="button" data-window-action="close" aria-label="Close AI Director"></button>
+                  <button type="button" data-window-action="minimize" aria-label="Minimize AI Director"></button>
+                  <button type="button" data-window-action="maximize" aria-label="Maximize AI Director"></button>
                 </span>
                 <strong>AI Director</strong>
                 <small>Prompt + Generate</small>
@@ -321,14 +321,14 @@
               <span class="resize-handle" aria-hidden="true"></span>
             </section>
 
-            <section class="director-window script-window" aria-label="Script and behavior window" data-window="script" data-window-title="Script" data-x="16" data-y="650" data-w="350" data-h="110">
+            <section class="director-window script-window" aria-label="Behaviour window" data-window="script" data-window-title="Behaviour" data-x="16" data-y="650" data-w="350" data-h="110">
               <div class="window-titlebar">
                 <span class="window-controls">
-                  <button type="button" data-window-action="close" aria-label="Close Script"></button>
-                  <button type="button" data-window-action="minimize" aria-label="Minimize Script"></button>
-                  <button type="button" data-window-action="maximize" aria-label="Maximize Script"></button>
+                  <button type="button" data-window-action="close" aria-label="Close Behaviour"></button>
+                  <button type="button" data-window-action="minimize" aria-label="Minimize Behaviour"></button>
+                  <button type="button" data-window-action="maximize" aria-label="Maximize Behaviour"></button>
                 </span>
-                <strong>Behavior Console</strong>
+                <strong>Behaviour</strong>
                 <small>Lingo + Prompt</small>
               </div>
               <div class="stage-script" id="stageScript"></div>
@@ -336,28 +336,28 @@
               <span class="resize-handle" aria-hidden="true"></span>
             </section>
 
-            <section class="director-window score-panel director-score-window" aria-label="Score timeline" data-window="score" data-window-title="Score" data-x="0" data-y="96" data-w="350" data-h="540">
+            <section class="director-window score-panel director-score-window" aria-label="Timeline" data-window="score" data-window-title="Timeline" data-x="0" data-y="96" data-w="350" data-h="540">
               <div class="window-titlebar">
                 <span class="window-controls">
-                  <button type="button" data-window-action="close" aria-label="Close Score"></button>
-                  <button type="button" data-window-action="minimize" aria-label="Minimize Score"></button>
-                  <button type="button" data-window-action="maximize" aria-label="Maximize Score"></button>
+                  <button type="button" data-window-action="close" aria-label="Close Timeline"></button>
+                  <button type="button" data-window-action="minimize" aria-label="Minimize Timeline"></button>
+                  <button type="button" data-window-action="maximize" aria-label="Maximize Timeline"></button>
                 </span>
-                <strong>Timeline Space</strong>
+                <strong>Timeline</strong>
                 <small>30%</small>
               </div>
               <div class="score-grid" id="scoreGrid"></div>
               <span class="resize-handle" aria-hidden="true"></span>
             </section>
 
-            <aside class="director-window inspector-panel film-output property-window" aria-live="polite" data-window="inspector" data-window-title="Inspector" data-x="894" data-y="300" data-w="260" data-h="330">
+            <aside class="director-window inspector-panel film-output property-window" aria-live="polite" data-window="inspector" data-window-title="Score" data-x="894" data-y="300" data-w="260" data-h="330">
               <div class="window-titlebar">
                 <span class="window-controls">
-                  <button type="button" data-window-action="close" aria-label="Close Inspector"></button>
-                  <button type="button" data-window-action="minimize" aria-label="Minimize Inspector"></button>
-                  <button type="button" data-window-action="maximize" aria-label="Maximize Inspector"></button>
+                  <button type="button" data-window-action="close" aria-label="Close Score"></button>
+                  <button type="button" data-window-action="minimize" aria-label="Minimize Score"></button>
+                  <button type="button" data-window-action="maximize" aria-label="Maximize Score"></button>
                 </span>
-                <strong>AI Director & Score</strong>
+                <strong>Score</strong>
                 <small>15%</small>
               </div>
               <div class="treatment" id="filmTreatment"></div>
@@ -384,6 +384,6 @@
       <a href="mailto:hello@ainimation.studio">hello@ainimation.studio</a>
     </footer>
 
-    <script src="assets/app.js?v=import-menu-1" defer></script>
+    <script src="assets/app.js?v=director-names-1" defer></script>
   </body>
 </html>
