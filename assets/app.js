@@ -114,11 +114,8 @@ const enterStudio = new URLSearchParams(window.location.search).get("enter") ===
 if (enterStudio) {
   document.body.classList.add("studio-entering");
   const jumpToWorkspace = () => {
-    const workspace = document.querySelector("#workspace");
-    if (!workspace) return;
-    const top = workspace.offsetTop - 76;
-    document.documentElement.scrollTop = Math.max(0, top);
-    document.body.scrollTop = Math.max(0, top);
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
   };
   window.addEventListener("load", jumpToWorkspace);
   window.setTimeout(jumpToWorkspace, 80);
@@ -166,12 +163,17 @@ function initDirectorWindowManager() {
     win.style.height = `${height}px`;
   }
 
+  function rectValue(value, fallback) {
+    const number = parseFloat(value);
+    return Number.isFinite(number) ? number : fallback;
+  }
+
   function currentRect(win) {
     return {
-      left: parseFloat(win.style.left) || win.offsetLeft,
-      top: parseFloat(win.style.top) || win.offsetTop,
-      width: parseFloat(win.style.width) || win.offsetWidth,
-      height: parseFloat(win.style.height) || win.offsetHeight,
+      left: rectValue(win.style.left, win.offsetLeft),
+      top: rectValue(win.style.top, win.offsetTop),
+      width: rectValue(win.style.width, win.offsetWidth),
+      height: rectValue(win.style.height, win.offsetHeight),
     };
   }
 
@@ -334,6 +336,20 @@ function initDirectorWindowManager() {
 }
 
 initDirectorWindowManager();
+
+function initStudioCollabBar() {
+  const shell = document.querySelector(".director-shell");
+  const collabBar = shell?.querySelector(".studio-collab-bar");
+  const closeButton = collabBar?.querySelector(".collab-close");
+  if (!shell || !collabBar || !closeButton) return;
+
+  closeButton.addEventListener("click", () => {
+    collabBar.classList.add("is-hidden");
+    window.dispatchEvent(new Event("resize"));
+  });
+}
+
+initStudioCollabBar();
 
 const filmForm = document.querySelector("#filmForm");
 const outputTitle = document.querySelector("#outputTitle");
