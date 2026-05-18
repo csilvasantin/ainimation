@@ -3310,6 +3310,19 @@ h2 {
   padding: 0;
 }
 
+.studio-entering .director-workbench,
+.studio-entered .director-workbench {
+  align-self: stretch;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.studio-entering .studio-status,
+.studio-entered .studio-status {
+  min-height: 44px;
+}
+
 .studio-entering .window-taskbar,
 .studio-entered .window-taskbar {
   bottom: 8px;
