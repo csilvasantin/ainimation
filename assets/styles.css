@@ -3122,3 +3122,53 @@ h2 {
   max-width: 1180px;
   min-height: 820px;
 }
+
+.studio-entering,
+.studio-entered {
+  overflow: hidden;
+}
+
+.studio-entering .studio-site-header,
+.studio-entered .studio-site-header,
+.studio-entering .site-footer,
+.studio-entered .site-footer {
+  display: none;
+}
+
+.studio-entering main,
+.studio-entered main {
+  height: 100svh;
+  overflow: hidden;
+}
+
+.studio-entering .studio-workspace,
+.studio-entered .studio-workspace {
+  height: 100svh;
+  min-height: 100svh;
+  overflow: hidden;
+  padding: 0;
+}
+
+.studio-entering .director-shell.retro-director,
+.studio-entered .director-shell.retro-director {
+  border: 0;
+  border-radius: 0;
+  display: grid;
+  grid-template-rows: auto auto minmax(0, 1fr) auto;
+  height: 100svh;
+  margin: 0;
+  max-width: none;
+  min-height: 0;
+  width: 100vw;
+}
+
+.studio-entering .studio-collab-bar,
+.studio-entered .studio-collab-bar {
+  margin: 12px 12px 8px;
+}
+
+.studio-entering .director-workbench,
+.studio-entered .director-workbench {
+  height: auto;
+  min-height: 0;
+}
