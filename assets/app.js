@@ -360,10 +360,10 @@ function initDirectorWindowManager() {
     menuButton.setAttribute("aria-expanded", String(isOpen));
   });
 
-  menu?.querySelectorAll("[data-open-window]").forEach((button) => {
+  document.querySelectorAll("[data-open-window]").forEach((button) => {
     button.addEventListener("click", () => {
       openWindow(button.dataset.openWindow);
-      menu.classList.remove("open");
+      menu?.classList.remove("open");
       menuButton?.setAttribute("aria-expanded", "false");
     });
   });
@@ -493,6 +493,7 @@ const addSceneButton = document.querySelector("#addScene");
 const copyMarkdownButton = document.querySelector("#copyMarkdown");
 const downloadJsonButton = document.querySelector("#downloadJson");
 const filmStorageKey = "ainimation-film-plan";
+const scoreLabelsStorageKey = "ainimation-score-labels";
 
 const sceneCounts = {
   "60 seconds": 4,
@@ -614,6 +615,52 @@ function loadFilmPlan() {
   }
 }
 
+function loadScoreLabels() {
+  const fallback = ["Member", "1", "2", "3", "Voice", "Music", "Video"];
+  try {
+    const labels = JSON.parse(localStorage.getItem(scoreLabelsStorageKey));
+    if (!Array.isArray(labels)) return fallback;
+    return fallback.map((label, index) => String(labels[index] || label).trim() || label);
+  } catch {
+    return fallback;
+  }
+}
+
+function saveScoreLabels(labels) {
+  localStorage.setItem(scoreLabelsStorageKey, JSON.stringify(labels));
+}
+
+function initScoreLabelEditing() {
+  const labels = [...scoreGrid.querySelectorAll("[data-score-label-index]")];
+  if (!labels.length) return;
+
+  const saveLabel = (label) => {
+    const index = Number(label.dataset.scoreLabelIndex);
+    const currentLabels = loadScoreLabels();
+    const fallback = currentLabels[index] || `Row ${index + 1}`;
+    const value = label.textContent.trim() || fallback;
+    currentLabels[index] = value;
+    label.textContent = value;
+    saveScoreLabels(currentLabels);
+  };
+
+  labels.forEach((label) => {
+    label.addEventListener("pointerdown", (event) => event.stopPropagation());
+    label.addEventListener("blur", () => saveLabel(label));
+    label.addEventListener("keydown", (event) => {
+      if (event.key === "Enter") {
+        event.preventDefault();
+        label.blur();
+      }
+      if (event.key === "Escape") {
+        event.preventDefault();
+        label.textContent = loadScoreLabels()[Number(label.dataset.scoreLabelIndex)] || label.textContent;
+        label.blur();
+      }
+    });
+  });
+}
+
 function normalizeFilmPlan(plan) {
   if (!plan) return plan;
   const fallback = buildFilmPlan(false);
@@ -683,14 +730,15 @@ function renderFilmPlan(plan) {
     const totalFrames = Math.max(...plan.scenes.map((scene) => scene.startFrame + scene.length), 240);
     const frameMarks = Array.from({ length: 9 }, (_, index) => Math.round(1 + (totalFrames - 1) * (index / 8)));
     const castNames = (plan.cast || makeCast(plan)).map((member) => member.name);
+    const scoreLabels = loadScoreLabels();
     const scoreChannels = [
-      { name: "Member", lane: "stage", label: (scene) => scene.beat },
-      { name: "1", lane: "cast", label: (scene, index) => castNames[index % Math.max(castNames.length, 1)] || scene.beat },
-      { name: "2", lane: "cast", label: (scene, index) => castNames[(index + 1) % Math.max(castNames.length, 1)] || scene.beat },
-      { name: "3", lane: "behavior", label: (scene) => scene.behavior },
-      { name: "Voice", lane: "voice", label: (scene) => scene.beat },
-      { name: "Music", lane: "music", label: (scene) => `${scene.act} motif` },
-      { name: "Video", lane: "video", label: (scene) => scene.beat },
+      { name: scoreLabels[0], lane: "stage", label: (scene) => scene.beat },
+      { name: scoreLabels[1], lane: "cast", label: (scene, index) => castNames[index % Math.max(castNames.length, 1)] || scene.beat },
+      { name: scoreLabels[2], lane: "cast", label: (scene, index) => castNames[(index + 1) % Math.max(castNames.length, 1)] || scene.beat },
+      { name: scoreLabels[3], lane: "behavior", label: (scene) => scene.behavior },
+      { name: scoreLabels[4], lane: "voice", label: (scene) => scene.beat },
+      { name: scoreLabels[5], lane: "music", label: (scene) => `${scene.act} motif` },
+      { name: scoreLabels[6], lane: "video", label: (scene) => scene.beat },
     ];
     scoreGrid.style.setProperty("--total-frames", totalFrames);
     scoreGrid.innerHTML = `
@@ -704,7 +752,7 @@ function renderFilmPlan(plan) {
           <i class="score-playhead" role="slider" aria-label="Timeline playhead" aria-valuemin="1" aria-valuemax="${totalFrames}" aria-valuenow="${plan.scenes[0]?.startFrame || 1}" data-frame="${plan.scenes[0]?.startFrame || 1}"></i>
         </div>
         ${scoreChannels.map((channel, channelIndex) => `
-          <div class="score-row-label">${channel.name}</div>
+          <div class="score-row-label" contenteditable="true" spellcheck="false" role="textbox" aria-label="Edit timeline row label" data-score-label-index="${channelIndex}">${channel.name}</div>
           <div class="score-track ${channel.lane}">
             ${plan.scenes.map((scene, sceneIndex) => {
               const stagger = channelIndex < 3 ? channelIndex * 8 : 0;
@@ -722,6 +770,7 @@ function renderFilmPlan(plan) {
       </div>
     `;
     initScorePlayhead(totalFrames);
+    initScoreLabelEditing();
   }
 
   if (stageScript) {
