@@ -212,6 +212,13 @@ function initDirectorWindowManager() {
     const win = windows.find((item) => item.dataset.window === id);
     if (!win) return;
     win.classList.remove("is-hidden", "is-minimized");
+    if (id === "score" && !isStackedLayout()) {
+      applyRect(win, {
+        ...currentRect(win),
+        left: 0,
+        width: workbench.getBoundingClientRect().width,
+      });
+    }
     bringToFront(win);
     updateTaskbar();
   }
@@ -287,9 +294,17 @@ function initDirectorWindowManager() {
       titlebar.setPointerCapture(event.pointerId);
 
       const move = (moveEvent) => {
+        const bounds = workbench.getBoundingClientRect();
+        let nextLeft = start.left + moveEvent.clientX - startX;
+        if (win.dataset.window === "score") {
+          const edgeSnap = 96;
+          const maxLeft = Math.max(0, bounds.width - start.width);
+          if (moveEvent.clientX <= bounds.left + edgeSnap) nextLeft = 0;
+          if (moveEvent.clientX >= bounds.right - edgeSnap) nextLeft = maxLeft;
+        }
         applyRect(win, {
           ...start,
-          left: start.left + moveEvent.clientX - startX,
+          left: nextLeft,
           top: start.top + moveEvent.clientY - startY,
         });
       };
