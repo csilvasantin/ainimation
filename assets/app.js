@@ -153,8 +153,10 @@ function initDirectorWindowManager() {
   function applyRect(win, rect) {
     if (isStackedLayout()) return;
     const bounds = workbench.getBoundingClientRect();
-    const width = clamp(rect.width, 220, Math.max(240, bounds.width));
-    const height = clamp(rect.height, 36, Math.max(120, bounds.height));
+    const minWidth = win.dataset.window === "tools" ? 64 : 220;
+    const minHeight = win.dataset.window === "tools" ? 220 : 36;
+    const width = clamp(rect.width, minWidth, Math.max(minWidth, bounds.width));
+    const height = clamp(rect.height, minHeight, Math.max(minHeight, bounds.height));
     const maxLeft = Math.max(0, bounds.width - width);
     const maxTop = Math.max(0, bounds.height - height);
     let left = clamp(rect.left, 0, maxLeft);

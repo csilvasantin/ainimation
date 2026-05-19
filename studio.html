@@ -18,7 +18,7 @@
     <meta property="og:url" content="https://ainimation.studio/studio.html" />
     <link rel="canonical" href="https://ainimation.studio/studio.html" />
     <link rel="manifest" href="site.webmanifest" />
-    <link rel="stylesheet" href="assets/styles.css?v=cast-import-menu-1" />
+    <link rel="stylesheet" href="assets/styles.css?v=tools-window-1" />
   </head>
   <body class="studio-page">
     <header class="site-header studio-site-header" aria-label="Primary">
@@ -161,7 +161,6 @@
 
           <div class="director-menubar" aria-label="Application menu">
             <a class="director-brand-link" href="index.html">ADMIRA Director v.1.0</a>
-            <input class="tools-toggle" id="toolsToggle" type="checkbox" checked />
             <span class="member-menu">
               <button class="menu-button" type="button" aria-expanded="false" data-member-menu>Members</button>
               <span class="member-menu-list" aria-label="Import members">
@@ -206,7 +205,7 @@
             <button class="menubar-action" type="button" data-open-window="inspector">Score</button>
             <button class="menubar-action" type="button" data-open-window="prompt">AI Director</button>
             <button class="menubar-action" type="button" data-collab-open>Collaborate</button>
-            <label class="menubar-action tools-menu-label" for="toolsToggle">Tools</label>
+            <button class="menubar-action tools-menu-label" type="button" data-open-window="tools">Tools</button>
             <span class="window-menu">
               <button class="menu-button" type="button" aria-expanded="false">Window</button>
               <span class="window-menu-list" aria-label="Open windows">
@@ -216,32 +215,42 @@
                 <button type="button" data-open-window="script">Behaviour</button>
                 <button type="button" data-open-window="inspector">Score</button>
                 <button type="button" data-open-window="prompt">AI Director</button>
+                <button type="button" data-open-window="tools">Tools</button>
               </span>
             </span>
           </div>
 
           <div class="director-workbench">
-            <aside class="tool-palette" aria-label="Import tools">
-              <strong>Tools</strong>
-              <div class="tool-grid">
-                <button type="button" title="Import video" data-import-trigger="video">V</button>
-                <button type="button" title="Import text" data-import-trigger="text">T</button>
-                <button type="button" title="Import reference frame" data-import-trigger="reference">R</button>
-                <button type="button" title="Import motion path" data-import-trigger="path">~</button>
-                <button type="button" title="Generate AI asset" data-import-trigger="ai">AI</button>
-                <button type="button" title="Import behavior" data-import-trigger="behavior">fx</button>
+            <aside class="director-window tool-palette" aria-label="Import tools" data-window="tools" data-window-title="Tools" data-x="10" data-y="10" data-w="68" data-h="320">
+              <div class="window-titlebar">
+                <span class="window-controls">
+                  <button type="button" data-window-action="close" aria-label="Close Tools"></button>
+                  <button type="button" data-window-action="minimize" aria-label="Minimize Tools"></button>
+                  <button type="button" data-window-action="maximize" aria-label="Maximize Tools"></button>
+                </span>
+                <strong>Tools</strong>
               </div>
-              <div class="tool-grid tool-symbols" aria-hidden="true">
-                <span>✋</span><span>⌕</span>
-                <span>A</span><span>╱</span>
-                <span>◼</span><span>□</span>
-                <span>●</span><span>○</span>
-              </div>
-              <div class="tool-swatches" aria-hidden="true">
-                <span></span><span></span>
-              </div>
-              <div class="tool-strokes" aria-hidden="true">
-                <span></span><span></span><span></span>
+              <div class="tool-palette-body">
+                <div class="tool-grid">
+                  <button type="button" title="Import video" data-import-trigger="video">V</button>
+                  <button type="button" title="Import text" data-import-trigger="text">T</button>
+                  <button type="button" title="Import reference frame" data-import-trigger="reference">R</button>
+                  <button type="button" title="Import motion path" data-import-trigger="path">~</button>
+                  <button type="button" title="Generate AI asset" data-import-trigger="ai">AI</button>
+                  <button type="button" title="Import behavior" data-import-trigger="behavior">fx</button>
+                </div>
+                <div class="tool-grid tool-symbols" aria-hidden="true">
+                  <span>✋</span><span>⌕</span>
+                  <span>A</span><span>╱</span>
+                  <span>◼</span><span>□</span>
+                  <span>●</span><span>○</span>
+                </div>
+                <div class="tool-swatches" aria-hidden="true">
+                  <span></span><span></span>
+                </div>
+                <div class="tool-strokes" aria-hidden="true">
+                  <span></span><span></span><span></span>
+                </div>
               </div>
               <div class="import-menu" aria-label="Import elements">
                 <button type="button" data-import-asset="Character reference" data-import-kind="Character">Character reference</button>
@@ -251,6 +260,7 @@
                 <button type="button" data-import-asset="Motion path" data-import-kind="Behavior">Motion path</button>
                 <button type="button" data-import-asset="AI generated prop" data-import-kind="Generated asset">AI generated prop</button>
               </div>
+              <span class="resize-handle" aria-hidden="true"></span>
             </aside>
             <section class="director-window stage-panel director-stage-window" aria-label="Stage preview" data-window="stage" data-window-title="Stage" data-x="380" data-y="96" data-w="500" data-h="430">
               <div class="window-titlebar">
@@ -434,6 +444,6 @@
       <a href="mailto:hello@ainimation.studio">hello@ainimation.studio</a>
     </footer>
 
-    <script src="assets/app.js?v=cast-import-menu-1" defer></script>
+    <script src="assets/app.js?v=tools-window-1" defer></script>
   </body>
 </html>
