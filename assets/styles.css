@@ -2478,13 +2478,26 @@ h2 {
 }
 
 .hero-film {
-  background: #f8f7f2;
-  border: 1px solid rgba(248, 247, 242, 0.18);
-  border-radius: 8px;
-  box-shadow: 0 28px 120px rgba(0, 0, 0, 0.42);
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
   color: #171a1f;
   min-width: 0;
-  overflow: hidden;
+  overflow: visible;
+}
+
+.hero-digital-twin {
+  align-self: center;
+  filter: drop-shadow(0 22px 60px rgba(255, 44, 193, 0.2));
+}
+
+.hero-digital-twin img {
+  display: block;
+  height: auto;
+  max-width: 100%;
+  object-fit: contain;
+  width: min(100%, 920px);
 }
 
 .film-topbar {
