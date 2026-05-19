@@ -2198,6 +2198,10 @@ h2 {
   z-index: 4;
 }
 
+.stage-imported-member.is-out-of-frame {
+  display: none;
+}
+
 .stage-imported-member img,
 .stage-imported-member video,
 .stage-imported-member audio {

@@ -734,6 +734,40 @@ function initFileImportMenu(menuSelector, buttonSelector, inputSelector) {
 initFileImportMenu(".member-menu", "[data-member-menu]", "[data-member-file-input]");
 initFileImportMenu(".cast-menu", "[data-cast-menu]", "[data-cast-file-input]");
 
+function currentTimelineFrame() {
+  return Number(document.querySelector(".score-playhead")?.dataset.frame || 1);
+}
+
+function syncStageToFrame(frame = currentTimelineFrame(), shouldPlay = false) {
+  const plan = currentPlan();
+  document.querySelectorAll(".stage-imported-member[data-cast-index]").forEach((figure) => {
+    const media = figure.querySelector("video, audio");
+    const member = plan.cast?.[Number(figure.dataset.castIndex)];
+    if (!member) return;
+    const start = Number(member.startFrame || 1);
+    const duration = Math.max(1, Number(member.durationFrames || 24));
+    const isActive = frame >= start && frame <= start + duration - 1;
+    figure.classList.toggle("is-out-of-frame", !isActive);
+    figure.setAttribute("aria-hidden", String(!isActive));
+    if (!media) return;
+    if (!isActive || !shouldPlay) {
+      media.pause();
+      return;
+    }
+    const fps = Number(document.querySelector("[data-score-fps]")?.dataset.value || 24);
+    const targetTime = Math.max(0, (frame - start) / Math.max(1, fps));
+    if (Math.abs((media.currentTime || 0) - targetTime) > 0.2) {
+      if (Number.isFinite(media.duration) && media.duration > 0) {
+        media.currentTime = Math.min(targetTime, Math.max(0, media.duration - 0.05));
+      } else {
+        media.currentTime = targetTime;
+      }
+    }
+    media.muted = false;
+    media.play?.().catch(() => {});
+  });
+}
+
 function initScorePlayhead(totalFrames) {
   const ruler = document.querySelector(".score-ruler");
   const playhead = ruler?.querySelector(".score-playhead");
@@ -750,31 +784,6 @@ function initScorePlayhead(totalFrames) {
   const fpsValues = [12, 24, 25, 30, 60];
   let currentFps = Number(fpsReadout?.dataset.value || fpsReadout?.textContent || 24);
   let playTimer = null;
-  const syncStageMedia = (frame, shouldPlay) => {
-    const plan = currentPlan();
-    document.querySelectorAll(".stage-imported-member[data-cast-index]").forEach((figure) => {
-      const media = figure.querySelector("video, audio");
-      const member = plan.cast?.[Number(figure.dataset.castIndex)];
-      if (!media || !member) return;
-      const start = Number(member.startFrame || 1);
-      const duration = Math.max(1, Number(member.durationFrames || 24));
-      const isActive = frame >= start && frame <= start + duration - 1;
-      if (!isActive || !shouldPlay) {
-        media.pause();
-        return;
-      }
-      const targetTime = Math.max(0, (frame - start) / Math.max(1, getFps()));
-      if (Math.abs((media.currentTime || 0) - targetTime) > 0.2) {
-        if (Number.isFinite(media.duration) && media.duration > 0) {
-          media.currentTime = Math.min(targetTime, Math.max(0, media.duration - 0.05));
-        } else {
-          media.currentTime = targetTime;
-        }
-      }
-      media.muted = false;
-      media.play?.().catch(() => {});
-    });
-  };
   const clampFrame = (frame) => Math.min(Math.max(frame, 1), totalFrames);
   const setFrame = (frame) => {
     currentFrame = clampFrame(frame);
@@ -782,7 +791,7 @@ function initScorePlayhead(totalFrames) {
     playhead.style.left = `${left}%`;
     playhead.dataset.frame = String(currentFrame);
     playhead.setAttribute("aria-valuenow", String(currentFrame));
-    syncStageMedia(currentFrame, Boolean(playTimer));
+    syncStageToFrame(currentFrame, Boolean(playTimer));
   };
   const setFps = (fps) => {
     currentFps = fpsValues.includes(Number(fps)) ? Number(fps) : 24;
@@ -798,7 +807,7 @@ function initScorePlayhead(totalFrames) {
       window.clearInterval(playTimer);
       playTimer = null;
     }
-    syncStageMedia(currentFrame, false);
+    syncStageToFrame(currentFrame, false);
     if (playButton) {
       playButton.textContent = "▶";
       playButton.setAttribute("aria-label", "Play timeline");
@@ -811,7 +820,7 @@ function initScorePlayhead(totalFrames) {
     playButton.textContent = "■";
     playButton.setAttribute("aria-label", "Stop timeline");
     playButton.setAttribute("aria-pressed", "true");
-    syncStageMedia(currentFrame, true);
+    syncStageToFrame(currentFrame, true);
     playTimer = window.setInterval(() => {
       if (currentFrame >= totalFrames) {
         stopPlayback();
@@ -1176,6 +1185,16 @@ function initTimelineSpriteDragging(totalFrames) {
         sprite.style.width = `${(duration / totalFrames) * 100}%`;
         const range = sprite.querySelector("small");
         if (range) range.textContent = `${frame}-${frame + duration - 1}`;
+        const plan = currentPlan();
+        if (plan.cast?.[castIndex]) {
+          plan.cast[castIndex] = {
+            ...plan.cast[castIndex],
+            startFrame: frame,
+            durationFrames: duration,
+          };
+          saveFilmPlan(plan);
+          syncStageToFrame(currentTimelineFrame(), false);
+        }
       };
       const updateFromPointer = (clientX) => {
         const delta = frameDelta(clientX);
@@ -1205,17 +1224,6 @@ function initTimelineSpriteDragging(totalFrames) {
         sprite.removeEventListener("pointermove", move);
         sprite.removeEventListener("pointerup", up);
         sprite.removeEventListener("pointercancel", up);
-        const nextFrame = Number(sprite.dataset.startFrame || startFrame);
-        const nextDuration = Number(sprite.dataset.durationFrames || durationFrames);
-        const plan = currentPlan();
-        if (plan.cast?.[castIndex]) {
-          plan.cast[castIndex] = {
-            ...plan.cast[castIndex],
-            startFrame: nextFrame,
-            durationFrames: nextDuration,
-          };
-          saveFilmPlan(plan);
-        }
       };
       sprite.addEventListener("pointermove", move);
       sprite.addEventListener("pointerup", up);
@@ -1475,6 +1483,7 @@ function renderFilmPlan(plan) {
     initTimelineMarkerEditing(totalFrames);
     initScoreLabelEditing();
     initTimelineSpriteDragging(totalFrames);
+    syncStageToFrame(currentTimelineFrame(), false);
   }
 
   if (stageScript) {
