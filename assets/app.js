@@ -302,6 +302,48 @@ function initDirectorWindowManager() {
     };
   }
 
+  function defaultLayoutRect(win, fallbackRect) {
+    if (isStackedLayout()) return fallbackRect;
+    const bounds = workbench.getBoundingClientRect();
+    const gap = 10;
+    const sideWidth = clamp(Math.round(bounds.width * 0.21), 260, 430);
+    const stageWidth = Math.max(420, bounds.width - sideWidth - gap);
+    const timelineHeight = clamp(Math.round(bounds.height * 0.2), 250, 360);
+    const timelineTop = Math.max(0, bounds.height - timelineHeight);
+    const lowerHeight = clamp(Math.round(bounds.height * 0.15), 140, 210);
+    const lowerTop = Math.max(0, timelineTop - lowerHeight - gap);
+    const stageHeight = Math.max(360, lowerTop - gap);
+    const sideLeft = stageWidth + gap;
+    const castHeight = clamp(Math.round(bounds.height * 0.18), 190, 300);
+    const toolsWidth = Math.min(180, sideWidth);
+    const toolsHeight = clamp(Math.round(bounds.height * 0.32), 260, 500);
+    const toolsTop = castHeight + gap;
+    const inspectorTop = toolsTop + toolsHeight + gap;
+    const inspectorHeight = Math.max(160, timelineTop - inspectorTop - gap);
+    const scriptWidth = Math.min(540, Math.max(260, stageWidth * 0.34));
+    const promptWidth = Math.min(780, Math.max(340, stageWidth * 0.56));
+    const promptLeft = stageWidth >= scriptWidth + promptWidth + gap
+      ? Math.min(stageWidth * 0.36, Math.max(0, stageWidth - promptWidth))
+      : scriptWidth + gap;
+
+    const layouts = {
+      stage: { left: 0, top: 0, width: stageWidth, height: stageHeight },
+      cast: { left: sideLeft, top: 0, width: sideWidth, height: castHeight },
+      tools: { left: sideLeft, top: toolsTop, width: toolsWidth, height: toolsHeight },
+      inspector: { left: sideLeft, top: inspectorTop, width: sideWidth, height: inspectorHeight },
+      score: { left: 0, top: timelineTop, width: bounds.width, height: timelineHeight },
+      script: { left: 0, top: lowerTop, width: scriptWidth, height: lowerHeight },
+      prompt: {
+        left: promptLeft,
+        top: lowerTop,
+        width: promptWidth,
+        height: lowerHeight,
+      },
+    };
+
+    return layouts[win.dataset.window] || fallbackRect;
+  }
+
   function restoreAbsoluteWindow(win) {
     if (win.style.position !== "fixed") return;
     const bounds = workbench.getBoundingClientRect();
@@ -403,7 +445,7 @@ function initDirectorWindowManager() {
       width: Number(win.dataset.w || 320),
       height: Number(win.dataset.h || 240),
     };
-    applyRect(win, rect);
+    applyRect(win, defaultLayoutRect(win, rect));
     bringToFront(win);
     addResizeHandles(win);
 
@@ -619,6 +661,29 @@ function initImportMenu() {
 }
 
 initImportMenu();
+
+function initStageColorPicker() {
+  const stageCanvas = document.querySelector(".stage-canvas");
+  const input = document.querySelector(".stage-color-input");
+  const swatch = document.querySelector(".stage-background-swatch");
+  if (!stageCanvas || !input || !swatch) return;
+
+  const storageKey = "admira-stage-background";
+  const defaultColor = input.value || "#10141f";
+  const applyColor = (color) => {
+    const nextColor = /^#[0-9a-f]{6}$/i.test(color) ? color : defaultColor;
+    input.value = nextColor;
+    swatch.style.backgroundColor = nextColor;
+    stageCanvas.style.setProperty("--stage-fill", nextColor);
+    localStorage.setItem(storageKey, nextColor);
+  };
+
+  applyColor(localStorage.getItem(storageKey) || defaultColor);
+  swatch.addEventListener("click", () => input.click());
+  input.addEventListener("input", () => applyColor(input.value));
+}
+
+initStageColorPicker();
 
 function initFileImportMenu(menuSelector, buttonSelector, inputSelector) {
   const menu = document.querySelector(menuSelector);

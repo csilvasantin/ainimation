@@ -18,7 +18,7 @@
     <meta property="og:url" content="https://ainimation.studio/studio.html" />
     <link rel="canonical" href="https://ainimation.studio/studio.html" />
     <link rel="manifest" href="site.webmanifest" />
-    <link rel="stylesheet" href="assets/styles.css?v=stage-rulers-1" />
+    <link rel="stylesheet" href="assets/styles.css?v=stage-layout-color-1" />
   </head>
   <body class="studio-page">
     <header class="site-header studio-site-header" aria-label="Primary">
@@ -221,7 +221,7 @@
           </div>
 
           <div class="director-workbench">
-            <aside class="director-window tool-palette" aria-label="Import tools" data-window="tools" data-window-title="Tools" data-x="10" data-y="10" data-w="68" data-h="320">
+            <aside class="director-window tool-palette" aria-label="Import tools" data-window="tools" data-window-title="Tools" data-x="1598" data-y="320" data-w="180" data-h="500">
               <div class="window-titlebar">
                 <span class="window-controls">
                   <button type="button" data-window-action="close" aria-label="Close Tools"></button>
@@ -245,8 +245,10 @@
                   <span>◼</span><span>□</span>
                   <span>●</span><span>○</span>
                 </div>
-                <div class="tool-swatches" aria-hidden="true">
-                  <span></span><span></span>
+                <div class="tool-swatches" aria-label="Color selection">
+                  <button class="tool-color-swatch foreground-swatch" type="button" title="Foreground color" aria-label="Foreground color"></button>
+                  <button class="tool-color-swatch stage-background-swatch" type="button" title="Stage background color" aria-label="Stage background color"></button>
+                  <input class="stage-color-input" type="color" value="#10141f" aria-label="Choose stage background color" />
                 </div>
                 <div class="tool-strokes" aria-hidden="true">
                   <span></span><span></span><span></span>
@@ -262,7 +264,7 @@
               </div>
               <span class="resize-handle" aria-hidden="true"></span>
             </aside>
-            <section class="director-window stage-panel director-stage-window" aria-label="Stage preview" data-window="stage" data-window-title="Stage" data-x="380" data-y="96" data-w="500" data-h="430">
+            <section class="director-window stage-panel director-stage-window" aria-label="Stage preview" data-window="stage" data-window-title="Stage" data-x="0" data-y="0" data-w="1588" data-h="1120">
               <div class="window-titlebar">
                 <span class="window-controls">
                   <button type="button" data-window-action="close" aria-label="Close Stage"></button>
@@ -293,7 +295,7 @@
               <span class="resize-handle" aria-hidden="true"></span>
             </section>
 
-            <aside class="director-window cast-panel director-cast-window" aria-label="Cast members" data-window="cast" data-window-title="Cast" data-x="894" data-y="96" data-w="260" data-h="190">
+            <aside class="director-window cast-panel director-cast-window" aria-label="Cast members" data-window="cast" data-window-title="Cast" data-x="1598" data-y="0" data-w="430" data-h="300">
               <div class="window-titlebar">
                 <span class="window-controls">
                   <button type="button" data-window-action="close" aria-label="Close Cast"></button>
@@ -306,7 +308,7 @@
               <span class="resize-handle" aria-hidden="true"></span>
             </aside>
 
-            <section class="director-window intent-window" aria-label="AI authoring intent" data-window="prompt" data-window-title="AI Director" data-x="380" data-y="540" data-w="500" data-h="130">
+            <section class="director-window intent-window" aria-label="AI authoring intent" data-window="prompt" data-window-title="AI Director" data-x="560" data-y="1170" data-w="780" data-h="210">
               <div class="window-titlebar">
                 <span class="window-controls">
                   <button type="button" data-window-action="close" aria-label="Close AI Director"></button>
@@ -394,7 +396,7 @@
               <span class="resize-handle" aria-hidden="true"></span>
             </section>
 
-            <section class="director-window script-window" aria-label="Behaviour window" data-window="script" data-window-title="Behaviour" data-x="16" data-y="650" data-w="350" data-h="110">
+            <section class="director-window script-window" aria-label="Behaviour window" data-window="script" data-window-title="Behaviour" data-x="0" data-y="1200" data-w="540" data-h="150">
               <div class="window-titlebar">
                 <span class="window-controls">
                   <button type="button" data-window-action="close" aria-label="Close Behaviour"></button>
@@ -409,7 +411,7 @@
               <span class="resize-handle" aria-hidden="true"></span>
             </section>
 
-            <section class="director-window score-panel director-score-window" aria-label="Timeline" data-window="score" data-window-title="Timeline" data-x="0" data-y="516" data-w="1600" data-h="248">
+            <section class="director-window score-panel director-score-window" aria-label="Timeline" data-window="score" data-window-title="Timeline" data-x="0" data-y="1400" data-w="2048" data-h="360">
               <div class="window-titlebar">
                 <span class="window-controls">
                   <button type="button" data-window-action="close" aria-label="Close Timeline"></button>
@@ -422,7 +424,7 @@
               <span class="resize-handle" aria-hidden="true"></span>
             </section>
 
-            <aside class="director-window inspector-panel film-output property-window" aria-live="polite" data-window="inspector" data-window-title="Score" data-x="894" data-y="300" data-w="260" data-h="330">
+            <aside class="director-window inspector-panel film-output property-window" aria-live="polite" data-window="inspector" data-window-title="Score" data-x="1598" data-y="840" data-w="430" data-h="560">
               <div class="window-titlebar">
                 <span class="window-controls">
                   <button type="button" data-window-action="close" aria-label="Close Score"></button>
@@ -455,6 +457,6 @@
       <a href="mailto:hello@ainimation.studio">hello@ainimation.studio</a>
     </footer>
 
-    <script src="assets/app.js?v=stage-rulers-1" defer></script>
+    <script src="assets/app.js?v=stage-layout-color-1" defer></script>
   </body>
 </html>

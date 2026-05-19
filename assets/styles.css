@@ -2085,7 +2085,13 @@ h2 {
 }
 
 .stage-ruler-y span {
-  writing-mode: vertical-rl;
+  align-self: center;
+  display: inline-block;
+  justify-self: center;
+  line-height: 1;
+  transform: rotate(-90deg);
+  transform-origin: center;
+  white-space: nowrap;
 }
 
 .stage-resolution-badge {
@@ -2108,7 +2114,7 @@ h2 {
     linear-gradient(180deg, rgba(8, 12, 22, 0.08), rgba(8, 12, 22, 0.44)),
     radial-gradient(circle at 55% 18%, rgba(255, 104, 217, 0.48), transparent 20%),
     radial-gradient(circle at 70% 32%, rgba(33, 219, 255, 0.42), transparent 22%),
-    linear-gradient(135deg, #0b1327, #152640 45%, #10141f);
+    var(--stage-fill, linear-gradient(135deg, #0b1327, #152640 45%, #10141f));
   bottom: 10px;
   left: var(--stage-ruler-y);
   overflow: hidden;
@@ -3612,22 +3618,39 @@ h2 {
   position: relative;
 }
 
-.tool-swatches span {
+.tool-color-swatch {
   background: #fff;
   border: 1px solid #7d8796;
+  border-radius: 0;
+  cursor: pointer;
   display: block;
   height: 22px;
+  padding: 0;
   width: 22px;
 }
 
-.tool-swatches span:first-child {
+.tool-color-swatch:focus-visible {
+  outline: 2px solid #2f6df6;
+  outline-offset: 2px;
+}
+
+.foreground-swatch {
   background: #070b12;
   z-index: 2;
 }
 
-.tool-swatches span:last-child {
+.stage-background-swatch {
+  background: #10141f;
   margin-left: -10px;
   margin-top: 10px;
+}
+
+.stage-color-input {
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+  position: absolute;
+  width: 1px;
 }
 
 .tool-strokes {
