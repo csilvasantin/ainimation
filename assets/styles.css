@@ -3679,11 +3679,13 @@ h2 {
   height: 6px;
 }
 
-.stage-canvas[data-stage-tool="hand"] .stage-imported-member {
+.stage-canvas[data-stage-tool="hand"] .stage-imported-member,
+.stage-canvas[data-stage-tool="hand"] .stage-text-item {
   cursor: grab;
 }
 
-.stage-canvas[data-stage-tool="hand"] .stage-imported-member:active {
+.stage-canvas[data-stage-tool="hand"] .stage-imported-member:active,
+.stage-canvas[data-stage-tool="hand"] .stage-text-item:active {
   cursor: grabbing;
 }
 

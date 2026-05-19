@@ -1191,7 +1191,9 @@ function renderStageItems(stage, plan) {
       text.style.left = `${clampPercent(item.x)}%`;
       text.style.top = `${clampPercent(item.y)}%`;
       text.style.color = item.color || "";
-      text.addEventListener("pointerdown", (event) => event.stopPropagation());
+      text.addEventListener("pointerdown", (event) => {
+        if (stage.dataset.stageTool === "text") event.stopPropagation();
+      });
       text.addEventListener("blur", () => {
         const nextPlan = currentPlan();
         nextPlan.stageItems = (nextPlan.stageItems || []).map((stageItem) => (
@@ -1538,6 +1540,7 @@ function initStageTools() {
   stage.addEventListener("pointerdown", (event) => {
     const tool = activeTool();
     const member = event.target.closest(".stage-imported-member");
+    const textItem = event.target.closest(".stage-text-item");
     if (tool === "hand" && member) {
       event.preventDefault();
       const castIndex = Number(member.dataset.castIndex);
@@ -1577,6 +1580,47 @@ function initStageTools() {
           };
           saveFilmPlan(plan);
         }
+      };
+      stage.addEventListener("pointermove", move);
+      stage.addEventListener("pointerup", up);
+      stage.addEventListener("pointercancel", up);
+      return;
+    }
+
+    if (tool === "hand" && textItem) {
+      event.preventDefault();
+      const itemId = textItem.dataset.stageItemId;
+      const start = stagePointFromEvent(stage, event);
+      const startLeft = Number.parseFloat(textItem.style.left) || 0;
+      const startTop = Number.parseFloat(textItem.style.top) || 0;
+      const stageRect = stage.getBoundingClientRect();
+      const itemRect = textItem.getBoundingClientRect();
+      const itemWidth = stageRect.width ? (itemRect.width / stageRect.width) * 100 : 0;
+      const itemHeight = stageRect.height ? (itemRect.height / stageRect.height) * 100 : 0;
+      stage.setPointerCapture(event.pointerId);
+      const move = (moveEvent) => {
+        const next = stagePointFromEvent(stage, moveEvent);
+        const nextLeft = Math.min(clampPercent(startLeft + (next.x - start.x)), Math.max(0, 100 - itemWidth));
+        const nextTop = Math.min(clampPercent(startTop + (next.y - start.y)), Math.max(0, 100 - itemHeight));
+        textItem.style.left = `${nextLeft}%`;
+        textItem.style.top = `${nextTop}%`;
+      };
+      const up = () => {
+        stage.removeEventListener("pointermove", move);
+        stage.removeEventListener("pointerup", up);
+        stage.removeEventListener("pointercancel", up);
+        const plan = currentPlan();
+        plan.stageItems = (plan.stageItems || []).map((item) => (
+          item.id === itemId
+            ? {
+              ...item,
+              x: Number.parseFloat(textItem.style.left) || 0,
+              y: Number.parseFloat(textItem.style.top) || 0,
+              text: textItem.textContent.trim() || "Text",
+            }
+            : item
+        ));
+        saveFilmPlan(plan);
       };
       stage.addEventListener("pointermove", move);
       stage.addEventListener("pointerup", up);
