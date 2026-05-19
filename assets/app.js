@@ -1029,6 +1029,19 @@ function loadFilmPlan() {
   }
 }
 
+function clearWorkingCastOnBoot() {
+  const saved = loadFilmPlan();
+  if (!saved) return;
+  const persistentCast = (saved.cast || []).filter((member) => !member.imported);
+  localStorage.setItem(filmStorageKey, JSON.stringify({
+    ...saved,
+    cast: persistentCast,
+    stageItems: [],
+  }));
+}
+
+clearWorkingCastOnBoot();
+
 function loadScoreLabels() {
   const fallback = ["Member", "1", "2", "3", "Voice", "Music", "Video"];
   try {
@@ -1340,7 +1353,14 @@ function hydrateFilmForm(plan) {
 
 function renderFilmPlan(plan) {
   const castMembers = plan.cast || makeCast(plan);
-  const importedTimelineMembers = castMembers.filter((member) => member.imported && member.src);
+  const visibleCastMembers = castMembers
+    .map((member, index) => ({ member, index }))
+    .filter(({ member }) => member.imported || member.src);
+  const importedTimelineMembers = castMembers.filter((member) => (
+    member.imported &&
+    member.src &&
+    member.onStage !== false
+  ));
   const importedStageMembers = importedTimelineMembers.filter((member) => (
     member.onStage !== false &&
     ["animation", "audio", "image", "video"].includes(member.mediaType)
@@ -1365,7 +1385,7 @@ function renderFilmPlan(plan) {
   `).join("");
 
   if (castBin) {
-    castBin.innerHTML = castMembers.map((member, index) => {
+    castBin.innerHTML = visibleCastMembers.length ? visibleCastMembers.map(({ member, index }) => {
       const media = member.src && ["animation", "image"].includes(member.mediaType)
         ? `<img src="${escapeHtml(member.src)}" alt="" />`
         : member.src && member.mediaType === "video"
@@ -1374,7 +1394,7 @@ function renderFilmPlan(plan) {
             ? `<b class="cast-member-kind">${escapeHtml(member.mediaType || "asset")}</b>`
             : "";
       return `
-      <article class="cast-member ${member.imported ? "imported-member" : ""}" data-media-type="${escapeHtml(member.mediaType || "generated")}">
+      <article class="cast-member ${member.imported ? "imported-member" : ""} ${member.onStage !== false ? "is-on-stage" : ""}" data-media-type="${escapeHtml(member.mediaType || "generated")}" data-cast-index="${index}" role="button" tabindex="0" aria-pressed="${member.onStage !== false}">
         ${media}
         <span>${String(index + 1).padStart(2, "0")}</span>
         <div>
@@ -1383,7 +1403,32 @@ function renderFilmPlan(plan) {
         </div>
       </article>
     `;
-    }).join("");
+    }).join("") : `<p class="cast-empty-state">Import cast members to begin</p>`;
+
+    castBin.querySelectorAll("[data-cast-index]").forEach((item) => {
+      const toggleCastMember = () => {
+        const castIndex = Number(item.dataset.castIndex);
+        const nextPlan = currentPlan();
+        if (!Number.isInteger(castIndex) || !nextPlan.cast?.[castIndex]?.src) return;
+        const selectedCount = nextPlan.cast.filter((member) => member.imported && member.src && member.onStage !== false).length;
+        const wasSelected = nextPlan.cast[castIndex].onStage !== false;
+        nextPlan.cast[castIndex] = {
+          ...nextPlan.cast[castIndex],
+          onStage: !wasSelected,
+          startFrame: nextPlan.cast[castIndex].startFrame || (1 + selectedCount * 24),
+          durationFrames: nextPlan.cast[castIndex].durationFrames || 24,
+        };
+        saveFilmPlan(nextPlan);
+        renderFilmPlan(nextPlan);
+      };
+      item.addEventListener("click", toggleCastMember);
+      item.addEventListener("keydown", (event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          toggleCastMember();
+        }
+      });
+    });
   }
 
   const stageWindow = document.querySelector(".stage-canvas") || document.querySelector(".stage-window");
@@ -1603,7 +1648,7 @@ function importMemberFiles(files, mode = "image") {
         fileName: file.file.name,
         src: URL.createObjectURL(file.file),
         imported: true,
-        onStage: ["animation", "audio", "image", "video"].includes(file.mediaType),
+        onStage: false,
         startFrame: 1 + (timelineMemberCount + index) * 24,
         durationFrames: 24,
         prompt: `Imported ${file.mediaType} member. Place in Cast, schedule on Timeline, and prepare for later AI animation passes.`,

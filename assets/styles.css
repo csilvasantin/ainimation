@@ -2282,6 +2282,26 @@ h2 {
   padding: 7px;
 }
 
+.director-cast-window .cast-member[role="button"] {
+  cursor: pointer;
+}
+
+.director-cast-window .cast-member.is-on-stage {
+  box-shadow: inset 0 0 0 2px rgba(166, 255, 101, 0.82), 0 0 22px rgba(166, 255, 101, 0.18);
+}
+
+.cast-empty-state {
+  align-items: center;
+  color: rgba(237, 246, 255, 0.58);
+  display: flex;
+  font-size: 0.72rem;
+  font-weight: 850;
+  grid-column: 1 / -1;
+  justify-content: center;
+  min-height: 96px;
+  text-align: center;
+}
+
 .director-cast-window .cast-member img,
 .director-cast-window .cast-member video,
 .director-cast-window .cast-member-kind {
