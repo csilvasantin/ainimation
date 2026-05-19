@@ -18,7 +18,7 @@
     <meta property="og:url" content="https://ainimation.studio/studio.html" />
     <link rel="canonical" href="https://ainimation.studio/studio.html" />
     <link rel="manifest" href="site.webmanifest" />
-    <link rel="stylesheet" href="assets/styles.css?v=timeline-fps-stepper-1" />
+    <link rel="stylesheet" href="assets/styles.css?v=members-import-1" />
   </head>
   <body class="studio-page">
     <header class="site-header studio-site-header" aria-label="Primary">
@@ -161,7 +161,19 @@
 
           <div class="director-menubar" aria-label="Application menu">
             <a class="director-brand-link" href="index.html">ADMIRA Director v.1.0</a>
-            <span>Projects</span>
+            <span class="member-menu">
+              <button class="menu-button" type="button" aria-expanded="false" data-member-menu>Members</button>
+              <span class="member-menu-list" aria-label="Import members">
+                <label>
+                  Import images
+                  <input class="member-file-input" type="file" accept="image/*" multiple data-member-file-input data-member-import-mode="image" />
+                </label>
+                <label>
+                  Import videos
+                  <input class="member-file-input" type="file" accept="video/*" multiple data-member-file-input data-member-import-mode="video" />
+                </label>
+              </span>
+            </span>
             <button class="menubar-action" type="button" data-open-window="score">Timeline</button>
             <span>Stage</span>
             <span>Cast</span>
@@ -381,6 +393,6 @@
       <a href="mailto:hello@ainimation.studio">hello@ainimation.studio</a>
     </footer>
 
-    <script src="assets/app.js?v=timeline-fps-stepper-1" defer></script>
+    <script src="assets/app.js?v=members-import-1" defer></script>
   </body>
 </html>

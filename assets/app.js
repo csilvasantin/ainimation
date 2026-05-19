@@ -499,6 +499,38 @@ function initImportMenu() {
 
 initImportMenu();
 
+function initMemberMenu() {
+  const menu = document.querySelector(".member-menu");
+  const button = menu?.querySelector("[data-member-menu]");
+  const fileInputs = [...(menu?.querySelectorAll("[data-member-file-input]") || [])];
+  if (!menu || !button || !fileInputs.length) return;
+
+  button.addEventListener("click", (event) => {
+    event.stopPropagation();
+    const isOpen = !menu.classList.contains("open");
+    menu.classList.toggle("open", isOpen);
+    button.setAttribute("aria-expanded", String(isOpen));
+  });
+
+  fileInputs.forEach((fileInput) => {
+    fileInput.addEventListener("change", () => {
+      importMemberFiles(fileInput.files, fileInput.dataset.memberImportMode || "image");
+      fileInput.value = "";
+      menu.classList.remove("open");
+      button.setAttribute("aria-expanded", "false");
+    });
+  });
+
+  document.addEventListener("click", (event) => {
+    if (!menu.contains(event.target)) {
+      menu.classList.remove("open");
+      button.setAttribute("aria-expanded", "false");
+    }
+  });
+}
+
+initMemberMenu();
+
 function initScorePlayhead(totalFrames) {
   const ruler = document.querySelector(".score-ruler");
   const playhead = ruler?.querySelector(".score-playhead");
@@ -915,6 +947,8 @@ function hydrateFilmForm(plan) {
 }
 
 function renderFilmPlan(plan) {
+  const castMembers = plan.cast || makeCast(plan);
+  const importedMediaMembers = castMembers.filter((member) => member.imported && member.src && ["image", "video"].includes(member.mediaType));
   outputTitle.textContent = plan.title;
   sceneCount.textContent = `${plan.scenes.length} score rows`;
   filmTreatment.innerHTML = `
@@ -935,22 +969,53 @@ function renderFilmPlan(plan) {
   `).join("");
 
   if (castBin) {
-    castBin.innerHTML = (plan.cast || makeCast(plan)).map((member, index) => `
-      <article class="cast-member">
+    castBin.innerHTML = castMembers.map((member, index) => {
+      const media = member.src && member.mediaType === "image"
+        ? `<img src="${escapeHtml(member.src)}" alt="" />`
+        : member.src && member.mediaType === "video"
+          ? `<video src="${escapeHtml(member.src)}" muted playsinline></video>`
+          : "";
+      return `
+      <article class="cast-member ${member.imported ? "imported-member" : ""}" data-media-type="${escapeHtml(member.mediaType || "generated")}">
+        ${media}
         <span>${String(index + 1).padStart(2, "0")}</span>
         <div>
-          <strong>${member.name}</strong>
-          <small>${member.role} · ${member.type}</small>
+          <strong>${escapeHtml(member.name)}</strong>
+          <small>${escapeHtml(member.role)} · ${escapeHtml(member.type)}</small>
         </div>
       </article>
-    `).join("");
+    `;
+    }).join("");
+  }
+
+  const stageWindow = document.querySelector(".stage-window");
+  if (stageWindow) {
+    stageWindow.querySelectorAll(".stage-imported-member").forEach((member) => member.remove());
+    importedMediaMembers.slice(0, 6).forEach((member, index) => {
+      const figure = document.createElement("figure");
+      figure.className = `stage-imported-member ${member.mediaType === "video" ? "video-member" : "image-member"}`;
+      figure.style.left = `${16 + (index % 3) * 24}%`;
+      figure.style.top = `${54 + Math.floor(index / 3) * 18}%`;
+      const media = document.createElement(member.mediaType === "video" ? "video" : "img");
+      media.src = member.src;
+      media.alt = "";
+      if (member.mediaType === "video") {
+        media.muted = true;
+        media.playsInline = true;
+      }
+      const caption = document.createElement("figcaption");
+      caption.textContent = member.name;
+      figure.append(media, caption);
+      stageWindow.append(figure);
+    });
   }
 
   if (scoreGrid) {
-    const totalFrames = Math.max(...plan.scenes.map((scene) => scene.startFrame + scene.length), 240);
+    const importedEndFrames = importedMediaMembers.map((member) => Number(member.startFrame || 1) + Number(member.durationFrames || 72));
+    const totalFrames = Math.max(...plan.scenes.map((scene) => scene.startFrame + scene.length), ...importedEndFrames, 240);
     const frameMarks = Array.from({ length: 9 }, (_, index) => Math.round(1 + (totalFrames - 1) * (index / 8)));
     const timelineMarkers = loadTimelineMarkers(totalFrames);
-    const castNames = (plan.cast || makeCast(plan)).map((member) => member.name);
+    const castNames = castMembers.map((member) => member.name);
     const scoreLabels = loadScoreLabels();
     const scoreChannels = [
       { name: scoreLabels[0], lane: "stage", label: (scene) => scene.beat },
@@ -960,6 +1025,11 @@ function renderFilmPlan(plan) {
       { name: scoreLabels[4], lane: "voice", label: (scene) => scene.beat },
       { name: scoreLabels[5], lane: "music", label: (scene) => `${scene.act} motif` },
       { name: scoreLabels[6], lane: "video", label: (scene) => scene.beat },
+      ...importedMediaMembers.map((member) => ({
+        name: member.name,
+        lane: member.mediaType === "video" ? "video" : "cast",
+        member,
+      })),
     ];
     scoreGrid.style.setProperty("--total-frames", totalFrames);
     scoreGrid.innerHTML = `
@@ -991,15 +1061,20 @@ function renderFilmPlan(plan) {
           <i class="score-playhead" role="slider" aria-label="Timeline playhead" aria-valuemin="1" aria-valuemax="${totalFrames}" aria-valuenow="${plan.scenes[0]?.startFrame || 1}" data-frame="${plan.scenes[0]?.startFrame || 1}"></i>
         </div>
         ${scoreChannels.map((channel, channelIndex) => `
-          <div class="score-row-label" contenteditable="true" spellcheck="false" role="textbox" aria-label="Edit timeline row label" data-score-label-index="${channelIndex}">${channel.name}</div>
+          <div class="score-row-label" contenteditable="true" spellcheck="false" role="textbox" aria-label="Edit timeline row label" data-score-label-index="${channelIndex}">${escapeHtml(channel.name)}</div>
           <div class="score-track ${channel.lane}">
-            ${plan.scenes.map((scene, sceneIndex) => {
-              const stagger = channelIndex < 3 ? channelIndex * 8 : 0;
-              const start = Math.min(totalFrames - 8, Math.max(1, scene.startFrame + stagger));
-              const length = Math.max(18, Math.min(totalFrames - start, scene.length - stagger));
+            ${(channel.member ? [channel.member] : plan.scenes).map((item, itemIndex) => {
+              const stagger = channel.member ? 0 : channelIndex < 3 ? channelIndex * 8 : 0;
+              const start = channel.member
+                ? Math.min(totalFrames - 8, Math.max(1, Number(item.startFrame || 1)))
+                : Math.min(totalFrames - 8, Math.max(1, item.startFrame + stagger));
+              const length = channel.member
+                ? Math.max(18, Math.min(totalFrames - start, Number(item.durationFrames || 72)))
+                : Math.max(18, Math.min(totalFrames - start, item.length - stagger));
+              const spriteLabel = channel.member ? item.name : channel.label(item, itemIndex);
               return `
-                <button class="score-sprite ${channel.lane}" type="button" style="left:${((start - 1) / totalFrames) * 100}%;width:${(length / totalFrames) * 100}%">
-                  <span>${channel.label(scene, sceneIndex)}</span>
+                <button class="score-sprite ${channel.lane} ${channel.member ? "imported-member" : ""}" type="button" style="left:${((start - 1) / totalFrames) * 100}%;width:${(length / totalFrames) * 100}%">
+                  <span>${escapeHtml(spriteLabel)}</span>
                   <small>${start}-${start + length}</small>
                 </button>
               `;
@@ -1078,6 +1153,46 @@ function currentPlan() {
   return normalizeFilmPlan(loadFilmPlan()) || buildFilmPlan();
 }
 
+function cleanMemberName(fileName) {
+  return String(fileName || "Imported member")
+    .replace(/\.[^/.]+$/, "")
+    .replace(/[_-]+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim()
+    .slice(0, 34) || "Imported member";
+}
+
+function importMemberFiles(files, mode = "image") {
+  const incoming = [...(files || [])];
+  if (!incoming.length) return;
+  const plan = currentPlan();
+  const existing = plan.cast || makeCast(plan);
+  const imported = incoming
+    .filter((file) => mode === "video" ? file.type.startsWith("video/") : file.type.startsWith("image/"))
+    .map((file, index) => {
+      const mediaType = file.type.startsWith("video/") ? "video" : "image";
+      const baseName = cleanMemberName(file.name);
+      const memberNumber = existing.length + index + 1;
+      return {
+        role: "Imported",
+        name: `${baseName} ${String(memberNumber).padStart(2, "0")}`,
+        type: mediaType === "video" ? "Video member" : "Image member",
+        mediaType,
+        fileName: file.name,
+        src: URL.createObjectURL(file),
+        imported: true,
+        startFrame: 1 + (memberNumber % 5) * 48,
+        durationFrames: mediaType === "video" ? 96 : 72,
+        prompt: `Imported ${mediaType} member. Place on Stage, expose in Cast, and schedule on Timeline for later AI animation passes.`,
+      };
+    });
+  if (!imported.length) return;
+  plan.cast = [...existing, ...imported];
+  saveFilmPlan(plan);
+  renderFilmPlan(plan);
+  window.refreshDirectorWindows?.();
+}
+
 function importCastAsset(name, kind) {
   const plan = currentPlan();
   const mode = document.querySelector(".tool-palette")?.dataset.importMode || "asset";
@@ -1085,6 +1200,7 @@ function importCastAsset(name, kind) {
     role: "Imported",
     name: `${name} ${String((plan.cast?.length || 0) + 1).padStart(2, "0")}`,
     type: kind,
+    imported: true,
     prompt: `Imported via ${mode.toUpperCase()} tool. Store as reusable ${kind.toLowerCase()} inside Cast & Assets for stage, score, and AI Director workflows.`,
   };
   plan.cast = [...(plan.cast || makeCast(plan)), imported];
