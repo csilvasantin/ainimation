@@ -747,6 +747,13 @@ function syncStageToFrame(frame = currentTimelineFrame(), shouldPlay = false) {
     const start = Number(member.startFrame || 1);
     const duration = Math.max(1, Number(member.durationFrames || 24));
     const isActive = frame >= start && frame <= start + duration - 1;
+    const keyframe = interpolateStageKeyframe(member, frame, Number(figure.dataset.stageIndex || 0));
+    if (keyframe) {
+      figure.style.left = `${keyframe.x}%`;
+      figure.style.top = `${keyframe.y}%`;
+      figure.style.width = `${keyframe.w}%`;
+      figure.style.height = `${keyframe.h}%`;
+    }
     figure.classList.toggle("is-out-of-frame", !isActive);
     figure.setAttribute("aria-hidden", String(!isActive));
     if (!media) return;
@@ -1278,6 +1285,71 @@ function clampStageSize(value, fallback = 12) {
   return Math.min(Math.max(Number(value) || fallback, 4), 80);
 }
 
+function defaultStageKeyframe(member, frame = Number(member?.startFrame || 1), index = 0) {
+  return {
+    frame: Number(frame) || 1,
+    x: clampPercent(member?.stageX ?? (16 + (index % 3) * 24)),
+    y: clampPercent(member?.stageY ?? (54 + Math.floor(index / 3) * 18)),
+    w: clampStageSize(member?.stageW, 12),
+    h: clampStageSize(member?.stageH, 10),
+  };
+}
+
+function stageKeyframesFor(member, index = 0) {
+  const fallback = defaultStageKeyframe(member, Number(member?.startFrame || 1), index);
+  const keyframes = Array.isArray(member?.keyframes) && member.keyframes.length
+    ? member.keyframes
+    : [fallback];
+  return keyframes
+    .map((keyframe) => ({
+      frame: Math.max(1, Number(keyframe.frame || fallback.frame)),
+      x: clampPercent(keyframe.x ?? fallback.x),
+      y: clampPercent(keyframe.y ?? fallback.y),
+      w: clampStageSize(keyframe.w, fallback.w),
+      h: clampStageSize(keyframe.h, fallback.h),
+    }))
+    .sort((a, b) => a.frame - b.frame);
+}
+
+function interpolateStageKeyframe(member, frame, index = 0) {
+  const keyframes = stageKeyframesFor(member, index);
+  const currentFrame = Number(frame || 1);
+  let previous = keyframes[0];
+  let next = keyframes[keyframes.length - 1];
+  for (const keyframe of keyframes) {
+    if (keyframe.frame <= currentFrame) previous = keyframe;
+    if (keyframe.frame >= currentFrame) {
+      next = keyframe;
+      break;
+    }
+  }
+  if (!previous || !next || previous.frame === next.frame) return previous || next;
+  const progress = (currentFrame - previous.frame) / (next.frame - previous.frame);
+  return {
+    frame: currentFrame,
+    x: previous.x + (next.x - previous.x) * progress,
+    y: previous.y + (next.y - previous.y) * progress,
+    w: previous.w + (next.w - previous.w) * progress,
+    h: previous.h + (next.h - previous.h) * progress,
+  };
+}
+
+function upsertStageKeyframe(member, frame, values, index = 0) {
+  const nextFrame = Math.max(1, Number(frame || 1));
+  const base = interpolateStageKeyframe(member, nextFrame, index) || defaultStageKeyframe(member, nextFrame, index);
+  const nextKeyframe = {
+    frame: nextFrame,
+    x: clampPercent(values.x ?? base.x),
+    y: clampPercent(values.y ?? base.y),
+    w: clampStageSize(values.w, base.w),
+    h: clampStageSize(values.h, base.h),
+  };
+  return [
+    ...stageKeyframesFor(member, index).filter((keyframe) => keyframe.frame !== nextFrame),
+    nextKeyframe,
+  ].sort((a, b) => a.frame - b.frame);
+}
+
 function stagePointFromEvent(stage, event) {
   const rect = stage.getBoundingClientRect();
   const x = rect.width ? ((event.clientX - rect.left) / rect.width) * 100 : 0;
@@ -1412,12 +1484,18 @@ function renderFilmPlan(plan) {
         if (!Number.isInteger(castIndex) || !nextPlan.cast?.[castIndex]?.src) return;
         const selectedCount = nextPlan.cast.filter((member) => member.imported && member.src && member.onStage !== false).length;
         const wasSelected = nextPlan.cast[castIndex].onStage !== false;
+        const startFrame = nextPlan.cast[castIndex].startFrame || (1 + selectedCount * 24);
         nextPlan.cast[castIndex] = {
           ...nextPlan.cast[castIndex],
           onStage: !wasSelected,
-          startFrame: nextPlan.cast[castIndex].startFrame || (1 + selectedCount * 24),
+          startFrame,
           durationFrames: nextPlan.cast[castIndex].durationFrames || 24,
         };
+        if (!wasSelected && !nextPlan.cast[castIndex].keyframes?.length) {
+          nextPlan.cast[castIndex].keyframes = [
+            defaultStageKeyframe(nextPlan.cast[castIndex], startFrame, selectedCount),
+          ];
+        }
         saveFilmPlan(nextPlan);
         renderFilmPlan(nextPlan);
       };
@@ -1438,10 +1516,12 @@ function renderFilmPlan(plan) {
       const figure = document.createElement("figure");
       figure.className = `stage-imported-member ${member.mediaType === "video" ? "video-member" : member.mediaType === "audio" ? "audio-member" : "image-member"}`;
       figure.dataset.castIndex = String(castMembers.indexOf(member));
-      figure.style.left = `${clampPercent(member.stageX ?? (16 + (index % 3) * 24))}%`;
-      figure.style.top = `${clampPercent(member.stageY ?? (54 + Math.floor(index / 3) * 18))}%`;
-      figure.style.width = `${clampStageSize(member.stageW, 12)}%`;
-      figure.style.height = `${clampStageSize(member.stageH, 10)}%`;
+      figure.dataset.stageIndex = String(index);
+      const keyframe = interpolateStageKeyframe(member, currentTimelineFrame(), index) || defaultStageKeyframe(member, Number(member.startFrame || 1), index);
+      figure.style.left = `${keyframe.x}%`;
+      figure.style.top = `${keyframe.y}%`;
+      figure.style.width = `${keyframe.w}%`;
+      figure.style.height = `${keyframe.h}%`;
       const media = document.createElement(member.mediaType === "video" ? "video" : member.mediaType === "audio" ? "audio" : "img");
       media.src = member.src;
       media.alt = "";
@@ -1731,7 +1811,16 @@ function initStageTools() {
             stageW: Number.parseFloat(member.style.width) || startWidth,
             stageH: Number.parseFloat(member.style.height) || startHeight,
           };
+          const frame = currentTimelineFrame();
+          const values = {
+            x: Number.parseFloat(member.style.left) || 0,
+            y: Number.parseFloat(member.style.top) || 0,
+            w: Number.parseFloat(member.style.width) || startWidth,
+            h: Number.parseFloat(member.style.height) || startHeight,
+          };
+          plan.cast[castIndex].keyframes = upsertStageKeyframe(plan.cast[castIndex], frame, values, Number(member.dataset.stageIndex || 0));
           saveFilmPlan(plan);
+          syncStageToFrame(frame, false);
         }
       };
       stage.addEventListener("pointermove", move);
@@ -1911,7 +2000,7 @@ if (filmForm) {
     const plan = currentPlan();
     plan.cast = (plan.cast || makeCast(plan)).map((member) => (
       member.imported && ["animation", "audio", "image", "video"].includes(member.mediaType)
-        ? { ...member, onStage: false, stageX: undefined, stageY: undefined, stageW: undefined, stageH: undefined }
+        ? { ...member, onStage: false, stageX: undefined, stageY: undefined, stageW: undefined, stageH: undefined, keyframes: [] }
         : member
     ));
     plan.stageItems = [];
