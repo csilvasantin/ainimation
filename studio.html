@@ -18,7 +18,7 @@
     <meta property="og:url" content="https://ainimation.studio/studio.html" />
     <link rel="canonical" href="https://ainimation.studio/studio.html" />
     <link rel="manifest" href="site.webmanifest" />
-    <link rel="stylesheet" href="assets/styles.css?v=stage-clean-tools-1" />
+    <link rel="stylesheet" href="assets/styles.css?v=stage-tools-active-2" />
   </head>
   <body class="studio-page">
     <header class="site-header studio-site-header" aria-label="Primary">
@@ -239,15 +239,20 @@
                   <button type="button" title="Generate AI asset" data-import-trigger="ai">AI</button>
                   <button type="button" title="Import behavior" data-import-trigger="behavior">fx</button>
                 </div>
-                <div class="tool-grid tool-symbols" aria-hidden="true">
-                  <span>✋</span><span>⌕</span>
-                  <span>A</span><span>╱</span>
-                  <span>◼</span><span>□</span>
-                  <span>●</span><span>○</span>
+                <div class="tool-grid tool-symbols" aria-label="Stage drawing tools">
+                  <button type="button" title="Move cast members" data-stage-tool="hand" aria-pressed="true">✋</button>
+                  <button type="button" title="Inspect stage object" data-stage-tool="inspect">⌕</button>
+                  <button type="button" title="Write text" data-stage-tool="text">A</button>
+                  <button type="button" title="Draw line" data-stage-tool="line">╱</button>
+                  <button type="button" title="Filled rectangle" data-stage-tool="rect-fill">◼</button>
+                  <button type="button" title="Rectangle outline" data-stage-tool="rect">□</button>
+                  <button type="button" title="Filled oval" data-stage-tool="oval-fill">●</button>
+                  <button type="button" title="Oval outline" data-stage-tool="oval">○</button>
                 </div>
                 <div class="tool-swatches" aria-label="Color selection">
                   <button class="tool-color-swatch foreground-swatch" type="button" title="Foreground color" aria-label="Foreground color"></button>
                   <button class="tool-color-swatch stage-background-swatch" type="button" title="Stage background color" aria-label="Stage background color"></button>
+                  <input class="foreground-color-input" type="color" value="#edf6ff" aria-label="Choose foreground color" />
                   <input class="stage-color-input" type="color" value="#10141f" aria-label="Choose stage background color" />
                 </div>
                 <div class="tool-strokes" aria-hidden="true">
@@ -455,6 +460,6 @@
       <a href="mailto:hello@ainimation.studio">hello@ainimation.studio</a>
     </footer>
 
-    <script src="assets/app.js?v=stage-clean-tools-1" defer></script>
+    <script src="assets/app.js?v=stage-tools-active-2" defer></script>
   </body>
 </html>

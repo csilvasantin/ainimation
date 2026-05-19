@@ -3583,6 +3583,7 @@ h2 {
 }
 
 .tool-palette .tool-grid button:hover,
+.tool-palette .tool-grid button[aria-pressed="true"],
 .tool-palette .tool-grid button[data-import-trigger="ai"] {
   background: linear-gradient(180deg, #b8ff73, #82ff4b);
   color: #071009;
@@ -3593,8 +3594,7 @@ h2 {
   padding-top: 6px;
 }
 
-.tool-symbols span {
-  cursor: default;
+.tool-symbols button {
   font-size: 0.82rem;
 }
 
@@ -3634,6 +3634,7 @@ h2 {
   margin-top: 13px;
 }
 
+.foreground-color-input,
 .stage-color-input {
   height: 1px;
   opacity: 0;
@@ -3665,6 +3666,57 @@ h2 {
 
 .tool-strokes span:nth-child(3) {
   height: 6px;
+}
+
+.stage-canvas[data-stage-tool="hand"] .stage-imported-member {
+  cursor: grab;
+}
+
+.stage-canvas[data-stage-tool="hand"] .stage-imported-member:active {
+  cursor: grabbing;
+}
+
+.stage-canvas[data-stage-tool="text"] {
+  cursor: text;
+}
+
+.stage-canvas[data-stage-tool="line"] {
+  cursor: crosshair;
+}
+
+.stage-text-item {
+  background: rgba(7, 11, 18, 0.34);
+  border: 1px solid rgba(237, 246, 255, 0.42);
+  border-radius: 6px;
+  color: var(--stage-foreground, #edf6ff);
+  font-size: clamp(12px, 1.4vw, 22px);
+  font-weight: 850;
+  left: 0;
+  line-height: 1.1;
+  min-width: 64px;
+  padding: 6px 8px;
+  position: absolute;
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.62);
+  top: 0;
+  z-index: 5;
+}
+
+.stage-text-item:focus {
+  border-color: #a6ff65;
+  box-shadow: 0 0 0 2px rgba(166, 255, 101, 0.2);
+  outline: none;
+}
+
+.stage-line-item {
+  background: var(--stage-foreground, #edf6ff);
+  border-radius: 999px;
+  box-shadow: 0 0 10px rgba(237, 246, 255, 0.32);
+  height: 3px;
+  left: 0;
+  position: absolute;
+  top: 0;
+  transform-origin: 0 50%;
+  z-index: 5;
 }
 
 .tool-palette .import-menu {

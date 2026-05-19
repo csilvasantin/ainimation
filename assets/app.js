@@ -668,23 +668,37 @@ initImportMenu();
 
 function initStageColorPicker() {
   const stageCanvas = document.querySelector(".stage-canvas");
-  const input = document.querySelector(".stage-color-input");
-  const swatch = document.querySelector(".stage-background-swatch");
-  if (!stageCanvas || !input || !swatch) return;
+  const backgroundInput = document.querySelector(".stage-color-input");
+  const backgroundSwatch = document.querySelector(".stage-background-swatch");
+  const foregroundInput = document.querySelector(".foreground-color-input");
+  const foregroundSwatch = document.querySelector(".foreground-swatch");
+  if (!stageCanvas || !backgroundInput || !backgroundSwatch || !foregroundInput || !foregroundSwatch) return;
 
   const storageKey = "admira-stage-background";
-  const defaultColor = input.value || "#10141f";
-  const applyColor = (color) => {
+  const foregroundStorageKey = "admira-stage-foreground";
+  const defaultColor = backgroundInput.value || "#10141f";
+  const defaultForegroundColor = foregroundInput.value || "#edf6ff";
+  const applyBackgroundColor = (color) => {
     const nextColor = /^#[0-9a-f]{6}$/i.test(color) ? color : defaultColor;
-    input.value = nextColor;
-    swatch.style.backgroundColor = nextColor;
+    backgroundInput.value = nextColor;
+    backgroundSwatch.style.backgroundColor = nextColor;
     stageCanvas.style.setProperty("--stage-fill", nextColor);
     localStorage.setItem(storageKey, nextColor);
   };
+  const applyForegroundColor = (color) => {
+    const nextColor = /^#[0-9a-f]{6}$/i.test(color) ? color : defaultForegroundColor;
+    foregroundInput.value = nextColor;
+    foregroundSwatch.style.backgroundColor = nextColor;
+    stageCanvas.style.setProperty("--stage-foreground", nextColor);
+    localStorage.setItem(foregroundStorageKey, nextColor);
+  };
 
-  applyColor(localStorage.getItem(storageKey) || defaultColor);
-  swatch.addEventListener("click", () => input.click());
-  input.addEventListener("input", () => applyColor(input.value));
+  applyBackgroundColor(localStorage.getItem(storageKey) || defaultColor);
+  applyForegroundColor(localStorage.getItem(foregroundStorageKey) || defaultForegroundColor);
+  backgroundSwatch.addEventListener("click", () => backgroundInput.click());
+  backgroundInput.addEventListener("input", () => applyBackgroundColor(backgroundInput.value));
+  foregroundSwatch.addEventListener("click", () => foregroundInput.click());
+  foregroundInput.addEventListener("input", () => applyForegroundColor(foregroundInput.value));
 }
 
 initStageColorPicker();
@@ -963,6 +977,7 @@ function buildFilmPlan(extraScene = false) {
       voice: `Create voice cast, sparse narration, and timed reads attached to score rows rather than loose audio files.`,
     },
     cast: makeCast(film),
+    stageItems: [],
     scenes: makeScenes(film, count),
   };
 }
@@ -1116,6 +1131,7 @@ function normalizeFilmPlan(plan) {
       ...(plan.pipeline || {}),
     },
     cast: plan.cast || makeCast(plan),
+    stageItems: Array.isArray(plan.stageItems) ? plan.stageItems : [],
   };
   merged.scenes = (plan.scenes || fallback.scenes).map((scene, index) => ({
     ...fallback.scenes[index % fallback.scenes.length],
@@ -1127,6 +1143,72 @@ function normalizeFilmPlan(plan) {
     script: scene.script || fallback.scenes[index % fallback.scenes.length].script,
   }));
   return merged;
+}
+
+function clampPercent(value) {
+  return Math.min(Math.max(Number(value) || 0, 0), 100);
+}
+
+function stagePointFromEvent(stage, event) {
+  const rect = stage.getBoundingClientRect();
+  const x = rect.width ? ((event.clientX - rect.left) / rect.width) * 100 : 0;
+  const y = rect.height ? ((event.clientY - rect.top) / rect.height) * 100 : 0;
+  return { x: clampPercent(x), y: clampPercent(y) };
+}
+
+function stageItemId(prefix = "stage") {
+  return `${prefix}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`;
+}
+
+function positionStageLine(line, item) {
+  const x1 = clampPercent(item.x1);
+  const y1 = clampPercent(item.y1);
+  const x2 = clampPercent(item.x2);
+  const y2 = clampPercent(item.y2);
+  const dx = x2 - x1;
+  const dy = y2 - y1;
+  const length = Math.hypot(dx, dy);
+  const angle = Math.atan2(dy, dx) * (180 / Math.PI);
+  line.style.left = `${x1}%`;
+  line.style.top = `${y1}%`;
+  line.style.width = `${length}%`;
+  line.style.transform = `rotate(${angle}deg)`;
+  line.style.backgroundColor = item.color || "";
+}
+
+function renderStageItems(stage, plan) {
+  stage.querySelectorAll(".stage-item").forEach((item) => item.remove());
+  (plan.stageItems || []).forEach((item) => {
+    if (item.type === "text") {
+      const text = document.createElement("div");
+      text.className = "stage-item stage-text-item";
+      text.dataset.stageItemId = item.id;
+      text.contentEditable = "true";
+      text.spellcheck = false;
+      text.textContent = item.text || "Text";
+      text.style.left = `${clampPercent(item.x)}%`;
+      text.style.top = `${clampPercent(item.y)}%`;
+      text.style.color = item.color || "";
+      text.addEventListener("pointerdown", (event) => event.stopPropagation());
+      text.addEventListener("blur", () => {
+        const nextPlan = currentPlan();
+        nextPlan.stageItems = (nextPlan.stageItems || []).map((stageItem) => (
+          stageItem.id === item.id
+            ? { ...stageItem, text: text.textContent.trim() || "Text" }
+            : stageItem
+        ));
+        saveFilmPlan(nextPlan);
+      });
+      stage.append(text);
+    }
+    if (item.type === "line") {
+      const line = document.createElement("span");
+      line.className = "stage-item stage-line-item";
+      line.dataset.stageItemId = item.id;
+      positionStageLine(line, item);
+      stage.append(line);
+    }
+  });
 }
 
 function hydrateFilmForm(plan) {
@@ -1188,12 +1270,13 @@ function renderFilmPlan(plan) {
 
   const stageWindow = document.querySelector(".stage-canvas") || document.querySelector(".stage-window");
   if (stageWindow) {
-    stageWindow.querySelectorAll(".stage-imported-member").forEach((member) => member.remove());
+    stageWindow.querySelectorAll(".stage-imported-member, .stage-item").forEach((member) => member.remove());
     importedStageMembers.slice(0, 6).forEach((member, index) => {
       const figure = document.createElement("figure");
       figure.className = `stage-imported-member ${member.mediaType === "video" ? "video-member" : "image-member"}`;
-      figure.style.left = `${16 + (index % 3) * 24}%`;
-      figure.style.top = `${54 + Math.floor(index / 3) * 18}%`;
+      figure.dataset.castIndex = String(castMembers.indexOf(member));
+      figure.style.left = `${clampPercent(member.stageX ?? (16 + (index % 3) * 24))}%`;
+      figure.style.top = `${clampPercent(member.stageY ?? (54 + Math.floor(index / 3) * 18))}%`;
       const media = document.createElement(member.mediaType === "video" ? "video" : "img");
       media.src = member.src;
       media.alt = "";
@@ -1206,6 +1289,7 @@ function renderFilmPlan(plan) {
       figure.append(media, caption);
       stageWindow.append(figure);
     });
+    renderStageItems(stageWindow, plan);
   }
 
   if (scoreGrid) {
@@ -1415,6 +1499,140 @@ function importMemberFiles(files, mode = "image") {
   window.refreshDirectorWindows?.();
 }
 
+function initStageTools() {
+  const stage = document.querySelector(".stage-canvas");
+  const palette = document.querySelector(".tool-palette");
+  const toolButtons = [...document.querySelectorAll(".tool-symbols [data-stage-tool]")];
+  if (!stage || !palette || !toolButtons.length) return;
+
+  const setActiveTool = (tool) => {
+    palette.dataset.stageTool = tool;
+    stage.dataset.stageTool = tool;
+    toolButtons.forEach((button) => {
+      button.setAttribute("aria-pressed", String(button.dataset.stageTool === tool));
+    });
+  };
+  const activeTool = () => palette.dataset.stageTool || "hand";
+  const foregroundColor = () => (
+    getComputedStyle(stage).getPropertyValue("--stage-foreground").trim() || "#edf6ff"
+  );
+
+  toolButtons.forEach((button) => {
+    button.addEventListener("click", (event) => {
+      event.stopPropagation();
+      setActiveTool(button.dataset.stageTool);
+      palette.classList.remove("open");
+      palette.dataset.openFor = "";
+    });
+  });
+
+  setActiveTool(palette.dataset.stageTool || "hand");
+
+  stage.addEventListener("pointerdown", (event) => {
+    const tool = activeTool();
+    const member = event.target.closest(".stage-imported-member");
+    if (tool === "hand" && member) {
+      event.preventDefault();
+      const castIndex = Number(member.dataset.castIndex);
+      const start = stagePointFromEvent(stage, event);
+      const startLeft = Number.parseFloat(member.style.left) || 0;
+      const startTop = Number.parseFloat(member.style.top) || 0;
+      stage.setPointerCapture(event.pointerId);
+      const move = (moveEvent) => {
+        const next = stagePointFromEvent(stage, moveEvent);
+        const nextLeft = clampPercent(startLeft + (next.x - start.x));
+        const nextTop = clampPercent(startTop + (next.y - start.y));
+        member.style.left = `${nextLeft}%`;
+        member.style.top = `${nextTop}%`;
+      };
+      const up = () => {
+        stage.removeEventListener("pointermove", move);
+        stage.removeEventListener("pointerup", up);
+        stage.removeEventListener("pointercancel", up);
+        const plan = currentPlan();
+        if (Number.isInteger(castIndex) && plan.cast?.[castIndex]) {
+          plan.cast[castIndex] = {
+            ...plan.cast[castIndex],
+            stageX: Number.parseFloat(member.style.left) || 0,
+            stageY: Number.parseFloat(member.style.top) || 0,
+          };
+          saveFilmPlan(plan);
+        }
+      };
+      stage.addEventListener("pointermove", move);
+      stage.addEventListener("pointerup", up);
+      stage.addEventListener("pointercancel", up);
+      return;
+    }
+
+    if (event.target.closest(".stage-item") || member) return;
+
+    if (tool === "text") {
+      event.preventDefault();
+      const point = stagePointFromEvent(stage, event);
+      const plan = currentPlan();
+      const item = {
+        id: stageItemId("text"),
+        type: "text",
+        x: point.x,
+        y: point.y,
+        text: "Text",
+        color: foregroundColor(),
+      };
+      plan.stageItems = [...(plan.stageItems || []), item];
+      saveFilmPlan(plan);
+      renderFilmPlan(plan);
+      const text = stage.querySelector(`[data-stage-item-id="${item.id}"]`);
+      if (text) {
+        text.focus();
+        document.getSelection()?.selectAllChildren(text);
+      }
+      return;
+    }
+
+    if (tool === "line") {
+      event.preventDefault();
+      const start = stagePointFromEvent(stage, event);
+      const item = {
+        id: stageItemId("line"),
+        type: "line",
+        x1: start.x,
+        y1: start.y,
+        x2: start.x,
+        y2: start.y,
+        color: foregroundColor(),
+      };
+      const preview = document.createElement("span");
+      preview.className = "stage-item stage-line-item";
+      preview.dataset.stageItemId = item.id;
+      positionStageLine(preview, item);
+      stage.append(preview);
+      stage.setPointerCapture(event.pointerId);
+      const move = (moveEvent) => {
+        const next = stagePointFromEvent(stage, moveEvent);
+        item.x2 = next.x;
+        item.y2 = next.y;
+        positionStageLine(preview, item);
+      };
+      const up = () => {
+        stage.removeEventListener("pointermove", move);
+        stage.removeEventListener("pointerup", up);
+        stage.removeEventListener("pointercancel", up);
+        if (Math.hypot(item.x2 - item.x1, item.y2 - item.y1) < 1) {
+          preview.remove();
+          return;
+        }
+        const plan = currentPlan();
+        plan.stageItems = [...(plan.stageItems || []), item];
+        saveFilmPlan(plan);
+      };
+      stage.addEventListener("pointermove", move);
+      stage.addEventListener("pointerup", up);
+      stage.addEventListener("pointercancel", up);
+    }
+  });
+}
+
 function importCastAsset(name, kind) {
   const plan = currentPlan();
   const mode = document.querySelector(".tool-palette")?.dataset.importMode || "asset";
@@ -1435,6 +1653,7 @@ if (filmForm) {
   const initialPlan = currentPlan();
   hydrateFilmForm(initialPlan);
   renderFilmPlan(initialPlan);
+  initStageTools();
 
   filmForm.addEventListener("submit", (event) => {
     event.preventDefault();
@@ -1476,9 +1695,10 @@ if (filmForm) {
     const plan = currentPlan();
     plan.cast = (plan.cast || makeCast(plan)).map((member) => (
       member.imported && ["animation", "image", "video"].includes(member.mediaType)
-        ? { ...member, onStage: false }
+        ? { ...member, onStage: false, stageX: undefined, stageY: undefined }
         : member
     ));
+    plan.stageItems = [];
     saveFilmPlan(plan);
     renderFilmPlan(plan);
   });
