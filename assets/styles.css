@@ -3395,7 +3395,7 @@ body.studio-entered {
   contain: layout paint;
   display: grid;
   grid-template-columns: 128px minmax(0, 1fr);
-  grid-template-rows: 28px 26px repeat(7, minmax(30px, 1fr));
+  grid-template-rows: 46px 26px repeat(7, minmax(30px, 1fr));
   height: 100%;
   min-height: 100%;
   min-width: 0;
@@ -3415,6 +3415,8 @@ body.studio-entered {
 .score-tools {
   align-items: center;
   display: flex;
+  flex-direction: column;
+  gap: 2px;
   justify-content: center;
   padding: 4px 5px;
 }
@@ -3433,20 +3435,21 @@ body.studio-entered {
   color: #1d2838;
   font: 800 0.62rem/1 var(--font-ui, inherit);
   height: 18px;
-  max-width: 48px;
+  max-width: 30px;
   padding: 0 2px;
-  width: 48px;
+  text-align: center;
+  width: 30px;
 }
 
 .score-transport {
   display: grid;
   gap: 2px;
-  grid-template-columns: 20px 48px 20px 20px;
+  grid-template-columns: 20px 30px 20px;
   justify-content: center;
-  width: 100%;
 }
 
-.score-transport button {
+.score-transport button,
+.score-play-top {
   align-items: center;
   appearance: none;
   background: linear-gradient(180deg, #ffffff, #d6dce7);
@@ -3461,12 +3464,17 @@ body.studio-entered {
   padding: 0;
 }
 
-.score-transport button:hover {
+.score-play-top {
+  width: 28px;
+}
+
+.score-transport button:hover,
+.score-play-top:hover {
   background: linear-gradient(180deg, #ffffff, #c8d7ef);
   color: #233047;
 }
 
-.score-transport button[aria-pressed="true"] {
+.score-play-top[aria-pressed="true"] {
   background: linear-gradient(180deg, #f7d3df, #d74271);
   border-color: #9e274d;
   color: #ffffff;
@@ -3493,14 +3501,47 @@ body.studio-entered {
   touch-action: none;
 }
 
-.score-ruler span {
+.score-ruler > span {
   color: #7d8796;
   font-size: 0.68rem;
   font-weight: 800;
   position: absolute;
-  top: 22px;
+  top: 38px;
   transform: translateX(-50%);
   white-space: nowrap;
+}
+
+.score-marker-layer {
+  inset: 2px 0 auto;
+  height: 20px;
+  position: absolute;
+  z-index: 7;
+}
+
+.score-marker {
+  appearance: none;
+  background: #fff6a8;
+  border: 1px solid #b6a348;
+  border-radius: 2px;
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.7) inset;
+  color: #2b3140;
+  cursor: text;
+  font: 900 0.58rem/1 var(--font-ui, inherit);
+  max-width: 70px;
+  min-width: 24px;
+  overflow: hidden;
+  padding: 2px 4px;
+  position: absolute;
+  text-align: center;
+  text-overflow: ellipsis;
+  top: 0;
+  transform: translateX(-50%);
+  white-space: nowrap;
+}
+
+.score-marker span {
+  display: block;
+  outline: none;
 }
 
 .score-playhead {

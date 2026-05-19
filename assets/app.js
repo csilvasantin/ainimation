@@ -613,6 +613,7 @@ const copyMarkdownButton = document.querySelector("#copyMarkdown");
 const downloadJsonButton = document.querySelector("#downloadJson");
 const filmStorageKey = "ainimation-film-plan";
 const scoreLabelsStorageKey = "ainimation-score-labels";
+const timelineMarkersStorageKey = "ainimation-timeline-markers";
 
 const sceneCounts = {
   "60 seconds": 4,
@@ -749,6 +750,86 @@ function saveScoreLabels(labels) {
   localStorage.setItem(scoreLabelsStorageKey, JSON.stringify(labels));
 }
 
+function escapeHtml(value) {
+  return String(value)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#39;");
+}
+
+function loadTimelineMarkers(totalFrames) {
+  const fallback = [
+    { id: "in", frame: 1, label: "IN" },
+    { id: "turn", frame: Math.round(totalFrames * 0.5), label: "MID" },
+    { id: "out", frame: totalFrames, label: "OUT" },
+  ];
+  try {
+    const markers = JSON.parse(localStorage.getItem(timelineMarkersStorageKey));
+    if (!Array.isArray(markers)) return fallback;
+    return markers
+      .map((marker, index) => ({
+        id: String(marker.id || `mark-${index}`),
+        frame: Math.min(Math.max(Number(marker.frame || 1), 1), totalFrames),
+        label: String(marker.label || "MARK").slice(0, 14),
+      }))
+      .sort((a, b) => a.frame - b.frame);
+  } catch {
+    return fallback;
+  }
+}
+
+function saveTimelineMarkers(markers) {
+  localStorage.setItem(timelineMarkersStorageKey, JSON.stringify(markers));
+}
+
+function initTimelineMarkerEditing(totalFrames) {
+  const ruler = document.querySelector(".score-ruler");
+  const markers = [...scoreGrid.querySelectorAll(".score-marker")];
+  if (!ruler) return;
+
+  const frameFromPointer = (event) => {
+    const rect = ruler.getBoundingClientRect();
+    const ratio = rect.width ? (event.clientX - rect.left) / rect.width : 0;
+    return Math.min(Math.max(Math.round(ratio * (totalFrames - 1)) + 1, 1), totalFrames);
+  };
+  const persistMarkers = () => {
+    const next = [...scoreGrid.querySelectorAll(".score-marker")].map((marker) => ({
+      id: marker.dataset.markerId,
+      frame: Number(marker.dataset.markerFrame || 1),
+      label: marker.querySelector("span")?.textContent.trim().slice(0, 14) || "MARK",
+    }));
+    saveTimelineMarkers(next);
+  };
+
+  markers.forEach((marker) => {
+    const label = marker.querySelector("span");
+    marker.addEventListener("pointerdown", (event) => event.stopPropagation());
+    label?.addEventListener("blur", () => {
+      label.textContent = label.textContent.trim().slice(0, 14) || "MARK";
+      persistMarkers();
+    });
+    label?.addEventListener("keydown", (event) => {
+      if (event.key === "Enter") {
+        event.preventDefault();
+        label.blur();
+      }
+    });
+  });
+
+  ruler.addEventListener("dblclick", (event) => {
+    if (event.target.closest(".score-marker") || event.target.closest(".score-playhead")) return;
+    const frame = frameFromPointer(event);
+    const next = [
+      ...loadTimelineMarkers(totalFrames),
+      { id: `mark-${Date.now()}`, frame, label: `F${frame}` },
+    ];
+    saveTimelineMarkers(next);
+    renderFilmPlan(currentPlan());
+  });
+}
+
 function initScoreLabelEditing() {
   const labels = [...scoreGrid.querySelectorAll("[data-score-label-index]")];
   if (!labels.length) return;
@@ -848,6 +929,7 @@ function renderFilmPlan(plan) {
   if (scoreGrid) {
     const totalFrames = Math.max(...plan.scenes.map((scene) => scene.startFrame + scene.length), 240);
     const frameMarks = Array.from({ length: 9 }, (_, index) => Math.round(1 + (totalFrames - 1) * (index / 8)));
+    const timelineMarkers = loadTimelineMarkers(totalFrames);
     const castNames = (plan.cast || makeCast(plan)).map((member) => member.name);
     const scoreLabels = loadScoreLabels();
     const scoreChannels = [
@@ -863,24 +945,31 @@ function renderFilmPlan(plan) {
     scoreGrid.innerHTML = `
       <div class="director-score">
         <div class="score-tools" aria-label="Timeline transport">
+          <button class="score-play-top" type="button" data-score-play aria-label="Play timeline" aria-pressed="false">▶</button>
           <div class="score-transport" role="group" aria-label="Timeline frame controls">
             <button type="button" data-score-step="prev" aria-label="Previous frame">←</button>
             <label class="score-fps" aria-label="Timeline playback speed">
               <select data-score-fps aria-label="Timeline frames per second">
-                <option value="12">12 fps</option>
-                <option value="24" selected>24 fps</option>
-                <option value="25">25 fps</option>
-                <option value="30">30 fps</option>
-                <option value="60">60 fps</option>
+                <option value="12">12</option>
+                <option value="24" selected>24</option>
+                <option value="25">25</option>
+                <option value="30">30</option>
+                <option value="60">60</option>
               </select>
             </label>
             <button type="button" data-score-step="next" aria-label="Next frame">→</button>
-            <button type="button" data-score-play aria-label="Play timeline" aria-pressed="false">▶</button>
           </div>
         </div>
         <div class="score-member-title">Member</div>
         <div class="score-ruler">
           ${frameMarks.map((frame) => `<span style="left:${((frame - 1) / (totalFrames - 1)) * 100}%">${frame}</span>`).join("")}
+          <div class="score-marker-layer" aria-label="Timeline marks">
+            ${timelineMarkers.map((marker) => `
+              <button class="score-marker" type="button" style="left:${((marker.frame - 1) / (totalFrames - 1)) * 100}%" data-marker-id="${escapeHtml(marker.id)}" data-marker-frame="${marker.frame}" aria-label="Timeline mark ${escapeHtml(marker.label)} at frame ${marker.frame}">
+                <span contenteditable="true" spellcheck="false">${escapeHtml(marker.label)}</span>
+              </button>
+            `).join("")}
+          </div>
           <i class="score-playhead" role="slider" aria-label="Timeline playhead" aria-valuemin="1" aria-valuemax="${totalFrames}" aria-valuenow="${plan.scenes[0]?.startFrame || 1}" data-frame="${plan.scenes[0]?.startFrame || 1}"></i>
         </div>
         ${scoreChannels.map((channel, channelIndex) => `
@@ -902,6 +991,7 @@ function renderFilmPlan(plan) {
       </div>
     `;
     initScorePlayhead(totalFrames);
+    initTimelineMarkerEditing(totalFrames);
     initScoreLabelEditing();
   }
 
