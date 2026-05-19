@@ -109,10 +109,11 @@ reduceMotion.addEventListener("change", () => {
   }
 });
 
-const enterStudio = new URLSearchParams(window.location.search).get("enter") === "1";
+const params = new URLSearchParams(window.location.search);
+const enterStudio = document.body.classList.contains("studio-page") && params.get("intro") !== "1";
 
 if (enterStudio) {
-  document.body.classList.add("studio-entering");
+  document.body.classList.add("studio-entering", "studio-entered");
   const jumpToWorkspace = () => {
     document.documentElement.scrollTop = 0;
     document.body.scrollTop = 0;
@@ -122,9 +123,6 @@ if (enterStudio) {
   window.setTimeout(jumpToWorkspace, 420);
   window.setTimeout(jumpToWorkspace, 900);
   window.setTimeout(jumpToWorkspace, 1600);
-  window.setTimeout(() => {
-    document.body.classList.add("studio-entered");
-  }, 3600);
 }
 
 function initDirectorWindowManager() {
