@@ -3421,24 +3421,31 @@ body.studio-entered {
   padding: 4px 5px;
 }
 
-.score-fps {
+.score-fps-stepper {
   align-items: center;
-  display: flex;
-  min-width: 0;
+  display: grid;
+  gap: 1px;
+  grid-template-columns: 20px 9px;
+  width: 30px;
 }
 
-.score-fps select {
-  appearance: none;
+.score-fps-value {
+  align-items: center;
   background: linear-gradient(180deg, #ffffff, #d8dde8);
   border: 1px solid #9aa5b5;
   border-radius: 3px;
   color: #1d2838;
+  display: flex;
   font: 800 0.62rem/1 var(--font-ui, inherit);
   height: 18px;
-  max-width: 30px;
-  padding: 0 2px;
-  text-align: center;
-  width: 30px;
+  justify-content: center;
+  width: 20px;
+}
+
+.score-fps-buttons {
+  display: grid;
+  grid-template-rows: 9px 9px;
+  height: 18px;
 }
 
 .score-transport {
@@ -3462,6 +3469,13 @@ body.studio-entered {
   height: 18px;
   justify-content: center;
   padding: 0;
+}
+
+.score-fps-buttons button {
+  border-radius: 2px;
+  font-size: 0.45rem;
+  height: 9px;
+  width: 9px;
 }
 
 .score-play-top {

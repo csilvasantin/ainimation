@@ -503,13 +503,17 @@ function initScorePlayhead(totalFrames) {
   const ruler = document.querySelector(".score-ruler");
   const playhead = ruler?.querySelector(".score-playhead");
   const transport = document.querySelector(".score-tools");
-  const fpsSelect = transport?.querySelector("[data-score-fps]");
+  const fpsReadout = transport?.querySelector("[data-score-fps]");
+  const fpsDownButton = transport?.querySelector("[data-score-fps-step='down']");
+  const fpsUpButton = transport?.querySelector("[data-score-fps-step='up']");
   const prevButton = transport?.querySelector("[data-score-step='prev']");
   const nextButton = transport?.querySelector("[data-score-step='next']");
   const playButton = transport?.querySelector("[data-score-play]");
   if (!ruler || !playhead) return;
 
   let currentFrame = Number(playhead.dataset.frame || 1);
+  const fpsValues = [12, 24, 25, 30, 60];
+  let currentFps = Number(fpsReadout?.dataset.value || fpsReadout?.textContent || 24);
   let playTimer = null;
   const clampFrame = (frame) => Math.min(Math.max(frame, 1), totalFrames);
   const setFrame = (frame) => {
@@ -519,7 +523,15 @@ function initScorePlayhead(totalFrames) {
     playhead.dataset.frame = String(currentFrame);
     playhead.setAttribute("aria-valuenow", String(currentFrame));
   };
-  const getFps = () => Math.max(1, Number(fpsSelect?.value || 24));
+  const setFps = (fps) => {
+    currentFps = fpsValues.includes(Number(fps)) ? Number(fps) : 24;
+    if (fpsReadout) {
+      fpsReadout.textContent = String(currentFps);
+      fpsReadout.dataset.value = String(currentFps);
+      fpsReadout.setAttribute("aria-label", `${currentFps} frames per second`);
+    }
+  };
+  const getFps = () => currentFps;
   const stopPlayback = () => {
     if (playTimer) {
       window.clearInterval(playTimer);
@@ -550,6 +562,12 @@ function initScorePlayhead(totalFrames) {
     stopPlayback();
     if (wasPlaying) startPlayback();
   };
+  const stepFps = (direction) => {
+    const index = Math.max(0, fpsValues.indexOf(currentFps));
+    const nextIndex = Math.min(Math.max(index + direction, 0), fpsValues.length - 1);
+    setFps(fpsValues[nextIndex]);
+    restartPlayback();
+  };
   const frameFromPointer = (event) => {
     const rect = ruler.getBoundingClientRect();
     const ratio = rect.width ? (event.clientX - rect.left) / rect.width : 0;
@@ -557,6 +575,7 @@ function initScorePlayhead(totalFrames) {
   };
   const moveToPointer = (event) => setFrame(frameFromPointer(event));
 
+  setFps(currentFps);
   setFrame(Number(playhead.dataset.frame || 1));
   playhead.addEventListener("pointerdown", (event) => {
     event.preventDefault();
@@ -595,7 +614,8 @@ function initScorePlayhead(totalFrames) {
     if (playTimer) stopPlayback();
     else startPlayback();
   });
-  fpsSelect?.addEventListener("change", restartPlayback);
+  fpsDownButton?.addEventListener("click", () => stepFps(-1));
+  fpsUpButton?.addEventListener("click", () => stepFps(1));
 }
 
 const filmForm = document.querySelector("#filmForm");
@@ -948,15 +968,13 @@ function renderFilmPlan(plan) {
           <button class="score-play-top" type="button" data-score-play aria-label="Play timeline" aria-pressed="false">▶</button>
           <div class="score-transport" role="group" aria-label="Timeline frame controls">
             <button type="button" data-score-step="prev" aria-label="Previous frame">←</button>
-            <label class="score-fps" aria-label="Timeline playback speed">
-              <select data-score-fps aria-label="Timeline frames per second">
-                <option value="12">12</option>
-                <option value="24" selected>24</option>
-                <option value="25">25</option>
-                <option value="30">30</option>
-                <option value="60">60</option>
-              </select>
-            </label>
+            <div class="score-fps-stepper" aria-label="Timeline playback speed">
+              <output class="score-fps-value" data-score-fps data-value="24" aria-label="24 frames per second">24</output>
+              <span class="score-fps-buttons" aria-label="Frames per second controls">
+                <button type="button" data-score-fps-step="up" aria-label="Increase FPS">▲</button>
+                <button type="button" data-score-fps-step="down" aria-label="Decrease FPS">▼</button>
+              </span>
+            </div>
             <button type="button" data-score-step="next" aria-label="Next frame">→</button>
           </div>
         </div>
