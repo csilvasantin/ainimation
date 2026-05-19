@@ -18,7 +18,7 @@
     <meta property="og:url" content="https://ainimation.studio/studio.html" />
     <link rel="canonical" href="https://ainimation.studio/studio.html" />
     <link rel="manifest" href="site.webmanifest" />
-    <link rel="stylesheet" href="assets/styles.css?v=tools-palette-2" />
+    <link rel="stylesheet" href="assets/styles.css?v=cast-import-menu-1" />
   </head>
   <body class="studio-page">
     <header class="site-header studio-site-header" aria-label="Primary">
@@ -176,11 +176,35 @@
               </span>
             </span>
             <button class="menubar-action" type="button" data-open-window="score">Timeline</button>
-            <span>Stage</span>
-            <span>Cast</span>
-            <span>Assets</span>
-            <span>Score</span>
-            <span>AI Director</span>
+            <button class="menubar-action" type="button" data-open-window="stage">Stage</button>
+            <span class="cast-menu">
+              <button class="menu-button" type="button" aria-expanded="false" data-cast-menu>Cast</button>
+              <span class="cast-menu-list" aria-label="Import cast members">
+                <label>
+                  Import images
+                  <input class="member-file-input" type="file" accept="image/*" multiple data-cast-file-input data-member-import-mode="image" />
+                </label>
+                <label>
+                  Import videos
+                  <input class="member-file-input" type="file" accept="video/*" multiple data-cast-file-input data-member-import-mode="video" />
+                </label>
+                <label>
+                  Import sounds
+                  <input class="member-file-input" type="file" accept="audio/*" multiple data-cast-file-input data-member-import-mode="audio" />
+                </label>
+                <label>
+                  Import texts
+                  <input class="member-file-input" type="file" accept=".txt,.md,.rtf,.json,text/*,application/json" multiple data-cast-file-input data-member-import-mode="text" />
+                </label>
+                <label>
+                  Import animations
+                  <input class="member-file-input" type="file" accept="image/gif,video/*,.json,.lottie" multiple data-cast-file-input data-member-import-mode="animation" />
+                </label>
+              </span>
+            </span>
+            <button class="menubar-action" type="button" data-open-window="cast">Assets</button>
+            <button class="menubar-action" type="button" data-open-window="inspector">Score</button>
+            <button class="menubar-action" type="button" data-open-window="prompt">AI Director</button>
             <button class="menubar-action" type="button" data-collab-open>Collaborate</button>
             <label class="menubar-action tools-menu-label" for="toolsToggle">Tools</label>
             <span class="window-menu">
@@ -410,6 +434,6 @@
       <a href="mailto:hello@ainimation.studio">hello@ainimation.studio</a>
     </footer>
 
-    <script src="assets/app.js?v=tools-palette-2" defer></script>
+    <script src="assets/app.js?v=cast-import-menu-1" defer></script>
   </body>
 </html>

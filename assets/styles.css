@@ -1271,6 +1271,7 @@ h2 {
 
 .director-menubar span {
   color: #2d333d;
+  cursor: pointer;
   font-size: 0.82rem;
   font-weight: 820;
 }
@@ -1287,13 +1288,15 @@ h2 {
 }
 
 .window-menu,
-.member-menu {
+.member-menu,
+.cast-menu {
   display: inline-flex;
   position: relative;
 }
 
 .window-menu-list,
-.member-menu-list {
+.member-menu-list,
+.cast-menu-list {
   background: #f8fafc;
   border: 1px solid #778292;
   border-radius: 6px;
@@ -1311,13 +1314,18 @@ h2 {
 .window-menu.open .window-menu-list,
 .member-menu.open .member-menu-list,
 .member-menu:hover .member-menu-list,
-.member-menu:focus-within .member-menu-list {
+.member-menu:focus-within .member-menu-list,
+.cast-menu.open .cast-menu-list,
+.cast-menu:hover .cast-menu-list,
+.cast-menu:focus-within .cast-menu-list {
   display: grid;
 }
 
 .window-menu-list button,
 .member-menu-list button,
-.member-menu-list label {
+.member-menu-list label,
+.cast-menu-list button,
+.cast-menu-list label {
   background: transparent;
   border: 0;
   border-radius: 4px;
@@ -1333,7 +1341,9 @@ h2 {
 
 .window-menu-list button:hover,
 .member-menu-list button:hover,
-.member-menu-list label:hover {
+.member-menu-list label:hover,
+.cast-menu-list button:hover,
+.cast-menu-list label:hover {
   background: #e3e8f0;
 }
 
@@ -1879,6 +1889,7 @@ h2 {
 .director-menubar span,
 .menu-button {
   color: rgba(239, 246, 255, 0.72);
+  cursor: pointer;
   font-size: 0.82rem;
   font-weight: 760;
 }
@@ -1889,7 +1900,8 @@ h2 {
 }
 
 .window-menu-list,
-.member-menu-list {
+.member-menu-list,
+.cast-menu-list {
   background: rgba(12, 17, 27, 0.98);
   border: 1px solid rgba(221, 236, 255, 0.18);
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
@@ -1897,13 +1909,17 @@ h2 {
 
 .window-menu-list button,
 .member-menu-list button,
-.member-menu-list label {
+.member-menu-list label,
+.cast-menu-list button,
+.cast-menu-list label {
   color: rgba(239, 246, 255, 0.78);
 }
 
 .window-menu-list button:hover,
 .member-menu-list button:hover,
-.member-menu-list label:hover {
+.member-menu-list label:hover,
+.cast-menu-list button:hover,
+.cast-menu-list label:hover {
   background: rgba(166, 255, 101, 0.16);
   color: #fff;
 }
@@ -2145,14 +2161,29 @@ h2 {
 }
 
 .director-cast-window .cast-member img,
-.director-cast-window .cast-member video {
+.director-cast-window .cast-member video,
+.director-cast-window .cast-member-kind {
   height: 100%;
   inset: 0;
   object-fit: cover;
-  opacity: 0.88;
   position: absolute;
   width: 100%;
   z-index: 0;
+}
+
+.director-cast-window .cast-member img,
+.director-cast-window .cast-member video {
+  opacity: 0.88;
+}
+
+.director-cast-window .cast-member-kind {
+  align-items: center;
+  color: rgba(255, 255, 255, 0.82);
+  display: flex;
+  font-size: 0.68rem;
+  justify-content: center;
+  letter-spacing: 0;
+  text-transform: uppercase;
 }
 
 .director-cast-window .cast-member.imported-member::after {

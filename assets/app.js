@@ -528,10 +528,10 @@ function initImportMenu() {
 
 initImportMenu();
 
-function initMemberMenu() {
-  const menu = document.querySelector(".member-menu");
-  const button = menu?.querySelector("[data-member-menu]");
-  const fileInputs = [...(menu?.querySelectorAll("[data-member-file-input]") || [])];
+function initFileImportMenu(menuSelector, buttonSelector, inputSelector) {
+  const menu = document.querySelector(menuSelector);
+  const button = menu?.querySelector(buttonSelector);
+  const fileInputs = [...(menu?.querySelectorAll(inputSelector) || [])];
   if (!menu || !button || !fileInputs.length) return;
 
   button.addEventListener("click", (event) => {
@@ -558,7 +558,8 @@ function initMemberMenu() {
   });
 }
 
-initMemberMenu();
+initFileImportMenu(".member-menu", "[data-member-menu]", "[data-member-file-input]");
+initFileImportMenu(".cast-menu", "[data-cast-menu]", "[data-cast-file-input]");
 
 function initScorePlayhead(totalFrames) {
   const ruler = document.querySelector(".score-ruler");
@@ -977,7 +978,8 @@ function hydrateFilmForm(plan) {
 
 function renderFilmPlan(plan) {
   const castMembers = plan.cast || makeCast(plan);
-  const importedMediaMembers = castMembers.filter((member) => member.imported && member.src && ["image", "video"].includes(member.mediaType));
+  const importedTimelineMembers = castMembers.filter((member) => member.imported && member.src);
+  const importedStageMembers = importedTimelineMembers.filter((member) => ["animation", "image", "video"].includes(member.mediaType));
   outputTitle.textContent = plan.title;
   sceneCount.textContent = `${plan.scenes.length} score rows`;
   filmTreatment.innerHTML = `
@@ -999,11 +1001,13 @@ function renderFilmPlan(plan) {
 
   if (castBin) {
     castBin.innerHTML = castMembers.map((member, index) => {
-      const media = member.src && member.mediaType === "image"
+      const media = member.src && ["animation", "image"].includes(member.mediaType)
         ? `<img src="${escapeHtml(member.src)}" alt="" />`
         : member.src && member.mediaType === "video"
           ? `<video src="${escapeHtml(member.src)}" muted playsinline></video>`
-          : "";
+          : member.src
+            ? `<b class="cast-member-kind">${escapeHtml(member.mediaType || "asset")}</b>`
+            : "";
       return `
       <article class="cast-member ${member.imported ? "imported-member" : ""}" data-media-type="${escapeHtml(member.mediaType || "generated")}">
         ${media}
@@ -1020,7 +1024,7 @@ function renderFilmPlan(plan) {
   const stageWindow = document.querySelector(".stage-window");
   if (stageWindow) {
     stageWindow.querySelectorAll(".stage-imported-member").forEach((member) => member.remove());
-    importedMediaMembers.slice(0, 6).forEach((member, index) => {
+    importedStageMembers.slice(0, 6).forEach((member, index) => {
       const figure = document.createElement("figure");
       figure.className = `stage-imported-member ${member.mediaType === "video" ? "video-member" : "image-member"}`;
       figure.style.left = `${16 + (index % 3) * 24}%`;
@@ -1040,7 +1044,7 @@ function renderFilmPlan(plan) {
   }
 
   if (scoreGrid) {
-    const importedEndFrames = importedMediaMembers.map((member) => Number(member.startFrame || 1) + Number(member.durationFrames || 72));
+    const importedEndFrames = importedTimelineMembers.map((member) => Number(member.startFrame || 1) + Number(member.durationFrames || 72));
     const totalFrames = Math.max(...plan.scenes.map((scene) => scene.startFrame + scene.length), ...importedEndFrames, 240);
     const frameMarks = Array.from({ length: 9 }, (_, index) => Math.round(1 + (totalFrames - 1) * (index / 8)));
     const timelineMarkers = loadTimelineMarkers(totalFrames);
@@ -1054,9 +1058,9 @@ function renderFilmPlan(plan) {
       { name: scoreLabels[4], lane: "voice", label: (scene) => scene.beat },
       { name: scoreLabels[5], lane: "music", label: (scene) => `${scene.act} motif` },
       { name: scoreLabels[6], lane: "video", label: (scene) => scene.beat },
-      ...importedMediaMembers.map((member) => ({
+      ...importedTimelineMembers.map((member) => ({
         name: member.name,
-        lane: member.mediaType === "video" ? "video" : "cast",
+        lane: member.mediaType === "video" || member.mediaType === "animation" ? "video" : member.mediaType === "audio" ? "music" : "cast",
         member,
       })),
     ];
@@ -1191,28 +1195,51 @@ function cleanMemberName(fileName) {
     .slice(0, 34) || "Imported member";
 }
 
+function memberTypeFromMode(file, mode) {
+  if (mode === "audio") return file.type.startsWith("audio/") ? "audio" : "";
+  if (mode === "text") return file.type.startsWith("text/") || /\.(txt|md|rtf|json)$/i.test(file.name) ? "text" : "";
+  if (mode === "animation") {
+    if (file.type.startsWith("video/")) return "video";
+    if (file.type === "image/gif") return "animation";
+    if (/\.(gif|json|lottie)$/i.test(file.name)) return "animation";
+    return "";
+  }
+  if (mode === "video") return file.type.startsWith("video/") ? "video" : "";
+  return file.type.startsWith("image/") ? "image" : "";
+}
+
+function memberTypeLabel(mediaType) {
+  return {
+    animation: "Animation member",
+    audio: "Sound member",
+    image: "Image member",
+    text: "Text member",
+    video: "Video member",
+  }[mediaType] || "Imported member";
+}
+
 function importMemberFiles(files, mode = "image") {
   const incoming = [...(files || [])];
   if (!incoming.length) return;
   const plan = currentPlan();
   const existing = plan.cast || makeCast(plan);
   const imported = incoming
-    .filter((file) => mode === "video" ? file.type.startsWith("video/") : file.type.startsWith("image/"))
+    .map((file) => ({ file, mediaType: memberTypeFromMode(file, mode) }))
+    .filter((item) => item.mediaType)
     .map((file, index) => {
-      const mediaType = file.type.startsWith("video/") ? "video" : "image";
-      const baseName = cleanMemberName(file.name);
+      const baseName = cleanMemberName(file.file.name);
       const memberNumber = existing.length + index + 1;
       return {
         role: "Imported",
         name: `${baseName} ${String(memberNumber).padStart(2, "0")}`,
-        type: mediaType === "video" ? "Video member" : "Image member",
-        mediaType,
-        fileName: file.name,
-        src: URL.createObjectURL(file),
+        type: memberTypeLabel(file.mediaType),
+        mediaType: file.mediaType,
+        fileName: file.file.name,
+        src: URL.createObjectURL(file.file),
         imported: true,
         startFrame: 1 + (memberNumber % 5) * 48,
-        durationFrames: mediaType === "video" ? 96 : 72,
-        prompt: `Imported ${mediaType} member. Place on Stage, expose in Cast, and schedule on Timeline for later AI animation passes.`,
+        durationFrames: ["video", "animation", "audio"].includes(file.mediaType) ? 96 : 72,
+        prompt: `Imported ${file.mediaType} member. Place in Cast, schedule on Timeline, and prepare for later AI animation passes.`,
       };
     });
   if (!imported.length) return;
