@@ -843,6 +843,7 @@ const filmTreatment = document.querySelector("#filmTreatment");
 const pipelineGrid = document.querySelector("#pipelineGrid");
 const sceneBoard = document.querySelector("#sceneBoard");
 const sceneCount = document.querySelector("#sceneCount");
+const clearStageButton = document.querySelector("[data-clear-stage]");
 const castBin = document.querySelector("#castBin");
 const scoreGrid = document.querySelector("#scoreGrid");
 const stageScript = document.querySelector("#stageScript");
@@ -1136,9 +1137,12 @@ function hydrateFilmForm(plan) {
 function renderFilmPlan(plan) {
   const castMembers = plan.cast || makeCast(plan);
   const importedTimelineMembers = castMembers.filter((member) => member.imported && member.src);
-  const importedStageMembers = importedTimelineMembers.filter((member) => ["animation", "image", "video"].includes(member.mediaType));
+  const importedStageMembers = importedTimelineMembers.filter((member) => (
+    member.onStage !== false &&
+    ["animation", "image", "video"].includes(member.mediaType)
+  ));
   outputTitle.textContent = plan.title;
-  sceneCount.textContent = `${plan.scenes.length} score rows`;
+  sceneCount.textContent = "1920 × 1080";
   filmTreatment.innerHTML = `
     <p><strong>Authoring brief</strong><br>${plan.treatment}</p>
     <p><strong>Interaction theme</strong><br>${plan.theme}</p>
@@ -1394,6 +1398,7 @@ function importMemberFiles(files, mode = "image") {
         fileName: file.file.name,
         src: URL.createObjectURL(file.file),
         imported: true,
+        onStage: ["animation", "image", "video"].includes(file.mediaType),
         startFrame: 1 + (memberNumber % 5) * 48,
         durationFrames: ["video", "animation", "audio"].includes(file.mediaType) ? 96 : 72,
         prompt: `Imported ${file.mediaType} member. Place in Cast, schedule on Timeline, and prepare for later AI animation passes.`,
@@ -1461,5 +1466,16 @@ if (filmForm) {
     link.download = `${plan.title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "film"}-ainimation-plan.json`;
     link.click();
     URL.revokeObjectURL(url);
+  });
+
+  clearStageButton?.addEventListener("click", () => {
+    const plan = currentPlan();
+    plan.cast = (plan.cast || makeCast(plan)).map((member) => (
+      member.imported && ["animation", "image", "video"].includes(member.mediaType)
+        ? { ...member, onStage: false }
+        : member
+    ));
+    saveFilmPlan(plan);
+    renderFilmPlan(plan);
   });
 }

@@ -734,6 +734,32 @@ h2 {
   white-space: nowrap;
 }
 
+.stage-title-actions {
+  align-items: center;
+  display: inline-flex;
+  gap: 8px;
+  margin-left: auto;
+}
+
+.stage-clear-button {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(220, 239, 255, 0.18);
+  border-radius: 999px;
+  color: rgba(239, 246, 255, 0.78);
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.68rem;
+  font-weight: 900;
+  padding: 5px 9px;
+  text-transform: uppercase;
+}
+
+.stage-clear-button:hover {
+  background: rgba(255, 101, 79, 0.16);
+  border-color: rgba(255, 101, 79, 0.4);
+  color: #fff;
+}
+
 .treatment {
   color: #4f5662;
   display: grid;
@@ -2025,8 +2051,8 @@ h2 {
 }
 
 .stage-window {
-  --stage-ruler-x: 30px;
-  --stage-ruler-y: 48px;
+  --stage-ruler-x: 24px;
+  --stage-ruler-y: 38px;
   background: #070b12;
   border-radius: 0 0 14px 14px;
   color: rgba(220, 235, 255, 0.78);
@@ -2045,7 +2071,7 @@ h2 {
 
 .stage-ruler b {
   color: #a6ff65;
-  font-size: 0.58rem;
+  font-size: 0.54rem;
   font-weight: 950;
   text-transform: uppercase;
 }
@@ -2057,10 +2083,10 @@ h2 {
     repeating-linear-gradient(90deg, rgba(210, 228, 255, 0.42) 0 1px, transparent 1px 16.666%);
   border-bottom: 1px solid rgba(210, 228, 255, 0.22);
   display: grid;
-  grid-template-columns: 42px repeat(7, minmax(0, 1fr));
+  grid-template-columns: 34px repeat(7, minmax(0, 1fr));
   height: var(--stage-ruler-x);
   left: 0;
-  padding: 0 8px 4px;
+  padding: 0 6px 3px;
   right: 0;
   top: 0;
 }
@@ -2072,10 +2098,10 @@ h2 {
   border-right: 1px solid rgba(210, 228, 255, 0.22);
   bottom: 0;
   display: grid;
-  grid-template-rows: 24px repeat(7, minmax(0, 1fr));
+  grid-template-rows: 20px repeat(7, minmax(0, 1fr));
   justify-items: end;
   left: 0;
-  padding: 8px 5px;
+  padding: 6px 3px;
   top: var(--stage-ruler-x);
   width: var(--stage-ruler-y);
 }
@@ -2105,7 +2131,7 @@ h2 {
   padding: 5px 8px;
   position: absolute;
   right: 12px;
-  top: 6px;
+  top: 4px;
   z-index: 9;
 }
 
@@ -3563,17 +3589,17 @@ h2 {
   background: linear-gradient(180deg, #eef1f6, #c9d0dc);
   border-radius: 0 0 12px 12px;
   display: grid;
-  gap: 6px;
+  gap: 8px;
   justify-content: center;
   min-height: 0;
-  overflow: auto;
-  padding: 7px 5px 10px;
+  overflow: hidden;
+  padding: 8px 8px 12px;
 }
 
 .tool-grid {
   display: grid;
-  gap: 3px;
-  grid-template-columns: repeat(2, 21px);
+  gap: 5px;
+  grid-template-columns: repeat(2, 36px);
 }
 
 .tool-palette .tool-grid button,
@@ -3587,10 +3613,10 @@ h2 {
   cursor: pointer;
   display: flex;
   font: 900 0.56rem/1 ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
-  height: 21px;
+  height: 28px;
   justify-content: center;
   padding: 0;
-  width: 21px;
+  width: 36px;
 }
 
 .tool-palette .tool-grid button:hover,
@@ -3606,15 +3632,15 @@ h2 {
 
 .tool-symbols span {
   cursor: default;
-  font-size: 0.7rem;
+  font-size: 0.82rem;
 }
 
 .tool-swatches {
   display: grid;
   gap: 0;
-  grid-template-columns: 26px 18px;
+  grid-template-columns: 40px 26px;
   justify-content: center;
-  min-height: 34px;
+  min-height: 48px;
   position: relative;
 }
 
@@ -3624,9 +3650,9 @@ h2 {
   border-radius: 0;
   cursor: pointer;
   display: block;
-  height: 22px;
+  height: 34px;
   padding: 0;
-  width: 22px;
+  width: 34px;
 }
 
 .tool-color-swatch:focus-visible {
@@ -3641,8 +3667,8 @@ h2 {
 
 .stage-background-swatch {
   background: #10141f;
-  margin-left: -10px;
-  margin-top: 10px;
+  margin-left: -13px;
+  margin-top: 13px;
 }
 
 .stage-color-input {
@@ -3656,8 +3682,12 @@ h2 {
 .tool-strokes {
   border-top: 1px solid rgba(82, 92, 108, 0.46);
   display: grid;
-  gap: 4px;
-  padding: 6px 3px 2px;
+  gap: 5px;
+  padding: 7px 4px 2px;
+}
+
+.tool-palette .resize-handle {
+  display: none;
 }
 
 .tool-strokes span {
@@ -4105,6 +4135,10 @@ body.studio-entered {
   display: block;
   position: absolute;
   z-index: 28;
+}
+
+.director-window.tool-palette .resize-handle {
+  display: none;
 }
 
 .director-window .resize-n,
