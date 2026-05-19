@@ -1149,6 +1149,10 @@ function clampPercent(value) {
   return Math.min(Math.max(Number(value) || 0, 0), 100);
 }
 
+function clampStageSize(value, fallback = 12) {
+  return Math.min(Math.max(Number(value) || fallback, 4), 80);
+}
+
 function stagePointFromEvent(stage, event) {
   const rect = stage.getBoundingClientRect();
   const x = rect.width ? ((event.clientX - rect.left) / rect.width) * 100 : 0;
@@ -1277,6 +1281,8 @@ function renderFilmPlan(plan) {
       figure.dataset.castIndex = String(castMembers.indexOf(member));
       figure.style.left = `${clampPercent(member.stageX ?? (16 + (index % 3) * 24))}%`;
       figure.style.top = `${clampPercent(member.stageY ?? (54 + Math.floor(index / 3) * 18))}%`;
+      figure.style.width = `${clampStageSize(member.stageW, 12)}%`;
+      figure.style.height = `${clampStageSize(member.stageH, 10)}%`;
       const media = document.createElement(member.mediaType === "video" ? "video" : "img");
       media.src = member.src;
       media.alt = "";
@@ -1286,14 +1292,17 @@ function renderFilmPlan(plan) {
       }
       const caption = document.createElement("figcaption");
       caption.textContent = member.name;
-      figure.append(media, caption);
+      const resizeHandle = document.createElement("span");
+      resizeHandle.className = "stage-member-resize";
+      resizeHandle.setAttribute("aria-hidden", "true");
+      figure.append(media, caption, resizeHandle);
       stageWindow.append(figure);
     });
     renderStageItems(stageWindow, plan);
   }
 
   if (scoreGrid) {
-    const importedEndFrames = importedTimelineMembers.map((member) => Number(member.startFrame || 1) + Number(member.durationFrames || 72));
+    const importedEndFrames = importedTimelineMembers.map((member) => Number(member.startFrame || 1) + Number(member.durationFrames || 24));
     const totalFrames = Math.max(...plan.scenes.map((scene) => scene.startFrame + scene.length), ...importedEndFrames, 240);
     const frameMarks = Array.from({ length: 9 }, (_, index) => Math.round(1 + (totalFrames - 1) * (index / 8)));
     const timelineMarkers = loadTimelineMarkers(totalFrames);
@@ -1351,7 +1360,7 @@ function renderFilmPlan(plan) {
                 ? Math.min(totalFrames - 8, Math.max(1, Number(item.startFrame || 1)))
                 : Math.min(totalFrames - 8, Math.max(1, item.startFrame + stagger));
               const length = channel.member
-                ? Math.max(18, Math.min(totalFrames - start, Number(item.durationFrames || 72)))
+                ? Math.max(1, Math.min(totalFrames - start, Number(item.durationFrames || 24)))
                 : Math.max(18, Math.min(totalFrames - start, item.length - stagger));
               const spriteLabel = channel.member ? item.name : channel.label(item, itemIndex);
               return `
@@ -1488,7 +1497,7 @@ function importMemberFiles(files, mode = "image") {
         imported: true,
         onStage: ["animation", "image", "video"].includes(file.mediaType),
         startFrame: 1 + (memberNumber % 5) * 48,
-        durationFrames: ["video", "animation", "audio"].includes(file.mediaType) ? 96 : 72,
+        durationFrames: 24,
         prompt: `Imported ${file.mediaType} member. Place in Cast, schedule on Timeline, and prepare for later AI animation passes.`,
       };
     });
@@ -1537,13 +1546,23 @@ function initStageTools() {
       const start = stagePointFromEvent(stage, event);
       const startLeft = Number.parseFloat(member.style.left) || 0;
       const startTop = Number.parseFloat(member.style.top) || 0;
+      const startWidth = Number.parseFloat(member.style.width) || 12;
+      const startHeight = Number.parseFloat(member.style.height) || 10;
+      const isScaling = Boolean(event.target.closest(".stage-member-resize"));
       stage.setPointerCapture(event.pointerId);
       const move = (moveEvent) => {
         const next = stagePointFromEvent(stage, moveEvent);
-        const nextLeft = clampPercent(startLeft + (next.x - start.x));
-        const nextTop = clampPercent(startTop + (next.y - start.y));
-        member.style.left = `${nextLeft}%`;
-        member.style.top = `${nextTop}%`;
+        if (isScaling) {
+          const nextWidth = Math.min(clampStageSize(startWidth + (next.x - start.x), startWidth), 100 - startLeft);
+          const nextHeight = Math.min(clampStageSize(startHeight + (next.y - start.y), startHeight), 100 - startTop);
+          member.style.width = `${nextWidth}%`;
+          member.style.height = `${nextHeight}%`;
+        } else {
+          const nextLeft = Math.min(clampPercent(startLeft + (next.x - start.x)), 100 - startWidth);
+          const nextTop = Math.min(clampPercent(startTop + (next.y - start.y)), 100 - startHeight);
+          member.style.left = `${nextLeft}%`;
+          member.style.top = `${nextTop}%`;
+        }
       };
       const up = () => {
         stage.removeEventListener("pointermove", move);
@@ -1555,6 +1574,8 @@ function initStageTools() {
             ...plan.cast[castIndex],
             stageX: Number.parseFloat(member.style.left) || 0,
             stageY: Number.parseFloat(member.style.top) || 0,
+            stageW: Number.parseFloat(member.style.width) || startWidth,
+            stageH: Number.parseFloat(member.style.height) || startHeight,
           };
           saveFilmPlan(plan);
         }
@@ -1695,7 +1716,7 @@ if (filmForm) {
     const plan = currentPlan();
     plan.cast = (plan.cast || makeCast(plan)).map((member) => (
       member.imported && ["animation", "image", "video"].includes(member.mediaType)
-        ? { ...member, onStage: false, stageX: undefined, stageY: undefined }
+        ? { ...member, onStage: false, stageX: undefined, stageY: undefined, stageW: undefined, stageH: undefined }
         : member
     ));
     plan.stageItems = [];
