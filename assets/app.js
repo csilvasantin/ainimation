@@ -502,15 +502,53 @@ initImportMenu();
 function initScorePlayhead(totalFrames) {
   const ruler = document.querySelector(".score-ruler");
   const playhead = ruler?.querySelector(".score-playhead");
+  const transport = document.querySelector(".score-tools");
+  const fpsSelect = transport?.querySelector("[data-score-fps]");
+  const prevButton = transport?.querySelector("[data-score-step='prev']");
+  const nextButton = transport?.querySelector("[data-score-step='next']");
+  const playButton = transport?.querySelector("[data-score-play]");
   if (!ruler || !playhead) return;
 
+  let currentFrame = Number(playhead.dataset.frame || 1);
+  let playTimer = null;
   const clampFrame = (frame) => Math.min(Math.max(frame, 1), totalFrames);
   const setFrame = (frame) => {
-    const currentFrame = clampFrame(frame);
+    currentFrame = clampFrame(frame);
     const left = totalFrames <= 1 ? 0 : ((currentFrame - 1) / (totalFrames - 1)) * 100;
     playhead.style.left = `${left}%`;
     playhead.dataset.frame = String(currentFrame);
     playhead.setAttribute("aria-valuenow", String(currentFrame));
+  };
+  const getFps = () => Math.max(1, Number(fpsSelect?.value || 24));
+  const stopPlayback = () => {
+    if (playTimer) {
+      window.clearInterval(playTimer);
+      playTimer = null;
+    }
+    if (playButton) {
+      playButton.textContent = "▶";
+      playButton.setAttribute("aria-label", "Play timeline");
+      playButton.setAttribute("aria-pressed", "false");
+    }
+  };
+  const startPlayback = () => {
+    if (!playButton) return;
+    if (currentFrame >= totalFrames) setFrame(1);
+    playButton.textContent = "■";
+    playButton.setAttribute("aria-label", "Stop timeline");
+    playButton.setAttribute("aria-pressed", "true");
+    playTimer = window.setInterval(() => {
+      if (currentFrame >= totalFrames) {
+        stopPlayback();
+        return;
+      }
+      setFrame(currentFrame + 1);
+    }, 1000 / getFps());
+  };
+  const restartPlayback = () => {
+    const wasPlaying = Boolean(playTimer);
+    stopPlayback();
+    if (wasPlaying) startPlayback();
   };
   const frameFromPointer = (event) => {
     const rect = ruler.getBoundingClientRect();
@@ -523,6 +561,7 @@ function initScorePlayhead(totalFrames) {
   playhead.addEventListener("pointerdown", (event) => {
     event.preventDefault();
     event.stopPropagation();
+    stopPlayback();
     playhead.setPointerCapture(event.pointerId);
     playhead.classList.add("is-dragging");
     moveToPointer(event);
@@ -541,8 +580,22 @@ function initScorePlayhead(totalFrames) {
   });
   ruler.addEventListener("pointerdown", (event) => {
     if (event.target === playhead) return;
+    stopPlayback();
     moveToPointer(event);
   });
+  prevButton?.addEventListener("click", () => {
+    stopPlayback();
+    setFrame(currentFrame - 1);
+  });
+  nextButton?.addEventListener("click", () => {
+    stopPlayback();
+    setFrame(currentFrame + 1);
+  });
+  playButton?.addEventListener("click", () => {
+    if (playTimer) stopPlayback();
+    else startPlayback();
+  });
+  fpsSelect?.addEventListener("change", restartPlayback);
 }
 
 const filmForm = document.querySelector("#filmForm");
@@ -809,8 +862,22 @@ function renderFilmPlan(plan) {
     scoreGrid.style.setProperty("--total-frames", totalFrames);
     scoreGrid.innerHTML = `
       <div class="director-score">
-        <div class="score-tools" aria-hidden="true">
-          <span></span><span></span><span></span>
+        <div class="score-tools" aria-label="Timeline transport">
+          <label class="score-fps">
+            <span>FPS</span>
+            <select data-score-fps aria-label="Timeline frames per second">
+              <option value="12">12</option>
+              <option value="24" selected>24</option>
+              <option value="25">25</option>
+              <option value="30">30</option>
+              <option value="60">60</option>
+            </select>
+          </label>
+          <div class="score-transport" role="group" aria-label="Timeline frame controls">
+            <button type="button" data-score-step="prev" aria-label="Previous frame">←</button>
+            <button type="button" data-score-step="next" aria-label="Next frame">→</button>
+            <button type="button" data-score-play aria-label="Play timeline" aria-pressed="false">▶</button>
+          </div>
         </div>
         <div class="score-member-title">Member</div>
         <div class="score-ruler">
