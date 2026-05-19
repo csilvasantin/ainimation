@@ -1255,9 +1255,11 @@ h2 {
   display: flex;
   gap: 18px;
   min-height: 38px;
-  overflow-x: auto;
+  overflow: visible;
   padding: 0 12px;
+  position: relative;
   white-space: nowrap;
+  z-index: 5000;
 }
 
 .director-menubar strong {
@@ -1292,6 +1294,7 @@ h2 {
 .cast-menu {
   display: inline-flex;
   position: relative;
+  z-index: 5010;
 }
 
 .window-menu-list,
@@ -1308,7 +1311,7 @@ h2 {
   padding: 6px;
   position: absolute;
   top: calc(100% + 8px);
-  z-index: 30;
+  z-index: 7000;
 }
 
 .window-menu.open .window-menu-list,
@@ -1366,6 +1369,7 @@ h2 {
   padding: 10px;
   position: relative;
   overflow: hidden;
+  z-index: 1;
 }
 
 .tool-palette {
@@ -1730,6 +1734,14 @@ h2 {
 .director-shell.retro-director > * {
   position: relative;
   z-index: 2;
+}
+
+.director-shell.retro-director > .director-menubar {
+  z-index: 5000;
+}
+
+.director-shell.retro-director > .director-workbench {
+  z-index: 1;
 }
 
 .studio-collab-bar {
@@ -3293,6 +3305,7 @@ h2 {
   margin: 0;
   max-width: none;
   min-height: 0;
+  overflow: visible;
   width: 100vw;
 }
 

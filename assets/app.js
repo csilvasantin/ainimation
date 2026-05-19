@@ -203,6 +203,96 @@ function initDirectorWindowManager() {
     };
   }
 
+  function overlaps(first, second) {
+    return (
+      first.left < second.left + second.width &&
+      first.left + first.width > second.left &&
+      first.top < second.top + second.height &&
+      first.top + first.height > second.top
+    );
+  }
+
+  function candidateFits(rect, bounds) {
+    return (
+      rect.left >= 0 &&
+      rect.top >= 0 &&
+      rect.left + rect.width <= bounds.width &&
+      rect.top + rect.height <= bounds.height
+    );
+  }
+
+  function magnetizeRect(win, rect) {
+    if (isStackedLayout() || win.classList.contains("is-docked")) return rect;
+    const bounds = workbench.getBoundingClientRect();
+    const snap = 18;
+    const gap = 8;
+    const next = { ...rect };
+    const maxLeft = Math.max(0, bounds.width - next.width);
+    const maxTop = Math.max(0, bounds.height - next.height);
+
+    if (Math.abs(next.left) <= snap) next.left = 0;
+    if (Math.abs(next.top) <= snap) next.top = 0;
+    if (Math.abs(maxLeft - next.left) <= snap) next.left = maxLeft;
+    if (Math.abs(maxTop - next.top) <= snap) next.top = maxTop;
+
+    const visibleWindows = windows.filter((other) => (
+      other !== win &&
+      !other.classList.contains("is-hidden") &&
+      !other.classList.contains("is-minimized") &&
+      !other.classList.contains("is-docked")
+    ));
+
+    for (const other of visibleWindows) {
+      const otherRect = currentRect(other);
+      const isVerticallyNear = next.top < otherRect.top + otherRect.height && next.top + next.height > otherRect.top;
+      const isHorizontallyNear = next.left < otherRect.left + otherRect.width && next.left + next.width > otherRect.left;
+      const xSnaps = [
+        { value: otherRect.left - next.width - gap, distance: Math.abs(next.left + next.width - otherRect.left) },
+        { value: otherRect.left + otherRect.width + gap, distance: Math.abs(next.left - (otherRect.left + otherRect.width)) },
+        { value: otherRect.left, distance: Math.abs(next.left - otherRect.left) },
+        { value: otherRect.left + otherRect.width - next.width, distance: Math.abs(next.left + next.width - (otherRect.left + otherRect.width)) },
+      ];
+      const ySnaps = [
+        { value: otherRect.top - next.height - gap, distance: Math.abs(next.top + next.height - otherRect.top) },
+        { value: otherRect.top + otherRect.height + gap, distance: Math.abs(next.top - (otherRect.top + otherRect.height)) },
+        { value: otherRect.top, distance: Math.abs(next.top - otherRect.top) },
+        { value: otherRect.top + otherRect.height - next.height, distance: Math.abs(next.top + next.height - (otherRect.top + otherRect.height)) },
+      ];
+      const xSnap = xSnaps
+        .filter((candidate) => candidate.distance <= snap)
+        .sort((a, b) => a.distance - b.distance)[0];
+      const ySnap = ySnaps
+        .filter((candidate) => candidate.distance <= snap)
+        .sort((a, b) => a.distance - b.distance)[0];
+
+      if (xSnap && isVerticallyNear) next.left = xSnap.value;
+      if (ySnap && isHorizontallyNear) next.top = ySnap.value;
+
+      if (!overlaps(next, otherRect)) continue;
+      const separationCandidates = [
+        { left: otherRect.left - next.width - gap, top: next.top },
+        { left: otherRect.left + otherRect.width + gap, top: next.top },
+        { left: next.left, top: otherRect.top - next.height - gap },
+        { left: next.left, top: otherRect.top + otherRect.height + gap },
+      ]
+        .map((candidate) => ({ ...next, ...candidate }))
+        .filter((candidate) => candidateFits(candidate, bounds))
+        .filter((candidate) => visibleWindows.every((item) => item === other || !overlaps(candidate, currentRect(item))))
+        .sort((a, b) => {
+          const aDistance = Math.abs(a.left - next.left) + Math.abs(a.top - next.top);
+          const bDistance = Math.abs(b.left - next.left) + Math.abs(b.top - next.top);
+          return aDistance - bDistance;
+        });
+
+      if (separationCandidates[0]) {
+        next.left = separationCandidates[0].left;
+        next.top = separationCandidates[0].top;
+      }
+    }
+
+    return next;
+  }
+
   function fullWorkbenchRect() {
     return {
       left: 0,
@@ -344,11 +434,11 @@ function initDirectorWindowManager() {
           if (moveEvent.clientX <= bounds.left + edgeSnap) nextLeft = 0;
           if (moveEvent.clientX >= bounds.right - edgeSnap) nextLeft = maxLeft;
         }
-        applyRect(win, {
+        applyRect(win, magnetizeRect(win, {
           ...start,
           left: nextLeft,
           top: start.top + moveEvent.clientY - startY,
-        });
+        }));
       };
       const up = () => {
         win.classList.remove("dragging");
