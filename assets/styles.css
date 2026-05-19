@@ -2120,27 +2120,8 @@ h2 {
   white-space: nowrap;
 }
 
-.stage-resolution-badge {
-  background: rgba(8, 12, 20, 0.78);
-  border: 1px solid rgba(166, 255, 101, 0.36);
-  border-radius: 999px;
-  color: #a6ff65;
-  font-size: 0.62rem;
-  font-weight: 950;
-  letter-spacing: 0;
-  padding: 5px 8px;
-  position: absolute;
-  right: 12px;
-  top: 4px;
-  z-index: 9;
-}
-
 .stage-canvas {
-  background:
-    linear-gradient(180deg, rgba(8, 12, 22, 0.08), rgba(8, 12, 22, 0.44)),
-    radial-gradient(circle at 55% 18%, rgba(255, 104, 217, 0.48), transparent 20%),
-    radial-gradient(circle at 70% 32%, rgba(33, 219, 255, 0.42), transparent 22%),
-    var(--stage-fill, linear-gradient(135deg, #0b1327, #152640 45%, #10141f));
+  background: var(--stage-fill, linear-gradient(135deg, #0b1327, #152640 45%, #10141f));
   bottom: 10px;
   left: var(--stage-ruler-y);
   overflow: hidden;
@@ -2152,35 +2133,17 @@ h2 {
 
 .stage-grid {
   background:
-    linear-gradient(90deg, transparent 0 48%, rgba(255, 98, 218, 0.78) 49% 51%, transparent 52%),
     repeating-linear-gradient(90deg, rgba(190, 231, 255, 0.11) 0 1px, transparent 1px 58px),
     repeating-linear-gradient(0deg, rgba(190, 231, 255, 0.1) 0 1px, transparent 1px 42px);
   opacity: 0.72;
 }
 
 .stage-canvas::before {
-  background:
-    linear-gradient(90deg, rgba(39, 210, 255, 0), rgba(39, 210, 255, 0.74), rgba(255, 96, 216, 0)),
-    linear-gradient(90deg, rgba(255, 96, 216, 0), rgba(255, 96, 216, 0.66), rgba(39, 210, 255, 0));
-  content: "";
-  height: 7px;
-  left: 12%;
-  position: absolute;
-  right: 8%;
-  top: 24%;
-  transform: perspective(200px) rotateX(18deg);
-  z-index: 1;
+  content: none;
 }
 
 .stage-canvas::after {
-  background: linear-gradient(180deg, transparent, rgba(10, 15, 25, 0.88));
-  bottom: 0;
-  content: "";
-  height: 44%;
-  left: 0;
-  position: absolute;
-  right: 0;
-  z-index: 1;
+  content: none;
 }
 
 .stage-actor {
@@ -3589,17 +3552,17 @@ h2 {
   background: linear-gradient(180deg, #eef1f6, #c9d0dc);
   border-radius: 0 0 12px 12px;
   display: grid;
-  gap: 8px;
+  gap: 9px;
   justify-content: center;
   min-height: 0;
   overflow: hidden;
-  padding: 8px 8px 12px;
+  padding: 9px 10px 12px;
 }
 
 .tool-grid {
   display: grid;
-  gap: 5px;
-  grid-template-columns: repeat(2, 36px);
+  gap: 6px;
+  grid-template-columns: repeat(2, 40px);
 }
 
 .tool-palette .tool-grid button,
@@ -3613,10 +3576,10 @@ h2 {
   cursor: pointer;
   display: flex;
   font: 900 0.56rem/1 ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
-  height: 28px;
+  height: 30px;
   justify-content: center;
   padding: 0;
-  width: 36px;
+  width: 40px;
 }
 
 .tool-palette .tool-grid button:hover,
@@ -3638,21 +3601,21 @@ h2 {
 .tool-swatches {
   display: grid;
   gap: 0;
-  grid-template-columns: 40px 26px;
+  grid-template-columns: 44px 30px;
   justify-content: center;
-  min-height: 48px;
+  min-height: 52px;
   position: relative;
 }
 
-.tool-color-swatch {
+.tool-palette .tool-color-swatch {
   background: #fff;
   border: 1px solid #7d8796;
   border-radius: 0;
   cursor: pointer;
   display: block;
-  height: 34px;
+  height: 38px;
   padding: 0;
-  width: 34px;
+  width: 38px;
 }
 
 .tool-color-swatch:focus-visible {
@@ -3660,12 +3623,12 @@ h2 {
   outline-offset: 2px;
 }
 
-.foreground-swatch {
+.tool-palette .foreground-swatch {
   background: #070b12;
   z-index: 2;
 }
 
-.stage-background-swatch {
+.tool-palette .stage-background-swatch {
   background: #10141f;
   margin-left: -13px;
   margin-top: 13px;

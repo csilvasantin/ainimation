@@ -153,8 +153,9 @@ function initDirectorWindowManager() {
   function applyRect(win, rect) {
     if (isStackedLayout()) return;
     const bounds = workbench.getBoundingClientRect();
-    const minWidth = win.dataset.window === "tools" ? 64 : 220;
-    const minHeight = win.dataset.window === "tools" ? 220 : 36;
+    const isTools = win.dataset.window === "tools";
+    const minWidth = isTools ? 112 : 220;
+    const minHeight = isTools ? 430 : 36;
     const width = clamp(rect.width, minWidth, Math.max(minWidth, bounds.width));
     const height = clamp(rect.height, minHeight, Math.max(minHeight, bounds.height));
     const maxLeft = Math.max(0, bounds.width - width);
@@ -315,8 +316,8 @@ function initDirectorWindowManager() {
     const stageHeight = Math.max(360, lowerTop - gap);
     const sideLeft = stageWidth + gap;
     const castHeight = clamp(Math.round(bounds.height * 0.18), 190, 300);
-    const toolsWidth = Math.min(180, sideWidth);
-    const toolsHeight = clamp(Math.round(bounds.height * 0.32), 260, 500);
+    const toolsWidth = Math.min(180, Math.max(112, sideWidth));
+    const toolsHeight = clamp(Math.round(bounds.height * 0.42), 430, 620);
     const toolsTop = castHeight + gap;
     const inspectorTop = toolsTop + toolsHeight + gap;
     const inspectorHeight = Math.max(160, timelineTop - inspectorTop - gap);
@@ -554,6 +555,9 @@ function initDirectorWindowManager() {
       });
     });
   }
+
+  const toolsWindow = windows.find((item) => item.dataset.window === "tools");
+  if (toolsWindow) bringToFront(toolsWindow);
 
   menuButton?.addEventListener("click", () => {
     const isOpen = menu.classList.toggle("open");
