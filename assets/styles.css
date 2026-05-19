@@ -3307,23 +3307,6 @@ h2 {
   color: #fff;
 }
 
-.director-menubar .tool-palette {
-  background: rgba(255, 255, 255, 0.055);
-  border: 1px solid rgba(218, 233, 255, 0.14);
-  border-radius: 12px;
-  bottom: auto;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
-  display: flex;
-  gap: 5px;
-  grid-row: auto;
-  left: auto;
-  margin-left: auto;
-  overflow: visible;
-  padding: 5px;
-  position: relative;
-  z-index: auto;
-}
-
 .menubar-action {
   background: transparent;
   border: 0;
@@ -3343,9 +3326,24 @@ h2 {
   color: #fff;
 }
 
-.director-menubar .tool-palette button {
-  height: 28px;
-  width: 30px;
+.tools-toggle {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.tools-menu-label {
+  align-items: center;
+  display: inline-flex;
+  user-select: none;
+}
+
+.director-shell:has(.tools-toggle:not(:checked)) .tool-palette {
+  display: none;
+}
+
+.tools-toggle:checked + .member-menu ~ .tools-menu-label {
+  color: #fff;
 }
 
 .import-menu {
@@ -3367,7 +3365,7 @@ h2 {
   display: grid;
 }
 
-.director-menubar .tool-palette .import-menu button {
+.tool-palette .import-menu button {
   background: transparent;
   border: 0;
   border-radius: 8px;
@@ -3384,9 +3382,140 @@ h2 {
   width: 100%;
 }
 
-.director-menubar .tool-palette .import-menu button:hover {
+.tool-palette .import-menu button:hover {
   background: rgba(166, 255, 101, 0.16);
   color: #fff;
+}
+
+.studio-entering .tool-palette,
+.studio-entered .tool-palette {
+  align-content: start;
+  background: linear-gradient(180deg, #eef1f6, #c9d0dc);
+  border: 1px solid #798493;
+  border-radius: 3px;
+  bottom: auto;
+  box-shadow: inset 0 1px 0 #fff, 0 18px 42px rgba(0, 0, 0, 0.28);
+  color: #17202c;
+  display: grid;
+  gap: 6px;
+  grid-template-columns: 1fr;
+  height: auto;
+  left: 10px;
+  max-height: calc(100% - 20px);
+  overflow: visible;
+  padding: 4px;
+  position: absolute;
+  top: 10px;
+  width: 54px;
+  z-index: 60;
+}
+
+.tool-palette.is-hidden {
+  display: none;
+}
+
+.tool-palette strong {
+  background: linear-gradient(180deg, #f8fafc, #bfc6d1);
+  border: 1px solid #929cac;
+  border-radius: 2px;
+  color: #11151b;
+  display: block;
+  font: 850 0.56rem/1 var(--font-ui, inherit);
+  padding: 3px 2px;
+  text-align: center;
+}
+
+.tool-grid {
+  display: grid;
+  gap: 3px;
+  grid-template-columns: repeat(2, 21px);
+}
+
+.tool-palette .tool-grid button,
+.tool-symbols span {
+  align-items: center;
+  background: linear-gradient(180deg, #fff, #d8dee8);
+  border: 1px solid #8f9aaa;
+  border-radius: 2px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  color: #1b2737;
+  cursor: pointer;
+  display: flex;
+  font: 900 0.56rem/1 ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  height: 21px;
+  justify-content: center;
+  padding: 0;
+  width: 21px;
+}
+
+.tool-palette .tool-grid button:hover,
+.tool-palette .tool-grid button[data-import-trigger="ai"] {
+  background: linear-gradient(180deg, #b8ff73, #82ff4b);
+  color: #071009;
+}
+
+.tool-symbols {
+  border-top: 1px solid rgba(82, 92, 108, 0.46);
+  padding-top: 6px;
+}
+
+.tool-symbols span {
+  cursor: default;
+  font-size: 0.7rem;
+}
+
+.tool-swatches {
+  display: grid;
+  gap: 0;
+  grid-template-columns: 26px 18px;
+  justify-content: center;
+  min-height: 34px;
+  position: relative;
+}
+
+.tool-swatches span {
+  background: #fff;
+  border: 1px solid #7d8796;
+  display: block;
+  height: 22px;
+  width: 22px;
+}
+
+.tool-swatches span:first-child {
+  background: #070b12;
+  z-index: 2;
+}
+
+.tool-swatches span:last-child {
+  margin-left: -10px;
+  margin-top: 10px;
+}
+
+.tool-strokes {
+  border-top: 1px solid rgba(82, 92, 108, 0.46);
+  display: grid;
+  gap: 4px;
+  padding: 6px 3px 2px;
+}
+
+.tool-strokes span {
+  background: #11151b;
+  display: block;
+  height: 2px;
+}
+
+.tool-strokes span:nth-child(2) {
+  height: 4px;
+}
+
+.tool-strokes span:nth-child(3) {
+  height: 6px;
+}
+
+.tool-palette .import-menu {
+  left: calc(100% + 8px);
+  right: auto;
+  top: 26px;
 }
 
 .studio-entering .director-workbench,

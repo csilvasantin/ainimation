@@ -478,15 +478,44 @@ initStudioCollabBar();
 function initImportMenu() {
   const palette = document.querySelector(".tool-palette");
   const menu = palette?.querySelector(".import-menu");
+  const toolsButton = document.querySelector("[data-tools-open]");
   if (!palette || !menu) return;
+
+  const setToolsVisible = (visible) => {
+    palette.classList.toggle("is-hidden", !visible);
+    toolsButton?.setAttribute("aria-pressed", String(visible));
+    if (!visible) {
+      palette.classList.remove("open");
+      palette.dataset.openFor = "";
+    }
+  };
+  let toolsPointerHandled = false;
 
   palette.querySelectorAll("[data-import-trigger]").forEach((button) => {
     button.addEventListener("click", (event) => {
       event.stopPropagation();
+      setToolsVisible(true);
       palette.dataset.importMode = button.dataset.importTrigger;
       palette.classList.toggle("open", palette.dataset.openFor !== button.dataset.importTrigger);
       palette.dataset.openFor = palette.classList.contains("open") ? button.dataset.importTrigger : "";
     });
+  });
+
+  document.addEventListener("pointerdown", (event) => {
+    if (!event.target.closest("[data-tools-open]")) return;
+    event.preventDefault();
+    event.stopPropagation();
+    toolsPointerHandled = true;
+    setToolsVisible(palette.classList.contains("is-hidden"));
+  });
+
+  toolsButton?.addEventListener("click", (event) => {
+    event.stopPropagation();
+    if (toolsPointerHandled) {
+      toolsPointerHandled = false;
+      return;
+    }
+    setToolsVisible(palette.classList.contains("is-hidden"));
   });
 
   document.addEventListener("click", (event) => {

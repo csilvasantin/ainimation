@@ -18,7 +18,7 @@
     <meta property="og:url" content="https://ainimation.studio/studio.html" />
     <link rel="canonical" href="https://ainimation.studio/studio.html" />
     <link rel="manifest" href="site.webmanifest" />
-    <link rel="stylesheet" href="assets/styles.css?v=members-import-1" />
+    <link rel="stylesheet" href="assets/styles.css?v=tools-palette-2" />
   </head>
   <body class="studio-page">
     <header class="site-header studio-site-header" aria-label="Primary">
@@ -161,6 +161,7 @@
 
           <div class="director-menubar" aria-label="Application menu">
             <a class="director-brand-link" href="index.html">ADMIRA Director v.1.0</a>
+            <input class="tools-toggle" id="toolsToggle" type="checkbox" checked />
             <span class="member-menu">
               <button class="menu-button" type="button" aria-expanded="false" data-member-menu>Members</button>
               <span class="member-menu-list" aria-label="Import members">
@@ -181,6 +182,7 @@
             <span>Score</span>
             <span>AI Director</span>
             <button class="menubar-action" type="button" data-collab-open>Collaborate</button>
+            <label class="menubar-action tools-menu-label" for="toolsToggle">Tools</label>
             <span class="window-menu">
               <button class="menu-button" type="button" aria-expanded="false">Window</button>
               <span class="window-menu-list" aria-label="Open windows">
@@ -192,13 +194,31 @@
                 <button type="button" data-open-window="prompt">AI Director</button>
               </span>
             </span>
+          </div>
+
+          <div class="director-workbench">
             <aside class="tool-palette" aria-label="Import tools">
-              <button type="button" title="Import video" data-import-trigger="video">V</button>
-              <button type="button" title="Import text" data-import-trigger="text">T</button>
-              <button type="button" title="Import reference frame" data-import-trigger="reference">R</button>
-              <button type="button" title="Import motion path" data-import-trigger="path">~</button>
-              <button type="button" title="Generate AI asset" data-import-trigger="ai">AI</button>
-              <button type="button" title="Import behavior" data-import-trigger="behavior">fx</button>
+              <strong>Tools</strong>
+              <div class="tool-grid">
+                <button type="button" title="Import video" data-import-trigger="video">V</button>
+                <button type="button" title="Import text" data-import-trigger="text">T</button>
+                <button type="button" title="Import reference frame" data-import-trigger="reference">R</button>
+                <button type="button" title="Import motion path" data-import-trigger="path">~</button>
+                <button type="button" title="Generate AI asset" data-import-trigger="ai">AI</button>
+                <button type="button" title="Import behavior" data-import-trigger="behavior">fx</button>
+              </div>
+              <div class="tool-grid tool-symbols" aria-hidden="true">
+                <span>✋</span><span>⌕</span>
+                <span>A</span><span>╱</span>
+                <span>◼</span><span>□</span>
+                <span>●</span><span>○</span>
+              </div>
+              <div class="tool-swatches" aria-hidden="true">
+                <span></span><span></span>
+              </div>
+              <div class="tool-strokes" aria-hidden="true">
+                <span></span><span></span><span></span>
+              </div>
               <div class="import-menu" aria-label="Import elements">
                 <button type="button" data-import-asset="Character reference" data-import-kind="Character">Character reference</button>
                 <button type="button" data-import-asset="Background plate" data-import-kind="Environment">Background plate</button>
@@ -208,9 +228,6 @@
                 <button type="button" data-import-asset="AI generated prop" data-import-kind="Generated asset">AI generated prop</button>
               </div>
             </aside>
-          </div>
-
-          <div class="director-workbench">
             <section class="director-window stage-panel director-stage-window" aria-label="Stage preview" data-window="stage" data-window-title="Stage" data-x="380" data-y="96" data-w="500" data-h="430">
               <div class="window-titlebar">
                 <span class="window-controls">
@@ -393,6 +410,6 @@
       <a href="mailto:hello@ainimation.studio">hello@ainimation.studio</a>
     </footer>
 
-    <script src="assets/app.js?v=members-import-1" defer></script>
+    <script src="assets/app.js?v=tools-palette-2" defer></script>
   </body>
 </html>
