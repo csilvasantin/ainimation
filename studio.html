@@ -18,7 +18,7 @@
     <meta property="og:url" content="https://ainimation.studio/studio.html" />
     <link rel="canonical" href="https://ainimation.studio/studio.html" />
     <link rel="manifest" href="site.webmanifest" />
-    <link rel="stylesheet" href="assets/styles.css?v=digital-twin-1" />
+    <link rel="stylesheet" href="assets/styles.css?v=stage-rulers-1" />
   </head>
   <body class="studio-page">
     <header class="site-header studio-site-header" aria-label="Primary">
@@ -273,11 +273,22 @@
                 <span id="sceneCount">5 score rows</span>
               </div>
               <div class="stage-window" aria-label="Generated stage composition">
-                <div class="stage-grid" aria-hidden="true"></div>
-                <div class="stage-actor primary-actor">Archivist</div>
-                <div class="stage-actor signal-actor">Signal</div>
-                <div class="stage-actor city-actor">City</div>
-                <div class="camera-frame" aria-hidden="true"></div>
+                <div class="stage-ruler stage-ruler-x" aria-label="Horizontal pixels">
+                  <b>H px</b>
+                  <span>0</span><span>320</span><span>640</span><span>960</span><span>1280</span><span>1600</span><span>1920</span>
+                </div>
+                <div class="stage-ruler stage-ruler-y" aria-label="Vertical pixels">
+                  <b>V px</b>
+                  <span>0</span><span>180</span><span>360</span><span>540</span><span>720</span><span>900</span><span>1080</span>
+                </div>
+                <div class="stage-resolution-badge">1920 × 1080</div>
+                <div class="stage-canvas" aria-label="Full HD stage canvas">
+                  <div class="stage-grid" aria-hidden="true"></div>
+                  <div class="stage-actor primary-actor">Archivist</div>
+                  <div class="stage-actor signal-actor">Signal</div>
+                  <div class="stage-actor city-actor">City</div>
+                  <div class="camera-frame" aria-hidden="true"></div>
+                </div>
               </div>
               <span class="resize-handle" aria-hidden="true"></span>
             </section>
@@ -444,6 +455,6 @@
       <a href="mailto:hello@ainimation.studio">hello@ainimation.studio</a>
     </footer>
 
-    <script src="assets/app.js?v=digital-twin-1" defer></script>
+    <script src="assets/app.js?v=stage-rulers-1" defer></script>
   </body>
 </html>

@@ -1113,7 +1113,7 @@ function renderFilmPlan(plan) {
     }).join("");
   }
 
-  const stageWindow = document.querySelector(".stage-window");
+  const stageWindow = document.querySelector(".stage-canvas") || document.querySelector(".stage-window");
   if (stageWindow) {
     stageWindow.querySelectorAll(".stage-imported-member").forEach((member) => member.remove());
     importedStageMembers.slice(0, 6).forEach((member, index) => {
