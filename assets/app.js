@@ -1118,6 +1118,58 @@ function initScoreLabelEditing() {
   });
 }
 
+function initTimelineSpriteDragging(totalFrames) {
+  const sprites = [...scoreGrid.querySelectorAll(".score-sprite.imported-member[data-cast-index]")];
+  if (!sprites.length) return;
+
+  sprites.forEach((sprite) => {
+    sprite.addEventListener("pointerdown", (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      const track = sprite.closest(".score-track");
+      const castIndex = Number(sprite.dataset.castIndex);
+      if (!track || !Number.isInteger(castIndex)) return;
+      const trackRect = track.getBoundingClientRect();
+      const startFrame = Number(sprite.dataset.startFrame || 1);
+      const durationFrames = Number(sprite.dataset.durationFrames || 24);
+      const maxStartFrame = Math.max(1, totalFrames - durationFrames + 1);
+      const frameFromDelta = (clientX) => {
+        const delta = trackRect.width ? ((clientX - event.clientX) / trackRect.width) * totalFrames : 0;
+        return Math.min(Math.max(Math.round(startFrame + delta), 1), maxStartFrame);
+      };
+      const updateSprite = (frame) => {
+        sprite.dataset.startFrame = String(frame);
+        sprite.style.left = `${((frame - 1) / totalFrames) * 100}%`;
+        const range = sprite.querySelector("small");
+        if (range) range.textContent = `${frame}-${frame + durationFrames - 1}`;
+      };
+
+      sprite.classList.add("is-dragging");
+      sprite.setPointerCapture(event.pointerId);
+      const move = (moveEvent) => updateSprite(frameFromDelta(moveEvent.clientX));
+      const up = () => {
+        sprite.classList.remove("is-dragging");
+        sprite.removeEventListener("pointermove", move);
+        sprite.removeEventListener("pointerup", up);
+        sprite.removeEventListener("pointercancel", up);
+        const nextFrame = Number(sprite.dataset.startFrame || startFrame);
+        const plan = currentPlan();
+        if (plan.cast?.[castIndex]) {
+          plan.cast[castIndex] = {
+            ...plan.cast[castIndex],
+            startFrame: nextFrame,
+            durationFrames,
+          };
+          saveFilmPlan(plan);
+        }
+      };
+      sprite.addEventListener("pointermove", move);
+      sprite.addEventListener("pointerup", up);
+      sprite.addEventListener("pointercancel", up);
+    });
+  });
+}
+
 function normalizeFilmPlan(plan) {
   if (!plan) return plan;
   const fallback = buildFilmPlan(false);
@@ -1302,26 +1354,16 @@ function renderFilmPlan(plan) {
   }
 
   if (scoreGrid) {
-    const importedEndFrames = importedTimelineMembers.map((member) => Number(member.startFrame || 1) + Number(member.durationFrames || 24));
-    const totalFrames = Math.max(...plan.scenes.map((scene) => scene.startFrame + scene.length), ...importedEndFrames, 240);
+    const importedEndFrames = importedTimelineMembers.map((member) => Number(member.startFrame || 1) + Number(member.durationFrames || 24) - 1);
+    const totalFrames = Math.max(...importedEndFrames, 240);
     const frameMarks = Array.from({ length: 9 }, (_, index) => Math.round(1 + (totalFrames - 1) * (index / 8)));
     const timelineMarkers = loadTimelineMarkers(totalFrames);
-    const castNames = castMembers.map((member) => member.name);
-    const scoreLabels = loadScoreLabels();
-    const scoreChannels = [
-      { name: scoreLabels[0], lane: "stage", label: (scene) => scene.beat },
-      { name: scoreLabels[1], lane: "cast", label: (scene, index) => castNames[index % Math.max(castNames.length, 1)] || scene.beat },
-      { name: scoreLabels[2], lane: "cast", label: (scene, index) => castNames[(index + 1) % Math.max(castNames.length, 1)] || scene.beat },
-      { name: scoreLabels[3], lane: "behavior", label: (scene) => scene.behavior },
-      { name: scoreLabels[4], lane: "voice", label: (scene) => scene.beat },
-      { name: scoreLabels[5], lane: "music", label: (scene) => `${scene.act} motif` },
-      { name: scoreLabels[6], lane: "video", label: (scene) => scene.beat },
-      ...importedTimelineMembers.map((member) => ({
+    const scoreChannels = importedTimelineMembers.map((member) => ({
         name: member.name,
         lane: member.mediaType === "video" || member.mediaType === "animation" ? "video" : member.mediaType === "audio" ? "music" : "cast",
         member,
-      })),
-    ];
+        castIndex: castMembers.indexOf(member),
+      }));
     scoreGrid.style.setProperty("--total-frames", totalFrames);
     scoreGrid.innerHTML = `
       <div class="director-score">
@@ -1349,24 +1391,20 @@ function renderFilmPlan(plan) {
               </button>
             `).join("")}
           </div>
-          <i class="score-playhead" role="slider" aria-label="Timeline playhead" aria-valuemin="1" aria-valuemax="${totalFrames}" aria-valuenow="${plan.scenes[0]?.startFrame || 1}" data-frame="${plan.scenes[0]?.startFrame || 1}"></i>
+          <i class="score-playhead" role="slider" aria-label="Timeline playhead" aria-valuemin="1" aria-valuemax="${totalFrames}" aria-valuenow="1" data-frame="1"></i>
         </div>
+        ${scoreChannels.length ? "" : `<div class="score-empty-state">Import cast members to start the timeline</div>`}
         ${scoreChannels.map((channel, channelIndex) => `
           <div class="score-row-label" contenteditable="true" spellcheck="false" role="textbox" aria-label="Edit timeline row label" data-score-label-index="${channelIndex}">${escapeHtml(channel.name)}</div>
           <div class="score-track ${channel.lane}">
-            ${(channel.member ? [channel.member] : plan.scenes).map((item, itemIndex) => {
-              const stagger = channel.member ? 0 : channelIndex < 3 ? channelIndex * 8 : 0;
-              const start = channel.member
-                ? Math.min(totalFrames - 8, Math.max(1, Number(item.startFrame || 1)))
-                : Math.min(totalFrames - 8, Math.max(1, item.startFrame + stagger));
-              const length = channel.member
-                ? Math.max(1, Math.min(totalFrames - start, Number(item.durationFrames || 24)))
-                : Math.max(18, Math.min(totalFrames - start, item.length - stagger));
-              const spriteLabel = channel.member ? item.name : channel.label(item, itemIndex);
+            ${[channel.member].map((item) => {
+              const length = Math.max(1, Number(item.durationFrames || 24));
+              const start = Math.min(Math.max(1, Number(item.startFrame || 1)), Math.max(1, totalFrames - length + 1));
+              const spriteLabel = item.name;
               return `
-                <button class="score-sprite ${channel.lane} ${channel.member ? "imported-member" : ""}" type="button" style="left:${((start - 1) / totalFrames) * 100}%;width:${(length / totalFrames) * 100}%">
+                <button class="score-sprite ${channel.lane} imported-member" type="button" style="left:${((start - 1) / totalFrames) * 100}%;width:${(length / totalFrames) * 100}%" data-cast-index="${channel.castIndex}" data-start-frame="${start}" data-duration-frames="${length}">
                   <span>${escapeHtml(spriteLabel)}</span>
-                  <small>${start}-${start + length}</small>
+                  <small>${start}-${start + length - 1}</small>
                 </button>
               `;
             }).join("")}
@@ -1377,6 +1415,7 @@ function renderFilmPlan(plan) {
     initScorePlayhead(totalFrames);
     initTimelineMarkerEditing(totalFrames);
     initScoreLabelEditing();
+    initTimelineSpriteDragging(totalFrames);
   }
 
   if (stageScript) {
@@ -1481,6 +1520,7 @@ function importMemberFiles(files, mode = "image") {
   if (!incoming.length) return;
   const plan = currentPlan();
   const existing = plan.cast || makeCast(plan);
+  const timelineMemberCount = existing.filter((member) => member.imported && member.src).length;
   const imported = incoming
     .map((file) => ({ file, mediaType: memberTypeFromMode(file, mode) }))
     .filter((item) => item.mediaType)
@@ -1496,7 +1536,7 @@ function importMemberFiles(files, mode = "image") {
         src: URL.createObjectURL(file.file),
         imported: true,
         onStage: ["animation", "image", "video"].includes(file.mediaType),
-        startFrame: 1 + (memberNumber % 5) * 48,
+        startFrame: 1 + (timelineMemberCount + index) * 24,
         durationFrames: 24,
         prompt: `Imported ${file.mediaType} member. Place in Cast, schedule on Timeline, and prepare for later AI animation passes.`,
       };
