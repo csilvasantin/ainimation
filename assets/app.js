@@ -750,6 +750,31 @@ function initScorePlayhead(totalFrames) {
   const fpsValues = [12, 24, 25, 30, 60];
   let currentFps = Number(fpsReadout?.dataset.value || fpsReadout?.textContent || 24);
   let playTimer = null;
+  const syncStageMedia = (frame, shouldPlay) => {
+    const plan = currentPlan();
+    document.querySelectorAll(".stage-imported-member[data-cast-index]").forEach((figure) => {
+      const media = figure.querySelector("video, audio");
+      const member = plan.cast?.[Number(figure.dataset.castIndex)];
+      if (!media || !member) return;
+      const start = Number(member.startFrame || 1);
+      const duration = Math.max(1, Number(member.durationFrames || 24));
+      const isActive = frame >= start && frame <= start + duration - 1;
+      if (!isActive || !shouldPlay) {
+        media.pause();
+        return;
+      }
+      const targetTime = Math.max(0, (frame - start) / Math.max(1, getFps()));
+      if (Math.abs((media.currentTime || 0) - targetTime) > 0.2) {
+        if (Number.isFinite(media.duration) && media.duration > 0) {
+          media.currentTime = Math.min(targetTime, Math.max(0, media.duration - 0.05));
+        } else {
+          media.currentTime = targetTime;
+        }
+      }
+      media.muted = false;
+      media.play?.().catch(() => {});
+    });
+  };
   const clampFrame = (frame) => Math.min(Math.max(frame, 1), totalFrames);
   const setFrame = (frame) => {
     currentFrame = clampFrame(frame);
@@ -757,6 +782,7 @@ function initScorePlayhead(totalFrames) {
     playhead.style.left = `${left}%`;
     playhead.dataset.frame = String(currentFrame);
     playhead.setAttribute("aria-valuenow", String(currentFrame));
+    syncStageMedia(currentFrame, Boolean(playTimer));
   };
   const setFps = (fps) => {
     currentFps = fpsValues.includes(Number(fps)) ? Number(fps) : 24;
@@ -772,6 +798,7 @@ function initScorePlayhead(totalFrames) {
       window.clearInterval(playTimer);
       playTimer = null;
     }
+    syncStageMedia(currentFrame, false);
     if (playButton) {
       playButton.textContent = "▶";
       playButton.setAttribute("aria-label", "Play timeline");
@@ -784,6 +811,7 @@ function initScorePlayhead(totalFrames) {
     playButton.textContent = "■";
     playButton.setAttribute("aria-label", "Stop timeline");
     playButton.setAttribute("aria-pressed", "true");
+    syncStageMedia(currentFrame, true);
     playTimer = window.setInterval(() => {
       if (currentFrame >= totalFrames) {
         stopPlayback();
@@ -1132,33 +1160,59 @@ function initTimelineSpriteDragging(totalFrames) {
       const trackRect = track.getBoundingClientRect();
       const startFrame = Number(sprite.dataset.startFrame || 1);
       const durationFrames = Number(sprite.dataset.durationFrames || 24);
-      const maxStartFrame = Math.max(1, totalFrames - durationFrames + 1);
-      const frameFromDelta = (clientX) => {
+      const action = event.target.closest("[data-sprite-handle='start']")
+        ? "trim-start"
+        : event.target.closest("[data-sprite-handle='end']")
+          ? "trim-end"
+          : "move";
+      const frameDelta = (clientX) => {
         const delta = trackRect.width ? ((clientX - event.clientX) / trackRect.width) * totalFrames : 0;
-        return Math.min(Math.max(Math.round(startFrame + delta), 1), maxStartFrame);
+        return Math.round(delta);
       };
-      const updateSprite = (frame) => {
+      const updateSprite = (frame, duration) => {
         sprite.dataset.startFrame = String(frame);
+        sprite.dataset.durationFrames = String(duration);
         sprite.style.left = `${((frame - 1) / totalFrames) * 100}%`;
+        sprite.style.width = `${(duration / totalFrames) * 100}%`;
         const range = sprite.querySelector("small");
-        if (range) range.textContent = `${frame}-${frame + durationFrames - 1}`;
+        if (range) range.textContent = `${frame}-${frame + duration - 1}`;
+      };
+      const updateFromPointer = (clientX) => {
+        const delta = frameDelta(clientX);
+        let nextStart = startFrame;
+        let nextDuration = durationFrames;
+        if (action === "move") {
+          const maxStartFrame = Math.max(1, totalFrames - durationFrames + 1);
+          nextStart = Math.min(Math.max(startFrame + delta, 1), maxStartFrame);
+        }
+        if (action === "trim-start") {
+          const endFrame = startFrame + durationFrames - 1;
+          nextStart = Math.min(Math.max(startFrame + delta, 1), endFrame);
+          nextDuration = Math.max(1, endFrame - nextStart + 1);
+        }
+        if (action === "trim-end") {
+          const endFrame = Math.min(Math.max(startFrame + durationFrames - 1 + delta, startFrame), totalFrames);
+          nextDuration = Math.max(1, endFrame - startFrame + 1);
+        }
+        updateSprite(nextStart, nextDuration);
       };
 
       sprite.classList.add("is-dragging");
       sprite.setPointerCapture(event.pointerId);
-      const move = (moveEvent) => updateSprite(frameFromDelta(moveEvent.clientX));
+      const move = (moveEvent) => updateFromPointer(moveEvent.clientX);
       const up = () => {
         sprite.classList.remove("is-dragging");
         sprite.removeEventListener("pointermove", move);
         sprite.removeEventListener("pointerup", up);
         sprite.removeEventListener("pointercancel", up);
         const nextFrame = Number(sprite.dataset.startFrame || startFrame);
+        const nextDuration = Number(sprite.dataset.durationFrames || durationFrames);
         const plan = currentPlan();
         if (plan.cast?.[castIndex]) {
           plan.cast[castIndex] = {
             ...plan.cast[castIndex],
             startFrame: nextFrame,
-            durationFrames,
+            durationFrames: nextDuration,
           };
           saveFilmPlan(plan);
         }
@@ -1281,7 +1335,7 @@ function renderFilmPlan(plan) {
   const importedTimelineMembers = castMembers.filter((member) => member.imported && member.src);
   const importedStageMembers = importedTimelineMembers.filter((member) => (
     member.onStage !== false &&
-    ["animation", "image", "video"].includes(member.mediaType)
+    ["animation", "audio", "image", "video"].includes(member.mediaType)
   ));
   outputTitle.textContent = plan.title;
   sceneCount.textContent = "1920 × 1080";
@@ -1329,18 +1383,21 @@ function renderFilmPlan(plan) {
     stageWindow.querySelectorAll(".stage-imported-member, .stage-item").forEach((member) => member.remove());
     importedStageMembers.slice(0, 6).forEach((member, index) => {
       const figure = document.createElement("figure");
-      figure.className = `stage-imported-member ${member.mediaType === "video" ? "video-member" : "image-member"}`;
+      figure.className = `stage-imported-member ${member.mediaType === "video" ? "video-member" : member.mediaType === "audio" ? "audio-member" : "image-member"}`;
       figure.dataset.castIndex = String(castMembers.indexOf(member));
       figure.style.left = `${clampPercent(member.stageX ?? (16 + (index % 3) * 24))}%`;
       figure.style.top = `${clampPercent(member.stageY ?? (54 + Math.floor(index / 3) * 18))}%`;
       figure.style.width = `${clampStageSize(member.stageW, 12)}%`;
       figure.style.height = `${clampStageSize(member.stageH, 10)}%`;
-      const media = document.createElement(member.mediaType === "video" ? "video" : "img");
+      const media = document.createElement(member.mediaType === "video" ? "video" : member.mediaType === "audio" ? "audio" : "img");
       media.src = member.src;
       media.alt = "";
       if (member.mediaType === "video") {
-        media.muted = true;
+        media.muted = false;
         media.playsInline = true;
+      }
+      if (member.mediaType === "audio") {
+        media.preload = "metadata";
       }
       const caption = document.createElement("figcaption");
       caption.textContent = member.name;
@@ -1403,8 +1460,10 @@ function renderFilmPlan(plan) {
               const spriteLabel = item.name;
               return `
                 <button class="score-sprite ${channel.lane} imported-member" type="button" style="left:${((start - 1) / totalFrames) * 100}%;width:${(length / totalFrames) * 100}%" data-cast-index="${channel.castIndex}" data-start-frame="${start}" data-duration-frames="${length}">
+                  <i class="score-sprite-handle start" data-sprite-handle="start" aria-hidden="true"></i>
                   <span>${escapeHtml(spriteLabel)}</span>
                   <small>${start}-${start + length - 1}</small>
+                  <i class="score-sprite-handle end" data-sprite-handle="end" aria-hidden="true"></i>
                 </button>
               `;
             }).join("")}
@@ -1535,7 +1594,7 @@ function importMemberFiles(files, mode = "image") {
         fileName: file.file.name,
         src: URL.createObjectURL(file.file),
         imported: true,
-        onStage: ["animation", "image", "video"].includes(file.mediaType),
+        onStage: ["animation", "audio", "image", "video"].includes(file.mediaType),
         startFrame: 1 + (timelineMemberCount + index) * 24,
         durationFrames: 24,
         prompt: `Imported ${file.mediaType} member. Place in Cast, schedule on Timeline, and prepare for later AI animation passes.`,
@@ -1797,7 +1856,7 @@ if (filmForm) {
   clearStageButton?.addEventListener("click", () => {
     const plan = currentPlan();
     plan.cast = (plan.cast || makeCast(plan)).map((member) => (
-      member.imported && ["animation", "image", "video"].includes(member.mediaType)
+      member.imported && ["animation", "audio", "image", "video"].includes(member.mediaType)
         ? { ...member, onStage: false, stageX: undefined, stageY: undefined, stageW: undefined, stageH: undefined }
         : member
     ));

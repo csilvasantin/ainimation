@@ -2199,10 +2199,25 @@ h2 {
 }
 
 .stage-imported-member img,
-.stage-imported-member video {
+.stage-imported-member video,
+.stage-imported-member audio {
   height: 100%;
   object-fit: cover;
   width: 100%;
+}
+
+.stage-imported-member.audio-member {
+  background:
+    repeating-linear-gradient(90deg, rgba(166, 255, 101, 0.35) 0 3px, transparent 3px 9px),
+    linear-gradient(180deg, rgba(8, 12, 20, 0.96), rgba(20, 27, 40, 0.94));
+}
+
+.stage-imported-member.audio-member audio {
+  height: 0;
+  opacity: 0;
+  pointer-events: none;
+  position: absolute;
+  width: 0;
 }
 
 .stage-imported-member figcaption {
@@ -4169,6 +4184,23 @@ body.studio-entered {
 .score-sprite.imported-member {
   cursor: ew-resize;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.76), 0 0 0 1px rgba(32, 96, 255, 0.18);
+}
+
+.score-sprite-handle {
+  bottom: 1px;
+  cursor: ew-resize;
+  position: absolute;
+  top: 1px;
+  width: 8px;
+  z-index: 3;
+}
+
+.score-sprite-handle.start {
+  left: -2px;
+}
+
+.score-sprite-handle.end {
+  right: -2px;
 }
 
 .score-sprite.imported-member.is-dragging {
