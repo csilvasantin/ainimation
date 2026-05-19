@@ -3395,7 +3395,7 @@ body.studio-entered {
   contain: layout paint;
   display: grid;
   grid-template-columns: 128px minmax(0, 1fr);
-  grid-template-rows: 52px 26px repeat(7, minmax(30px, 1fr));
+  grid-template-rows: 28px 26px repeat(7, minmax(30px, 1fr));
   height: 100%;
   min-height: 100%;
   min-width: 0;
@@ -3415,25 +3415,14 @@ body.studio-entered {
 .score-tools {
   align-items: center;
   display: flex;
-  flex-direction: column;
-  gap: 4px;
   justify-content: center;
-  padding: 4px;
+  padding: 4px 5px;
 }
 
 .score-fps {
   align-items: center;
-  display: grid;
-  gap: 4px;
-  grid-template-columns: auto 1fr;
-  width: 100%;
-}
-
-.score-fps span {
-  color: #5f6c7d;
-  font-size: 0.62rem;
-  font-weight: 900;
-  letter-spacing: 0;
+  display: flex;
+  min-width: 0;
 }
 
 .score-fps select {
@@ -3442,15 +3431,18 @@ body.studio-entered {
   border: 1px solid #9aa5b5;
   border-radius: 3px;
   color: #1d2838;
-  font: 800 0.68rem/1 var(--font-ui, inherit);
+  font: 800 0.62rem/1 var(--font-ui, inherit);
   height: 18px;
-  padding: 0 16px 0 6px;
+  max-width: 48px;
+  padding: 0 2px;
+  width: 48px;
 }
 
 .score-transport {
   display: grid;
-  gap: 3px;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 2px;
+  grid-template-columns: 20px 48px 20px 20px;
+  justify-content: center;
   width: 100%;
 }
 

@@ -863,18 +863,17 @@ function renderFilmPlan(plan) {
     scoreGrid.innerHTML = `
       <div class="director-score">
         <div class="score-tools" aria-label="Timeline transport">
-          <label class="score-fps">
-            <span>FPS</span>
-            <select data-score-fps aria-label="Timeline frames per second">
-              <option value="12">12</option>
-              <option value="24" selected>24</option>
-              <option value="25">25</option>
-              <option value="30">30</option>
-              <option value="60">60</option>
-            </select>
-          </label>
           <div class="score-transport" role="group" aria-label="Timeline frame controls">
             <button type="button" data-score-step="prev" aria-label="Previous frame">←</button>
+            <label class="score-fps" aria-label="Timeline playback speed">
+              <select data-score-fps aria-label="Timeline frames per second">
+                <option value="12">12 fps</option>
+                <option value="24" selected>24 fps</option>
+                <option value="25">25 fps</option>
+                <option value="30">30 fps</option>
+                <option value="60">60 fps</option>
+              </select>
+            </label>
             <button type="button" data-score-step="next" aria-label="Next frame">→</button>
             <button type="button" data-score-play aria-label="Play timeline" aria-pressed="false">▶</button>
           </div>
