@@ -4811,16 +4811,16 @@ body.studio-entered {
   cursor: ew-resize;
   position: absolute;
   top: 1px;
-  width: 8px;
+  width: 14px;
   z-index: 3;
 }
 
 .score-sprite-handle.start {
-  left: -2px;
+  left: -5px;
 }
 
 .score-sprite-handle.end {
-  right: -2px;
+  right: -5px;
 }
 
 .score-sprite.imported-member.is-dragging {
@@ -4844,7 +4844,8 @@ body.studio-entered {
 
 .score-keyframe-dot:hover,
 .score-keyframe-dot:focus,
-.score-keyframe-dot.is-selected {
+.score-keyframe-dot.is-selected,
+.score-keyframe-dot.is-dragging {
   background: #ffe65c;
   border-color: #101827;
   outline: 0;

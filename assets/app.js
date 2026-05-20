@@ -1661,6 +1661,7 @@ function initTimelineSpriteDragging(totalFrames) {
       }
       scoreGrid.querySelectorAll(".score-sprite.is-selected").forEach((item) => item.classList.remove("is-selected"));
       sprite.classList.add("is-selected");
+      setTimelineFrame(Number(sprite.dataset.startFrame || 1), false);
     };
     sprite.querySelector("[data-sprite-remove]")?.addEventListener("pointerdown", (event) => {
       event.preventDefault();
@@ -1688,6 +1689,7 @@ function initTimelineSpriteDragging(totalFrames) {
       const trackRect = track.getBoundingClientRect();
       const startFrame = Number(sprite.dataset.startFrame || 1);
       const durationFrames = Number(sprite.dataset.durationFrames || 24);
+      let activeStartFrame = startFrame;
       const displayFrames = Math.max(1, Number(document.querySelector(".score-playhead")?.dataset.displayFrames || totalFrames));
       const action = event.target.closest("[data-sprite-handle='start']")
         ? "trim-start"
@@ -1699,6 +1701,7 @@ function initTimelineSpriteDragging(totalFrames) {
         return Math.round(delta);
       };
       const updateSprite = (frame, duration) => {
+        activeStartFrame = frame;
         sprite.dataset.startFrame = String(frame);
         sprite.dataset.durationFrames = String(duration);
         sprite.style.left = `${((frame - 1) / displayFrames) * 100}%`;
@@ -1713,7 +1716,7 @@ function initTimelineSpriteDragging(totalFrames) {
             durationFrames: duration,
           };
           saveFilmPlan(plan);
-          syncStageToFrame(currentTimelineFrame(), false);
+          setTimelineFrame(frame, false);
         }
         if (stageItemId) {
           plan.stageItems = (plan.stageItems || []).map((item) => (
@@ -1722,7 +1725,7 @@ function initTimelineSpriteDragging(totalFrames) {
               : item
           ));
           saveFilmPlan(plan);
-          syncStageToFrame(currentTimelineFrame(), false);
+          setTimelineFrame(frame, false);
         }
       };
       const updateFromPointer = (clientX) => {
@@ -1753,6 +1756,8 @@ function initTimelineSpriteDragging(totalFrames) {
         sprite.removeEventListener("pointermove", move);
         sprite.removeEventListener("pointerup", up);
         sprite.removeEventListener("pointercancel", up);
+        renderFilmPlan(currentPlan());
+        setTimelineFrame(activeStartFrame, false);
       };
       sprite.addEventListener("pointermove", move);
       sprite.addEventListener("pointerup", up);
@@ -1762,24 +1767,126 @@ function initTimelineSpriteDragging(totalFrames) {
 }
 
 function initTimelineKeyframeDots() {
+  const playhead = document.querySelector(".score-playhead");
+  const totalFrames = Math.max(1, Number(playhead?.getAttribute("aria-valuemax") || 240));
+  const displayFrames = Math.max(1, Number(playhead?.dataset.displayFrames || totalFrames));
+  const clampFrame = (frame, minFrame = 1, maxFrame = totalFrames) => (
+    Math.min(Math.max(Math.round(Number(frame || 1)), minFrame), Math.max(minFrame, maxFrame))
+  );
+  const frameFromTrackPointer = (track, clientX, minFrame = 1, maxFrame = totalFrames) => {
+    const rect = track?.getBoundingClientRect();
+    if (!rect?.width) return minFrame;
+    const ratio = Math.min(Math.max((clientX - rect.left) / rect.width, 0), 1);
+    return clampFrame((ratio * (displayFrames - 1)) + 1, minFrame, maxFrame);
+  };
+  const selectDot = (dot, frame = Number(dot.dataset.keyframeFrame || 1)) => {
+    selectedStageKeyframe = dot.dataset.stageItemId
+      ? { stageItemId: dot.dataset.stageItemId, frame }
+      : { castIndex: Number(dot.dataset.castIndex), frame };
+    if (dot.dataset.stageItemId) {
+      setSelectedStageTarget({ stageItemId: dot.dataset.stageItemId, scope: "keyframe" });
+    } else {
+      setSelectedStageTarget({ castIndex: Number(dot.dataset.castIndex), scope: "keyframe" });
+    }
+    document.querySelectorAll(".score-keyframe-dot.is-selected").forEach((item) => {
+      item.classList.remove("is-selected");
+    });
+    dot.classList.add("is-selected");
+    setTimelineFrame(frame, false);
+  };
+  const moveKeyframe = (dot, fromFrame, toFrame) => {
+    const plan = currentPlan();
+    let movedFrame = fromFrame;
+    const castIndex = Number(dot.dataset.castIndex);
+    const stageItemId = dot.dataset.stageItemId;
+    if (Number.isInteger(castIndex) && plan.cast?.[castIndex]) {
+      const member = plan.cast[castIndex];
+      const start = Math.max(1, Number(member.startFrame || 1));
+      const end = start + Math.max(1, Number(member.durationFrames || 24)) - 1;
+      movedFrame = clampFrame(toFrame, start, end);
+      let moved = false;
+      plan.cast[castIndex] = {
+        ...member,
+        keyframes: stageKeyframesFor(member).map((keyframe) => {
+          if (moved || keyframe.frame !== fromFrame) return keyframe;
+          moved = true;
+          return { ...keyframe, frame: movedFrame };
+        }).sort((a, b) => a.frame - b.frame),
+      };
+    }
+    if (stageItemId) {
+      const items = plan.stageItems || [];
+      const item = items.find((stageItem) => stageItem.id === stageItemId);
+      if (item) {
+        const start = Math.max(1, Number(item.startFrame || 1));
+        const end = start + Math.max(1, Number(item.durationFrames || 24)) - 1;
+        movedFrame = clampFrame(toFrame, start, end);
+        let moved = false;
+        plan.stageItems = items.map((stageItem) => {
+          if (stageItem.id !== stageItemId) return stageItem;
+          return {
+            ...stageItem,
+            keyframes: stageKeyframesFor(stageItem).map((keyframe) => {
+              if (moved || keyframe.frame !== fromFrame) return keyframe;
+              moved = true;
+              return { ...keyframe, frame: movedFrame };
+            }).sort((a, b) => a.frame - b.frame),
+          };
+        });
+      }
+    }
+    dot.dataset.keyframeFrame = String(movedFrame);
+    dot.style.left = `${displayFrames <= 1 ? 0 : ((movedFrame - 1) / (displayFrames - 1)) * 100}%`;
+    dot.setAttribute("aria-label", `Keyframe at frame ${movedFrame}`);
+    dot.title = `Keyframe ${movedFrame}`;
+    saveFilmPlan(plan);
+    selectDot(dot, movedFrame);
+    return movedFrame;
+  };
   scoreGrid.querySelectorAll(".score-keyframe-dot[data-keyframe-frame]").forEach((dot) => {
+    dot.addEventListener("pointerdown", (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      const track = dot.closest(".score-track");
+      if (!track) return;
+      let activeFrame = Number(dot.dataset.keyframeFrame || 1);
+      let didDrag = false;
+      const castIndex = Number(dot.dataset.castIndex);
+      const stageItemId = dot.dataset.stageItemId;
+      const plan = currentPlan();
+      const target = Number.isInteger(castIndex)
+        ? plan.cast?.[castIndex]
+        : (plan.stageItems || []).find((item) => item.id === stageItemId);
+      const minFrame = Math.max(1, Number(target?.startFrame || 1));
+      const maxFrame = minFrame + Math.max(1, Number(target?.durationFrames || totalFrames)) - 1;
+      selectDot(dot, activeFrame);
+      dot.setPointerCapture(event.pointerId);
+      const move = (moveEvent) => {
+        const nextFrame = frameFromTrackPointer(track, moveEvent.clientX, minFrame, Math.min(maxFrame, totalFrames));
+        if (nextFrame === activeFrame) return;
+        didDrag = true;
+        activeFrame = moveKeyframe(dot, activeFrame, nextFrame);
+      };
+      const up = () => {
+        dot.classList.toggle("is-dragging", false);
+        dot.removeEventListener("pointermove", move);
+        dot.removeEventListener("pointerup", up);
+        dot.removeEventListener("pointercancel", up);
+        if (didDrag) {
+          renderFilmPlan(currentPlan());
+          setTimelineFrame(activeFrame, false);
+        }
+      };
+      dot.classList.add("is-dragging");
+      dot.addEventListener("pointermove", move);
+      dot.addEventListener("pointerup", up);
+      dot.addEventListener("pointercancel", up);
+    });
     dot.addEventListener("click", (event) => {
       event.preventDefault();
       event.stopPropagation();
       const frame = Number(dot.dataset.keyframeFrame || 1);
-      selectedStageKeyframe = dot.dataset.stageItemId
-        ? { stageItemId: dot.dataset.stageItemId, frame }
-        : { castIndex: Number(dot.dataset.castIndex), frame };
-      if (dot.dataset.stageItemId) {
-        setSelectedStageTarget({ stageItemId: dot.dataset.stageItemId, scope: "keyframe" });
-      } else {
-        setSelectedStageTarget({ castIndex: Number(dot.dataset.castIndex), scope: "keyframe" });
-      }
-      setTimelineFrame(frame, false);
-      document.querySelectorAll(".score-keyframe-dot.is-selected").forEach((item) => {
-        item.classList.remove("is-selected");
-      });
-      dot.classList.add("is-selected");
+      selectDot(dot, frame);
     });
   });
 }
