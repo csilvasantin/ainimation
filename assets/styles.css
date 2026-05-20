@@ -1317,6 +1317,7 @@ h2 {
 
 .window-menu,
 .member-menu,
+.edit-menu,
 .cast-menu {
   display: inline-flex;
   position: relative;
@@ -1325,6 +1326,7 @@ h2 {
 
 .window-menu-list,
 .member-menu-list,
+.edit-menu-list,
 .cast-menu-list {
   background: #f8fafc;
   border: 1px solid #778292;
@@ -1344,6 +1346,9 @@ h2 {
 .member-menu.open .member-menu-list,
 .member-menu:hover .member-menu-list,
 .member-menu:focus-within .member-menu-list,
+.edit-menu.open .edit-menu-list,
+.edit-menu:hover .edit-menu-list,
+.edit-menu:focus-within .edit-menu-list,
 .cast-menu.open .cast-menu-list,
 .cast-menu:hover .cast-menu-list,
 .cast-menu:focus-within .cast-menu-list {
@@ -1353,6 +1358,7 @@ h2 {
 .window-menu-list button,
 .member-menu-list button,
 .member-menu-list label,
+.edit-menu-list button,
 .cast-menu-list button,
 .cast-menu-list label {
   background: transparent;
@@ -1371,9 +1377,55 @@ h2 {
 .window-menu-list button:hover,
 .member-menu-list button:hover,
 .member-menu-list label:hover,
+.edit-menu-list button:hover,
 .cast-menu-list button:hover,
 .cast-menu-list label:hover {
   background: #e3e8f0;
+}
+
+.edit-menu-list {
+  min-width: 320px;
+}
+
+.edit-menu-list button {
+  align-items: center;
+  display: grid;
+  gap: 10px;
+  grid-template-columns: 18px minmax(0, 1fr) auto;
+}
+
+.edit-menu-list button:disabled {
+  cursor: default;
+  opacity: 0.42;
+}
+
+.edit-menu-list button:disabled:hover {
+  background: transparent;
+}
+
+.edit-menu-list i[role="separator"] {
+  background: rgba(17, 21, 27, 0.16);
+  display: block;
+  height: 1px;
+  margin: 6px 2px;
+}
+
+.edit-menu-icon {
+  color: inherit;
+  font-size: 0.86rem;
+  line-height: 1;
+  text-align: center;
+}
+
+.edit-menu-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.edit-menu-list kbd {
+  color: rgba(17, 21, 27, 0.52);
+  font: 850 0.72rem/1 var(--font-ui, inherit);
 }
 
 .member-file-input {
@@ -1939,6 +1991,7 @@ h2 {
 
 .window-menu-list,
 .member-menu-list,
+.edit-menu-list,
 .cast-menu-list {
   background: rgba(12, 17, 27, 0.98);
   border: 1px solid rgba(221, 236, 255, 0.18);
@@ -1948,6 +2001,7 @@ h2 {
 .window-menu-list button,
 .member-menu-list button,
 .member-menu-list label,
+.edit-menu-list button,
 .cast-menu-list button,
 .cast-menu-list label {
   color: rgba(239, 246, 255, 0.78);
@@ -1956,10 +2010,19 @@ h2 {
 .window-menu-list button:hover,
 .member-menu-list button:hover,
 .member-menu-list label:hover,
+.edit-menu-list button:hover,
 .cast-menu-list button:hover,
 .cast-menu-list label:hover {
   background: rgba(166, 255, 101, 0.16);
   color: #fff;
+}
+
+.edit-menu-list i[role="separator"] {
+  background: rgba(221, 236, 255, 0.14);
+}
+
+.edit-menu-list kbd {
+  color: rgba(239, 246, 255, 0.46);
 }
 
 .director-workbench {

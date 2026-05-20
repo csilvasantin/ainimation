@@ -796,6 +796,48 @@ function initFileImportMenu(menuSelector, buttonSelector, inputSelector) {
 initFileImportMenu(".member-menu", "[data-member-menu]", "[data-member-file-input]");
 initFileImportMenu(".cast-menu", "[data-cast-menu]", "[data-cast-file-input]");
 
+function initEditMenu() {
+  const menu = document.querySelector(".edit-menu");
+  const button = menu?.querySelector("[data-edit-menu]");
+  if (!menu || !button) return;
+
+  const closeMenu = () => {
+    menu.classList.remove("open");
+    button.setAttribute("aria-expanded", "false");
+  };
+
+  button.addEventListener("click", (event) => {
+    event.stopPropagation();
+    const isOpen = !menu.classList.contains("open");
+    menu.classList.toggle("open", isOpen);
+    button.setAttribute("aria-expanded", String(isOpen));
+  });
+
+  menu.querySelectorAll("[data-edit-command]").forEach((item) => {
+    item.addEventListener("click", (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      if (item.disabled) return;
+      const command = item.dataset.editCommand;
+      if (command === "find") {
+        window.find?.("");
+      } else {
+        const execCommand = command === "pasteText" ? "paste" : command;
+        try {
+          document.execCommand(execCommand);
+        } catch {}
+      }
+      closeMenu();
+    });
+  });
+
+  document.addEventListener("click", (event) => {
+    if (!menu.contains(event.target)) closeMenu();
+  });
+}
+
+initEditMenu();
+
 function currentTimelineFrame() {
   return Number(document.querySelector(".score-playhead")?.dataset.frame || 1);
 }
@@ -2587,7 +2629,7 @@ function exportStageVideo() {
 function makeExportPackage(plan) {
   return {
     package: "Admira Player Ready",
-    version: "AiDirector v2026.05.20 r15",
+    version: "AiDirector v2026.05.20 r16",
     includeMetadata: Boolean(includeMetadata?.checked),
     formats: {
       video: ["MP4", "MOV", "ProRes", "4K/8K", "PP Solving"],

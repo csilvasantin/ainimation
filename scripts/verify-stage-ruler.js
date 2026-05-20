@@ -33,6 +33,14 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
     const scriptWindow = document.querySelector('[data-window="script"]');
     const fileMenu = document.querySelector("[data-member-menu]");
     const fileMenuItems = [...document.querySelectorAll(".member-menu-list button, .member-menu-list label")].map((item) => item.textContent.trim());
+    const editMenu = document.querySelector("[data-edit-menu]");
+    const editMenuItems = [...document.querySelectorAll(".edit-menu-list button")].map((item) => ({
+      text: item.querySelector(".edit-menu-text")?.textContent.trim() || item.textContent.trim(),
+      shortcut: item.querySelector("kbd")?.textContent.trim() || "",
+      disabled: item.disabled,
+      command: item.dataset.editCommand || "",
+    }));
+    const editMenuSeparators = document.querySelectorAll(".edit-menu-list [role='separator']").length;
     const toolShortcuts = [...document.querySelectorAll(".tool-shortcuts a")].map((link) => ({
       text: link.textContent.trim(),
       href: link.href,
@@ -74,6 +82,11 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
         hasProjectOpen: Boolean(document.querySelector("[data-project-open-input]")),
         hasStockImport: Boolean(document.querySelector("[data-stock-import]")),
         hasStageDownload: Boolean(document.querySelector("[data-download-stage-video]")),
+      },
+      editMenu: {
+        text: editMenu?.textContent.trim() || "",
+        items: editMenuItems,
+        separators: editMenuSeparators,
       },
       toolShortcuts,
       brand: {
@@ -529,8 +542,8 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
   const missingLabels = result.labels.length !== expectedYLabels || result.xLabels.length !== expectedXLabels;
   const hasWrongRotation = result.labels.some((label) => label.transform === "matrix(0, 1, -1, 0, 0, 0)");
 
-  if (!result.stylesheetHref.includes("aidirector-20260520-r15")) {
-    throw new Error(`Expected aidirector-20260520-r15 stylesheet cache key, got ${result.stylesheetHref}`);
+  if (!result.stylesheetHref.includes("aidirector-20260520-r16")) {
+    throw new Error(`Expected aidirector-20260520-r16 stylesheet cache key, got ${result.stylesheetHref}`);
   }
 
   if (
@@ -556,7 +569,7 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
     throw new Error(`Unexpected stage ruler toggle: ${JSON.stringify(result.rulerToggle)}`);
   }
 
-  if (result.brand.text !== "AiDirector v.2026.05.20 r15" || result.brand.rightGap > 20) {
+  if (result.brand.text !== "AiDirector v.2026.05.20 r16" || result.brand.rightGap > 20) {
     throw new Error(`Unexpected menu brand placement: ${JSON.stringify(result.brand)}`);
   }
 
@@ -656,6 +669,32 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
     !result.fileMenu.hasStageDownload
   ) {
     throw new Error(`Unexpected Archivo menu: ${JSON.stringify(result.fileMenu)}`);
+  }
+
+  const expectedEditItems = [
+    ["Deshacer", "Ctrl+Z", false, "undo"],
+    ["Rehacer", "Ctrl+Y", false, "redo"],
+    ["Cortar", "Ctrl+X", true, "cut"],
+    ["Copiar", "Ctrl+C", true, "copy"],
+    ["Pegar", "Ctrl+V", false, "paste"],
+    ["Pegar sin formato", "Ctrl+Mayús+V", false, "pasteText"],
+    ["Seleccionar todo", "Ctrl+A", false, "selectAll"],
+    ["Eliminar", "", true, "delete"],
+    ["Duplicar", "Ctrl+D", true, "duplicate"],
+    ["Buscar y reemplazar", "Ctrl+H", false, "find"],
+  ];
+  if (
+    result.editMenu.text !== "Editar" ||
+    result.editMenu.separators !== 3 ||
+    result.editMenu.items.length !== expectedEditItems.length ||
+    expectedEditItems.some(([text, shortcut, disabled, command], index) => (
+      result.editMenu.items[index]?.text !== text ||
+      result.editMenu.items[index]?.shortcut !== shortcut ||
+      result.editMenu.items[index]?.disabled !== disabled ||
+      result.editMenu.items[index]?.command !== command
+    ))
+  ) {
+    throw new Error(`Unexpected Editar menu: ${JSON.stringify(result.editMenu)}`);
   }
 
   if (

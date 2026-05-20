@@ -18,7 +18,7 @@
     <meta property="og:url" content="https://ainimation.studio/studio.html" />
     <link rel="canonical" href="https://ainimation.studio/studio.html" />
     <link rel="manifest" href="site.webmanifest" />
-    <link rel="stylesheet" href="assets/styles.css?v=aidirector-20260520-r15" />
+    <link rel="stylesheet" href="assets/styles.css?v=aidirector-20260520-r16" />
   </head>
   <body class="studio-page">
     <header class="site-header studio-site-header" aria-label="Primary">
@@ -176,6 +176,63 @@
                 <button type="button" data-download-stage-video>Descargar</button>
               </span>
             </span>
+            <span class="edit-menu">
+              <button class="menu-button" type="button" aria-expanded="false" data-edit-menu>Editar</button>
+              <span class="edit-menu-list" aria-label="Editar">
+                <button type="button" data-edit-command="undo">
+                  <span class="edit-menu-icon" aria-hidden="true">↶</span>
+                  <span class="edit-menu-text">Deshacer</span>
+                  <kbd>Ctrl+Z</kbd>
+                </button>
+                <button type="button" data-edit-command="redo">
+                  <span class="edit-menu-icon" aria-hidden="true">↷</span>
+                  <span class="edit-menu-text">Rehacer</span>
+                  <kbd>Ctrl+Y</kbd>
+                </button>
+                <i role="separator"></i>
+                <button type="button" data-edit-command="cut" disabled>
+                  <span class="edit-menu-icon" aria-hidden="true">✂</span>
+                  <span class="edit-menu-text">Cortar</span>
+                  <kbd>Ctrl+X</kbd>
+                </button>
+                <button type="button" data-edit-command="copy" disabled>
+                  <span class="edit-menu-icon" aria-hidden="true">□</span>
+                  <span class="edit-menu-text">Copiar</span>
+                  <kbd>Ctrl+C</kbd>
+                </button>
+                <button type="button" data-edit-command="paste">
+                  <span class="edit-menu-icon" aria-hidden="true">▣</span>
+                  <span class="edit-menu-text">Pegar</span>
+                  <kbd>Ctrl+V</kbd>
+                </button>
+                <button type="button" data-edit-command="pasteText">
+                  <span class="edit-menu-icon" aria-hidden="true">▤</span>
+                  <span class="edit-menu-text">Pegar sin formato</span>
+                  <kbd>Ctrl+Mayús+V</kbd>
+                </button>
+                <i role="separator"></i>
+                <button type="button" data-edit-command="selectAll">
+                  <span class="edit-menu-icon" aria-hidden="true">▦</span>
+                  <span class="edit-menu-text">Seleccionar todo</span>
+                  <kbd>Ctrl+A</kbd>
+                </button>
+                <button type="button" data-edit-command="delete" disabled>
+                  <span class="edit-menu-icon" aria-hidden="true">⌫</span>
+                  <span class="edit-menu-text">Eliminar</span>
+                </button>
+                <button type="button" data-edit-command="duplicate" disabled>
+                  <span class="edit-menu-icon" aria-hidden="true">⊕</span>
+                  <span class="edit-menu-text">Duplicar</span>
+                  <kbd>Ctrl+D</kbd>
+                </button>
+                <i role="separator"></i>
+                <button type="button" data-edit-command="find">
+                  <span class="edit-menu-icon" aria-hidden="true">⌘</span>
+                  <span class="edit-menu-text">Buscar y reemplazar</span>
+                  <kbd>Ctrl+H</kbd>
+                </button>
+              </span>
+            </span>
             <button class="menubar-action" type="button" data-open-window="score">Timeline</button>
             <button class="menubar-action" type="button" data-open-window="stage">Stage</button>
             <span class="cast-menu">
@@ -220,7 +277,7 @@
                 <button type="button" data-open-window="tools">Tools</button>
               </span>
             </span>
-            <a class="director-brand-link" href="index.html">AiDirector v.2026.05.20 r15</a>
+            <a class="director-brand-link" href="index.html">AiDirector v.2026.05.20 r16</a>
           </div>
 
           <div class="director-workbench">
@@ -475,6 +532,6 @@
       <a href="mailto:hello@ainimation.studio">hello@ainimation.studio</a>
     </footer>
 
-    <script src="assets/app.js?v=aidirector-20260520-r15" defer></script>
+    <script src="assets/app.js?v=aidirector-20260520-r16" defer></script>
   </body>
 </html>
