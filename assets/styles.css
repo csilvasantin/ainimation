@@ -1904,7 +1904,7 @@ h2 {
   font-size: 1rem;
   font-weight: 850;
   letter-spacing: 0;
-  margin-right: 4px;
+  margin-left: auto;
   white-space: nowrap;
 }
 
@@ -2112,12 +2112,15 @@ h2 {
 
 .stage-ruler-y span {
   align-self: center;
-  display: inline-block;
+  display: grid;
+  height: 18px;
   justify-self: center;
+  place-items: center;
   line-height: 1;
-  transform: rotate(-90deg);
+  transform: rotate(90deg);
   transform-origin: center;
   white-space: nowrap;
+  width: 32px;
 }
 
 .stage-canvas {
@@ -3751,26 +3754,59 @@ h2 {
 }
 
 .stage-text-item {
+  align-items: start;
   background: rgba(7, 11, 18, 0.34);
   border: 1px solid rgba(237, 246, 255, 0.42);
   border-radius: 6px;
   color: var(--stage-foreground, #edf6ff);
+  display: inline-grid;
   font-size: clamp(12px, 1.4vw, 22px);
   font-weight: 850;
   left: 0;
   line-height: 1.1;
   min-width: 64px;
-  padding: 6px 8px;
+  padding: 0;
   position: absolute;
   text-shadow: 0 1px 8px rgba(0, 0, 0, 0.62);
   top: 0;
   z-index: 5;
 }
 
-.stage-text-item:focus {
+.stage-text-content {
+  display: block;
+  min-height: 1.1em;
+  min-width: 64px;
+  padding: 8px 28px 8px 10px;
+}
+
+.stage-text-content:focus {
   border-color: #a6ff65;
   box-shadow: 0 0 0 2px rgba(166, 255, 101, 0.2);
   outline: none;
+}
+
+.stage-text-remove {
+  align-items: center;
+  background: rgba(255, 101, 79, 0.92);
+  border: 1px solid rgba(255, 255, 255, 0.66);
+  border-radius: 999px;
+  color: #fff;
+  cursor: pointer;
+  display: inline-flex;
+  font: 900 14px/1 ui-sans-serif, system-ui, sans-serif;
+  height: 20px;
+  justify-content: center;
+  padding: 0;
+  position: absolute;
+  right: -8px;
+  text-shadow: none;
+  top: -8px;
+  width: 20px;
+  z-index: 7;
+}
+
+.stage-text-remove:hover {
+  background: #ff3f35;
 }
 
 .stage-line-item {

@@ -1,0 +1,23 @@
+{
+  "name": "ainimation",
+  "version": "1.0.0",
+  "description": "Static website for `ainimation.studio`.",
+  "private": true,
+  "scripts": {
+    "verify:stage": "node scripts/verify-stage-ruler.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/csilvasantin/ainimation.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/csilvasantin/ainimation/issues"
+  },
+  "homepage": "https://github.com/csilvasantin/ainimation#readme",
+  "devDependencies": {
+    "playwright": "^1.60.0"
+  }
+}

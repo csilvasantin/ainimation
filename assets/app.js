@@ -368,7 +368,7 @@ function initDirectorWindowManager() {
     const timelineTop = Math.max(0, bounds.height - timelineHeight);
     const lowerHeight = clamp(Math.round(bounds.height * 0.15), 140, 210);
     const lowerTop = Math.max(0, timelineTop - lowerHeight - gap);
-    const stageHeight = Math.max(360, lowerTop - gap);
+    const stageHeight = Math.max(360, timelineTop - gap);
     const sideLeft = stageWidth + gap;
     const castHeight = clamp(Math.round(bounds.height * 0.18), 190, 300);
     const toolsWidth = Math.min(180, Math.max(112, sideWidth));
@@ -654,6 +654,8 @@ function initStudioCollabBar() {
       requestAnimationFrame(() => window.refreshDirectorWindows?.());
     });
   };
+
+  if (collabBar.classList.contains("is-hidden")) refreshWorkspace();
 
   closeButton.addEventListener("click", () => {
     collabBar.classList.add("is-hidden");
@@ -1455,24 +1457,44 @@ function renderStageItems(stage, plan) {
       const text = document.createElement("div");
       text.className = "stage-item stage-text-item";
       text.dataset.stageItemId = item.id;
-      text.contentEditable = "true";
-      text.spellcheck = false;
-      text.textContent = item.text || "Text";
       text.style.left = `${clampPercent(item.x)}%`;
       text.style.top = `${clampPercent(item.y)}%`;
       text.style.color = item.color || "";
+      const content = document.createElement("span");
+      content.className = "stage-text-content";
+      content.contentEditable = "true";
+      content.spellcheck = false;
+      content.textContent = item.text || "Text";
+      const removeButton = document.createElement("button");
+      removeButton.className = "stage-text-remove";
+      removeButton.type = "button";
+      removeButton.setAttribute("aria-label", "Remove stage text");
+      removeButton.textContent = "×";
       text.addEventListener("pointerdown", (event) => {
         if (stage.dataset.stageTool === "text") event.stopPropagation();
       });
-      text.addEventListener("blur", () => {
+      content.addEventListener("blur", () => {
         const nextPlan = currentPlan();
         nextPlan.stageItems = (nextPlan.stageItems || []).map((stageItem) => (
           stageItem.id === item.id
-            ? { ...stageItem, text: text.textContent.trim() || "Text" }
+            ? { ...stageItem, text: content.textContent.trim() || "Text" }
             : stageItem
         ));
         saveFilmPlan(nextPlan);
       });
+      removeButton.addEventListener("pointerdown", (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+      });
+      removeButton.addEventListener("click", (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        const nextPlan = currentPlan();
+        nextPlan.stageItems = (nextPlan.stageItems || []).filter((stageItem) => stageItem.id !== item.id);
+        saveFilmPlan(nextPlan);
+        renderFilmPlan(nextPlan);
+      });
+      text.append(content, removeButton);
       stage.append(text);
     }
     if (item.type === "line") {
@@ -2128,7 +2150,7 @@ function initStageTools() {
               ...item,
               x: Number.parseFloat(textItem.style.left) || 0,
               y: Number.parseFloat(textItem.style.top) || 0,
-              text: textItem.textContent.trim() || "Text",
+              text: textItem.querySelector(".stage-text-content")?.textContent.trim() || "Text",
             }
             : item
         ));
@@ -2157,7 +2179,7 @@ function initStageTools() {
       plan.stageItems = [...(plan.stageItems || []), item];
       saveFilmPlan(plan);
       renderFilmPlan(plan);
-      const text = stage.querySelector(`[data-stage-item-id="${item.id}"]`);
+      const text = stage.querySelector(`[data-stage-item-id="${item.id}"] .stage-text-content`);
       if (text) {
         text.focus();
         document.getSelection()?.selectAllChildren(text);
