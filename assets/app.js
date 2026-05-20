@@ -3,6 +3,8 @@ const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
 const contactEmail = ["hello", "ainimation.studio"].join("@");
 let uiAudioContext = null;
 let uiAudioReady = false;
+let selectedStageKeyframe = null;
+let selectedStageTarget = null;
 
 function contactMailto(subject = "AInimation Studio") {
   return `mai${"lto"}:${contactEmail}?subject=${encodeURIComponent(subject)}`;
@@ -806,6 +808,89 @@ function initFileImportMenu(menuSelector, buttonSelector, inputSelector) {
 initFileImportMenu(".member-menu", "[data-member-menu]", "[data-project-open-input]");
 initFileImportMenu(".cast-menu", "[data-cast-menu]", "[data-cast-file-input]");
 
+function selectedStageTargetExists(plan = null) {
+  if (!selectedStageTarget) return false;
+  const current = plan || currentPlan();
+  if (Number.isInteger(selectedStageTarget.castIndex)) {
+    const member = current.cast?.[selectedStageTarget.castIndex];
+    return Boolean(member?.imported && member?.src && member?.onStage !== false);
+  }
+  if (selectedStageTarget.stageItemId) {
+    return (current.stageItems || []).some((item) => item.id === selectedStageTarget.stageItemId);
+  }
+  return false;
+}
+
+function updateEditMenuState() {
+  const deleteButton = document.querySelector('[data-edit-command="delete"]');
+  if (deleteButton) deleteButton.disabled = !selectedStageTargetExists();
+}
+
+function setSelectedStageTarget(target) {
+  selectedStageTarget = target || null;
+  updateEditMenuState();
+}
+
+function clearSelectedStageTarget() {
+  setSelectedStageTarget(null);
+}
+
+function isSelectedCastTarget(castIndex) {
+  return selectedStageTarget?.castIndex === castIndex;
+}
+
+function isSelectedStageItemTarget(stageItemId) {
+  return Boolean(stageItemId && selectedStageTarget?.stageItemId === stageItemId);
+}
+
+function removeCastMemberFromStage(castIndex) {
+  const plan = currentPlan();
+  if (!Number.isInteger(castIndex) || !plan.cast?.[castIndex]) return false;
+  plan.cast[castIndex] = {
+    ...plan.cast[castIndex],
+    onStage: false,
+    stageX: undefined,
+    stageY: undefined,
+    stageW: undefined,
+    stageH: undefined,
+    keyframes: [],
+  };
+  selectedStageKeyframe = selectedStageKeyframe?.castIndex === castIndex ? null : selectedStageKeyframe;
+  clearSelectedStageTarget();
+  saveFilmPlan(plan);
+  renderFilmPlan(plan);
+  syncStageToFrame(currentTimelineFrame(), false);
+  return true;
+}
+
+function removeStageItem(stageItemId) {
+  if (!stageItemId) return false;
+  const plan = currentPlan();
+  const before = (plan.stageItems || []).length;
+  plan.stageItems = (plan.stageItems || []).filter((item) => item.id !== stageItemId);
+  if (plan.stageItems.length === before) return false;
+  selectedStageKeyframe = selectedStageKeyframe?.stageItemId === stageItemId ? null : selectedStageKeyframe;
+  clearSelectedStageTarget();
+  saveFilmPlan(plan);
+  renderFilmPlan(plan);
+  syncStageToFrame(currentTimelineFrame(), false);
+  return true;
+}
+
+function deleteSelectedStageTarget() {
+  if (!selectedStageTargetExists()) {
+    clearSelectedStageTarget();
+    return false;
+  }
+  if (Number.isInteger(selectedStageTarget.castIndex)) {
+    return removeCastMemberFromStage(selectedStageTarget.castIndex);
+  }
+  if (selectedStageTarget.stageItemId) {
+    return removeStageItem(selectedStageTarget.stageItemId);
+  }
+  return false;
+}
+
 function initEditMenu() {
   const menu = document.querySelector(".edit-menu");
   const button = menu?.querySelector("[data-edit-menu]");
@@ -831,6 +916,8 @@ function initEditMenu() {
       const command = item.dataset.editCommand;
       if (command === "find") {
         window.find?.("");
+      } else if (command === "delete" && deleteSelectedStageTarget()) {
+        playUiTick("select");
       } else {
         const execCommand = command === "pasteText" ? "paste" : command;
         try {
@@ -847,6 +934,7 @@ function initEditMenu() {
 }
 
 initEditMenu();
+updateEditMenuState();
 
 function currentTimelineFrame() {
   return Number(document.querySelector(".score-playhead")?.dataset.frame || 1);
@@ -1160,15 +1248,16 @@ const stageWidthPixels = 1920;
 const stageHeightPixels = 1080;
 const stageRulerStep = 100;
 const stockImportBatchSize = 3;
+const stockImportFetchLimit = 12;
 const admiraStockEndpoints = [
-  `https://pixer-eleven.csilvasantin.workers.dev/stock/list?limit=${stockImportBatchSize}`,
+  `https://pixer-eleven.csilvasantin.workers.dev/stock/list?limit=${stockImportFetchLimit}`,
   "https://www.admira.studio/api/stock/latest",
-  `https://www.admira.studio/api/stock?limit=${stockImportBatchSize}&sort=latest`,
+  `https://www.admira.studio/api/stock?limit=${stockImportFetchLimit}&sort=latest`,
   "https://www.admira.studio/api/stock",
   "https://www.admira.studio/stock/latest.json",
   "https://www.admira.studio/stock.json",
   "https://admira.studio/api/stock/latest",
-  `https://admira.studio/api/stock?limit=${stockImportBatchSize}&sort=latest`,
+  `https://admira.studio/api/stock?limit=${stockImportFetchLimit}&sort=latest`,
 ];
 const admiraStockExportEndpoints = [
   "https://pixer-eleven.csilvasantin.workers.dev/stock/publish",
@@ -1177,7 +1266,6 @@ let activeDirectorWindow = null;
 let draggedDirectorWindow = null;
 let dragOffsetX = 0;
 let dragOffsetY = 0;
-let selectedStageKeyframe = null;
 let stageAnimationCaptureCache = null;
 
 const sceneCounts = {
@@ -1495,6 +1583,31 @@ function initTimelineSpriteDragging(totalFrames) {
   if (!sprites.length) return;
 
   sprites.forEach((sprite) => {
+    const selectSprite = () => {
+      const castIndex = Number(sprite.dataset.castIndex);
+      const stageItemId = sprite.dataset.stageItemId;
+      if (Number.isInteger(castIndex)) {
+        setSelectedStageTarget({ castIndex });
+      } else if (stageItemId) {
+        setSelectedStageTarget({ stageItemId });
+      }
+      scoreGrid.querySelectorAll(".score-sprite.is-selected").forEach((item) => item.classList.remove("is-selected"));
+      sprite.classList.add("is-selected");
+    };
+    sprite.querySelector("[data-sprite-remove]")?.addEventListener("pointerdown", (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+    });
+    sprite.querySelector("[data-sprite-remove]")?.addEventListener("click", (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      const castIndex = Number(sprite.dataset.castIndex);
+      if (Number.isInteger(castIndex)) {
+        removeCastMemberFromStage(castIndex);
+        return;
+      }
+      removeStageItem(sprite.dataset.stageItemId);
+    });
     sprite.addEventListener("pointerdown", (event) => {
       event.preventDefault();
       event.stopPropagation();
@@ -1502,6 +1615,8 @@ function initTimelineSpriteDragging(totalFrames) {
       const castIndex = Number(sprite.dataset.castIndex);
       const stageItemId = sprite.dataset.stageItemId;
       if (!track || (!Number.isInteger(castIndex) && !stageItemId)) return;
+      selectSprite();
+      if (event.target.closest("[data-sprite-remove]")) return;
       const trackRect = track.getBoundingClientRect();
       const startFrame = Number(sprite.dataset.startFrame || 1);
       const durationFrames = Number(sprite.dataset.durationFrames || 24);
@@ -1900,7 +2015,7 @@ function renderStageItems(stage, plan) {
       const values = interpolateStageKeyframe(item, currentTimelineFrame()) || defaultStageKeyframe(item, Number(item.startFrame || 1));
       const renderItem = { ...item, ...values };
       const text = document.createElement("div");
-      text.className = "stage-item stage-text-item";
+      text.className = `stage-item stage-text-item ${isSelectedStageItemTarget(item.id) ? "is-selected" : ""}`;
       text.dataset.stageItemId = item.id;
       text.style.left = `${clampPercent(renderItem.x)}%`;
       text.style.top = `${clampPercent(renderItem.y)}%`;
@@ -1958,10 +2073,7 @@ function renderStageItems(stage, plan) {
       removeButton.addEventListener("click", (event) => {
         event.preventDefault();
         event.stopPropagation();
-        const nextPlan = currentPlan();
-        nextPlan.stageItems = (nextPlan.stageItems || []).filter((stageItem) => stageItem.id !== item.id);
-        saveFilmPlan(nextPlan);
-        renderFilmPlan(nextPlan);
+        removeStageItem(item.id);
       });
       text.append(content, removeButton);
       applyTextStyleToElement(text, renderItem);
@@ -1976,7 +2088,7 @@ function renderStageItems(stage, plan) {
     }
     if (isShapeStageItem(item)) {
       const shape = document.createElement("div");
-      shape.className = "stage-item stage-shape-item";
+      shape.className = `stage-item stage-shape-item ${isSelectedStageItemTarget(item.id) ? "is-selected" : ""}`;
       shape.dataset.stageItemId = item.id;
       shape.dataset.stageItemType = item.type;
       const resizeHandle = document.createElement("span");
@@ -2265,9 +2377,10 @@ function renderFilmPlan(plan) {
   if (stageWindow) {
     stageWindow.querySelectorAll(".stage-imported-member, .stage-item").forEach((member) => member.remove());
     importedStageMembers.slice(0, 6).forEach((member, index) => {
+      const castIndex = castMembers.indexOf(member);
       const figure = document.createElement("figure");
-      figure.className = `stage-imported-member ${member.mediaType === "video" ? "video-member" : member.mediaType === "audio" ? "audio-member" : "image-member"}`;
-      figure.dataset.castIndex = String(castMembers.indexOf(member));
+      figure.className = `stage-imported-member ${member.mediaType === "video" ? "video-member" : member.mediaType === "audio" ? "audio-member" : "image-member"} ${isSelectedCastTarget(castIndex) ? "is-selected" : ""}`;
+      figure.dataset.castIndex = String(castIndex);
       figure.dataset.stageIndex = String(index);
       const keyframe = interpolateStageKeyframe(member, currentTimelineFrame(), index) || defaultStageKeyframe(member, Number(member.startFrame || 1), index);
       figure.style.left = `${keyframe.x}%`;
@@ -2293,7 +2406,21 @@ function renderFilmPlan(plan) {
       const resizeHandle = document.createElement("span");
       resizeHandle.className = "stage-member-resize";
       resizeHandle.setAttribute("aria-hidden", "true");
-      figure.append(media, caption, resizeHandle);
+      const removeButton = document.createElement("button");
+      removeButton.className = "stage-member-remove";
+      removeButton.type = "button";
+      removeButton.setAttribute("aria-label", "Remove cast member from stage");
+      removeButton.textContent = "×";
+      removeButton.addEventListener("pointerdown", (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+      });
+      removeButton.addEventListener("click", (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        removeCastMemberFromStage(castIndex);
+      });
+      figure.append(media, caption, resizeHandle, removeButton);
       stageWindow.append(figure);
     });
     renderStageItems(stageWindow, plan);
@@ -2393,11 +2520,18 @@ function renderFilmPlan(plan) {
               const length = Math.max(1, Number(item.durationFrames || 24));
               const start = Math.min(Math.max(1, Number(item.startFrame || 1)), Math.max(1, totalFrames - length + 1));
               const spriteLabel = channel.name;
+              const selectedClass = Number.isInteger(channel.castIndex)
+                ? isSelectedCastTarget(channel.castIndex)
+                : isSelectedStageItemTarget(channel.stageItemId);
+              const removeLabel = Number.isInteger(channel.castIndex)
+                ? "Remove cast member from timeline"
+                : "Remove stage item from timeline";
               return `
-                <button class="score-sprite ${channel.lane} imported-member" type="button" style="left:${((start - 1) / displayFrames) * 100}%;width:${(length / displayFrames) * 100}%" ${channel.stageItemId ? `data-stage-item-id="${escapeHtml(channel.stageItemId)}"` : `data-cast-index="${channel.castIndex}"`} data-start-frame="${start}" data-duration-frames="${length}">
+                <button class="score-sprite ${channel.lane} imported-member ${selectedClass ? "is-selected" : ""}" type="button" style="left:${((start - 1) / displayFrames) * 100}%;width:${(length / displayFrames) * 100}%" ${channel.stageItemId ? `data-stage-item-id="${escapeHtml(channel.stageItemId)}"` : `data-cast-index="${channel.castIndex}"`} data-start-frame="${start}" data-duration-frames="${length}">
                   <i class="score-sprite-handle start" data-sprite-handle="start" aria-hidden="true"></i>
                   <span>${escapeHtml(spriteLabel)}</span>
                   <small>${start}-${start + length - 1}</small>
+                  <i class="score-sprite-remove" data-sprite-remove aria-label="${removeLabel}" title="Eliminar" role="button" tabindex="-1">×</i>
                   <i class="score-sprite-handle end" data-sprite-handle="end" aria-hidden="true"></i>
                 </button>
               `;
@@ -2443,6 +2577,7 @@ function renderFilmPlan(plan) {
       <div class="scene-prompt"><strong>${scene.behavior}()</strong><br>${scene.visualPrompt}</div>
     </article>
   `).join("");
+  updateEditMenuState();
 }
 
 function toMarkdown(plan) {
@@ -3149,9 +3284,12 @@ function updateMemberDurationFromMetadata(castIndex, src, mediaType) {
     if (!member || member.src !== src) return;
     const currentDuration = Math.max(1, Number(member.durationFrames || 24));
     if (!member.durationPending && currentDuration !== 24) return;
+    const nextDurationFrames = member.onStage
+      ? Math.max(currentDuration, durationFrames)
+      : durationFrames;
     plan.cast[castIndex] = {
       ...member,
-      durationFrames,
+      durationFrames: nextDurationFrames,
       durationPending: false,
     };
     saveFilmPlan(plan);
@@ -3280,6 +3418,22 @@ function stockMediaType(item, src) {
   return "image";
 }
 
+function stockTextFingerprint(item) {
+  return [
+    findStockField(item, ["motor", "engine", "generator", "createdBy", "author"]),
+    findStockField(item, ["type", "mediaType", "mime", "mimeType", "contentType"]),
+    findStockField(item, ["title", "name", "label"]),
+    findStockField(item, ["prompt", "comment", "description"]),
+  ].join(" ").toLowerCase();
+}
+
+function isAinimationGeneratedAnimation(item, src) {
+  const fingerprint = stockTextFingerprint(item);
+  const hasAinimationMarker = /\bainimation\b|aidirector/.test(fingerprint);
+  const hasAnimationMarker = /\banimation\b|animaci[oó]n|webm/.test(fingerprint) || /\.webm(\?|#|$)/i.test(src || "");
+  return hasAinimationMarker && hasAnimationMarker;
+}
+
 function stockMemberFromItem(item, endpoint, existingCount, timelineMemberCount) {
   const rawUrl = findStockField(item, [
     "assetUrl",
@@ -3296,7 +3450,9 @@ function stockMemberFromItem(item, endpoint, existingCount, timelineMemberCount)
   ]);
   const src = stockUrl(rawUrl, endpoint);
   if (!src) return null;
+  if (isAinimationGeneratedAnimation(item, src)) return null;
   const mediaType = stockMediaType(item, src);
+  if (mediaType === "animation") return null;
   const rawName = findStockField(item, ["title", "name", "fileName", "filename", "label", "slug"]);
   const baseName = cleanMemberName(rawName || "Admira Stock latest");
   return {
@@ -3381,7 +3537,7 @@ async function fetchLatestStockMembers(limit = stockImportBatchSize) {
     try {
       const response = await fetch(endpoint, { headers: { Accept: "application/json" } });
       if (!response.ok) throw new Error(`${response.status} ${response.statusText}`);
-      const items = stockItemsFromPayload(await response.json(), limit);
+      const items = stockItemsFromPayload(await response.json(), Math.max(limit, stockImportFetchLimit));
       const plan = currentPlan();
       const existing = plan.cast || makeCast(plan);
       const timelineMemberCount = existing.filter((member) => member.imported && member.src).length;
@@ -3511,19 +3667,8 @@ async function exportStageToAdmiraStock() {
     let lastError = null;
     for (const endpoint of admiraStockExportEndpoints) {
       try {
-        const payload = await postStageAnimationToStock(endpoint, blob, metadata);
-        const item = firstStockItem(payload) || payload;
-        const nextPlan = currentPlan();
-        const existing = nextPlan.cast || makeCast(nextPlan);
-        const timelineMemberCount = existing.filter((member) => member.imported && member.src).length;
-        const member = stockMemberFromItem(item, endpoint, existing.length, timelineMemberCount);
-        if (member) {
-          nextPlan.cast = [...existing, { ...member, mediaType: "animation", type: memberTypeLabel("animation"), stock: true }];
-          saveFilmPlan(nextPlan);
-          renderFilmPlan(nextPlan);
-        }
+        await postStageAnimationToStock(endpoint, blob, metadata);
         playUiTick("import");
-        document.querySelector('[data-open-window="cast"]')?.click();
         stockExportButton.textContent = "Exportado";
         window.setTimeout(() => { stockExportButton.textContent = originalText; }, 1400);
         return;
@@ -3663,6 +3808,7 @@ function initStageTools() {
     if (!textItem) return;
     activeTextItem = textItem;
     activeShapeItem = null;
+    setSelectedStageTarget({ stageItemId: textItem.dataset.stageItemId });
     stage.querySelectorAll(".stage-text-item").forEach((item) => {
       item.classList.toggle("is-selected", item === activeTextItem);
     });
@@ -3680,6 +3826,7 @@ function initStageTools() {
     if (!shapeItem) return;
     activeShapeItem = shapeItem;
     activeTextItem = null;
+    setSelectedStageTarget({ stageItemId: shapeItem.dataset.stageItemId });
     stage.querySelectorAll(".stage-text-item").forEach((item) => item.classList.remove("is-selected"));
     stage.querySelectorAll(".stage-shape-item").forEach((item) => {
       item.classList.toggle("is-selected", item === activeShapeItem);
@@ -3730,6 +3877,11 @@ function initStageTools() {
     if (tool === "hand" && member) {
       event.preventDefault();
       const castIndex = Number(member.dataset.castIndex);
+      setSelectedStageTarget({ castIndex });
+      stage.querySelectorAll(".stage-imported-member").forEach((item) => {
+        item.classList.toggle("is-selected", item === member);
+      });
+      stage.querySelectorAll(".stage-text-item, .stage-shape-item").forEach((item) => item.classList.remove("is-selected"));
       const start = stagePointFromEvent(stage, event);
       const startLeft = Number.parseFloat(member.style.left) || 0;
       const startTop = Number.parseFloat(member.style.top) || 0;
@@ -3923,6 +4075,10 @@ function initStageTools() {
     }
 
     if (event.target.closest(".stage-item") || member) return;
+    clearSelectedStageTarget();
+    stage.querySelectorAll(".stage-imported-member, .stage-text-item, .stage-shape-item").forEach((item) => {
+      item.classList.remove("is-selected");
+    });
 
     if (tool === "text") {
       event.preventDefault();
@@ -4177,6 +4333,15 @@ helpModal?.addEventListener("click", (event) => {
 });
 
 document.addEventListener("keydown", (event) => {
+  const activeTarget = event.target;
+  const isEditingText = activeTarget?.closest?.("input, textarea, [contenteditable='true']");
+  if ((event.key === "Delete" || event.key === "Backspace") && !isEditingText && selectedStageTargetExists()) {
+    event.preventDefault();
+    deleteSelectedStageTarget();
+    playUiTick("select");
+    return;
+  }
+
   if (["F1", "F2", "F3"].includes(event.key) && getActiveDirectorWindow()) {
     event.preventDefault();
     if (event.key === "F1") maximizeDirectorWindow();

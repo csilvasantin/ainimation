@@ -380,19 +380,35 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
       return new Response(JSON.stringify({
         items: [
           {
+            title: "AiDirector exported animation",
+            assetUrl: "https://www.admira.studio/media/aidirector-export.webm",
+            motor: "ainimation",
+            type: "animation",
+            mimeType: "video/webm",
+            prompt: "ainimation.studio AiDirector",
+          },
+          {
+            title: "The Last Signal animation",
+            assetUrl: "https://www.admira.studio/media/aidirector-legacy.webm",
+            motor: "ainimation",
+            type: "video",
+            mimeType: "video/webm",
+            prompt: "ainimation.studio AiDirector",
+          },
+          {
             title: "Latest Stock Take",
             assetUrl: "https://www.admira.studio/media/latest-stock-take.png",
             mimeType: "image/png",
           },
           {
             title: "Latest Stock Plate",
-            assetUrl: "https://www.admira.studio/media/latest-stock-plate.png",
-            mimeType: "image/png",
+            assetUrl: "https://www.admira.studio/media/latest-stock-plate.mp4",
+            mimeType: "video/mp4",
           },
           {
             title: "Latest Stock Character",
-            assetUrl: "https://www.admira.studio/media/latest-stock-character.png",
-            mimeType: "image/png",
+            assetUrl: "https://www.admira.studio/media/latest-stock-character.mp3",
+            mimeType: "audio/mpeg",
           },
         ],
       }), {
@@ -474,10 +490,32 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
       const stagedPlan = JSON.parse(localStorage.getItem("ainimation-film-plan") || "{}");
       const stockMembers = (stagedPlan.cast || []).filter((item) => item.stock && item.sourceUrl !== "https://www.admira.studio/media/aidirector-export.webm");
       const stagedMember = [...stockMembers].reverse().find((item) => item.stock);
+      const stageRemoveTarget = document.querySelector(".stage-imported-member[data-cast-index] .stage-member-remove");
+      const removedFromStageIndex = stageRemoveTarget?.closest(".stage-imported-member")?.dataset.castIndex || "";
+      stageRemoveTarget?.dispatchEvent(new PointerEvent("pointerdown", { bubbles: true }));
+      stageRemoveTarget?.click();
+      await new Promise((resolve) => window.setTimeout(resolve, 40));
+      const stageCountAfterStageRemove = document.querySelectorAll(".stage-imported-member").length;
+      if (removedFromStageIndex) {
+        document.querySelector(`.director-cast-window [data-cast-index="${removedFromStageIndex}"]`)?.click();
+        await new Promise((resolve) => window.setTimeout(resolve, 40));
+      }
+      const timelineRemoveTarget = document.querySelector(".score-sprite[data-cast-index] [data-sprite-remove]");
+      const removedFromTimelineIndex = timelineRemoveTarget?.closest(".score-sprite")?.dataset.castIndex || "";
+      timelineRemoveTarget?.dispatchEvent(new PointerEvent("pointerdown", { bubbles: true }));
+      timelineRemoveTarget?.click();
+      await new Promise((resolve) => window.setTimeout(resolve, 40));
+      const timelineCountAfterTimelineRemove = document.querySelectorAll(".score-sprite[data-cast-index]").length;
+      if (removedFromTimelineIndex) {
+        document.querySelector(`.director-cast-window [data-cast-index="${removedFromTimelineIndex}"]`)?.click();
+        await new Promise((resolve) => window.setTimeout(resolve, 40));
+      }
+      const restoredPlan = JSON.parse(localStorage.getItem("ainimation-film-plan") || "{}");
+      const restoredStockMembers = (restoredPlan.cast || []).filter((item) => item.stock && item.sourceUrl !== "https://www.admira.studio/media/aidirector-export.webm");
       return {
         calls,
         imported: Boolean(member),
-        importedCount: stockMembers.length,
+        importedCount: restoredStockMembers.length,
         visibleInCast: Boolean(card),
         cardDraggable: card?.getAttribute("draggable") === "true",
         cardWithinCast: Boolean(castWindowRect && cardRect && cardRect.width <= 130 && cardRect.height <= 90 && cardRect.right <= castWindowRect.right + 1),
@@ -492,6 +530,9 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
         stageCount: document.querySelectorAll(".stage-imported-member").length,
         timelineVisible: Boolean(document.querySelector(".score-sprite[data-cast-index]")),
         timelineCount: document.querySelectorAll(".score-sprite[data-cast-index]").length,
+        importedAinimationCount: restoredStockMembers.filter((item) => /ainimation|aidirector/i.test(`${item.name} ${item.sourceUrl} ${item.prompt || ""}`)).length,
+        stageCountAfterStageRemove,
+        timelineCountAfterTimelineRemove,
       };
     } finally {
       window.fetch = originalFetch;
@@ -601,9 +642,9 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
   await page.locator('[data-stage-tool="rect-fill"]').click();
   const stageBox = await page.locator(".stage-canvas").boundingBox();
   if (stageBox) {
-    await page.mouse.move(stageBox.x + stageBox.width * 0.78, stageBox.y + stageBox.height * 0.6);
+    await page.mouse.move(stageBox.x + stageBox.width * 0.88, stageBox.y + stageBox.height * 0.7);
     await page.mouse.down();
-    await page.mouse.move(stageBox.x + stageBox.width * 0.92, stageBox.y + stageBox.height * 0.74);
+    await page.mouse.move(stageBox.x + stageBox.width * 0.97, stageBox.y + stageBox.height * 0.86);
     await page.mouse.up();
     await page.waitForTimeout(120);
   }
@@ -826,8 +867,8 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
   const missingLabels = result.labels.length !== expectedYLabels || result.xLabels.length !== expectedXLabels;
   const hasWrongRotation = result.labels.some((label) => label.transform === "matrix(0, 1, -1, 0, 0, 0)");
 
-  if (!result.stylesheetHref.includes("aidirector-20260520-r27")) {
-    throw new Error(`Expected aidirector-20260520-r27 stylesheet cache key, got ${result.stylesheetHref}`);
+  if (!result.stylesheetHref.includes("aidirector-20260520-r28")) {
+    throw new Error(`Expected aidirector-20260520-r28 stylesheet cache key, got ${result.stylesheetHref}`);
   }
 
   if (
@@ -853,7 +894,7 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
     throw new Error(`Unexpected stage ruler toggle: ${JSON.stringify(result.rulerToggle)}`);
   }
 
-  if (result.brand.text !== "AiDirector v.2026.05.20 r27" || result.brand.rightGap > 20) {
+  if (result.brand.text !== "AiDirector v.2026.05.20 r28" || result.brand.rightGap > 20) {
     throw new Error(`Unexpected menu brand placement: ${JSON.stringify(result.brand)}`);
   }
 
@@ -922,7 +963,7 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
   if (
     !result.pointerCastDrop.onStage ||
     !result.pointerCastDrop.timelineVisible ||
-    result.pointerCastDrop.playheadFrame <= 1
+    result.pointerCastDrop.startFrame <= 1
   ) {
     throw new Error(`Unexpected pointer Cast drop: ${JSON.stringify(result.pointerCastDrop)}`);
   }
@@ -981,9 +1022,7 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
     result.stockExport.rafTicks >= 240 ||
     result.stockExport.recorderTracks.video !== 1 ||
     result.stockExport.recorderTracks.audio < 1 ||
-    result.stockExport.castMember?.mediaType !== "animation" ||
-    result.stockExport.castMember?.src !== "https://www.admira.studio/media/aidirector-export.webm" ||
-    result.stockExport.castMember?.stock !== true ||
+    result.stockExport.castMember !== null ||
     result.stockExport.buttonDisabled
   ) {
     throw new Error(`Unexpected Stock export flow: ${JSON.stringify(result.stockExport)}`);
@@ -1016,22 +1055,25 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
   }
 
   if (
-    !result.stockImport.calls[0]?.includes("pixer-eleven.csilvasantin.workers.dev/stock/list?limit=3") ||
+    !result.stockImport.calls[0]?.includes("pixer-eleven.csilvasantin.workers.dev/stock/list?limit=12") ||
     !result.stockImport.imported ||
     result.stockImport.importedCount < 3 ||
+    result.stockImport.importedAinimationCount !== 0 ||
     !result.stockImport.visibleInCast ||
     !result.stockImport.cardDraggable ||
     !result.stockImport.cardWithinCast ||
     !result.stockImport.mediaWithinCard ||
     result.stockImport.role !== "Stock" ||
     result.stockImport.source !== "admira.studio Stock" ||
-    result.stockImport.mediaType !== "image" ||
+    !["image", "video", "audio"].includes(result.stockImport.mediaType) ||
     result.stockImport.durationFrames < 96 ||
     result.stockImport.onStageAfterCastClick !== true ||
     result.stockImport.stageCount < 3 ||
+    result.stockImport.stageCountAfterStageRemove >= result.stockImport.stageCount ||
     result.stockImport.startFrameAfterTimelineDrop <= 1 ||
     !result.stockImport.timelineVisible ||
-    result.stockImport.timelineCount < 3
+    result.stockImport.timelineCount < 3 ||
+    result.stockImport.timelineCountAfterTimelineRemove >= result.stockImport.timelineCount
   ) {
     throw new Error(`Unexpected Stock import flow: ${JSON.stringify(result.stockImport)}`);
   }

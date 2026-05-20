@@ -2306,6 +2306,11 @@ h2 {
   z-index: 4;
 }
 
+.stage-imported-member.is-selected {
+  border-color: #a6ff65;
+  box-shadow: 0 0 0 2px rgba(166, 255, 101, 0.28), 0 14px 36px rgba(0, 0, 0, 0.44), 0 0 22px rgba(166, 255, 101, 0.18);
+}
+
 .stage-imported-member.is-out-of-frame,
 .stage-text-item.is-out-of-frame {
   display: none;
@@ -3697,6 +3702,38 @@ body.is-cast-pointer-dragging .director-cast-window {
   width: 100%;
 }
 
+.stage-member-remove {
+  align-items: center;
+  background: rgba(255, 101, 79, 0.94);
+  border: 1px solid rgba(255, 255, 255, 0.66);
+  border-radius: 999px;
+  color: #fff;
+  cursor: pointer;
+  display: inline-flex;
+  font: 900 14px/1 ui-sans-serif, system-ui, sans-serif;
+  height: 20px;
+  justify-content: center;
+  opacity: 0;
+  padding: 0;
+  position: absolute;
+  right: -8px;
+  text-shadow: none;
+  top: -8px;
+  transition: opacity 0.12s ease, transform 0.12s ease;
+  width: 20px;
+  z-index: 8;
+}
+
+.stage-imported-member:hover .stage-member-remove,
+.stage-imported-member.is-selected .stage-member-remove {
+  opacity: 1;
+}
+
+.stage-member-remove:hover {
+  background: #ff3f35;
+  transform: scale(1.05);
+}
+
 .tool-palette .import-menu button:hover {
   background: rgba(166, 255, 101, 0.16);
   color: #fff;
@@ -4655,6 +4692,40 @@ body.studio-entered {
 .score-sprite.imported-member {
   cursor: ew-resize;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.76), 0 0 0 1px rgba(32, 96, 255, 0.18);
+}
+
+.score-sprite.imported-member.is-selected {
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.76), 0 0 0 2px rgba(166, 255, 101, 0.6), 0 7px 15px rgba(40, 60, 20, 0.18);
+  outline: 0;
+}
+
+.score-sprite-remove {
+  align-items: center;
+  background: rgba(255, 101, 79, 0.94);
+  border: 1px solid rgba(255, 255, 255, 0.72);
+  border-radius: 999px;
+  color: #fff;
+  cursor: pointer;
+  display: inline-flex;
+  flex: 0 0 auto;
+  font: 900 11px/1 ui-sans-serif, system-ui, sans-serif;
+  height: 15px;
+  justify-content: center;
+  margin-left: 2px;
+  opacity: 0;
+  position: relative;
+  text-shadow: none;
+  width: 15px;
+  z-index: 4;
+}
+
+.score-sprite:hover .score-sprite-remove,
+.score-sprite.is-selected .score-sprite-remove {
+  opacity: 1;
+}
+
+.score-sprite-remove:hover {
+  background: #ff3f35;
 }
 
 .score-sprite-handle {
