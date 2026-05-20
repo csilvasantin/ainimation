@@ -74,6 +74,7 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
     const scoreToolsRect = document.querySelector(".score-tools")?.getBoundingClientRect();
     const scoreRulerRect = document.querySelector(".score-ruler")?.getBoundingClientRect();
     const scoreMemberTitleRect = document.querySelector(".score-member-title")?.getBoundingClientRect();
+    const scoreTitlebarRect = timelineWindow?.querySelector(".window-titlebar")?.getBoundingClientRect();
     const overlaps = (first, second) => Boolean(first && second) &&
       first.left < second.right &&
       first.right > second.left &&
@@ -120,6 +121,11 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
         toolsOverlapTimeline: overlaps(toolsRect, timelineRect),
       },
       timelineControls: {
+        toolsInsideTitlebar: Boolean(scoreToolsRect && scoreTitlebarRect &&
+          scoreToolsRect.left >= scoreTitlebarRect.left &&
+          scoreToolsRect.right <= scoreTitlebarRect.right &&
+          scoreToolsRect.top >= scoreTitlebarRect.top &&
+          scoreToolsRect.bottom <= scoreTitlebarRect.bottom),
         toolsInsideRuler: Boolean(scoreToolsRect && scoreRulerRect &&
           scoreToolsRect.left >= scoreRulerRect.left &&
           scoreToolsRect.right <= scoreRulerRect.right &&
@@ -1110,7 +1116,6 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
   await page.evaluate(() => {
     const plan = JSON.parse(localStorage.getItem("ainimation-film-plan") || "{}");
     plan.cast = [
-      ...(plan.cast || []),
       {
         name: "Imported Audio",
         role: "Audio",
@@ -1119,8 +1124,23 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
         src: "data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAESsAACJWAAACABAAZGF0YQAAAAA=",
         startFrame: 1,
         durationFrames: 24,
+        stockPrompt: "spoken interview audio",
+        stockFingerprint: "spoken interview audio voice",
         keyframes: [{ frame: 1, x: 16, y: 54, w: 12, h: 10 }],
       },
+      {
+        name: "Music Bed",
+        role: "Music",
+        imported: true,
+        mediaType: "audio",
+        src: "data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAESsAACJWAAACABAAZGF0YQAAAAA=",
+        startFrame: 1,
+        durationFrames: 24,
+        stockPrompt: "music bed with soft beat",
+        stockFingerprint: "music soundtrack melody beat",
+        keyframes: [{ frame: 1, x: 34, y: 54, w: 12, h: 10 }],
+      },
+      ...(plan.cast || []),
     ];
     localStorage.setItem("ainimation-film-plan", JSON.stringify(plan));
     window.renderFilmPlan?.(plan);
@@ -1141,8 +1161,8 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
   await page.evaluate(() => document.querySelector("[data-audio-mute-all]")?.click());
   await page.waitForTimeout(120);
   await page.evaluate(() => {
-    const castIndex = [...document.querySelectorAll("[data-audio-mute]")].at(-1)?.dataset.castIndex;
-    const label = document.querySelector(`.score-row-label span[data-cast-index="${castIndex}"]`);
+    const label = [...document.querySelectorAll(".score-row-label span[data-cast-index]")]
+      .find((item) => item.textContent.trim() === "Imported Audio");
     if (!label) return;
     label.textContent = "Narration Stem";
     label.dispatchEvent(new FocusEvent("blur", { bubbles: true }));
@@ -1153,6 +1173,13 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
     const member = (plan.cast || []).find((item) => item.mediaType === "audio" && item.name === "Narration Stem");
     const muteButton = document.querySelector("[data-audio-mute]");
     const muteAllButton = document.querySelector("[data-audio-mute-all]");
+    const stageAudioVisuals = [...document.querySelectorAll(".stage-imported-member.audio-member")].map((item) => ({
+      hasGlyph: Boolean(item.querySelector(".stage-audio-glyph")),
+      sound: item.classList.contains("sound-member"),
+      music: item.classList.contains("music-member"),
+      glyphAudio: Boolean(item.querySelector(".stage-audio-glyph.audio")),
+      glyphMusic: Boolean(item.querySelector(".stage-audio-glyph.music")),
+    }));
     return {
       hasMuteButton: Boolean(muteButton),
       hasMuteAllButton: Boolean(muteAllButton),
@@ -1162,6 +1189,7 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
       savedName: member?.name || "",
       muted: Boolean(member?.muted),
       labelEditable: Boolean(document.querySelector(".score-row-label span[contenteditable='true']")),
+      stageAudioVisuals,
     };
   }, allMutedAfterGlobal);
 
@@ -1172,8 +1200,8 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
   const missingLabels = result.labels.length !== expectedYLabels || result.xLabels.length !== expectedXLabels;
   const hasWrongRotation = result.labels.some((label) => label.transform === "matrix(0, 1, -1, 0, 0, 0)");
 
-  if (!result.stylesheetHref.includes("aidirector-20260520-r37")) {
-    throw new Error(`Expected aidirector-20260520-r37 stylesheet cache key, got ${result.stylesheetHref}`);
+  if (!result.stylesheetHref.includes("aidirector-20260520-r38")) {
+    throw new Error(`Expected aidirector-20260520-r38 stylesheet cache key, got ${result.stylesheetHref}`);
   }
 
   if (
@@ -1200,7 +1228,7 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
   }
 
   if (
-    result.brand.text !== "◆ AiDirector v.2026.05.20 r37" ||
+    result.brand.text !== "◆ AiDirector v.2026.05.20 r38" ||
     result.brand.rightGap > 20 ||
     result.brand.menuHeight > 50 ||
     result.brand.toolsTitlebarHeight > 31
@@ -1299,7 +1327,9 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
     result.audioTimeline.mutePressed !== "false" ||
     result.audioTimeline.savedName !== "Narration Stem" ||
     result.audioTimeline.muted ||
-    !result.audioTimeline.labelEditable
+    !result.audioTimeline.labelEditable ||
+    !result.audioTimeline.stageAudioVisuals.some((item) => item.sound && item.glyphAudio) ||
+    !result.audioTimeline.stageAudioVisuals.some((item) => item.music && item.glyphMusic)
   ) {
     throw new Error(`Unexpected audio timeline controls: ${JSON.stringify(result.audioTimeline)}`);
   }
@@ -1492,7 +1522,8 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
   }
 
   if (
-    !result.timelineControls.toolsInsideRuler ||
+    !result.timelineControls.toolsInsideTitlebar ||
+    result.timelineControls.toolsInsideRuler ||
     result.timelineControls.toolsInMemberColumn ||
     result.timelineControls.memberTitleHeight < 60
   ) {

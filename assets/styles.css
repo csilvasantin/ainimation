@@ -2397,8 +2397,24 @@ h2 {
 
 .stage-imported-member.audio-member {
   background:
-    repeating-linear-gradient(90deg, rgba(166, 255, 101, 0.35) 0 3px, transparent 3px 9px),
+    radial-gradient(circle at 50% 34%, rgba(238, 247, 255, 0.14), transparent 0 24%),
+    repeating-linear-gradient(90deg, rgba(166, 255, 101, 0.28) 0 3px, transparent 3px 10px),
     linear-gradient(180deg, rgba(8, 12, 20, 0.96), rgba(20, 27, 40, 0.94));
+  display: flex;
+  justify-content: center;
+}
+
+.stage-imported-member.audio-member.sound-member {
+  background:
+    radial-gradient(circle at 50% 38%, rgba(124, 215, 255, 0.2), transparent 0 26%),
+    repeating-linear-gradient(90deg, rgba(124, 215, 255, 0.32) 0 2px, transparent 2px 9px),
+    linear-gradient(180deg, rgba(6, 12, 23, 0.98), rgba(10, 33, 50, 0.94));
+}
+
+.stage-imported-member.audio-member.music-member {
+  background:
+    repeating-linear-gradient(90deg, rgba(255, 238, 169, 0.68) 0 4px, rgba(10, 15, 24, 0.28) 4px 6px, transparent 6px 14px),
+    linear-gradient(180deg, rgba(18, 14, 8, 0.98), rgba(58, 38, 8, 0.94));
 }
 
 .stage-imported-member.audio-member audio {
@@ -2407,6 +2423,57 @@ h2 {
   pointer-events: none;
   position: absolute;
   width: 0;
+}
+
+.stage-audio-glyph {
+  align-items: center;
+  border-radius: 999px;
+  box-shadow: 0 0 18px rgba(0, 0, 0, 0.34);
+  display: inline-flex;
+  height: min(42%, 68px);
+  justify-content: center;
+  left: 50%;
+  min-height: 34px;
+  min-width: 34px;
+  position: absolute;
+  top: 42%;
+  transform: translate(-50%, -50%);
+  width: min(28%, 68px);
+  z-index: 2;
+}
+
+.stage-audio-glyph.audio {
+  background: linear-gradient(180deg, #dff6ff, #70cdf4);
+  border: 1px solid rgba(213, 246, 255, 0.86);
+}
+
+.stage-audio-glyph.audio::before {
+  background: #08121f;
+  clip-path: polygon(0 34%, 34% 34%, 78% 0, 78% 100%, 34% 66%, 0 66%);
+  content: "";
+  height: 42%;
+  width: 46%;
+}
+
+.stage-audio-glyph.audio::after {
+  border: 2px solid #08121f;
+  border-left: 0;
+  border-radius: 0 999px 999px 0;
+  content: "";
+  height: 38%;
+  margin-left: -8%;
+  width: 22%;
+}
+
+.stage-audio-glyph.music {
+  background: linear-gradient(180deg, #fff5b8, #f2b84b);
+  border: 1px solid rgba(255, 242, 176, 0.9);
+  color: #171107;
+  font: 950 clamp(1.15rem, 4vw, 2.4rem)/1 var(--font-ui, inherit);
+}
+
+.stage-audio-glyph.music::before {
+  content: "♪";
 }
 
 .stage-imported-member figcaption {
@@ -4297,6 +4364,16 @@ body.studio-entered {
   position: absolute;
   top: 4px;
   z-index: 11;
+}
+
+.director-score-window .window-titlebar .score-tools {
+  background: rgba(237, 241, 247, 0.9);
+  cursor: default;
+  left: auto;
+  margin-left: 2px;
+  padding: 2px 5px;
+  position: static;
+  top: auto;
 }
 
 .score-play-cluster {

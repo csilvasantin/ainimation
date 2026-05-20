@@ -2672,7 +2672,12 @@ function renderFilmPlan(plan) {
     importedStageMembers.slice(0, 6).forEach((member, index) => {
       const castIndex = castMembers.indexOf(member);
       const figure = document.createElement("figure");
-      figure.className = `stage-imported-member ${member.mediaType === "video" ? "video-member" : member.mediaType === "audio" ? "audio-member" : "image-member"} ${isSelectedCastTarget(castIndex) ? "is-selected" : ""}`;
+      const stageMediaClass = member.mediaType === "video"
+        ? "video-member"
+        : member.mediaType === "audio"
+          ? `audio-member ${audioStageKind(member) === "music" ? "music-member" : "sound-member"}`
+          : "image-member";
+      figure.className = `stage-imported-member ${stageMediaClass} ${isSelectedCastTarget(castIndex) ? "is-selected" : ""}`;
       figure.dataset.castIndex = String(castIndex);
       figure.dataset.stageIndex = String(index);
       const keyframe = interpolateStageKeyframe(member, currentTimelineFrame(), index) || defaultStageKeyframe(member, Number(member.startFrame || 1), index);
@@ -2694,6 +2699,11 @@ function renderFilmPlan(plan) {
         media.muted = Boolean(member.muted);
         media.preload = "metadata";
       }
+      const audioGlyph = document.createElement("span");
+      if (member.mediaType === "audio") {
+        audioGlyph.className = `stage-audio-glyph ${audioStageKind(member)}`;
+        audioGlyph.setAttribute("aria-hidden", "true");
+      }
       const caption = document.createElement("figcaption");
       caption.textContent = member.name;
       const resizeHandle = document.createElement("span");
@@ -2713,7 +2723,9 @@ function renderFilmPlan(plan) {
         event.stopPropagation();
         removeCastMemberFromStage(castIndex);
       });
-      figure.append(media, caption, resizeHandle, removeButton);
+      figure.append(media);
+      if (member.mediaType === "audio") figure.append(audioGlyph);
+      figure.append(caption, resizeHandle, removeButton);
       stageWindow.append(figure);
     });
     renderStageItems(stageWindow, plan);
@@ -2833,6 +2845,7 @@ function renderFilmPlan(plan) {
         `).join("")}
       </div>
     `;
+    dockTimelineControlsInTitlebar();
     initScorePlayhead(totalFrames);
     initTimelineMarkerEditing(totalFrames);
     initScoreLabelEditing();
@@ -3953,6 +3966,10 @@ function stockMemberMatchesCategory(member, category = "") {
   return stockMemberCategory(member) === category;
 }
 
+function audioStageKind(member) {
+  return stockMemberCategory(member) === "music" ? "music" : "audio";
+}
+
 async function fetchLatestStockMembers(limit = stockImportBatchSize, category = "", options = {}) {
   let lastError = null;
   let hadUsableResponse = false;
@@ -4296,6 +4313,16 @@ function composeStockMembersIntoPlan(members) {
   window.refreshDirectorWindows?.();
   document.querySelector('[data-open-window="cast"]')?.click();
   return members.length;
+}
+
+function dockTimelineControlsInTitlebar() {
+  const timelineWindow = document.querySelector('.director-score-window[data-window="score"]');
+  const titlebar = timelineWindow?.querySelector(".window-titlebar");
+  const tools = scoreGrid?.querySelector(".score-tools");
+  if (!titlebar || !tools) return;
+  titlebar.querySelector(".score-tools")?.remove();
+  tools.addEventListener("pointerdown", (event) => event.stopPropagation());
+  titlebar.append(tools);
 }
 
 function confirmStockImportTray() {
