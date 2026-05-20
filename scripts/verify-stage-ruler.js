@@ -13,12 +13,14 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
   }
 
   await page.goto(targetUrl, { waitUntil: "networkidle" });
+  await page.evaluate(() => localStorage.removeItem("ainimation-timeline-zoom"));
   await page.waitForTimeout(1200);
   await page.waitForFunction(() => {
     window.refreshDirectorWindows?.();
     const rect = document.querySelector(".stage-canvas")?.getBoundingClientRect();
     return rect && rect.width > 400 && rect.height > 300;
   }, { timeout: 30000 });
+  await page.evaluate(() => window.renderFilmPlan?.(window.currentPlan?.()));
   await page.evaluate(() => window.renderStageRulers?.());
 
   const result = await page.evaluate(() => {
@@ -654,6 +656,63 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
     startLabel: await page.locator('[data-score-bound="start"]').getAttribute("aria-label"),
     endLabel: await page.locator('[data-score-bound="end"]').getAttribute("aria-label"),
   };
+  result.timelineZoom = await page.evaluate(() => {
+    const readout = document.querySelector("[data-score-zoom]");
+    const sprite = document.querySelector(".score-sprite[data-cast-index]");
+    const widthBefore = sprite ? parseFloat(sprite.style.width) : 0;
+    document.querySelector('[data-score-zoom-step="up"]')?.click();
+    document.querySelector('[data-score-zoom-step="up"]')?.click();
+    const nextReadout = document.querySelector("[data-score-zoom]");
+    const nextSprite = document.querySelector(".score-sprite[data-cast-index]");
+    const playhead = document.querySelector(".score-playhead");
+    return {
+      initial: readout?.dataset.value || "",
+      afterUp: nextReadout?.dataset.value || "",
+      displayFrames: Number(playhead?.dataset.displayFrames || 0),
+      totalFrames: Number(playhead?.getAttribute("aria-valuemax") || 0),
+      widthBefore,
+      widthAfter: nextSprite ? parseFloat(nextSprite.style.width) : 0,
+    };
+  });
+  result.videoDurationFrames = await page.evaluate(async () => {
+    const plan = JSON.parse(localStorage.getItem("ainimation-film-plan") || "{}");
+    const src = "mock-video-duration.webm";
+    const castIndex = (plan.cast || []).length;
+    plan.cast = [
+      ...(plan.cast || []),
+      {
+        name: "Duration Probe Video",
+        role: "Video",
+        imported: true,
+        mediaType: "video",
+        src,
+        startFrame: 1,
+        durationFrames: 24,
+        durationPending: true,
+      },
+    ];
+    localStorage.setItem("ainimation-film-plan", JSON.stringify(plan));
+    const createElement = document.createElement.bind(document);
+    document.createElement = (tagName) => {
+      if (String(tagName).toLowerCase() !== "video") return createElement(tagName);
+      return {
+        duration: 3.2,
+        load() {},
+        removeAttribute() {},
+        addEventListener(type, callback) {
+          if (type === "loadedmetadata") setTimeout(callback, 0);
+        },
+        set src(value) {
+          this.currentSrc = value;
+        },
+      };
+    };
+    window.updateMemberDurationFromMetadata?.(castIndex, src, "video");
+    await new Promise((resolve) => setTimeout(resolve, 80));
+    document.createElement = createElement;
+    const nextPlan = JSON.parse(localStorage.getItem("ainimation-film-plan") || "{}");
+    return nextPlan.cast?.[castIndex]?.durationFrames || 0;
+  });
 
   await page.evaluate(() => {
     const plan = JSON.parse(localStorage.getItem("ainimation-film-plan") || "{}");
@@ -706,8 +765,8 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
   const missingLabels = result.labels.length !== expectedYLabels || result.xLabels.length !== expectedXLabels;
   const hasWrongRotation = result.labels.some((label) => label.transform === "matrix(0, 1, -1, 0, 0, 0)");
 
-  if (!result.stylesheetHref.includes("aidirector-20260520-r19")) {
-    throw new Error(`Expected aidirector-20260520-r19 stylesheet cache key, got ${result.stylesheetHref}`);
+  if (!result.stylesheetHref.includes("aidirector-20260520-r20")) {
+    throw new Error(`Expected aidirector-20260520-r20 stylesheet cache key, got ${result.stylesheetHref}`);
   }
 
   if (
@@ -733,7 +792,7 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
     throw new Error(`Unexpected stage ruler toggle: ${JSON.stringify(result.rulerToggle)}`);
   }
 
-  if (result.brand.text !== "AiDirector v.2026.05.20 r19" || result.brand.rightGap > 20) {
+  if (result.brand.text !== "AiDirector v.2026.05.20 r20" || result.brand.rightGap > 20) {
     throw new Error(`Unexpected menu brand placement: ${JSON.stringify(result.brand)}`);
   }
 
@@ -785,6 +844,17 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
     result.timelineBounds.endLabel !== "Go to end"
   ) {
     throw new Error(`Unexpected timeline bounds controls: ${JSON.stringify(result.timelineBounds)}`);
+  }
+  if (
+    result.timelineZoom.initial !== "100" ||
+    result.timelineZoom.afterUp !== "200" ||
+    result.timelineZoom.displayFrames !== result.timelineZoom.totalFrames * 2 ||
+    !(result.timelineZoom.widthAfter > 0 && result.timelineZoom.widthAfter < result.timelineZoom.widthBefore)
+  ) {
+    throw new Error(`Unexpected timeline zoom behavior: ${JSON.stringify(result.timelineZoom)}`);
+  }
+  if (result.videoDurationFrames !== 77) {
+    throw new Error(`Video duration should map to timeline frames: ${result.videoDurationFrames}`);
   }
 
   if (

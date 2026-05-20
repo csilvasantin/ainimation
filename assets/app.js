@@ -852,7 +852,8 @@ function setTimelineFrame(frame, shouldPlay = false) {
     return;
   }
   const currentFrame = Math.min(Math.max(Number(frame || 1), 1), Math.max(1, totalFrames));
-  const left = totalFrames <= 1 ? 0 : ((currentFrame - 1) / (totalFrames - 1)) * 100;
+  const displayFrames = Math.max(1, Number(playhead.dataset.displayFrames || totalFrames));
+  const left = displayFrames <= 1 ? 0 : ((currentFrame - 1) / (displayFrames - 1)) * 100;
   playhead.style.left = `${left}%`;
   playhead.dataset.frame = String(currentFrame);
   playhead.setAttribute("aria-valuenow", String(currentFrame));
@@ -882,7 +883,7 @@ function syncStageToFrame(frame = currentTimelineFrame(), shouldPlay = false) {
       media.pause();
       return;
     }
-    const fps = Number(document.querySelector("[data-score-fps]")?.dataset.value || 24);
+    const fps = timelineFps();
     const targetTime = Math.max(0, (frame - start) / Math.max(1, fps));
     if (Math.abs((media.currentTime || 0) - targetTime) > 0.2) {
       if (Number.isFinite(media.duration) && media.duration > 0) {
@@ -944,6 +945,29 @@ function memberHasAudio(member) {
   return ["audio", "video", "animation"].includes(member?.mediaType);
 }
 
+function timelineFps() {
+  return Number(document.querySelector("[data-score-fps]")?.dataset.value || 24);
+}
+
+function framesFromSeconds(seconds, fps = timelineFps()) {
+  return Math.max(1, Math.ceil(Math.max(0, Number(seconds) || 0) * Math.max(1, Number(fps) || 24)));
+}
+
+function loadTimelineZoom() {
+  const value = Number(localStorage.getItem(timelineZoomStorageKey) || 100);
+  return [50, 100, 150, 200].includes(value) ? value : 100;
+}
+
+function saveTimelineZoom(value) {
+  const zoom = [50, 100, 150, 200].includes(Number(value)) ? Number(value) : 100;
+  localStorage.setItem(timelineZoomStorageKey, String(zoom));
+  return zoom;
+}
+
+function timelineDisplayFrames(totalFrames, zoom = loadTimelineZoom()) {
+  return Math.max(1, Math.ceil(Math.max(1, totalFrames) * (Math.max(50, Math.min(200, zoom)) / 100)));
+}
+
 function initScorePlayhead(totalFrames) {
   const ruler = document.querySelector(".score-ruler");
   const playhead = ruler?.querySelector(".score-playhead");
@@ -951,6 +975,9 @@ function initScorePlayhead(totalFrames) {
   const fpsReadout = transport?.querySelector("[data-score-fps]");
   const fpsDownButton = transport?.querySelector("[data-score-fps-step='down']");
   const fpsUpButton = transport?.querySelector("[data-score-fps-step='up']");
+  const zoomReadout = transport?.querySelector("[data-score-zoom]");
+  const zoomDownButton = transport?.querySelector("[data-score-zoom-step='down']");
+  const zoomUpButton = transport?.querySelector("[data-score-zoom-step='up']");
   const prevButton = transport?.querySelector("[data-score-step='prev']");
   const nextButton = transport?.querySelector("[data-score-step='next']");
   const startButton = transport?.querySelector("[data-score-bound='start']");
@@ -962,10 +989,11 @@ function initScorePlayhead(totalFrames) {
   const fpsValues = [12, 24, 25, 30, 60];
   let currentFps = Number(fpsReadout?.dataset.value || fpsReadout?.textContent || 24);
   let playTimer = null;
+  const displayFrames = Math.max(1, Number(playhead.dataset.displayFrames || totalFrames));
   const clampFrame = (frame) => Math.min(Math.max(frame, 1), totalFrames);
   const setFrame = (frame) => {
     currentFrame = clampFrame(frame);
-    const left = totalFrames <= 1 ? 0 : ((currentFrame - 1) / (totalFrames - 1)) * 100;
+    const left = displayFrames <= 1 ? 0 : ((currentFrame - 1) / (displayFrames - 1)) * 100;
     playhead.style.left = `${left}%`;
     playhead.dataset.frame = String(currentFrame);
     playhead.setAttribute("aria-valuenow", String(currentFrame));
@@ -980,6 +1008,15 @@ function initScorePlayhead(totalFrames) {
     }
   };
   const getFps = () => currentFps;
+  const stepZoom = (direction) => {
+    const values = [50, 100, 150, 200];
+    const currentZoom = Number(zoomReadout?.dataset.value || loadTimelineZoom());
+    const index = Math.max(0, values.indexOf(currentZoom));
+    const nextIndex = Math.min(Math.max(index + direction, 0), values.length - 1);
+    saveTimelineZoom(values[nextIndex]);
+    renderFilmPlan(currentPlan());
+    setTimelineFrame(currentFrame, false);
+  };
   const stopPlayback = () => {
     if (playTimer) {
       window.clearInterval(playTimer);
@@ -1021,7 +1058,7 @@ function initScorePlayhead(totalFrames) {
   const frameFromPointer = (event) => {
     const rect = ruler.getBoundingClientRect();
     const ratio = rect.width ? (event.clientX - rect.left) / rect.width : 0;
-    return Math.round(ratio * (totalFrames - 1)) + 1;
+    return Math.round(ratio * (displayFrames - 1)) + 1;
   };
   const moveToPointer = (event) => setFrame(frameFromPointer(event));
 
@@ -1074,6 +1111,8 @@ function initScorePlayhead(totalFrames) {
   });
   fpsDownButton?.addEventListener("click", () => stepFps(-1));
   fpsUpButton?.addEventListener("click", () => stepFps(1));
+  zoomDownButton?.addEventListener("click", () => stepZoom(-1));
+  zoomUpButton?.addEventListener("click", () => stepZoom(1));
 }
 
 const filmForm = document.querySelector("#filmForm");
@@ -1108,6 +1147,7 @@ const directorWindows = document.querySelectorAll(".director-window");
 const filmStorageKey = "ainimation-film-plan";
 const scoreLabelsStorageKey = "ainimation-score-labels";
 const timelineMarkersStorageKey = "ainimation-timeline-markers";
+const timelineZoomStorageKey = "ainimation-timeline-zoom";
 const stageWidthPixels = 1920;
 const stageHeightPixels = 1080;
 const stageRulerStep = 100;
@@ -1438,20 +1478,21 @@ function initTimelineSpriteDragging(totalFrames) {
       const trackRect = track.getBoundingClientRect();
       const startFrame = Number(sprite.dataset.startFrame || 1);
       const durationFrames = Number(sprite.dataset.durationFrames || 24);
+      const displayFrames = Math.max(1, Number(document.querySelector(".score-playhead")?.dataset.displayFrames || totalFrames));
       const action = event.target.closest("[data-sprite-handle='start']")
         ? "trim-start"
         : event.target.closest("[data-sprite-handle='end']")
           ? "trim-end"
           : "move";
       const frameDelta = (clientX) => {
-        const delta = trackRect.width ? ((clientX - event.clientX) / trackRect.width) * totalFrames : 0;
+        const delta = trackRect.width ? ((clientX - event.clientX) / trackRect.width) * displayFrames : 0;
         return Math.round(delta);
       };
       const updateSprite = (frame, duration) => {
         sprite.dataset.startFrame = String(frame);
         sprite.dataset.durationFrames = String(duration);
-        sprite.style.left = `${((frame - 1) / totalFrames) * 100}%`;
-        sprite.style.width = `${(duration / totalFrames) * 100}%`;
+        sprite.style.left = `${((frame - 1) / displayFrames) * 100}%`;
+        sprite.style.width = `${(duration / displayFrames) * 100}%`;
         const range = sprite.querySelector("small");
         if (range) range.textContent = `${frame}-${frame + duration - 1}`;
         const plan = currentPlan();
@@ -1958,13 +1999,14 @@ function scheduleCastMember(plan, castIndex, options = {}) {
 function frameFromTimelineClientX(clientX, target = null) {
   const playhead = document.querySelector(".score-playhead");
   const totalFrames = Math.max(1, Number(playhead?.getAttribute("aria-valuemax") || 240));
+  const displayFrames = Math.max(1, Number(playhead?.dataset.displayFrames || totalFrames));
   const track = target?.closest?.(".score-track") ||
     document.querySelector(".score-track") ||
     document.querySelector(".score-ruler");
   const rect = track?.getBoundingClientRect();
   if (!rect?.width) return currentTimelineFrame();
   const ratio = Math.min(Math.max((clientX - rect.left) / rect.width, 0), 1);
-  return Math.round(ratio * (totalFrames - 1)) + 1;
+  return Math.min(Math.round(ratio * (displayFrames - 1)) + 1, totalFrames);
 }
 
 function castDropTargetAt(clientX, clientY) {
@@ -2236,7 +2278,9 @@ function renderFilmPlan(plan) {
       ...timelineShapeItems.map((item) => Number(item.startFrame || 1) + Number(item.durationFrames || 24) - 1),
     ];
     const totalFrames = Math.max(...importedEndFrames, 240);
-    const frameMarks = Array.from({ length: 9 }, (_, index) => Math.round(1 + (totalFrames - 1) * (index / 8)));
+    const timelineZoom = loadTimelineZoom();
+    const displayFrames = timelineDisplayFrames(totalFrames, timelineZoom);
+    const frameMarks = Array.from({ length: 9 }, (_, index) => Math.round(1 + (displayFrames - 1) * (index / 8)));
     const timelineMarkers = loadTimelineMarkers(totalFrames);
     const scoreChannels = [
       ...importedTimelineMembers.map((member) => ({
@@ -2262,6 +2306,8 @@ function renderFilmPlan(plan) {
       })),
     ];
     scoreGrid.style.setProperty("--total-frames", totalFrames);
+    scoreGrid.style.setProperty("--timeline-display-frames", displayFrames);
+    scoreGrid.style.setProperty("--timeline-zoom", timelineZoom);
     scoreGrid.innerHTML = `
       <div class="director-score">
         <div class="score-tools" aria-label="Timeline transport">
@@ -2281,18 +2327,23 @@ function renderFilmPlan(plan) {
             </div>
             <button type="button" data-score-step="next" aria-label="Next keyframe">→</button>
           </div>
+          <div class="score-zoom-stepper" aria-label="Timeline zoom">
+            <button type="button" data-score-zoom-step="down" aria-label="Make timeline larger">−</button>
+            <output data-score-zoom data-value="${timelineZoom}" aria-label="Timeline zoom ${timelineZoom} percent">${timelineZoom}%</output>
+            <button type="button" data-score-zoom-step="up" aria-label="Make timeline smaller">+</button>
+          </div>
         </div>
         <div class="score-member-title">Member</div>
         <div class="score-ruler">
-          ${frameMarks.map((frame) => `<span style="left:${((frame - 1) / (totalFrames - 1)) * 100}%">${frame}</span>`).join("")}
+          ${frameMarks.map((frame) => `<span style="left:${displayFrames <= 1 ? 0 : ((frame - 1) / (displayFrames - 1)) * 100}%">${frame}</span>`).join("")}
           <div class="score-marker-layer" aria-label="Timeline marks">
             ${timelineMarkers.map((marker) => `
-              <button class="score-marker" type="button" style="left:${((marker.frame - 1) / (totalFrames - 1)) * 100}%" data-marker-id="${escapeHtml(marker.id)}" data-marker-frame="${marker.frame}" aria-label="Timeline mark ${escapeHtml(marker.label)} at frame ${marker.frame}">
+              <button class="score-marker" type="button" style="left:${displayFrames <= 1 ? 0 : ((marker.frame - 1) / (displayFrames - 1)) * 100}%" data-marker-id="${escapeHtml(marker.id)}" data-marker-frame="${marker.frame}" aria-label="Timeline mark ${escapeHtml(marker.label)} at frame ${marker.frame}">
                 <span contenteditable="true" spellcheck="false">${escapeHtml(marker.label)}</span>
               </button>
             `).join("")}
           </div>
-          <i class="score-playhead" role="slider" aria-label="Timeline playhead" aria-valuemin="1" aria-valuemax="${totalFrames}" aria-valuenow="1" data-frame="1"></i>
+          <i class="score-playhead" role="slider" aria-label="Timeline playhead" aria-valuemin="1" aria-valuemax="${totalFrames}" aria-valuenow="1" data-frame="1" data-display-frames="${displayFrames}"></i>
         </div>
         ${scoreChannels.length ? "" : `<div class="score-empty-state">Import cast members to start the timeline</div>`}
         ${scoreChannels.map((channel, channelIndex) => `
@@ -2301,14 +2352,14 @@ function renderFilmPlan(plan) {
             ${channel.hasAudio ? `<button class="score-audio-mute ${channel.member.muted ? "is-muted" : ""}" type="button" data-audio-mute data-cast-index="${channel.castIndex}" aria-pressed="${channel.member.muted ? "true" : "false"}" aria-label="${channel.member.muted ? "Unmute audio" : "Mute audio"}">${channel.member.muted ? "M" : "S"}</button>` : ""}
           </div>
           <div class="score-track ${channel.lane}">
-            ${Number.isInteger(channel.castIndex) ? keyframeDotsForMember(channel.member, totalFrames, channel.castIndex) : ""}
-            ${channel.stageItemId ? keyframeDotsForStageItem(channel.member, totalFrames) : ""}
+            ${Number.isInteger(channel.castIndex) ? keyframeDotsForMember(channel.member, displayFrames, channel.castIndex) : ""}
+            ${channel.stageItemId ? keyframeDotsForStageItem(channel.member, displayFrames) : ""}
             ${[channel.member].map((item) => {
               const length = Math.max(1, Number(item.durationFrames || 24));
               const start = Math.min(Math.max(1, Number(item.startFrame || 1)), Math.max(1, totalFrames - length + 1));
               const spriteLabel = channel.name;
               return `
-                <button class="score-sprite ${channel.lane} imported-member" type="button" style="left:${((start - 1) / totalFrames) * 100}%;width:${(length / totalFrames) * 100}%" ${channel.stageItemId ? `data-stage-item-id="${escapeHtml(channel.stageItemId)}"` : `data-cast-index="${channel.castIndex}"`} data-start-frame="${start}" data-duration-frames="${length}">
+                <button class="score-sprite ${channel.lane} imported-member" type="button" style="left:${((start - 1) / displayFrames) * 100}%;width:${(length / displayFrames) * 100}%" ${channel.stageItemId ? `data-stage-item-id="${escapeHtml(channel.stageItemId)}"` : `data-cast-index="${channel.castIndex}"`} data-start-frame="${start}" data-duration-frames="${length}">
                   <i class="score-sprite-handle start" data-sprite-handle="start" aria-hidden="true"></i>
                   <span>${escapeHtml(spriteLabel)}</span>
                   <small>${start}-${start + length - 1}</small>
@@ -2692,7 +2743,7 @@ async function exportStageVideo() {
 function makeExportPackage(plan) {
   return {
     package: "Admira Player Ready",
-    version: "AiDirector v2026.05.20 r19",
+    version: "AiDirector v2026.05.20 r20",
     includeMetadata: Boolean(includeMetadata?.checked),
     formats: {
       video: ["MP4", "MOV", "ProRes", "4K/8K", "PP Solving"],
@@ -2968,6 +3019,56 @@ function memberTypeLabel(mediaType) {
   }[mediaType] || "Imported member";
 }
 
+function isTimedMediaType(mediaType) {
+  return ["audio", "video", "animation"].includes(mediaType);
+}
+
+function probeMediaDurationFrames(src, mediaType) {
+  if (!src || !isTimedMediaType(mediaType)) return Promise.resolve(24);
+  return new Promise((resolve) => {
+    const media = document.createElement(mediaType === "audio" ? "audio" : "video");
+    let settled = false;
+    const finish = (frames) => {
+      if (settled) return;
+      settled = true;
+      media.removeAttribute("src");
+      media.load?.();
+      resolve(frames);
+    };
+    media.preload = "metadata";
+    media.muted = true;
+    media.playsInline = true;
+    media.crossOrigin = /^https?:\/\//i.test(src) ? "anonymous" : "";
+    media.addEventListener("loadedmetadata", () => {
+      finish(Number.isFinite(media.duration) && media.duration > 0
+        ? framesFromSeconds(media.duration)
+        : 24);
+    }, { once: true });
+    media.addEventListener("error", () => finish(24), { once: true });
+    window.setTimeout(() => finish(24), 3000);
+    media.src = src;
+  });
+}
+
+function updateMemberDurationFromMetadata(castIndex, src, mediaType) {
+  if (!isTimedMediaType(mediaType)) return;
+  probeMediaDurationFrames(src, mediaType).then((durationFrames) => {
+    const plan = currentPlan();
+    const member = plan.cast?.[castIndex];
+    if (!member || member.src !== src) return;
+    const currentDuration = Math.max(1, Number(member.durationFrames || 24));
+    if (!member.durationPending && currentDuration !== 24) return;
+    plan.cast[castIndex] = {
+      ...member,
+      durationFrames,
+      durationPending: false,
+    };
+    saveFilmPlan(plan);
+    renderFilmPlan(plan);
+    setTimelineFrame(currentTimelineFrame(), false);
+  }).catch(() => {});
+}
+
 function importMemberFiles(files, mode = "image") {
   const incoming = [...(files || [])];
   if (!incoming.length) return;
@@ -2991,13 +3092,20 @@ function importMemberFiles(files, mode = "image") {
         onStage: false,
         startFrame: 1 + (timelineMemberCount + index) * 24,
         durationFrames: 24,
+        durationPending: isTimedMediaType(file.mediaType),
         prompt: `Imported ${file.mediaType} member. Place in Cast, schedule on Timeline, and prepare for later AI animation passes.`,
       };
     });
   if (!imported.length) return;
+  const firstImportedIndex = existing.length;
   plan.cast = [...existing, ...imported];
   saveFilmPlan(plan);
   renderFilmPlan(plan);
+  imported.forEach((member, index) => updateMemberDurationFromMetadata(
+    firstImportedIndex + index,
+    member.src,
+    member.mediaType,
+  ));
   playUiTick("import");
   window.refreshDirectorWindows?.();
 }
@@ -3105,6 +3213,7 @@ function stockMemberFromItem(item, endpoint, existingCount, timelineMemberCount)
     onStage: false,
     startFrame: 1 + timelineMemberCount * 24,
     durationFrames: 24,
+    durationPending: isTimedMediaType(mediaType),
     prompt: "Imported from admira.studio Stock. Add to Stage from Cast to schedule it on the Timeline.",
   };
 }
@@ -3136,9 +3245,11 @@ async function importLatestAdmiraStock() {
   try {
     const member = await fetchLatestStockMember();
     const plan = currentPlan();
+    const castIndex = (plan.cast || makeCast(plan)).length;
     plan.cast = [...(plan.cast || makeCast(plan)), member];
     saveFilmPlan(plan);
     renderFilmPlan(plan);
+    updateMemberDurationFromMetadata(castIndex, member.src, member.mediaType);
     playUiTick("import");
     window.refreshDirectorWindows?.();
     document.querySelector('[data-open-window="cast"]')?.click();
