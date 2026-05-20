@@ -2417,11 +2417,20 @@ function totalTimelineFrames(plan) {
   const castEnds = (plan.cast || [])
     .filter((member) => member.imported && member.src && member.onStage !== false)
     .map((member) => Number(member.startFrame || 1) + Number(member.durationFrames || 24) - 1);
-  const textEnds = (plan.stageItems || [])
-    .filter((item) => item.type === "text")
+  const stageItemEnds = (plan.stageItems || [])
     .map((item) => Number(item.startFrame || 1) + Number(item.durationFrames || 24) - 1);
-  return Math.max(...castEnds, ...textEnds, 240);
+  const keyframeEnds = [
+    ...(plan.cast || []),
+    ...(plan.stageItems || []),
+  ].flatMap((item) => (
+    Array.isArray(item.keyframes)
+      ? item.keyframes.map((keyframe) => Number(keyframe.frame || 1))
+      : []
+  ));
+  return Math.max(1, ...castEnds, ...stageItemEnds, ...keyframeEnds);
 }
+
+window.totalTimelineFrames = totalTimelineFrames;
 
 function stageGradient(ctx, width, height) {
   const gradient = ctx.createLinearGradient(0, 0, width, height);
@@ -2654,7 +2663,7 @@ async function exportStageVideo() {
 function makeExportPackage(plan) {
   return {
     package: "Admira Player Ready",
-    version: "AiDirector v2026.05.20 r17",
+    version: "AiDirector v2026.05.20 r18",
     includeMetadata: Boolean(includeMetadata?.checked),
     formats: {
       video: ["MP4", "MOV", "ProRes", "4K/8K", "PP Solving"],
@@ -3143,10 +3152,14 @@ async function exportStageToAdmiraStock() {
   const originalText = stockExportButton.textContent;
   stockExportButton.disabled = true;
   stockExportButton.textContent = "Exportando...";
+  let fallbackBlob = null;
+  let fallbackPlan = null;
   try {
     const plan = currentPlan();
+    fallbackPlan = plan;
     const fps = Number(document.querySelector("[data-score-fps]")?.dataset.value || 24);
     const blob = await renderStageAnimationBlob();
+    fallbackBlob = blob;
     const metadata = {
       title: `${plan.title || "AiDirector Stage"} animation`,
       source: "ainimation.studio AiDirector",
@@ -3185,7 +3198,10 @@ async function exportStageToAdmiraStock() {
   } catch (error) {
     console.warn("Admira Stock export failed", error);
     stockExportButton.textContent = "Stock no disponible";
-    window.alert("No se ha podido exportar la animación a admira.studio Stock.");
+    if (fallbackBlob && fallbackPlan) {
+      downloadBlob(fallbackBlob, `${planSlug(fallbackPlan)}-stock-animation.webm`);
+    }
+    window.alert("No se ha podido exportar la animación a admira.studio Stock. He generado el WebM local como respaldo; falta que Stock acepte subida autenticada o devuelva una URL pública usable.");
     window.setTimeout(() => { stockExportButton.textContent = originalText; }, 1800);
   } finally {
     closeArchivoMenu();

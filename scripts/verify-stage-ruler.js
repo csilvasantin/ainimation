@@ -177,6 +177,8 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
     const originalFetch = window.fetch;
     const calls = [];
     const formEntries = [];
+    let intervalTicks = 0;
+    let intervalCleared = false;
 
     class FakeMediaRecorder extends EventTarget {
       static isTypeSupported() {
@@ -199,10 +201,14 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
       window.MediaRecorder = FakeMediaRecorder;
       HTMLCanvasElement.prototype.captureStream = () => ({});
       window.setInterval = (callback) => {
-        for (let index = 0; index < 260; index += 1) callback();
+        intervalCleared = false;
+        for (let index = 0; index < 260 && !intervalCleared; index += 1) {
+          intervalTicks += 1;
+          callback();
+        }
         return 1;
       };
-      window.clearInterval = () => {};
+      window.clearInterval = () => { intervalCleared = true; };
       window.fetch = async (url, options = {}) => {
         calls.push({ url: String(url), method: options.method || "GET" });
         if (options.body instanceof FormData) {
@@ -232,6 +238,8 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
       return {
         calls,
         formEntries,
+        intervalTicks,
+        expectedFrames: window.totalTimelineFrames?.(plan) || null,
         buttonText: button.textContent.trim(),
         buttonDisabled: button.disabled,
         castMember: member ? {
@@ -625,8 +633,8 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
   const missingLabels = result.labels.length !== expectedYLabels || result.xLabels.length !== expectedXLabels;
   const hasWrongRotation = result.labels.some((label) => label.transform === "matrix(0, 1, -1, 0, 0, 0)");
 
-  if (!result.stylesheetHref.includes("aidirector-20260520-r17")) {
-    throw new Error(`Expected aidirector-20260520-r17 stylesheet cache key, got ${result.stylesheetHref}`);
+  if (!result.stylesheetHref.includes("aidirector-20260520-r18")) {
+    throw new Error(`Expected aidirector-20260520-r18 stylesheet cache key, got ${result.stylesheetHref}`);
   }
 
   if (
@@ -652,7 +660,7 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
     throw new Error(`Unexpected stage ruler toggle: ${JSON.stringify(result.rulerToggle)}`);
   }
 
-  if (result.brand.text !== "AiDirector v.2026.05.20 r17" || result.brand.rightGap > 20) {
+  if (result.brand.text !== "AiDirector v.2026.05.20 r18" || result.brand.rightGap > 20) {
     throw new Error(`Unexpected menu brand placement: ${JSON.stringify(result.brand)}`);
   }
 
@@ -759,6 +767,7 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
     result.stockExport.calls[0]?.method !== "POST" ||
     !result.stockExport.formEntries.some(([key, value]) => key === "file" && value.startsWith("video/webm:")) ||
     !result.stockExport.formEntries.some(([key, value]) => key === "mediaType" && value === "animation") ||
+    result.stockExport.expectedFrames !== result.stockExport.intervalTicks ||
     result.stockExport.castMember?.mediaType !== "animation" ||
     result.stockExport.castMember?.src !== "https://www.admira.studio/media/aidirector-export.webm" ||
     result.stockExport.castMember?.stock !== true ||
