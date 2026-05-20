@@ -992,6 +992,7 @@ const openHelpButton = document.querySelector("#openHelp");
 const closeHelpButton = document.querySelector("#closeHelp");
 const fileNewButton = document.querySelector("[data-file-new]");
 const projectOpenInput = document.querySelector("[data-project-open-input]");
+const stockImportButton = document.querySelector("[data-stock-import]");
 const downloadStageVideoButton = document.querySelector("[data-download-stage-video]");
 const directorShell = document.querySelector(".director-shell");
 const directorWindows = document.querySelectorAll(".director-window");
@@ -1001,6 +1002,15 @@ const timelineMarkersStorageKey = "ainimation-timeline-markers";
 const stageWidthPixels = 1920;
 const stageHeightPixels = 1080;
 const stageRulerStep = 100;
+const admiraStockEndpoints = [
+  "https://www.admira.studio/api/stock/latest",
+  "https://www.admira.studio/api/stock?limit=1&sort=latest",
+  "https://www.admira.studio/api/stock",
+  "https://www.admira.studio/stock/latest.json",
+  "https://www.admira.studio/stock.json",
+  "https://admira.studio/api/stock/latest",
+  "https://admira.studio/api/stock?limit=1&sort=latest",
+];
 let activeDirectorWindow = null;
 let draggedDirectorWindow = null;
 let dragOffsetX = 0;
@@ -1615,9 +1625,9 @@ function renderFilmPlan(plan) {
   if (castBin) {
     castBin.innerHTML = visibleCastMembers.length ? visibleCastMembers.map(({ member, index }) => {
       const media = member.src && ["animation", "image"].includes(member.mediaType)
-        ? `<img src="${escapeHtml(member.src)}" alt="" />`
+        ? `<img src="${escapeHtml(member.src)}" alt="" crossorigin="anonymous" />`
         : member.src && member.mediaType === "video"
-          ? `<video src="${escapeHtml(member.src)}" muted playsinline></video>`
+          ? `<video src="${escapeHtml(member.src)}" muted playsinline crossorigin="anonymous"></video>`
           : member.src
             ? `<b class="cast-member-kind">${escapeHtml(member.mediaType || "asset")}</b>`
             : "";
@@ -1680,6 +1690,9 @@ function renderFilmPlan(plan) {
       figure.style.width = `${keyframe.w}%`;
       figure.style.height = `${keyframe.h}%`;
       const media = document.createElement(member.mediaType === "video" ? "video" : member.mediaType === "audio" ? "audio" : "img");
+      if (member.stock || /^https?:\/\//i.test(member.src || "")) {
+        media.crossOrigin = "anonymous";
+      }
       media.src = member.src;
       media.alt = "";
       if (member.mediaType === "video") {
@@ -2062,7 +2075,7 @@ function exportStageVideo() {
 function makeExportPackage(plan) {
   return {
     package: "Admira Player Ready",
-    version: "AiDirector v2026.05.20 r6",
+    version: "AiDirector v2026.05.20 r7",
     includeMetadata: Boolean(includeMetadata?.checked),
     formats: {
       video: ["MP4", "MOV", "ProRes", "4K/8K", "PP Solving"],
@@ -2370,6 +2383,159 @@ function importMemberFiles(files, mode = "image") {
   renderFilmPlan(plan);
   playUiTick("import");
   window.refreshDirectorWindows?.();
+}
+
+function closeArchivoMenu() {
+  document.querySelector(".member-menu")?.classList.remove("open");
+  document.querySelector("[data-member-menu]")?.setAttribute("aria-expanded", "false");
+}
+
+function firstStockItem(payload) {
+  if (!payload) return null;
+  if (Array.isArray(payload)) return payload[0] || null;
+  const candidates = [
+    payload.items,
+    payload.results,
+    payload.stock,
+    payload.contents,
+    payload.content,
+    payload.assets,
+    payload.data,
+    payload.latest,
+  ].filter(Boolean);
+  for (const candidate of candidates) {
+    const item = firstStockItem(candidate);
+    if (item) return item;
+  }
+  return typeof payload === "object" ? payload : null;
+}
+
+function findStockField(source, fieldNames, visited = new Set()) {
+  if (!source || typeof source !== "object" || visited.has(source)) return "";
+  visited.add(source);
+  const names = new Set(fieldNames.map((name) => name.toLowerCase()));
+  for (const [key, value] of Object.entries(source)) {
+    if (names.has(key.toLowerCase())) {
+      if (typeof value === "string" && value.trim()) return value.trim();
+      if (value && typeof value === "object") {
+        const nested = findStockField(value, ["url", "src", "href", "path"], visited);
+        if (nested) return nested;
+      }
+    }
+  }
+  for (const value of Object.values(source)) {
+    if (Array.isArray(value)) {
+      for (const item of value) {
+        const nested = findStockField(item, fieldNames, visited);
+        if (nested) return nested;
+      }
+    } else if (value && typeof value === "object") {
+      const nested = findStockField(value, fieldNames, visited);
+      if (nested) return nested;
+    }
+  }
+  return "";
+}
+
+function stockUrl(value, endpoint) {
+  if (!value) return "";
+  try {
+    return new URL(value, endpoint).href;
+  } catch {
+    return value;
+  }
+}
+
+function stockMediaType(item, src) {
+  const mime = findStockField(item, ["mime", "mimeType", "contentType", "mediaType", "type"]);
+  if (/video/i.test(mime) || /\.(mp4|mov|webm|m4v)(\?|#|$)/i.test(src)) return "video";
+  if (/audio/i.test(mime) || /\.(mp3|wav|ogg|m4a)(\?|#|$)/i.test(src)) return "audio";
+  if (/gif|lottie|animation/i.test(mime) || /\.(gif|lottie)(\?|#|$)/i.test(src)) return "animation";
+  if (/text|json|markdown/i.test(mime) || /\.(txt|md|rtf|json)(\?|#|$)/i.test(src)) return "text";
+  return "image";
+}
+
+function stockMemberFromItem(item, endpoint, existingCount, timelineMemberCount) {
+  const rawUrl = findStockField(item, [
+    "assetUrl",
+    "mediaUrl",
+    "downloadUrl",
+    "publicUrl",
+    "previewUrl",
+    "thumbnailUrl",
+    "imageUrl",
+    "videoUrl",
+    "url",
+    "src",
+    "href",
+  ]);
+  const src = stockUrl(rawUrl, endpoint);
+  if (!src) return null;
+  const mediaType = stockMediaType(item, src);
+  const rawName = findStockField(item, ["title", "name", "fileName", "filename", "label", "slug"]);
+  const baseName = cleanMemberName(rawName || "Admira Stock latest");
+  return {
+    role: "Stock",
+    name: `${baseName} ${String(existingCount + 1).padStart(2, "0")}`,
+    type: memberTypeLabel(mediaType),
+    mediaType,
+    fileName: rawName || src.split("/").pop() || "stock",
+    src,
+    imported: true,
+    stock: true,
+    source: "admira.studio Stock",
+    sourceUrl: src,
+    onStage: false,
+    startFrame: 1 + timelineMemberCount * 24,
+    durationFrames: 24,
+    prompt: "Imported from admira.studio Stock. Add to Stage from Cast to schedule it on the Timeline.",
+  };
+}
+
+async function fetchLatestStockMember() {
+  let lastError = null;
+  for (const endpoint of admiraStockEndpoints) {
+    try {
+      const response = await fetch(endpoint, { headers: { Accept: "application/json" } });
+      if (!response.ok) throw new Error(`${response.status} ${response.statusText}`);
+      const item = firstStockItem(await response.json());
+      const plan = currentPlan();
+      const existing = plan.cast || makeCast(plan);
+      const timelineMemberCount = existing.filter((member) => member.imported && member.src).length;
+      const member = stockMemberFromItem(item, endpoint, existing.length, timelineMemberCount);
+      if (member) return member;
+    } catch (error) {
+      lastError = error;
+    }
+  }
+  throw lastError || new Error("Stock has not returned a usable media asset.");
+}
+
+async function importLatestAdmiraStock() {
+  if (!stockImportButton) return;
+  const originalText = stockImportButton.textContent;
+  stockImportButton.disabled = true;
+  stockImportButton.textContent = "Importando...";
+  try {
+    const member = await fetchLatestStockMember();
+    const plan = currentPlan();
+    plan.cast = [...(plan.cast || makeCast(plan)), member];
+    saveFilmPlan(plan);
+    renderFilmPlan(plan);
+    playUiTick("import");
+    window.refreshDirectorWindows?.();
+    document.querySelector('[data-open-window="cast"]')?.click();
+    stockImportButton.textContent = "Importado";
+    window.setTimeout(() => { stockImportButton.textContent = originalText; }, 1200);
+  } catch (error) {
+    console.warn("Admira Stock import failed", error);
+    stockImportButton.textContent = "Stock no disponible";
+    window.alert("No se ha podido importar el último contenido de admira.studio Stock.");
+    window.setTimeout(() => { stockImportButton.textContent = originalText; }, 1800);
+  } finally {
+    closeArchivoMenu();
+    stockImportButton.disabled = false;
+  }
 }
 
 function initStageTools() {
@@ -2680,8 +2846,7 @@ if (filmForm) {
     saveFilmPlan(plan);
     hydrateFilmForm(plan);
     renderFilmPlan(plan);
-    document.querySelector(".member-menu")?.classList.remove("open");
-    document.querySelector("[data-member-menu]")?.setAttribute("aria-expanded", "false");
+    closeArchivoMenu();
   });
 
   projectOpenInput?.addEventListener("change", () => {
@@ -2699,15 +2864,17 @@ if (filmForm) {
         window.alert("No se ha podido abrir el archivo del proyecto.");
       }
       projectOpenInput.value = "";
-      document.querySelector(".member-menu")?.classList.remove("open");
-      document.querySelector("[data-member-menu]")?.setAttribute("aria-expanded", "false");
+      closeArchivoMenu();
     });
     reader.readAsText(file);
   });
 
+  stockImportButton?.addEventListener("click", () => {
+    importLatestAdmiraStock();
+  });
+
   downloadStageVideoButton?.addEventListener("click", () => {
-    document.querySelector(".member-menu")?.classList.remove("open");
-    document.querySelector("[data-member-menu]")?.setAttribute("aria-expanded", "false");
+    closeArchivoMenu();
     exportStageVideo();
   });
 

@@ -59,6 +59,7 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
         text: fileMenu?.textContent.trim() || "",
         items: fileMenuItems,
         hasProjectOpen: Boolean(document.querySelector("[data-project-open-input]")),
+        hasStockImport: Boolean(document.querySelector("[data-stock-import]")),
         hasStageDownload: Boolean(document.querySelector("[data-download-stage-video]")),
       },
       brand: {
@@ -153,6 +154,52 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
     };
   });
 
+  result.stockImport = await page.evaluate(async () => {
+    const originalFetch = window.fetch;
+    const calls = [];
+    window.fetch = async (url) => {
+      calls.push(String(url));
+      return new Response(JSON.stringify({
+        items: [{
+          title: "Latest Stock Take",
+          assetUrl: "https://www.admira.studio/media/latest-stock-take.png",
+          mimeType: "image/png",
+        }],
+      }), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      });
+    };
+
+    try {
+      document.querySelector("[data-stock-import]")?.click();
+      await new Promise((resolve) => window.setTimeout(resolve, 80));
+      const plan = JSON.parse(localStorage.getItem("ainimation-film-plan") || "{}");
+      const member = (plan.cast || []).find((item) => item.stock);
+      const card = member
+        ? document.querySelector(`[data-cast-index="${(plan.cast || []).indexOf(member)}"]`)
+        : null;
+      card?.click();
+      await new Promise((resolve) => window.setTimeout(resolve, 40));
+      const stagedPlan = JSON.parse(localStorage.getItem("ainimation-film-plan") || "{}");
+      const stagedMember = (stagedPlan.cast || []).find((item) => item.stock);
+      return {
+        calls,
+        imported: Boolean(member),
+        visibleInCast: Boolean(card),
+        name: member?.name || "",
+        role: member?.role || "",
+        source: member?.source || "",
+        mediaType: member?.mediaType || "",
+        durationFrames: member?.durationFrames,
+        onStageAfterCastClick: stagedMember?.onStage,
+        timelineVisible: Boolean(document.querySelector(".score-sprite[data-cast-index]")),
+      };
+    } finally {
+      window.fetch = originalFetch;
+    }
+  });
+
   await browser.close();
 
   const expectedXLabels = Math.floor(result.rulerReference.stageWidth / 100) + 1 + (result.rulerReference.stageWidth % 100 ? 1 : 0);
@@ -160,8 +207,8 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
   const missingLabels = result.labels.length !== expectedYLabels || result.xLabels.length !== expectedXLabels;
   const hasWrongRotation = result.labels.some((label) => label.transform === "matrix(0, 1, -1, 0, 0, 0)");
 
-  if (!result.stylesheetHref.includes("aidirector-20260520-r6")) {
-    throw new Error(`Expected aidirector-20260520-r6 stylesheet cache key, got ${result.stylesheetHref}`);
+  if (!result.stylesheetHref.includes("aidirector-20260520-r7")) {
+    throw new Error(`Expected aidirector-20260520-r7 stylesheet cache key, got ${result.stylesheetHref}`);
   }
 
   if (
@@ -187,17 +234,32 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
     throw new Error(`Unexpected stage ruler toggle: ${JSON.stringify(result.rulerToggle)}`);
   }
 
-  if (result.brand.text !== "AiDirector v.2026.05.20 r6" || result.brand.rightGap > 20) {
+  if (result.brand.text !== "AiDirector v.2026.05.20 r7" || result.brand.rightGap > 20) {
     throw new Error(`Unexpected menu brand placement: ${JSON.stringify(result.brand)}`);
   }
 
   if (
     result.fileMenu.text !== "Archivo" ||
-    !["Nuevo", "Abrir", "Importar", "Descargar"].every((item) => result.fileMenu.items.includes(item)) ||
+    !["Nuevo", "Abrir", "Importar", "Importar archivo", "Descargar"].every((item) => result.fileMenu.items.includes(item)) ||
     !result.fileMenu.hasProjectOpen ||
+    !result.fileMenu.hasStockImport ||
     !result.fileMenu.hasStageDownload
   ) {
     throw new Error(`Unexpected Archivo menu: ${JSON.stringify(result.fileMenu)}`);
+  }
+
+  if (
+    !result.stockImport.calls[0]?.includes("www.admira.studio") ||
+    !result.stockImport.imported ||
+    !result.stockImport.visibleInCast ||
+    result.stockImport.role !== "Stock" ||
+    result.stockImport.source !== "admira.studio Stock" ||
+    result.stockImport.mediaType !== "image" ||
+    result.stockImport.durationFrames !== 24 ||
+    result.stockImport.onStageAfterCastClick !== true ||
+    !result.stockImport.timelineVisible
+  ) {
+    throw new Error(`Unexpected Stock import flow: ${JSON.stringify(result.stockImport)}`);
   }
 
   if (
