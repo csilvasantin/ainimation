@@ -656,6 +656,8 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
       document.querySelector("[data-stock-tray-compose]")?.click();
       await new Promise((resolve) => window.setTimeout(resolve, 80));
       const plan = JSON.parse(localStorage.getItem("ainimation-film-plan") || "{}");
+      const stageCountAfterImport = document.querySelectorAll(".stage-imported-member").length;
+      const timelineCountAfterImport = document.querySelectorAll(".score-sprite[data-cast-index]").length;
       const member = [...(plan.cast || [])].reverse().find((item) => item.stock && item.sourceUrl !== "https://www.admira.studio/media/aidirector-export.webm");
       const card = member
         ? document.querySelector(`.director-cast-window [data-cast-index="${(plan.cast || []).indexOf(member)}"]`)
@@ -742,7 +744,7 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
       const restoredPlan = JSON.parse(localStorage.getItem("ainimation-film-plan") || "{}");
       const restoredStockMembers = (restoredPlan.cast || []).filter((item) => item.stock && item.sourceUrl !== "https://www.admira.studio/media/aidirector-export.webm");
       const visualStageMembers = restoredStockMembers
-        .filter((item) => ["image", "video"].includes(item.mediaType))
+        .filter((item) => item.onStage !== false && ["image", "video"].includes(item.mediaType))
         .map((item) => ({
           mediaType: item.mediaType,
           aspectRatio: Number(Number(item.aspectRatio || 0).toFixed(4)),
@@ -769,6 +771,8 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
         selectedCounter,
         imported: Boolean(member),
         importedCount: restoredStockMembers.length,
+        stageCountAfterImport,
+        timelineCountAfterImport,
         visibleInCast: Boolean(card),
         cardDraggable: card?.getAttribute("draggable") === "true",
         cardWithinCast: Boolean(castWindowRect && cardRect && cardRect.width <= 130 && cardRect.height <= 90 && cardRect.right <= castWindowRect.right + 1),
@@ -828,6 +832,13 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
     };
   });
 
+  await page.evaluate(() => {
+    const firstDot = document.querySelector(".score-keyframe-dot[data-cast-index]");
+    firstDot?.click();
+    const frame = Number(firstDot?.dataset.keyframeFrame || 1);
+    window.setTimelineFrame?.(frame + 1, false);
+  });
+
   const stageMember = await page.$(".stage-imported-member");
   const stageMemberBox = await stageMember?.boundingBox();
   if (stageMemberBox) {
@@ -837,6 +848,14 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
     await page.mouse.up();
     await page.waitForTimeout(120);
   }
+  await page.evaluate(() => {
+    const zoom = document.querySelector("[data-score-zoom]");
+    if (zoom) {
+      zoom.value = "200";
+      zoom.dispatchEvent(new Event("change", { bubbles: true }));
+    }
+  });
+  await page.waitForTimeout(80);
 
   result.stageKeyframes = await page.evaluate(() => {
     const plan = JSON.parse(localStorage.getItem("ainimation-film-plan") || "{}");
@@ -1115,6 +1134,11 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
     };
   });
   result.timelineZoom = await page.evaluate(() => {
+    const reset = document.querySelector("[data-score-zoom]");
+    if (reset) {
+      reset.value = "50";
+      reset.dispatchEvent(new Event("change", { bubbles: true }));
+    }
     const readout = document.querySelector("[data-score-zoom]");
     const sprite = document.querySelector(".score-sprite[data-cast-index]");
     const widthBefore = sprite ? parseFloat(sprite.style.width) : 0;
@@ -1318,8 +1342,8 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
   const missingLabels = result.labels.length !== expectedYLabels || result.xLabels.length !== expectedXLabels;
   const hasWrongRotation = result.labels.some((label) => label.transform === "matrix(0, 1, -1, 0, 0, 0)");
 
-  if (!result.stylesheetHref.includes("aidirector-20260520-r44")) {
-    throw new Error(`Expected aidirector-20260520-r44 stylesheet cache key, got ${result.stylesheetHref}`);
+  if (!result.stylesheetHref.includes("aidirector-20260520-r45")) {
+    throw new Error(`Expected aidirector-20260520-r45 stylesheet cache key, got ${result.stylesheetHref}`);
   }
 
   if (
@@ -1346,7 +1370,7 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
   }
 
   if (
-    result.brand.text !== "◆ AiDirector v.2026.05.20 r44" ||
+    result.brand.text !== "◆ AiDirector v.2026.05.20 r45" ||
     result.brand.rightGap > 20 ||
     result.brand.menuHeight > 50 ||
     result.brand.toolsTitlebarHeight > 31
@@ -1595,6 +1619,8 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
     result.stockImport.selectedCounter !== "4 seleccionados" ||
     !result.stockImport.imported ||
     result.stockImport.importedCount < 4 ||
+    result.stockImport.stageCountAfterImport !== 0 ||
+    result.stockImport.timelineCountAfterImport !== 0 ||
     result.stockImport.importedAinimationCount !== 0 ||
     !result.stockImport.visibleInCast ||
     !result.stockImport.cardDraggable ||
@@ -1605,18 +1631,18 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
     !["image", "video", "audio"].includes(result.stockImport.mediaType) ||
     result.stockImport.durationFrames < 96 ||
     result.stockImport.onStageAfterCastClick !== true ||
-    result.stockImport.stageCount < 3 ||
+    result.stockImport.stageCount < 1 ||
     result.stockImport.stageCountAfterStageRemove >= result.stockImport.stageCount ||
     result.stockImport.startFrameAfterTimelineDrop <= 1 ||
     !result.stockImport.timelineVisible ||
-    result.stockImport.timelineCount < 3 ||
+    result.stockImport.timelineCount < 1 ||
     result.stockImport.timelineCountAfterTimelineRemove >= result.stockImport.timelineCount
   ) {
     throw new Error(`Unexpected Stock import flow: ${JSON.stringify(result.stockImport)}`);
   }
 
   if (
-    result.stockImport.visualStageMembers.length < 2 ||
+    result.stockImport.visualStageMembers.length < 1 ||
     result.stockImport.visualStageMembers.some((item) => (
       item.aspectRatio <= 0 ||
       Math.abs(item.aspectRatio - item.stageAspectRatio) > 0.05

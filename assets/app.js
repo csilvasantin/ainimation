@@ -4093,7 +4093,7 @@ function stockMemberFromItem(item, endpoint, existingCount, timelineMemberCount)
     stockFingerprint: stockTextFingerprint(item),
     onStage: false,
     startFrame: 1 + timelineMemberCount * 24,
-    durationFrames: 24,
+    durationFrames: 96,
     durationPending: isTimedMediaType(mediaType),
     aspectRatio,
     aspectPending: isVisualMediaType(mediaType) && !aspectRatio,
@@ -4329,7 +4329,7 @@ function ensureStockImportTray() {
         </div>
         <span data-stock-selected-count>0 seleccionados</span>
         <button type="button" data-stock-tray-close>Cancelar</button>
-        <button type="button" data-stock-tray-compose>Componer en Stage</button>
+        <button type="button" data-stock-tray-compose>Importar al Cast</button>
       </footer>
     </div>
   `;
@@ -4378,7 +4378,7 @@ function updateStockImportTraySelection() {
   const composeButton = tray.querySelector("[data-stock-tray-compose]");
   if (composeButton) {
     composeButton.disabled = count === 0;
-    composeButton.textContent = count === 1 ? "Componer 1 en Stage" : `Componer ${count} en Stage`;
+    composeButton.textContent = count === 1 ? "Importar 1 al Cast" : `Importar ${count} al Cast`;
   }
   tray.querySelector("[data-stock-tray-summary]").textContent = `${visibleCount} de ${pendingStockImportMembers.length} assets visibles`;
   tray.querySelectorAll("[data-stock-category-filter]").forEach((button) => {
@@ -4515,7 +4515,6 @@ function composeStockMembersIntoPlan(members) {
   const plan = currentPlan();
   const castIndex = (plan.cast || makeCast(plan)).length;
   plan.cast = [...(plan.cast || makeCast(plan)), ...members];
-  composeImportedStockMembers(plan, castIndex, members.length);
   saveFilmPlan(plan);
   renderFilmPlan(plan);
   members.forEach((member, index) => updateMemberMetadataFromMedia(
@@ -4549,7 +4548,7 @@ function confirmStockImportTray() {
   closeStockImportTray();
   if (stockImportButton) {
     const originalText = "Importar";
-    stockImportButton.textContent = `${count} compuestos`;
+    stockImportButton.textContent = `${count} importados`;
     window.setTimeout(() => { stockImportButton.textContent = originalText; }, 1200);
   }
 }
