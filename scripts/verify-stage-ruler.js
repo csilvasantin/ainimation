@@ -1106,6 +1106,13 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
     const nextReadout = document.querySelector("[data-score-zoom]");
     const nextSprite = document.querySelector(".score-sprite[data-cast-index]");
     const playhead = document.querySelector(".score-playhead");
+    const manualInput = document.querySelector("[data-score-zoom]");
+    if (manualInput) {
+      manualInput.value = "900";
+      manualInput.dispatchEvent(new Event("change", { bubbles: true }));
+    }
+    const manualReadout = document.querySelector("[data-score-zoom]");
+    const manualPlayhead = document.querySelector(".score-playhead");
     return {
       initial: readout?.dataset.value || "",
       afterUp: nextReadout?.dataset.value || "",
@@ -1113,6 +1120,8 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
       totalFrames: Number(playhead?.getAttribute("aria-valuemax") || 0),
       widthBefore,
       widthAfter: nextSprite ? parseFloat(nextSprite.style.width) : 0,
+      manual: manualReadout?.dataset.value || "",
+      manualDisplayFrames: Number(manualPlayhead?.dataset.displayFrames || 0),
     };
   });
   result.castControls = await page.evaluate(() => {
@@ -1254,8 +1263,8 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
   const missingLabels = result.labels.length !== expectedYLabels || result.xLabels.length !== expectedXLabels;
   const hasWrongRotation = result.labels.some((label) => label.transform === "matrix(0, 1, -1, 0, 0, 0)");
 
-  if (!result.stylesheetHref.includes("aidirector-20260520-r39")) {
-    throw new Error(`Expected aidirector-20260520-r39 stylesheet cache key, got ${result.stylesheetHref}`);
+  if (!result.stylesheetHref.includes("aidirector-20260520-r40")) {
+    throw new Error(`Expected aidirector-20260520-r40 stylesheet cache key, got ${result.stylesheetHref}`);
   }
 
   if (
@@ -1282,7 +1291,7 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
   }
 
   if (
-    result.brand.text !== "◆ AiDirector v.2026.05.20 r39" ||
+    result.brand.text !== "◆ AiDirector v.2026.05.20 r40" ||
     result.brand.rightGap > 20 ||
     result.brand.menuHeight > 50 ||
     result.brand.toolsTitlebarHeight > 31
@@ -1362,9 +1371,11 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
     throw new Error(`Unexpected timeline mark creation/navigation: ${JSON.stringify(result.timelineMarks)}`);
   }
   if (
-    result.timelineZoom.initial !== "100" ||
-    result.timelineZoom.afterUp !== "200" ||
-    result.timelineZoom.displayFrames !== result.timelineZoom.totalFrames * 2 ||
+    result.timelineZoom.initial !== "50" ||
+    result.timelineZoom.afterUp !== "250" ||
+    result.timelineZoom.displayFrames !== Math.ceil(result.timelineZoom.totalFrames * 2.5) ||
+    result.timelineZoom.manual !== "900" ||
+    result.timelineZoom.manualDisplayFrames !== result.timelineZoom.totalFrames * 9 ||
     !(result.timelineZoom.widthAfter > 0 && result.timelineZoom.widthAfter < result.timelineZoom.widthBefore)
   ) {
     throw new Error(`Unexpected timeline zoom behavior: ${JSON.stringify(result.timelineZoom)}`);
@@ -1579,7 +1590,8 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
     result.timelineSpriteEdit.durationFrames <= 0 ||
     result.timelineSpriteEdit.startFrame !== result.timelineSpriteEdit.spriteStartFrame ||
     result.timelineSpriteEdit.durationFrames !== result.timelineSpriteEdit.spriteDurationFrames ||
-    result.timelineSpriteEdit.playheadFrame !== result.timelineSpriteEdit.startFrame
+    result.timelineSpriteEdit.playheadFrame < result.timelineSpriteEdit.startFrame ||
+    result.timelineSpriteEdit.playheadFrame > result.timelineSpriteEdit.startFrame + result.timelineSpriteEdit.durationFrames - 1
   ) {
     throw new Error(`Unexpected timeline sprite/handle editing: ${JSON.stringify(result.timelineSpriteEdit)}`);
   }

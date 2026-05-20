@@ -1127,18 +1127,19 @@ function framesFromSeconds(seconds, fps = timelineFps()) {
 }
 
 function loadTimelineZoom() {
-  const value = Number(localStorage.getItem(timelineZoomStorageKey) || 100);
-  return [50, 100, 150, 200].includes(value) ? value : 100;
+  const value = Number(localStorage.getItem(timelineZoomStorageKey) || 50);
+  return Math.min(Math.max(Number.isFinite(value) ? value : 50, 50), 900);
 }
 
 function saveTimelineZoom(value) {
-  const zoom = [50, 100, 150, 200].includes(Number(value)) ? Number(value) : 100;
+  const numericValue = Math.round(Number(value) || 50);
+  const zoom = Math.min(Math.max(numericValue, 50), 900);
   localStorage.setItem(timelineZoomStorageKey, String(zoom));
   return zoom;
 }
 
 function timelineDisplayFrames(totalFrames, zoom = loadTimelineZoom()) {
-  return Math.max(1, Math.ceil(Math.max(1, totalFrames) * (Math.max(50, Math.min(200, zoom)) / 100)));
+  return Math.max(1, Math.ceil(Math.max(1, totalFrames) * (Math.max(50, Math.min(900, zoom)) / 100)));
 }
 
 function timelineFrameMarks(displayFrames) {
@@ -1188,11 +1189,13 @@ function initScorePlayhead(totalFrames) {
   };
   const getFps = () => currentFps;
   const stepZoom = (direction) => {
-    const values = [50, 100, 150, 200];
     const currentZoom = Number(zoomReadout?.dataset.value || loadTimelineZoom());
-    const index = Math.max(0, values.indexOf(currentZoom));
-    const nextIndex = Math.min(Math.max(index + direction, 0), values.length - 1);
-    saveTimelineZoom(values[nextIndex]);
+    saveTimelineZoom(currentZoom + (direction * 100));
+    renderFilmPlan(currentPlan());
+    setTimelineFrame(currentFrame, false);
+  };
+  const commitZoomInput = () => {
+    saveTimelineZoom(zoomReadout?.value || zoomReadout?.dataset.value || loadTimelineZoom());
     renderFilmPlan(currentPlan());
     setTimelineFrame(currentFrame, false);
   };
@@ -1311,6 +1314,12 @@ function initScorePlayhead(totalFrames) {
   fpsUpButton?.addEventListener("click", () => stepFps(1));
   zoomDownButton?.addEventListener("click", () => stepZoom(-1));
   zoomUpButton?.addEventListener("click", () => stepZoom(1));
+  zoomReadout?.addEventListener("change", commitZoomInput);
+  zoomReadout?.addEventListener("keydown", (event) => {
+    if (event.key !== "Enter") return;
+    event.preventDefault();
+    commitZoomInput();
+  });
 }
 
 const filmForm = document.querySelector("#filmForm");
@@ -2917,7 +2926,7 @@ function renderFilmPlan(plan) {
             </div>
             <div class="score-zoom-stepper" aria-label="Timeline zoom">
               <button type="button" data-score-zoom-step="down" aria-label="Make timeline larger">−</button>
-              <output data-score-zoom data-value="${timelineZoom}" aria-label="Timeline zoom ${timelineZoom} percent">${timelineZoom}%</output>
+              <input type="number" data-score-zoom data-value="${timelineZoom}" value="${timelineZoom}" min="50" max="900" step="100" aria-label="Timeline zoom ${timelineZoom} percent" />
               <button type="button" data-score-zoom-step="up" aria-label="Make timeline smaller">+</button>
             </div>
             <label class="score-mark-entry" aria-label="Create timeline mark at current frame">
