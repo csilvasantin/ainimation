@@ -83,6 +83,9 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
     const scoreMemberTitleRect = document.querySelector(".score-member-title")?.getBoundingClientRect();
     const scoreTitlebarRect = timelineWindow?.querySelector(".window-titlebar")?.getBoundingClientRect();
     const frameNumbers = [...document.querySelectorAll(".score-frame-number")].slice(0, 12).map((item) => item.textContent.trim());
+    const castToolbar = document.querySelector("#castToolbar");
+    const castBin = document.querySelector("#castBin");
+    const castToolbarRect = castToolbar?.getBoundingClientRect();
     const castFilterButtons = [...document.querySelectorAll("button[data-cast-filter]")].map((item) => ({
       filter: item.dataset.castFilter,
       pressed: item.getAttribute("aria-pressed"),
@@ -165,6 +168,12 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
         viewButtons: castViewButtons,
         view: document.querySelector("#castBin")?.dataset.castView || "",
         filter: document.querySelector("#castBin")?.dataset.castFilter || "",
+      },
+      castEmptyState: {
+        hasEmptyMessage: Boolean(castBin?.querySelector(".cast-empty-state")),
+        noVerticalScrollbar: Boolean(castBin && castBin.scrollHeight <= castBin.clientHeight + 1),
+        toolbarDisplay: castToolbar ? getComputedStyle(castToolbar).display : "",
+        toolbarHeight: castToolbarRect ? Number(castToolbarRect.height.toFixed(2)) : null,
       },
     };
   });
@@ -1309,8 +1318,8 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
   const missingLabels = result.labels.length !== expectedYLabels || result.xLabels.length !== expectedXLabels;
   const hasWrongRotation = result.labels.some((label) => label.transform === "matrix(0, 1, -1, 0, 0, 0)");
 
-  if (!result.stylesheetHref.includes("aidirector-20260520-r43")) {
-    throw new Error(`Expected aidirector-20260520-r43 stylesheet cache key, got ${result.stylesheetHref}`);
+  if (!result.stylesheetHref.includes("aidirector-20260520-r44")) {
+    throw new Error(`Expected aidirector-20260520-r44 stylesheet cache key, got ${result.stylesheetHref}`);
   }
 
   if (
@@ -1337,7 +1346,7 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
   }
 
   if (
-    result.brand.text !== "◆ AiDirector v.2026.05.20 r43" ||
+    result.brand.text !== "◆ AiDirector v.2026.05.20 r44" ||
     result.brand.rightGap > 20 ||
     result.brand.menuHeight > 50 ||
     result.brand.toolsTitlebarHeight > 31
@@ -1345,6 +1354,14 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
     throw new Error(`Unexpected menu brand placement: ${JSON.stringify(result.brand)}`);
   }
 
+  if (
+    !result.castEmptyState.hasEmptyMessage ||
+    !result.castEmptyState.noVerticalScrollbar ||
+    result.castEmptyState.toolbarDisplay !== "none" ||
+    result.castEmptyState.toolbarHeight !== 0
+  ) {
+    throw new Error(`Unexpected empty Cast state: ${JSON.stringify(result.castEmptyState)}`);
+  }
   if (
     !result.settingsMenu.opened ||
     result.settingsMenu.expandedWhenOpen !== "true" ||

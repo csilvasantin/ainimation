@@ -2531,6 +2531,10 @@ h2 {
   padding: 4px 8px;
 }
 
+.cast-toolbar[hidden] {
+  display: none !important;
+}
+
 .cast-title-actions {
   align-items: center;
   display: inline-flex;
@@ -2708,6 +2712,13 @@ h2 {
   grid-auto-rows: 74px;
   justify-content: start;
   overflow-y: auto;
+}
+
+.director-cast-window .cast-bin:has(.cast-empty-state) {
+  align-content: center;
+  grid-auto-rows: auto;
+  grid-template-columns: minmax(0, 1fr);
+  overflow: hidden;
 }
 
 .director-cast-window .cast-member {
