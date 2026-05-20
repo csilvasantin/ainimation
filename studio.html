@@ -18,7 +18,7 @@
     <meta property="og:url" content="https://ainimation.studio/studio.html" />
     <link rel="canonical" href="https://ainimation.studio/studio.html" />
     <link rel="manifest" href="site.webmanifest" />
-    <link rel="stylesheet" href="assets/styles.css?v=aidirector-20260520-r4" />
+    <link rel="stylesheet" href="assets/styles.css?v=aidirector-20260520-r5" />
   </head>
   <body class="studio-page">
     <header class="site-header studio-site-header" aria-label="Primary">
@@ -161,16 +161,18 @@
 
           <div class="director-menubar" aria-label="Application menu">
             <span class="member-menu">
-              <button class="menu-button" type="button" aria-expanded="false" data-member-menu>Members</button>
-              <span class="member-menu-list" aria-label="Import members">
+              <button class="menu-button" type="button" aria-expanded="false" data-member-menu>Archivo</button>
+              <span class="member-menu-list" aria-label="Archivo">
+                <button type="button" data-file-new>Nuevo</button>
                 <label>
-                  Import images
-                  <input class="member-file-input" type="file" accept="image/*" multiple data-member-file-input data-member-import-mode="image" />
+                  Abrir
+                  <input class="member-file-input" type="file" accept="application/json,.json" data-project-open-input />
                 </label>
                 <label>
-                  Import videos
-                  <input class="member-file-input" type="file" accept="video/*" multiple data-member-file-input data-member-import-mode="video" />
+                  Importar
+                  <input class="member-file-input" type="file" accept="image/*,video/*,audio/*,.txt,.md,.rtf,.json,.lottie,text/*,application/json" multiple data-member-file-input data-member-import-mode="auto" />
                 </label>
+                <button type="button" data-download-stage-video>Descargar</button>
               </span>
             </span>
             <button class="menubar-action" type="button" data-open-window="score">Timeline</button>
@@ -217,7 +219,7 @@
                 <button type="button" data-open-window="tools">Tools</button>
               </span>
             </span>
-            <a class="director-brand-link" href="index.html">AiDirector v.2026.05.20 r4</a>
+            <a class="director-brand-link" href="index.html">AiDirector v.2026.05.20 r5</a>
           </div>
 
           <div class="director-workbench">
@@ -466,6 +468,6 @@
       <a href="mailto:hello@ainimation.studio">hello@ainimation.studio</a>
     </footer>
 
-    <script src="assets/app.js?v=aidirector-20260520-r4" defer></script>
+    <script src="assets/app.js?v=aidirector-20260520-r5" defer></script>
   </body>
 </html>

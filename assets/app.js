@@ -988,6 +988,9 @@ const includeMetadata = document.querySelector("#includeMetadata");
 const helpModal = document.querySelector("#helpModal");
 const openHelpButton = document.querySelector("#openHelp");
 const closeHelpButton = document.querySelector("#closeHelp");
+const fileNewButton = document.querySelector("[data-file-new]");
+const projectOpenInput = document.querySelector("[data-project-open-input]");
+const downloadStageVideoButton = document.querySelector("[data-download-stage-video]");
 const directorShell = document.querySelector(".director-shell");
 const directorWindows = document.querySelectorAll(".director-window");
 const filmStorageKey = "ainimation-film-plan";
@@ -1839,14 +1842,220 @@ function planSlug(plan) {
   return plan.title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "film";
 }
 
-function downloadPlanFile(plan, suffix, payload) {
-  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+function downloadBlob(blob, filename) {
   const url = URL.createObjectURL(blob);
   const link = document.createElement("a");
   link.href = url;
-  link.download = `${planSlug(plan)}-${suffix}.json`;
+  link.download = filename;
   link.click();
   URL.revokeObjectURL(url);
+}
+
+function downloadPlanFile(plan, suffix, payload) {
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+  downloadBlob(blob, `${planSlug(plan)}-${suffix}.json`);
+}
+
+function totalTimelineFrames(plan) {
+  const castEnds = (plan.cast || [])
+    .filter((member) => member.imported && member.src && member.onStage !== false)
+    .map((member) => Number(member.startFrame || 1) + Number(member.durationFrames || 24) - 1);
+  const textEnds = (plan.stageItems || [])
+    .filter((item) => item.type === "text")
+    .map((item) => Number(item.startFrame || 1) + Number(item.durationFrames || 24) - 1);
+  return Math.max(...castEnds, ...textEnds, 240);
+}
+
+function stageGradient(ctx, width, height) {
+  const gradient = ctx.createLinearGradient(0, 0, width, height);
+  gradient.addColorStop(0, "#0b1327");
+  gradient.addColorStop(0.48, "#152640");
+  gradient.addColorStop(1, "#10141f");
+  ctx.fillStyle = gradient;
+  ctx.fillRect(0, 0, width, height);
+}
+
+function drawStageGrid(ctx, width, height) {
+  ctx.save();
+  ctx.strokeStyle = "rgba(190, 231, 255, 0.16)";
+  ctx.lineWidth = 1;
+  for (let x = 0; x <= stageWidthPixels; x += stageRulerStep) {
+    const px = (x / stageWidthPixels) * width;
+    ctx.beginPath();
+    ctx.moveTo(px, 0);
+    ctx.lineTo(px, height);
+    ctx.stroke();
+  }
+  for (let y = 0; y <= stageHeightPixels; y += stageRulerStep) {
+    const py = (y / stageHeightPixels) * height;
+    ctx.beginPath();
+    ctx.moveTo(0, py);
+    ctx.lineTo(width, py);
+    ctx.stroke();
+  }
+  ctx.restore();
+}
+
+function drawRoundedImage(ctx, media, x, y, width, height, radius = 8) {
+  ctx.save();
+  roundedRectPath(ctx, x, y, width, height, radius);
+  ctx.clip();
+  ctx.drawImage(media, x, y, width, height);
+  ctx.restore();
+}
+
+function roundedRectPath(ctx, x, y, width, height, radius) {
+  const r = Math.min(radius, width / 2, height / 2);
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.lineTo(x + width - r, y);
+  ctx.quadraticCurveTo(x + width, y, x + width, y + r);
+  ctx.lineTo(x + width, y + height - r);
+  ctx.quadraticCurveTo(x + width, y + height, x + width - r, y + height);
+  ctx.lineTo(x + r, y + height);
+  ctx.quadraticCurveTo(x, y + height, x, y + height - r);
+  ctx.lineTo(x, y + r);
+  ctx.quadraticCurveTo(x, y, x + r, y);
+  ctx.closePath();
+}
+
+function drawStageDomFrame(ctx, stage, width, height) {
+  const stageRect = stage.getBoundingClientRect();
+  stageGradient(ctx, width, height);
+  drawStageGrid(ctx, width, height);
+
+  stage.querySelectorAll(".stage-imported-member:not(.is-out-of-frame)").forEach((figure) => {
+    const rect = figure.getBoundingClientRect();
+    const x = ((rect.left - stageRect.left) / stageRect.width) * width;
+    const y = ((rect.top - stageRect.top) / stageRect.height) * height;
+    const itemWidth = (rect.width / stageRect.width) * width;
+    const itemHeight = (rect.height / stageRect.height) * height;
+    const media = figure.querySelector("img, video");
+    ctx.save();
+    ctx.shadowColor = "rgba(0, 0, 0, 0.42)";
+    ctx.shadowBlur = 18;
+    ctx.strokeStyle = "rgba(230, 246, 255, 0.86)";
+    ctx.lineWidth = 1;
+    roundedRectPath(ctx, x, y, itemWidth, itemHeight, 8);
+    ctx.stroke();
+    ctx.restore();
+    try {
+      if (media && (media.tagName === "VIDEO" || media.complete)) {
+        drawRoundedImage(ctx, media, x, y, itemWidth, itemHeight, 8);
+      }
+    } catch {
+      ctx.fillStyle = "rgba(49, 190, 209, 0.28)";
+      ctx.fillRect(x, y, itemWidth, itemHeight);
+    }
+    const caption = figure.querySelector("figcaption")?.textContent.trim();
+    if (caption) {
+      ctx.fillStyle = "rgba(5, 8, 14, 0.82)";
+      ctx.fillRect(x, y + itemHeight - 22, itemWidth, 22);
+      ctx.fillStyle = "#ffffff";
+      ctx.font = "700 12px ui-sans-serif, system-ui, sans-serif";
+      ctx.fillText(caption, x + 6, y + itemHeight - 7, Math.max(10, itemWidth - 12));
+    }
+  });
+
+  stage.querySelectorAll(".stage-line-item").forEach((line) => {
+    const rect = line.getBoundingClientRect();
+    const style = getComputedStyle(line);
+    const x = ((rect.left - stageRect.left) / stageRect.width) * width;
+    const y = ((rect.top - stageRect.top + rect.height / 2) / stageRect.height) * height;
+    const lineWidth = (rect.width / stageRect.width) * width;
+    ctx.save();
+    ctx.translate(x, y);
+    if (style.transform !== "none") {
+      const matrix = new DOMMatrixReadOnly(style.transform);
+      ctx.transform(matrix.a, matrix.b, matrix.c, matrix.d, 0, 0);
+    }
+    ctx.strokeStyle = style.backgroundColor || "#edf6ff";
+    ctx.lineWidth = Math.max(2, (rect.height / stageRect.height) * height);
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    ctx.lineTo(lineWidth, 0);
+    ctx.stroke();
+    ctx.restore();
+  });
+
+  stage.querySelectorAll(".stage-text-item:not(.is-out-of-frame)").forEach((item) => {
+    const content = item.querySelector(".stage-text-content");
+    if (!content) return;
+    const rect = item.getBoundingClientRect();
+    const contentStyle = getComputedStyle(content);
+    const itemStyle = getComputedStyle(item);
+    const x = ((rect.left - stageRect.left) / stageRect.width) * width;
+    const y = ((rect.top - stageRect.top) / stageRect.height) * height;
+    const itemWidth = (rect.width / stageRect.width) * width;
+    const fontSize = Math.max(12, (Number.parseFloat(contentStyle.fontSize) / stageRect.height) * height);
+    ctx.fillStyle = itemStyle.color || "#edf6ff";
+    ctx.font = `${contentStyle.fontStyle} ${contentStyle.fontWeight} ${fontSize}px ui-sans-serif, system-ui, sans-serif`;
+    ctx.textAlign = contentStyle.textAlign || "left";
+    ctx.textBaseline = "top";
+    const textX = contentStyle.textAlign === "center" ? x + itemWidth / 2 : contentStyle.textAlign === "right" ? x + itemWidth - 10 : x + 10;
+    ctx.fillText(content.textContent.trim() || "Text", textX, y + 8, Math.max(20, itemWidth - 18));
+  });
+}
+
+function exportStageVideo() {
+  const stage = document.querySelector(".stage-canvas");
+  const plan = currentPlan();
+  const fps = Number(document.querySelector("[data-score-fps]")?.dataset.value || 24);
+  if (!stage || typeof MediaRecorder === "undefined") {
+    window.alert("Video export is not available in this browser yet.");
+    return;
+  }
+  const canvas = document.createElement("canvas");
+  canvas.width = 960;
+  canvas.height = 540;
+  const ctx = canvas.getContext("2d");
+  if (!ctx || typeof canvas.captureStream !== "function") {
+    window.alert("Video export is not available in this browser yet.");
+    return;
+  }
+  const stream = canvas.captureStream(Math.max(1, fps));
+  const mimeType = MediaRecorder.isTypeSupported("video/webm;codecs=vp9")
+    ? "video/webm;codecs=vp9"
+    : MediaRecorder.isTypeSupported("video/webm;codecs=vp8")
+      ? "video/webm;codecs=vp8"
+      : "video/webm";
+  const recorder = new MediaRecorder(stream, { mimeType });
+  const chunks = [];
+  const totalFrames = totalTimelineFrames(plan);
+  let frameNumber = 1;
+  let timer = null;
+  let stopped = false;
+  const previousLabel = downloadStageVideoButton?.textContent;
+  if (downloadStageVideoButton) {
+    downloadStageVideoButton.disabled = true;
+    downloadStageVideoButton.textContent = "Exportando...";
+  }
+
+  recorder.addEventListener("dataavailable", (event) => {
+    if (event.data?.size) chunks.push(event.data);
+  });
+  recorder.addEventListener("stop", () => {
+    window.clearInterval(timer);
+    const blob = new Blob(chunks, { type: "video/webm" });
+    downloadBlob(blob, `${planSlug(plan)}-stage.webm`);
+    if (downloadStageVideoButton) {
+      downloadStageVideoButton.disabled = false;
+      downloadStageVideoButton.textContent = previousLabel || "Descargar";
+    }
+    syncStageToFrame(currentTimelineFrame(), false);
+  });
+
+  drawStageDomFrame(ctx, stage, canvas.width, canvas.height);
+  recorder.start();
+  timer = window.setInterval(() => {
+    syncStageToFrame(frameNumber, false);
+    drawStageDomFrame(ctx, stage, canvas.width, canvas.height);
+    frameNumber += 1;
+    if (frameNumber > totalFrames && !stopped) {
+      stopped = true;
+      recorder.stop();
+    }
+  }, 1000 / Math.max(1, fps));
 }
 
 function makeExportPackage(plan) {
@@ -2068,6 +2277,14 @@ function cleanMemberName(fileName) {
 }
 
 function memberTypeFromMode(file, mode) {
+  if (mode === "auto") {
+    if (file.type.startsWith("image/gif")) return "animation";
+    if (file.type.startsWith("image/")) return "image";
+    if (file.type.startsWith("video/")) return "video";
+    if (file.type.startsWith("audio/")) return "audio";
+    if (file.type.startsWith("text/") || /\.(txt|md|rtf|json|lottie)$/i.test(file.name)) return "text";
+    return "";
+  }
   if (mode === "audio") return file.type.startsWith("audio/") ? "audio" : "";
   if (mode === "text") return file.type.startsWith("text/") || /\.(txt|md|rtf|json)$/i.test(file.name) ? "text" : "";
   if (mode === "animation") {
@@ -2424,6 +2641,42 @@ if (filmForm) {
   renderStageRulers();
   renderFilmPlan(initialPlan);
   initStageTools();
+
+  fileNewButton?.addEventListener("click", () => {
+    const plan = buildFilmPlan(false);
+    saveFilmPlan(plan);
+    hydrateFilmForm(plan);
+    renderFilmPlan(plan);
+    document.querySelector(".member-menu")?.classList.remove("open");
+    document.querySelector("[data-member-menu]")?.setAttribute("aria-expanded", "false");
+  });
+
+  projectOpenInput?.addEventListener("change", () => {
+    const file = projectOpenInput.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.addEventListener("load", () => {
+      try {
+        const plan = normalizeFilmPlan(JSON.parse(String(reader.result || "{}")));
+        if (!plan) throw new Error("Empty project");
+        saveFilmPlan(plan);
+        hydrateFilmForm(plan);
+        renderFilmPlan(plan);
+      } catch {
+        window.alert("No se ha podido abrir el archivo del proyecto.");
+      }
+      projectOpenInput.value = "";
+      document.querySelector(".member-menu")?.classList.remove("open");
+      document.querySelector("[data-member-menu]")?.setAttribute("aria-expanded", "false");
+    });
+    reader.readAsText(file);
+  });
+
+  downloadStageVideoButton?.addEventListener("click", () => {
+    document.querySelector(".member-menu")?.classList.remove("open");
+    document.querySelector("[data-member-menu]")?.setAttribute("aria-expanded", "false");
+    exportStageVideo();
+  });
 
   filmForm.addEventListener("submit", (event) => {
     event.preventDefault();

@@ -18,6 +18,8 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
     const collabBar = document.querySelector(".studio-collab-bar");
     const promptWindow = document.querySelector('[data-window="prompt"]');
     const scriptWindow = document.querySelector('[data-window="script"]');
+    const fileMenu = document.querySelector("[data-member-menu]");
+    const fileMenuItems = [...document.querySelectorAll(".member-menu-list button, .member-menu-list label")].map((item) => item.textContent.trim());
     const labels = [...document.querySelectorAll(".stage-ruler-y span")].map((label) => {
       const rect = label.getBoundingClientRect();
       const style = getComputedStyle(label);
@@ -40,6 +42,12 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
       stylesheetHref,
       labels,
       xLabels,
+      fileMenu: {
+        text: fileMenu?.textContent.trim() || "",
+        items: fileMenuItems,
+        hasProjectOpen: Boolean(document.querySelector("[data-project-open-input]")),
+        hasStageDownload: Boolean(document.querySelector("[data-download-stage-video]")),
+      },
       brand: {
         text: brand?.textContent.trim() || "",
         rightGap: brandRect && menuRect ? Number((menuRect.right - brandRect.right).toFixed(2)) : null,
@@ -60,7 +68,7 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
   ));
 
   await page.locator('[data-stage-tool="text"]').click();
-  await page.locator(".stage-canvas").click({ position: { x: 240, y: 180 } });
+  await page.locator(".stage-canvas").click({ position: { x: 240, y: 180 }, force: true });
   await page.locator('[data-text-style="italic"]').click();
   await page.locator('[data-text-align="center"]').click();
   await page.evaluate(() => {
@@ -100,21 +108,89 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
 
   result.stageText.itemCountAfterRemove = await page.locator(".stage-text-item").count();
 
+  result.stageVideoExport = await page.evaluate(async () => {
+    const button = document.querySelector("[data-download-stage-video]");
+    const originalMediaRecorder = window.MediaRecorder;
+    const originalCaptureStream = HTMLCanvasElement.prototype.captureStream;
+    const originalSetInterval = window.setInterval;
+    const originalClearInterval = window.clearInterval;
+    const originalCreateObjectUrl = URL.createObjectURL;
+    const originalRevokeObjectUrl = URL.revokeObjectURL;
+    const originalAnchorClick = HTMLAnchorElement.prototype.click;
+    let downloadedFile = "";
+
+    class FakeMediaRecorder extends EventTarget {
+      static isTypeSupported() {
+        return true;
+      }
+
+      start() {}
+
+      stop() {
+        const dataEvent = new Event("dataavailable");
+        Object.defineProperty(dataEvent, "data", {
+          value: new Blob(["stage"], { type: "video/webm" }),
+        });
+        this.dispatchEvent(dataEvent);
+        this.dispatchEvent(new Event("stop"));
+      }
+    }
+
+    try {
+      window.MediaRecorder = FakeMediaRecorder;
+      HTMLCanvasElement.prototype.captureStream = () => ({});
+      window.setInterval = (callback) => {
+        for (let index = 0; index < 260; index += 1) callback();
+        return 1;
+      };
+      window.clearInterval = () => {};
+      URL.createObjectURL = () => "blob:stage-test";
+      URL.revokeObjectURL = () => {};
+      HTMLAnchorElement.prototype.click = function click() {
+        downloadedFile = this.download;
+      };
+      button.click();
+      await Promise.resolve();
+      return {
+        downloadedFile,
+        buttonText: button.textContent.trim(),
+        buttonDisabled: button.disabled,
+      };
+    } finally {
+      window.MediaRecorder = originalMediaRecorder;
+      HTMLCanvasElement.prototype.captureStream = originalCaptureStream;
+      window.setInterval = originalSetInterval;
+      window.clearInterval = originalClearInterval;
+      URL.createObjectURL = originalCreateObjectUrl;
+      URL.revokeObjectURL = originalRevokeObjectUrl;
+      HTMLAnchorElement.prototype.click = originalAnchorClick;
+    }
+  });
+
   await browser.close();
 
   const missingLabels = result.labels.length !== 12 || result.xLabels.length !== 21;
   const hasWrongRotation = result.labels.some((label) => label.transform === "matrix(0, 1, -1, 0, 0, 0)");
 
-  if (!result.stylesheetHref.includes("aidirector-20260520-r4")) {
-    throw new Error(`Expected aidirector-20260520-r4 stylesheet cache key, got ${result.stylesheetHref}`);
+  if (!result.stylesheetHref.includes("aidirector-20260520-r5")) {
+    throw new Error(`Expected aidirector-20260520-r5 stylesheet cache key, got ${result.stylesheetHref}`);
   }
 
   if (missingLabels || hasWrongRotation || result.labels[1]?.text !== "100" || result.xLabels[1] !== "100") {
     throw new Error(`Unexpected stage ruler labels: ${JSON.stringify({ y: result.labels, x: result.xLabels })}`);
   }
 
-  if (result.brand.text !== "AiDirector v.2026.05.20 r4" || result.brand.rightGap > 20) {
+  if (result.brand.text !== "AiDirector v.2026.05.20 r5" || result.brand.rightGap > 20) {
     throw new Error(`Unexpected menu brand placement: ${JSON.stringify(result.brand)}`);
+  }
+
+  if (
+    result.fileMenu.text !== "Archivo" ||
+    !["Nuevo", "Abrir", "Importar", "Descargar"].every((item) => result.fileMenu.items.includes(item)) ||
+    !result.fileMenu.hasProjectOpen ||
+    !result.fileMenu.hasStageDownload
+  ) {
+    throw new Error(`Unexpected Archivo menu: ${JSON.stringify(result.fileMenu)}`);
   }
 
   if (
@@ -148,6 +224,14 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
     result.stageText.itemCountAfterRemove !== 0
   ) {
     throw new Error(`Unexpected stage text controls: ${JSON.stringify(result.stageText)}`);
+  }
+
+  if (
+    !result.stageVideoExport.downloadedFile.endsWith("-stage.webm") ||
+    result.stageVideoExport.buttonText !== "Descargar" ||
+    result.stageVideoExport.buttonDisabled
+  ) {
+    throw new Error(`Unexpected stage video export: ${JSON.stringify(result.stageVideoExport)}`);
   }
 
   console.log(JSON.stringify(result, null, 2));
