@@ -18,6 +18,7 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
     localStorage.removeItem("ainimation-cast-view");
     localStorage.removeItem("ainimation-cast-filter");
     localStorage.removeItem("ainimation-timeline-markers");
+    localStorage.removeItem("ainimation-timeline-controls-width");
   });
   await page.waitForTimeout(1200);
   await page.waitForFunction(() => {
@@ -151,6 +152,8 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
         memberTitleHeight: scoreMemberTitleRect ? Number(scoreMemberTitleRect.height.toFixed(2)) : 0,
         frameNumbers,
         hasMarkInput: Boolean(document.querySelector("[data-score-mark-input]")),
+        hasResizeHandle: Boolean(document.querySelector("[data-score-tools-resize]")),
+        toolsWidth: scoreToolsRect ? Number(scoreToolsRect.width.toFixed(2)) : 0,
       },
       castControls: {
         filterButtons: castFilterButtons,
@@ -1124,6 +1127,26 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
       manualDisplayFrames: Number(manualPlayhead?.dataset.displayFrames || 0),
     };
   });
+  const scoreToolsResizeHandle = await page.$("[data-score-tools-resize]");
+  const scoreToolsResizeBox = await scoreToolsResizeHandle?.boundingBox();
+  if (scoreToolsResizeBox) {
+    await page.mouse.move(scoreToolsResizeBox.x + scoreToolsResizeBox.width / 2, scoreToolsResizeBox.y + scoreToolsResizeBox.height / 2);
+    await page.mouse.down();
+    await page.mouse.move(scoreToolsResizeBox.x + scoreToolsResizeBox.width / 2 + 180, scoreToolsResizeBox.y + scoreToolsResizeBox.height / 2);
+    await page.mouse.up();
+    await page.waitForTimeout(120);
+  }
+  result.timelineControlResize = await page.evaluate(() => {
+    const tools = document.querySelector(".score-tools");
+    return {
+      width: Number((tools?.getBoundingClientRect().width || 0).toFixed(2)),
+      storedWidth: Number(localStorage.getItem("ainimation-timeline-controls-width") || 0),
+      wide: tools?.classList.contains("is-wide") || false,
+      handle: Boolean(document.querySelector("[data-score-tools-resize]")),
+      playClusterWidth: Number((document.querySelector(".score-play-cluster")?.getBoundingClientRect().width || 0).toFixed(2)),
+      markWidth: Number((document.querySelector(".score-mark-entry")?.getBoundingClientRect().width || 0).toFixed(2)),
+    };
+  });
   result.castControls = await page.evaluate(() => {
     document.querySelector('[data-cast-view="list"]')?.click();
     document.querySelector('[data-cast-filter="image"]')?.click();
@@ -1263,8 +1286,8 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
   const missingLabels = result.labels.length !== expectedYLabels || result.xLabels.length !== expectedXLabels;
   const hasWrongRotation = result.labels.some((label) => label.transform === "matrix(0, 1, -1, 0, 0, 0)");
 
-  if (!result.stylesheetHref.includes("aidirector-20260520-r40")) {
-    throw new Error(`Expected aidirector-20260520-r40 stylesheet cache key, got ${result.stylesheetHref}`);
+  if (!result.stylesheetHref.includes("aidirector-20260520-r41")) {
+    throw new Error(`Expected aidirector-20260520-r41 stylesheet cache key, got ${result.stylesheetHref}`);
   }
 
   if (
@@ -1291,7 +1314,7 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
   }
 
   if (
-    result.brand.text !== "◆ AiDirector v.2026.05.20 r40" ||
+    result.brand.text !== "◆ AiDirector v.2026.05.20 r41" ||
     result.brand.rightGap > 20 ||
     result.brand.menuHeight > 50 ||
     result.brand.toolsTitlebarHeight > 31
@@ -1379,6 +1402,16 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
     !(result.timelineZoom.widthAfter > 0 && result.timelineZoom.widthAfter < result.timelineZoom.widthBefore)
   ) {
     throw new Error(`Unexpected timeline zoom behavior: ${JSON.stringify(result.timelineZoom)}`);
+  }
+  if (
+    !result.timelineControlResize.handle ||
+    result.timelineControlResize.width <= result.timelineControls.toolsWidth + 80 ||
+    result.timelineControlResize.storedWidth <= result.timelineControls.toolsWidth + 80 ||
+    !result.timelineControlResize.wide ||
+    result.timelineControlResize.playClusterWidth < 70 ||
+    result.timelineControlResize.markWidth < 120
+  ) {
+    throw new Error(`Unexpected timeline control resizing: ${JSON.stringify(result.timelineControlResize)}`);
   }
   if (
     result.castControls.view !== "list" ||
@@ -1611,6 +1644,7 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
     result.timelineControls.toolsInMemberColumn ||
     result.timelineControls.memberTitleHeight < 60 ||
     !result.timelineControls.hasMarkInput ||
+    !result.timelineControls.hasResizeHandle ||
     result.timelineControls.frameNumbers.slice(0, 5).join(",") !== "1,2,3,4,5"
   ) {
     throw new Error(`Unexpected timeline control placement: ${JSON.stringify(result.timelineControls)}`);

@@ -1146,6 +1146,32 @@ function timelineFrameMarks(displayFrames) {
   return Array.from({ length: Math.max(1, displayFrames) }, (_, index) => index + 1);
 }
 
+function loadTimelineControlsWidth() {
+  const value = Number(localStorage.getItem(timelineControlsWidthStorageKey) || 0);
+  return Number.isFinite(value) && value >= 340 ? Math.min(value, 900) : 0;
+}
+
+function saveTimelineControlsWidth(value) {
+  const width = Math.min(Math.max(Math.round(Number(value) || 0), 340), 900);
+  localStorage.setItem(timelineControlsWidthStorageKey, String(width));
+  return width;
+}
+
+function timelineControlsStyle() {
+  const width = loadTimelineControlsWidth();
+  return width ? ` style="width:${width}px"` : "";
+}
+
+function setTimelineControlsWidth(transport, width) {
+  if (!transport) return 0;
+  const titlebar = transport.closest(".window-titlebar");
+  const maxFromTitlebar = titlebar ? Math.max(340, titlebar.getBoundingClientRect().width - 178) : 900;
+  const nextWidth = Math.min(Math.max(Math.round(Number(width) || 0), 340), Math.min(900, maxFromTitlebar));
+  transport.style.width = `${nextWidth}px`;
+  transport.classList.toggle("is-wide", nextWidth >= 520);
+  return nextWidth;
+}
+
 function initScorePlayhead(totalFrames) {
   const ruler = document.querySelector(".score-ruler");
   const playhead = ruler?.querySelector(".score-playhead");
@@ -1158,6 +1184,7 @@ function initScorePlayhead(totalFrames) {
   const zoomUpButton = transport?.querySelector("[data-score-zoom-step='up']");
   const markInput = transport?.querySelector("[data-score-mark-input]");
   const markAddButton = transport?.querySelector("[data-score-mark-add]");
+  const controlsResizeHandle = transport?.querySelector("[data-score-tools-resize]");
   const prevButton = transport?.querySelector("[data-score-step='prev']");
   const nextButton = transport?.querySelector("[data-score-step='next']");
   const startButton = transport?.querySelector("[data-score-bound='start']");
@@ -1253,7 +1280,30 @@ function initScorePlayhead(totalFrames) {
   const moveToPointer = (event) => setFrame(frameFromPointer(event));
 
   setFps(currentFps);
+  setTimelineControlsWidth(transport, loadTimelineControlsWidth() || transport.getBoundingClientRect().width);
   setFrame(Number(playhead.dataset.frame || 1));
+  controlsResizeHandle?.addEventListener("pointerdown", (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    const startX = event.clientX;
+    const startWidth = transport.getBoundingClientRect().width;
+    controlsResizeHandle.setPointerCapture(event.pointerId);
+    transport.classList.add("is-resizing");
+    const move = (moveEvent) => {
+      setTimelineControlsWidth(transport, startWidth + moveEvent.clientX - startX);
+    };
+    const up = () => {
+      const savedWidth = setTimelineControlsWidth(transport, transport.getBoundingClientRect().width);
+      saveTimelineControlsWidth(savedWidth);
+      transport.classList.remove("is-resizing");
+      controlsResizeHandle.removeEventListener("pointermove", move);
+      controlsResizeHandle.removeEventListener("pointerup", up);
+      controlsResizeHandle.removeEventListener("pointercancel", up);
+    };
+    controlsResizeHandle.addEventListener("pointermove", move);
+    controlsResizeHandle.addEventListener("pointerup", up);
+    controlsResizeHandle.addEventListener("pointercancel", up);
+  });
   playhead.addEventListener("pointerdown", (event) => {
     event.preventDefault();
     event.stopPropagation();
@@ -1356,6 +1406,7 @@ const filmStorageKey = "ainimation-film-plan";
 const scoreLabelsStorageKey = "ainimation-score-labels";
 const timelineMarkersStorageKey = "ainimation-timeline-markers";
 const timelineZoomStorageKey = "ainimation-timeline-zoom";
+const timelineControlsWidthStorageKey = "ainimation-timeline-controls-width";
 const castViewStorageKey = "ainimation-cast-view";
 const castFilterStorageKey = "ainimation-cast-filter";
 const stageWidthPixels = 1920;
@@ -2907,7 +2958,7 @@ function renderFilmPlan(plan) {
           </button>
         </div>
         <div class="score-ruler">
-          <div class="score-tools" aria-label="Timeline transport">
+          <div class="score-tools" aria-label="Timeline transport"${timelineControlsStyle()}>
             <div class="score-play-cluster" role="group" aria-label="Timeline range controls">
               <button class="score-bound-button" type="button" data-score-bound="start" aria-label="Go to start">|←</button>
               <button class="score-play-top" type="button" data-score-play aria-label="Play timeline" aria-pressed="false">▶</button>
@@ -2934,6 +2985,7 @@ function renderFilmPlan(plan) {
               <input type="text" data-score-mark-input maxlength="14" placeholder="F${currentTimelineFrame()}" />
               <button type="button" data-score-mark-add aria-label="Save mark at current frame">+</button>
             </label>
+            <span class="score-tools-resize" data-score-tools-resize aria-hidden="true"></span>
           </div>
           ${frameMarks.map((frame) => `<span class="score-frame-number" style="left:${displayFrames <= 1 ? 0 : ((frame - 1) / (displayFrames - 1)) * 100}%">${frame}</span>`).join("")}
           <div class="score-marker-layer" aria-label="Timeline marks">

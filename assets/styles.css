@@ -4485,8 +4485,10 @@ body.studio-entered {
   display: flex;
   flex-direction: row;
   gap: 5px;
-  justify-content: center;
+  justify-content: space-between;
   left: 24px;
+  max-width: calc(100% - 176px);
+  min-width: 340px;
   padding: 3px 5px;
   position: absolute;
   top: 4px;
@@ -4498,9 +4500,47 @@ body.studio-entered {
   cursor: default;
   left: auto;
   margin-left: 2px;
-  padding: 2px 5px;
+  padding: 2px 11px 2px 5px;
   position: static;
   top: auto;
+}
+
+.director-score-window .window-titlebar .score-tools.is-resizing {
+  cursor: ew-resize;
+  user-select: none;
+}
+
+.score-tools.is-wide {
+  gap: 9px;
+}
+
+.score-tools.is-wide .score-play-cluster,
+.score-tools.is-wide .score-transport,
+.score-tools.is-wide .score-zoom-stepper {
+  flex: 1 1 0;
+}
+
+.score-tools.is-wide .score-mark-entry {
+  flex: 1.35 1 126px;
+}
+
+.score-tools-resize {
+  bottom: 3px;
+  cursor: ew-resize;
+  position: absolute;
+  right: 2px;
+  top: 3px;
+  width: 8px;
+}
+
+.score-tools-resize::before {
+  background:
+    linear-gradient(90deg, rgba(92, 103, 120, 0.55) 0 1px, transparent 1px 3px);
+  content: "";
+  display: block;
+  height: 100%;
+  margin-left: 2px;
+  width: 5px;
 }
 
 .score-play-cluster {
