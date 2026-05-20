@@ -25,7 +25,7 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
 
   const result = await page.evaluate(() => {
     const stylesheetHref = document.querySelector('link[rel="stylesheet"]')?.href || "";
-    const brand = document.querySelector(".director-brand-link");
+    const brand = document.querySelector(".director-brand-button");
     const menu = document.querySelector(".director-menubar");
     const stageWindow = document.querySelector('[data-window="stage"]');
     const stageCanvas = document.querySelector(".stage-canvas");
@@ -70,6 +70,7 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
     const timelineRect = timelineWindow?.getBoundingClientRect();
     const toolsRect = toolsWindow?.getBoundingClientRect();
     const castRect = castWindow?.getBoundingClientRect();
+    const toolsTitlebarRect = toolsWindow?.querySelector(".window-titlebar")?.getBoundingClientRect();
     const overlaps = (first, second) => Boolean(first && second) &&
       first.left < second.right &&
       first.right > second.left &&
@@ -102,8 +103,10 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
       },
       toolShortcuts,
       brand: {
-        text: brand?.textContent.trim() || "",
+        text: brand?.textContent.replace(/\s+/g, " ").trim() || "",
         rightGap: brandRect && menuRect ? Number((menuRect.right - brandRect.right).toFixed(2)) : null,
+        menuHeight: menuRect ? Number(menuRect.height.toFixed(2)) : null,
+        toolsTitlebarHeight: toolsTitlebarRect ? Number(toolsTitlebarRect.height.toFixed(2)) : null,
       },
       initialWindows: {
         collabHidden: collabBar?.classList.contains("is-hidden") || false,
@@ -113,6 +116,31 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
         toolsOverlapCast: overlaps(toolsRect, castRect),
         toolsOverlapTimeline: overlaps(toolsRect, timelineRect),
       },
+    };
+  });
+
+  result.settingsMenu = await page.evaluate(() => {
+    const menu = document.querySelector(".settings-menu");
+    const button = document.querySelector("[data-settings-menu]");
+    const light = document.querySelector('[data-theme-choice="light"]');
+    const dark = document.querySelector('[data-theme-choice="dark"]');
+    button?.click();
+    const opened = menu?.classList.contains("open") || false;
+    const expandedWhenOpen = button?.getAttribute("aria-expanded") || "";
+    light?.click();
+    const lightTheme = document.body.dataset.interfaceTheme || "";
+    const lightPressed = light?.getAttribute("aria-pressed") || "";
+    button?.click();
+    dark?.click();
+    return {
+      opened,
+      expandedWhenOpen,
+      label: menu?.querySelector(".settings-menu-list strong")?.textContent.trim() || "",
+      lightTheme,
+      lightPressed,
+      darkTheme: document.body.dataset.interfaceTheme || "",
+      darkPressed: dark?.getAttribute("aria-pressed") || "",
+      storedTheme: localStorage.getItem("ainimation-interface-theme") || "",
     };
   });
 
@@ -867,8 +895,8 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
   const missingLabels = result.labels.length !== expectedYLabels || result.xLabels.length !== expectedXLabels;
   const hasWrongRotation = result.labels.some((label) => label.transform === "matrix(0, 1, -1, 0, 0, 0)");
 
-  if (!result.stylesheetHref.includes("aidirector-20260520-r28")) {
-    throw new Error(`Expected aidirector-20260520-r28 stylesheet cache key, got ${result.stylesheetHref}`);
+  if (!result.stylesheetHref.includes("aidirector-20260520-r29")) {
+    throw new Error(`Expected aidirector-20260520-r29 stylesheet cache key, got ${result.stylesheetHref}`);
   }
 
   if (
@@ -894,8 +922,26 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
     throw new Error(`Unexpected stage ruler toggle: ${JSON.stringify(result.rulerToggle)}`);
   }
 
-  if (result.brand.text !== "AiDirector v.2026.05.20 r28" || result.brand.rightGap > 20) {
+  if (
+    result.brand.text !== "◆ AiDirector v.2026.05.20 r29" ||
+    result.brand.rightGap > 20 ||
+    result.brand.menuHeight > 50 ||
+    result.brand.toolsTitlebarHeight > 31
+  ) {
     throw new Error(`Unexpected menu brand placement: ${JSON.stringify(result.brand)}`);
+  }
+
+  if (
+    !result.settingsMenu.opened ||
+    result.settingsMenu.expandedWhenOpen !== "true" ||
+    result.settingsMenu.label !== "Settings" ||
+    result.settingsMenu.lightTheme !== "light" ||
+    result.settingsMenu.lightPressed !== "true" ||
+    result.settingsMenu.darkTheme !== "dark" ||
+    result.settingsMenu.darkPressed !== "true" ||
+    result.settingsMenu.storedTheme !== "dark"
+  ) {
+    throw new Error(`Unexpected settings menu behavior: ${JSON.stringify(result.settingsMenu)}`);
   }
 
   if (

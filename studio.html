@@ -18,7 +18,7 @@
     <meta property="og:url" content="https://ainimation.studio/studio.html" />
     <link rel="canonical" href="https://ainimation.studio/studio.html" />
     <link rel="manifest" href="site.webmanifest" />
-    <link rel="stylesheet" href="assets/styles.css?v=aidirector-20260520-r28" />
+    <link rel="stylesheet" href="assets/styles.css?v=aidirector-20260520-r29" />
   </head>
   <body class="studio-page">
     <header class="site-header studio-site-header" aria-label="Primary">
@@ -274,7 +274,19 @@
                 <button type="button" data-open-window="tools">Tools</button>
               </span>
             </span>
-            <a class="director-brand-link" href="index.html">AiDirector v.2026.05.20 r28</a>
+            <span class="settings-menu">
+              <button class="director-brand-button" type="button" data-settings-menu aria-expanded="false">
+                <span class="director-brand-mark" aria-hidden="true">◆</span>
+                <span>AiDirector v.2026.05.20 r29</span>
+              </button>
+              <span class="settings-menu-list" aria-label="Studio settings">
+                <strong>Settings</strong>
+                <span class="settings-menu-row" role="group" aria-label="Interface mode">
+                  <button type="button" data-theme-choice="dark" aria-pressed="true">Dark</button>
+                  <button type="button" data-theme-choice="light" aria-pressed="false">Light</button>
+                </span>
+              </span>
+            </span>
           </div>
 
           <div class="director-workbench">
@@ -529,6 +541,6 @@
       <a href="mailto:hello@ainimation.studio">hello@ainimation.studio</a>
     </footer>
 
-    <script src="assets/app.js?v=aidirector-20260520-r28" defer></script>
+    <script src="assets/app.js?v=aidirector-20260520-r29" defer></script>
   </body>
 </html>

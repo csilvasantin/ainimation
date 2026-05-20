@@ -5,6 +5,26 @@ let uiAudioContext = null;
 let uiAudioReady = false;
 let selectedStageKeyframe = null;
 let selectedStageTarget = null;
+const interfaceThemeStorageKey = "ainimation-interface-theme";
+
+function storedInterfaceTheme() {
+  try {
+    return localStorage.getItem(interfaceThemeStorageKey) === "light" ? "light" : "dark";
+  } catch {
+    return "dark";
+  }
+}
+
+function applyInterfaceTheme(theme = "dark") {
+  const mode = theme === "light" ? "light" : "dark";
+  document.body.dataset.interfaceTheme = mode;
+  document.querySelector('meta[name="theme-color"]')?.setAttribute("content", mode === "light" ? "#eef3f9" : "#0f1115");
+  document.querySelectorAll("[data-theme-choice]").forEach((button) => {
+    button.setAttribute("aria-pressed", String(button.dataset.themeChoice === mode));
+  });
+}
+
+applyInterfaceTheme(storedInterfaceTheme());
 
 function contactMailto(subject = "AInimation Studio") {
   return `mai${"lto"}:${contactEmail}?subject=${encodeURIComponent(subject)}`;
@@ -807,6 +827,47 @@ function initFileImportMenu(menuSelector, buttonSelector, inputSelector) {
 
 initFileImportMenu(".member-menu", "[data-member-menu]", "[data-project-open-input]");
 initFileImportMenu(".cast-menu", "[data-cast-menu]", "[data-cast-file-input]");
+
+function initSettingsMenu() {
+  const menu = document.querySelector(".settings-menu");
+  const button = menu?.querySelector("[data-settings-menu]");
+  const choices = [...(menu?.querySelectorAll("[data-theme-choice]") || [])];
+  if (!menu || !button || !choices.length) return;
+
+  const closeMenu = () => {
+    menu.classList.remove("open");
+    button.setAttribute("aria-expanded", "false");
+  };
+
+  applyInterfaceTheme(storedInterfaceTheme());
+
+  button.addEventListener("click", (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    const isOpen = !menu.classList.contains("open");
+    menu.classList.toggle("open", isOpen);
+    button.setAttribute("aria-expanded", String(isOpen));
+  });
+
+  choices.forEach((choice) => {
+    choice.addEventListener("click", (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      const mode = choice.dataset.themeChoice === "light" ? "light" : "dark";
+      try {
+        localStorage.setItem(interfaceThemeStorageKey, mode);
+      } catch {}
+      applyInterfaceTheme(mode);
+      closeMenu();
+    });
+  });
+
+  document.addEventListener("click", (event) => {
+    if (!menu.contains(event.target)) closeMenu();
+  });
+}
+
+initSettingsMenu();
 
 function selectedStageTargetExists(plan = null) {
   if (!selectedStageTarget) return false;
