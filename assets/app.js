@@ -1334,6 +1334,7 @@ let dragOffsetX = 0;
 let dragOffsetY = 0;
 let stageAnimationCaptureCache = null;
 let pendingStockImportMembers = [];
+let pendingStockSelectedIndexes = new Set();
 
 const sceneCounts = {
   "60 seconds": 4,
@@ -3994,12 +3995,13 @@ function ensureStockImportTray() {
       <header class="stock-tray-header">
         <div>
           <strong id="stock-tray-title">Admira Stock</strong>
-          <span>3 últimos assets válidos</span>
+          <span data-stock-tray-summary>Selecciona assets válidos para componer</span>
         </div>
         <button type="button" data-stock-tray-close aria-label="Cerrar">×</button>
       </header>
       <div class="stock-tray-list" data-stock-tray-list></div>
       <footer class="stock-tray-actions">
+        <span data-stock-selected-count>0 seleccionados</span>
         <button type="button" data-stock-tray-close>Cancelar</button>
         <button type="button" data-stock-tray-compose>Componer en Stage</button>
       </footer>
@@ -4023,24 +4025,63 @@ function closeStockImportTray() {
   tray.classList.remove("open");
   tray.setAttribute("aria-hidden", "true");
   pendingStockImportMembers = [];
+  pendingStockSelectedIndexes = new Set();
+}
+
+function updateStockImportTraySelection() {
+  const tray = document.querySelector("[data-stock-import-tray]");
+  if (!tray) return;
+  const count = pendingStockSelectedIndexes.size;
+  tray.querySelector("[data-stock-selected-count]").textContent = `${count} seleccionados`;
+  const composeButton = tray.querySelector("[data-stock-tray-compose]");
+  if (composeButton) {
+    composeButton.disabled = count === 0;
+    composeButton.textContent = count === 1 ? "Componer 1 en Stage" : `Componer ${count} en Stage`;
+  }
+  tray.querySelector("[data-stock-tray-summary]").textContent = `${pendingStockImportMembers.length} assets válidos encontrados`;
+  tray.querySelectorAll("[data-stock-tray-item]").forEach((item) => {
+    const index = Number(item.dataset.stockIndex);
+    const selected = pendingStockSelectedIndexes.has(index);
+    item.classList.toggle("is-selected", selected);
+    item.setAttribute("aria-pressed", selected ? "true" : "false");
+    item.querySelector("[data-stock-tray-check]").textContent = selected ? "✓" : "";
+  });
+}
+
+function toggleStockImportTrayItem(index) {
+  if (!Number.isInteger(index)) return;
+  if (pendingStockSelectedIndexes.has(index)) {
+    pendingStockSelectedIndexes.delete(index);
+  } else {
+    pendingStockSelectedIndexes.add(index);
+  }
+  updateStockImportTraySelection();
 }
 
 function openStockImportTray(members) {
   pendingStockImportMembers = [...members];
+  pendingStockSelectedIndexes = new Set(
+    pendingStockImportMembers.slice(0, stockImportBatchSize).map((_, index) => index),
+  );
   const tray = ensureStockImportTray();
   const list = tray.querySelector("[data-stock-tray-list]");
   if (list) {
     list.innerHTML = pendingStockImportMembers.map((member, index) => `
-      <article class="stock-tray-item" data-stock-tray-item data-media-type="${escapeHtml(member.mediaType || "asset")}">
+      <button class="stock-tray-item" type="button" data-stock-tray-item data-stock-index="${index}" data-media-type="${escapeHtml(member.mediaType || "asset")}" aria-pressed="false">
+        <span class="stock-tray-check" data-stock-tray-check aria-hidden="true"></span>
         <div class="stock-tray-preview">${stockImportPreviewMedia(member)}</div>
         <div class="stock-tray-copy">
           <span>${String(index + 1).padStart(2, "0")}</span>
           <strong>${escapeHtml(member.name)}</strong>
           <small>${escapeHtml(stockImportMeta(member))}</small>
         </div>
-      </article>
+      </button>
     `).join("");
+    list.querySelectorAll("[data-stock-tray-item]").forEach((item) => {
+      item.addEventListener("click", () => toggleStockImportTrayItem(Number(item.dataset.stockIndex)));
+    });
   }
+  updateStockImportTraySelection();
   tray.classList.add("open");
   tray.setAttribute("aria-hidden", "false");
 }
@@ -4064,7 +4105,10 @@ function composeStockMembersIntoPlan(members) {
 }
 
 function confirmStockImportTray() {
-  const members = pendingStockImportMembers.slice(0, stockImportBatchSize);
+  const members = [...pendingStockSelectedIndexes]
+    .sort((a, b) => a - b)
+    .map((index) => pendingStockImportMembers[index])
+    .filter(Boolean);
   if (!members.length) return;
   const count = composeStockMembersIntoPlan(members);
   closeStockImportTray();
@@ -4081,7 +4125,7 @@ async function importLatestAdmiraStockBatch() {
   stockImportButton.disabled = true;
   stockImportButton.textContent = "Importando...";
   try {
-    const members = await fetchLatestStockMembers(stockImportBatchSize);
+    const members = await fetchLatestStockMembers(stockImportFetchLimit);
     openStockImportTray(members);
     playUiTick("import");
     stockImportButton.textContent = `${members.length} listos`;

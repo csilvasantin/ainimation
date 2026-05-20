@@ -456,6 +456,19 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
             mimeType: "audio/mpeg",
             duration: 7,
           },
+          {
+            title: "Latest Stock Texture",
+            assetUrl: "https://www.admira.studio/media/latest-stock-texture.jpg",
+            mimeType: "image/jpeg",
+            width: 1600,
+            height: 900,
+          },
+          {
+            title: "Latest Stock Voiceover",
+            assetUrl: "https://www.admira.studio/media/latest-stock-voiceover.m4a",
+            mimeType: "audio/mp4",
+            duration: 18,
+          },
         ],
       }), {
         status: 200,
@@ -479,6 +492,11 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
         hasPreview: Boolean(item.querySelector("img, video, .stock-tray-audio")),
       }));
       const trayWasOpen = tray?.classList.contains("open") || false;
+      const defaultSelectedCount = document.querySelectorAll("[data-stock-tray-item][aria-pressed='true']").length;
+      document.querySelector("[data-stock-tray-item][data-stock-index='3']")?.click();
+      await new Promise((resolve) => window.setTimeout(resolve, 20));
+      const selectedBeforeCompose = document.querySelectorAll("[data-stock-tray-item][aria-pressed='true']").length;
+      const selectedCounter = document.querySelector("[data-stock-selected-count]")?.textContent.trim() || "";
       document.querySelector("[data-stock-tray-compose]")?.click();
       await new Promise((resolve) => window.setTimeout(resolve, 80));
       const plan = JSON.parse(localStorage.getItem("ainimation-film-plan") || "{}");
@@ -582,7 +600,10 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
         trayCount: trayItems.length,
         trayMediaTypes: trayItems.map((item) => item.mediaType),
         trayHasPreviews: trayItems.every((item) => item.hasPreview),
-        trayShowsMetadata: trayItems.some((item) => /1200 x 1200|1920 x 1080|12s|7s/.test(item.text)),
+        trayShowsMetadata: trayItems.some((item) => /1200 x 1200|1920 x 1080|1600 x 900|12s|7s|18s/.test(item.text)),
+        defaultSelectedCount,
+        selectedBeforeCompose,
+        selectedCounter,
         imported: Boolean(member),
         importedCount: restoredStockMembers.length,
         visibleInCast: Boolean(card),
@@ -1035,8 +1056,8 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
   const missingLabels = result.labels.length !== expectedYLabels || result.xLabels.length !== expectedXLabels;
   const hasWrongRotation = result.labels.some((label) => label.transform === "matrix(0, 1, -1, 0, 0, 0)");
 
-  if (!result.stylesheetHref.includes("aidirector-20260520-r33")) {
-    throw new Error(`Expected aidirector-20260520-r33 stylesheet cache key, got ${result.stylesheetHref}`);
+  if (!result.stylesheetHref.includes("aidirector-20260520-r34")) {
+    throw new Error(`Expected aidirector-20260520-r34 stylesheet cache key, got ${result.stylesheetHref}`);
   }
 
   if (
@@ -1063,7 +1084,7 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
   }
 
   if (
-    result.brand.text !== "◆ AiDirector v.2026.05.20 r33" ||
+    result.brand.text !== "◆ AiDirector v.2026.05.20 r34" ||
     result.brand.rightGap > 20 ||
     result.brand.menuHeight > 50 ||
     result.brand.toolsTitlebarHeight > 31
@@ -1243,12 +1264,15 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
   if (
     !result.stockImport.calls[0]?.includes("pixer-eleven.csilvasantin.workers.dev/stock/list?limit=12") ||
     !result.stockImport.trayOpen ||
-    result.stockImport.trayCount !== 3 ||
+    result.stockImport.trayCount < 5 ||
     !["image", "video", "audio"].every((type) => result.stockImport.trayMediaTypes.includes(type)) ||
     !result.stockImport.trayHasPreviews ||
     !result.stockImport.trayShowsMetadata ||
+    result.stockImport.defaultSelectedCount !== 3 ||
+    result.stockImport.selectedBeforeCompose !== 4 ||
+    result.stockImport.selectedCounter !== "4 seleccionados" ||
     !result.stockImport.imported ||
-    result.stockImport.importedCount < 3 ||
+    result.stockImport.importedCount < 4 ||
     result.stockImport.importedAinimationCount !== 0 ||
     !result.stockImport.visibleInCast ||
     !result.stockImport.cardDraggable ||
