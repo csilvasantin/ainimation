@@ -1409,7 +1409,8 @@ const timelineMarkersStorageKey = "ainimation-timeline-markers";
 const timelineZoomStorageKey = "ainimation-timeline-zoom";
 const timelineControlsWidthStorageKey = "ainimation-timeline-controls-width";
 const castViewStorageKey = "ainimation-cast-view";
-const castFilterStorageKey = "ainimation-cast-filter";
+const castFilterStorageKey = "ainimation-cast-filters";
+const castFilterTypes = ["image", "video", "audio", "music"];
 const stageWidthPixels = 1920;
 const stageHeightPixels = 1080;
 const stageRulerStep = 100;
@@ -1739,57 +1740,74 @@ function saveCastViewMode(mode) {
 }
 
 function loadCastFilterMode() {
-  const value = localStorage.getItem(castFilterStorageKey) || "all";
-  return ["all", "audio", "music", "image", "video"].includes(value) ? value : "all";
+  const value = localStorage.getItem(castFilterStorageKey);
+  if (!value || value === "all") return [...castFilterTypes];
+  const selected = value.split(",").map((item) => item.trim()).filter((item) => castFilterTypes.includes(item));
+  return selected.length ? [...new Set(selected)] : [...castFilterTypes];
 }
 
-function saveCastFilterMode(mode) {
-  const next = ["all", "audio", "music", "image", "video"].includes(mode) ? mode : "all";
-  localStorage.setItem(castFilterStorageKey, next);
-  return next;
+function saveCastFilterMode(filters) {
+  const next = filters.filter((item) => castFilterTypes.includes(item));
+  const selected = next.length ? [...new Set(next)] : [...castFilterTypes];
+  localStorage.setItem(castFilterStorageKey, selected.join(","));
+  return selected;
+}
+
+function toggleCastFilterMode(mode, currentFilters) {
+  if (!castFilterTypes.includes(mode)) return currentFilters;
+  const selected = new Set(currentFilters);
+  if (selected.has(mode) && selected.size > 1) {
+    selected.delete(mode);
+  } else {
+    selected.add(mode);
+  }
+  return saveCastFilterMode([...selected]);
 }
 
 function castMemberMatchesFilter(member, filter) {
-  if (!filter || filter === "all") return true;
-  return stockMemberCategory(member) === filter;
+  const selected = Array.isArray(filter) && filter.length ? filter : castFilterTypes;
+  return selected.includes(stockMemberCategory(member));
 }
 
 function renderCastToolbar(totalCount, visibleCount, filter, viewMode) {
   if (!castToolbar && !castViewControls) return;
+  const selected = Array.isArray(filter) && filter.length ? filter : castFilterTypes;
   const filters = [
-    ["all", "Todos"],
-    ["image", "Imágenes"],
-    ["video", "Vídeo"],
-    ["audio", "Audio"],
-    ["music", "Música"],
+    ["image", "Imagen", "Imagen"],
+    ["video", "Vídeo", "Vídeo"],
+    ["audio", "Audio", "Audio"],
+    ["music", "Música", "Música"],
   ];
   if (castToolbar) {
-    castToolbar.innerHTML = `
-      <div class="cast-filter-group" aria-label="Filtrar Cast por tipo">
-        ${filters.map(([value, label]) => `
-          <button type="button" data-cast-filter="${value}" aria-pressed="${filter === value ? "true" : "false"}">${label}</button>
-        `).join("")}
-      </div>
-      <span class="cast-count">${visibleCount}/${totalCount}</span>
-    `;
+    castToolbar.hidden = true;
+    castToolbar.innerHTML = "";
   }
   if (castViewControls) {
     castViewControls.innerHTML = `
+      <span class="cast-filter-group" aria-label="Filtrar Cast por tipo">
+        ${filters.map(([value, label, title]) => `
+          <button type="button" data-cast-filter="${value}" aria-pressed="${selected.includes(value) ? "true" : "false"}" aria-label="${label}" title="${title}">
+            <span class="cast-type-icon cast-type-icon-${value}" aria-hidden="true"></span>
+          </button>
+        `).join("")}
+      </span>
+      <span class="cast-count" aria-label="${visibleCount} de ${totalCount} miembros visibles">${visibleCount}/${totalCount}</span>
       <span class="cast-view-group" aria-label="Vista del Cast">
       <button type="button" data-cast-view="icons" aria-pressed="${viewMode === "icons" ? "true" : "false"}" aria-label="Vista iconos">▦</button>
       <button type="button" data-cast-view="list" aria-pressed="${viewMode === "list" ? "true" : "false"}" aria-label="Vista listado">☰</button>
       </span>
     `;
   }
-  castToolbar?.querySelectorAll("[data-cast-filter]").forEach((button) => {
-    button.addEventListener("click", () => {
-      saveCastFilterMode(button.dataset.castFilter || "all");
-      renderFilmPlan(currentPlan());
-    });
-  });
   if (castViewControls) {
     castViewControls.onpointerdown = (event) => event.stopPropagation();
   }
+  castViewControls?.querySelectorAll("button[data-cast-filter]").forEach((button) => {
+    button.addEventListener("pointerdown", (event) => event.stopPropagation());
+    button.addEventListener("click", () => {
+      toggleCastFilterMode(button.dataset.castFilter || "", selected);
+      renderFilmPlan(currentPlan());
+    });
+  });
   castViewControls?.querySelectorAll("button[data-cast-view]").forEach((button) => {
     button.addEventListener("pointerdown", (event) => event.stopPropagation());
     button.addEventListener("click", () => {
@@ -2796,7 +2814,7 @@ function renderFilmPlan(plan) {
 
   if (castBin) {
     castBin.dataset.castView = castViewMode;
-    castBin.dataset.castFilter = castFilter;
+    castBin.dataset.castFilter = castFilter.join(",");
     renderCastToolbar(availableCastMembers.length, visibleCastMembers.length, castFilter, castViewMode);
     castBin.innerHTML = visibleCastMembers.length ? visibleCastMembers.map(({ member, index }) => {
       const media = member.src && ["animation", "image"].includes(member.mediaType)

@@ -2534,6 +2534,7 @@ h2 {
 .cast-title-actions {
   align-items: center;
   display: inline-flex;
+  gap: 8px;
   margin-left: auto;
   min-width: 0;
 }
@@ -2575,6 +2576,11 @@ h2 {
   padding: 0 7px;
 }
 
+.cast-filter-group button {
+  padding: 0;
+  width: 24px;
+}
+
 .window-titlebar .cast-view-group button {
   height: 22px;
 }
@@ -2593,10 +2599,108 @@ h2 {
 }
 
 .cast-count {
-  color: #596272;
+  color: rgba(239, 246, 255, 0.58);
   font-size: 0.62rem;
   font-weight: 900;
   white-space: nowrap;
+}
+
+.cast-type-icon {
+  display: block;
+  height: 14px;
+  position: relative;
+  width: 14px;
+}
+
+.cast-type-icon::before,
+.cast-type-icon::after {
+  content: "";
+  position: absolute;
+}
+
+.cast-type-icon-image {
+  border: 1.5px solid currentColor;
+  border-radius: 2px;
+}
+
+.cast-type-icon-image::before {
+  background: currentColor;
+  border-radius: 50%;
+  height: 2.5px;
+  right: 2px;
+  top: 2px;
+  width: 2.5px;
+}
+
+.cast-type-icon-image::after {
+  border-bottom: 5px solid currentColor;
+  border-left: 4px solid transparent;
+  border-right: 4px solid transparent;
+  bottom: 2px;
+  left: 2px;
+}
+
+.cast-type-icon-video {
+  border: 1.5px solid currentColor;
+  border-radius: 2px;
+}
+
+.cast-type-icon-video::before,
+.cast-type-icon-video::after {
+  background: currentColor;
+  border-radius: 1px;
+  height: 2px;
+  left: 2px;
+  right: 2px;
+}
+
+.cast-type-icon-video::before {
+  top: 2px;
+}
+
+.cast-type-icon-video::after {
+  bottom: 2px;
+}
+
+.cast-type-icon-audio::before {
+  border-bottom: 4px solid transparent;
+  border-right: 6px solid currentColor;
+  border-top: 4px solid transparent;
+  height: 0;
+  left: 1px;
+  top: 3px;
+  width: 0;
+}
+
+.cast-type-icon-audio::after {
+  border: 1.5px solid currentColor;
+  border-bottom-color: transparent;
+  border-left-color: transparent;
+  border-radius: 50%;
+  height: 10px;
+  right: 1px;
+  top: 2px;
+  transform: rotate(45deg);
+  width: 10px;
+}
+
+.cast-type-icon-music::before {
+  background: currentColor;
+  border-radius: 2px;
+  height: 10px;
+  right: 4px;
+  top: 1px;
+  width: 2px;
+}
+
+.cast-type-icon-music::after {
+  background: currentColor;
+  border-radius: 50%;
+  bottom: 1px;
+  height: 5px;
+  left: 2px;
+  width: 7px;
+  box-shadow: 5px -9px 0 -2px currentColor;
 }
 
 .director-cast-window .cast-bin {
