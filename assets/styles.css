@@ -2079,7 +2079,7 @@ h2 {
 .stage-ruler-x {
   background:
     linear-gradient(180deg, rgba(237, 243, 255, 0.12), rgba(237, 243, 255, 0.03)),
-    repeating-linear-gradient(90deg, rgba(210, 228, 255, 0.42) 0 1px, transparent 1px calc(100% / 19.2));
+    repeating-linear-gradient(90deg, rgba(210, 228, 255, 0.42) 0 1px, transparent 1px 100px);
   border-bottom: 1px solid rgba(210, 228, 255, 0.22);
   height: var(--stage-ruler-x);
   left: var(--stage-ruler-y);
@@ -2091,7 +2091,7 @@ h2 {
 .stage-ruler-y {
   background:
     linear-gradient(90deg, rgba(237, 243, 255, 0.12), rgba(237, 243, 255, 0.03)),
-    repeating-linear-gradient(0deg, rgba(210, 228, 255, 0.42) 0 1px, transparent 1px calc(100% / 10.8));
+    repeating-linear-gradient(0deg, rgba(210, 228, 255, 0.42) 0 1px, transparent 1px 100px);
   border-right: 1px solid rgba(210, 228, 255, 0.22);
   bottom: 10px;
   left: 0;
@@ -2145,10 +2145,41 @@ h2 {
   z-index: 1;
 }
 
+.stage-ruler-toggle {
+  align-items: center;
+  background: rgba(8, 13, 22, 0.92);
+  border: 0;
+  border-bottom: 1px solid rgba(210, 228, 255, 0.22);
+  border-right: 1px solid rgba(210, 228, 255, 0.22);
+  color: rgba(220, 235, 255, 0.78);
+  cursor: pointer;
+  display: flex;
+  font: 900 0.52rem/1 ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  height: var(--stage-ruler-x);
+  justify-content: center;
+  left: 0;
+  letter-spacing: 0;
+  padding: 0;
+  position: absolute;
+  top: 0;
+  width: var(--stage-ruler-y);
+  z-index: 10;
+}
+
+.stage-ruler-toggle:hover,
+.stage-ruler-toggle[aria-pressed="true"] {
+  color: #a6ff65;
+}
+
+.stage-window.rulers-hidden .stage-ruler,
+.stage-window.rulers-hidden .stage-grid {
+  opacity: 0;
+}
+
 .stage-grid {
   background:
-    repeating-linear-gradient(90deg, rgba(190, 231, 255, 0.11) 0 1px, transparent 1px calc(100% / 19.2)),
-    repeating-linear-gradient(0deg, rgba(190, 231, 255, 0.1) 0 1px, transparent 1px calc(100% / 10.8));
+    repeating-linear-gradient(90deg, rgba(190, 231, 255, 0.11) 0 1px, transparent 1px 100px),
+    repeating-linear-gradient(0deg, rgba(190, 231, 255, 0.1) 0 1px, transparent 1px 100px);
   opacity: 0.72;
 }
 
@@ -3632,17 +3663,17 @@ h2 {
   background: linear-gradient(180deg, #eef1f6, #c9d0dc);
   border-radius: 0 0 12px 12px;
   display: grid;
-  gap: 9px;
+  gap: 8px;
   justify-content: center;
   min-height: 0;
   overflow: hidden;
-  padding: 9px 10px 12px;
+  padding: 8px 8px 12px;
 }
 
 .tool-grid {
   display: grid;
-  gap: 6px;
-  grid-template-columns: repeat(2, 40px);
+  gap: 5px;
+  grid-template-columns: repeat(2, 36px);
 }
 
 .tool-palette .tool-grid button,
@@ -3659,7 +3690,7 @@ h2 {
   height: 30px;
   justify-content: center;
   padding: 0;
-  width: 40px;
+  width: 36px;
 }
 
 .tool-palette .tool-grid button:hover,
@@ -3681,7 +3712,7 @@ h2 {
 .tool-swatches {
   display: grid;
   gap: 0;
-  grid-template-columns: 44px 30px;
+  grid-template-columns: 40px 28px;
   justify-content: center;
   min-height: 52px;
   position: relative;
@@ -3693,9 +3724,9 @@ h2 {
   border-radius: 0;
   cursor: pointer;
   display: block;
-  height: 38px;
+  height: 36px;
   padding: 0;
-  width: 38px;
+  width: 36px;
 }
 
 .tool-color-swatch:focus-visible {
@@ -3727,7 +3758,7 @@ h2 {
   border-top: 1px solid rgba(82, 92, 108, 0.46);
   display: grid;
   gap: 4px;
-  grid-template-columns: repeat(3, 26px);
+  grid-template-columns: repeat(3, 24px);
   justify-content: center;
   padding: 7px 2px 2px;
 }
@@ -3745,7 +3776,7 @@ h2 {
   height: 22px;
   justify-content: center;
   padding: 0;
-  width: 26px;
+  width: 24px;
 }
 
 .tool-text-controls button[data-text-style="italic"] {

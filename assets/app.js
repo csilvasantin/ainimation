@@ -153,6 +153,7 @@ if (canvas) {
 window.addEventListener("resize", () => {
   resizeCanvas();
   draw();
+  renderStageRulers();
 });
 
 reduceMotion.addEventListener("change", () => {
@@ -209,8 +210,8 @@ function initDirectorWindowManager() {
     if (isStackedLayout()) return;
     const bounds = workbench.getBoundingClientRect();
     const isTools = win.dataset.window === "tools";
-    const minWidth = isTools ? 112 : 220;
-    const minHeight = isTools ? 430 : 36;
+    const minWidth = isTools ? 96 : 220;
+    const minHeight = isTools ? 560 : 36;
     const width = clamp(rect.width, minWidth, Math.max(minWidth, bounds.width));
     const height = clamp(rect.height, minHeight, Math.max(minHeight, bounds.height));
     const maxLeft = Math.max(0, bounds.width - width);
@@ -226,6 +227,7 @@ function initDirectorWindowManager() {
     win.style.top = `${top}px`;
     win.style.width = `${width}px`;
     win.style.height = `${height}px`;
+    window.requestAnimationFrame(() => renderStageRulers());
   }
 
   function addResizeHandles(win) {
@@ -371,9 +373,9 @@ function initDirectorWindowManager() {
     const stageHeight = Math.max(360, timelineTop - gap);
     const sideLeft = stageWidth + gap;
     const castHeight = clamp(Math.round(bounds.height * 0.18), 190, 300);
-    const toolsWidth = Math.min(180, Math.max(112, sideWidth));
-    const toolsHeight = clamp(Math.round(bounds.height * 0.42), 430, 620);
+    const toolsWidth = 132;
     const toolsTop = castHeight + gap;
+    const toolsHeight = Math.max(560, timelineTop - toolsTop - gap);
     const inspectorTop = toolsTop + toolsHeight + gap;
     const inspectorHeight = Math.max(160, timelineTop - inspectorTop - gap);
     const scriptWidth = Math.min(540, Math.max(260, stageWidth * 0.34));
@@ -1922,7 +1924,6 @@ function roundedRectPath(ctx, x, y, width, height, radius) {
 function drawStageDomFrame(ctx, stage, width, height) {
   const stageRect = stage.getBoundingClientRect();
   stageGradient(ctx, width, height);
-  drawStageGrid(ctx, width, height);
 
   stage.querySelectorAll(".stage-imported-member:not(.is-out-of-frame)").forEach((figure) => {
     const rect = figure.getBoundingClientRect();
@@ -2061,7 +2062,7 @@ function exportStageVideo() {
 function makeExportPackage(plan) {
   return {
     package: "Admira Player Ready",
-    version: "Admira AiNimation Studio v2026.05.18 r4",
+    version: "AiDirector v2026.05.20 r6",
     includeMetadata: Boolean(includeMetadata?.checked),
     formats: {
       video: ["MP4", "MOV", "ProRes", "4K/8K", "PP Solving"],
@@ -2248,7 +2249,11 @@ function currentPlan() {
 function renderStageRulers() {
   const xRuler = document.querySelector(".stage-ruler-x");
   const yRuler = document.querySelector(".stage-ruler-y");
-  if (!xRuler || !yRuler) return;
+  const stage = document.querySelector(".stage-canvas");
+  if (!xRuler || !yRuler || !stage) return;
+  const stageRect = stage.getBoundingClientRect();
+  const stageWidth = Math.max(1, Math.round(stageRect.width));
+  const stageHeight = Math.max(1, Math.round(stageRect.height));
   const makeMarks = (max) => {
     const marks = [];
     for (let value = 0; value <= max; value += stageRulerStep) {
@@ -2259,12 +2264,38 @@ function renderStageRulers() {
   };
   const xLabel = xRuler.querySelector("b")?.outerHTML || "<b>H px</b>";
   const yLabel = yRuler.querySelector("b")?.outerHTML || "<b>V px</b>";
-  xRuler.innerHTML = `${xLabel}${makeMarks(stageWidthPixels).map((value) => (
-    `<span style="left:${(value / stageWidthPixels) * 100}%">${value}</span>`
+  xRuler.innerHTML = `${xLabel}${makeMarks(stageWidth).map((value) => (
+    `<span style="left:${value}px">${value}</span>`
   )).join("")}`;
-  yRuler.innerHTML = `${yLabel}${makeMarks(stageHeightPixels).map((value) => (
-    `<span style="top:${(value / stageHeightPixels) * 100}%">${value}</span>`
+  yRuler.innerHTML = `${yLabel}${makeMarks(stageHeight).map((value) => (
+    `<span style="top:${value}px">${value}</span>`
   )).join("")}`;
+}
+
+window.renderStageRulers = renderStageRulers;
+
+function initStageRulerToggle() {
+  const stageWindow = document.querySelector(".stage-window");
+  const toggle = document.querySelector("[data-stage-ruler-toggle]");
+  const stage = document.querySelector(".stage-canvas");
+  if (!stageWindow || !toggle || !stage) return;
+  toggle.addEventListener("click", () => {
+    const hidden = stageWindow.classList.toggle("rulers-hidden");
+    toggle.setAttribute("aria-pressed", String(!hidden));
+  });
+  if (typeof ResizeObserver !== "undefined") {
+    const observer = new ResizeObserver(() => renderStageRulers());
+    observer.observe(stage);
+  }
+  window.addEventListener("load", renderStageRulers);
+  window.setTimeout(renderStageRulers, 80);
+  window.setTimeout(renderStageRulers, 420);
+  let refreshCount = 0;
+  const refreshTimer = window.setInterval(() => {
+    renderStageRulers();
+    refreshCount += 1;
+    if (refreshCount >= 10) window.clearInterval(refreshTimer);
+  }, 250);
 }
 
 function cleanMemberName(fileName) {
@@ -2639,8 +2670,10 @@ if (filmForm) {
   const initialPlan = currentPlan();
   hydrateFilmForm(initialPlan);
   renderStageRulers();
+  initStageRulerToggle();
   renderFilmPlan(initialPlan);
   initStageTools();
+  window.requestAnimationFrame(() => window.requestAnimationFrame(renderStageRulers));
 
   fileNewButton?.addEventListener("click", () => {
     const plan = buildFilmPlan(false);

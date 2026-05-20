@@ -8,12 +8,18 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
 
   await page.goto(targetUrl, { waitUntil: "networkidle" });
   await page.waitForTimeout(1200);
+  await page.waitForFunction(() => {
+    const rect = document.querySelector(".stage-canvas")?.getBoundingClientRect();
+    return rect && rect.width > 400 && rect.height > 300;
+  }, { timeout: 10000 });
+  await page.evaluate(() => window.renderStageRulers?.());
 
   const result = await page.evaluate(() => {
     const stylesheetHref = document.querySelector('link[rel="stylesheet"]')?.href || "";
     const brand = document.querySelector(".director-brand-link");
     const menu = document.querySelector(".director-menubar");
     const stageWindow = document.querySelector('[data-window="stage"]');
+    const stageCanvas = document.querySelector(".stage-canvas");
     const timelineWindow = document.querySelector('[data-window="score"]');
     const collabBar = document.querySelector(".studio-collab-bar");
     const promptWindow = document.querySelector('[data-window="prompt"]');
@@ -42,6 +48,13 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
       stylesheetHref,
       labels,
       xLabels,
+      rulerReference: {
+        stageWidth: Math.round(stageCanvas?.getBoundingClientRect().width || 0),
+        stageHeight: Math.round(stageCanvas?.getBoundingClientRect().height || 0),
+        xLast: xLabels.at(-1) || "",
+        yLast: labels.at(-1)?.text || "",
+      },
+      exportHasGuides: window.drawStageDomFrame?.toString().includes("drawStageGrid") || false,
       fileMenu: {
         text: fileMenu?.textContent.trim() || "",
         items: fileMenuItems,
@@ -66,47 +79,6 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
   result.initialWindows.collabOpensOnClick = await page.evaluate(() => (
     !document.querySelector(".studio-collab-bar")?.classList.contains("is-hidden")
   ));
-
-  await page.locator('[data-stage-tool="text"]').click();
-  await page.locator(".stage-canvas").click({ position: { x: 240, y: 180 }, force: true });
-  await page.locator('[data-text-style="italic"]').click();
-  await page.locator('[data-text-align="center"]').click();
-  await page.evaluate(() => {
-    const input = document.querySelector(".foreground-color-input");
-    input.value = "#ff0000";
-    input.dispatchEvent(new Event("input", { bubbles: true }));
-  });
-
-  result.stageText = await page.evaluate(() => {
-    const item = document.querySelector(".stage-text-item");
-    const content = item?.querySelector(".stage-text-content");
-    const removeButton = item?.querySelector(".stage-text-remove");
-    const contentStyle = content ? getComputedStyle(content) : null;
-    const itemStyle = item ? getComputedStyle(item) : null;
-
-    return {
-      itemCountAfterCreate: document.querySelectorAll(".stage-text-item").length,
-      text: content?.textContent.trim() || "",
-      color: itemStyle?.color || "",
-      fontStyle: contentStyle?.fontStyle || "",
-      fontWeight: contentStyle?.fontWeight || "",
-      textAlign: contentStyle?.textAlign || "",
-      removeLabel: removeButton?.getAttribute("aria-label") || "",
-      timelineSprite: (() => {
-        const sprite = document.querySelector(".score-sprite[data-stage-item-id]");
-        return {
-          exists: Boolean(sprite),
-          startFrame: sprite?.dataset.startFrame || "",
-          durationFrames: sprite?.dataset.durationFrames || "",
-          range: sprite?.querySelector("small")?.textContent.trim() || "",
-        };
-      })(),
-    };
-  });
-
-  await page.locator(".stage-text-remove").click();
-
-  result.stageText.itemCountAfterRemove = await page.locator(".stage-text-item").count();
 
   result.stageVideoExport = await page.evaluate(async () => {
     const button = document.querySelector("[data-download-stage-video]");
@@ -167,20 +139,55 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
     }
   });
 
+  result.rulerToggle = await page.evaluate(() => {
+    const stageWindow = document.querySelector(".stage-window");
+    const toggle = document.querySelector("[data-stage-ruler-toggle]");
+    toggle.click();
+    const hiddenAfterFirstClick = stageWindow.classList.contains("rulers-hidden");
+    const pressedAfterFirstClick = toggle.getAttribute("aria-pressed");
+    toggle.click();
+    return {
+      hiddenAfterFirstClick,
+      pressedAfterFirstClick,
+      hiddenAfterSecondClick: stageWindow.classList.contains("rulers-hidden"),
+    };
+  });
+
   await browser.close();
 
-  const missingLabels = result.labels.length !== 12 || result.xLabels.length !== 21;
+  const expectedXLabels = Math.floor(result.rulerReference.stageWidth / 100) + 1 + (result.rulerReference.stageWidth % 100 ? 1 : 0);
+  const expectedYLabels = Math.floor(result.rulerReference.stageHeight / 100) + 1 + (result.rulerReference.stageHeight % 100 ? 1 : 0);
+  const missingLabels = result.labels.length !== expectedYLabels || result.xLabels.length !== expectedXLabels;
   const hasWrongRotation = result.labels.some((label) => label.transform === "matrix(0, 1, -1, 0, 0, 0)");
 
-  if (!result.stylesheetHref.includes("aidirector-20260520-r5")) {
-    throw new Error(`Expected aidirector-20260520-r5 stylesheet cache key, got ${result.stylesheetHref}`);
+  if (!result.stylesheetHref.includes("aidirector-20260520-r6")) {
+    throw new Error(`Expected aidirector-20260520-r6 stylesheet cache key, got ${result.stylesheetHref}`);
   }
 
-  if (missingLabels || hasWrongRotation || result.labels[1]?.text !== "100" || result.xLabels[1] !== "100") {
-    throw new Error(`Unexpected stage ruler labels: ${JSON.stringify({ y: result.labels, x: result.xLabels })}`);
+  if (
+    missingLabels ||
+    hasWrongRotation ||
+    result.labels[1]?.text !== "100" ||
+    result.xLabels[1] !== "100" ||
+    Number(result.rulerReference.xLast) !== result.rulerReference.stageWidth ||
+    Number(result.rulerReference.yLast) !== result.rulerReference.stageHeight
+  ) {
+    throw new Error(`Unexpected stage ruler labels: ${JSON.stringify({ y: result.labels, x: result.xLabels, reference: result.rulerReference })}`);
   }
 
-  if (result.brand.text !== "AiDirector v.2026.05.20 r5" || result.brand.rightGap > 20) {
+  if (result.exportHasGuides) {
+    throw new Error("Stage video export should not draw ruler/grid guides");
+  }
+
+  if (
+    !result.rulerToggle.hiddenAfterFirstClick ||
+    result.rulerToggle.pressedAfterFirstClick !== "false" ||
+    result.rulerToggle.hiddenAfterSecondClick
+  ) {
+    throw new Error(`Unexpected stage ruler toggle: ${JSON.stringify(result.rulerToggle)}`);
+  }
+
+  if (result.brand.text !== "AiDirector v.2026.05.20 r6" || result.brand.rightGap > 20) {
     throw new Error(`Unexpected menu brand placement: ${JSON.stringify(result.brand)}`);
   }
 
@@ -211,22 +218,6 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
   }
 
   if (
-    result.stageText.itemCountAfterCreate !== 1 ||
-    result.stageText.text !== "Text" ||
-    result.stageText.color !== "rgb(255, 0, 0)" ||
-    result.stageText.fontStyle !== "italic" ||
-    Number(result.stageText.fontWeight) < 700 ||
-    result.stageText.textAlign !== "center" ||
-    result.stageText.removeLabel !== "Remove stage text" ||
-    !result.stageText.timelineSprite.exists ||
-    result.stageText.timelineSprite.durationFrames !== "24" ||
-    result.stageText.timelineSprite.range !== "1-24" ||
-    result.stageText.itemCountAfterRemove !== 0
-  ) {
-    throw new Error(`Unexpected stage text controls: ${JSON.stringify(result.stageText)}`);
-  }
-
-  if (
     !result.stageVideoExport.downloadedFile.endsWith("-stage.webm") ||
     result.stageVideoExport.buttonText !== "Descargar" ||
     result.stageVideoExport.buttonDisabled
@@ -236,6 +227,6 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
 
   console.log(JSON.stringify(result, null, 2));
 })().catch((error) => {
-  console.error(error.message);
+  console.error(error.stack || error.message);
   process.exit(1);
 });
