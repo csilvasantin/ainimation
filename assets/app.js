@@ -1,5 +1,59 @@
 const canvas = document.querySelector("#hero-canvas");
 const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+const contactEmail = ["hello", "ainimation.studio"].join("@");
+let uiAudioContext = null;
+let uiAudioReady = false;
+
+function contactMailto(subject = "AInimation Studio") {
+  return `mai${"lto"}:${contactEmail}?subject=${encodeURIComponent(subject)}`;
+}
+
+function getUiAudioContext() {
+  const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+  if (!AudioContextClass) return null;
+  uiAudioContext ||= new AudioContextClass();
+  return uiAudioContext;
+}
+
+function unlockUiAudio() {
+  const context = getUiAudioContext();
+  if (!context) return;
+  if (context.state === "suspended") context.resume().catch(() => {});
+  uiAudioReady = true;
+}
+
+function playUiTick(kind = "tap") {
+  if (!uiAudioReady) return;
+  const context = getUiAudioContext();
+  if (!context) return;
+  const now = context.currentTime;
+  const oscillator = context.createOscillator();
+  const gain = context.createGain();
+  const settings = {
+    import: [740, 0.055, 0.026],
+    select: [520, 0.045, 0.02],
+    stage: [330, 0.06, 0.024],
+    tap: [620, 0.032, 0.014],
+  }[kind] || [620, 0.032, 0.014];
+
+  oscillator.type = "triangle";
+  oscillator.frequency.setValueAtTime(settings[0], now);
+  oscillator.frequency.exponentialRampToValueAtTime(Math.max(80, settings[0] * 0.62), now + settings[1]);
+  gain.gain.setValueAtTime(0.0001, now);
+  gain.gain.exponentialRampToValueAtTime(settings[2], now + 0.008);
+  gain.gain.exponentialRampToValueAtTime(0.0001, now + settings[1]);
+  oscillator.connect(gain);
+  gain.connect(context.destination);
+  oscillator.start(now);
+  oscillator.stop(now + settings[1] + 0.01);
+}
+
+document.addEventListener("pointerdown", unlockUiAudio, { once: true });
+document.addEventListener("keydown", unlockUiAudio, { once: true });
+document.addEventListener("click", (event) => {
+  if (!event.target.closest("button, a, [role='button'], input[type='file']")) return;
+  playUiTick("tap");
+}, true);
 
 let width = 0;
 let height = 0;
@@ -115,6 +169,9 @@ const enterStudio = document.body.classList.contains("studio-page") && params.ge
 if (enterStudio) {
   document.body.classList.add("studio-entering", "studio-entered");
   const jumpToWorkspace = () => {
+    const workspace = document.querySelector("#workspace");
+    if (!workspace) return;
+    workspace.scrollIntoView({ block: "start" });
     document.documentElement.scrollTop = 0;
     document.body.scrollTop = 0;
   };
@@ -911,9 +968,23 @@ const aiCueList = document.querySelector("#aiCueList");
 const addSceneButton = document.querySelector("#addScene");
 const copyMarkdownButton = document.querySelector("#copyMarkdown");
 const downloadJsonButton = document.querySelector("#downloadJson");
+const exportModal = document.querySelector("#exportModal");
+const closeExportButton = document.querySelector("#closeExport");
+const exportAllFormatsButton = document.querySelector("#exportAllFormats");
+const exportMovieTitle = document.querySelector("#exportMovieTitle");
+const includeMetadata = document.querySelector("#includeMetadata");
+const helpModal = document.querySelector("#helpModal");
+const openHelpButton = document.querySelector("#openHelp");
+const closeHelpButton = document.querySelector("#closeHelp");
+const directorShell = document.querySelector(".director-shell");
+const directorWindows = document.querySelectorAll(".director-window");
 const filmStorageKey = "ainimation-film-plan";
 const scoreLabelsStorageKey = "ainimation-score-labels";
 const timelineMarkersStorageKey = "ainimation-timeline-markers";
+let activeDirectorWindow = null;
+let draggedDirectorWindow = null;
+let dragOffsetX = 0;
+let dragOffsetY = 0;
 
 const sceneCounts = {
   "60 seconds": 4,
@@ -1496,6 +1567,7 @@ function renderFilmPlan(plan) {
             defaultStageKeyframe(nextPlan.cast[castIndex], startFrame, selectedCount),
           ];
         }
+        playUiTick(wasSelected ? "select" : "stage");
         saveFilmPlan(nextPlan);
         renderFilmPlan(nextPlan);
       };
@@ -1672,6 +1744,203 @@ function toMarkdown(plan) {
   return lines.join("\n");
 }
 
+function planSlug(plan) {
+  return plan.title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "film";
+}
+
+function downloadPlanFile(plan, suffix, payload) {
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = `${planSlug(plan)}-${suffix}.json`;
+  link.click();
+  URL.revokeObjectURL(url);
+}
+
+function makeExportPackage(plan) {
+  return {
+    package: "Admira Player Ready",
+    version: "Admira AiNimation Studio v2026.05.18 r4",
+    includeMetadata: Boolean(includeMetadata?.checked),
+    formats: {
+      video: ["MP4", "MOV", "ProRes", "4K/8K", "PP Solving"],
+      audio: ["WAV", "MP3", "Stem Tracks", "Full Score + Voice"],
+      text: ["PNG Sequence", "EXR", "Prompts Log", "Production Bible"],
+      animations: ["Lottie", "JSON", "SRT", "USDz", "GLB"],
+    },
+    player: {
+      ready: true,
+      controls: ["Play Video", "Play Animation", "Preview Audio", "View Image Sequence", "Read Script"],
+    },
+    project: plan,
+    markdown: toMarkdown(plan),
+  };
+}
+
+function openExportStudio() {
+  if (!exportModal) return;
+  const plan = currentPlan();
+  if (exportMovieTitle) exportMovieTitle.textContent = plan.title;
+  exportModal.classList.add("open");
+  exportModal.setAttribute("aria-hidden", "false");
+}
+
+function closeExportStudio() {
+  if (!exportModal) return;
+  exportModal.classList.remove("open");
+  exportModal.setAttribute("aria-hidden", "true");
+}
+
+function openHelpStudio() {
+  if (!helpModal) return;
+  helpModal.classList.add("open");
+  helpModal.setAttribute("aria-hidden", "false");
+}
+
+function closeHelpStudio() {
+  if (!helpModal) return;
+  helpModal.classList.remove("open");
+  helpModal.setAttribute("aria-hidden", "true");
+}
+
+function setActiveDirectorWindow(windowEl) {
+  if (!windowEl || windowEl.classList.contains("window-closed")) return;
+  directorWindows.forEach((item) => item.classList.remove("window-active"));
+  windowEl.classList.add("window-active");
+  activeDirectorWindow = windowEl;
+}
+
+function getActiveDirectorWindow() {
+  if (activeDirectorWindow && !activeDirectorWindow.classList.contains("window-closed")) {
+    return activeDirectorWindow;
+  }
+  return [...directorWindows].find((windowEl) => !windowEl.classList.contains("window-closed")) || null;
+}
+
+function maximizeDirectorWindow(windowEl = getActiveDirectorWindow()) {
+  if (!windowEl) return;
+  setActiveDirectorWindow(windowEl);
+  const isMaximized = windowEl.classList.toggle("window-maximized");
+  windowEl.classList.remove("window-minimized");
+  directorShell?.classList.toggle("has-maximized-window", isMaximized);
+  if (!isMaximized) directorShell?.classList.remove("has-maximized-window");
+}
+
+function minimizeDirectorWindow(windowEl = getActiveDirectorWindow()) {
+  if (!windowEl) return;
+  setActiveDirectorWindow(windowEl);
+  windowEl.classList.toggle("window-minimized");
+  windowEl.classList.remove("window-maximized");
+  directorShell?.classList.remove("has-maximized-window");
+}
+
+function closeDirectorWindow(windowEl = getActiveDirectorWindow()) {
+  if (!windowEl) return;
+  windowEl.classList.remove("window-maximized", "window-minimized", "window-active");
+  windowEl.classList.add("window-closed");
+  directorShell?.classList.remove("has-maximized-window");
+  activeDirectorWindow = getActiveDirectorWindow();
+  if (activeDirectorWindow) setActiveDirectorWindow(activeDirectorWindow);
+}
+
+function makeWindowFreeform(windowEl) {
+  if (!windowEl || !directorShell || windowEl.classList.contains("window-freeform")) return;
+  const shellRect = directorShell.getBoundingClientRect();
+  const rect = windowEl.getBoundingClientRect();
+  const width = rect.width;
+  const height = rect.height;
+  windowEl.style.left = `${rect.left - shellRect.left}px`;
+  windowEl.style.top = `${rect.top - shellRect.top}px`;
+  windowEl.style.width = `${width}px`;
+  windowEl.style.height = `${height}px`;
+  windowEl.classList.add("window-freeform");
+}
+
+function clampWindowPosition(windowEl, left, top) {
+  const shellRect = directorShell.getBoundingClientRect();
+  const rect = windowEl.getBoundingClientRect();
+  const maxLeft = Math.max(0, shellRect.width - rect.width - 8);
+  const maxTop = Math.max(0, shellRect.height - rect.height - 8);
+  return {
+    left: Math.min(Math.max(8, left), maxLeft),
+    top: Math.min(Math.max(8, top), maxTop),
+  };
+}
+
+directorWindows.forEach((windowEl) => {
+  windowEl.addEventListener("pointerdown", () => setActiveDirectorWindow(windowEl));
+  windowEl.addEventListener("focusin", () => setActiveDirectorWindow(windowEl));
+  const titlebar = windowEl.querySelector(".window-titlebar");
+
+  titlebar?.addEventListener("pointerdown", (event) => {
+    if (event.target.closest(".window-controls")) return;
+    if (windowEl.classList.contains("window-maximized") || windowEl.classList.contains("window-closed")) return;
+    event.preventDefault();
+    setActiveDirectorWindow(windowEl);
+    makeWindowFreeform(windowEl);
+    const shellRect = directorShell.getBoundingClientRect();
+    const rect = windowEl.getBoundingClientRect();
+    dragOffsetX = event.clientX - rect.left;
+    dragOffsetY = event.clientY - rect.top;
+    draggedDirectorWindow = windowEl;
+    windowEl.classList.add("window-dragging");
+    windowEl.setPointerCapture?.(event.pointerId);
+    const position = clampWindowPosition(windowEl, event.clientX - shellRect.left - dragOffsetX, event.clientY - shellRect.top - dragOffsetY);
+    windowEl.style.left = `${position.left}px`;
+    windowEl.style.top = `${position.top}px`;
+  });
+
+  const controls = windowEl.querySelectorAll(".window-controls i");
+  const actions = [
+    ["Close", "F3", closeDirectorWindow],
+    ["Minimize", "F2", minimizeDirectorWindow],
+    ["Maximize", "F1", maximizeDirectorWindow],
+  ];
+
+  controls.forEach((control, index) => {
+    const [label, shortcut, action] = actions[index] || actions[2];
+    control.setAttribute("role", "button");
+    control.setAttribute("tabindex", "0");
+    control.setAttribute("aria-label", `${label} window (${shortcut})`);
+    control.setAttribute("title", `${label} window (${shortcut})`);
+    control.dataset.windowAction = label.toLowerCase();
+    control.addEventListener("click", (event) => {
+      event.stopPropagation();
+      setActiveDirectorWindow(windowEl);
+      action(windowEl);
+    });
+    control.addEventListener("keydown", (event) => {
+      if (event.key !== "Enter" && event.key !== " ") return;
+      event.preventDefault();
+      setActiveDirectorWindow(windowEl);
+      action(windowEl);
+    });
+  });
+});
+
+document.addEventListener("pointermove", (event) => {
+  if (!draggedDirectorWindow || !directorShell) return;
+  const shellRect = directorShell.getBoundingClientRect();
+  const position = clampWindowPosition(
+    draggedDirectorWindow,
+    event.clientX - shellRect.left - dragOffsetX,
+    event.clientY - shellRect.top - dragOffsetY,
+  );
+  draggedDirectorWindow.style.left = `${position.left}px`;
+  draggedDirectorWindow.style.top = `${position.top}px`;
+});
+
+document.addEventListener("pointerup", () => {
+  if (!draggedDirectorWindow) return;
+  draggedDirectorWindow.classList.remove("window-dragging");
+  draggedDirectorWindow = null;
+});
+
+if (directorWindows.length) {
+  setActiveDirectorWindow(directorWindows[0]);
+}
+
 function currentPlan() {
   return normalizeFilmPlan(loadFilmPlan()) || buildFilmPlan();
 }
@@ -1738,6 +2007,7 @@ function importMemberFiles(files, mode = "image") {
   plan.cast = [...existing, ...imported];
   saveFilmPlan(plan);
   renderFilmPlan(plan);
+  playUiTick("import");
   window.refreshDirectorWindows?.();
 }
 
@@ -1971,11 +2241,13 @@ if (filmForm) {
     const plan = buildFilmPlan(true);
     saveFilmPlan(plan);
     renderFilmPlan(plan);
+    playUiTick("stage");
   });
 
   document.querySelectorAll("[data-import-asset]").forEach((button) => {
     button.addEventListener("click", () => {
       importCastAsset(button.dataset.importAsset, button.dataset.importKind || "Asset");
+      playUiTick("import");
     });
   });
 
@@ -1986,14 +2258,13 @@ if (filmForm) {
   });
 
   downloadJsonButton?.addEventListener("click", () => {
+    if (exportModal) {
+      openExportStudio();
+      return;
+    }
+
     const plan = currentPlan();
-    const blob = new Blob([JSON.stringify(plan, null, 2)], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = `${plan.title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "film"}-ainimation-plan.json`;
-    link.click();
-    URL.revokeObjectURL(url);
+    downloadPlanFile(plan, "ainimation-plan", plan);
   });
 
   clearStageButton?.addEventListener("click", () => {
@@ -2008,3 +2279,128 @@ if (filmForm) {
     renderFilmPlan(plan);
   });
 }
+
+closeExportButton?.addEventListener("click", closeExportStudio);
+openHelpButton?.addEventListener("click", openHelpStudio);
+closeHelpButton?.addEventListener("click", closeHelpStudio);
+
+exportModal?.addEventListener("click", (event) => {
+  if (event.target === exportModal) closeExportStudio();
+});
+
+helpModal?.addEventListener("click", (event) => {
+  if (event.target === helpModal) closeHelpStudio();
+});
+
+document.addEventListener("keydown", (event) => {
+  if (["F1", "F2", "F3"].includes(event.key) && getActiveDirectorWindow()) {
+    event.preventDefault();
+    if (event.key === "F1") maximizeDirectorWindow();
+    if (event.key === "F2") minimizeDirectorWindow();
+    if (event.key === "F3") closeDirectorWindow();
+    return;
+  }
+
+  if (event.key === "Escape" && exportModal?.classList.contains("open")) {
+    closeExportStudio();
+  }
+  if (event.key === "Escape" && helpModal?.classList.contains("open")) {
+    closeHelpStudio();
+  }
+});
+
+document.querySelectorAll("[data-export-format]").forEach((button) => {
+  button.addEventListener("click", () => {
+    const plan = currentPlan();
+    downloadPlanFile(plan, `ainimation-${button.dataset.exportFormat}`, {
+      format: button.dataset.exportFormat,
+      project: plan,
+    });
+  });
+});
+
+exportAllFormatsButton?.addEventListener("click", () => {
+  const plan = currentPlan();
+  downloadPlanFile(plan, "admira-player-export", makeExportPackage(plan));
+});
+
+const contactOutput = document.querySelector("#contactOutput");
+const contactButtons = document.querySelectorAll("[data-contact-command]");
+const contactLinks = document.querySelectorAll("[data-contact-link]");
+
+const contactCommands = {
+  "/contact": [
+    { text: "Get in touch", cls: "heading" },
+    { text: "" },
+    { text: `  MAIL  ${contactEmail}`, cls: "accent" },
+    { text: "  WEB   ainimation.studio", cls: "green" },
+    { text: "  BASE  Barcelona / remote", cls: "purple" },
+    { text: "" },
+    { text: "  Open to: pilot productions, AI animation systems, creative tooling, partnerships, and consulting." },
+    { text: "" },
+    { text: "  Let's build something that moves.", cls: "accent" },
+    { text: "" },
+    { text: `  // or just say hi at ${contactEmail}`, cls: "dim" },
+  ],
+  "/email": [
+    { text: "Email", cls: "heading" },
+    { text: "" },
+    { text: `  ${contactEmail}`, cls: "accent" },
+    { text: "" },
+    { text: "  Tap the email link below to start a message.", cls: "dim" },
+  ],
+  "/site": [
+    { text: "Site", cls: "heading" },
+    { text: "" },
+    { text: "  https://ainimation.studio", cls: "green" },
+    { text: "  Director-style AI authoring environment" },
+  ],
+  "/location": [
+    { text: "Location", cls: "heading" },
+    { text: "" },
+    { text: "  Barcelona / remote", cls: "purple" },
+    { text: "  Working with teams in Europe and beyond." },
+  ],
+};
+
+function renderContactCommand(command = "/contact") {
+  if (!contactOutput) return;
+  const lines = contactCommands[command] || contactCommands["/contact"];
+  contactOutput.innerHTML = "";
+
+  const echo = document.createElement("div");
+  echo.className = "contact-line dim";
+  echo.textContent = `> ${command}`;
+  contactOutput.appendChild(echo);
+
+  for (const line of lines) {
+    const row = document.createElement("div");
+    row.className = `contact-line ${line.cls || ""}`.trim();
+    row.textContent = line.text || "\u00a0";
+    contactOutput.appendChild(row);
+  }
+
+  if (command === "/contact" || command === "/email") {
+    const link = document.createElement("a");
+    link.className = "contact-action-link";
+    link.href = contactMailto("AInimation Studio contact");
+    link.textContent = "Open email";
+    contactOutput.appendChild(link);
+  }
+}
+
+if (contactOutput) {
+  renderContactCommand(location.hash === "#contact" ? "/contact" : "/contact");
+}
+
+contactButtons.forEach((button) => {
+  button.addEventListener("click", () => {
+    renderContactCommand(button.dataset.contactCommand);
+  });
+});
+
+contactLinks.forEach((link) => {
+  link.addEventListener("click", () => {
+    window.setTimeout(() => renderContactCommand("/email"), 120);
+  });
+});

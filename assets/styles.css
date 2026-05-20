@@ -1230,39 +1230,39 @@ h2 {
 }
 
 .studio-entering .studio-boot {
-  animation: bootExit 3.7s ease forwards;
+  animation: bootExit 0.9s ease forwards;
   display: flex;
 }
 
 .studio-entering .boot-card {
-  animation: bootCard 3.2s ease forwards;
+  animation: bootCard 0.78s ease forwards;
 }
 
 .studio-entering .boot-steps span {
-  animation: bootStep 2.8s ease forwards;
+  animation: bootStep 0.66s ease forwards;
   opacity: 0.32;
 }
 
-.studio-entering .boot-steps span:nth-child(2) { animation-delay: 0.35s; }
-.studio-entering .boot-steps span:nth-child(3) { animation-delay: 0.7s; }
-.studio-entering .boot-steps span:nth-child(4) { animation-delay: 1.05s; }
+.studio-entering .boot-steps span:nth-child(2) { animation-delay: 0.08s; }
+.studio-entering .boot-steps span:nth-child(3) { animation-delay: 0.16s; }
+.studio-entering .boot-steps span:nth-child(4) { animation-delay: 0.24s; }
 
 .studio-entering .director-menubar,
 .studio-entering .tool-palette,
 .studio-entering .director-window,
 .studio-entering .studio-status {
-  animation: windowEnter 0.72s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  animation: windowEnter 0.26s cubic-bezier(0.2, 0.8, 0.2, 1) both;
 }
 
-.studio-entering .director-menubar { animation-delay: 2.85s; }
-.studio-entering .tool-palette { animation-delay: 3s; }
-.studio-entering .director-stage-window { animation-delay: 3.08s; }
-.studio-entering .director-cast-window { animation-delay: 3.18s; }
-.studio-entering .intent-window { animation-delay: 3.28s; }
-.studio-entering .director-score-window { animation-delay: 3.38s; }
-.studio-entering .script-window { animation-delay: 3.48s; }
-.studio-entering .property-window { animation-delay: 3.58s; }
-.studio-entering .studio-status { animation-delay: 3.68s; }
+.studio-entering .director-menubar { animation-delay: 0.28s; }
+.studio-entering .tool-palette { animation-delay: 0.32s; }
+.studio-entering .director-stage-window { animation-delay: 0.35s; }
+.studio-entering .director-cast-window { animation-delay: 0.38s; }
+.studio-entering .intent-window { animation-delay: 0.41s; }
+.studio-entering .director-score-window { animation-delay: 0.44s; }
+.studio-entering .script-window { animation-delay: 0.47s; }
+.studio-entering .property-window { animation-delay: 0.5s; }
+.studio-entering .studio-status { animation-delay: 0.53s; }
 
 .studio-entered .studio-boot {
   display: none;
@@ -2269,6 +2269,8 @@ h2 {
 
 .director-cast-window .cast-bin {
   grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-auto-rows: 74px;
+  overflow-y: auto;
 }
 
 .director-cast-window .cast-member {
@@ -2277,9 +2279,16 @@ h2 {
     linear-gradient(135deg, rgba(49, 190, 209, 0.9), rgba(124, 92, 255, 0.76) 48%, rgba(8, 12, 20, 0.96));
   border: 1px solid rgba(220, 239, 255, 0.14);
   border-radius: 8px;
-  min-height: 62px;
+  aspect-ratio: auto;
+  min-height: 0;
   overflow: hidden;
-  padding: 7px;
+  padding: 6px;
+  transform-origin: center;
+  transition: border-color 0.12s ease, box-shadow 0.12s ease, transform 0.12s ease;
+}
+
+.director-cast-window .cast-member:active {
+  transform: scale(0.97);
 }
 
 .director-cast-window .cast-member[role="button"] {
@@ -2305,11 +2314,12 @@ h2 {
 .director-cast-window .cast-member img,
 .director-cast-window .cast-member video,
 .director-cast-window .cast-member-kind {
-  height: 100%;
-  inset: 0;
+  border-radius: 6px;
+  height: calc(100% - 20px);
+  inset: 4px 4px auto 4px;
   object-fit: cover;
   position: absolute;
-  width: 100%;
+  width: calc(100% - 8px);
   z-index: 0;
 }
 
@@ -2329,7 +2339,7 @@ h2 {
 }
 
 .director-cast-window .cast-member.imported-member::after {
-  background: linear-gradient(180deg, transparent 20%, rgba(5, 8, 14, 0.86));
+  background: linear-gradient(180deg, transparent 42%, rgba(5, 8, 14, 0.88));
   content: "";
   inset: 0;
   position: absolute;
@@ -2362,9 +2372,13 @@ h2 {
 .director-cast-window .cast-member strong {
   align-self: end;
   color: #fff;
-  font-size: 0.58rem;
+  font-size: 0.52rem;
   line-height: 1.1;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
   text-shadow: 0 1px 8px rgba(0, 0, 0, 0.9);
+  white-space: nowrap;
 }
 
 .intent-window .film-form {

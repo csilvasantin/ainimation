@@ -30,8 +30,8 @@
         <a href="#idea">Idea</a>
         <a href="#film">Film</a>
         <a href="#blocks">Blocks</a>
-        <a href="studio.html">Studio</a>
-        <a href="mailto:hello@ainimation.studio">Contact</a>
+        <a href="studio.html?enter=1">Studio</a>
+        <a href="#contact">Contact</a>
       </nav>
     </header>
 
@@ -79,7 +79,7 @@
             <h3>Generate</h3>
             <p>Turn intent into image, video, music, voice, timing, and behaviors.</p>
           </a>
-          <a class="home-block" href="studio.html#workflow">
+          <a class="home-block" href="studio.html?enter=1">
             <span>03</span>
             <h3>Control</h3>
             <p>Inspect every prompt, scene, channel, asset, and export.</p>
@@ -99,12 +99,73 @@
         </div>
         <a class="button primary" href="studio.html">Enter Studio</a>
       </section>
+
+      <section id="contact" class="contact-section" aria-labelledby="contact-title">
+        <div class="contact-copy">
+          <p class="section-kicker">Contact</p>
+          <h2 id="contact-title">Open a line to the studio.</h2>
+          <p>
+            For pilot productions, AI animation workflows, product partnerships,
+            and early access to the authoring environment.
+          </p>
+        </div>
+
+        <div class="contact-terminal" aria-label="AInimation contact terminal">
+          <div class="contact-osbar">
+            <span>AI Animation Studio - Admira Director</span>
+            <span>Contact Node - Live</span>
+          </div>
+          <div class="contact-toolbar">
+            <button type="button">Invite Team</button>
+            <div class="contact-avatars" aria-hidden="true">
+              <span></span><span></span><span></span><span></span>
+            </div>
+            <strong>Real-time concept pilots</strong>
+            <a href="#contact" data-contact-link>Share Studio Link</a>
+          </div>
+          <div class="contact-window-head">
+            <strong>NEON SHADOWS</strong>
+            <span>Shared with Team - 4 online</span>
+          </div>
+          <div class="contact-tabs" aria-label="Contact workspace tabs">
+            <span>Projects</span>
+            <span>Stage</span>
+            <span>Cast</span>
+            <span class="active">Contact</span>
+            <span>AI Director</span>
+          </div>
+          <div class="contact-panels">
+            <div class="contact-panel contact-panel-main">
+              <div class="contact-panel-head">
+                <span>Contact Space (45%)</span>
+                <i>live</i>
+              </div>
+              <div class="contact-output" id="contactOutput" aria-live="polite"></div>
+            </div>
+            <div class="contact-panel contact-panel-side">
+              <div class="contact-panel-head">
+                <span>Director Commands</span>
+                <i>AI</i>
+              </div>
+              <div class="contact-input">
+                <button type="button" data-contact-command="/contact">/contact</button>
+                <button type="button" data-contact-command="/email">/email</button>
+                <button type="button" data-contact-command="/site">/site</button>
+                <button type="button" data-contact-command="/location">/location</button>
+              </div>
+              <div class="contact-signal" aria-hidden="true">
+                <span></span><span></span><span></span><span></span><span></span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
     </main>
 
     <footer class="site-footer">
       <span>AInimation Studio</span>
       <span>Director-style AI authoring environment</span>
-      <a href="mailto:hello@ainimation.studio">hello@ainimation.studio</a>
+      <a href="#contact" data-contact-link>Email the studio</a>
     </footer>
 
     <script src="assets/app.js?v=stage-keyframes-1" defer></script>
