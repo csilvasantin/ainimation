@@ -87,10 +87,12 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
       pressed: item.getAttribute("aria-pressed"),
       text: item.textContent.trim(),
     }));
-    const castViewButtons = [...document.querySelectorAll("[data-cast-view]")].map((item) => ({
+    const castViewButtons = [...document.querySelectorAll("button[data-cast-view]")].map((item) => ({
       view: item.dataset.castView,
       pressed: item.getAttribute("aria-pressed"),
       label: item.getAttribute("aria-label") || "",
+      inTitlebar: Boolean(item.closest(".window-titlebar")),
+      inToolbar: Boolean(item.closest(".cast-toolbar")),
     }));
     const overlaps = (first, second) => Boolean(first && second) &&
       first.left < second.right &&
@@ -1148,14 +1150,16 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
     };
   });
   result.castControls = await page.evaluate(() => {
-    document.querySelector('[data-cast-view="list"]')?.click();
+    document.querySelector('button[data-cast-view="list"]')?.click();
     document.querySelector('[data-cast-filter="image"]')?.click();
     const cards = [...document.querySelectorAll("#castBin .cast-member")].map((item) => item.dataset.mediaType || "");
     return {
       view: document.querySelector("#castBin")?.dataset.castView || "",
       filter: document.querySelector("#castBin")?.dataset.castFilter || "",
-      listPressed: document.querySelector('[data-cast-view="list"]')?.getAttribute("aria-pressed") || "",
+      listPressed: document.querySelector('button[data-cast-view="list"]')?.getAttribute("aria-pressed") || "",
       imagePressed: document.querySelector('[data-cast-filter="image"]')?.getAttribute("aria-pressed") || "",
+      viewButtonsInTitlebar: [...document.querySelectorAll("button[data-cast-view]")]
+        .every((item) => item.closest(".window-titlebar") && !item.closest(".cast-toolbar")),
       cards,
     };
   });
@@ -1286,8 +1290,8 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
   const missingLabels = result.labels.length !== expectedYLabels || result.xLabels.length !== expectedXLabels;
   const hasWrongRotation = result.labels.some((label) => label.transform === "matrix(0, 1, -1, 0, 0, 0)");
 
-  if (!result.stylesheetHref.includes("aidirector-20260520-r41")) {
-    throw new Error(`Expected aidirector-20260520-r41 stylesheet cache key, got ${result.stylesheetHref}`);
+  if (!result.stylesheetHref.includes("aidirector-20260520-r42")) {
+    throw new Error(`Expected aidirector-20260520-r42 stylesheet cache key, got ${result.stylesheetHref}`);
   }
 
   if (
@@ -1314,7 +1318,7 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
   }
 
   if (
-    result.brand.text !== "◆ AiDirector v.2026.05.20 r41" ||
+    result.brand.text !== "◆ AiDirector v.2026.05.20 r42" ||
     result.brand.rightGap > 20 ||
     result.brand.menuHeight > 50 ||
     result.brand.toolsTitlebarHeight > 31
@@ -1418,6 +1422,7 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
     result.castControls.filter !== "image" ||
     result.castControls.listPressed !== "true" ||
     result.castControls.imagePressed !== "true" ||
+    !result.castControls.viewButtonsInTitlebar ||
     !result.castControls.cards.length ||
     result.castControls.cards.some((type) => type !== "image")
   ) {

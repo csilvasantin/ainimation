@@ -1381,6 +1381,7 @@ const sceneCount = document.querySelector("#sceneCount");
 const clearStageButton = document.querySelector("[data-clear-stage]");
 const castBin = document.querySelector("#castBin");
 const castToolbar = document.querySelector("#castToolbar");
+const castViewControls = document.querySelector("#castViewControls");
 const scoreGrid = document.querySelector("#scoreGrid");
 const stageScript = document.querySelector("#stageScript");
 const aiCueList = document.querySelector("#aiCueList");
@@ -1754,7 +1755,7 @@ function castMemberMatchesFilter(member, filter) {
 }
 
 function renderCastToolbar(totalCount, visibleCount, filter, viewMode) {
-  if (!castToolbar) return;
+  if (!castToolbar && !castViewControls) return;
   const filters = [
     ["all", "Todos"],
     ["image", "Imágenes"],
@@ -1762,25 +1763,35 @@ function renderCastToolbar(totalCount, visibleCount, filter, viewMode) {
     ["audio", "Audio"],
     ["music", "Música"],
   ];
-  castToolbar.innerHTML = `
-    <div class="cast-filter-group" aria-label="Filtrar Cast por tipo">
-      ${filters.map(([value, label]) => `
-        <button type="button" data-cast-filter="${value}" aria-pressed="${filter === value ? "true" : "false"}">${label}</button>
-      `).join("")}
-    </div>
-    <span class="cast-count">${visibleCount}/${totalCount}</span>
-    <div class="cast-view-group" aria-label="Vista del Cast">
+  if (castToolbar) {
+    castToolbar.innerHTML = `
+      <div class="cast-filter-group" aria-label="Filtrar Cast por tipo">
+        ${filters.map(([value, label]) => `
+          <button type="button" data-cast-filter="${value}" aria-pressed="${filter === value ? "true" : "false"}">${label}</button>
+        `).join("")}
+      </div>
+      <span class="cast-count">${visibleCount}/${totalCount}</span>
+    `;
+  }
+  if (castViewControls) {
+    castViewControls.innerHTML = `
+      <span class="cast-view-group" aria-label="Vista del Cast">
       <button type="button" data-cast-view="icons" aria-pressed="${viewMode === "icons" ? "true" : "false"}" aria-label="Vista iconos">▦</button>
       <button type="button" data-cast-view="list" aria-pressed="${viewMode === "list" ? "true" : "false"}" aria-label="Vista listado">☰</button>
-    </div>
-  `;
-  castToolbar.querySelectorAll("[data-cast-filter]").forEach((button) => {
+      </span>
+    `;
+  }
+  castToolbar?.querySelectorAll("[data-cast-filter]").forEach((button) => {
     button.addEventListener("click", () => {
       saveCastFilterMode(button.dataset.castFilter || "all");
       renderFilmPlan(currentPlan());
     });
   });
-  castToolbar.querySelectorAll("[data-cast-view]").forEach((button) => {
+  if (castViewControls) {
+    castViewControls.onpointerdown = (event) => event.stopPropagation();
+  }
+  castViewControls?.querySelectorAll("button[data-cast-view]").forEach((button) => {
+    button.addEventListener("pointerdown", (event) => event.stopPropagation());
     button.addEventListener("click", () => {
       saveCastViewMode(button.dataset.castView || "icons");
       renderFilmPlan(currentPlan());

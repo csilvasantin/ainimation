@@ -2526,9 +2526,20 @@ h2 {
   color: #17202d;
   display: grid;
   gap: 6px;
-  grid-template-columns: minmax(0, 1fr) auto auto;
+  grid-template-columns: minmax(0, 1fr) auto;
   min-height: 34px;
   padding: 4px 8px;
+}
+
+.cast-title-actions {
+  align-items: center;
+  display: inline-flex;
+  margin-left: auto;
+  min-width: 0;
+}
+
+.window-titlebar .cast-title-actions {
+  color: inherit;
 }
 
 .cast-filter-group,
@@ -2562,6 +2573,10 @@ h2 {
   height: 22px;
   justify-content: center;
   padding: 0 7px;
+}
+
+.window-titlebar .cast-view-group button {
+  height: 22px;
 }
 
 .cast-view-group button {
