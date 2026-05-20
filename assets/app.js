@@ -847,7 +847,7 @@ function syncStageToFrame(frame = currentTimelineFrame(), shouldPlay = false) {
         media.currentTime = targetTime;
       }
     }
-    media.muted = false;
+    media.muted = Boolean(member.muted);
     media.play?.().catch(() => {});
   });
   document.querySelectorAll(".stage-item[data-stage-item-id]").forEach((stageItemEl) => {
@@ -869,6 +869,35 @@ function syncStageToFrame(frame = currentTimelineFrame(), shouldPlay = false) {
     stageItemEl.classList.toggle("is-out-of-frame", !isActive);
     stageItemEl.setAttribute("aria-hidden", String(!isActive));
   });
+}
+
+function timelineKeyframeFrames() {
+  const plan = currentPlan();
+  const castFrames = (plan.cast || []).flatMap((member) => (
+    member.imported && Array.isArray(member.keyframes)
+      ? member.keyframes.map((keyframe) => Number(keyframe.frame || 1))
+      : []
+  ));
+  const itemFrames = (plan.stageItems || []).flatMap((item) => (
+    Array.isArray(item.keyframes)
+      ? item.keyframes.map((keyframe) => Number(keyframe.frame || 1))
+      : []
+  ));
+  return [...new Set([...castFrames, ...itemFrames].filter((frame) => Number.isFinite(frame) && frame > 0))]
+    .sort((a, b) => a - b);
+}
+
+function nextKeyframeFrame(currentFrame, totalFrames, direction) {
+  const frames = timelineKeyframeFrames();
+  if (!frames.length) return Math.min(Math.max(currentFrame + direction, 1), totalFrames);
+  if (direction < 0) {
+    return frames.filter((frame) => frame < currentFrame).at(-1) || frames[0] || 1;
+  }
+  return frames.find((frame) => frame > currentFrame) || frames.at(-1) || totalFrames;
+}
+
+function memberHasAudio(member) {
+  return ["audio", "video", "animation"].includes(member?.mediaType);
 }
 
 function initScorePlayhead(totalFrames) {
@@ -979,11 +1008,11 @@ function initScorePlayhead(totalFrames) {
   });
   prevButton?.addEventListener("click", () => {
     stopPlayback();
-    setFrame(currentFrame - 1);
+    setFrame(nextKeyframeFrame(currentFrame, totalFrames, -1));
   });
   nextButton?.addEventListener("click", () => {
     stopPlayback();
-    setFrame(currentFrame + 1);
+    setFrame(nextKeyframeFrame(currentFrame, totalFrames, 1));
   });
   playButton?.addEventListener("click", () => {
     if (playTimer) stopPlayback();
@@ -1284,6 +1313,21 @@ function initScoreLabelEditing() {
     currentLabels[index] = value;
     label.textContent = value;
     saveScoreLabels(currentLabels);
+    const castIndex = Number(label.dataset.castIndex);
+    const stageItemId = label.dataset.stageItemId;
+    const plan = currentPlan();
+    if (Number.isInteger(castIndex) && plan.cast?.[castIndex]) {
+      plan.cast[castIndex] = { ...plan.cast[castIndex], name: value };
+      saveFilmPlan(plan);
+    }
+    if (stageItemId) {
+      plan.stageItems = (plan.stageItems || []).map((item) => (
+        item.id === stageItemId && item.type === "text"
+          ? { ...item, text: value }
+          : item
+      ));
+      saveFilmPlan(plan);
+    }
   };
 
   labels.forEach((label) => {
@@ -1299,6 +1343,24 @@ function initScoreLabelEditing() {
         label.textContent = loadScoreLabels()[Number(label.dataset.scoreLabelIndex)] || label.textContent;
         label.blur();
       }
+    });
+  });
+}
+
+function initTimelineAudioMute() {
+  scoreGrid.querySelectorAll("[data-audio-mute][data-cast-index]").forEach((button) => {
+    button.addEventListener("pointerdown", (event) => event.stopPropagation());
+    button.addEventListener("click", (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      const castIndex = Number(button.dataset.castIndex);
+      const plan = currentPlan();
+      if (!Number.isInteger(castIndex) || !plan.cast?.[castIndex]) return;
+      const muted = !Boolean(plan.cast[castIndex].muted);
+      plan.cast[castIndex] = { ...plan.cast[castIndex], muted };
+      saveFilmPlan(plan);
+      renderFilmPlan(plan);
+      syncStageToFrame(currentTimelineFrame(), false);
     });
   });
 }
@@ -2013,10 +2075,11 @@ function renderFilmPlan(plan) {
       media.src = member.src;
       media.alt = "";
       if (member.mediaType === "video") {
-        media.muted = false;
+        media.muted = Boolean(member.muted);
         media.playsInline = true;
       }
       if (member.mediaType === "audio") {
+        media.muted = Boolean(member.muted);
         media.preload = "metadata";
       }
       const caption = document.createElement("figcaption");
@@ -2045,18 +2108,21 @@ function renderFilmPlan(plan) {
         lane: member.mediaType === "video" || member.mediaType === "animation" ? "video" : member.mediaType === "audio" ? "music" : "cast",
         member,
         castIndex: castMembers.indexOf(member),
+        hasAudio: memberHasAudio(member),
       })),
       ...timelineTextItems.map((item, index) => ({
         name: item.text || `Text ${index + 1}`,
         lane: "cast",
         member: item,
         stageItemId: item.id,
+        hasAudio: false,
       })),
       ...timelineShapeItems.map((item, index) => ({
         name: item.type.startsWith("oval") ? `Oval ${index + 1}` : `Rectangle ${index + 1}`,
         lane: "stage",
         member: item,
         stageItemId: item.id,
+        hasAudio: false,
       })),
     ];
     scoreGrid.style.setProperty("--total-frames", totalFrames);
@@ -2065,7 +2131,7 @@ function renderFilmPlan(plan) {
         <div class="score-tools" aria-label="Timeline transport">
           <button class="score-play-top" type="button" data-score-play aria-label="Play timeline" aria-pressed="false">▶</button>
           <div class="score-transport" role="group" aria-label="Timeline frame controls">
-            <button type="button" data-score-step="prev" aria-label="Previous frame">←</button>
+            <button type="button" data-score-step="prev" aria-label="Previous keyframe">←</button>
             <div class="score-fps-stepper" aria-label="Timeline playback speed">
               <output class="score-fps-value" data-score-fps data-value="24" aria-label="24 frames per second">24</output>
               <span class="score-fps-buttons" aria-label="Frames per second controls">
@@ -2073,7 +2139,7 @@ function renderFilmPlan(plan) {
                 <button type="button" data-score-fps-step="down" aria-label="Decrease FPS">▼</button>
               </span>
             </div>
-            <button type="button" data-score-step="next" aria-label="Next frame">→</button>
+            <button type="button" data-score-step="next" aria-label="Next keyframe">→</button>
           </div>
         </div>
         <div class="score-member-title">Member</div>
@@ -2090,7 +2156,10 @@ function renderFilmPlan(plan) {
         </div>
         ${scoreChannels.length ? "" : `<div class="score-empty-state">Import cast members to start the timeline</div>`}
         ${scoreChannels.map((channel, channelIndex) => `
-          <div class="score-row-label" contenteditable="true" spellcheck="false" role="textbox" aria-label="Edit timeline row label" data-score-label-index="${channelIndex}">${escapeHtml(channel.name)}</div>
+          <div class="score-row-label">
+            <span contenteditable="true" spellcheck="false" role="textbox" aria-label="Edit timeline row label" data-score-label-index="${channelIndex}" ${Number.isInteger(channel.castIndex) ? `data-cast-index="${channel.castIndex}"` : ""} ${channel.stageItemId ? `data-stage-item-id="${escapeHtml(channel.stageItemId)}"` : ""}>${escapeHtml(channel.name)}</span>
+            ${channel.hasAudio ? `<button class="score-audio-mute ${channel.member.muted ? "is-muted" : ""}" type="button" data-audio-mute data-cast-index="${channel.castIndex}" aria-pressed="${channel.member.muted ? "true" : "false"}" aria-label="${channel.member.muted ? "Unmute audio" : "Mute audio"}">${channel.member.muted ? "M" : "S"}</button>` : ""}
+          </div>
           <div class="score-track ${channel.lane}">
             ${Number.isInteger(channel.castIndex) ? keyframeDotsForMember(channel.member, totalFrames, channel.castIndex) : ""}
             ${channel.stageItemId ? keyframeDotsForStageItem(channel.member, totalFrames) : ""}
@@ -2114,6 +2183,7 @@ function renderFilmPlan(plan) {
     initScorePlayhead(totalFrames);
     initTimelineMarkerEditing(totalFrames);
     initScoreLabelEditing();
+    initTimelineAudioMute();
     initTimelineSpriteDragging(totalFrames);
     initTimelineKeyframeDots();
     initCastDropTargets();
@@ -2425,7 +2495,7 @@ function exportStageVideo() {
 function makeExportPackage(plan) {
   return {
     package: "Admira Player Ready",
-    version: "AiDirector v2026.05.20 r13",
+    version: "AiDirector v2026.05.20 r14",
     includeMetadata: Boolean(includeMetadata?.checked),
     formats: {
       video: ["MP4", "MOV", "ProRes", "4K/8K", "PP Solving"],

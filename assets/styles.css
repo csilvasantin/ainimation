@@ -4309,24 +4309,61 @@ body.studio-entered {
 .score-row-label {
   align-items: center;
   color: #697382;
-  cursor: text;
+  cursor: default;
   display: flex;
   font-size: 0.74rem;
   font-weight: 850;
+  gap: 4px;
   justify-content: flex-end;
   min-width: 0;
   outline: 0;
   overflow: hidden;
-  padding: 0 10px 0 6px;
+  padding: 0 6px;
+}
+
+.score-row-label span {
+  cursor: text;
+  min-width: 0;
+  outline: 0;
+  overflow: hidden;
+  text-align: right;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .score-row-label:hover,
-.score-row-label:focus {
+.score-row-label:focus-within {
   background: linear-gradient(180deg, #fff, #dceeff);
   box-shadow: inset 0 0 0 1px rgba(36, 91, 214, 0.32);
   color: #17202d;
+}
+
+.score-audio-mute {
+  align-items: center;
+  appearance: none;
+  background: linear-gradient(180deg, #ffffff, #d6dce7);
+  border: 1px solid #9aa5b5;
+  border-radius: 3px;
+  color: #233047;
+  cursor: pointer;
+  display: flex;
+  flex: 0 0 auto;
+  font: 950 0.54rem/1 var(--font-ui, inherit);
+  height: 16px;
+  justify-content: center;
+  padding: 0;
+  width: 18px;
+}
+
+.score-audio-mute:hover {
+  background: linear-gradient(180deg, #ffffff, #c8d7ef);
+}
+
+.score-audio-mute.is-muted,
+.score-audio-mute[aria-pressed="true"] {
+  background: linear-gradient(180deg, #ffe3e7, #d74271);
+  border-color: #9e274d;
+  color: #fff;
 }
 
 .score-track {
