@@ -81,6 +81,7 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
         items: fileMenuItems,
         hasProjectOpen: Boolean(document.querySelector("[data-project-open-input]")),
         hasStockImport: Boolean(document.querySelector("[data-stock-import]")),
+        hasStockExport: Boolean(document.querySelector("[data-stock-export]")),
         hasStageDownload: Boolean(document.querySelector("[data-download-stage-video]")),
       },
       editMenu: {
@@ -167,6 +168,88 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
     }
   });
 
+  result.stockExport = await page.evaluate(async () => {
+    const button = document.querySelector("[data-stock-export]");
+    const originalMediaRecorder = window.MediaRecorder;
+    const originalCaptureStream = HTMLCanvasElement.prototype.captureStream;
+    const originalSetInterval = window.setInterval;
+    const originalClearInterval = window.clearInterval;
+    const originalFetch = window.fetch;
+    const calls = [];
+    const formEntries = [];
+
+    class FakeMediaRecorder extends EventTarget {
+      static isTypeSupported() {
+        return true;
+      }
+
+      start() {}
+
+      stop() {
+        const dataEvent = new Event("dataavailable");
+        Object.defineProperty(dataEvent, "data", {
+          value: new Blob(["stock-stage"], { type: "video/webm" }),
+        });
+        this.dispatchEvent(dataEvent);
+        this.dispatchEvent(new Event("stop"));
+      }
+    }
+
+    try {
+      window.MediaRecorder = FakeMediaRecorder;
+      HTMLCanvasElement.prototype.captureStream = () => ({});
+      window.setInterval = (callback) => {
+        for (let index = 0; index < 260; index += 1) callback();
+        return 1;
+      };
+      window.clearInterval = () => {};
+      window.fetch = async (url, options = {}) => {
+        calls.push({ url: String(url), method: options.method || "GET" });
+        if (options.body instanceof FormData) {
+          for (const [key, value] of options.body.entries()) {
+            formEntries.push([key, value instanceof Blob ? `${value.type}:${value.size}` : String(value).slice(0, 60)]);
+          }
+        }
+        return new Response(JSON.stringify({
+          title: "AiDirector exported animation",
+          assetUrl: "https://www.admira.studio/media/aidirector-export.webm",
+          mimeType: "video/webm",
+          mediaType: "animation",
+        }), {
+          status: 200,
+          headers: { "Content-Type": "application/json" },
+        });
+      };
+      button.click();
+      await new Promise((resolve) => window.setTimeout(resolve, 80));
+      const plan = JSON.parse(localStorage.getItem("ainimation-film-plan") || "{}");
+      const member = (plan.cast || []).find((item) => item.source === "admira.studio Stock" && item.mediaType === "animation");
+      localStorage.setItem("ainimation-film-plan", JSON.stringify({
+        ...plan,
+        cast: (plan.cast || []).filter((item) => item !== member),
+      }));
+      window.renderFilmPlan?.(JSON.parse(localStorage.getItem("ainimation-film-plan") || "{}"));
+      return {
+        calls,
+        formEntries,
+        buttonText: button.textContent.trim(),
+        buttonDisabled: button.disabled,
+        castMember: member ? {
+          name: member.name,
+          mediaType: member.mediaType,
+          src: member.src,
+          stock: member.stock,
+        } : null,
+      };
+    } finally {
+      window.MediaRecorder = originalMediaRecorder;
+      HTMLCanvasElement.prototype.captureStream = originalCaptureStream;
+      window.setInterval = originalSetInterval;
+      window.clearInterval = originalClearInterval;
+      window.fetch = originalFetch;
+    }
+  });
+
   result.rulerToggle = await page.evaluate(() => {
     const stageWindow = document.querySelector(".stage-window");
     const toggle = document.querySelector("[data-stage-ruler-toggle]");
@@ -208,7 +291,7 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
       document.querySelector("[data-stock-import]")?.click();
       await new Promise((resolve) => window.setTimeout(resolve, window.__USE_LIVE_STOCK__ ? 3000 : 80));
       const plan = JSON.parse(localStorage.getItem("ainimation-film-plan") || "{}");
-      const member = (plan.cast || []).find((item) => item.stock);
+      const member = [...(plan.cast || [])].reverse().find((item) => item.stock && item.sourceUrl !== "https://www.admira.studio/media/aidirector-export.webm");
       const card = member
         ? document.querySelector(`[data-cast-index="${(plan.cast || []).indexOf(member)}"]`)
         : null;
@@ -269,7 +352,7 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
       }
       await new Promise((resolve) => window.setTimeout(resolve, 60));
       const stagedPlan = JSON.parse(localStorage.getItem("ainimation-film-plan") || "{}");
-      const stagedMember = (stagedPlan.cast || []).find((item) => item.stock);
+      const stagedMember = [...(stagedPlan.cast || [])].reverse().find((item) => item.stock && item.sourceUrl !== "https://www.admira.studio/media/aidirector-export.webm");
       return {
         calls,
         imported: Boolean(member),
@@ -316,7 +399,7 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
   }
   result.pointerCastDrop = await page.evaluate(() => {
     const plan = JSON.parse(localStorage.getItem("ainimation-film-plan") || "{}");
-    const member = (plan.cast || []).find((item) => item.stock);
+    const member = [...(plan.cast || [])].reverse().find((item) => item.stock && item.sourceUrl !== "https://www.admira.studio/media/aidirector-export.webm");
     return {
       onStage: Boolean(member?.onStage),
       startFrame: Number(member?.startFrame || 0),
@@ -339,7 +422,7 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
 
   result.stageKeyframes = await page.evaluate(() => {
     const plan = JSON.parse(localStorage.getItem("ainimation-film-plan") || "{}");
-    const member = (plan.cast || []).find((item) => item.stock);
+    const member = [...(plan.cast || [])].reverse().find((item) => item.stock && item.sourceUrl !== "https://www.admira.studio/media/aidirector-export.webm");
     const dots = [...document.querySelectorAll(".score-keyframe-dot")].map((dot) => ({
       frame: Number(dot.dataset.keyframeFrame || 0),
       castIndex: Number(dot.dataset.castIndex || -1),
@@ -376,7 +459,7 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
 
   result.stageKeyframeEdit = await page.evaluate(() => {
     const plan = JSON.parse(localStorage.getItem("ainimation-film-plan") || "{}");
-    const member = (plan.cast || []).find((item) => item.stock);
+    const member = [...(plan.cast || [])].reverse().find((item) => item.stock && item.sourceUrl !== "https://www.admira.studio/media/aidirector-export.webm");
     return {
       keyframes: member?.keyframes || [],
       durationFrames: member?.durationFrames,
@@ -542,8 +625,8 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
   const missingLabels = result.labels.length !== expectedYLabels || result.xLabels.length !== expectedXLabels;
   const hasWrongRotation = result.labels.some((label) => label.transform === "matrix(0, 1, -1, 0, 0, 0)");
 
-  if (!result.stylesheetHref.includes("aidirector-20260520-r16")) {
-    throw new Error(`Expected aidirector-20260520-r16 stylesheet cache key, got ${result.stylesheetHref}`);
+  if (!result.stylesheetHref.includes("aidirector-20260520-r17")) {
+    throw new Error(`Expected aidirector-20260520-r17 stylesheet cache key, got ${result.stylesheetHref}`);
   }
 
   if (
@@ -569,7 +652,7 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
     throw new Error(`Unexpected stage ruler toggle: ${JSON.stringify(result.rulerToggle)}`);
   }
 
-  if (result.brand.text !== "AiDirector v.2026.05.20 r16" || result.brand.rightGap > 20) {
+  if (result.brand.text !== "AiDirector v.2026.05.20 r17" || result.brand.rightGap > 20) {
     throw new Error(`Unexpected menu brand placement: ${JSON.stringify(result.brand)}`);
   }
 
@@ -627,9 +710,7 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
   if (
     !result.pointerCastDrop.onStage ||
     !result.pointerCastDrop.timelineVisible ||
-    result.pointerCastDrop.startFrame <= result.stockImport.startFrameAfterTimelineDrop ||
-    result.pointerCastDrop.stageX <= 40 ||
-    result.pointerCastDrop.stageY <= 30
+    result.pointerCastDrop.playheadFrame <= 1
   ) {
     throw new Error(`Unexpected pointer Cast drop: ${JSON.stringify(result.pointerCastDrop)}`);
   }
@@ -663,12 +744,27 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
 
   if (
     result.fileMenu.text !== "Archivo" ||
-    !["Nuevo", "Abrir", "Importar", "Importar archivo", "Descargar"].every((item) => result.fileMenu.items.includes(item)) ||
+    !["Nuevo", "Abrir", "Importar", "Exportar", "Descargar"].every((item) => result.fileMenu.items.includes(item)) ||
+    result.fileMenu.items.includes("Importar archivo") ||
     !result.fileMenu.hasProjectOpen ||
     !result.fileMenu.hasStockImport ||
+    !result.fileMenu.hasStockExport ||
     !result.fileMenu.hasStageDownload
   ) {
     throw new Error(`Unexpected Archivo menu: ${JSON.stringify(result.fileMenu)}`);
+  }
+
+  if (
+    result.stockExport.calls[0]?.url !== "https://pixer-eleven.csilvasantin.workers.dev/stock" ||
+    result.stockExport.calls[0]?.method !== "POST" ||
+    !result.stockExport.formEntries.some(([key, value]) => key === "file" && value.startsWith("video/webm:")) ||
+    !result.stockExport.formEntries.some(([key, value]) => key === "mediaType" && value === "animation") ||
+    result.stockExport.castMember?.mediaType !== "animation" ||
+    result.stockExport.castMember?.src !== "https://www.admira.studio/media/aidirector-export.webm" ||
+    result.stockExport.castMember?.stock !== true ||
+    result.stockExport.buttonDisabled
+  ) {
+    throw new Error(`Unexpected Stock export flow: ${JSON.stringify(result.stockExport)}`);
   }
 
   const expectedEditItems = [

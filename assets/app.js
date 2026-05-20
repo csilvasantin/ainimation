@@ -778,7 +778,9 @@ function initFileImportMenu(menuSelector, buttonSelector, inputSelector) {
 
   fileInputs.forEach((fileInput) => {
     fileInput.addEventListener("change", () => {
-      importMemberFiles(fileInput.files, fileInput.dataset.memberImportMode || "image");
+      if (fileInput.dataset.memberImportMode) {
+        importMemberFiles(fileInput.files, fileInput.dataset.memberImportMode || "image");
+      }
       fileInput.value = "";
       menu.classList.remove("open");
       button.setAttribute("aria-expanded", "false");
@@ -793,7 +795,7 @@ function initFileImportMenu(menuSelector, buttonSelector, inputSelector) {
   });
 }
 
-initFileImportMenu(".member-menu", "[data-member-menu]", "[data-member-file-input]");
+initFileImportMenu(".member-menu", "[data-member-menu]", "[data-project-open-input]");
 initFileImportMenu(".cast-menu", "[data-cast-menu]", "[data-cast-file-input]");
 
 function initEditMenu() {
@@ -1099,6 +1101,7 @@ const closeHelpButton = document.querySelector("#closeHelp");
 const fileNewButton = document.querySelector("[data-file-new]");
 const projectOpenInput = document.querySelector("[data-project-open-input]");
 const stockImportButton = document.querySelector("[data-stock-import]");
+const stockExportButton = document.querySelector("[data-stock-export]");
 const downloadStageVideoButton = document.querySelector("[data-download-stage-video]");
 const directorShell = document.querySelector(".director-shell");
 const directorWindows = document.querySelectorAll(".director-window");
@@ -1117,6 +1120,13 @@ const admiraStockEndpoints = [
   "https://www.admira.studio/stock.json",
   "https://admira.studio/api/stock/latest",
   "https://admira.studio/api/stock?limit=1&sort=latest",
+];
+const admiraStockExportEndpoints = [
+  "https://pixer-eleven.csilvasantin.workers.dev/stock",
+  "https://pixer-eleven.csilvasantin.workers.dev/stock/upload",
+  "https://pixer-eleven.csilvasantin.workers.dev/stock/create",
+  "https://www.admira.studio/api/stock",
+  "https://www.admira.studio/api/stock/upload",
 ];
 let activeDirectorWindow = null;
 let draggedDirectorWindow = null;
@@ -2565,21 +2575,19 @@ function drawStageDomFrame(ctx, stage, width, height) {
   });
 }
 
-function exportStageVideo() {
+function renderStageAnimationBlob() {
   const stage = document.querySelector(".stage-canvas");
   const plan = currentPlan();
   const fps = Number(document.querySelector("[data-score-fps]")?.dataset.value || 24);
   if (!stage || typeof MediaRecorder === "undefined") {
-    window.alert("Video export is not available in this browser yet.");
-    return;
+    return Promise.reject(new Error("Video export is not available in this browser yet."));
   }
   const canvas = document.createElement("canvas");
   canvas.width = 960;
   canvas.height = 540;
   const ctx = canvas.getContext("2d");
   if (!ctx || typeof canvas.captureStream !== "function") {
-    window.alert("Video export is not available in this browser yet.");
-    return;
+    return Promise.reject(new Error("Video export is not available in this browser yet."));
   }
   const stream = canvas.captureStream(Math.max(1, fps));
   const mimeType = MediaRecorder.isTypeSupported("video/webm;codecs=vp9")
@@ -2593,43 +2601,60 @@ function exportStageVideo() {
   let frameNumber = 1;
   let timer = null;
   let stopped = false;
+
+  return new Promise((resolve, reject) => {
+    recorder.addEventListener("dataavailable", (event) => {
+      if (event.data?.size) chunks.push(event.data);
+    });
+    recorder.addEventListener("error", () => {
+      window.clearInterval(timer);
+      syncStageToFrame(currentTimelineFrame(), false);
+      reject(new Error("Could not record Stage animation."));
+    });
+    recorder.addEventListener("stop", () => {
+      window.clearInterval(timer);
+      syncStageToFrame(currentTimelineFrame(), false);
+      resolve(new Blob(chunks, { type: "video/webm" }));
+    });
+
+    drawStageDomFrame(ctx, stage, canvas.width, canvas.height);
+    recorder.start();
+    timer = window.setInterval(() => {
+      syncStageToFrame(frameNumber, false);
+      drawStageDomFrame(ctx, stage, canvas.width, canvas.height);
+      frameNumber += 1;
+      if (frameNumber > totalFrames && !stopped) {
+        stopped = true;
+        recorder.stop();
+      }
+    }, 1000 / Math.max(1, fps));
+  });
+}
+
+async function exportStageVideo() {
+  const plan = currentPlan();
   const previousLabel = downloadStageVideoButton?.textContent;
   if (downloadStageVideoButton) {
     downloadStageVideoButton.disabled = true;
     downloadStageVideoButton.textContent = "Exportando...";
   }
-
-  recorder.addEventListener("dataavailable", (event) => {
-    if (event.data?.size) chunks.push(event.data);
-  });
-  recorder.addEventListener("stop", () => {
-    window.clearInterval(timer);
-    const blob = new Blob(chunks, { type: "video/webm" });
+  try {
+    const blob = await renderStageAnimationBlob();
     downloadBlob(blob, `${planSlug(plan)}-stage.webm`);
+  } catch (error) {
+    window.alert(error.message || "Video export is not available in this browser yet.");
+  } finally {
     if (downloadStageVideoButton) {
       downloadStageVideoButton.disabled = false;
       downloadStageVideoButton.textContent = previousLabel || "Descargar";
     }
-    syncStageToFrame(currentTimelineFrame(), false);
-  });
-
-  drawStageDomFrame(ctx, stage, canvas.width, canvas.height);
-  recorder.start();
-  timer = window.setInterval(() => {
-    syncStageToFrame(frameNumber, false);
-    drawStageDomFrame(ctx, stage, canvas.width, canvas.height);
-    frameNumber += 1;
-    if (frameNumber > totalFrames && !stopped) {
-      stopped = true;
-      recorder.stop();
-    }
-  }, 1000 / Math.max(1, fps));
+  }
 }
 
 function makeExportPackage(plan) {
   return {
     package: "Admira Player Ready",
-    version: "AiDirector v2026.05.20 r16",
+    version: "AiDirector v2026.05.20 r17",
     includeMetadata: Boolean(includeMetadata?.checked),
     formats: {
       video: ["MP4", "MOV", "ProRes", "4K/8K", "PP Solving"],
@@ -3089,6 +3114,82 @@ async function importLatestAdmiraStock() {
   } finally {
     closeArchivoMenu();
     stockImportButton.disabled = false;
+  }
+}
+
+async function postStageAnimationToStock(endpoint, blob, metadata) {
+  const fileName = `${planSlug(metadata.project)}-animation.webm`;
+  const formData = new FormData();
+  formData.append("file", blob, fileName);
+  formData.append("title", metadata.title);
+  formData.append("name", metadata.title);
+  formData.append("type", "animation");
+  formData.append("mediaType", "animation");
+  formData.append("mimeType", blob.type || "video/webm");
+  formData.append("fileName", fileName);
+  formData.append("metadata", JSON.stringify(metadata));
+  const response = await fetch(endpoint, {
+    method: "POST",
+    headers: { Accept: "application/json" },
+    body: formData,
+  });
+  if (!response.ok) throw new Error(`${response.status} ${response.statusText}`);
+  const contentType = response.headers.get("content-type") || "";
+  return contentType.includes("application/json") ? response.json() : { ok: true };
+}
+
+async function exportStageToAdmiraStock() {
+  if (!stockExportButton) return;
+  const originalText = stockExportButton.textContent;
+  stockExportButton.disabled = true;
+  stockExportButton.textContent = "Exportando...";
+  try {
+    const plan = currentPlan();
+    const fps = Number(document.querySelector("[data-score-fps]")?.dataset.value || 24);
+    const blob = await renderStageAnimationBlob();
+    const metadata = {
+      title: `${plan.title || "AiDirector Stage"} animation`,
+      source: "ainimation.studio AiDirector",
+      type: "animation",
+      mediaType: "animation",
+      mimeType: blob.type || "video/webm",
+      durationFrames: totalTimelineFrames(plan),
+      fps,
+      exportedAt: new Date().toISOString(),
+      project: plan,
+    };
+    let lastError = null;
+    for (const endpoint of admiraStockExportEndpoints) {
+      try {
+        const payload = await postStageAnimationToStock(endpoint, blob, metadata);
+        const item = firstStockItem(payload) || payload;
+        const nextPlan = currentPlan();
+        const existing = nextPlan.cast || makeCast(nextPlan);
+        const timelineMemberCount = existing.filter((member) => member.imported && member.src).length;
+        const member = stockMemberFromItem(item, endpoint, existing.length, timelineMemberCount);
+        if (member) {
+          nextPlan.cast = [...existing, { ...member, mediaType: "animation", type: memberTypeLabel("animation"), stock: true }];
+          saveFilmPlan(nextPlan);
+          renderFilmPlan(nextPlan);
+        }
+        playUiTick("import");
+        document.querySelector('[data-open-window="cast"]')?.click();
+        stockExportButton.textContent = "Exportado";
+        window.setTimeout(() => { stockExportButton.textContent = originalText; }, 1400);
+        return;
+      } catch (error) {
+        lastError = error;
+      }
+    }
+    throw lastError || new Error("Stock did not accept the animation export.");
+  } catch (error) {
+    console.warn("Admira Stock export failed", error);
+    stockExportButton.textContent = "Stock no disponible";
+    window.alert("No se ha podido exportar la animación a admira.studio Stock.");
+    window.setTimeout(() => { stockExportButton.textContent = originalText; }, 1800);
+  } finally {
+    closeArchivoMenu();
+    stockExportButton.disabled = false;
   }
 }
 
@@ -3649,6 +3750,10 @@ if (filmForm) {
 
   stockImportButton?.addEventListener("click", () => {
     importLatestAdmiraStock();
+  });
+
+  stockExportButton?.addEventListener("click", () => {
+    exportStageToAdmiraStock();
   });
 
   downloadStageVideoButton?.addEventListener("click", () => {
