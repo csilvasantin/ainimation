@@ -13,7 +13,12 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
   }
 
   await page.goto(targetUrl, { waitUntil: "networkidle" });
-  await page.evaluate(() => localStorage.removeItem("ainimation-timeline-zoom"));
+  await page.evaluate(() => {
+    localStorage.removeItem("ainimation-timeline-zoom");
+    localStorage.removeItem("ainimation-cast-view");
+    localStorage.removeItem("ainimation-cast-filter");
+    localStorage.removeItem("ainimation-timeline-markers");
+  });
   await page.waitForTimeout(1200);
   await page.waitForFunction(() => {
     window.refreshDirectorWindows?.();
@@ -75,6 +80,17 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
     const scoreRulerRect = document.querySelector(".score-ruler")?.getBoundingClientRect();
     const scoreMemberTitleRect = document.querySelector(".score-member-title")?.getBoundingClientRect();
     const scoreTitlebarRect = timelineWindow?.querySelector(".window-titlebar")?.getBoundingClientRect();
+    const frameNumbers = [...document.querySelectorAll(".score-frame-number")].slice(0, 12).map((item) => item.textContent.trim());
+    const castFilterButtons = [...document.querySelectorAll("[data-cast-filter]")].map((item) => ({
+      filter: item.dataset.castFilter,
+      pressed: item.getAttribute("aria-pressed"),
+      text: item.textContent.trim(),
+    }));
+    const castViewButtons = [...document.querySelectorAll("[data-cast-view]")].map((item) => ({
+      view: item.dataset.castView,
+      pressed: item.getAttribute("aria-pressed"),
+      label: item.getAttribute("aria-label") || "",
+    }));
     const overlaps = (first, second) => Boolean(first && second) &&
       first.left < second.right &&
       first.right > second.left &&
@@ -133,6 +149,14 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
           scoreToolsRect.bottom <= scoreRulerRect.bottom),
         toolsInMemberColumn: Boolean(scoreToolsRect && scoreMemberTitleRect && overlaps(scoreToolsRect, scoreMemberTitleRect)),
         memberTitleHeight: scoreMemberTitleRect ? Number(scoreMemberTitleRect.height.toFixed(2)) : 0,
+        frameNumbers,
+        hasMarkInput: Boolean(document.querySelector("[data-score-mark-input]")),
+      },
+      castControls: {
+        filterButtons: castFilterButtons,
+        viewButtons: castViewButtons,
+        view: document.querySelector("#castBin")?.dataset.castView || "",
+        filter: document.querySelector("#castBin")?.dataset.castFilter || "",
       },
     };
   });
@@ -1055,6 +1079,24 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
     startLabel: await page.locator('[data-score-bound="start"]').getAttribute("aria-label"),
     endLabel: await page.locator('[data-score-bound="end"]').getAttribute("aria-label"),
   };
+  result.timelineMarks = await page.evaluate(() => {
+    document.querySelector('[data-score-bound="start"]')?.click();
+    const input = document.querySelector("[data-score-mark-input]");
+    if (input) {
+      input.value = "Beat";
+      input.dispatchEvent(new InputEvent("input", { bubbles: true, inputType: "insertText", data: "Beat" }));
+    }
+    document.querySelector("[data-score-mark-add]")?.click();
+    const marker = [...document.querySelectorAll(".score-marker")]
+      .find((item) => item.textContent.trim() === "Beat");
+    marker?.click();
+    return {
+      created: Boolean(marker),
+      frame: Number(marker?.dataset.markerFrame || 0),
+      playheadFrame: Number(document.querySelector(".score-playhead")?.dataset.frame || 0),
+      labels: [...document.querySelectorAll(".score-marker")].map((item) => item.textContent.trim()),
+    };
+  });
   result.timelineZoom = await page.evaluate(() => {
     const readout = document.querySelector("[data-score-zoom]");
     const sprite = document.querySelector(".score-sprite[data-cast-index]");
@@ -1071,6 +1113,18 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
       totalFrames: Number(playhead?.getAttribute("aria-valuemax") || 0),
       widthBefore,
       widthAfter: nextSprite ? parseFloat(nextSprite.style.width) : 0,
+    };
+  });
+  result.castControls = await page.evaluate(() => {
+    document.querySelector('[data-cast-view="list"]')?.click();
+    document.querySelector('[data-cast-filter="image"]')?.click();
+    const cards = [...document.querySelectorAll("#castBin .cast-member")].map((item) => item.dataset.mediaType || "");
+    return {
+      view: document.querySelector("#castBin")?.dataset.castView || "",
+      filter: document.querySelector("#castBin")?.dataset.castFilter || "",
+      listPressed: document.querySelector('[data-cast-view="list"]')?.getAttribute("aria-pressed") || "",
+      imagePressed: document.querySelector('[data-cast-filter="image"]')?.getAttribute("aria-pressed") || "",
+      cards,
     };
   });
   result.videoDurationFrames = await page.evaluate(async () => {
@@ -1200,8 +1254,8 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
   const missingLabels = result.labels.length !== expectedYLabels || result.xLabels.length !== expectedXLabels;
   const hasWrongRotation = result.labels.some((label) => label.transform === "matrix(0, 1, -1, 0, 0, 0)");
 
-  if (!result.stylesheetHref.includes("aidirector-20260520-r38")) {
-    throw new Error(`Expected aidirector-20260520-r38 stylesheet cache key, got ${result.stylesheetHref}`);
+  if (!result.stylesheetHref.includes("aidirector-20260520-r39")) {
+    throw new Error(`Expected aidirector-20260520-r39 stylesheet cache key, got ${result.stylesheetHref}`);
   }
 
   if (
@@ -1228,7 +1282,7 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
   }
 
   if (
-    result.brand.text !== "◆ AiDirector v.2026.05.20 r38" ||
+    result.brand.text !== "◆ AiDirector v.2026.05.20 r39" ||
     result.brand.rightGap > 20 ||
     result.brand.menuHeight > 50 ||
     result.brand.toolsTitlebarHeight > 31
@@ -1285,8 +1339,8 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
     result.keyframeNavigation.nextKeyframeFrame <= 1 ||
     result.keyframeNavigation.previousKeyframeFrame < 1 ||
     result.keyframeNavigation.previousKeyframeFrame > result.keyframeNavigation.nextKeyframeFrame ||
-    result.keyframeNavigation.prevLabel !== "Previous keyframe" ||
-    result.keyframeNavigation.nextLabel !== "Next keyframe"
+    result.keyframeNavigation.prevLabel !== "Previous mark" ||
+    result.keyframeNavigation.nextLabel !== "Next mark"
   ) {
     throw new Error(`Unexpected keyframe navigation: ${JSON.stringify(result.keyframeNavigation)}`);
   }
@@ -1300,12 +1354,30 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
     throw new Error(`Unexpected timeline bounds controls: ${JSON.stringify(result.timelineBounds)}`);
   }
   if (
+    !result.timelineMarks.created ||
+    result.timelineMarks.frame !== 1 ||
+    result.timelineMarks.playheadFrame !== 1 ||
+    !result.timelineMarks.labels.includes("Beat")
+  ) {
+    throw new Error(`Unexpected timeline mark creation/navigation: ${JSON.stringify(result.timelineMarks)}`);
+  }
+  if (
     result.timelineZoom.initial !== "100" ||
     result.timelineZoom.afterUp !== "200" ||
     result.timelineZoom.displayFrames !== result.timelineZoom.totalFrames * 2 ||
     !(result.timelineZoom.widthAfter > 0 && result.timelineZoom.widthAfter < result.timelineZoom.widthBefore)
   ) {
     throw new Error(`Unexpected timeline zoom behavior: ${JSON.stringify(result.timelineZoom)}`);
+  }
+  if (
+    result.castControls.view !== "list" ||
+    result.castControls.filter !== "image" ||
+    result.castControls.listPressed !== "true" ||
+    result.castControls.imagePressed !== "true" ||
+    !result.castControls.cards.length ||
+    result.castControls.cards.some((type) => type !== "image")
+  ) {
+    throw new Error(`Unexpected cast controls: ${JSON.stringify(result.castControls)}`);
   }
   if (result.videoDurationFrames !== 77) {
     throw new Error(`Video duration should map to timeline frames: ${result.videoDurationFrames}`);
@@ -1525,7 +1597,9 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
     !result.timelineControls.toolsInsideTitlebar ||
     result.timelineControls.toolsInsideRuler ||
     result.timelineControls.toolsInMemberColumn ||
-    result.timelineControls.memberTitleHeight < 60
+    result.timelineControls.memberTitleHeight < 60 ||
+    !result.timelineControls.hasMarkInput ||
+    result.timelineControls.frameNumbers.slice(0, 5).join(",") !== "1,2,3,4,5"
   ) {
     throw new Error(`Unexpected timeline control placement: ${JSON.stringify(result.timelineControls)}`);
   }
