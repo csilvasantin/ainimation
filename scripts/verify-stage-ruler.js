@@ -743,6 +743,33 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
       }
       const restoredPlan = JSON.parse(localStorage.getItem("ainimation-film-plan") || "{}");
       const restoredStockMembers = (restoredPlan.cast || []).filter((item) => item.stock && item.sourceUrl !== "https://www.admira.studio/media/aidirector-export.webm");
+      const syntheticPlan = JSON.parse(localStorage.getItem("ainimation-film-plan") || "{}");
+      const syntheticIndex = (syntheticPlan.cast || []).length;
+      syntheticPlan.cast = [
+        ...(syntheticPlan.cast || []),
+        {
+          name: "Synthetic Vertical Video",
+          role: "Stock",
+          type: "Video",
+          mediaType: "video",
+          src: "mock-vertical-video.mp4",
+          imported: true,
+          stock: true,
+          source: "admira.studio Stock",
+          sourceUrl: "mock-vertical-video.mp4",
+          aspectRatio: 9 / 16,
+          onStage: false,
+          startFrame: 1,
+          durationFrames: 96,
+        },
+      ];
+      localStorage.setItem("ainimation-film-plan", JSON.stringify(syntheticPlan));
+      window.scheduleCastMember?.(syntheticPlan, syntheticIndex, { stagePoint: { x: 50, y: 50 } });
+      const syntheticMember = syntheticPlan.cast?.[syntheticIndex];
+      const syntheticStageAspect = syntheticMember
+        ? Number((((Number(syntheticMember.stageW || 0) / Number(syntheticMember.stageH || 1)) * (1920 / 1080))).toFixed(4))
+        : 0;
+      localStorage.setItem("ainimation-film-plan", JSON.stringify(restoredPlan));
       const visualStageMembers = restoredStockMembers
         .filter((item) => item.onStage !== false && ["image", "video"].includes(item.mediaType))
         .map((item) => ({
@@ -791,6 +818,8 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
         visualStageMembers,
         stageCountAfterStageRemove,
         timelineCountAfterTimelineRemove,
+        syntheticVerticalVideoAspect: Number(Number(syntheticMember?.aspectRatio || 0).toFixed(4)),
+        syntheticVerticalVideoStageAspect: syntheticStageAspect,
       };
     } finally {
       window.fetch = originalFetch;
@@ -1342,8 +1371,8 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
   const missingLabels = result.labels.length !== expectedYLabels || result.xLabels.length !== expectedXLabels;
   const hasWrongRotation = result.labels.some((label) => label.transform === "matrix(0, 1, -1, 0, 0, 0)");
 
-  if (!result.stylesheetHref.includes("aidirector-20260520-r45")) {
-    throw new Error(`Expected aidirector-20260520-r45 stylesheet cache key, got ${result.stylesheetHref}`);
+  if (!result.stylesheetHref.includes("aidirector-20260520-r46")) {
+    throw new Error(`Expected aidirector-20260520-r46 stylesheet cache key, got ${result.stylesheetHref}`);
   }
 
   if (
@@ -1370,7 +1399,7 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
   }
 
   if (
-    result.brand.text !== "◆ AiDirector v.2026.05.20 r45" ||
+    result.brand.text !== "◆ AiDirector v.2026.05.20 r46" ||
     result.brand.rightGap > 20 ||
     result.brand.menuHeight > 50 ||
     result.brand.toolsTitlebarHeight > 31
@@ -1646,7 +1675,9 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
     result.stockImport.visualStageMembers.some((item) => (
       item.aspectRatio <= 0 ||
       Math.abs(item.aspectRatio - item.stageAspectRatio) > 0.05
-    ))
+    )) ||
+    result.stockImport.syntheticVerticalVideoAspect <= 0 ||
+    Math.abs(result.stockImport.syntheticVerticalVideoAspect - result.stockImport.syntheticVerticalVideoStageAspect) > 0.05
   ) {
     throw new Error(`Imported visual media should keep original proportions: ${JSON.stringify(result.stockImport.visualStageMembers)}`);
   }

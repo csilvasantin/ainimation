@@ -2173,6 +2173,14 @@ function stageBoxForMediaAspect(aspectRatio, bounds = {}) {
   };
 }
 
+function mediaAspectRatioForMember(member) {
+  const explicit = Number(member?.aspectRatio || 0);
+  if (explicit > 0) return explicit;
+  const width = Number(member?.sourceWidth || 0);
+  const height = Number(member?.sourceHeight || 0);
+  return width > 0 && height > 0 ? width / height : null;
+}
+
 function stageBoxWithMediaAspect(member, bounds = {}) {
   if (!["image", "video"].includes(member?.mediaType)) {
     return {
@@ -2180,7 +2188,7 @@ function stageBoxWithMediaAspect(member, bounds = {}) {
       h: clampStageSize(bounds.h, 24),
     };
   }
-  return stageBoxForMediaAspect(member.aspectRatio, bounds);
+  return stageBoxForMediaAspect(mediaAspectRatioForMember(member), bounds);
 }
 
 function centerStageBoxInBounds(bounds, box) {
@@ -4071,7 +4079,7 @@ function stockMemberFromItem(item, endpoint, existingCount, timelineMemberCount)
   const width = findStockNumberField(item, ["width", "w", "naturalWidth", "videoWidth", "imageWidth", "pixelWidth"]);
   const height = findStockNumberField(item, ["height", "h", "naturalHeight", "videoHeight", "imageHeight", "pixelHeight"]);
   const durationSeconds = findStockNumberField(item, ["duration", "durationSeconds", "seconds", "videoDuration", "audioDuration"]);
-  const aspectRatio = width && height ? width / height : mediaType === "video" ? visualStageAspectRatio() : null;
+  const aspectRatio = width && height ? width / height : null;
   const rawName = findStockField(item, ["title", "name", "fileName", "filename", "label", "slug"]);
   const stockPrompt = findStockField(item, ["prompt", "comment", "description", "caption", "alt", "query"]);
   const baseName = cleanMemberName(rawName || "Admira Stock latest");
