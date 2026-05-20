@@ -1169,6 +1169,7 @@ let draggedDirectorWindow = null;
 let dragOffsetX = 0;
 let dragOffsetY = 0;
 let selectedStageKeyframe = null;
+let stageAnimationCaptureCache = null;
 
 const sceneCounts = {
   "60 seconds": 4,
@@ -2479,6 +2480,62 @@ function totalTimelineFrames(plan) {
 
 window.totalTimelineFrames = totalTimelineFrames;
 
+function stageAnimationSignature(plan = currentPlan()) {
+  const cast = (plan.cast || [])
+    .filter((member) => member.imported && member.src && member.onStage !== false)
+    .map((member) => ({
+      src: member.src,
+      mediaType: member.mediaType,
+      muted: Boolean(member.muted),
+      startFrame: Number(member.startFrame || 1),
+      durationFrames: Number(member.durationFrames || 24),
+      keyframes: stageKeyframesFor(member),
+    }));
+  const stageItems = (plan.stageItems || [])
+    .filter((item) => item.type === "text" || isShapeStageItem(item))
+    .map((item) => ({
+      id: item.id,
+      type: item.type,
+      text: item.text || "",
+      color: item.color || "",
+      startFrame: Number(item.startFrame || 1),
+      durationFrames: Number(item.durationFrames || 24),
+      keyframes: stageKeyframesFor(item),
+      fontWeight: item.fontWeight || "",
+      fontStyle: item.fontStyle || "",
+      textDecoration: item.textDecoration || "",
+      textAlign: item.textAlign || "",
+      fontSize: item.fontSize || "",
+    }));
+  return JSON.stringify({
+    fps: timelineFps(),
+    totalFrames: totalTimelineFrames(plan),
+    cast,
+    stageItems,
+  });
+}
+
+function getStageAnimationCapture() {
+  const signature = stageAnimationSignature();
+  if (stageAnimationCaptureCache?.signature === signature) {
+    if (stageAnimationCaptureCache.blob) return Promise.resolve(stageAnimationCaptureCache.blob);
+    if (stageAnimationCaptureCache.promise) return stageAnimationCaptureCache.promise;
+  }
+  const promise = renderStageAnimationBlob()
+    .then((blob) => {
+      stageAnimationCaptureCache = { signature, blob };
+      return blob;
+    })
+    .catch((error) => {
+      if (stageAnimationCaptureCache?.signature === signature) stageAnimationCaptureCache = null;
+      throw error;
+    });
+  stageAnimationCaptureCache = { signature, promise };
+  return promise;
+}
+
+window.getStageAnimationCapture = getStageAnimationCapture;
+
 function captureAudioTracksFromStage() {
   return [...document.querySelectorAll(".stage-imported-member:not(.is-out-of-frame) video, .stage-imported-member:not(.is-out-of-frame) audio")]
     .filter((media) => !media.muted)
@@ -2728,7 +2785,7 @@ async function exportStageVideo() {
     downloadStageVideoButton.textContent = "Exportando...";
   }
   try {
-    const blob = await renderStageAnimationBlob();
+    const blob = await getStageAnimationCapture();
     downloadBlob(blob, `${planSlug(plan)}-stage.webm`);
   } catch (error) {
     window.alert(error.message || "Video export is not available in this browser yet.");
@@ -2743,7 +2800,7 @@ async function exportStageVideo() {
 function makeExportPackage(plan) {
   return {
     package: "Admira Player Ready",
-    version: "AiDirector v2026.05.20 r20",
+    version: "AiDirector v2026.05.20 r21",
     includeMetadata: Boolean(includeMetadata?.checked),
     formats: {
       video: ["MP4", "MOV", "ProRes", "4K/8K", "PP Solving"],
@@ -3318,7 +3375,7 @@ async function exportStageToAdmiraStock() {
     const plan = currentPlan();
     fallbackPlan = plan;
     const fps = Number(document.querySelector("[data-score-fps]")?.dataset.value || 24);
-    const blob = await renderStageAnimationBlob();
+    const blob = await getStageAnimationCapture();
     fallbackBlob = blob;
     const metadata = {
       title: `${plan.title || "AiDirector Stage"} animation`,

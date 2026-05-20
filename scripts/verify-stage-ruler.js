@@ -124,6 +124,8 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
     const originalRevokeObjectUrl = URL.revokeObjectURL;
     const originalAnchorClick = HTMLAnchorElement.prototype.click;
     let downloadedFile = "";
+    const downloadedFiles = [];
+    let recorderCount = 0;
 
     let recorderTracks = { audio: 0, video: 0 };
     let rafTime = 0;
@@ -144,6 +146,7 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
 
       constructor(stream) {
         super();
+        recorderCount += 1;
         recorderTracks = {
           audio: stream?.getAudioTracks?.().length || 0,
           video: stream?.getVideoTracks?.().length || 0,
@@ -178,13 +181,18 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
       URL.revokeObjectURL = () => {};
       HTMLAnchorElement.prototype.click = function click() {
         downloadedFile = this.download;
+        downloadedFiles.push(this.download);
       };
       button.click();
       await new Promise((resolve) => window.setTimeout(resolve, 500));
+      button.click();
+      await new Promise((resolve) => window.setTimeout(resolve, 120));
       return {
         downloadedFile,
+        downloadedFiles,
         buttonText: button.textContent.trim(),
         buttonDisabled: button.disabled,
+        recorderCount,
         recorderTracks,
       };
     } finally {
@@ -771,8 +779,8 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
   const missingLabels = result.labels.length !== expectedYLabels || result.xLabels.length !== expectedXLabels;
   const hasWrongRotation = result.labels.some((label) => label.transform === "matrix(0, 1, -1, 0, 0, 0)");
 
-  if (!result.stylesheetHref.includes("aidirector-20260520-r20")) {
-    throw new Error(`Expected aidirector-20260520-r20 stylesheet cache key, got ${result.stylesheetHref}`);
+  if (!result.stylesheetHref.includes("aidirector-20260520-r21")) {
+    throw new Error(`Expected aidirector-20260520-r21 stylesheet cache key, got ${result.stylesheetHref}`);
   }
 
   if (
@@ -798,7 +806,7 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
     throw new Error(`Unexpected stage ruler toggle: ${JSON.stringify(result.rulerToggle)}`);
   }
 
-  if (result.brand.text !== "AiDirector v.2026.05.20 r20" || result.brand.rightGap > 20) {
+  if (result.brand.text !== "AiDirector v.2026.05.20 r21" || result.brand.rightGap > 20) {
     throw new Error(`Unexpected menu brand placement: ${JSON.stringify(result.brand)}`);
   }
 
@@ -1013,8 +1021,10 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
 
   if (
     !result.stageVideoExport.downloadedFile.endsWith("-stage.webm") ||
+    result.stageVideoExport.downloadedFiles.length !== 2 ||
     result.stageVideoExport.buttonText !== "Descargar" ||
     result.stageVideoExport.buttonDisabled ||
+    result.stageVideoExport.recorderCount !== 1 ||
     result.stageVideoExport.recorderTracks.video !== 1
   ) {
     throw new Error(`Unexpected stage video export: ${JSON.stringify(result.stageVideoExport)}`);
