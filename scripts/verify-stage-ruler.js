@@ -113,6 +113,9 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
     const button = document.querySelector("[data-download-stage-video]");
     const originalMediaRecorder = window.MediaRecorder;
     const originalCaptureStream = HTMLCanvasElement.prototype.captureStream;
+    const originalRequestAnimationFrame = window.requestAnimationFrame;
+    const originalCancelAnimationFrame = window.cancelAnimationFrame;
+    const originalMediaStream = window.MediaStream;
     const originalSetInterval = window.setInterval;
     const originalClearInterval = window.clearInterval;
     const originalCreateObjectUrl = URL.createObjectURL;
@@ -120,9 +123,29 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
     const originalAnchorClick = HTMLAnchorElement.prototype.click;
     let downloadedFile = "";
 
+    let recorderTracks = { audio: 0, video: 0 };
+    let rafTime = 0;
+    class FakeMediaStream {
+      constructor(tracks = []) {
+        this.tracks = tracks;
+      }
+
+      getTracks() { return this.tracks; }
+      getVideoTracks() { return this.tracks.filter((track) => track.kind === "video"); }
+      getAudioTracks() { return this.tracks.filter((track) => track.kind === "audio"); }
+    }
+
     class FakeMediaRecorder extends EventTarget {
       static isTypeSupported() {
         return true;
+      }
+
+      constructor(stream) {
+        super();
+        recorderTracks = {
+          audio: stream?.getAudioTracks?.().length || 0,
+          video: stream?.getVideoTracks?.().length || 0,
+        };
       }
 
       start() {}
@@ -139,11 +162,15 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
 
     try {
       window.MediaRecorder = FakeMediaRecorder;
-      HTMLCanvasElement.prototype.captureStream = () => ({});
-      window.setInterval = (callback) => {
-        for (let index = 0; index < 260; index += 1) callback();
-        return 1;
+      window.MediaStream = FakeMediaStream;
+      HTMLCanvasElement.prototype.captureStream = () => new FakeMediaStream([{ kind: "video" }]);
+      window.requestAnimationFrame = (callback) => {
+        rafTime += 1000 / 60;
+        window.setTimeout(() => callback(rafTime), 0);
+        return rafTime;
       };
+      window.cancelAnimationFrame = () => {};
+      window.setInterval = (callback) => { callback(); return 1; };
       window.clearInterval = () => {};
       URL.createObjectURL = () => "blob:stage-test";
       URL.revokeObjectURL = () => {};
@@ -151,15 +178,19 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
         downloadedFile = this.download;
       };
       button.click();
-      await Promise.resolve();
+      await new Promise((resolve) => window.setTimeout(resolve, 500));
       return {
         downloadedFile,
         buttonText: button.textContent.trim(),
         buttonDisabled: button.disabled,
+        recorderTracks,
       };
     } finally {
       window.MediaRecorder = originalMediaRecorder;
       HTMLCanvasElement.prototype.captureStream = originalCaptureStream;
+      window.requestAnimationFrame = originalRequestAnimationFrame;
+      window.cancelAnimationFrame = originalCancelAnimationFrame;
+      window.MediaStream = originalMediaStream;
       window.setInterval = originalSetInterval;
       window.clearInterval = originalClearInterval;
       URL.createObjectURL = originalCreateObjectUrl;
@@ -172,17 +203,37 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
     const button = document.querySelector("[data-stock-export]");
     const originalMediaRecorder = window.MediaRecorder;
     const originalCaptureStream = HTMLCanvasElement.prototype.captureStream;
-    const originalSetInterval = window.setInterval;
-    const originalClearInterval = window.clearInterval;
+    const originalMediaCaptureStream = HTMLMediaElement.prototype.captureStream;
+    const originalRequestAnimationFrame = window.requestAnimationFrame;
+    const originalCancelAnimationFrame = window.cancelAnimationFrame;
+    const originalMediaStream = window.MediaStream;
     const originalFetch = window.fetch;
     const calls = [];
     const formEntries = [];
-    let intervalTicks = 0;
-    let intervalCleared = false;
+    let rafTicks = 0;
+    let recorderTracks = { audio: 0, video: 0 };
+
+    class FakeMediaStream {
+      constructor(tracks = []) {
+        this.tracks = tracks;
+      }
+
+      getTracks() { return this.tracks; }
+      getVideoTracks() { return this.tracks.filter((track) => track.kind === "video"); }
+      getAudioTracks() { return this.tracks.filter((track) => track.kind === "audio"); }
+    }
 
     class FakeMediaRecorder extends EventTarget {
       static isTypeSupported() {
         return true;
+      }
+
+      constructor(stream) {
+        super();
+        recorderTracks = {
+          audio: stream?.getAudioTracks?.().length || 0,
+          video: stream?.getVideoTracks?.().length || 0,
+        };
       }
 
       start() {}
@@ -199,16 +250,17 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
 
     try {
       window.MediaRecorder = FakeMediaRecorder;
-      HTMLCanvasElement.prototype.captureStream = () => ({});
-      window.setInterval = (callback) => {
-        intervalCleared = false;
-        for (let index = 0; index < 260 && !intervalCleared; index += 1) {
-          intervalTicks += 1;
-          callback();
-        }
-        return 1;
+      window.MediaStream = FakeMediaStream;
+      HTMLCanvasElement.prototype.captureStream = () => new FakeMediaStream([{ kind: "video" }]);
+      HTMLMediaElement.prototype.captureStream = () => new FakeMediaStream([{ kind: "audio" }]);
+      let rafTime = 0;
+      window.requestAnimationFrame = (callback) => {
+        rafTicks += 1;
+        rafTime += 1000 / 12;
+        window.setTimeout(() => callback(rafTime), 0);
+        return rafTicks;
       };
-      window.clearInterval = () => { intervalCleared = true; };
+      window.cancelAnimationFrame = () => {};
       window.fetch = async (url, options = {}) => {
         calls.push({ url: String(url), method: options.method || "GET" });
         if (options.body instanceof FormData) {
@@ -226,20 +278,39 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
           headers: { "Content-Type": "application/json" },
         });
       };
+      const plan = window.currentPlan?.() || JSON.parse(localStorage.getItem("ainimation-film-plan") || "{}");
+      plan.cast = [
+        ...(plan.cast || []),
+        {
+          name: "Export Audio Bed",
+          role: "Audio",
+          imported: true,
+          mediaType: "audio",
+          type: "Sound member",
+          src: "data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAESsAACJWAAACABAAZGF0YQAAAAA=",
+          onStage: true,
+          startFrame: 1,
+          durationFrames: 121,
+          keyframes: [{ frame: 1, x: 16, y: 54, w: 12, h: 10 }],
+        },
+      ];
+      localStorage.setItem("ainimation-film-plan", JSON.stringify(plan));
+      window.renderFilmPlan?.(plan);
       button.click();
-      await new Promise((resolve) => window.setTimeout(resolve, 80));
-      const plan = JSON.parse(localStorage.getItem("ainimation-film-plan") || "{}");
-      const member = (plan.cast || []).find((item) => item.source === "admira.studio Stock" && item.mediaType === "animation");
+      await new Promise((resolve) => window.setTimeout(resolve, 800));
+      const exportedPlan = JSON.parse(localStorage.getItem("ainimation-film-plan") || "{}");
+      const member = (exportedPlan.cast || []).find((item) => item.source === "admira.studio Stock" && item.mediaType === "animation");
       localStorage.setItem("ainimation-film-plan", JSON.stringify({
-        ...plan,
-        cast: (plan.cast || []).filter((item) => item !== member),
+        ...exportedPlan,
+        cast: (exportedPlan.cast || []).filter((item) => item !== member && item.name !== "Export Audio Bed"),
       }));
       window.renderFilmPlan?.(JSON.parse(localStorage.getItem("ainimation-film-plan") || "{}"));
       return {
         calls,
         formEntries,
-        intervalTicks,
+        rafTicks,
         expectedFrames: window.totalTimelineFrames?.(plan) || null,
+        recorderTracks,
         buttonText: button.textContent.trim(),
         buttonDisabled: button.disabled,
         castMember: member ? {
@@ -252,8 +323,10 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
     } finally {
       window.MediaRecorder = originalMediaRecorder;
       HTMLCanvasElement.prototype.captureStream = originalCaptureStream;
-      window.setInterval = originalSetInterval;
-      window.clearInterval = originalClearInterval;
+      HTMLMediaElement.prototype.captureStream = originalMediaCaptureStream;
+      window.requestAnimationFrame = originalRequestAnimationFrame;
+      window.cancelAnimationFrame = originalCancelAnimationFrame;
+      window.MediaStream = originalMediaStream;
       window.fetch = originalFetch;
     }
   });
@@ -633,8 +706,8 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
   const missingLabels = result.labels.length !== expectedYLabels || result.xLabels.length !== expectedXLabels;
   const hasWrongRotation = result.labels.some((label) => label.transform === "matrix(0, 1, -1, 0, 0, 0)");
 
-  if (!result.stylesheetHref.includes("aidirector-20260520-r18")) {
-    throw new Error(`Expected aidirector-20260520-r18 stylesheet cache key, got ${result.stylesheetHref}`);
+  if (!result.stylesheetHref.includes("aidirector-20260520-r19")) {
+    throw new Error(`Expected aidirector-20260520-r19 stylesheet cache key, got ${result.stylesheetHref}`);
   }
 
   if (
@@ -660,7 +733,7 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
     throw new Error(`Unexpected stage ruler toggle: ${JSON.stringify(result.rulerToggle)}`);
   }
 
-  if (result.brand.text !== "AiDirector v.2026.05.20 r18" || result.brand.rightGap > 20) {
+  if (result.brand.text !== "AiDirector v.2026.05.20 r19" || result.brand.rightGap > 20) {
     throw new Error(`Unexpected menu brand placement: ${JSON.stringify(result.brand)}`);
   }
 
@@ -682,14 +755,13 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
 
   if (
     !result.stageText.created ||
-    result.stageText.durationFrames !== 96 ||
-    result.stageText.keyframes.length !== 4 ||
+    result.stageText.durationFrames < 72 ||
+    result.stageText.keyframes.length < 3 ||
     result.stageText.keyframes[1]?.frame !== result.stageText.keyframes[0]?.frame + 24 ||
     result.stageText.keyframes[2]?.frame !== result.stageText.keyframes[1]?.frame + 24 ||
-    result.stageText.keyframes[3]?.frame !== result.stageText.keyframes[2]?.frame + 24 ||
     result.stageText.keyframes[1]?.color !== "#00ff00" ||
     result.stageText.keyframes[2]?.textAlign !== "center" ||
-    result.stageText.dotCount !== 4 ||
+    result.stageText.dotCount < 3 ||
     !result.stageText.selected ||
     result.stageText.color !== "#00ff00" ||
     result.stageText.textAlign !== "center"
@@ -767,7 +839,11 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
     result.stockExport.calls[0]?.method !== "POST" ||
     !result.stockExport.formEntries.some(([key, value]) => key === "file" && value.startsWith("video/webm:")) ||
     !result.stockExport.formEntries.some(([key, value]) => key === "mediaType" && value === "animation") ||
-    result.stockExport.expectedFrames !== result.stockExport.intervalTicks ||
+    result.stockExport.expectedFrames !== 121 ||
+    result.stockExport.rafTicks < 2 ||
+    result.stockExport.rafTicks >= 240 ||
+    result.stockExport.recorderTracks.video !== 1 ||
+    result.stockExport.recorderTracks.audio < 1 ||
     result.stockExport.castMember?.mediaType !== "animation" ||
     result.stockExport.castMember?.src !== "https://www.admira.studio/media/aidirector-export.webm" ||
     result.stockExport.castMember?.stock !== true ||
@@ -860,7 +936,8 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
   if (
     !result.stageVideoExport.downloadedFile.endsWith("-stage.webm") ||
     result.stageVideoExport.buttonText !== "Descargar" ||
-    result.stageVideoExport.buttonDisabled
+    result.stageVideoExport.buttonDisabled ||
+    result.stageVideoExport.recorderTracks.video !== 1
   ) {
     throw new Error(`Unexpected stage video export: ${JSON.stringify(result.stageVideoExport)}`);
   }

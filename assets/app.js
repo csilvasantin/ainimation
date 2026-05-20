@@ -2432,6 +2432,28 @@ function totalTimelineFrames(plan) {
 
 window.totalTimelineFrames = totalTimelineFrames;
 
+function captureAudioTracksFromStage() {
+  return [...document.querySelectorAll(".stage-imported-member:not(.is-out-of-frame) video, .stage-imported-member:not(.is-out-of-frame) audio")]
+    .filter((media) => !media.muted)
+    .flatMap((media) => {
+      const capture = media.captureStream || media.mozCaptureStream;
+      if (typeof capture !== "function") return [];
+      try {
+        return capture.call(media)?.getAudioTracks?.() || [];
+      } catch {
+        return [];
+      }
+    });
+}
+
+function mergeCanvasAndAudioStreams(canvasStream, audioTracks) {
+  if (typeof MediaStream === "undefined" || !canvasStream?.getTracks) return canvasStream;
+  return new MediaStream([
+    ...canvasStream.getVideoTracks(),
+    ...audioTracks,
+  ]);
+}
+
 function stageGradient(ctx, width, height) {
   const gradient = ctx.createLinearGradient(0, 0, width, height);
   gradient.addColorStop(0, "#0b1327");
@@ -2598,7 +2620,10 @@ function renderStageAnimationBlob() {
   if (!ctx || typeof canvas.captureStream !== "function") {
     return Promise.reject(new Error("Video export is not available in this browser yet."));
   }
-  const stream = canvas.captureStream(Math.max(1, fps));
+  const exportFps = Math.max(30, Math.min(60, fps * 2));
+  const canvasStream = canvas.captureStream(exportFps);
+  syncStageToFrame(1, true);
+  const stream = mergeCanvasAndAudioStreams(canvasStream, captureAudioTracksFromStage());
   const mimeType = MediaRecorder.isTypeSupported("video/webm;codecs=vp9")
     ? "video/webm;codecs=vp9"
     : MediaRecorder.isTypeSupported("video/webm;codecs=vp8")
@@ -2607,8 +2632,9 @@ function renderStageAnimationBlob() {
   const recorder = new MediaRecorder(stream, { mimeType });
   const chunks = [];
   const totalFrames = totalTimelineFrames(plan);
-  let frameNumber = 1;
-  let timer = null;
+  const durationMs = (totalFrames / Math.max(1, fps)) * 1000;
+  let animationFrame = null;
+  let startedAt = 0;
   let stopped = false;
 
   return new Promise((resolve, reject) => {
@@ -2616,27 +2642,34 @@ function renderStageAnimationBlob() {
       if (event.data?.size) chunks.push(event.data);
     });
     recorder.addEventListener("error", () => {
-      window.clearInterval(timer);
+      if (animationFrame) window.cancelAnimationFrame(animationFrame);
       syncStageToFrame(currentTimelineFrame(), false);
       reject(new Error("Could not record Stage animation."));
     });
     recorder.addEventListener("stop", () => {
-      window.clearInterval(timer);
+      if (animationFrame) window.cancelAnimationFrame(animationFrame);
       syncStageToFrame(currentTimelineFrame(), false);
       resolve(new Blob(chunks, { type: "video/webm" }));
     });
 
-    drawStageDomFrame(ctx, stage, canvas.width, canvas.height);
-    recorder.start();
-    timer = window.setInterval(() => {
-      syncStageToFrame(frameNumber, false);
+    const renderAt = (timestamp) => {
+      if (!startedAt) startedAt = timestamp;
+      const elapsed = Math.max(0, timestamp - startedAt);
+      const frame = Math.min(totalFrames, 1 + (elapsed / 1000) * Math.max(1, fps));
+      syncStageToFrame(frame, true);
       drawStageDomFrame(ctx, stage, canvas.width, canvas.height);
-      frameNumber += 1;
-      if (frameNumber > totalFrames && !stopped) {
+      if (elapsed >= durationMs && !stopped) {
         stopped = true;
         recorder.stop();
+        return;
       }
-    }, 1000 / Math.max(1, fps));
+      animationFrame = window.requestAnimationFrame(renderAt);
+    };
+
+    syncStageToFrame(1, true);
+    drawStageDomFrame(ctx, stage, canvas.width, canvas.height);
+    recorder.start();
+    animationFrame = window.requestAnimationFrame(renderAt);
   });
 }
 
@@ -2663,7 +2696,7 @@ async function exportStageVideo() {
 function makeExportPackage(plan) {
   return {
     package: "Admira Player Ready",
-    version: "AiDirector v2026.05.20 r18",
+    version: "AiDirector v2026.05.20 r19",
     includeMetadata: Boolean(includeMetadata?.checked),
     formats: {
       video: ["MP4", "MOV", "ProRes", "4K/8K", "PP Solving"],
