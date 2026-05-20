@@ -748,6 +748,7 @@ function initStageColorPicker() {
     foregroundSwatch.style.backgroundColor = nextColor;
     stageCanvas.style.setProperty("--stage-foreground", nextColor);
     localStorage.setItem(foregroundStorageKey, nextColor);
+    window.dispatchEvent(new CustomEvent("stageforegroundchange", { detail: { color: nextColor } }));
   };
 
   applyBackgroundColor(localStorage.getItem(storageKey) || defaultColor);
@@ -1434,6 +1435,26 @@ function stageItemId(prefix = "stage") {
   return `${prefix}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`;
 }
 
+function textStyleForItem(item) {
+  return {
+    fontWeight: item.fontWeight || "850",
+    fontStyle: item.fontStyle || "normal",
+    textDecoration: item.textDecoration || "none",
+    textAlign: item.textAlign || "left",
+  };
+}
+
+function applyTextStyleToElement(textItem, item) {
+  const content = textItem.querySelector(".stage-text-content");
+  const style = textStyleForItem(item);
+  textItem.style.color = item.color || "";
+  if (!content) return;
+  content.style.fontWeight = style.fontWeight;
+  content.style.fontStyle = style.fontStyle;
+  content.style.textDecoration = style.textDecoration;
+  content.style.textAlign = style.textAlign;
+}
+
 function positionStageLine(line, item) {
   const x1 = clampPercent(item.x1);
   const y1 = clampPercent(item.y1);
@@ -1459,7 +1480,6 @@ function renderStageItems(stage, plan) {
       text.dataset.stageItemId = item.id;
       text.style.left = `${clampPercent(item.x)}%`;
       text.style.top = `${clampPercent(item.y)}%`;
-      text.style.color = item.color || "";
       const content = document.createElement("span");
       content.className = "stage-text-content";
       content.contentEditable = "true";
@@ -1472,6 +1492,10 @@ function renderStageItems(stage, plan) {
       removeButton.textContent = "×";
       text.addEventListener("pointerdown", (event) => {
         if (stage.dataset.stageTool === "text") event.stopPropagation();
+        window.dispatchEvent(new CustomEvent("stagetextselect", { detail: { id: item.id } }));
+      });
+      content.addEventListener("focus", () => {
+        window.dispatchEvent(new CustomEvent("stagetextselect", { detail: { id: item.id } }));
       });
       content.addEventListener("blur", () => {
         const nextPlan = currentPlan();
@@ -1495,6 +1519,7 @@ function renderStageItems(stage, plan) {
         renderFilmPlan(nextPlan);
       });
       text.append(content, removeButton);
+      applyTextStyleToElement(text, item);
       stage.append(text);
     }
     if (item.type === "line") {
@@ -2037,7 +2062,16 @@ function initStageTools() {
   const stage = document.querySelector(".stage-canvas");
   const palette = document.querySelector(".tool-palette");
   const toolButtons = [...document.querySelectorAll(".tool-symbols [data-stage-tool]")];
+  const textStyleButtons = [...document.querySelectorAll("[data-text-style]")];
+  const textAlignButtons = [...document.querySelectorAll("[data-text-align]")];
   if (!stage || !palette || !toolButtons.length) return;
+  let activeTextItem = null;
+  const textStyleState = {
+    bold: true,
+    italic: false,
+    underline: false,
+    align: "left",
+  };
 
   const setActiveTool = (tool) => {
     palette.dataset.stageTool = tool;
@@ -2050,6 +2084,49 @@ function initStageTools() {
   const foregroundColor = () => (
     getComputedStyle(stage).getPropertyValue("--stage-foreground").trim() || "#edf6ff"
   );
+  const textStylePayload = () => ({
+    fontWeight: textStyleState.bold ? "850" : "400",
+    fontStyle: textStyleState.italic ? "italic" : "normal",
+    textDecoration: textStyleState.underline ? "underline" : "none",
+    textAlign: textStyleState.align,
+  });
+  const syncTextControlButtons = () => {
+    textStyleButtons.forEach((button) => {
+      button.setAttribute("aria-pressed", String(Boolean(textStyleState[button.dataset.textStyle])));
+    });
+    textAlignButtons.forEach((button) => {
+      button.setAttribute("aria-pressed", String(button.dataset.textAlign === textStyleState.align));
+    });
+  };
+  const saveActiveTextPatch = (patch) => {
+    if (!activeTextItem) return;
+    const itemId = activeTextItem.dataset.stageItemId;
+    const plan = currentPlan();
+    let nextItem = null;
+    plan.stageItems = (plan.stageItems || []).map((item) => {
+      if (item.id !== itemId) return item;
+      nextItem = { ...item, ...patch };
+      return nextItem;
+    });
+    if (!nextItem) return;
+    saveFilmPlan(plan);
+    applyTextStyleToElement(activeTextItem, nextItem);
+  };
+  const setActiveTextItem = (textItem) => {
+    if (!textItem) return;
+    activeTextItem = textItem;
+    stage.querySelectorAll(".stage-text-item").forEach((item) => {
+      item.classList.toggle("is-selected", item === activeTextItem);
+    });
+    const itemId = textItem.dataset.stageItemId;
+    const planItem = (currentPlan().stageItems || []).find((item) => item.id === itemId);
+    const style = textStyleForItem(planItem || {});
+    textStyleState.bold = style.fontWeight !== "400";
+    textStyleState.italic = style.fontStyle === "italic";
+    textStyleState.underline = style.textDecoration === "underline";
+    textStyleState.align = style.textAlign || "left";
+    syncTextControlButtons();
+  };
 
   toolButtons.forEach((button) => {
     button.addEventListener("click", (event) => {
@@ -2059,8 +2136,32 @@ function initStageTools() {
       palette.dataset.openFor = "";
     });
   });
+  textStyleButtons.forEach((button) => {
+    button.addEventListener("click", () => {
+      const key = button.dataset.textStyle;
+      textStyleState[key] = !textStyleState[key];
+      syncTextControlButtons();
+      saveActiveTextPatch(textStylePayload());
+    });
+  });
+  textAlignButtons.forEach((button) => {
+    button.addEventListener("click", () => {
+      textStyleState.align = button.dataset.textAlign || "left";
+      syncTextControlButtons();
+      saveActiveTextPatch(textStylePayload());
+    });
+  });
+  window.addEventListener("stagetextselect", (event) => {
+    const textItem = stage.querySelector(`[data-stage-item-id="${event.detail?.id}"]`);
+    setActiveTextItem(textItem);
+  });
+  window.addEventListener("stageforegroundchange", (event) => {
+    if (!activeTextItem) return;
+    saveActiveTextPatch({ color: event.detail?.color || foregroundColor() });
+  });
 
   setActiveTool(palette.dataset.stageTool || "hand");
+  syncTextControlButtons();
 
   stage.addEventListener("pointerdown", (event) => {
     const tool = activeTool();
@@ -2123,6 +2224,7 @@ function initStageTools() {
 
     if (tool === "hand" && textItem) {
       event.preventDefault();
+      setActiveTextItem(textItem);
       const itemId = textItem.dataset.stageItemId;
       const start = stagePointFromEvent(stage, event);
       const startLeft = Number.parseFloat(textItem.style.left) || 0;
@@ -2175,12 +2277,14 @@ function initStageTools() {
         y: point.y,
         text: "Text",
         color: foregroundColor(),
+        ...textStylePayload(),
       };
       plan.stageItems = [...(plan.stageItems || []), item];
       saveFilmPlan(plan);
       renderFilmPlan(plan);
       const text = stage.querySelector(`[data-stage-item-id="${item.id}"] .stage-text-content`);
       if (text) {
+        setActiveTextItem(text.closest(".stage-text-item"));
         text.focus();
         document.getSelection()?.selectAllChildren(text);
       }

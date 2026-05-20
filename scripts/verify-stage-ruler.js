@@ -59,14 +59,28 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
 
   await page.locator('[data-stage-tool="text"]').click();
   await page.locator(".stage-canvas").click({ position: { x: 240, y: 180 } });
+  await page.locator('[data-text-style="italic"]').click();
+  await page.locator('[data-text-align="center"]').click();
+  await page.evaluate(() => {
+    const input = document.querySelector(".foreground-color-input");
+    input.value = "#ff0000";
+    input.dispatchEvent(new Event("input", { bubbles: true }));
+  });
 
   result.stageText = await page.evaluate(() => {
     const item = document.querySelector(".stage-text-item");
+    const content = item?.querySelector(".stage-text-content");
     const removeButton = item?.querySelector(".stage-text-remove");
+    const contentStyle = content ? getComputedStyle(content) : null;
+    const itemStyle = item ? getComputedStyle(item) : null;
 
     return {
       itemCountAfterCreate: document.querySelectorAll(".stage-text-item").length,
-      text: item?.querySelector(".stage-text-content")?.textContent.trim() || "",
+      text: content?.textContent.trim() || "",
+      color: itemStyle?.color || "",
+      fontStyle: contentStyle?.fontStyle || "",
+      fontWeight: contentStyle?.fontWeight || "",
+      textAlign: contentStyle?.textAlign || "",
       removeLabel: removeButton?.getAttribute("aria-label") || "",
     };
   });
@@ -80,15 +94,15 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
   const missingLabels = result.labels.length !== 7;
   const hasWrongRotation = result.labels.some((label) => label.transform !== "matrix(0, 1, -1, 0, 0, 0)");
 
-  if (!result.stylesheetHref.includes("aidirector-20260520-r2")) {
-    throw new Error(`Expected aidirector-20260520-r2 stylesheet cache key, got ${result.stylesheetHref}`);
+  if (!result.stylesheetHref.includes("aidirector-20260520-r3")) {
+    throw new Error(`Expected aidirector-20260520-r3 stylesheet cache key, got ${result.stylesheetHref}`);
   }
 
   if (missingLabels || hasWrongRotation) {
     throw new Error(`Unexpected vertical ruler labels: ${JSON.stringify(result.labels)}`);
   }
 
-  if (result.brand.text !== "AiDirector v.2026.05.20 r2" || result.brand.rightGap > 20) {
+  if (result.brand.text !== "AiDirector v.2026.05.20 r3" || result.brand.rightGap > 20) {
     throw new Error(`Unexpected menu brand placement: ${JSON.stringify(result.brand)}`);
   }
 
@@ -112,6 +126,10 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
   if (
     result.stageText.itemCountAfterCreate !== 1 ||
     result.stageText.text !== "Text" ||
+    result.stageText.color !== "rgb(255, 0, 0)" ||
+    result.stageText.fontStyle !== "italic" ||
+    Number(result.stageText.fontWeight) < 700 ||
+    result.stageText.textAlign !== "center" ||
     result.stageText.removeLabel !== "Remove stage text" ||
     result.stageText.itemCountAfterRemove !== 0
   ) {
