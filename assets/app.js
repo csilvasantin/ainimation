@@ -3363,13 +3363,14 @@ function blobToBase64(blob) {
 
 async function postStageAnimationToStock(endpoint, blob, metadata) {
   // El worker pixer-eleven /stock/publish espera JSON con base64 (o sourceUrl)
-  // y un type válido (audio|music|image|video). La animación se publica como
-  // "video", motor "ainimation". Aparece directamente en admira.studio/stock.
+  // y un type válido. Las animaciones se publican como type "animation" (tipo
+  // real ya admitido por el worker), motor "ainimation". Aparece directamente
+  // en admira.studio/stock bajo el filtro "Animaciones".
   const base64 = await blobToBase64(blob);
   const fpsTxt = metadata.fps ? `${metadata.fps} fps` : "";
   const framesTxt = metadata.durationFrames ? `${metadata.durationFrames} frames` : "";
   const payload = {
-    type: "video",
+    type: "animation",
     motor: "ainimation",
     title: metadata.title || "ainimation",
     prompt: metadata.source || "ainimation.studio AiDirector",
