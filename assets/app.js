@@ -1595,9 +1595,13 @@ function keyframeDotsForStageItem(item, totalFrames) {
 }
 
 function stagePointFromEvent(stage, event) {
+  return stagePointFromClient(stage, event.clientX, event.clientY);
+}
+
+function stagePointFromClient(stage, clientX, clientY) {
   const rect = stage.getBoundingClientRect();
-  const x = rect.width ? ((event.clientX - rect.left) / rect.width) * 100 : 0;
-  const y = rect.height ? ((event.clientY - rect.top) / rect.height) * 100 : 0;
+  const x = rect.width ? ((clientX - rect.left) / rect.width) * 100 : 0;
+  const y = rect.height ? ((clientY - rect.top) / rect.height) * 100 : 0;
   return { x: clampPercent(x), y: clampPercent(y) };
 }
 
@@ -1740,6 +1744,96 @@ function hydrateFilmForm(plan) {
   }
 }
 
+function scheduleCastMember(plan, castIndex, options = {}) {
+  if (!Number.isInteger(castIndex) || !plan.cast?.[castIndex]?.src) return null;
+  const selectedCount = plan.cast.filter((member) => member.imported && member.src && member.onStage !== false).length;
+  const wasSelected = plan.cast[castIndex].onStage !== false;
+  const startFrame = Math.max(1, Number(options.startFrame || plan.cast[castIndex].startFrame || (1 + selectedCount * 24)));
+  const durationFrames = Math.max(1, Number(plan.cast[castIndex].durationFrames || 24));
+  const nextMember = {
+    ...plan.cast[castIndex],
+    onStage: true,
+    startFrame,
+    durationFrames,
+  };
+  if (options.stagePoint) {
+    nextMember.stageX = Math.min(Math.max(0, options.stagePoint.x - 6), 88);
+    nextMember.stageY = Math.min(Math.max(0, options.stagePoint.y - 5), 90);
+  }
+  if (!wasSelected || !nextMember.keyframes?.length || options.stagePoint) {
+    nextMember.keyframes = [
+      defaultStageKeyframe(nextMember, startFrame, selectedCount),
+    ];
+  }
+  plan.cast[castIndex] = nextMember;
+  return nextMember;
+}
+
+function frameFromTimelineClientX(clientX, target = null) {
+  const playhead = document.querySelector(".score-playhead");
+  const totalFrames = Math.max(1, Number(playhead?.getAttribute("aria-valuemax") || 240));
+  const track = target?.closest?.(".score-track") ||
+    document.querySelector(".score-track") ||
+    document.querySelector(".score-ruler");
+  const rect = track?.getBoundingClientRect();
+  if (!rect?.width) return currentTimelineFrame();
+  const ratio = Math.min(Math.max((clientX - rect.left) / rect.width, 0), 1);
+  return Math.round(ratio * (totalFrames - 1)) + 1;
+}
+
+function castIndexFromDrag(event) {
+  const custom = event.dataTransfer?.getData("application/x-ainimation-cast-index");
+  if (custom !== "") return Number(custom);
+  const plain = event.dataTransfer?.getData("text/plain") || "";
+  return plain.startsWith("cast:") ? Number(plain.slice(5)) : NaN;
+}
+
+function initCastDropTargets() {
+  const stage = document.querySelector(".stage-canvas");
+  const timeline = document.querySelector(".director-score");
+  if (stage) {
+    stage.ondragover = (event) => {
+      if (!Number.isInteger(castIndexFromDrag(event))) return;
+      event.preventDefault();
+      event.dataTransfer.dropEffect = "copy";
+    };
+    stage.ondrop = (event) => {
+      const castIndex = castIndexFromDrag(event);
+      if (!Number.isInteger(castIndex)) return;
+      event.preventDefault();
+      activateCastMemberFromDrop(castIndex, {
+        stagePoint: stagePointFromClient(stage, event.clientX, event.clientY),
+      });
+    };
+  }
+  if (timeline) {
+    timeline.ondragover = (event) => {
+      if (!Number.isInteger(castIndexFromDrag(event))) return;
+      event.preventDefault();
+      event.dataTransfer.dropEffect = "copy";
+    };
+    timeline.ondrop = (event) => {
+      const castIndex = castIndexFromDrag(event);
+      if (!Number.isInteger(castIndex)) return;
+      event.preventDefault();
+      activateCastMemberFromDrop(castIndex, {
+        startFrame: frameFromTimelineClientX(event.clientX, event.target),
+      });
+    };
+  }
+}
+
+function activateCastMemberFromDrop(castIndex, options = {}) {
+  const plan = currentPlan();
+  const member = scheduleCastMember(plan, castIndex, options);
+  if (!member) return false;
+  saveFilmPlan(plan);
+  renderFilmPlan(plan);
+  setTimelineFrame(member.startFrame || currentTimelineFrame(), false);
+  playUiTick(options.stagePoint ? "stage" : "select");
+  return true;
+}
+
 function renderFilmPlan(plan) {
   const castMembers = plan.cast || makeCast(plan);
   const visibleCastMembers = castMembers
@@ -1785,7 +1879,7 @@ function renderFilmPlan(plan) {
             ? `<b class="cast-member-kind">${escapeHtml(member.mediaType || "asset")}</b>`
             : "";
       return `
-      <article class="cast-member ${member.imported ? "imported-member" : ""} ${member.onStage !== false ? "is-on-stage" : ""}" data-media-type="${escapeHtml(member.mediaType || "generated")}" data-cast-index="${index}" role="button" tabindex="0" aria-pressed="${member.onStage !== false}">
+      <article class="cast-member ${member.imported ? "imported-member" : ""} ${member.onStage !== false ? "is-on-stage" : ""}" data-media-type="${escapeHtml(member.mediaType || "generated")}" data-cast-index="${index}" role="button" tabindex="0" draggable="true" aria-pressed="${member.onStage !== false}">
         ${media}
         <span>${String(index + 1).padStart(2, "0")}</span>
         <div>
@@ -1801,19 +1895,14 @@ function renderFilmPlan(plan) {
         const castIndex = Number(item.dataset.castIndex);
         const nextPlan = currentPlan();
         if (!Number.isInteger(castIndex) || !nextPlan.cast?.[castIndex]?.src) return;
-        const selectedCount = nextPlan.cast.filter((member) => member.imported && member.src && member.onStage !== false).length;
         const wasSelected = nextPlan.cast[castIndex].onStage !== false;
-        const startFrame = nextPlan.cast[castIndex].startFrame || (1 + selectedCount * 24);
-        nextPlan.cast[castIndex] = {
-          ...nextPlan.cast[castIndex],
-          onStage: !wasSelected,
-          startFrame,
-          durationFrames: nextPlan.cast[castIndex].durationFrames || 24,
-        };
-        if (!wasSelected && !nextPlan.cast[castIndex].keyframes?.length) {
-          nextPlan.cast[castIndex].keyframes = [
-            defaultStageKeyframe(nextPlan.cast[castIndex], startFrame, selectedCount),
-          ];
+        if (wasSelected) {
+          nextPlan.cast[castIndex] = {
+            ...nextPlan.cast[castIndex],
+            onStage: false,
+          };
+        } else {
+          scheduleCastMember(nextPlan, castIndex);
         }
         playUiTick(wasSelected ? "select" : "stage");
         saveFilmPlan(nextPlan);
@@ -1825,6 +1914,15 @@ function renderFilmPlan(plan) {
           event.preventDefault();
           toggleCastMember();
         }
+      });
+      item.addEventListener("dragstart", (event) => {
+        item.classList.add("is-dragging");
+        event.dataTransfer.effectAllowed = "copyMove";
+        event.dataTransfer.setData("text/plain", `cast:${item.dataset.castIndex}`);
+        event.dataTransfer.setData("application/x-ainimation-cast-index", item.dataset.castIndex);
+      });
+      item.addEventListener("dragend", () => {
+        item.classList.remove("is-dragging");
       });
     });
   }
@@ -1952,6 +2050,7 @@ function renderFilmPlan(plan) {
     initScoreLabelEditing();
     initTimelineSpriteDragging(totalFrames);
     initTimelineKeyframeDots();
+    initCastDropTargets();
     syncStageToFrame(currentTimelineFrame(), false);
   }
 
@@ -2260,7 +2359,7 @@ function exportStageVideo() {
 function makeExportPackage(plan) {
   return {
     package: "Admira Player Ready",
-    version: "AiDirector v2026.05.20 r11",
+    version: "AiDirector v2026.05.20 r12",
     includeMetadata: Boolean(includeMetadata?.checked),
     formats: {
       video: ["MP4", "MOV", "ProRes", "4K/8K", "PP Solving"],

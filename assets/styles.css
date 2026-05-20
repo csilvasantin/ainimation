@@ -2330,6 +2330,7 @@ h2 {
   min-height: 0;
   overflow: hidden;
   padding: 6px;
+  position: relative;
   transform-origin: center;
   transition: border-color 0.12s ease, box-shadow 0.12s ease, transform 0.12s ease;
 }
@@ -2339,7 +2340,13 @@ h2 {
 }
 
 .director-cast-window .cast-member[role="button"] {
-  cursor: pointer;
+  cursor: grab;
+}
+
+.director-cast-window .cast-member.is-dragging {
+  cursor: grabbing;
+  opacity: 0.72;
+  transform: scale(0.96);
 }
 
 .director-cast-window .cast-member.is-on-stage {
@@ -2368,6 +2375,13 @@ h2 {
   position: absolute;
   width: calc(100% - 8px);
   z-index: 0;
+}
+
+.director-cast-window .cast-member img,
+.director-cast-window .cast-member video {
+  display: block;
+  max-height: 54px;
+  max-width: 114px;
 }
 
 .director-cast-window .cast-member img,

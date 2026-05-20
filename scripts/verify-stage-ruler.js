@@ -198,20 +198,79 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
       const card = member
         ? document.querySelector(`[data-cast-index="${(plan.cast || []).indexOf(member)}"]`)
         : null;
-      card?.click();
-      await new Promise((resolve) => window.setTimeout(resolve, 40));
+      const castWindowRect = document.querySelector('[data-window="cast"]')?.getBoundingClientRect();
+      const cardRect = card?.getBoundingClientRect();
+      const mediaRect = card?.querySelector("img, video, .cast-member-kind")?.getBoundingClientRect();
+      if (card) {
+        const castIndex = String((plan.cast || []).indexOf(member));
+        const stage = document.querySelector(".stage-canvas");
+        const stageRect = stage?.getBoundingClientRect();
+        const stageTransfer = new DataTransfer();
+        stageTransfer.setData("text/plain", `cast:${castIndex}`);
+        stageTransfer.setData("application/x-ainimation-cast-index", castIndex);
+        card.dispatchEvent(new DragEvent("dragstart", { bubbles: true, dataTransfer: stageTransfer }));
+        stage?.dispatchEvent(new DragEvent("dragover", {
+          bubbles: true,
+          cancelable: true,
+          clientX: stageRect.left + stageRect.width * 0.42,
+          clientY: stageRect.top + stageRect.height * 0.38,
+          dataTransfer: stageTransfer,
+        }));
+        stage?.dispatchEvent(new DragEvent("drop", {
+          bubbles: true,
+          cancelable: true,
+          clientX: stageRect.left + stageRect.width * 0.42,
+          clientY: stageRect.top + stageRect.height * 0.38,
+          dataTransfer: stageTransfer,
+        }));
+        card.dispatchEvent(new DragEvent("dragend", { bubbles: true, dataTransfer: stageTransfer }));
+      }
+      await new Promise((resolve) => window.setTimeout(resolve, 60));
+      const timelineCard = member
+        ? document.querySelector(`[data-cast-index="${(plan.cast || []).indexOf(member)}"]`)
+        : null;
+      if (timelineCard) {
+        const castIndex = String((plan.cast || []).indexOf(member));
+        const track = document.querySelector(".score-track");
+        const trackRect = track?.getBoundingClientRect();
+        const timelineTransfer = new DataTransfer();
+        timelineTransfer.setData("text/plain", `cast:${castIndex}`);
+        timelineTransfer.setData("application/x-ainimation-cast-index", castIndex);
+        timelineCard.dispatchEvent(new DragEvent("dragstart", { bubbles: true, dataTransfer: timelineTransfer }));
+        track?.dispatchEvent(new DragEvent("dragover", {
+          bubbles: true,
+          cancelable: true,
+          clientX: trackRect.left + trackRect.width * 0.5,
+          clientY: trackRect.top + trackRect.height / 2,
+          dataTransfer: timelineTransfer,
+        }));
+        track?.dispatchEvent(new DragEvent("drop", {
+          bubbles: true,
+          cancelable: true,
+          clientX: trackRect.left + trackRect.width * 0.5,
+          clientY: trackRect.top + trackRect.height / 2,
+          dataTransfer: timelineTransfer,
+        }));
+        timelineCard.dispatchEvent(new DragEvent("dragend", { bubbles: true, dataTransfer: timelineTransfer }));
+      }
+      await new Promise((resolve) => window.setTimeout(resolve, 60));
       const stagedPlan = JSON.parse(localStorage.getItem("ainimation-film-plan") || "{}");
       const stagedMember = (stagedPlan.cast || []).find((item) => item.stock);
       return {
         calls,
         imported: Boolean(member),
         visibleInCast: Boolean(card),
+        cardDraggable: card?.getAttribute("draggable") === "true",
+        cardWithinCast: Boolean(castWindowRect && cardRect && cardRect.width <= 130 && cardRect.height <= 90 && cardRect.right <= castWindowRect.right + 1),
+        mediaWithinCard: Boolean(cardRect && mediaRect && mediaRect.width <= cardRect.width && mediaRect.height <= cardRect.height),
         name: member?.name || "",
         role: member?.role || "",
         source: member?.source || "",
         mediaType: member?.mediaType || "",
         durationFrames: member?.durationFrames,
         onStageAfterCastClick: stagedMember?.onStage,
+        startFrameAfterTimelineDrop: stagedMember?.startFrame,
+        stageCount: document.querySelectorAll(".stage-imported-member").length,
         timelineVisible: Boolean(document.querySelector(".score-sprite[data-cast-index]")),
       };
     } finally {
@@ -322,8 +381,8 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
   const missingLabels = result.labels.length !== expectedYLabels || result.xLabels.length !== expectedXLabels;
   const hasWrongRotation = result.labels.some((label) => label.transform === "matrix(0, 1, -1, 0, 0, 0)");
 
-  if (!result.stylesheetHref.includes("aidirector-20260520-r11")) {
-    throw new Error(`Expected aidirector-20260520-r11 stylesheet cache key, got ${result.stylesheetHref}`);
+  if (!result.stylesheetHref.includes("aidirector-20260520-r12")) {
+    throw new Error(`Expected aidirector-20260520-r12 stylesheet cache key, got ${result.stylesheetHref}`);
   }
 
   if (
@@ -349,7 +408,7 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
     throw new Error(`Unexpected stage ruler toggle: ${JSON.stringify(result.rulerToggle)}`);
   }
 
-  if (result.brand.text !== "AiDirector v.2026.05.20 r11" || result.brand.rightGap > 20) {
+  if (result.brand.text !== "AiDirector v.2026.05.20 r12" || result.brand.rightGap > 20) {
     throw new Error(`Unexpected menu brand placement: ${JSON.stringify(result.brand)}`);
   }
 
@@ -359,9 +418,8 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
     result.stageShapes.type !== "rect-fill" ||
     result.stageShapes.durationFrames !== 72 ||
     result.stageShapes.keyframes.length !== 3 ||
-    result.stageShapes.keyframes[0]?.frame !== 25 ||
-    result.stageShapes.keyframes[1]?.frame !== 49 ||
-    result.stageShapes.keyframes[2]?.frame !== 73 ||
+    result.stageShapes.keyframes[1]?.frame !== result.stageShapes.keyframes[0]?.frame + 24 ||
+    result.stageShapes.keyframes[2]?.frame !== result.stageShapes.keyframes[1]?.frame + 24 ||
     result.stageShapes.keyframes[2]?.color !== "#ff0000" ||
     result.stageShapes.dotCount !== 3 ||
     !result.stageShapes.selected ||
@@ -401,11 +459,16 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
     !result.stockImport.calls[0]?.includes("pixer-eleven.csilvasantin.workers.dev/stock/list") ||
     !result.stockImport.imported ||
     !result.stockImport.visibleInCast ||
+    !result.stockImport.cardDraggable ||
+    !result.stockImport.cardWithinCast ||
+    !result.stockImport.mediaWithinCard ||
     result.stockImport.role !== "Stock" ||
     result.stockImport.source !== "admira.studio Stock" ||
     result.stockImport.mediaType !== "image" ||
     result.stockImport.durationFrames !== 24 ||
     result.stockImport.onStageAfterCastClick !== true ||
+    result.stockImport.stageCount < 1 ||
+    result.stockImport.startFrameAfterTimelineDrop <= 1 ||
     !result.stockImport.timelineVisible
   ) {
     throw new Error(`Unexpected Stock import flow: ${JSON.stringify(result.stockImport)}`);
@@ -415,18 +478,17 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
     !result.stageKeyframes.hasStageMember ||
     result.stageKeyframes.durationFrames !== 48 ||
     result.stageKeyframes.keyframes.length !== 2 ||
-    result.stageKeyframes.keyframes[0]?.frame !== 1 ||
-    result.stageKeyframes.keyframes[1]?.frame !== 25 ||
+    result.stageKeyframes.keyframes[1]?.frame <= result.stageKeyframes.keyframes[0]?.frame ||
     result.stageKeyframes.dotCount !== 2 ||
-    !result.stageKeyframes.dotFrames.includes(25) ||
-    result.stageKeyframes.playheadFrame !== 25 ||
-    result.stageKeyframeClick.playheadFrame !== 25 ||
-    result.stageKeyframeClick.selectedFrame !== 25 ||
+    !result.stageKeyframes.dotFrames.includes(result.stageKeyframes.keyframes[1]?.frame) ||
+    result.stageKeyframes.playheadFrame !== result.stageKeyframes.keyframes[1]?.frame ||
+    result.stageKeyframeClick.playheadFrame !== result.stageKeyframes.keyframes[1]?.frame ||
+    result.stageKeyframeClick.selectedFrame !== result.stageKeyframes.keyframes[1]?.frame ||
     result.stageKeyframeEdit.durationFrames !== 48 ||
     result.stageKeyframeEdit.keyframes.length !== 2 ||
-    result.stageKeyframeEdit.keyframes[1]?.frame !== 25 ||
+    result.stageKeyframeEdit.keyframes[1]?.frame !== result.stageKeyframes.keyframes[1]?.frame ||
     result.stageKeyframeEdit.dotCount !== 2 ||
-    result.stageKeyframeEdit.selectedFrame !== 25
+    result.stageKeyframeEdit.selectedFrame !== result.stageKeyframes.keyframes[1]?.frame
   ) {
     throw new Error(`Unexpected Stage keyframe timeline dots: ${JSON.stringify({ drag: result.stageKeyframes, click: result.stageKeyframeClick, edit: result.stageKeyframeEdit })}`);
   }
