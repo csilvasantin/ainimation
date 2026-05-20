@@ -448,11 +448,13 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
             mimeType: "video/mp4",
             width: 1920,
             height: 1080,
+            duration: 12,
           },
           {
             title: "Latest Stock Character",
             assetUrl: "https://www.admira.studio/media/latest-stock-character.mp3",
             mimeType: "audio/mpeg",
+            duration: 7,
           },
         ],
       }), {
@@ -470,6 +472,15 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
     try {
       document.querySelector("[data-stock-import]")?.click();
       await new Promise((resolve) => window.setTimeout(resolve, window.__USE_LIVE_STOCK__ ? 3000 : 80));
+      const tray = document.querySelector("[data-stock-import-tray]");
+      const trayItems = [...document.querySelectorAll("[data-stock-tray-item]")].map((item) => ({
+        mediaType: item.dataset.mediaType,
+        text: item.textContent.replace(/\s+/g, " ").trim(),
+        hasPreview: Boolean(item.querySelector("img, video, .stock-tray-audio")),
+      }));
+      const trayWasOpen = tray?.classList.contains("open") || false;
+      document.querySelector("[data-stock-tray-compose]")?.click();
+      await new Promise((resolve) => window.setTimeout(resolve, 80));
       const plan = JSON.parse(localStorage.getItem("ainimation-film-plan") || "{}");
       const member = [...(plan.cast || [])].reverse().find((item) => item.stock && item.sourceUrl !== "https://www.admira.studio/media/aidirector-export.webm");
       const card = member
@@ -567,6 +578,11 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
         }));
       return {
         calls,
+        trayOpen: trayWasOpen,
+        trayCount: trayItems.length,
+        trayMediaTypes: trayItems.map((item) => item.mediaType),
+        trayHasPreviews: trayItems.every((item) => item.hasPreview),
+        trayShowsMetadata: trayItems.some((item) => /1200 x 1200|1920 x 1080|12s|7s/.test(item.text)),
         imported: Boolean(member),
         importedCount: restoredStockMembers.length,
         visibleInCast: Boolean(card),
@@ -1019,8 +1035,8 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
   const missingLabels = result.labels.length !== expectedYLabels || result.xLabels.length !== expectedXLabels;
   const hasWrongRotation = result.labels.some((label) => label.transform === "matrix(0, 1, -1, 0, 0, 0)");
 
-  if (!result.stylesheetHref.includes("aidirector-20260520-r32")) {
-    throw new Error(`Expected aidirector-20260520-r32 stylesheet cache key, got ${result.stylesheetHref}`);
+  if (!result.stylesheetHref.includes("aidirector-20260520-r33")) {
+    throw new Error(`Expected aidirector-20260520-r33 stylesheet cache key, got ${result.stylesheetHref}`);
   }
 
   if (
@@ -1047,7 +1063,7 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
   }
 
   if (
-    result.brand.text !== "◆ AiDirector v.2026.05.20 r32" ||
+    result.brand.text !== "◆ AiDirector v.2026.05.20 r33" ||
     result.brand.rightGap > 20 ||
     result.brand.menuHeight > 50 ||
     result.brand.toolsTitlebarHeight > 31
@@ -1226,6 +1242,11 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
 
   if (
     !result.stockImport.calls[0]?.includes("pixer-eleven.csilvasantin.workers.dev/stock/list?limit=12") ||
+    !result.stockImport.trayOpen ||
+    result.stockImport.trayCount !== 3 ||
+    !["image", "video", "audio"].every((type) => result.stockImport.trayMediaTypes.includes(type)) ||
+    !result.stockImport.trayHasPreviews ||
+    !result.stockImport.trayShowsMetadata ||
     !result.stockImport.imported ||
     result.stockImport.importedCount < 3 ||
     result.stockImport.importedAinimationCount !== 0 ||

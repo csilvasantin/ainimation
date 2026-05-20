@@ -1333,6 +1333,7 @@ let draggedDirectorWindow = null;
 let dragOffsetX = 0;
 let dragOffsetY = 0;
 let stageAnimationCaptureCache = null;
+let pendingStockImportMembers = [];
 
 const sceneCounts = {
   "60 seconds": 4,
@@ -3806,6 +3807,15 @@ function isAinimationGeneratedAnimation(item, src) {
   return hasAinimationMarker && hasAnimationMarker;
 }
 
+function formatStockDuration(seconds) {
+  const value = Number(seconds || 0);
+  if (!Number.isFinite(value) || value <= 0) return "";
+  const total = Math.round(value);
+  const minutes = Math.floor(total / 60);
+  const remainder = total % 60;
+  return minutes ? `${minutes}:${String(remainder).padStart(2, "0")}` : `${remainder}s`;
+}
+
 function stockMemberFromItem(item, endpoint, existingCount, timelineMemberCount) {
   const rawUrl = findStockField(item, [
     "assetUrl",
@@ -3827,6 +3837,7 @@ function stockMemberFromItem(item, endpoint, existingCount, timelineMemberCount)
   if (mediaType === "animation") return null;
   const width = findStockNumberField(item, ["width", "w", "naturalWidth", "videoWidth", "imageWidth", "pixelWidth"]);
   const height = findStockNumberField(item, ["height", "h", "naturalHeight", "videoHeight", "imageHeight", "pixelHeight"]);
+  const durationSeconds = findStockNumberField(item, ["duration", "durationSeconds", "seconds", "videoDuration", "audioDuration"]);
   const aspectRatio = width && height ? width / height : mediaType === "video" ? visualStageAspectRatio() : null;
   const rawName = findStockField(item, ["title", "name", "fileName", "filename", "label", "slug"]);
   const baseName = cleanMemberName(rawName || "Admira Stock latest");
@@ -3841,6 +3852,9 @@ function stockMemberFromItem(item, endpoint, existingCount, timelineMemberCount)
     stock: true,
     source: "admira.studio Stock",
     sourceUrl: src,
+    sourceWidth: width || null,
+    sourceHeight: height || null,
+    sourceDuration: durationSeconds || null,
     onStage: false,
     startFrame: 1 + timelineMemberCount * 24,
     durationFrames: 24,
@@ -3944,6 +3958,123 @@ async function fetchLatestStockMembers(limit = stockImportBatchSize) {
   throw lastError || new Error("Stock has not returned usable media assets.");
 }
 
+function stockImportPreviewMedia(member) {
+  if (member.mediaType === "image") {
+    return `<img src="${escapeHtml(member.src)}" alt="" crossorigin="anonymous" />`;
+  }
+  if (member.mediaType === "video") {
+    return `<video src="${escapeHtml(member.src)}" muted playsinline preload="metadata" crossorigin="anonymous"></video>`;
+  }
+  if (member.mediaType === "audio") {
+    return `<span class="stock-tray-audio" aria-hidden="true">A</span>`;
+  }
+  return `<span class="stock-tray-audio" aria-hidden="true">${escapeHtml((member.mediaType || "asset").slice(0, 1).toUpperCase())}</span>`;
+}
+
+function stockImportMeta(member) {
+  const dimensions = member.sourceWidth && member.sourceHeight
+    ? `${Math.round(member.sourceWidth)} x ${Math.round(member.sourceHeight)}`
+    : member.aspectRatio
+      ? `${Number(member.aspectRatio).toFixed(2)} ratio`
+      : "";
+  const duration = formatStockDuration(member.sourceDuration);
+  return [member.mediaType, dimensions, duration].filter(Boolean).join(" · ");
+}
+
+function ensureStockImportTray() {
+  let tray = document.querySelector("[data-stock-import-tray]");
+  if (tray) return tray;
+  tray = document.createElement("section");
+  tray.className = "stock-import-tray";
+  tray.dataset.stockImportTray = "";
+  tray.setAttribute("aria-hidden", "true");
+  tray.setAttribute("aria-label", "Admira Stock import review");
+  tray.innerHTML = `
+    <div class="stock-tray-panel" role="dialog" aria-modal="true" aria-labelledby="stock-tray-title">
+      <header class="stock-tray-header">
+        <div>
+          <strong id="stock-tray-title">Admira Stock</strong>
+          <span>3 últimos assets válidos</span>
+        </div>
+        <button type="button" data-stock-tray-close aria-label="Cerrar">×</button>
+      </header>
+      <div class="stock-tray-list" data-stock-tray-list></div>
+      <footer class="stock-tray-actions">
+        <button type="button" data-stock-tray-close>Cancelar</button>
+        <button type="button" data-stock-tray-compose>Componer en Stage</button>
+      </footer>
+    </div>
+  `;
+  tray.addEventListener("click", (event) => {
+    if (event.target === tray || event.target.closest("[data-stock-tray-close]")) {
+      closeStockImportTray();
+    }
+  });
+  tray.querySelector("[data-stock-tray-compose]")?.addEventListener("click", () => {
+    confirmStockImportTray();
+  });
+  document.body.append(tray);
+  return tray;
+}
+
+function closeStockImportTray() {
+  const tray = document.querySelector("[data-stock-import-tray]");
+  if (!tray) return;
+  tray.classList.remove("open");
+  tray.setAttribute("aria-hidden", "true");
+  pendingStockImportMembers = [];
+}
+
+function openStockImportTray(members) {
+  pendingStockImportMembers = [...members];
+  const tray = ensureStockImportTray();
+  const list = tray.querySelector("[data-stock-tray-list]");
+  if (list) {
+    list.innerHTML = pendingStockImportMembers.map((member, index) => `
+      <article class="stock-tray-item" data-stock-tray-item data-media-type="${escapeHtml(member.mediaType || "asset")}">
+        <div class="stock-tray-preview">${stockImportPreviewMedia(member)}</div>
+        <div class="stock-tray-copy">
+          <span>${String(index + 1).padStart(2, "0")}</span>
+          <strong>${escapeHtml(member.name)}</strong>
+          <small>${escapeHtml(stockImportMeta(member))}</small>
+        </div>
+      </article>
+    `).join("");
+  }
+  tray.classList.add("open");
+  tray.setAttribute("aria-hidden", "false");
+}
+
+function composeStockMembersIntoPlan(members) {
+  const plan = currentPlan();
+  const castIndex = (plan.cast || makeCast(plan)).length;
+  plan.cast = [...(plan.cast || makeCast(plan)), ...members];
+  composeImportedStockMembers(plan, castIndex, members.length);
+  saveFilmPlan(plan);
+  renderFilmPlan(plan);
+  members.forEach((member, index) => updateMemberMetadataFromMedia(
+    castIndex + index,
+    member.src,
+    member.mediaType,
+  ));
+  playUiTick("import");
+  window.refreshDirectorWindows?.();
+  document.querySelector('[data-open-window="cast"]')?.click();
+  return members.length;
+}
+
+function confirmStockImportTray() {
+  const members = pendingStockImportMembers.slice(0, stockImportBatchSize);
+  if (!members.length) return;
+  const count = composeStockMembersIntoPlan(members);
+  closeStockImportTray();
+  if (stockImportButton) {
+    const originalText = "Importar";
+    stockImportButton.textContent = `${count} compuestos`;
+    window.setTimeout(() => { stockImportButton.textContent = originalText; }, 1200);
+  }
+}
+
 async function importLatestAdmiraStockBatch() {
   if (!stockImportButton) return;
   const originalText = stockImportButton.textContent;
@@ -3951,21 +4082,9 @@ async function importLatestAdmiraStockBatch() {
   stockImportButton.textContent = "Importando...";
   try {
     const members = await fetchLatestStockMembers(stockImportBatchSize);
-    const plan = currentPlan();
-    const castIndex = (plan.cast || makeCast(plan)).length;
-    plan.cast = [...(plan.cast || makeCast(plan)), ...members];
-    composeImportedStockMembers(plan, castIndex, members.length);
-    saveFilmPlan(plan);
-    renderFilmPlan(plan);
-    members.forEach((member, index) => updateMemberMetadataFromMedia(
-      castIndex + index,
-      member.src,
-      member.mediaType,
-    ));
+    openStockImportTray(members);
     playUiTick("import");
-    window.refreshDirectorWindows?.();
-    document.querySelector('[data-open-window="cast"]')?.click();
-    stockImportButton.textContent = `${members.length} importados`;
+    stockImportButton.textContent = `${members.length} listos`;
     window.setTimeout(() => { stockImportButton.textContent = originalText; }, 1200);
   } catch (error) {
     console.warn("Admira Stock import failed", error);
@@ -4748,6 +4867,9 @@ document.addEventListener("keydown", (event) => {
   }
   if (event.key === "Escape" && helpModal?.classList.contains("open")) {
     closeHelpStudio();
+  }
+  if (event.key === "Escape" && document.querySelector("[data-stock-import-tray]")?.classList.contains("open")) {
+    closeStockImportTray();
   }
 });
 

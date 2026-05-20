@@ -4851,6 +4851,214 @@ body.studio-entered {
   outline: 0;
 }
 
+.stock-import-tray {
+  align-items: center;
+  background: rgba(4, 7, 12, 0.58);
+  display: none;
+  inset: 0;
+  justify-content: center;
+  padding: 24px;
+  position: fixed;
+  z-index: 100;
+}
+
+.stock-import-tray.open {
+  display: flex;
+}
+
+.stock-tray-panel {
+  background: linear-gradient(180deg, #141b27, #0b1019);
+  border: 1px solid rgba(167, 255, 91, 0.3);
+  border-radius: 8px;
+  box-shadow: 0 26px 70px rgba(0, 0, 0, 0.46);
+  color: #eef5ff;
+  max-width: min(820px, calc(100vw - 32px));
+  padding: 14px;
+  width: 820px;
+}
+
+.stock-tray-header,
+.stock-tray-actions {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.stock-tray-header {
+  border-bottom: 1px solid rgba(191, 211, 235, 0.14);
+  padding: 0 0 12px;
+}
+
+.stock-tray-header div {
+  display: grid;
+  gap: 2px;
+}
+
+.stock-tray-header strong {
+  font-size: 0.92rem;
+  font-weight: 900;
+}
+
+.stock-tray-header span {
+  color: rgba(221, 232, 246, 0.68);
+  font-size: 0.72rem;
+  font-weight: 760;
+}
+
+.stock-tray-header button {
+  align-items: center;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 6px;
+  color: #eef5ff;
+  cursor: pointer;
+  display: inline-flex;
+  font-weight: 900;
+  height: 28px;
+  justify-content: center;
+  width: 28px;
+}
+
+.stock-tray-list {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  padding: 14px 0;
+}
+
+.stock-tray-item {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(191, 211, 235, 0.16);
+  border-radius: 7px;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.stock-tray-preview {
+  align-items: center;
+  aspect-ratio: 16 / 10;
+  background:
+    linear-gradient(45deg, rgba(255, 255, 255, 0.035) 25%, transparent 25% 75%, rgba(255, 255, 255, 0.035) 75%),
+    #080d15;
+  background-size: 14px 14px;
+  display: flex;
+  justify-content: center;
+}
+
+.stock-tray-preview img,
+.stock-tray-preview video {
+  height: 100%;
+  object-fit: contain;
+  width: 100%;
+}
+
+.stock-tray-audio {
+  align-items: center;
+  background: #a7ff5b;
+  border-radius: 999px;
+  color: #0b1019;
+  display: inline-flex;
+  font-size: 1.05rem;
+  font-weight: 950;
+  height: 48px;
+  justify-content: center;
+  width: 48px;
+}
+
+.stock-tray-copy {
+  display: grid;
+  gap: 4px;
+  min-height: 88px;
+  padding: 10px;
+}
+
+.stock-tray-copy span {
+  color: #a7ff5b;
+  font-size: 0.68rem;
+  font-weight: 900;
+}
+
+.stock-tray-copy strong {
+  font-size: 0.78rem;
+  line-height: 1.22;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.stock-tray-copy small {
+  color: rgba(221, 232, 246, 0.62);
+  font-size: 0.68rem;
+  font-weight: 760;
+}
+
+.stock-tray-actions {
+  border-top: 1px solid rgba(191, 211, 235, 0.14);
+  padding-top: 12px;
+}
+
+.stock-tray-actions button {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 6px;
+  color: #eef5ff;
+  cursor: pointer;
+  font-size: 0.76rem;
+  font-weight: 900;
+  min-height: 32px;
+  padding: 0 12px;
+}
+
+.stock-tray-actions [data-stock-tray-compose] {
+  background: #a7ff5b;
+  border-color: #a7ff5b;
+  color: #0b1019;
+}
+
+body.studio-page[data-interface-theme="light"] .stock-import-tray {
+  background: rgba(28, 38, 54, 0.36);
+}
+
+body.studio-page[data-interface-theme="light"] .stock-tray-panel {
+  background: linear-gradient(180deg, #ffffff, #edf2f8);
+  border-color: rgba(104, 118, 138, 0.26);
+  color: #172030;
+}
+
+body.studio-page[data-interface-theme="light"] .stock-tray-header span,
+body.studio-page[data-interface-theme="light"] .stock-tray-copy small {
+  color: rgba(23, 32, 48, 0.62);
+}
+
+body.studio-page[data-interface-theme="light"] .stock-tray-item {
+  background: rgba(23, 32, 48, 0.045);
+  border-color: rgba(104, 118, 138, 0.18);
+}
+
+body.studio-page[data-interface-theme="light"] .stock-tray-header button,
+body.studio-page[data-interface-theme="light"] .stock-tray-actions button {
+  background: rgba(23, 32, 48, 0.06);
+  border-color: rgba(104, 118, 138, 0.18);
+  color: #172030;
+}
+
+@media (max-width: 720px) {
+  .stock-import-tray {
+    align-items: stretch;
+    padding: 12px;
+  }
+
+  .stock-tray-panel {
+    max-width: 100%;
+    overflow-y: auto;
+    width: 100%;
+  }
+
+  .stock-tray-list {
+    grid-template-columns: 1fr;
+  }
+}
+
 body.studio-page[data-interface-theme="light"] {
   background:
     linear-gradient(180deg, #eef3f9, #dfe6ef 44%, #cfd8e5);
