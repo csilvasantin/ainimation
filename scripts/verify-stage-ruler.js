@@ -269,6 +269,12 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
           for (const [key, value] of options.body.entries()) {
             formEntries.push([key, value instanceof Blob ? `${value.type}:${value.size}` : String(value).slice(0, 60)]);
           }
+        } else if (typeof options.body === "string") {
+          const payload = JSON.parse(options.body);
+          for (const key of ["type", "motor", "mime", "comment", "base64"]) {
+            const value = payload[key];
+            formEntries.push([key, key === "base64" ? String(value || "").slice(0, 12) : String(value || "").slice(0, 60)]);
+          }
         }
         return new Response(JSON.stringify({
           title: "AiDirector exported animation",
@@ -905,10 +911,12 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
   }
 
   if (
-    result.stockExport.calls[0]?.url !== "https://pixer-eleven.csilvasantin.workers.dev/stock" ||
+    result.stockExport.calls[0]?.url !== "https://pixer-eleven.csilvasantin.workers.dev/stock/publish" ||
     result.stockExport.calls[0]?.method !== "POST" ||
-    !result.stockExport.formEntries.some(([key, value]) => key === "file" && value.startsWith("video/webm:")) ||
-    !result.stockExport.formEntries.some(([key, value]) => key === "mediaType" && value === "animation") ||
+    !result.stockExport.formEntries.some(([key, value]) => key === "type" && value === "video") ||
+    !result.stockExport.formEntries.some(([key, value]) => key === "motor" && value === "ainimation") ||
+    !result.stockExport.formEntries.some(([key, value]) => key === "mime" && value === "video/webm") ||
+    !result.stockExport.formEntries.some(([key, value]) => key === "base64" && value.length > 0) ||
     result.stockExport.expectedFrames !== 121 ||
     result.stockExport.rafTicks < 2 ||
     result.stockExport.rafTicks >= 240 ||
