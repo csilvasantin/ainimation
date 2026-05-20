@@ -32,6 +32,12 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
     const scriptWindow = document.querySelector('[data-window="script"]');
     const fileMenu = document.querySelector("[data-member-menu]");
     const fileMenuItems = [...document.querySelectorAll(".member-menu-list button, .member-menu-list label")].map((item) => item.textContent.trim());
+    const toolShortcuts = [...document.querySelectorAll(".tool-shortcuts a")].map((link) => ({
+      text: link.textContent.trim(),
+      href: link.href,
+      target: link.target,
+      rel: link.rel,
+    }));
     const labels = [...document.querySelectorAll(".stage-ruler-y span")].map((label) => {
       const rect = label.getBoundingClientRect();
       const style = getComputedStyle(label);
@@ -68,6 +74,7 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
         hasStockImport: Boolean(document.querySelector("[data-stock-import]")),
         hasStageDownload: Boolean(document.querySelector("[data-download-stage-video]")),
       },
+      toolShortcuts,
       brand: {
         text: brand?.textContent.trim() || "",
         rightGap: brandRect && menuRect ? Number((menuRect.right - brandRect.right).toFixed(2)) : null,
@@ -275,8 +282,8 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
   const missingLabels = result.labels.length !== expectedYLabels || result.xLabels.length !== expectedXLabels;
   const hasWrongRotation = result.labels.some((label) => label.transform === "matrix(0, 1, -1, 0, 0, 0)");
 
-  if (!result.stylesheetHref.includes("aidirector-20260520-r9")) {
-    throw new Error(`Expected aidirector-20260520-r9 stylesheet cache key, got ${result.stylesheetHref}`);
+  if (!result.stylesheetHref.includes("aidirector-20260520-r10")) {
+    throw new Error(`Expected aidirector-20260520-r10 stylesheet cache key, got ${result.stylesheetHref}`);
   }
 
   if (
@@ -302,8 +309,25 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
     throw new Error(`Unexpected stage ruler toggle: ${JSON.stringify(result.rulerToggle)}`);
   }
 
-  if (result.brand.text !== "AiDirector v.2026.05.20 r9" || result.brand.rightGap > 20) {
+  if (result.brand.text !== "AiDirector v.2026.05.20 r10" || result.brand.rightGap > 20) {
     throw new Error(`Unexpected menu brand placement: ${JSON.stringify(result.brand)}`);
+  }
+
+  const expectedToolShortcuts = [
+    ["Studio", "https://www.admira.studio/"],
+    ["Publicity", "https://www.admira.app/"],
+    ["Digital Twin", "https://www.xpaceos.com/"],
+  ];
+  if (
+    result.toolShortcuts.length !== expectedToolShortcuts.length ||
+    expectedToolShortcuts.some(([text, href], index) => (
+      result.toolShortcuts[index]?.text !== text ||
+      result.toolShortcuts[index]?.href !== href ||
+      result.toolShortcuts[index]?.target !== "_blank" ||
+      !result.toolShortcuts[index]?.rel.includes("noopener")
+    ))
+  ) {
+    throw new Error(`Unexpected Tools shortcuts: ${JSON.stringify(result.toolShortcuts)}`);
   }
 
   if (

@@ -3818,6 +3818,39 @@ h2 {
   height: 6px;
 }
 
+.tool-shortcuts {
+  border-top: 1px solid rgba(82, 92, 108, 0.46);
+  display: grid;
+  gap: 4px;
+  padding: 7px 0 0;
+  width: 78px;
+}
+
+.tool-shortcuts a {
+  align-items: center;
+  background: linear-gradient(180deg, #fbfcff, #d9e0ea);
+  border: 1px solid #8792a3;
+  border-radius: 2px;
+  color: #17202d;
+  display: flex;
+  font: 900 0.58rem/1 ui-sans-serif, system-ui, sans-serif;
+  height: 22px;
+  justify-content: center;
+  overflow: hidden;
+  padding: 0 3px;
+  text-align: center;
+  text-decoration: none;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tool-shortcuts a:hover,
+.tool-shortcuts a:focus-visible {
+  background: linear-gradient(180deg, #b8ff73, #82ff4b);
+  color: #071009;
+  outline: 0;
+}
+
 .stage-canvas[data-stage-tool="hand"] .stage-imported-member,
 .stage-canvas[data-stage-tool="hand"] .stage-text-item {
   cursor: grab;
