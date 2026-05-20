@@ -667,6 +667,39 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
     };
   });
 
+  const clipKeyframesBefore = result.stageKeyframeEdit.keyframes;
+  const clipSprite = await page.$(`.score-sprite[data-cast-index="${result.stageKeyframes.castIndex}"]`);
+  await clipSprite?.click();
+  await page.waitForTimeout(80);
+  const clipStageMember = await page.$(`.stage-imported-member[data-cast-index="${result.stageKeyframes.castIndex}"]`);
+  const clipStageMemberBox = await clipStageMember?.boundingBox();
+  if (clipStageMemberBox) {
+    await page.mouse.move(clipStageMemberBox.x + clipStageMemberBox.width / 2, clipStageMemberBox.y + clipStageMemberBox.height / 2);
+    await page.mouse.down();
+    await page.mouse.move(clipStageMemberBox.x + clipStageMemberBox.width / 2 + 52, clipStageMemberBox.y + clipStageMemberBox.height / 2 + 22);
+    await page.mouse.up();
+    await page.waitForTimeout(120);
+  }
+  result.timelineClipTransform = await page.evaluate(({ castIndex, before }) => {
+    const plan = JSON.parse(localStorage.getItem("ainimation-film-plan") || "{}");
+    const member = (plan.cast || [])[castIndex];
+    const after = member?.keyframes || [];
+    const beforeDelta = before.length > 1 ? Number((before[1].x - before[0].x).toFixed(4)) : 0;
+    const afterDelta = after.length > 1 ? Number((after[1].x - after[0].x).toFixed(4)) : 0;
+    return {
+      selectedSprite: document.querySelector(`.score-sprite[data-cast-index="${castIndex}"]`)?.classList.contains("is-selected") || false,
+      beforeCount: before.length,
+      afterCount: after.length,
+      beforeDelta,
+      afterDelta,
+      firstMoved: Math.abs(Number(after[0]?.x || 0) - Number(before[0]?.x || 0)) > 0.5 ||
+        Math.abs(Number(after[0]?.y || 0) - Number(before[0]?.y || 0)) > 0.5,
+      secondMoved: Math.abs(Number(after[1]?.x || 0) - Number(before[1]?.x || 0)) > 0.5 ||
+        Math.abs(Number(after[1]?.y || 0) - Number(before[1]?.y || 0)) > 0.5,
+      playheadFrame: Number(document.querySelector(".score-playhead")?.dataset.frame || 0),
+    };
+  }, { castIndex: result.stageKeyframes.castIndex, before: clipKeyframesBefore });
+
   await page.locator('[data-stage-tool="rect-fill"]').click();
   const stageBox = await page.locator(".stage-canvas").boundingBox();
   if (stageBox) {
@@ -895,8 +928,8 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
   const missingLabels = result.labels.length !== expectedYLabels || result.xLabels.length !== expectedXLabels;
   const hasWrongRotation = result.labels.some((label) => label.transform === "matrix(0, 1, -1, 0, 0, 0)");
 
-  if (!result.stylesheetHref.includes("aidirector-20260520-r29")) {
-    throw new Error(`Expected aidirector-20260520-r29 stylesheet cache key, got ${result.stylesheetHref}`);
+  if (!result.stylesheetHref.includes("aidirector-20260520-r30")) {
+    throw new Error(`Expected aidirector-20260520-r30 stylesheet cache key, got ${result.stylesheetHref}`);
   }
 
   if (
@@ -923,7 +956,7 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
   }
 
   if (
-    result.brand.text !== "◆ AiDirector v.2026.05.20 r29" ||
+    result.brand.text !== "◆ AiDirector v.2026.05.20 r30" ||
     result.brand.rightGap > 20 ||
     result.brand.menuHeight > 50 ||
     result.brand.toolsTitlebarHeight > 31
@@ -1140,6 +1173,17 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
     result.stageKeyframeEdit.selectedFrame !== result.stageKeyframes.keyframes[1]?.frame
   ) {
     throw new Error(`Unexpected Stage keyframe timeline dots: ${JSON.stringify({ drag: result.stageKeyframes, click: result.stageKeyframeClick, edit: result.stageKeyframeEdit })}`);
+  }
+
+  if (
+    !result.timelineClipTransform.selectedSprite ||
+    result.timelineClipTransform.beforeCount !== result.timelineClipTransform.afterCount ||
+    result.timelineClipTransform.beforeCount < 2 ||
+    !result.timelineClipTransform.firstMoved ||
+    !result.timelineClipTransform.secondMoved ||
+    Math.abs(result.timelineClipTransform.beforeDelta - result.timelineClipTransform.afterDelta) > 0.1
+  ) {
+    throw new Error(`Unexpected timeline clip transform: ${JSON.stringify(result.timelineClipTransform)}`);
   }
 
   if (

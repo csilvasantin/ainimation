@@ -900,6 +900,10 @@ function isSelectedCastTarget(castIndex) {
   return selectedStageTarget?.castIndex === castIndex;
 }
 
+function selectedCastTargetScope(castIndex) {
+  return selectedStageTarget?.castIndex === castIndex ? selectedStageTarget.scope || "" : "";
+}
+
 function isSelectedStageItemTarget(stageItemId) {
   return Boolean(stageItemId && selectedStageTarget?.stageItemId === stageItemId);
 }
@@ -1648,9 +1652,11 @@ function initTimelineSpriteDragging(totalFrames) {
       const castIndex = Number(sprite.dataset.castIndex);
       const stageItemId = sprite.dataset.stageItemId;
       if (Number.isInteger(castIndex)) {
-        setSelectedStageTarget({ castIndex });
+        selectedStageKeyframe = null;
+        setSelectedStageTarget({ castIndex, scope: "clip" });
       } else if (stageItemId) {
-        setSelectedStageTarget({ stageItemId });
+        selectedStageKeyframe = null;
+        setSelectedStageTarget({ stageItemId, scope: "clip" });
       }
       scoreGrid.querySelectorAll(".score-sprite.is-selected").forEach((item) => item.classList.remove("is-selected"));
       sprite.classList.add("is-selected");
@@ -1763,6 +1769,11 @@ function initTimelineKeyframeDots() {
       selectedStageKeyframe = dot.dataset.stageItemId
         ? { stageItemId: dot.dataset.stageItemId, frame }
         : { castIndex: Number(dot.dataset.castIndex), frame };
+      if (dot.dataset.stageItemId) {
+        setSelectedStageTarget({ stageItemId: dot.dataset.stageItemId, scope: "keyframe" });
+      } else {
+        setSelectedStageTarget({ castIndex: Number(dot.dataset.castIndex), scope: "keyframe" });
+      }
       setTimelineFrame(frame, false);
       document.querySelectorAll(".score-keyframe-dot.is-selected").forEach((item) => {
         item.classList.remove("is-selected");
@@ -1907,6 +1918,36 @@ function upsertStageKeyframe(member, frame, values, index = 0) {
     ...stageKeyframesFor(member, index).filter((keyframe) => keyframe.frame !== nextFrame),
     nextKeyframe,
   ].sort((a, b) => a.frame - b.frame);
+}
+
+function transformMemberClipKeyframes(member, before, after, index = 0) {
+  const delta = {
+    x: Number(after.x || 0) - Number(before.x || 0),
+    y: Number(after.y || 0) - Number(before.y || 0),
+    w: Number(after.w || 0) - Number(before.w || 0),
+    h: Number(after.h || 0) - Number(before.h || 0),
+  };
+  const keyframes = stageKeyframesFor(member, index).map((keyframe) => ({
+    ...keyframe,
+    x: clampPercent(keyframe.x + delta.x),
+    y: clampPercent(keyframe.y + delta.y),
+    w: clampStageSize(keyframe.w + delta.w, keyframe.w),
+    h: clampStageSize(keyframe.h + delta.h, keyframe.h),
+  }));
+  const first = keyframes[0] || {
+    x: clampPercent(after.x),
+    y: clampPercent(after.y),
+    w: clampStageSize(after.w, before.w || 12),
+    h: clampStageSize(after.h, before.h || 10),
+  };
+  return {
+    ...member,
+    stageX: first.x,
+    stageY: first.y,
+    stageW: first.w,
+    stageH: first.h,
+    keyframes,
+  };
 }
 
 function stageValuesChanged(before, after) {
@@ -3938,7 +3979,8 @@ function initStageTools() {
     if (tool === "hand" && member) {
       event.preventDefault();
       const castIndex = Number(member.dataset.castIndex);
-      setSelectedStageTarget({ castIndex });
+      const targetScope = selectedCastTargetScope(castIndex) === "clip" ? "clip" : "keyframe";
+      setSelectedStageTarget({ castIndex, scope: targetScope });
       stage.querySelectorAll(".stage-imported-member").forEach((item) => {
         item.classList.toggle("is-selected", item === member);
       });
@@ -3991,6 +4033,18 @@ function initStageTools() {
             h: Number.parseFloat(member.style.height) || startHeight,
           };
           if (!stageValuesChanged(startValues, values)) return;
+          if (selectedCastTargetScope(castIndex) === "clip") {
+            plan.cast[castIndex] = transformMemberClipKeyframes(
+              plan.cast[castIndex],
+              startValues,
+              values,
+              Number(member.dataset.stageIndex || 0),
+            );
+            saveFilmPlan(plan);
+            renderFilmPlan(plan);
+            setTimelineFrame(frame, false);
+            return;
+          }
           const timing = nextStageKeyframeTiming(plan.cast[castIndex], frame, castIndex);
           plan.cast[castIndex].durationFrames = timing.durationFrames;
           plan.cast[castIndex].keyframes = upsertStageKeyframe(plan.cast[castIndex], timing.frame, values, Number(member.dataset.stageIndex || 0));
