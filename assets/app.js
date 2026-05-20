@@ -850,14 +850,15 @@ function syncStageToFrame(frame = currentTimelineFrame(), shouldPlay = false) {
     media.muted = false;
     media.play?.().catch(() => {});
   });
-  document.querySelectorAll(".stage-text-item[data-stage-item-id]").forEach((textItem) => {
-    const item = (plan.stageItems || []).find((stageItem) => stageItem.id === textItem.dataset.stageItemId);
+  document.querySelectorAll(".stage-item[data-stage-item-id]").forEach((stageItemEl) => {
+    const item = (plan.stageItems || []).find((currentItem) => currentItem.id === stageItemEl.dataset.stageItemId);
     if (!item) return;
     const start = Number(item.startFrame || 1);
     const duration = Math.max(1, Number(item.durationFrames || 24));
     const isActive = frame >= start && frame <= start + duration - 1;
-    textItem.classList.toggle("is-out-of-frame", !isActive);
-    textItem.setAttribute("aria-hidden", String(!isActive));
+    if (isShapeStageItem(item)) applyShapeStyle(stageItemEl, item, frame);
+    stageItemEl.classList.toggle("is-out-of-frame", !isActive);
+    stageItemEl.setAttribute("aria-hidden", String(!isActive));
   });
 }
 
@@ -1386,10 +1387,9 @@ function initTimelineKeyframeDots() {
       event.preventDefault();
       event.stopPropagation();
       const frame = Number(dot.dataset.keyframeFrame || 1);
-      selectedStageKeyframe = {
-        castIndex: Number(dot.dataset.castIndex),
-        frame,
-      };
+      selectedStageKeyframe = dot.dataset.stageItemId
+        ? { stageItemId: dot.dataset.stageItemId, frame }
+        : { castIndex: Number(dot.dataset.castIndex), frame };
       setTimelineFrame(frame, false);
       document.querySelectorAll(".score-keyframe-dot.is-selected").forEach((item) => {
         item.classList.remove("is-selected");
@@ -1412,11 +1412,12 @@ function normalizeFilmPlan(plan) {
     cast: plan.cast || makeCast(plan),
     stageItems: Array.isArray(plan.stageItems)
       ? plan.stageItems.map((item) => (
-        item.type === "text"
+        item.type === "text" || isShapeStageItem(item)
           ? {
             ...item,
             startFrame: Math.max(1, Number(item.startFrame || 1)),
             durationFrames: Math.max(1, Number(item.durationFrames || 24)),
+            keyframes: Array.isArray(item.keyframes) ? item.keyframes : undefined,
           }
           : item
       ))
@@ -1445,10 +1446,10 @@ function clampStageSize(value, fallback = 12) {
 function defaultStageKeyframe(member, frame = Number(member?.startFrame || 1), index = 0) {
   return {
     frame: Number(frame) || 1,
-    x: clampPercent(member?.stageX ?? (16 + (index % 3) * 24)),
-    y: clampPercent(member?.stageY ?? (54 + Math.floor(index / 3) * 18)),
-    w: clampStageSize(member?.stageW, 12),
-    h: clampStageSize(member?.stageH, 10),
+    x: clampPercent(member?.stageX ?? member?.x ?? (16 + (index % 3) * 24)),
+    y: clampPercent(member?.stageY ?? member?.y ?? (54 + Math.floor(index / 3) * 18)),
+    w: clampStageSize(member?.stageW ?? member?.w, 12),
+    h: clampStageSize(member?.stageH ?? member?.h, 10),
   };
 }
 
@@ -1464,6 +1465,7 @@ function stageKeyframesFor(member, index = 0) {
       y: clampPercent(keyframe.y ?? fallback.y),
       w: clampStageSize(keyframe.w, fallback.w),
       h: clampStageSize(keyframe.h, fallback.h),
+      color: keyframe.color || member?.color || "",
     }))
     .sort((a, b) => a.frame - b.frame);
 }
@@ -1488,6 +1490,7 @@ function interpolateStageKeyframe(member, frame, index = 0) {
     y: previous.y + (next.y - previous.y) * progress,
     w: previous.w + (next.w - previous.w) * progress,
     h: previous.h + (next.h - previous.h) * progress,
+    color: previous.color || next.color || "",
   };
 }
 
@@ -1500,6 +1503,7 @@ function upsertStageKeyframe(member, frame, values, index = 0) {
     y: clampPercent(values.y ?? base.y),
     w: clampStageSize(values.w, base.w),
     h: clampStageSize(values.h, base.h),
+    color: values.color || base.color || member?.color || "",
   };
   return [
     ...stageKeyframesFor(member, index).filter((keyframe) => keyframe.frame !== nextFrame),
@@ -1508,7 +1512,8 @@ function upsertStageKeyframe(member, frame, values, index = 0) {
 }
 
 function stageValuesChanged(before, after) {
-  return ["x", "y", "w", "h"].some((key) => Math.abs(Number(before[key] || 0) - Number(after[key] || 0)) > 0.05);
+  return ["x", "y", "w", "h"].some((key) => Math.abs(Number(before[key] || 0) - Number(after[key] || 0)) > 0.05) ||
+    String(before.color || "") !== String(after.color || "");
 }
 
 function nextStageKeyframeTiming(member, currentFrame, castIndex) {
@@ -1533,18 +1538,60 @@ function nextStageKeyframeTiming(member, currentFrame, castIndex) {
   };
 }
 
-function keyframeDotsForMember(member, totalFrames, castIndex) {
-  if (!member || !Array.isArray(member.keyframes) || !member.keyframes.length) return "";
-  return stageKeyframesFor(member)
+function nextStageItemKeyframeTiming(item, currentFrame) {
+  const start = Math.max(1, Number(item?.startFrame || 1));
+  const duration = Math.max(1, Number(item?.durationFrames || 24));
+  const end = start + duration - 1;
+  const selectedFrame = selectedStageKeyframe?.stageItemId === item?.id ? selectedStageKeyframe.frame : null;
+  const existingFrame = stageKeyframesFor(item).map((keyframe) => keyframe.frame).find((frame) => frame === selectedFrame && frame === currentFrame);
+  if (existingFrame) {
+    return {
+      frame: existingFrame,
+      durationFrames: Math.max(duration, existingFrame - start + 1),
+      isExisting: true,
+    };
+  }
+  const nextFrame = currentFrame > end ? currentFrame : end + 1;
+  return {
+    frame: nextFrame,
+    durationFrames: Math.max(duration + 24, nextFrame - start + 24),
+    isExisting: false,
+  };
+}
+
+function keyframeDotButtons(keyframes, totalFrames, attributes, isSelected) {
+  return keyframes
     .map((keyframe) => {
       const frame = Math.min(Math.max(1, keyframe.frame), totalFrames);
       const left = totalFrames <= 1 ? 0 : ((frame - 1) / (totalFrames - 1)) * 100;
-      const selected = selectedStageKeyframe?.castIndex === castIndex && selectedStageKeyframe?.frame === frame;
+      const dataAttributes = Object.entries({ ...attributes, keyframeFrame: frame })
+        .map(([key, value]) => `data-${key.replace(/[A-Z]/g, (match) => `-${match.toLowerCase()}`)}="${escapeHtml(String(value))}"`)
+        .join(" ");
       return `
-        <button class="score-keyframe-dot ${selected ? "is-selected" : ""}" type="button" style="left:${left}%" data-keyframe-frame="${frame}" data-cast-index="${castIndex}" aria-label="Keyframe at frame ${frame}" title="Keyframe ${frame}"></button>
+        <button class="score-keyframe-dot ${isSelected(frame) ? "is-selected" : ""}" type="button" style="left:${left}%" ${dataAttributes} aria-label="Keyframe at frame ${frame}" title="Keyframe ${frame}"></button>
       `;
     })
     .join("");
+}
+
+function keyframeDotsForMember(member, totalFrames, castIndex) {
+  if (!member || !Array.isArray(member.keyframes) || !member.keyframes.length) return "";
+  return keyframeDotButtons(
+    stageKeyframesFor(member),
+    totalFrames,
+    { castIndex },
+    (frame) => selectedStageKeyframe?.castIndex === castIndex && selectedStageKeyframe?.frame === frame,
+  );
+}
+
+function keyframeDotsForStageItem(item, totalFrames) {
+  if (!item || !Array.isArray(item.keyframes) || !item.keyframes.length) return "";
+  return keyframeDotButtons(
+    stageKeyframesFor(item),
+    totalFrames,
+    { stageItemId: item.id },
+    (frame) => selectedStageKeyframe?.stageItemId === item.id && selectedStageKeyframe?.frame === frame,
+  );
 }
 
 function stagePointFromEvent(stage, event) {
@@ -1592,6 +1639,23 @@ function positionStageLine(line, item) {
   line.style.width = `${length}%`;
   line.style.transform = `rotate(${angle}deg)`;
   line.style.backgroundColor = item.color || "";
+}
+
+function isShapeStageItem(item) {
+  return ["oval", "oval-fill", "rect", "rect-fill"].includes(item?.type);
+}
+
+function applyShapeStyle(shape, item, frame = currentTimelineFrame()) {
+  const values = interpolateStageKeyframe(item, frame) || defaultStageKeyframe(item, Number(item.startFrame || 1));
+  shape.style.left = `${clampPercent(values.x ?? item.x)}%`;
+  shape.style.top = `${clampPercent(values.y ?? item.y)}%`;
+  shape.style.width = `${clampStageSize(values.w, item.w || 12)}%`;
+  shape.style.height = `${clampStageSize(values.h, item.h || 10)}%`;
+  const color = values.color || item.color || "";
+  shape.style.borderColor = color;
+  shape.style.backgroundColor = item.type.endsWith("-fill") ? color : "transparent";
+  shape.classList.toggle("is-filled", item.type.endsWith("-fill"));
+  shape.classList.toggle("is-oval", item.type.startsWith("oval"));
 }
 
 function renderStageItems(stage, plan) {
@@ -1652,6 +1716,18 @@ function renderStageItems(stage, plan) {
       positionStageLine(line, item);
       stage.append(line);
     }
+    if (isShapeStageItem(item)) {
+      const shape = document.createElement("div");
+      shape.className = "stage-item stage-shape-item";
+      shape.dataset.stageItemId = item.id;
+      shape.dataset.stageItemType = item.type;
+      const resizeHandle = document.createElement("span");
+      resizeHandle.className = "stage-shape-resize";
+      resizeHandle.setAttribute("aria-hidden", "true");
+      shape.append(resizeHandle);
+      applyShapeStyle(shape, item);
+      stage.append(shape);
+    }
   });
 }
 
@@ -1675,6 +1751,7 @@ function renderFilmPlan(plan) {
     member.onStage !== false
   ));
   const timelineTextItems = (plan.stageItems || []).filter((item) => item.type === "text");
+  const timelineShapeItems = (plan.stageItems || []).filter((item) => isShapeStageItem(item));
   const importedStageMembers = importedTimelineMembers.filter((member) => (
     member.onStage !== false &&
     ["animation", "audio", "image", "video"].includes(member.mediaType)
@@ -1793,6 +1870,7 @@ function renderFilmPlan(plan) {
     const importedEndFrames = [
       ...importedTimelineMembers.map((member) => Number(member.startFrame || 1) + Number(member.durationFrames || 24) - 1),
       ...timelineTextItems.map((item) => Number(item.startFrame || 1) + Number(item.durationFrames || 24) - 1),
+      ...timelineShapeItems.map((item) => Number(item.startFrame || 1) + Number(item.durationFrames || 24) - 1),
     ];
     const totalFrames = Math.max(...importedEndFrames, 240);
     const frameMarks = Array.from({ length: 9 }, (_, index) => Math.round(1 + (totalFrames - 1) * (index / 8)));
@@ -1807,6 +1885,12 @@ function renderFilmPlan(plan) {
       ...timelineTextItems.map((item, index) => ({
         name: item.text || `Text ${index + 1}`,
         lane: "cast",
+        member: item,
+        stageItemId: item.id,
+      })),
+      ...timelineShapeItems.map((item, index) => ({
+        name: item.type.startsWith("oval") ? `Oval ${index + 1}` : `Rectangle ${index + 1}`,
+        lane: "stage",
         member: item,
         stageItemId: item.id,
       })),
@@ -1845,6 +1929,7 @@ function renderFilmPlan(plan) {
           <div class="score-row-label" contenteditable="true" spellcheck="false" role="textbox" aria-label="Edit timeline row label" data-score-label-index="${channelIndex}">${escapeHtml(channel.name)}</div>
           <div class="score-track ${channel.lane}">
             ${Number.isInteger(channel.castIndex) ? keyframeDotsForMember(channel.member, totalFrames, channel.castIndex) : ""}
+            ${channel.stageItemId ? keyframeDotsForStageItem(channel.member, totalFrames) : ""}
             ${[channel.member].map((item) => {
               const length = Math.max(1, Number(item.durationFrames || 24));
               const start = Math.min(Math.max(1, Number(item.startFrame || 1)), Math.max(1, totalFrames - length + 1));
@@ -2070,6 +2155,28 @@ function drawStageDomFrame(ctx, stage, width, height) {
     ctx.restore();
   });
 
+  stage.querySelectorAll(".stage-shape-item:not(.is-out-of-frame)").forEach((shape) => {
+    const rect = shape.getBoundingClientRect();
+    const style = getComputedStyle(shape);
+    const x = ((rect.left - stageRect.left) / stageRect.width) * width;
+    const y = ((rect.top - stageRect.top) / stageRect.height) * height;
+    const itemWidth = (rect.width / stageRect.width) * width;
+    const itemHeight = (rect.height / stageRect.height) * height;
+    ctx.save();
+    ctx.lineWidth = Math.max(2, (2 / stageRect.height) * height);
+    ctx.strokeStyle = style.borderColor || "#edf6ff";
+    ctx.fillStyle = style.backgroundColor || "transparent";
+    ctx.beginPath();
+    if (shape.classList.contains("is-oval")) {
+      ctx.ellipse(x + itemWidth / 2, y + itemHeight / 2, itemWidth / 2, itemHeight / 2, 0, 0, Math.PI * 2);
+    } else {
+      ctx.rect(x, y, itemWidth, itemHeight);
+    }
+    if (shape.classList.contains("is-filled")) ctx.fill();
+    ctx.stroke();
+    ctx.restore();
+  });
+
   stage.querySelectorAll(".stage-text-item:not(.is-out-of-frame)").forEach((item) => {
     const content = item.querySelector(".stage-text-content");
     if (!content) return;
@@ -2153,7 +2260,7 @@ function exportStageVideo() {
 function makeExportPackage(plan) {
   return {
     package: "Admira Player Ready",
-    version: "AiDirector v2026.05.20 r10",
+    version: "AiDirector v2026.05.20 r11",
     includeMetadata: Boolean(includeMetadata?.checked),
     formats: {
       video: ["MP4", "MOV", "ProRes", "4K/8K", "PP Solving"],
@@ -2624,6 +2731,7 @@ function initStageTools() {
   const textAlignButtons = [...document.querySelectorAll("[data-text-align]")];
   if (!stage || !palette || !toolButtons.length) return;
   let activeTextItem = null;
+  let activeShapeItem = null;
   const textStyleState = {
     bold: true,
     italic: false,
@@ -2670,12 +2778,46 @@ function initStageTools() {
     saveFilmPlan(plan);
     applyTextStyleToElement(activeTextItem, nextItem);
   };
+  const saveActiveShapePatch = (patch) => {
+    if (!activeShapeItem) return;
+    const itemId = activeShapeItem.dataset.stageItemId;
+    const plan = currentPlan();
+    let nextItem = null;
+    plan.stageItems = (plan.stageItems || []).map((item) => {
+      if (item.id !== itemId) return item;
+      const timing = nextStageItemKeyframeTiming(item, currentTimelineFrame());
+      const values = {
+        x: Number.parseFloat(activeShapeItem.style.left) || item.x || 0,
+        y: Number.parseFloat(activeShapeItem.style.top) || item.y || 0,
+        w: Number.parseFloat(activeShapeItem.style.width) || item.w || 12,
+        h: Number.parseFloat(activeShapeItem.style.height) || item.h || 10,
+        color: patch.color || item.color,
+      };
+      nextItem = {
+        ...item,
+        ...values,
+        ...patch,
+        durationFrames: timing.durationFrames,
+        keyframes: upsertStageKeyframe(item, timing.frame, values),
+      };
+      selectedStageKeyframe = timing.isExisting ? { stageItemId: item.id, frame: timing.frame } : null;
+      return nextItem;
+    });
+    if (!nextItem) return;
+    saveFilmPlan(plan);
+    renderFilmPlan(plan);
+    activeShapeItem = stage.querySelector(`[data-stage-item-id="${nextItem.id}"]`);
+    if (activeShapeItem) setActiveShapeItem(activeShapeItem);
+    setTimelineFrame((nextItem.keyframes || []).at(-1)?.frame || currentTimelineFrame(), false);
+  };
   const setActiveTextItem = (textItem) => {
     if (!textItem) return;
     activeTextItem = textItem;
+    activeShapeItem = null;
     stage.querySelectorAll(".stage-text-item").forEach((item) => {
       item.classList.toggle("is-selected", item === activeTextItem);
     });
+    stage.querySelectorAll(".stage-shape-item").forEach((item) => item.classList.remove("is-selected"));
     const itemId = textItem.dataset.stageItemId;
     const planItem = (currentPlan().stageItems || []).find((item) => item.id === itemId);
     const style = textStyleForItem(planItem || {});
@@ -2684,6 +2826,15 @@ function initStageTools() {
     textStyleState.underline = style.textDecoration === "underline";
     textStyleState.align = style.textAlign || "left";
     syncTextControlButtons();
+  };
+  const setActiveShapeItem = (shapeItem) => {
+    if (!shapeItem) return;
+    activeShapeItem = shapeItem;
+    activeTextItem = null;
+    stage.querySelectorAll(".stage-text-item").forEach((item) => item.classList.remove("is-selected"));
+    stage.querySelectorAll(".stage-shape-item").forEach((item) => {
+      item.classList.toggle("is-selected", item === activeShapeItem);
+    });
   };
 
   toolButtons.forEach((button) => {
@@ -2714,8 +2865,9 @@ function initStageTools() {
     setActiveTextItem(textItem);
   });
   window.addEventListener("stageforegroundchange", (event) => {
-    if (!activeTextItem) return;
-    saveActiveTextPatch({ color: event.detail?.color || foregroundColor() });
+    const color = event.detail?.color || foregroundColor();
+    if (activeTextItem) saveActiveTextPatch({ color });
+    if (activeShapeItem) saveActiveShapePatch({ color });
   });
 
   setActiveTool(palette.dataset.stageTool || "hand");
@@ -2725,6 +2877,7 @@ function initStageTools() {
     const tool = activeTool();
     const member = event.target.closest(".stage-imported-member");
     const textItem = event.target.closest(".stage-text-item");
+    const shapeItem = event.target.closest(".stage-shape-item");
     if (tool === "hand" && member) {
       event.preventDefault();
       const castIndex = Number(member.dataset.castIndex);
@@ -2833,6 +2986,76 @@ function initStageTools() {
       return;
     }
 
+    if (tool === "hand" && shapeItem) {
+      event.preventDefault();
+      setActiveShapeItem(shapeItem);
+      const itemId = shapeItem.dataset.stageItemId;
+      const start = stagePointFromEvent(stage, event);
+      const startLeft = Number.parseFloat(shapeItem.style.left) || 0;
+      const startTop = Number.parseFloat(shapeItem.style.top) || 0;
+      const startWidth = Number.parseFloat(shapeItem.style.width) || 12;
+      const startHeight = Number.parseFloat(shapeItem.style.height) || 10;
+      const isScaling = Boolean(event.target.closest(".stage-shape-resize"));
+      const startValues = {
+        x: startLeft,
+        y: startTop,
+        w: startWidth,
+        h: startHeight,
+        color: shapeItem.style.borderColor || "",
+      };
+      stage.setPointerCapture(event.pointerId);
+      const move = (moveEvent) => {
+        const next = stagePointFromEvent(stage, moveEvent);
+        if (isScaling) {
+          const nextWidth = Math.min(clampStageSize(startWidth + (next.x - start.x), startWidth), 100 - startLeft);
+          const nextHeight = Math.min(clampStageSize(startHeight + (next.y - start.y), startHeight), 100 - startTop);
+          shapeItem.style.width = `${nextWidth}%`;
+          shapeItem.style.height = `${nextHeight}%`;
+        } else {
+          const nextLeft = Math.min(clampPercent(startLeft + (next.x - start.x)), 100 - startWidth);
+          const nextTop = Math.min(clampPercent(startTop + (next.y - start.y)), 100 - startHeight);
+          shapeItem.style.left = `${nextLeft}%`;
+          shapeItem.style.top = `${nextTop}%`;
+        }
+      };
+      const up = () => {
+        stage.removeEventListener("pointermove", move);
+        stage.removeEventListener("pointerup", up);
+        stage.removeEventListener("pointercancel", up);
+        const plan = currentPlan();
+        let nextFrame = currentTimelineFrame();
+        plan.stageItems = (plan.stageItems || []).map((item) => {
+          if (item.id !== itemId) return item;
+          const values = {
+            x: Number.parseFloat(shapeItem.style.left) || 0,
+            y: Number.parseFloat(shapeItem.style.top) || 0,
+            w: Number.parseFloat(shapeItem.style.width) || startWidth,
+            h: Number.parseFloat(shapeItem.style.height) || startHeight,
+            color: item.color || foregroundColor(),
+          };
+          if (!stageValuesChanged(startValues, values)) return item;
+          const timing = nextStageItemKeyframeTiming(item, currentTimelineFrame());
+          nextFrame = timing.frame;
+          selectedStageKeyframe = timing.isExisting ? { stageItemId: item.id, frame: timing.frame } : null;
+          return {
+            ...item,
+            ...values,
+            durationFrames: timing.durationFrames,
+            keyframes: upsertStageKeyframe(item, timing.frame, values),
+          };
+        });
+        saveFilmPlan(plan);
+        renderFilmPlan(plan);
+        const nextShape = stage.querySelector(`[data-stage-item-id="${itemId}"]`);
+        if (nextShape) setActiveShapeItem(nextShape);
+        setTimelineFrame(nextFrame, false);
+      };
+      stage.addEventListener("pointermove", move);
+      stage.addEventListener("pointerup", up);
+      stage.addEventListener("pointercancel", up);
+      return;
+    }
+
     if (event.target.closest(".stage-item") || member) return;
 
     if (tool === "text") {
@@ -2859,6 +3082,59 @@ function initStageTools() {
         text.focus();
         document.getSelection()?.selectAllChildren(text);
       }
+      return;
+    }
+
+    if (["rect-fill", "rect", "oval-fill", "oval"].includes(tool)) {
+      event.preventDefault();
+      const start = stagePointFromEvent(stage, event);
+      const item = {
+        id: stageItemId(tool),
+        type: tool,
+        x: start.x,
+        y: start.y,
+        w: 1,
+        h: 1,
+        color: foregroundColor(),
+        startFrame: currentTimelineFrame(),
+        durationFrames: 24,
+      };
+      item.keyframes = [defaultStageKeyframe(item, item.startFrame)];
+      const preview = document.createElement("div");
+      preview.className = "stage-item stage-shape-item";
+      preview.dataset.stageItemId = item.id;
+      preview.dataset.stageItemType = item.type;
+      preview.append(Object.assign(document.createElement("span"), { className: "stage-shape-resize" }));
+      stage.append(preview);
+      applyShapeStyle(preview, item);
+      stage.setPointerCapture(event.pointerId);
+      const move = (moveEvent) => {
+        const next = stagePointFromEvent(stage, moveEvent);
+        item.x = Math.min(start.x, next.x);
+        item.y = Math.min(start.y, next.y);
+        item.w = clampStageSize(Math.abs(next.x - start.x), 1);
+        item.h = clampStageSize(Math.abs(next.y - start.y), 1);
+        item.keyframes = [defaultStageKeyframe(item, item.startFrame)];
+        applyShapeStyle(preview, item);
+      };
+      const up = () => {
+        stage.removeEventListener("pointermove", move);
+        stage.removeEventListener("pointerup", up);
+        stage.removeEventListener("pointercancel", up);
+        if (item.w < 2 || item.h < 2) {
+          preview.remove();
+          return;
+        }
+        const plan = currentPlan();
+        plan.stageItems = [...(plan.stageItems || []), item];
+        saveFilmPlan(plan);
+        renderFilmPlan(plan);
+        const shape = stage.querySelector(`[data-stage-item-id="${item.id}"]`);
+        if (shape) setActiveShapeItem(shape);
+      };
+      stage.addEventListener("pointermove", move);
+      stage.addEventListener("pointerup", up);
+      stage.addEventListener("pointercancel", up);
       return;
     }
 

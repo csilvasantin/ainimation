@@ -275,6 +275,46 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
     };
   });
 
+  await page.locator('[data-stage-tool="rect-fill"]').click();
+  const stageBox = await page.locator(".stage-canvas").boundingBox();
+  if (stageBox) {
+    await page.mouse.move(stageBox.x + stageBox.width * 0.18, stageBox.y + stageBox.height * 0.18);
+    await page.mouse.down();
+    await page.mouse.move(stageBox.x + stageBox.width * 0.32, stageBox.y + stageBox.height * 0.32);
+    await page.mouse.up();
+    await page.waitForTimeout(120);
+  }
+  await page.locator('[data-stage-tool="hand"]').click();
+  const shapeBox = await page.locator(".stage-shape-item").first().boundingBox();
+  if (shapeBox) {
+    await page.mouse.move(shapeBox.x + shapeBox.width / 2, shapeBox.y + shapeBox.height / 2);
+    await page.mouse.down();
+    await page.mouse.move(shapeBox.x + shapeBox.width / 2 + 90, shapeBox.y + shapeBox.height / 2 + 28);
+    await page.mouse.up();
+    await page.waitForTimeout(120);
+  }
+  await page.evaluate(() => {
+    const input = document.querySelector(".foreground-color-input");
+    input.value = "#ff0000";
+    input.dispatchEvent(new Event("input", { bubbles: true }));
+  });
+  await page.waitForTimeout(120);
+
+  result.stageShapes = await page.evaluate(() => {
+    const plan = JSON.parse(localStorage.getItem("ainimation-film-plan") || "{}");
+    const item = (plan.stageItems || []).find((stageItem) => stageItem.type === "rect-fill");
+    return {
+      available: true,
+      created: Boolean(item),
+      type: item?.type || "",
+      durationFrames: item?.durationFrames,
+      keyframes: item?.keyframes || [],
+      dotCount: document.querySelectorAll(`.score-keyframe-dot[data-stage-item-id="${item?.id}"]`).length,
+      selected: document.querySelector(".stage-shape-item")?.classList.contains("is-selected") || false,
+      color: item?.color || "",
+    };
+  });
+
   await browser.close();
 
   const expectedXLabels = Math.floor(result.rulerReference.stageWidth / 100) + 1 + (result.rulerReference.stageWidth % 100 ? 1 : 0);
@@ -282,8 +322,8 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
   const missingLabels = result.labels.length !== expectedYLabels || result.xLabels.length !== expectedXLabels;
   const hasWrongRotation = result.labels.some((label) => label.transform === "matrix(0, 1, -1, 0, 0, 0)");
 
-  if (!result.stylesheetHref.includes("aidirector-20260520-r10")) {
-    throw new Error(`Expected aidirector-20260520-r10 stylesheet cache key, got ${result.stylesheetHref}`);
+  if (!result.stylesheetHref.includes("aidirector-20260520-r11")) {
+    throw new Error(`Expected aidirector-20260520-r11 stylesheet cache key, got ${result.stylesheetHref}`);
   }
 
   if (
@@ -309,8 +349,25 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
     throw new Error(`Unexpected stage ruler toggle: ${JSON.stringify(result.rulerToggle)}`);
   }
 
-  if (result.brand.text !== "AiDirector v.2026.05.20 r10" || result.brand.rightGap > 20) {
+  if (result.brand.text !== "AiDirector v.2026.05.20 r11" || result.brand.rightGap > 20) {
     throw new Error(`Unexpected menu brand placement: ${JSON.stringify(result.brand)}`);
+  }
+
+  if (
+    !result.stageShapes.available ||
+    !result.stageShapes.created ||
+    result.stageShapes.type !== "rect-fill" ||
+    result.stageShapes.durationFrames !== 72 ||
+    result.stageShapes.keyframes.length !== 3 ||
+    result.stageShapes.keyframes[0]?.frame !== 25 ||
+    result.stageShapes.keyframes[1]?.frame !== 49 ||
+    result.stageShapes.keyframes[2]?.frame !== 73 ||
+    result.stageShapes.keyframes[2]?.color !== "#ff0000" ||
+    result.stageShapes.dotCount !== 3 ||
+    !result.stageShapes.selected ||
+    result.stageShapes.color !== "#ff0000"
+  ) {
+    throw new Error(`Unexpected Stage shape editing: ${JSON.stringify(result.stageShapes)}`);
   }
 
   const expectedToolShortcuts = [
