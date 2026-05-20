@@ -2077,29 +2077,23 @@ h2 {
 }
 
 .stage-ruler-x {
-  align-items: end;
   background:
     linear-gradient(180deg, rgba(237, 243, 255, 0.12), rgba(237, 243, 255, 0.03)),
-    repeating-linear-gradient(90deg, rgba(210, 228, 255, 0.42) 0 1px, transparent 1px 16.666%);
+    repeating-linear-gradient(90deg, rgba(210, 228, 255, 0.42) 0 1px, transparent 1px calc(100% / 19.2));
   border-bottom: 1px solid rgba(210, 228, 255, 0.22);
-  display: grid;
-  grid-template-columns: 34px repeat(7, minmax(0, 1fr));
   height: var(--stage-ruler-x);
-  left: 0;
+  left: var(--stage-ruler-y);
   padding: 0 6px 3px;
-  right: 0;
+  right: 10px;
   top: 0;
 }
 
 .stage-ruler-y {
   background:
     linear-gradient(90deg, rgba(237, 243, 255, 0.12), rgba(237, 243, 255, 0.03)),
-    repeating-linear-gradient(0deg, rgba(210, 228, 255, 0.42) 0 1px, transparent 1px 16.666%);
+    repeating-linear-gradient(0deg, rgba(210, 228, 255, 0.42) 0 1px, transparent 1px calc(100% / 10.8));
   border-right: 1px solid rgba(210, 228, 255, 0.22);
-  bottom: 0;
-  display: grid;
-  grid-template-rows: 20px repeat(7, minmax(0, 1fr));
-  justify-items: end;
+  bottom: 10px;
   left: 0;
   padding: 6px 3px;
   top: var(--stage-ruler-x);
@@ -2107,19 +2101,36 @@ h2 {
 }
 
 .stage-ruler-y b {
-  justify-self: center;
+  left: 3px;
+  position: absolute;
+  top: 6px;
+}
+
+.stage-ruler-x b {
+  left: calc((var(--stage-ruler-y) * -1) + 6px);
+  position: absolute;
+  top: 6px;
+}
+
+.stage-ruler-x span,
+.stage-ruler-y span {
+  display: block;
+  line-height: 1;
+  position: absolute;
+  white-space: nowrap;
+}
+
+.stage-ruler-x span {
+  bottom: 4px;
+  transform: translateX(-50%);
 }
 
 .stage-ruler-y span {
-  align-self: center;
   display: grid;
   height: 18px;
-  justify-self: center;
   place-items: center;
-  line-height: 1;
-  transform: rotate(90deg);
-  transform-origin: center;
-  white-space: nowrap;
+  right: 5px;
+  transform: translateY(-50%);
   width: 32px;
 }
 
@@ -2136,8 +2147,8 @@ h2 {
 
 .stage-grid {
   background:
-    repeating-linear-gradient(90deg, rgba(190, 231, 255, 0.11) 0 1px, transparent 1px 58px),
-    repeating-linear-gradient(0deg, rgba(190, 231, 255, 0.1) 0 1px, transparent 1px 42px);
+    repeating-linear-gradient(90deg, rgba(190, 231, 255, 0.11) 0 1px, transparent 1px calc(100% / 19.2)),
+    repeating-linear-gradient(0deg, rgba(190, 231, 255, 0.1) 0 1px, transparent 1px calc(100% / 10.8));
   opacity: 0.72;
 }
 
@@ -2201,7 +2212,8 @@ h2 {
   z-index: 4;
 }
 
-.stage-imported-member.is-out-of-frame {
+.stage-imported-member.is-out-of-frame,
+.stage-text-item.is-out-of-frame {
   display: none;
 }
 
@@ -2271,8 +2283,9 @@ h2 {
 }
 
 .director-cast-window .cast-bin {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fill, 122px);
   grid-auto-rows: 74px;
+  justify-content: start;
   overflow-y: auto;
 }
 

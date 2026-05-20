@@ -29,6 +29,7 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
         height: Number(rect.height.toFixed(2)),
       };
     });
+    const xLabels = [...document.querySelectorAll(".stage-ruler-x span")].map((label) => label.textContent.trim());
 
     const brandRect = brand?.getBoundingClientRect();
     const menuRect = menu?.getBoundingClientRect();
@@ -38,6 +39,7 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
     return {
       stylesheetHref,
       labels,
+      xLabels,
       brand: {
         text: brand?.textContent.trim() || "",
         rightGap: brandRect && menuRect ? Number((menuRect.right - brandRect.right).toFixed(2)) : null,
@@ -82,6 +84,15 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
       fontWeight: contentStyle?.fontWeight || "",
       textAlign: contentStyle?.textAlign || "",
       removeLabel: removeButton?.getAttribute("aria-label") || "",
+      timelineSprite: (() => {
+        const sprite = document.querySelector(".score-sprite[data-stage-item-id]");
+        return {
+          exists: Boolean(sprite),
+          startFrame: sprite?.dataset.startFrame || "",
+          durationFrames: sprite?.dataset.durationFrames || "",
+          range: sprite?.querySelector("small")?.textContent.trim() || "",
+        };
+      })(),
     };
   });
 
@@ -91,18 +102,18 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
 
   await browser.close();
 
-  const missingLabels = result.labels.length !== 7;
-  const hasWrongRotation = result.labels.some((label) => label.transform !== "matrix(0, 1, -1, 0, 0, 0)");
+  const missingLabels = result.labels.length !== 12 || result.xLabels.length !== 21;
+  const hasWrongRotation = result.labels.some((label) => label.transform === "matrix(0, 1, -1, 0, 0, 0)");
 
-  if (!result.stylesheetHref.includes("aidirector-20260520-r3")) {
-    throw new Error(`Expected aidirector-20260520-r3 stylesheet cache key, got ${result.stylesheetHref}`);
+  if (!result.stylesheetHref.includes("aidirector-20260520-r4")) {
+    throw new Error(`Expected aidirector-20260520-r4 stylesheet cache key, got ${result.stylesheetHref}`);
   }
 
-  if (missingLabels || hasWrongRotation) {
-    throw new Error(`Unexpected vertical ruler labels: ${JSON.stringify(result.labels)}`);
+  if (missingLabels || hasWrongRotation || result.labels[1]?.text !== "100" || result.xLabels[1] !== "100") {
+    throw new Error(`Unexpected stage ruler labels: ${JSON.stringify({ y: result.labels, x: result.xLabels })}`);
   }
 
-  if (result.brand.text !== "AiDirector v.2026.05.20 r3" || result.brand.rightGap > 20) {
+  if (result.brand.text !== "AiDirector v.2026.05.20 r4" || result.brand.rightGap > 20) {
     throw new Error(`Unexpected menu brand placement: ${JSON.stringify(result.brand)}`);
   }
 
@@ -131,6 +142,9 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
     Number(result.stageText.fontWeight) < 700 ||
     result.stageText.textAlign !== "center" ||
     result.stageText.removeLabel !== "Remove stage text" ||
+    !result.stageText.timelineSprite.exists ||
+    result.stageText.timelineSprite.durationFrames !== "24" ||
+    result.stageText.timelineSprite.range !== "1-24" ||
     result.stageText.itemCountAfterRemove !== 0
   ) {
     throw new Error(`Unexpected stage text controls: ${JSON.stringify(result.stageText)}`);

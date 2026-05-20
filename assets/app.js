@@ -833,6 +833,15 @@ function syncStageToFrame(frame = currentTimelineFrame(), shouldPlay = false) {
     media.muted = false;
     media.play?.().catch(() => {});
   });
+  document.querySelectorAll(".stage-text-item[data-stage-item-id]").forEach((textItem) => {
+    const item = (plan.stageItems || []).find((stageItem) => stageItem.id === textItem.dataset.stageItemId);
+    if (!item) return;
+    const start = Number(item.startFrame || 1);
+    const duration = Math.max(1, Number(item.durationFrames || 24));
+    const isActive = frame >= start && frame <= start + duration - 1;
+    textItem.classList.toggle("is-out-of-frame", !isActive);
+    textItem.setAttribute("aria-hidden", String(!isActive));
+  });
 }
 
 function initScorePlayhead(totalFrames) {
@@ -984,6 +993,9 @@ const directorWindows = document.querySelectorAll(".director-window");
 const filmStorageKey = "ainimation-film-plan";
 const scoreLabelsStorageKey = "ainimation-score-labels";
 const timelineMarkersStorageKey = "ainimation-timeline-markers";
+const stageWidthPixels = 1920;
+const stageHeightPixels = 1080;
+const stageRulerStep = 100;
 let activeDirectorWindow = null;
 let draggedDirectorWindow = null;
 let dragOffsetX = 0;
@@ -1250,7 +1262,7 @@ function initScoreLabelEditing() {
 }
 
 function initTimelineSpriteDragging(totalFrames) {
-  const sprites = [...scoreGrid.querySelectorAll(".score-sprite.imported-member[data-cast-index]")];
+  const sprites = [...scoreGrid.querySelectorAll(".score-sprite[data-cast-index], .score-sprite[data-stage-item-id]")];
   if (!sprites.length) return;
 
   sprites.forEach((sprite) => {
@@ -1259,7 +1271,8 @@ function initTimelineSpriteDragging(totalFrames) {
       event.stopPropagation();
       const track = sprite.closest(".score-track");
       const castIndex = Number(sprite.dataset.castIndex);
-      if (!track || !Number.isInteger(castIndex)) return;
+      const stageItemId = sprite.dataset.stageItemId;
+      if (!track || (!Number.isInteger(castIndex) && !stageItemId)) return;
       const trackRect = track.getBoundingClientRect();
       const startFrame = Number(sprite.dataset.startFrame || 1);
       const durationFrames = Number(sprite.dataset.durationFrames || 24);
@@ -1286,6 +1299,15 @@ function initTimelineSpriteDragging(totalFrames) {
             startFrame: frame,
             durationFrames: duration,
           };
+          saveFilmPlan(plan);
+          syncStageToFrame(currentTimelineFrame(), false);
+        }
+        if (stageItemId) {
+          plan.stageItems = (plan.stageItems || []).map((item) => (
+            item.id === stageItemId
+              ? { ...item, startFrame: frame, durationFrames: duration }
+              : item
+          ));
           saveFilmPlan(plan);
           syncStageToFrame(currentTimelineFrame(), false);
         }
@@ -1337,7 +1359,17 @@ function normalizeFilmPlan(plan) {
       ...(plan.pipeline || {}),
     },
     cast: plan.cast || makeCast(plan),
-    stageItems: Array.isArray(plan.stageItems) ? plan.stageItems : [],
+    stageItems: Array.isArray(plan.stageItems)
+      ? plan.stageItems.map((item) => (
+        item.type === "text"
+          ? {
+            ...item,
+            startFrame: Math.max(1, Number(item.startFrame || 1)),
+            durationFrames: Math.max(1, Number(item.durationFrames || 24)),
+          }
+          : item
+      ))
+      : [],
   };
   merged.scenes = (plan.scenes || fallback.scenes).map((scene, index) => ({
     ...fallback.scenes[index % fallback.scenes.length],
@@ -1551,6 +1583,7 @@ function renderFilmPlan(plan) {
     member.src &&
     member.onStage !== false
   ));
+  const timelineTextItems = (plan.stageItems || []).filter((item) => item.type === "text");
   const importedStageMembers = importedTimelineMembers.filter((member) => (
     member.onStage !== false &&
     ["animation", "audio", "image", "video"].includes(member.mediaType)
@@ -1663,16 +1696,27 @@ function renderFilmPlan(plan) {
   }
 
   if (scoreGrid) {
-    const importedEndFrames = importedTimelineMembers.map((member) => Number(member.startFrame || 1) + Number(member.durationFrames || 24) - 1);
+    const importedEndFrames = [
+      ...importedTimelineMembers.map((member) => Number(member.startFrame || 1) + Number(member.durationFrames || 24) - 1),
+      ...timelineTextItems.map((item) => Number(item.startFrame || 1) + Number(item.durationFrames || 24) - 1),
+    ];
     const totalFrames = Math.max(...importedEndFrames, 240);
     const frameMarks = Array.from({ length: 9 }, (_, index) => Math.round(1 + (totalFrames - 1) * (index / 8)));
     const timelineMarkers = loadTimelineMarkers(totalFrames);
-    const scoreChannels = importedTimelineMembers.map((member) => ({
+    const scoreChannels = [
+      ...importedTimelineMembers.map((member) => ({
         name: member.name,
         lane: member.mediaType === "video" || member.mediaType === "animation" ? "video" : member.mediaType === "audio" ? "music" : "cast",
         member,
         castIndex: castMembers.indexOf(member),
-      }));
+      })),
+      ...timelineTextItems.map((item, index) => ({
+        name: item.text || `Text ${index + 1}`,
+        lane: "cast",
+        member: item,
+        stageItemId: item.id,
+      })),
+    ];
     scoreGrid.style.setProperty("--total-frames", totalFrames);
     scoreGrid.innerHTML = `
       <div class="director-score">
@@ -1709,9 +1753,9 @@ function renderFilmPlan(plan) {
             ${[channel.member].map((item) => {
               const length = Math.max(1, Number(item.durationFrames || 24));
               const start = Math.min(Math.max(1, Number(item.startFrame || 1)), Math.max(1, totalFrames - length + 1));
-              const spriteLabel = item.name;
+              const spriteLabel = channel.name;
               return `
-                <button class="score-sprite ${channel.lane} imported-member" type="button" style="left:${((start - 1) / totalFrames) * 100}%;width:${(length / totalFrames) * 100}%" data-cast-index="${channel.castIndex}" data-start-frame="${start}" data-duration-frames="${length}">
+                <button class="score-sprite ${channel.lane} imported-member" type="button" style="left:${((start - 1) / totalFrames) * 100}%;width:${(length / totalFrames) * 100}%" ${channel.stageItemId ? `data-stage-item-id="${escapeHtml(channel.stageItemId)}"` : `data-cast-index="${channel.castIndex}"`} data-start-frame="${start}" data-duration-frames="${length}">
                   <i class="score-sprite-handle start" data-sprite-handle="start" aria-hidden="true"></i>
                   <span>${escapeHtml(spriteLabel)}</span>
                   <small>${start}-${start + length - 1}</small>
@@ -1990,6 +2034,28 @@ if (directorWindows.length) {
 
 function currentPlan() {
   return normalizeFilmPlan(loadFilmPlan()) || buildFilmPlan();
+}
+
+function renderStageRulers() {
+  const xRuler = document.querySelector(".stage-ruler-x");
+  const yRuler = document.querySelector(".stage-ruler-y");
+  if (!xRuler || !yRuler) return;
+  const makeMarks = (max) => {
+    const marks = [];
+    for (let value = 0; value <= max; value += stageRulerStep) {
+      marks.push(value);
+    }
+    if (marks[marks.length - 1] !== max) marks.push(max);
+    return marks;
+  };
+  const xLabel = xRuler.querySelector("b")?.outerHTML || "<b>H px</b>";
+  const yLabel = yRuler.querySelector("b")?.outerHTML || "<b>V px</b>";
+  xRuler.innerHTML = `${xLabel}${makeMarks(stageWidthPixels).map((value) => (
+    `<span style="left:${(value / stageWidthPixels) * 100}%">${value}</span>`
+  )).join("")}`;
+  yRuler.innerHTML = `${yLabel}${makeMarks(stageHeightPixels).map((value) => (
+    `<span style="top:${(value / stageHeightPixels) * 100}%">${value}</span>`
+  )).join("")}`;
 }
 
 function cleanMemberName(fileName) {
@@ -2277,6 +2343,8 @@ function initStageTools() {
         y: point.y,
         text: "Text",
         color: foregroundColor(),
+        startFrame: currentTimelineFrame(),
+        durationFrames: 24,
         ...textStylePayload(),
       };
       plan.stageItems = [...(plan.stageItems || []), item];
@@ -2353,6 +2421,7 @@ function importCastAsset(name, kind) {
 if (filmForm) {
   const initialPlan = currentPlan();
   hydrateFilmForm(initialPlan);
+  renderStageRulers();
   renderFilmPlan(initialPlan);
   initStageTools();
 
