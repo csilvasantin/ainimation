@@ -800,6 +800,21 @@ function currentTimelineFrame() {
   return Number(document.querySelector(".score-playhead")?.dataset.frame || 1);
 }
 
+function setTimelineFrame(frame, shouldPlay = false) {
+  const playhead = document.querySelector(".score-playhead");
+  const totalFrames = Number(playhead?.getAttribute("aria-valuemax") || 240);
+  if (!playhead) {
+    syncStageToFrame(frame, shouldPlay);
+    return;
+  }
+  const currentFrame = Math.min(Math.max(Number(frame || 1), 1), Math.max(1, totalFrames));
+  const left = totalFrames <= 1 ? 0 : ((currentFrame - 1) / (totalFrames - 1)) * 100;
+  playhead.style.left = `${left}%`;
+  playhead.dataset.frame = String(currentFrame);
+  playhead.setAttribute("aria-valuenow", String(currentFrame));
+  syncStageToFrame(currentFrame, shouldPlay);
+}
+
 function syncStageToFrame(frame = currentTimelineFrame(), shouldPlay = false) {
   const plan = currentPlan();
   document.querySelectorAll(".stage-imported-member[data-cast-index]").forEach((figure) => {
@@ -1015,6 +1030,7 @@ let activeDirectorWindow = null;
 let draggedDirectorWindow = null;
 let dragOffsetX = 0;
 let dragOffsetY = 0;
+let selectedStageKeyframe = null;
 
 const sceneCounts = {
   "60 seconds": 4,
@@ -1363,6 +1379,25 @@ function initTimelineSpriteDragging(totalFrames) {
   });
 }
 
+function initTimelineKeyframeDots() {
+  scoreGrid.querySelectorAll(".score-keyframe-dot[data-keyframe-frame]").forEach((dot) => {
+    dot.addEventListener("click", (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      const frame = Number(dot.dataset.keyframeFrame || 1);
+      selectedStageKeyframe = {
+        castIndex: Number(dot.dataset.castIndex),
+        frame,
+      };
+      setTimelineFrame(frame, false);
+      document.querySelectorAll(".score-keyframe-dot.is-selected").forEach((item) => {
+        item.classList.remove("is-selected");
+      });
+      dot.classList.add("is-selected");
+    });
+  });
+}
+
 function normalizeFilmPlan(plan) {
   if (!plan) return plan;
   const fallback = buildFilmPlan(false);
@@ -1469,6 +1504,46 @@ function upsertStageKeyframe(member, frame, values, index = 0) {
     ...stageKeyframesFor(member, index).filter((keyframe) => keyframe.frame !== nextFrame),
     nextKeyframe,
   ].sort((a, b) => a.frame - b.frame);
+}
+
+function stageValuesChanged(before, after) {
+  return ["x", "y", "w", "h"].some((key) => Math.abs(Number(before[key] || 0) - Number(after[key] || 0)) > 0.05);
+}
+
+function nextStageKeyframeTiming(member, currentFrame, castIndex) {
+  const start = Math.max(1, Number(member?.startFrame || 1));
+  const duration = Math.max(1, Number(member?.durationFrames || 24));
+  const end = start + duration - 1;
+  const existingFrames = stageKeyframesFor(member).map((keyframe) => keyframe.frame);
+  const selectedFrame = selectedStageKeyframe?.castIndex === castIndex ? selectedStageKeyframe.frame : null;
+  const existingFrame = existingFrames.find((frame) => frame === selectedFrame && frame === currentFrame);
+  if (existingFrame) {
+    return {
+      frame: existingFrame,
+      durationFrames: Math.max(duration, existingFrame - start + 1),
+      isExisting: true,
+    };
+  }
+  const nextFrame = currentFrame > end ? currentFrame : end + 1;
+  return {
+    frame: nextFrame,
+    durationFrames: Math.max(duration + 24, nextFrame - start + 24),
+    isExisting: false,
+  };
+}
+
+function keyframeDotsForMember(member, totalFrames, castIndex) {
+  if (!member || !Array.isArray(member.keyframes) || !member.keyframes.length) return "";
+  return stageKeyframesFor(member)
+    .map((keyframe) => {
+      const frame = Math.min(Math.max(1, keyframe.frame), totalFrames);
+      const left = totalFrames <= 1 ? 0 : ((frame - 1) / (totalFrames - 1)) * 100;
+      const selected = selectedStageKeyframe?.castIndex === castIndex && selectedStageKeyframe?.frame === frame;
+      return `
+        <button class="score-keyframe-dot ${selected ? "is-selected" : ""}" type="button" style="left:${left}%" data-keyframe-frame="${frame}" data-cast-index="${castIndex}" aria-label="Keyframe at frame ${frame}" title="Keyframe ${frame}"></button>
+      `;
+    })
+    .join("");
 }
 
 function stagePointFromEvent(stage, event) {
@@ -1768,6 +1843,7 @@ function renderFilmPlan(plan) {
         ${scoreChannels.map((channel, channelIndex) => `
           <div class="score-row-label" contenteditable="true" spellcheck="false" role="textbox" aria-label="Edit timeline row label" data-score-label-index="${channelIndex}">${escapeHtml(channel.name)}</div>
           <div class="score-track ${channel.lane}">
+            ${Number.isInteger(channel.castIndex) ? keyframeDotsForMember(channel.member, totalFrames, channel.castIndex) : ""}
             ${[channel.member].map((item) => {
               const length = Math.max(1, Number(item.durationFrames || 24));
               const start = Math.min(Math.max(1, Number(item.startFrame || 1)), Math.max(1, totalFrames - length + 1));
@@ -1789,6 +1865,7 @@ function renderFilmPlan(plan) {
     initTimelineMarkerEditing(totalFrames);
     initScoreLabelEditing();
     initTimelineSpriteDragging(totalFrames);
+    initTimelineKeyframeDots();
     syncStageToFrame(currentTimelineFrame(), false);
   }
 
@@ -2075,7 +2152,7 @@ function exportStageVideo() {
 function makeExportPackage(plan) {
   return {
     package: "Admira Player Ready",
-    version: "AiDirector v2026.05.20 r7",
+    version: "AiDirector v2026.05.20 r8",
     includeMetadata: Boolean(includeMetadata?.checked),
     formats: {
       video: ["MP4", "MOV", "ProRes", "4K/8K", "PP Solving"],
@@ -2655,6 +2732,12 @@ function initStageTools() {
       const startTop = Number.parseFloat(member.style.top) || 0;
       const startWidth = Number.parseFloat(member.style.width) || 12;
       const startHeight = Number.parseFloat(member.style.height) || 10;
+      const startValues = {
+        x: startLeft,
+        y: startTop,
+        w: startWidth,
+        h: startHeight,
+      };
       const isScaling = Boolean(event.target.closest(".stage-member-resize"));
       stage.setPointerCapture(event.pointerId);
       const move = (moveEvent) => {
@@ -2677,6 +2760,7 @@ function initStageTools() {
         stage.removeEventListener("pointercancel", up);
         const plan = currentPlan();
         if (Number.isInteger(castIndex) && plan.cast?.[castIndex]) {
+          const frame = currentTimelineFrame();
           plan.cast[castIndex] = {
             ...plan.cast[castIndex],
             stageX: Number.parseFloat(member.style.left) || 0,
@@ -2684,16 +2768,20 @@ function initStageTools() {
             stageW: Number.parseFloat(member.style.width) || startWidth,
             stageH: Number.parseFloat(member.style.height) || startHeight,
           };
-          const frame = currentTimelineFrame();
           const values = {
             x: Number.parseFloat(member.style.left) || 0,
             y: Number.parseFloat(member.style.top) || 0,
             w: Number.parseFloat(member.style.width) || startWidth,
             h: Number.parseFloat(member.style.height) || startHeight,
           };
-          plan.cast[castIndex].keyframes = upsertStageKeyframe(plan.cast[castIndex], frame, values, Number(member.dataset.stageIndex || 0));
+          if (!stageValuesChanged(startValues, values)) return;
+          const timing = nextStageKeyframeTiming(plan.cast[castIndex], frame, castIndex);
+          plan.cast[castIndex].durationFrames = timing.durationFrames;
+          plan.cast[castIndex].keyframes = upsertStageKeyframe(plan.cast[castIndex], timing.frame, values, Number(member.dataset.stageIndex || 0));
           saveFilmPlan(plan);
-          syncStageToFrame(frame, false);
+          selectedStageKeyframe = timing.isExisting ? { castIndex, frame: timing.frame } : null;
+          renderFilmPlan(plan);
+          setTimelineFrame(timing.frame, false);
         }
       };
       stage.addEventListener("pointermove", move);
