@@ -1018,6 +1018,7 @@ const stageWidthPixels = 1920;
 const stageHeightPixels = 1080;
 const stageRulerStep = 100;
 const admiraStockEndpoints = [
+  "https://pixer-eleven.csilvasantin.workers.dev/stock/list?limit=1",
   "https://www.admira.studio/api/stock/latest",
   "https://www.admira.studio/api/stock?limit=1&sort=latest",
   "https://www.admira.studio/api/stock",
@@ -2152,7 +2153,7 @@ function exportStageVideo() {
 function makeExportPackage(plan) {
   return {
     package: "Admira Player Ready",
-    version: "AiDirector v2026.05.20 r8",
+    version: "AiDirector v2026.05.20 r9",
     includeMetadata: Boolean(includeMetadata?.checked),
     formats: {
       video: ["MP4", "MOV", "ProRes", "4K/8K", "PP Solving"],

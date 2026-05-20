@@ -5,6 +5,12 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
 (async () => {
   const browser = await chromium.launch({ headless: true });
   const page = await browser.newPage({ viewport: { width: 1440, height: 1000 } });
+  const useLiveStock = process.env.REAL_STOCK === "1";
+  if (useLiveStock) {
+    await page.addInitScript(() => {
+      window.__USE_LIVE_STOCK__ = true;
+    });
+  }
 
   await page.goto(targetUrl, { waitUntil: "networkidle" });
   await page.waitForTimeout(1200);
@@ -157,7 +163,7 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
   result.stockImport = await page.evaluate(async () => {
     const originalFetch = window.fetch;
     const calls = [];
-    window.fetch = async (url) => {
+    if (!window.__USE_LIVE_STOCK__) window.fetch = async (url) => {
       calls.push(String(url));
       return new Response(JSON.stringify({
         items: [{
@@ -170,6 +176,12 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
         headers: { "Content-Type": "application/json" },
       });
     };
+    if (window.__USE_LIVE_STOCK__) {
+      window.fetch = async (...args) => {
+        calls.push(String(args[0]));
+        return originalFetch(...args);
+      };
+    }
 
     try {
       document.querySelector("[data-stock-import]")?.click();
@@ -263,8 +275,8 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
   const missingLabels = result.labels.length !== expectedYLabels || result.xLabels.length !== expectedXLabels;
   const hasWrongRotation = result.labels.some((label) => label.transform === "matrix(0, 1, -1, 0, 0, 0)");
 
-  if (!result.stylesheetHref.includes("aidirector-20260520-r8")) {
-    throw new Error(`Expected aidirector-20260520-r8 stylesheet cache key, got ${result.stylesheetHref}`);
+  if (!result.stylesheetHref.includes("aidirector-20260520-r9")) {
+    throw new Error(`Expected aidirector-20260520-r9 stylesheet cache key, got ${result.stylesheetHref}`);
   }
 
   if (
@@ -290,7 +302,7 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
     throw new Error(`Unexpected stage ruler toggle: ${JSON.stringify(result.rulerToggle)}`);
   }
 
-  if (result.brand.text !== "AiDirector v.2026.05.20 r8" || result.brand.rightGap > 20) {
+  if (result.brand.text !== "AiDirector v.2026.05.20 r9" || result.brand.rightGap > 20) {
     throw new Error(`Unexpected menu brand placement: ${JSON.stringify(result.brand)}`);
   }
 
@@ -305,7 +317,7 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
   }
 
   if (
-    !result.stockImport.calls[0]?.includes("www.admira.studio") ||
+    !result.stockImport.calls[0]?.includes("pixer-eleven.csilvasantin.workers.dev/stock/list") ||
     !result.stockImport.imported ||
     !result.stockImport.visibleInCast ||
     result.stockImport.role !== "Stock" ||
