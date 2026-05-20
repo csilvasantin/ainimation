@@ -857,6 +857,15 @@ function syncStageToFrame(frame = currentTimelineFrame(), shouldPlay = false) {
     const duration = Math.max(1, Number(item.durationFrames || 24));
     const isActive = frame >= start && frame <= start + duration - 1;
     if (isShapeStageItem(item)) applyShapeStyle(stageItemEl, item, frame);
+    if (item.type === "text") {
+      const values = interpolateStageKeyframe(item, frame) || defaultStageKeyframe(item, start);
+      const renderItem = { ...item, ...values };
+      const content = stageItemEl.querySelector(".stage-text-content");
+      stageItemEl.style.left = `${clampPercent(values.x ?? item.x)}%`;
+      stageItemEl.style.top = `${clampPercent(values.y ?? item.y)}%`;
+      if (content && document.activeElement !== content) content.textContent = renderItem.text || item.text || "Text";
+      applyTextStyleToElement(stageItemEl, renderItem);
+    }
     stageItemEl.classList.toggle("is-out-of-frame", !isActive);
     stageItemEl.setAttribute("aria-hidden", String(!isActive));
   });
@@ -1450,6 +1459,13 @@ function defaultStageKeyframe(member, frame = Number(member?.startFrame || 1), i
     y: clampPercent(member?.stageY ?? member?.y ?? (54 + Math.floor(index / 3) * 18)),
     w: clampStageSize(member?.stageW ?? member?.w, 12),
     h: clampStageSize(member?.stageH ?? member?.h, 10),
+    color: member?.color || "",
+    text: member?.text || "",
+    fontWeight: member?.fontWeight || "850",
+    fontStyle: member?.fontStyle || "normal",
+    textDecoration: member?.textDecoration || "none",
+    textAlign: member?.textAlign || "left",
+    fontSize: member?.fontSize || "",
   };
 }
 
@@ -1466,6 +1482,12 @@ function stageKeyframesFor(member, index = 0) {
       w: clampStageSize(keyframe.w, fallback.w),
       h: clampStageSize(keyframe.h, fallback.h),
       color: keyframe.color || member?.color || "",
+      text: keyframe.text ?? member?.text ?? "",
+      fontWeight: keyframe.fontWeight || member?.fontWeight || "850",
+      fontStyle: keyframe.fontStyle || member?.fontStyle || "normal",
+      textDecoration: keyframe.textDecoration || member?.textDecoration || "none",
+      textAlign: keyframe.textAlign || member?.textAlign || "left",
+      fontSize: keyframe.fontSize || member?.fontSize || "",
     }))
     .sort((a, b) => a.frame - b.frame);
 }
@@ -1491,6 +1513,12 @@ function interpolateStageKeyframe(member, frame, index = 0) {
     w: previous.w + (next.w - previous.w) * progress,
     h: previous.h + (next.h - previous.h) * progress,
     color: previous.color || next.color || "",
+    text: previous.text || next.text || "",
+    fontWeight: previous.fontWeight || next.fontWeight || "850",
+    fontStyle: previous.fontStyle || next.fontStyle || "normal",
+    textDecoration: previous.textDecoration || next.textDecoration || "none",
+    textAlign: previous.textAlign || next.textAlign || "left",
+    fontSize: previous.fontSize || next.fontSize || "",
   };
 }
 
@@ -1504,6 +1532,12 @@ function upsertStageKeyframe(member, frame, values, index = 0) {
     w: clampStageSize(values.w, base.w),
     h: clampStageSize(values.h, base.h),
     color: values.color || base.color || member?.color || "",
+    text: values.text ?? base.text ?? member?.text ?? "",
+    fontWeight: values.fontWeight || base.fontWeight || member?.fontWeight || "850",
+    fontStyle: values.fontStyle || base.fontStyle || member?.fontStyle || "normal",
+    textDecoration: values.textDecoration || base.textDecoration || member?.textDecoration || "none",
+    textAlign: values.textAlign || base.textAlign || member?.textAlign || "left",
+    fontSize: values.fontSize || base.fontSize || member?.fontSize || "",
   };
   return [
     ...stageKeyframesFor(member, index).filter((keyframe) => keyframe.frame !== nextFrame),
@@ -1514,6 +1548,13 @@ function upsertStageKeyframe(member, frame, values, index = 0) {
 function stageValuesChanged(before, after) {
   return ["x", "y", "w", "h"].some((key) => Math.abs(Number(before[key] || 0) - Number(after[key] || 0)) > 0.05) ||
     String(before.color || "") !== String(after.color || "");
+}
+
+function stageTextValuesChanged(before, after) {
+  return stageValuesChanged(before, after) ||
+    ["text", "fontWeight", "fontStyle", "textDecoration", "textAlign", "fontSize"].some((key) => (
+      String(before[key] || "") !== String(after[key] || "")
+    ));
 }
 
 function nextStageKeyframeTiming(member, currentFrame, castIndex) {
@@ -1615,6 +1656,7 @@ function textStyleForItem(item) {
     fontStyle: item.fontStyle || "normal",
     textDecoration: item.textDecoration || "none",
     textAlign: item.textAlign || "left",
+    fontSize: item.fontSize || "",
   };
 }
 
@@ -1627,6 +1669,7 @@ function applyTextStyleToElement(textItem, item) {
   content.style.fontStyle = style.fontStyle;
   content.style.textDecoration = style.textDecoration;
   content.style.textAlign = style.textAlign;
+  content.style.fontSize = style.fontSize || "";
 }
 
 function positionStageLine(line, item) {
@@ -1666,16 +1709,18 @@ function renderStageItems(stage, plan) {
   stage.querySelectorAll(".stage-item").forEach((item) => item.remove());
   (plan.stageItems || []).forEach((item) => {
     if (item.type === "text") {
+      const values = interpolateStageKeyframe(item, currentTimelineFrame()) || defaultStageKeyframe(item, Number(item.startFrame || 1));
+      const renderItem = { ...item, ...values };
       const text = document.createElement("div");
       text.className = "stage-item stage-text-item";
       text.dataset.stageItemId = item.id;
-      text.style.left = `${clampPercent(item.x)}%`;
-      text.style.top = `${clampPercent(item.y)}%`;
+      text.style.left = `${clampPercent(renderItem.x)}%`;
+      text.style.top = `${clampPercent(renderItem.y)}%`;
       const content = document.createElement("span");
       content.className = "stage-text-content";
       content.contentEditable = "true";
       content.spellcheck = false;
-      content.textContent = item.text || "Text";
+      content.textContent = renderItem.text || item.text || "Text";
       const removeButton = document.createElement("button");
       removeButton.className = "stage-text-remove";
       removeButton.type = "button";
@@ -1690,12 +1735,33 @@ function renderStageItems(stage, plan) {
       });
       content.addEventListener("blur", () => {
         const nextPlan = currentPlan();
-        nextPlan.stageItems = (nextPlan.stageItems || []).map((stageItem) => (
-          stageItem.id === item.id
-            ? { ...stageItem, text: content.textContent.trim() || "Text" }
-            : stageItem
-        ));
+        const nextText = content.textContent.trim() || "Text";
+        let nextFrame = currentTimelineFrame();
+        nextPlan.stageItems = (nextPlan.stageItems || []).map((stageItem) => {
+          if (stageItem.id !== item.id) return stageItem;
+          const currentValues = interpolateStageKeyframe(stageItem, currentTimelineFrame()) || defaultStageKeyframe(stageItem);
+          const values = {
+            ...currentValues,
+            x: Number.parseFloat(text.style.left) || stageItem.x || 0,
+            y: Number.parseFloat(text.style.top) || stageItem.y || 0,
+            color: stageItem.color || currentValues.color || "",
+            text: nextText,
+            ...textStyleForItem(stageItem),
+          };
+          if (!stageTextValuesChanged(currentValues, values)) return stageItem;
+          const timing = nextStageItemKeyframeTiming(stageItem, currentTimelineFrame());
+          nextFrame = timing.frame;
+          selectedStageKeyframe = timing.isExisting ? { stageItemId: stageItem.id, frame: timing.frame } : null;
+          return {
+            ...stageItem,
+            ...values,
+            durationFrames: timing.durationFrames,
+            keyframes: upsertStageKeyframe(stageItem, timing.frame, values),
+          };
+        });
         saveFilmPlan(nextPlan);
+        renderFilmPlan(nextPlan);
+        setTimelineFrame(nextFrame, false);
       });
       removeButton.addEventListener("pointerdown", (event) => {
         event.preventDefault();
@@ -1710,7 +1776,7 @@ function renderStageItems(stage, plan) {
         renderFilmPlan(nextPlan);
       });
       text.append(content, removeButton);
-      applyTextStyleToElement(text, item);
+      applyTextStyleToElement(text, renderItem);
       stage.append(text);
     }
     if (item.type === "line") {
@@ -2359,7 +2425,7 @@ function exportStageVideo() {
 function makeExportPackage(plan) {
   return {
     package: "Admira Player Ready",
-    version: "AiDirector v2026.05.20 r12",
+    version: "AiDirector v2026.05.20 r13",
     includeMetadata: Boolean(includeMetadata?.checked),
     formats: {
       video: ["MP4", "MOV", "ProRes", "4K/8K", "PP Solving"],
@@ -2868,14 +2934,40 @@ function initStageTools() {
     const itemId = activeTextItem.dataset.stageItemId;
     const plan = currentPlan();
     let nextItem = null;
+    let nextFrame = currentTimelineFrame();
     plan.stageItems = (plan.stageItems || []).map((item) => {
       if (item.id !== itemId) return item;
-      nextItem = { ...item, ...patch };
+      const currentValues = interpolateStageKeyframe(item, currentTimelineFrame()) || defaultStageKeyframe(item);
+      const values = {
+        ...currentValues,
+        x: Number.parseFloat(activeTextItem.style.left) || item.x || 0,
+        y: Number.parseFloat(activeTextItem.style.top) || item.y || 0,
+        color: patch.color || currentValues.color || item.color || "",
+        text: activeTextItem.querySelector(".stage-text-content")?.textContent.trim() || currentValues.text || item.text || "Text",
+        ...textStyleForItem({ ...item, ...currentValues, ...patch }),
+      };
+      if (!stageTextValuesChanged(currentValues, values)) {
+        nextItem = { ...item, ...patch };
+        return nextItem;
+      }
+      const timing = nextStageItemKeyframeTiming(item, currentTimelineFrame());
+      nextFrame = timing.frame;
+      selectedStageKeyframe = timing.isExisting ? { stageItemId: item.id, frame: timing.frame } : null;
+      nextItem = {
+        ...item,
+        ...values,
+        ...patch,
+        durationFrames: timing.durationFrames,
+        keyframes: upsertStageKeyframe(item, timing.frame, values),
+      };
       return nextItem;
     });
     if (!nextItem) return;
     saveFilmPlan(plan);
-    applyTextStyleToElement(activeTextItem, nextItem);
+    renderFilmPlan(plan);
+    activeTextItem = stage.querySelector(`[data-stage-item-id="${nextItem.id}"]`);
+    if (activeTextItem) setActiveTextItem(activeTextItem);
+    setTimelineFrame(nextFrame, false);
   };
   const saveActiveShapePatch = (patch) => {
     if (!activeShapeItem) return;
@@ -3067,17 +3159,34 @@ function initStageTools() {
         stage.removeEventListener("pointerup", up);
         stage.removeEventListener("pointercancel", up);
         const plan = currentPlan();
-        plan.stageItems = (plan.stageItems || []).map((item) => (
-          item.id === itemId
-            ? {
-              ...item,
-              x: Number.parseFloat(textItem.style.left) || 0,
-              y: Number.parseFloat(textItem.style.top) || 0,
-              text: textItem.querySelector(".stage-text-content")?.textContent.trim() || "Text",
-            }
-            : item
-        ));
+        let nextFrame = currentTimelineFrame();
+        plan.stageItems = (plan.stageItems || []).map((item) => {
+          if (item.id !== itemId) return item;
+          const currentValues = interpolateStageKeyframe(item, currentTimelineFrame()) || defaultStageKeyframe(item);
+          const values = {
+            ...currentValues,
+            x: Number.parseFloat(textItem.style.left) || 0,
+            y: Number.parseFloat(textItem.style.top) || 0,
+            text: textItem.querySelector(".stage-text-content")?.textContent.trim() || currentValues.text || item.text || "Text",
+            color: currentValues.color || item.color || "",
+            ...textStyleForItem({ ...item, ...currentValues }),
+          };
+          if (!stageTextValuesChanged(currentValues, values)) return item;
+          const timing = nextStageItemKeyframeTiming(item, currentTimelineFrame());
+          nextFrame = timing.frame;
+          selectedStageKeyframe = timing.isExisting ? { stageItemId: item.id, frame: timing.frame } : null;
+          return {
+            ...item,
+            ...values,
+            durationFrames: timing.durationFrames,
+            keyframes: upsertStageKeyframe(item, timing.frame, values),
+          };
+        });
         saveFilmPlan(plan);
+        renderFilmPlan(plan);
+        const nextText = stage.querySelector(`[data-stage-item-id="${itemId}"]`);
+        if (nextText) setActiveTextItem(nextText);
+        setTimelineFrame(nextFrame, false);
       };
       stage.addEventListener("pointermove", move);
       stage.addEventListener("pointerup", up);
@@ -3172,6 +3281,7 @@ function initStageTools() {
         durationFrames: 24,
         ...textStylePayload(),
       };
+      item.keyframes = [defaultStageKeyframe(item, item.startFrame)];
       plan.stageItems = [...(plan.stageItems || []), item];
       saveFilmPlan(plan);
       renderFilmPlan(plan);

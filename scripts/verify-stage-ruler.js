@@ -374,6 +374,44 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
     };
   });
 
+  await page.locator('[data-stage-tool="text"]').click();
+  const textStageBox = await page.locator(".stage-canvas").boundingBox();
+  if (textStageBox) {
+    await page.mouse.click(textStageBox.x + textStageBox.width * 0.48, textStageBox.y + textStageBox.height * 0.42);
+    await page.waitForTimeout(120);
+  }
+  await page.evaluate(() => {
+    const input = document.querySelector(".foreground-color-input");
+    input.value = "#00ff00";
+    input.dispatchEvent(new Event("input", { bubbles: true }));
+  });
+  await page.waitForTimeout(120);
+  await page.locator('[data-text-align="center"]').click();
+  await page.waitForTimeout(120);
+  await page.locator('[data-stage-tool="hand"]').click();
+  const textBox = await page.locator(".stage-text-item").first().boundingBox();
+  if (textBox) {
+    await page.mouse.move(textBox.x + textBox.width / 2, textBox.y + textBox.height / 2);
+    await page.mouse.down();
+    await page.mouse.move(textBox.x + textBox.width / 2 + 70, textBox.y + textBox.height / 2 + 36);
+    await page.mouse.up();
+    await page.waitForTimeout(120);
+  }
+
+  result.stageText = await page.evaluate(() => {
+    const plan = JSON.parse(localStorage.getItem("ainimation-film-plan") || "{}");
+    const item = (plan.stageItems || []).find((stageItem) => stageItem.type === "text");
+    return {
+      created: Boolean(item),
+      durationFrames: item?.durationFrames,
+      keyframes: item?.keyframes || [],
+      dotCount: document.querySelectorAll(`.score-keyframe-dot[data-stage-item-id="${item?.id}"]`).length,
+      color: item?.color || "",
+      textAlign: item?.textAlign || "",
+      selected: document.querySelector(".stage-text-item")?.classList.contains("is-selected") || false,
+    };
+  });
+
   await browser.close();
 
   const expectedXLabels = Math.floor(result.rulerReference.stageWidth / 100) + 1 + (result.rulerReference.stageWidth % 100 ? 1 : 0);
@@ -381,8 +419,8 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
   const missingLabels = result.labels.length !== expectedYLabels || result.xLabels.length !== expectedXLabels;
   const hasWrongRotation = result.labels.some((label) => label.transform === "matrix(0, 1, -1, 0, 0, 0)");
 
-  if (!result.stylesheetHref.includes("aidirector-20260520-r12")) {
-    throw new Error(`Expected aidirector-20260520-r12 stylesheet cache key, got ${result.stylesheetHref}`);
+  if (!result.stylesheetHref.includes("aidirector-20260520-r13")) {
+    throw new Error(`Expected aidirector-20260520-r13 stylesheet cache key, got ${result.stylesheetHref}`);
   }
 
   if (
@@ -408,7 +446,7 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
     throw new Error(`Unexpected stage ruler toggle: ${JSON.stringify(result.rulerToggle)}`);
   }
 
-  if (result.brand.text !== "AiDirector v.2026.05.20 r12" || result.brand.rightGap > 20) {
+  if (result.brand.text !== "AiDirector v.2026.05.20 r13" || result.brand.rightGap > 20) {
     throw new Error(`Unexpected menu brand placement: ${JSON.stringify(result.brand)}`);
   }
 
@@ -426,6 +464,23 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
     result.stageShapes.color !== "#ff0000"
   ) {
     throw new Error(`Unexpected Stage shape editing: ${JSON.stringify(result.stageShapes)}`);
+  }
+
+  if (
+    !result.stageText.created ||
+    result.stageText.durationFrames !== 96 ||
+    result.stageText.keyframes.length !== 4 ||
+    result.stageText.keyframes[1]?.frame !== result.stageText.keyframes[0]?.frame + 24 ||
+    result.stageText.keyframes[2]?.frame !== result.stageText.keyframes[1]?.frame + 24 ||
+    result.stageText.keyframes[3]?.frame !== result.stageText.keyframes[2]?.frame + 24 ||
+    result.stageText.keyframes[1]?.color !== "#00ff00" ||
+    result.stageText.keyframes[2]?.textAlign !== "center" ||
+    result.stageText.dotCount !== 4 ||
+    !result.stageText.selected ||
+    result.stageText.color !== "#00ff00" ||
+    result.stageText.textAlign !== "center"
+  ) {
+    throw new Error(`Unexpected Stage text keyframes: ${JSON.stringify(result.stageText)}`);
   }
 
   const expectedToolShortcuts = [
