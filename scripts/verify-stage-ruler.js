@@ -441,6 +441,7 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
             mimeType: "image/png",
             width: 1200,
             height: 1200,
+            prompt: "Sam Altman conversation frame",
           },
           {
             title: "Latest Stock Plate",
@@ -449,12 +450,14 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
             width: 1920,
             height: 1080,
             duration: 12,
+            prompt: "AI revolution vertical video",
           },
           {
             title: "Latest Stock Character",
             assetUrl: "https://www.admira.studio/media/latest-stock-character.mp3",
             mimeType: "audio/mpeg",
             duration: 7,
+            prompt: "spoken interview audio",
           },
           {
             title: "Latest Stock Texture",
@@ -462,12 +465,21 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
             mimeType: "image/jpeg",
             width: 1600,
             height: 900,
+            prompt: "green screen texture plate",
           },
           {
             title: "Latest Stock Voiceover",
             assetUrl: "https://www.admira.studio/media/latest-stock-voiceover.m4a",
             mimeType: "audio/mp4",
             duration: 18,
+            prompt: "voiceover narration",
+          },
+          {
+            title: "Latest Stock Music Bed",
+            assetUrl: "https://www.admira.studio/media/latest-stock-music.mp3",
+            mimeType: "audio/mpeg",
+            duration: 31,
+            prompt: "music bed with soft beat",
           },
         ],
       }), {
@@ -488,10 +500,28 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
       const tray = document.querySelector("[data-stock-import-tray]");
       const trayItems = [...document.querySelectorAll("[data-stock-tray-item]")].map((item) => ({
         mediaType: item.dataset.mediaType,
+        category: item.dataset.stockCategory,
         text: item.textContent.replace(/\s+/g, " ").trim(),
         hasPreview: Boolean(item.querySelector("img, video, .stock-tray-audio")),
       }));
       const trayWasOpen = tray?.classList.contains("open") || false;
+      const categoryLabels = [...document.querySelectorAll("[data-stock-category-filter]")].map((item) => ({
+        text: item.textContent.trim(),
+        pressed: item.getAttribute("aria-pressed"),
+      }));
+      const searchInput = document.querySelector("[data-stock-prompt-search]");
+      if (searchInput) {
+        searchInput.value = "texture";
+        searchInput.dispatchEvent(new InputEvent("input", { bubbles: true, inputType: "insertText", data: "texture" }));
+      }
+      await new Promise((resolve) => window.setTimeout(resolve, 20));
+      const searchVisibleCount = document.querySelectorAll("[data-stock-tray-item]:not([hidden])").length;
+      const searchFirstVisibleText = document.querySelector("[data-stock-tray-item]:not([hidden])")?.textContent.replace(/\s+/g, " ").trim() || "";
+      if (searchInput) {
+        searchInput.value = "";
+        searchInput.dispatchEvent(new InputEvent("input", { bubbles: true, inputType: "deleteContentBackward" }));
+      }
+      await new Promise((resolve) => window.setTimeout(resolve, 20));
       const defaultSelectedCount = document.querySelectorAll("[data-stock-tray-item][aria-pressed='true']").length;
       document.querySelector("[data-stock-tray-item][data-stock-index='3']")?.click();
       await new Promise((resolve) => window.setTimeout(resolve, 20));
@@ -599,8 +629,12 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
         trayOpen: trayWasOpen,
         trayCount: trayItems.length,
         trayMediaTypes: trayItems.map((item) => item.mediaType),
+        trayCategories: trayItems.map((item) => item.category),
+        categoryLabels,
+        searchVisibleCount,
+        searchFirstVisibleText,
         trayHasPreviews: trayItems.every((item) => item.hasPreview),
-        trayShowsMetadata: trayItems.some((item) => /1200 x 1200|1920 x 1080|1600 x 900|12s|7s|18s/.test(item.text)),
+        trayShowsMetadata: trayItems.some((item) => /1200 x 1200|1920 x 1080|1600 x 900|12s|7s|18s|31s/.test(item.text)),
         defaultSelectedCount,
         selectedBeforeCompose,
         selectedCounter,
@@ -1056,8 +1090,8 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
   const missingLabels = result.labels.length !== expectedYLabels || result.xLabels.length !== expectedXLabels;
   const hasWrongRotation = result.labels.some((label) => label.transform === "matrix(0, 1, -1, 0, 0, 0)");
 
-  if (!result.stylesheetHref.includes("aidirector-20260520-r34")) {
-    throw new Error(`Expected aidirector-20260520-r34 stylesheet cache key, got ${result.stylesheetHref}`);
+  if (!result.stylesheetHref.includes("aidirector-20260520-r35")) {
+    throw new Error(`Expected aidirector-20260520-r35 stylesheet cache key, got ${result.stylesheetHref}`);
   }
 
   if (
@@ -1084,7 +1118,7 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
   }
 
   if (
-    result.brand.text !== "◆ AiDirector v.2026.05.20 r34" ||
+    result.brand.text !== "◆ AiDirector v.2026.05.20 r35" ||
     result.brand.rightGap > 20 ||
     result.brand.menuHeight > 50 ||
     result.brand.toolsTitlebarHeight > 31
@@ -1264,8 +1298,12 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
   if (
     !result.stockImport.calls[0]?.includes("pixer-eleven.csilvasantin.workers.dev/stock/list?limit=12") ||
     !result.stockImport.trayOpen ||
-    result.stockImport.trayCount < 5 ||
+    result.stockImport.trayCount < 6 ||
     !["image", "video", "audio"].every((type) => result.stockImport.trayMediaTypes.includes(type)) ||
+    !["image", "video", "audio", "music"].every((type) => result.stockImport.trayCategories.includes(type)) ||
+    !["Audio", "Música", "Imágenes", "Vídeo"].every((label) => result.stockImport.categoryLabels.some((item) => item.text === label && item.pressed === "true")) ||
+    result.stockImport.searchVisibleCount !== 1 ||
+    !/Texture/.test(result.stockImport.searchFirstVisibleText) ||
     !result.stockImport.trayHasPreviews ||
     !result.stockImport.trayShowsMetadata ||
     result.stockImport.defaultSelectedCount !== 3 ||
