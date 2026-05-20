@@ -1159,15 +1159,16 @@ const timelineZoomStorageKey = "ainimation-timeline-zoom";
 const stageWidthPixels = 1920;
 const stageHeightPixels = 1080;
 const stageRulerStep = 100;
+const stockImportBatchSize = 3;
 const admiraStockEndpoints = [
-  "https://pixer-eleven.csilvasantin.workers.dev/stock/list?limit=1",
+  `https://pixer-eleven.csilvasantin.workers.dev/stock/list?limit=${stockImportBatchSize}`,
   "https://www.admira.studio/api/stock/latest",
-  "https://www.admira.studio/api/stock?limit=1&sort=latest",
+  `https://www.admira.studio/api/stock?limit=${stockImportBatchSize}&sort=latest`,
   "https://www.admira.studio/api/stock",
   "https://www.admira.studio/stock/latest.json",
   "https://www.admira.studio/stock.json",
   "https://admira.studio/api/stock/latest",
-  "https://admira.studio/api/stock?limit=1&sort=latest",
+  `https://admira.studio/api/stock?limit=${stockImportBatchSize}&sort=latest`,
 ];
 const admiraStockExportEndpoints = [
   "https://pixer-eleven.csilvasantin.workers.dev/stock/publish",
@@ -3205,9 +3206,14 @@ function closeArchivoMenu() {
   document.querySelector("[data-member-menu]")?.setAttribute("aria-expanded", "false");
 }
 
-function firstStockItem(payload) {
-  if (!payload) return null;
-  if (Array.isArray(payload)) return payload[0] || null;
+function stockItemsFromPayload(payload, limit = stockImportBatchSize, visited = new Set()) {
+  if (!payload || limit <= 0 || visited.has(payload)) return [];
+  if (typeof payload === "object") visited.add(payload);
+  if (Array.isArray(payload)) {
+    return payload
+      .flatMap((item) => stockItemsFromPayload(item, limit, visited))
+      .slice(0, limit);
+  }
   const candidates = [
     payload.items,
     payload.results,
@@ -3219,10 +3225,14 @@ function firstStockItem(payload) {
     payload.latest,
   ].filter(Boolean);
   for (const candidate of candidates) {
-    const item = firstStockItem(candidate);
-    if (item) return item;
+    const items = stockItemsFromPayload(candidate, limit, visited);
+    if (items.length) return items.slice(0, limit);
   }
-  return typeof payload === "object" ? payload : null;
+  return typeof payload === "object" ? [payload] : [];
+}
+
+function firstStockItem(payload) {
+  return stockItemsFromPayload(payload, 1)[0] || null;
 }
 
 function findStockField(source, fieldNames, visited = new Set()) {
@@ -3308,47 +3318,123 @@ function stockMemberFromItem(item, endpoint, existingCount, timelineMemberCount)
   };
 }
 
-async function fetchLatestStockMember() {
+function composeImportedStockMembers(plan, startIndex, count) {
+  const layouts = [
+    { x: 10, y: 14, w: 42, h: 38 },
+    { x: 48, y: 18, w: 42, h: 38 },
+    { x: 28, y: 48, w: 44, h: 38 },
+  ];
+  for (let offset = 0; offset < count; offset += 1) {
+    const castIndex = startIndex + offset;
+    const member = plan.cast?.[castIndex];
+    if (!member) continue;
+    const layout = layouts[offset % layouts.length];
+    const startFrame = 1;
+    const durationFrames = Math.max(Number(member.durationFrames || 24), 96);
+    plan.cast[castIndex] = {
+      ...member,
+      onStage: true,
+      startFrame,
+      durationFrames,
+      stageX: layout.x,
+      stageY: layout.y,
+      stageW: layout.w,
+      stageH: layout.h,
+      keyframes: [
+        {
+          frame: startFrame,
+          x: layout.x,
+          y: layout.y,
+          w: layout.w,
+          h: layout.h,
+          color: member.color || "",
+          text: member.text || "",
+          fontWeight: member.fontWeight || "850",
+          fontStyle: member.fontStyle || "normal",
+          textDecoration: member.textDecoration || "none",
+          textAlign: member.textAlign || "left",
+          fontSize: member.fontSize || "",
+        },
+        {
+          frame: startFrame + durationFrames - 1,
+          x: Math.min(88, Math.max(0, layout.x + (offset - 1) * 5)),
+          y: Math.min(90, Math.max(0, layout.y + (offset % 2 ? 4 : -3))),
+          w: layout.w,
+          h: layout.h,
+          color: member.color || "",
+          text: member.text || "",
+          fontWeight: member.fontWeight || "850",
+          fontStyle: member.fontStyle || "normal",
+          textDecoration: member.textDecoration || "none",
+          textAlign: member.textAlign || "left",
+          fontSize: member.fontSize || "",
+        },
+      ],
+      prompt: "Imported from admira.studio Stock as part of a 3-asset stage composition. Export the Stage to publish it as an animation.",
+    };
+  }
+}
+
+async function fetchLatestStockMembers(limit = stockImportBatchSize) {
   let lastError = null;
   for (const endpoint of admiraStockEndpoints) {
     try {
       const response = await fetch(endpoint, { headers: { Accept: "application/json" } });
       if (!response.ok) throw new Error(`${response.status} ${response.statusText}`);
-      const item = firstStockItem(await response.json());
+      const items = stockItemsFromPayload(await response.json(), limit);
       const plan = currentPlan();
       const existing = plan.cast || makeCast(plan);
       const timelineMemberCount = existing.filter((member) => member.imported && member.src).length;
-      const member = stockMemberFromItem(item, endpoint, existing.length, timelineMemberCount);
-      if (member) return member;
+      const seenSources = new Set();
+      const members = items
+        .map((item, index) => stockMemberFromItem(
+          item,
+          endpoint,
+          existing.length + index,
+          timelineMemberCount + index,
+        ))
+        .filter(Boolean)
+        .filter((member) => {
+          if (seenSources.has(member.sourceUrl)) return false;
+          seenSources.add(member.sourceUrl);
+          return true;
+        })
+        .slice(0, limit);
+      if (members.length) return members;
     } catch (error) {
       lastError = error;
     }
   }
-  throw lastError || new Error("Stock has not returned a usable media asset.");
+  throw lastError || new Error("Stock has not returned usable media assets.");
 }
 
-async function importLatestAdmiraStock() {
+async function importLatestAdmiraStockBatch() {
   if (!stockImportButton) return;
   const originalText = stockImportButton.textContent;
   stockImportButton.disabled = true;
   stockImportButton.textContent = "Importando...";
   try {
-    const member = await fetchLatestStockMember();
+    const members = await fetchLatestStockMembers(stockImportBatchSize);
     const plan = currentPlan();
     const castIndex = (plan.cast || makeCast(plan)).length;
-    plan.cast = [...(plan.cast || makeCast(plan)), member];
+    plan.cast = [...(plan.cast || makeCast(plan)), ...members];
+    composeImportedStockMembers(plan, castIndex, members.length);
     saveFilmPlan(plan);
     renderFilmPlan(plan);
-    updateMemberDurationFromMetadata(castIndex, member.src, member.mediaType);
+    members.forEach((member, index) => updateMemberDurationFromMetadata(
+      castIndex + index,
+      member.src,
+      member.mediaType,
+    ));
     playUiTick("import");
     window.refreshDirectorWindows?.();
     document.querySelector('[data-open-window="cast"]')?.click();
-    stockImportButton.textContent = "Importado";
+    stockImportButton.textContent = `${members.length} importados`;
     window.setTimeout(() => { stockImportButton.textContent = originalText; }, 1200);
   } catch (error) {
     console.warn("Admira Stock import failed", error);
     stockImportButton.textContent = "Stock no disponible";
-    window.alert("No se ha podido importar el último contenido de admira.studio Stock.");
+    window.alert("No se han podido importar los últimos contenidos de admira.studio Stock.");
     window.setTimeout(() => { stockImportButton.textContent = originalText; }, 1800);
   } finally {
     closeArchivoMenu();
@@ -4016,7 +4102,7 @@ if (filmForm) {
   });
 
   stockImportButton?.addEventListener("click", () => {
-    importLatestAdmiraStock();
+    importLatestAdmiraStockBatch();
   });
 
   stockExportButton?.addEventListener("click", () => {

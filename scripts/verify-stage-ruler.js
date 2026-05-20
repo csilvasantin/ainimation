@@ -378,11 +378,23 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
     if (!window.__USE_LIVE_STOCK__) window.fetch = async (url) => {
       calls.push(String(url));
       return new Response(JSON.stringify({
-        items: [{
-          title: "Latest Stock Take",
-          assetUrl: "https://www.admira.studio/media/latest-stock-take.png",
-          mimeType: "image/png",
-        }],
+        items: [
+          {
+            title: "Latest Stock Take",
+            assetUrl: "https://www.admira.studio/media/latest-stock-take.png",
+            mimeType: "image/png",
+          },
+          {
+            title: "Latest Stock Plate",
+            assetUrl: "https://www.admira.studio/media/latest-stock-plate.png",
+            mimeType: "image/png",
+          },
+          {
+            title: "Latest Stock Character",
+            assetUrl: "https://www.admira.studio/media/latest-stock-character.png",
+            mimeType: "image/png",
+          },
+        ],
       }), {
         status: 200,
         headers: { "Content-Type": "application/json" },
@@ -401,7 +413,7 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
       const plan = JSON.parse(localStorage.getItem("ainimation-film-plan") || "{}");
       const member = [...(plan.cast || [])].reverse().find((item) => item.stock && item.sourceUrl !== "https://www.admira.studio/media/aidirector-export.webm");
       const card = member
-        ? document.querySelector(`[data-cast-index="${(plan.cast || []).indexOf(member)}"]`)
+        ? document.querySelector(`.director-cast-window [data-cast-index="${(plan.cast || []).indexOf(member)}"]`)
         : null;
       const castWindowRect = document.querySelector('[data-window="cast"]')?.getBoundingClientRect();
       const cardRect = card?.getBoundingClientRect();
@@ -432,7 +444,7 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
       }
       await new Promise((resolve) => window.setTimeout(resolve, 60));
       const timelineCard = member
-        ? document.querySelector(`[data-cast-index="${(plan.cast || []).indexOf(member)}"]`)
+        ? document.querySelector(`.director-cast-window [data-cast-index="${(plan.cast || []).indexOf(member)}"]`)
         : null;
       if (timelineCard) {
         const castIndex = String((plan.cast || []).indexOf(member));
@@ -460,10 +472,12 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
       }
       await new Promise((resolve) => window.setTimeout(resolve, 60));
       const stagedPlan = JSON.parse(localStorage.getItem("ainimation-film-plan") || "{}");
-      const stagedMember = [...(stagedPlan.cast || [])].reverse().find((item) => item.stock && item.sourceUrl !== "https://www.admira.studio/media/aidirector-export.webm");
+      const stockMembers = (stagedPlan.cast || []).filter((item) => item.stock && item.sourceUrl !== "https://www.admira.studio/media/aidirector-export.webm");
+      const stagedMember = [...stockMembers].reverse().find((item) => item.stock);
       return {
         calls,
         imported: Boolean(member),
+        importedCount: stockMembers.length,
         visibleInCast: Boolean(card),
         cardDraggable: card?.getAttribute("draggable") === "true",
         cardWithinCast: Boolean(castWindowRect && cardRect && cardRect.width <= 130 && cardRect.height <= 90 && cardRect.right <= castWindowRect.right + 1),
@@ -477,6 +491,7 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
         startFrameAfterTimelineDrop: stagedMember?.startFrame,
         stageCount: document.querySelectorAll(".stage-imported-member").length,
         timelineVisible: Boolean(document.querySelector(".score-sprite[data-cast-index]")),
+        timelineCount: document.querySelectorAll(".score-sprite[data-cast-index]").length,
       };
     } finally {
       window.fetch = originalFetch;
@@ -530,14 +545,20 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
 
   result.stageKeyframes = await page.evaluate(() => {
     const plan = JSON.parse(localStorage.getItem("ainimation-film-plan") || "{}");
-    const member = [...(plan.cast || [])].reverse().find((item) => item.stock && item.sourceUrl !== "https://www.admira.studio/media/aidirector-export.webm");
-    const dots = [...document.querySelectorAll(".score-keyframe-dot")].map((dot) => ({
+    const stockMembers = (plan.cast || [])
+      .map((item, index) => ({ item, index }))
+      .filter(({ item }) => item.stock && item.sourceUrl !== "https://www.admira.studio/media/aidirector-export.webm");
+    const selected = stockMembers
+      .sort((a, b) => (b.item.keyframes || []).length - (a.item.keyframes || []).length)[0];
+    const member = selected?.item;
+    const dots = [...document.querySelectorAll(`.score-keyframe-dot[data-cast-index="${selected?.index}"]`)].map((dot) => ({
       frame: Number(dot.dataset.keyframeFrame || 0),
       castIndex: Number(dot.dataset.castIndex || -1),
       selected: dot.classList.contains("is-selected"),
     }));
     return {
       hasStageMember: Boolean(document.querySelector(".stage-imported-member")),
+      castIndex: selected?.index ?? -1,
       keyframes: member?.keyframes || [],
       durationFrames: member?.durationFrames,
       dotFrames: dots.map((dot) => dot.frame),
@@ -546,16 +567,16 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
     };
   });
 
-  await page.evaluate(() => {
-    const dots = document.querySelectorAll(".score-keyframe-dot");
+  await page.evaluate((castIndex) => {
+    const dots = document.querySelectorAll(`.score-keyframe-dot[data-cast-index="${castIndex}"]`);
     dots[dots.length - 1]?.click();
-  });
+  }, result.stageKeyframes.castIndex);
   result.stageKeyframeClick = await page.evaluate(() => ({
     playheadFrame: Number(document.querySelector(".score-playhead")?.dataset.frame || 0),
     selectedFrame: Number(document.querySelector(".score-keyframe-dot.is-selected")?.dataset.keyframeFrame || 0),
   }));
 
-  const selectedStageMember = await page.$(".stage-imported-member");
+  const selectedStageMember = await page.$(`.stage-imported-member[data-cast-index="${result.stageKeyframes.castIndex}"]`);
   const selectedStageMemberBox = await selectedStageMember?.boundingBox();
   if (selectedStageMemberBox) {
     await page.mouse.move(selectedStageMemberBox.x + selectedStageMemberBox.width / 2, selectedStageMemberBox.y + selectedStageMemberBox.height / 2);
@@ -567,11 +588,12 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
 
   result.stageKeyframeEdit = await page.evaluate(() => {
     const plan = JSON.parse(localStorage.getItem("ainimation-film-plan") || "{}");
-    const member = [...(plan.cast || [])].reverse().find((item) => item.stock && item.sourceUrl !== "https://www.admira.studio/media/aidirector-export.webm");
+    const selectedCastIndex = Number(document.querySelector(".score-keyframe-dot.is-selected")?.dataset.castIndex || -1);
+    const member = (plan.cast || [])[selectedCastIndex];
     return {
       keyframes: member?.keyframes || [],
       durationFrames: member?.durationFrames,
-      dotCount: document.querySelectorAll(".score-keyframe-dot").length,
+      dotCount: document.querySelectorAll(`.score-keyframe-dot[data-cast-index="${selectedCastIndex}"]`).length,
       selectedFrame: Number(document.querySelector(".score-keyframe-dot.is-selected")?.dataset.keyframeFrame || 0),
     };
   });
@@ -579,9 +601,9 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
   await page.locator('[data-stage-tool="rect-fill"]').click();
   const stageBox = await page.locator(".stage-canvas").boundingBox();
   if (stageBox) {
-    await page.mouse.move(stageBox.x + stageBox.width * 0.18, stageBox.y + stageBox.height * 0.18);
+    await page.mouse.move(stageBox.x + stageBox.width * 0.78, stageBox.y + stageBox.height * 0.6);
     await page.mouse.down();
-    await page.mouse.move(stageBox.x + stageBox.width * 0.32, stageBox.y + stageBox.height * 0.32);
+    await page.mouse.move(stageBox.x + stageBox.width * 0.92, stageBox.y + stageBox.height * 0.74);
     await page.mouse.up();
     await page.waitForTimeout(120);
   }
@@ -619,7 +641,7 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
   await page.locator('[data-stage-tool="text"]').click();
   const textStageBox = await page.locator(".stage-canvas").boundingBox();
   if (textStageBox) {
-    await page.mouse.click(textStageBox.x + textStageBox.width * 0.48, textStageBox.y + textStageBox.height * 0.42);
+    await page.mouse.click(textStageBox.x + textStageBox.width * 0.8, textStageBox.y + textStageBox.height * 0.76);
     await page.waitForTimeout(120);
   }
   await page.evaluate(() => {
@@ -804,8 +826,8 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
   const missingLabels = result.labels.length !== expectedYLabels || result.xLabels.length !== expectedXLabels;
   const hasWrongRotation = result.labels.some((label) => label.transform === "matrix(0, 1, -1, 0, 0, 0)");
 
-  if (!result.stylesheetHref.includes("aidirector-20260520-r26")) {
-    throw new Error(`Expected aidirector-20260520-r26 stylesheet cache key, got ${result.stylesheetHref}`);
+  if (!result.stylesheetHref.includes("aidirector-20260520-r27")) {
+    throw new Error(`Expected aidirector-20260520-r27 stylesheet cache key, got ${result.stylesheetHref}`);
   }
 
   if (
@@ -831,7 +853,7 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
     throw new Error(`Unexpected stage ruler toggle: ${JSON.stringify(result.rulerToggle)}`);
   }
 
-  if (result.brand.text !== "AiDirector v.2026.05.20 r26" || result.brand.rightGap > 20) {
+  if (result.brand.text !== "AiDirector v.2026.05.20 r27" || result.brand.rightGap > 20) {
     throw new Error(`Unexpected menu brand placement: ${JSON.stringify(result.brand)}`);
   }
 
@@ -994,8 +1016,9 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
   }
 
   if (
-    !result.stockImport.calls[0]?.includes("pixer-eleven.csilvasantin.workers.dev/stock/list") ||
+    !result.stockImport.calls[0]?.includes("pixer-eleven.csilvasantin.workers.dev/stock/list?limit=3") ||
     !result.stockImport.imported ||
+    result.stockImport.importedCount < 3 ||
     !result.stockImport.visibleInCast ||
     !result.stockImport.cardDraggable ||
     !result.stockImport.cardWithinCast ||
@@ -1003,26 +1026,26 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
     result.stockImport.role !== "Stock" ||
     result.stockImport.source !== "admira.studio Stock" ||
     result.stockImport.mediaType !== "image" ||
-    result.stockImport.durationFrames !== 24 ||
+    result.stockImport.durationFrames < 96 ||
     result.stockImport.onStageAfterCastClick !== true ||
-    result.stockImport.stageCount < 1 ||
+    result.stockImport.stageCount < 3 ||
     result.stockImport.startFrameAfterTimelineDrop <= 1 ||
-    !result.stockImport.timelineVisible
+    !result.stockImport.timelineVisible ||
+    result.stockImport.timelineCount < 3
   ) {
     throw new Error(`Unexpected Stock import flow: ${JSON.stringify(result.stockImport)}`);
   }
 
   if (
     !result.stageKeyframes.hasStageMember ||
-    result.stageKeyframes.durationFrames !== 48 ||
+    result.stageKeyframes.durationFrames < 96 ||
     result.stageKeyframes.keyframes.length !== 2 ||
     result.stageKeyframes.keyframes[1]?.frame <= result.stageKeyframes.keyframes[0]?.frame ||
     result.stageKeyframes.dotCount !== 2 ||
     !result.stageKeyframes.dotFrames.includes(result.stageKeyframes.keyframes[1]?.frame) ||
-    result.stageKeyframes.playheadFrame !== result.stageKeyframes.keyframes[1]?.frame ||
     result.stageKeyframeClick.playheadFrame !== result.stageKeyframes.keyframes[1]?.frame ||
     result.stageKeyframeClick.selectedFrame !== result.stageKeyframes.keyframes[1]?.frame ||
-    result.stageKeyframeEdit.durationFrames !== 48 ||
+    result.stageKeyframeEdit.durationFrames < 96 ||
     result.stageKeyframeEdit.keyframes.length !== 2 ||
     result.stageKeyframeEdit.keyframes[1]?.frame !== result.stageKeyframes.keyframes[1]?.frame ||
     result.stageKeyframeEdit.dotCount !== 2 ||
