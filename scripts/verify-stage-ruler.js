@@ -417,6 +417,22 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
     const calls = [];
     if (!window.__USE_LIVE_STOCK__) window.fetch = async (url) => {
       calls.push(String(url));
+      const requestUrl = new URL(String(url), window.location.href);
+      if (requestUrl.searchParams.get("category") === "image") {
+        return new Response(JSON.stringify({
+          items: Array.from({ length: 10 }, (_, index) => ({
+            title: index === 3 ? "Latest Stock Texture" : `Latest Image ${index + 1}`,
+            assetUrl: `https://www.admira.studio/media/latest-image-${index + 1}.jpg`,
+            mimeType: "image/jpeg",
+            width: index === 3 ? 1600 : 1200,
+            height: index === 3 ? 900 : 1200,
+            prompt: index === 3 ? "green screen texture plate" : `image prompt ${index + 1}`,
+          })),
+        }), {
+          status: 200,
+          headers: { "Content-Type": "application/json" },
+        });
+      }
       return new Response(JSON.stringify({
         items: [
           {
@@ -508,6 +524,19 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
       const categoryLabels = [...document.querySelectorAll("[data-stock-category-filter]")].map((item) => ({
         text: item.textContent.trim(),
         pressed: item.getAttribute("aria-pressed"),
+      }));
+      document.querySelector("[data-stock-category-filter='image']")?.click();
+      await new Promise((resolve) => window.setTimeout(resolve, 100));
+      const categoryCalls = [...calls];
+      const categoryLabelsAfterClick = [...document.querySelectorAll("[data-stock-category-filter]")].map((item) => ({
+        text: item.textContent.trim(),
+        pressed: item.getAttribute("aria-pressed"),
+      }));
+      const trayItemsAfterCategory = [...document.querySelectorAll("[data-stock-tray-item]")].map((item) => ({
+        mediaType: item.dataset.mediaType,
+        category: item.dataset.stockCategory,
+        text: item.textContent.replace(/\s+/g, " ").trim(),
+        hasPreview: Boolean(item.querySelector("img, video, .stock-tray-audio")),
       }));
       const searchInput = document.querySelector("[data-stock-prompt-search]");
       if (searchInput) {
@@ -627,14 +656,17 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
       return {
         calls,
         trayOpen: trayWasOpen,
-        trayCount: trayItems.length,
-        trayMediaTypes: trayItems.map((item) => item.mediaType),
-        trayCategories: trayItems.map((item) => item.category),
+        initialTrayCount: trayItems.length,
+        trayCount: trayItemsAfterCategory.length,
+        trayMediaTypes: trayItemsAfterCategory.map((item) => item.mediaType),
+        trayCategories: trayItemsAfterCategory.map((item) => item.category),
         categoryLabels,
+        categoryLabelsAfterClick,
+        categoryCalls,
         searchVisibleCount,
         searchFirstVisibleText,
-        trayHasPreviews: trayItems.every((item) => item.hasPreview),
-        trayShowsMetadata: trayItems.some((item) => /1200 x 1200|1920 x 1080|1600 x 900|12s|7s|18s|31s/.test(item.text)),
+        trayHasPreviews: trayItemsAfterCategory.every((item) => item.hasPreview),
+        trayShowsMetadata: trayItemsAfterCategory.some((item) => /1200 x 1200|1600 x 900/.test(item.text)),
         defaultSelectedCount,
         selectedBeforeCompose,
         selectedCounter,
@@ -1090,8 +1122,8 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
   const missingLabels = result.labels.length !== expectedYLabels || result.xLabels.length !== expectedXLabels;
   const hasWrongRotation = result.labels.some((label) => label.transform === "matrix(0, 1, -1, 0, 0, 0)");
 
-  if (!result.stylesheetHref.includes("aidirector-20260520-r35")) {
-    throw new Error(`Expected aidirector-20260520-r35 stylesheet cache key, got ${result.stylesheetHref}`);
+  if (!result.stylesheetHref.includes("aidirector-20260520-r36")) {
+    throw new Error(`Expected aidirector-20260520-r36 stylesheet cache key, got ${result.stylesheetHref}`);
   }
 
   if (
@@ -1118,7 +1150,7 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
   }
 
   if (
-    result.brand.text !== "◆ AiDirector v.2026.05.20 r35" ||
+    result.brand.text !== "◆ AiDirector v.2026.05.20 r36" ||
     result.brand.rightGap > 20 ||
     result.brand.menuHeight > 50 ||
     result.brand.toolsTitlebarHeight > 31
@@ -1296,12 +1328,19 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
   }
 
   if (
-    !result.stockImport.calls[0]?.includes("pixer-eleven.csilvasantin.workers.dev/stock/list?limit=12") ||
+    !result.stockImport.calls[0]?.includes("pixer-eleven.csilvasantin.workers.dev/stock/list?limit=10") ||
+    !result.stockImport.categoryCalls.some((url) => (
+      url.includes("pixer-eleven.csilvasantin.workers.dev/stock/list") &&
+      url.includes("limit=10") &&
+      url.includes("category=image")
+    )) ||
     !result.stockImport.trayOpen ||
-    result.stockImport.trayCount < 6 ||
-    !["image", "video", "audio"].every((type) => result.stockImport.trayMediaTypes.includes(type)) ||
-    !["image", "video", "audio", "music"].every((type) => result.stockImport.trayCategories.includes(type)) ||
-    !["Audio", "Música", "Imágenes", "Vídeo"].every((label) => result.stockImport.categoryLabels.some((item) => item.text === label && item.pressed === "true")) ||
+    result.stockImport.initialTrayCount < 6 ||
+    result.stockImport.trayCount !== 10 ||
+    result.stockImport.trayMediaTypes.some((type) => type !== "image") ||
+    result.stockImport.trayCategories.some((type) => type !== "image") ||
+    !["Audio", "Música", "Imágenes", "Vídeo"].every((label) => result.stockImport.categoryLabels.some((item) => item.text === label && item.pressed === "false")) ||
+    !result.stockImport.categoryLabelsAfterClick.some((item) => item.text === "Imágenes" && item.pressed === "true") ||
     result.stockImport.searchVisibleCount !== 1 ||
     !/Texture/.test(result.stockImport.searchFirstVisibleText) ||
     !result.stockImport.trayHasPreviews ||

@@ -1314,7 +1314,7 @@ const stageWidthPixels = 1920;
 const stageHeightPixels = 1080;
 const stageRulerStep = 100;
 const stockImportBatchSize = 3;
-const stockImportFetchLimit = 12;
+const stockImportFetchLimit = 10;
 const admiraStockEndpoints = [
   `https://pixer-eleven.csilvasantin.workers.dev/stock/list?limit=${stockImportFetchLimit}`,
   "https://www.admira.studio/api/stock/latest",
@@ -1335,7 +1335,7 @@ let dragOffsetY = 0;
 let stageAnimationCaptureCache = null;
 let pendingStockImportMembers = [];
 let pendingStockSelectedIndexes = new Set();
-let pendingStockActiveCategories = new Set(["audio", "music", "image", "video"]);
+let pendingStockActiveCategory = "";
 let pendingStockSearchQuery = "";
 
 const sceneCounts = {
@@ -3931,11 +3931,31 @@ function composeImportedStockMembers(plan, startIndex, count) {
   }
 }
 
-async function fetchLatestStockMembers(limit = stockImportBatchSize) {
+function stockEndpointUrl(endpoint, limit, category = "") {
+  try {
+    const url = new URL(endpoint);
+    url.searchParams.set("limit", String(limit));
+    if (category) {
+      url.searchParams.set("type", category === "image" ? "images" : category);
+      url.searchParams.set("category", category);
+    }
+    return url.href;
+  } catch {
+    return endpoint;
+  }
+}
+
+function stockMemberMatchesCategory(member, category = "") {
+  if (!category) return true;
+  return stockMemberCategory(member) === category;
+}
+
+async function fetchLatestStockMembers(limit = stockImportBatchSize, category = "") {
   let lastError = null;
   for (const endpoint of admiraStockEndpoints) {
     try {
-      const response = await fetch(endpoint, { headers: { Accept: "application/json" } });
+      const requestUrl = stockEndpointUrl(endpoint, limit, category);
+      const response = await fetch(requestUrl, { headers: { Accept: "application/json" } });
       if (!response.ok) throw new Error(`${response.status} ${response.statusText}`);
       const items = stockItemsFromPayload(await response.json(), Math.max(limit, stockImportFetchLimit));
       const plan = currentPlan();
@@ -3955,6 +3975,7 @@ async function fetchLatestStockMembers(limit = stockImportBatchSize) {
           seenSources.add(member.sourceUrl);
           return true;
         })
+        .filter((member) => stockMemberMatchesCategory(member, category))
         .slice(0, limit);
       if (members.length) return members;
     } catch (error) {
@@ -4010,8 +4031,7 @@ function stockSearchText(member) {
 }
 
 function stockMemberMatchesTrayFilters(member) {
-  const category = stockMemberCategory(member);
-  if (!pendingStockActiveCategories.has(category)) return false;
+  if (!stockMemberMatchesCategory(member, pendingStockActiveCategory)) return false;
   const query = pendingStockSearchQuery.trim().toLowerCase();
   if (!query) return true;
   return query.split(/\s+/).every((token) => stockSearchText(member).includes(token));
@@ -4032,12 +4052,6 @@ function ensureStockImportTray() {
           <strong id="stock-tray-title">Admira Stock</strong>
           <span data-stock-tray-summary>Selecciona assets válidos para componer</span>
         </div>
-        <div class="stock-tray-filters" aria-label="Filtrar Stock por tipo">
-          <button type="button" data-stock-category-filter="audio" aria-pressed="true">Audio</button>
-          <button type="button" data-stock-category-filter="music" aria-pressed="true">Música</button>
-          <button type="button" data-stock-category-filter="image" aria-pressed="true">Imágenes</button>
-          <button type="button" data-stock-category-filter="video" aria-pressed="true">Vídeo</button>
-        </div>
         <label class="stock-tray-search">
           <span>Prompt</span>
           <input type="text" list="stockPromptOptions" data-stock-prompt-search placeholder="Buscar prompt" autocomplete="off" />
@@ -4047,6 +4061,12 @@ function ensureStockImportTray() {
       </header>
       <div class="stock-tray-list" data-stock-tray-list></div>
       <footer class="stock-tray-actions">
+        <div class="stock-tray-filters" aria-label="Cargar últimos Stock por tipo">
+          <button type="button" data-stock-category-filter="audio" aria-pressed="false">Audio</button>
+          <button type="button" data-stock-category-filter="music" aria-pressed="false">Música</button>
+          <button type="button" data-stock-category-filter="image" aria-pressed="false">Imágenes</button>
+          <button type="button" data-stock-category-filter="video" aria-pressed="false">Vídeo</button>
+        </div>
         <span data-stock-selected-count>0 seleccionados</span>
         <button type="button" data-stock-tray-close>Cancelar</button>
         <button type="button" data-stock-tray-compose>Componer en Stage</button>
@@ -4065,13 +4085,7 @@ function ensureStockImportTray() {
     button.addEventListener("click", () => {
       const category = button.dataset.stockCategoryFilter;
       if (!category) return;
-      if (pendingStockActiveCategories.has(category)) {
-        pendingStockActiveCategories.delete(category);
-      } else {
-        pendingStockActiveCategories.add(category);
-      }
-      if (!pendingStockActiveCategories.size) pendingStockActiveCategories.add(category);
-      updateStockImportTraySelection();
+      loadStockCategoryIntoTray(category);
     });
   });
   tray.querySelector("[data-stock-prompt-search]")?.addEventListener("input", (event) => {
@@ -4090,6 +4104,7 @@ function closeStockImportTray() {
   pendingStockImportMembers = [];
   pendingStockSelectedIndexes = new Set();
   pendingStockSearchQuery = "";
+  pendingStockActiveCategory = "";
 }
 
 function updateStockImportTraySelection() {
@@ -4105,7 +4120,7 @@ function updateStockImportTraySelection() {
   }
   tray.querySelector("[data-stock-tray-summary]").textContent = `${visibleCount} de ${pendingStockImportMembers.length} assets visibles`;
   tray.querySelectorAll("[data-stock-category-filter]").forEach((button) => {
-    const active = pendingStockActiveCategories.has(button.dataset.stockCategoryFilter);
+    const active = pendingStockActiveCategory === button.dataset.stockCategoryFilter;
     button.classList.toggle("is-active", active);
     button.setAttribute("aria-pressed", active ? "true" : "false");
   });
@@ -4132,10 +4147,10 @@ function toggleStockImportTrayItem(index) {
   updateStockImportTraySelection();
 }
 
-function openStockImportTray(members) {
+function setStockTrayMembers(members, options = {}) {
   pendingStockImportMembers = [...members];
-  pendingStockActiveCategories = new Set(["audio", "music", "image", "video"]);
-  pendingStockSearchQuery = "";
+  pendingStockActiveCategory = options.category || "";
+  if (options.clearSearch !== false) pendingStockSearchQuery = "";
   pendingStockSelectedIndexes = new Set(
     pendingStockImportMembers.slice(0, stockImportBatchSize).map((_, index) => index),
   );
@@ -4143,9 +4158,9 @@ function openStockImportTray(members) {
   const list = tray.querySelector("[data-stock-tray-list]");
   const searchInput = tray.querySelector("[data-stock-prompt-search]");
   if (searchInput) searchInput.value = "";
-  const options = tray.querySelector("[data-stock-prompt-options]");
-  if (options) {
-    options.innerHTML = [...new Set(pendingStockImportMembers
+  const promptOptions = tray.querySelector("[data-stock-prompt-options]");
+  if (promptOptions) {
+    promptOptions.innerHTML = [...new Set(pendingStockImportMembers
       .flatMap((member) => [member.stockPrompt, member.name])
       .filter(Boolean)
       .map((value) => String(value).trim())
@@ -4172,8 +4187,36 @@ function openStockImportTray(members) {
     });
   }
   updateStockImportTraySelection();
+}
+
+function openStockImportTray(members, options = {}) {
+  setStockTrayMembers(members, options);
+  const tray = ensureStockImportTray();
   tray.classList.add("open");
   tray.setAttribute("aria-hidden", "false");
+}
+
+async function loadStockCategoryIntoTray(category) {
+  const tray = ensureStockImportTray();
+  const list = tray.querySelector("[data-stock-tray-list]");
+  const previousText = tray.querySelector("[data-stock-tray-summary]")?.textContent || "";
+  tray.classList.add("is-loading");
+  tray.querySelector("[data-stock-tray-summary]").textContent = `Cargando últimos ${stockImportFetchLimit}`;
+  tray.querySelectorAll("[data-stock-category-filter]").forEach((button) => { button.disabled = true; });
+  if (list) list.setAttribute("aria-busy", "true");
+  try {
+    const members = await fetchLatestStockMembers(stockImportFetchLimit, category);
+    setStockTrayMembers(members, { category });
+    playUiTick("import");
+  } catch (error) {
+    console.warn("Admira Stock category import failed", error);
+    tray.querySelector("[data-stock-tray-summary]").textContent = previousText || "Stock no disponible";
+    window.alert("No se han podido cargar los últimos contenidos de ese tipo.");
+  } finally {
+    tray.classList.remove("is-loading");
+    tray.querySelectorAll("[data-stock-category-filter]").forEach((button) => { button.disabled = false; });
+    if (list) list.removeAttribute("aria-busy");
+  }
 }
 
 function composeStockMembersIntoPlan(members) {

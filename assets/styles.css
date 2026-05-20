@@ -4887,7 +4887,7 @@ body.studio-entered {
 .stock-tray-header {
   border-bottom: 1px solid rgba(191, 211, 235, 0.14);
   display: grid;
-  grid-template-columns: auto auto minmax(180px, 1fr) auto;
+  grid-template-columns: auto minmax(220px, 1fr) auto;
   padding: 0 0 12px;
 }
 
@@ -4945,6 +4945,11 @@ body.studio-entered {
   background: rgba(167, 255, 91, 0.18);
   border-color: rgba(167, 255, 91, 0.72);
   color: #a7ff5b;
+}
+
+.stock-tray-filters button:disabled {
+  cursor: wait;
+  opacity: 0.58;
 }
 
 .stock-tray-search {
@@ -5120,7 +5125,7 @@ body.studio-entered {
 .stock-tray-actions {
   border-top: 1px solid rgba(191, 211, 235, 0.14);
   display: grid;
-  grid-template-columns: 1fr auto auto;
+  grid-template-columns: minmax(220px, 1fr) auto auto auto;
   padding-top: 12px;
 }
 
