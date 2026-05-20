@@ -1247,6 +1247,7 @@ function initScorePlayhead(totalFrames) {
   });
   ruler.addEventListener("pointerdown", (event) => {
     if (event.target === playhead) return;
+    if (event.target.closest(".score-tools, .score-marker")) return;
     stopPlayback();
     moveToPointer(event);
   });
@@ -1827,6 +1828,75 @@ function clampStageSize(value, fallback = 12) {
   return Math.min(Math.max(Number(value) || fallback, 4), 80);
 }
 
+function visualStageAspectRatio() {
+  return stageWidthPixels / stageHeightPixels;
+}
+
+function stagePercentRatioFromMedia(aspectRatio) {
+  const ratio = Number(aspectRatio || 0);
+  return ratio > 0 ? ratio / visualStageAspectRatio() : null;
+}
+
+function stageBoxForMediaAspect(aspectRatio, bounds = {}) {
+  const fallback = {
+    w: clampStageSize(bounds.w, 24),
+    h: clampStageSize(bounds.h, 24),
+  };
+  const ratio = stagePercentRatioFromMedia(aspectRatio);
+  if (!ratio) return fallback;
+  const maxW = clampStageSize(bounds.maxW ?? bounds.w, fallback.w);
+  const maxH = clampStageSize(bounds.maxH ?? bounds.h, fallback.h);
+  let h = maxH;
+  let w = h * ratio;
+  if (w > maxW) {
+    w = maxW;
+    h = w / ratio;
+  }
+  return {
+    w: clampStageSize(w, fallback.w),
+    h: clampStageSize(h, fallback.h),
+  };
+}
+
+function stageBoxWithMediaAspect(member, bounds = {}) {
+  if (!["image", "video"].includes(member?.mediaType)) {
+    return {
+      w: clampStageSize(bounds.w, 24),
+      h: clampStageSize(bounds.h, 24),
+    };
+  }
+  return stageBoxForMediaAspect(member.aspectRatio, bounds);
+}
+
+function centerStageBoxInBounds(bounds, box) {
+  const x = clampPercent(Number(bounds.x || 0) + ((Number(bounds.w || box.w) - box.w) / 2));
+  const y = clampPercent(Number(bounds.y || 0) + ((Number(bounds.h || box.h) - box.h) / 2));
+  return {
+    x: Math.min(x, 100 - box.w),
+    y: Math.min(y, 100 - box.h),
+    w: box.w,
+    h: box.h,
+  };
+}
+
+function keyframeWithMediaAspect(keyframe, aspectRatio) {
+  const box = stageBoxForMediaAspect(aspectRatio, {
+    w: keyframe.w,
+    h: keyframe.h,
+    maxW: keyframe.w,
+    maxH: keyframe.h,
+  });
+  const centerX = Number(keyframe.x || 0) + (Number(keyframe.w || box.w) / 2);
+  const centerY = Number(keyframe.y || 0) + (Number(keyframe.h || box.h) / 2);
+  return {
+    ...keyframe,
+    x: Math.min(Math.max(0, centerX - (box.w / 2)), 100 - box.w),
+    y: Math.min(Math.max(0, centerY - (box.h / 2)), 100 - box.h),
+    w: box.w,
+    h: box.h,
+  };
+}
+
 function defaultStageKeyframe(member, frame = Number(member?.startFrame || 1), index = 0) {
   return {
     frame: Number(frame) || 1,
@@ -2225,8 +2295,15 @@ function scheduleCastMember(plan, castIndex, options = {}) {
     durationFrames,
   };
   if (options.stagePoint) {
-    nextMember.stageX = Math.min(Math.max(0, options.stagePoint.x - 6), 88);
-    nextMember.stageY = Math.min(Math.max(0, options.stagePoint.y - 5), 90);
+    const box = stageBoxWithMediaAspect(nextMember, { w: 24, h: 24, maxW: 34, maxH: 34 });
+    nextMember.stageX = Math.min(Math.max(0, options.stagePoint.x - (box.w / 2)), 100 - box.w);
+    nextMember.stageY = Math.min(Math.max(0, options.stagePoint.y - (box.h / 2)), 100 - box.h);
+    nextMember.stageW = box.w;
+    nextMember.stageH = box.h;
+  } else if (isVisualMediaType(nextMember.mediaType) && (!nextMember.stageW || !nextMember.stageH)) {
+    const box = stageBoxWithMediaAspect(nextMember, { w: 24, h: 24, maxW: 34, maxH: 34 });
+    nextMember.stageW = box.w;
+    nextMember.stageH = box.h;
   }
   if (!wasSelected || !nextMember.keyframes?.length || options.stagePoint) {
     nextMember.keyframes = [
@@ -2569,29 +2646,6 @@ function renderFilmPlan(plan) {
     scoreGrid.style.setProperty("--timeline-zoom", timelineZoom);
     scoreGrid.innerHTML = `
       <div class="director-score">
-        <div class="score-tools" aria-label="Timeline transport">
-          <div class="score-play-cluster" role="group" aria-label="Timeline range controls">
-            <button class="score-bound-button" type="button" data-score-bound="start" aria-label="Go to start">|←</button>
-            <button class="score-play-top" type="button" data-score-play aria-label="Play timeline" aria-pressed="false">▶</button>
-            <button class="score-bound-button" type="button" data-score-bound="end" aria-label="Go to end">→|</button>
-          </div>
-          <div class="score-transport" role="group" aria-label="Timeline frame controls">
-            <button type="button" data-score-step="prev" aria-label="Previous keyframe">←</button>
-            <div class="score-fps-stepper" aria-label="Timeline playback speed">
-              <output class="score-fps-value" data-score-fps data-value="24" aria-label="24 frames per second">24</output>
-              <span class="score-fps-buttons" aria-label="Frames per second controls">
-                <button type="button" data-score-fps-step="up" aria-label="Increase FPS">▲</button>
-                <button type="button" data-score-fps-step="down" aria-label="Decrease FPS">▼</button>
-              </span>
-            </div>
-            <button type="button" data-score-step="next" aria-label="Next keyframe">→</button>
-          </div>
-          <div class="score-zoom-stepper" aria-label="Timeline zoom">
-            <button type="button" data-score-zoom-step="down" aria-label="Make timeline larger">−</button>
-            <output data-score-zoom data-value="${timelineZoom}" aria-label="Timeline zoom ${timelineZoom} percent">${timelineZoom}%</output>
-            <button type="button" data-score-zoom-step="up" aria-label="Make timeline smaller">+</button>
-          </div>
-        </div>
         <div class="score-member-title">
           <span>Member</span>
           <button class="score-audio-mute-all ${allTimelineAudioMuted ? "is-muted" : ""}" type="button" data-audio-mute-all aria-pressed="${allTimelineAudioMuted ? "true" : "false"}" aria-label="${allTimelineAudioMuted ? "Unmute all timeline audio" : "Mute all timeline audio"}">
@@ -2599,6 +2653,29 @@ function renderFilmPlan(plan) {
           </button>
         </div>
         <div class="score-ruler">
+          <div class="score-tools" aria-label="Timeline transport">
+            <div class="score-play-cluster" role="group" aria-label="Timeline range controls">
+              <button class="score-bound-button" type="button" data-score-bound="start" aria-label="Go to start">|←</button>
+              <button class="score-play-top" type="button" data-score-play aria-label="Play timeline" aria-pressed="false">▶</button>
+              <button class="score-bound-button" type="button" data-score-bound="end" aria-label="Go to end">→|</button>
+            </div>
+            <div class="score-transport" role="group" aria-label="Timeline frame controls">
+              <button type="button" data-score-step="prev" aria-label="Previous keyframe">←</button>
+              <div class="score-fps-stepper" aria-label="Timeline playback speed">
+                <output class="score-fps-value" data-score-fps data-value="24" aria-label="24 frames per second">24</output>
+                <span class="score-fps-buttons" aria-label="Frames per second controls">
+                  <button type="button" data-score-fps-step="up" aria-label="Increase FPS">▲</button>
+                  <button type="button" data-score-fps-step="down" aria-label="Decrease FPS">▼</button>
+                </span>
+              </div>
+              <button type="button" data-score-step="next" aria-label="Next keyframe">→</button>
+            </div>
+            <div class="score-zoom-stepper" aria-label="Timeline zoom">
+              <button type="button" data-score-zoom-step="down" aria-label="Make timeline larger">−</button>
+              <output data-score-zoom data-value="${timelineZoom}" aria-label="Timeline zoom ${timelineZoom} percent">${timelineZoom}%</output>
+              <button type="button" data-score-zoom-step="up" aria-label="Make timeline smaller">+</button>
+            </div>
+          </div>
           ${frameMarks.map((frame) => `<span style="left:${displayFrames <= 1 ? 0 : ((frame - 1) / (displayFrames - 1)) * 100}%">${frame}</span>`).join("")}
           <div class="score-marker-layer" aria-label="Timeline marks">
             ${timelineMarkers.map((marker) => `
@@ -3351,53 +3428,115 @@ function isTimedMediaType(mediaType) {
   return ["audio", "video", "animation"].includes(mediaType);
 }
 
-function probeMediaDurationFrames(src, mediaType) {
-  if (!src || !isTimedMediaType(mediaType)) return Promise.resolve(24);
+function isVisualMediaType(mediaType) {
+  return ["image", "video"].includes(mediaType);
+}
+
+function probeMediaMetadata(src, mediaType) {
+  if (!src) return Promise.resolve({});
+  if (mediaType === "image") {
+    return new Promise((resolve) => {
+      const image = new Image();
+      let settled = false;
+      const finish = (metadata = {}) => {
+        if (settled) return;
+        settled = true;
+        image.removeAttribute("src");
+        resolve(metadata);
+      };
+      image.crossOrigin = /^https?:\/\//i.test(src) ? "anonymous" : "";
+      image.addEventListener("load", () => {
+        const aspectRatio = image.naturalWidth > 0 && image.naturalHeight > 0
+          ? image.naturalWidth / image.naturalHeight
+          : null;
+        finish({ aspectRatio });
+      }, { once: true });
+      image.addEventListener("error", () => finish(), { once: true });
+      window.setTimeout(() => finish(), 3000);
+      image.src = src;
+    });
+  }
+  if (!isTimedMediaType(mediaType)) return Promise.resolve({});
   return new Promise((resolve) => {
     const media = document.createElement(mediaType === "audio" ? "audio" : "video");
     let settled = false;
-    const finish = (frames) => {
+    const finish = (metadata = {}) => {
       if (settled) return;
       settled = true;
       media.removeAttribute("src");
       media.load?.();
-      resolve(frames);
+      resolve(metadata);
     };
     media.preload = "metadata";
     media.muted = true;
     media.playsInline = true;
     media.crossOrigin = /^https?:\/\//i.test(src) ? "anonymous" : "";
     media.addEventListener("loadedmetadata", () => {
-      finish(Number.isFinite(media.duration) && media.duration > 0
-        ? framesFromSeconds(media.duration)
-        : 24);
+      const aspectRatio = media.videoWidth > 0 && media.videoHeight > 0
+        ? media.videoWidth / media.videoHeight
+        : null;
+      finish({
+        durationFrames: Number.isFinite(media.duration) && media.duration > 0
+          ? framesFromSeconds(media.duration)
+          : 24,
+        aspectRatio,
+      });
     }, { once: true });
-    media.addEventListener("error", () => finish(24), { once: true });
-    window.setTimeout(() => finish(24), 3000);
+    media.addEventListener("error", () => finish({ durationFrames: 24 }), { once: true });
+    window.setTimeout(() => finish({ durationFrames: 24 }), 3000);
     media.src = src;
   });
 }
 
-function updateMemberDurationFromMetadata(castIndex, src, mediaType) {
-  if (!isTimedMediaType(mediaType)) return;
-  probeMediaDurationFrames(src, mediaType).then((durationFrames) => {
+function updateMemberMetadataFromMedia(castIndex, src, mediaType) {
+  if (!isTimedMediaType(mediaType) && !isVisualMediaType(mediaType)) return;
+  probeMediaMetadata(src, mediaType).then((metadata) => {
     const plan = currentPlan();
     const member = plan.cast?.[castIndex];
     if (!member || member.src !== src) return;
     const currentDuration = Math.max(1, Number(member.durationFrames || 24));
-    if (!member.durationPending && currentDuration !== 24) return;
-    const nextDurationFrames = member.onStage
-      ? Math.max(currentDuration, durationFrames)
-      : durationFrames;
-    plan.cast[castIndex] = {
+    let shouldRender = false;
+    const nextMember = {
       ...member,
-      durationFrames: nextDurationFrames,
       durationPending: false,
+      aspectPending: false,
     };
+    if (Number(metadata.durationFrames || 0) > 0 && (member.durationPending || currentDuration === 24)) {
+      const nextDurationFrames = member.onStage
+        ? Math.max(currentDuration, metadata.durationFrames)
+        : metadata.durationFrames;
+      nextMember.durationFrames = nextDurationFrames;
+      shouldRender ||= nextDurationFrames !== currentDuration;
+    }
+    if (Number(metadata.aspectRatio || 0) > 0) {
+      const currentAspectRatio = Number(member.aspectRatio || 0);
+      nextMember.aspectRatio = metadata.aspectRatio;
+      shouldRender ||= Math.abs(currentAspectRatio - metadata.aspectRatio) > 0.001;
+      if (member.aspectPending && member.onStage !== false) {
+        const keyframes = stageKeyframesFor(member, castIndex).map((keyframe) => (
+          keyframeWithMediaAspect(keyframe, metadata.aspectRatio)
+        ));
+        const first = keyframes[0];
+        nextMember.keyframes = keyframes;
+        if (first) {
+          nextMember.stageX = first.x;
+          nextMember.stageY = first.y;
+          nextMember.stageW = first.w;
+          nextMember.stageH = first.h;
+        }
+        shouldRender = true;
+      }
+    }
+    plan.cast[castIndex] = nextMember;
     saveFilmPlan(plan);
+    if (!shouldRender) return;
     renderFilmPlan(plan);
     setTimelineFrame(currentTimelineFrame(), false);
   }).catch(() => {});
+}
+
+function updateMemberDurationFromMetadata(castIndex, src, mediaType) {
+  updateMemberMetadataFromMedia(castIndex, src, mediaType);
 }
 
 function importMemberFiles(files, mode = "image") {
@@ -3424,6 +3563,7 @@ function importMemberFiles(files, mode = "image") {
         startFrame: 1 + (timelineMemberCount + index) * 24,
         durationFrames: 24,
         durationPending: isTimedMediaType(file.mediaType),
+        aspectPending: isVisualMediaType(file.mediaType),
         prompt: `Imported ${file.mediaType} member. Place in Cast, schedule on Timeline, and prepare for later AI animation passes.`,
       };
     });
@@ -3432,7 +3572,7 @@ function importMemberFiles(files, mode = "image") {
   plan.cast = [...existing, ...imported];
   saveFilmPlan(plan);
   renderFilmPlan(plan);
-  imported.forEach((member, index) => updateMemberDurationFromMetadata(
+  imported.forEach((member, index) => updateMemberMetadataFromMedia(
     firstImportedIndex + index,
     member.src,
     member.mediaType,
@@ -3502,6 +3642,29 @@ function findStockField(source, fieldNames, visited = new Set()) {
   return "";
 }
 
+function findStockNumberField(source, fieldNames, visited = new Set()) {
+  if (!source || typeof source !== "object" || visited.has(source)) return null;
+  visited.add(source);
+  const names = new Set(fieldNames.map((name) => name.toLowerCase()));
+  for (const [key, value] of Object.entries(source)) {
+    if (!names.has(key.toLowerCase())) continue;
+    const number = Number(value);
+    if (Number.isFinite(number) && number > 0) return number;
+  }
+  for (const value of Object.values(source)) {
+    if (Array.isArray(value)) {
+      for (const item of value) {
+        const nested = findStockNumberField(item, fieldNames, visited);
+        if (nested) return nested;
+      }
+    } else if (value && typeof value === "object") {
+      const nested = findStockNumberField(value, fieldNames, visited);
+      if (nested) return nested;
+    }
+  }
+  return null;
+}
+
 function stockUrl(value, endpoint) {
   if (!value) return "";
   try {
@@ -3555,6 +3718,9 @@ function stockMemberFromItem(item, endpoint, existingCount, timelineMemberCount)
   if (isAinimationGeneratedAnimation(item, src)) return null;
   const mediaType = stockMediaType(item, src);
   if (mediaType === "animation") return null;
+  const width = findStockNumberField(item, ["width", "w", "naturalWidth", "videoWidth", "imageWidth", "pixelWidth"]);
+  const height = findStockNumberField(item, ["height", "h", "naturalHeight", "videoHeight", "imageHeight", "pixelHeight"]);
+  const aspectRatio = width && height ? width / height : mediaType === "video" ? visualStageAspectRatio() : null;
   const rawName = findStockField(item, ["title", "name", "fileName", "filename", "label", "slug"]);
   const baseName = cleanMemberName(rawName || "Admira Stock latest");
   return {
@@ -3572,23 +3738,28 @@ function stockMemberFromItem(item, endpoint, existingCount, timelineMemberCount)
     startFrame: 1 + timelineMemberCount * 24,
     durationFrames: 24,
     durationPending: isTimedMediaType(mediaType),
+    aspectRatio,
+    aspectPending: isVisualMediaType(mediaType) && !aspectRatio,
     prompt: "Imported from admira.studio Stock. Add to Stage from Cast to schedule it on the Timeline.",
   };
 }
 
 function composeImportedStockMembers(plan, startIndex, count) {
   const layouts = [
-    { x: 10, y: 14, w: 42, h: 38 },
-    { x: 48, y: 18, w: 42, h: 38 },
-    { x: 28, y: 48, w: 44, h: 38 },
+    { x: 10, y: 14, w: 42, h: 38, maxW: 42, maxH: 38 },
+    { x: 48, y: 18, w: 42, h: 38, maxW: 42, maxH: 38 },
+    { x: 28, y: 48, w: 44, h: 38, maxW: 44, maxH: 38 },
   ];
   for (let offset = 0; offset < count; offset += 1) {
     const castIndex = startIndex + offset;
     const member = plan.cast?.[castIndex];
     if (!member) continue;
-    const layout = layouts[offset % layouts.length];
+    const slot = layouts[offset % layouts.length];
+    const layout = centerStageBoxInBounds(slot, stageBoxWithMediaAspect(member, slot));
     const startFrame = 1;
     const durationFrames = Math.max(Number(member.durationFrames || 24), 96);
+    const endX = Math.min(100 - layout.w, Math.max(0, layout.x + (offset - 1) * 5));
+    const endY = Math.min(100 - layout.h, Math.max(0, layout.y + (offset % 2 ? 4 : -3)));
     plan.cast[castIndex] = {
       ...member,
       onStage: true,
@@ -3615,8 +3786,8 @@ function composeImportedStockMembers(plan, startIndex, count) {
         },
         {
           frame: startFrame + durationFrames - 1,
-          x: Math.min(88, Math.max(0, layout.x + (offset - 1) * 5)),
-          y: Math.min(90, Math.max(0, layout.y + (offset % 2 ? 4 : -3))),
+          x: endX,
+          y: endY,
           w: layout.w,
           h: layout.h,
           color: member.color || "",
@@ -3679,7 +3850,7 @@ async function importLatestAdmiraStockBatch() {
     composeImportedStockMembers(plan, castIndex, members.length);
     saveFilmPlan(plan);
     renderFilmPlan(plan);
-    members.forEach((member, index) => updateMemberDurationFromMetadata(
+    members.forEach((member, index) => updateMemberMetadataFromMedia(
       castIndex + index,
       member.src,
       member.mediaType,
@@ -4189,7 +4360,7 @@ function initStageTools() {
       return;
     }
 
-    if (event.target.closest(".stage-item") || member) return;
+    if (!["text", "line", "rect-fill", "rect", "oval-fill", "oval"].includes(tool) && (event.target.closest(".stage-item") || member)) return;
     clearSelectedStageTarget();
     stage.querySelectorAll(".stage-imported-member, .stage-text-item, .stage-shape-item").forEach((item) => {
       item.classList.remove("is-selected");

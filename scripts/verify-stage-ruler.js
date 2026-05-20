@@ -71,6 +71,9 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
     const toolsRect = toolsWindow?.getBoundingClientRect();
     const castRect = castWindow?.getBoundingClientRect();
     const toolsTitlebarRect = toolsWindow?.querySelector(".window-titlebar")?.getBoundingClientRect();
+    const scoreToolsRect = document.querySelector(".score-tools")?.getBoundingClientRect();
+    const scoreRulerRect = document.querySelector(".score-ruler")?.getBoundingClientRect();
+    const scoreMemberTitleRect = document.querySelector(".score-member-title")?.getBoundingClientRect();
     const overlaps = (first, second) => Boolean(first && second) &&
       first.left < second.right &&
       first.right > second.left &&
@@ -115,6 +118,15 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
         stageBottomGapToTimeline: stageRect && timelineRect ? Number((timelineRect.top - stageRect.bottom).toFixed(2)) : null,
         toolsOverlapCast: overlaps(toolsRect, castRect),
         toolsOverlapTimeline: overlaps(toolsRect, timelineRect),
+      },
+      timelineControls: {
+        toolsInsideRuler: Boolean(scoreToolsRect && scoreRulerRect &&
+          scoreToolsRect.left >= scoreRulerRect.left &&
+          scoreToolsRect.right <= scoreRulerRect.right &&
+          scoreToolsRect.top >= scoreRulerRect.top &&
+          scoreToolsRect.bottom <= scoreRulerRect.bottom),
+        toolsInMemberColumn: Boolean(scoreToolsRect && scoreMemberTitleRect && overlaps(scoreToolsRect, scoreMemberTitleRect)),
+        memberTitleHeight: scoreMemberTitleRect ? Number(scoreMemberTitleRect.height.toFixed(2)) : 0,
       },
     };
   });
@@ -427,11 +439,15 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
             title: "Latest Stock Take",
             assetUrl: "https://www.admira.studio/media/latest-stock-take.png",
             mimeType: "image/png",
+            width: 1200,
+            height: 1200,
           },
           {
             title: "Latest Stock Plate",
             assetUrl: "https://www.admira.studio/media/latest-stock-plate.mp4",
             mimeType: "video/mp4",
+            width: 1920,
+            height: 1080,
           },
           {
             title: "Latest Stock Character",
@@ -540,6 +556,15 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
       }
       const restoredPlan = JSON.parse(localStorage.getItem("ainimation-film-plan") || "{}");
       const restoredStockMembers = (restoredPlan.cast || []).filter((item) => item.stock && item.sourceUrl !== "https://www.admira.studio/media/aidirector-export.webm");
+      const visualStageMembers = restoredStockMembers
+        .filter((item) => ["image", "video"].includes(item.mediaType))
+        .map((item) => ({
+          mediaType: item.mediaType,
+          aspectRatio: Number(Number(item.aspectRatio || 0).toFixed(4)),
+          stageAspectRatio: Number((((Number(item.stageW || 0) / Number(item.stageH || 1)) * (1920 / 1080))).toFixed(4)),
+          stageW: Number(Number(item.stageW || 0).toFixed(4)),
+          stageH: Number(Number(item.stageH || 0).toFixed(4)),
+        }));
       return {
         calls,
         imported: Boolean(member),
@@ -559,6 +584,7 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
         timelineVisible: Boolean(document.querySelector(".score-sprite[data-cast-index]")),
         timelineCount: document.querySelectorAll(".score-sprite[data-cast-index]").length,
         importedAinimationCount: restoredStockMembers.filter((item) => /ainimation|aidirector/i.test(`${item.name} ${item.sourceUrl} ${item.prompt || ""}`)).length,
+        visualStageMembers,
         stageCountAfterStageRemove,
         timelineCountAfterTimelineRemove,
       };
@@ -928,8 +954,8 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
   const missingLabels = result.labels.length !== expectedYLabels || result.xLabels.length !== expectedXLabels;
   const hasWrongRotation = result.labels.some((label) => label.transform === "matrix(0, 1, -1, 0, 0, 0)");
 
-  if (!result.stylesheetHref.includes("aidirector-20260520-r30")) {
-    throw new Error(`Expected aidirector-20260520-r30 stylesheet cache key, got ${result.stylesheetHref}`);
+  if (!result.stylesheetHref.includes("aidirector-20260520-r31")) {
+    throw new Error(`Expected aidirector-20260520-r31 stylesheet cache key, got ${result.stylesheetHref}`);
   }
 
   if (
@@ -956,7 +982,7 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
   }
 
   if (
-    result.brand.text !== "◆ AiDirector v.2026.05.20 r30" ||
+    result.brand.text !== "◆ AiDirector v.2026.05.20 r31" ||
     result.brand.rightGap > 20 ||
     result.brand.menuHeight > 50 ||
     result.brand.toolsTitlebarHeight > 31
@@ -1158,6 +1184,16 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
   }
 
   if (
+    result.stockImport.visualStageMembers.length < 2 ||
+    result.stockImport.visualStageMembers.some((item) => (
+      item.aspectRatio <= 0 ||
+      Math.abs(item.aspectRatio - item.stageAspectRatio) > 0.05
+    ))
+  ) {
+    throw new Error(`Imported visual media should keep original proportions: ${JSON.stringify(result.stockImport.visualStageMembers)}`);
+  }
+
+  if (
     !result.stageKeyframes.hasStageMember ||
     result.stageKeyframes.durationFrames < 96 ||
     result.stageKeyframes.keyframes.length !== 2 ||
@@ -1193,6 +1229,14 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
     !result.initialWindows.scriptHidden
   ) {
     throw new Error(`Unexpected initial window state: ${JSON.stringify(result.initialWindows)}`);
+  }
+
+  if (
+    !result.timelineControls.toolsInsideRuler ||
+    result.timelineControls.toolsInMemberColumn ||
+    result.timelineControls.memberTitleHeight < 60
+  ) {
+    throw new Error(`Unexpected timeline control placement: ${JSON.stringify(result.timelineControls)}`);
   }
 
   if (
