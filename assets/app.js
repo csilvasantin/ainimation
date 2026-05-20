@@ -211,7 +211,7 @@ function initDirectorWindowManager() {
     const bounds = workbench.getBoundingClientRect();
     const isTools = win.dataset.window === "tools";
     const minWidth = isTools ? 96 : 220;
-    const minHeight = isTools ? 560 : 36;
+    const minHeight = isTools ? 120 : 36;
     const width = clamp(rect.width, minWidth, Math.max(minWidth, bounds.width));
     const height = clamp(rect.height, minHeight, Math.max(minHeight, bounds.height));
     const maxLeft = Math.max(0, bounds.width - width);
@@ -375,7 +375,10 @@ function initDirectorWindowManager() {
     const castHeight = clamp(Math.round(bounds.height * 0.18), 190, 300);
     const toolsWidth = 132;
     const toolsTop = castHeight + gap;
-    const toolsHeight = Math.max(560, timelineTop - toolsTop - gap);
+    const toolsAvailableHeight = Math.max(0, timelineTop - toolsTop - gap);
+    const toolsHeight = toolsAvailableHeight > 0
+      ? Math.min(560, Math.max(120, toolsAvailableHeight))
+      : 120;
     const inspectorTop = toolsTop + toolsHeight + gap;
     const inspectorHeight = Math.max(160, timelineTop - inspectorTop - gap);
     const scriptWidth = Math.min(540, Math.max(260, stageWidth * 0.34));
@@ -427,9 +430,12 @@ function initDirectorWindowManager() {
     win.style.height = `${bounds.height}px`;
   }
 
-  function refreshWindowBounds() {
+  function refreshWindowBounds(resetLayout = false) {
     if (isStackedLayout()) return;
-    windows.forEach((win) => applyRect(win, currentRect(win)));
+    windows.forEach((win) => {
+      const rect = currentRect(win);
+      applyRect(win, resetLayout ? defaultLayoutRect(win, rect) : rect);
+    });
   }
 
   window.refreshDirectorWindows = refreshWindowBounds;
@@ -642,6 +648,8 @@ function initDirectorWindowManager() {
 }
 
 initDirectorWindowManager();
+window.setTimeout(() => window.refreshDirectorWindows?.(true), 80);
+window.setTimeout(() => window.refreshDirectorWindows?.(true), 320);
 
 function initStudioCollabBar() {
   const shell = document.querySelector(".director-shell");
@@ -652,8 +660,8 @@ function initStudioCollabBar() {
 
   const refreshWorkspace = () => {
     requestAnimationFrame(() => {
-      window.refreshDirectorWindows?.();
-      requestAnimationFrame(() => window.refreshDirectorWindows?.());
+      window.refreshDirectorWindows?.(true);
+      requestAnimationFrame(() => window.refreshDirectorWindows?.(true));
     });
   };
 

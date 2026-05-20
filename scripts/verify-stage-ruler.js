@@ -33,6 +33,8 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
     const collabBar = document.querySelector(".studio-collab-bar");
     const promptWindow = document.querySelector('[data-window="prompt"]');
     const scriptWindow = document.querySelector('[data-window="script"]');
+    const toolsWindow = document.querySelector('[data-window="tools"]');
+    const castWindow = document.querySelector('[data-window="cast"]');
     const fileMenu = document.querySelector("[data-member-menu]");
     const fileMenuItems = [...document.querySelectorAll(".member-menu-list button, .member-menu-list label")].map((item) => item.textContent.trim());
     const editMenu = document.querySelector("[data-edit-menu]");
@@ -66,6 +68,13 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
     const menuRect = menu?.getBoundingClientRect();
     const stageRect = stageWindow?.getBoundingClientRect();
     const timelineRect = timelineWindow?.getBoundingClientRect();
+    const toolsRect = toolsWindow?.getBoundingClientRect();
+    const castRect = castWindow?.getBoundingClientRect();
+    const overlaps = (first, second) => Boolean(first && second) &&
+      first.left < second.right &&
+      first.right > second.left &&
+      first.top < second.bottom &&
+      first.bottom > second.top;
 
     return {
       stylesheetHref,
@@ -101,6 +110,8 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
         promptHidden: promptWindow?.classList.contains("is-hidden") || false,
         scriptHidden: scriptWindow?.classList.contains("is-hidden") || false,
         stageBottomGapToTimeline: stageRect && timelineRect ? Number((timelineRect.top - stageRect.bottom).toFixed(2)) : null,
+        toolsOverlapCast: overlaps(toolsRect, castRect),
+        toolsOverlapTimeline: overlaps(toolsRect, timelineRect),
       },
     };
   });
@@ -793,8 +804,8 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
   const missingLabels = result.labels.length !== expectedYLabels || result.xLabels.length !== expectedXLabels;
   const hasWrongRotation = result.labels.some((label) => label.transform === "matrix(0, 1, -1, 0, 0, 0)");
 
-  if (!result.stylesheetHref.includes("aidirector-20260520-r22")) {
-    throw new Error(`Expected aidirector-20260520-r22 stylesheet cache key, got ${result.stylesheetHref}`);
+  if (!result.stylesheetHref.includes("aidirector-20260520-r26")) {
+    throw new Error(`Expected aidirector-20260520-r26 stylesheet cache key, got ${result.stylesheetHref}`);
   }
 
   if (
@@ -820,7 +831,7 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
     throw new Error(`Unexpected stage ruler toggle: ${JSON.stringify(result.rulerToggle)}`);
   }
 
-  if (result.brand.text !== "AiDirector v.2026.05.20 r22" || result.brand.rightGap > 20) {
+  if (result.brand.text !== "AiDirector v.2026.05.20 r26" || result.brand.rightGap > 20) {
     throw new Error(`Unexpected menu brand placement: ${JSON.stringify(result.brand)}`);
   }
 
@@ -939,7 +950,7 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
   if (
     result.stockExport.calls[0]?.url !== "https://pixer-eleven.csilvasantin.workers.dev/stock/publish" ||
     result.stockExport.calls[0]?.method !== "POST" ||
-    !result.stockExport.formEntries.some(([key, value]) => key === "type" && value === "video") ||
+    !result.stockExport.formEntries.some(([key, value]) => key === "type" && value === "animation") ||
     !result.stockExport.formEntries.some(([key, value]) => key === "motor" && value === "ainimation") ||
     !result.stockExport.formEntries.some(([key, value]) => key === "mime" && value === "video/webm") ||
     !result.stockExport.formEntries.some(([key, value]) => key === "base64" && value.length > 0) ||
@@ -1032,9 +1043,11 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
   if (
     result.initialWindows.stageBottomGapToTimeline === null ||
     result.initialWindows.stageBottomGapToTimeline < 0 ||
-    result.initialWindows.stageBottomGapToTimeline > 20
+    result.initialWindows.stageBottomGapToTimeline > 20 ||
+    result.initialWindows.toolsOverlapCast ||
+    result.initialWindows.toolsOverlapTimeline
   ) {
-    throw new Error(`Stage should fill the workspace down to the timeline: ${JSON.stringify(result.initialWindows)}`);
+    throw new Error(`Unexpected initial window layout: ${JSON.stringify(result.initialWindows)}`);
   }
 
   if (
