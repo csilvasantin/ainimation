@@ -15,9 +15,10 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
   await page.goto(targetUrl, { waitUntil: "networkidle" });
   await page.waitForTimeout(1200);
   await page.waitForFunction(() => {
+    window.refreshDirectorWindows?.();
     const rect = document.querySelector(".stage-canvas")?.getBoundingClientRect();
     return rect && rect.width > 400 && rect.height > 300;
-  }, { timeout: 10000 });
+  }, { timeout: 30000 });
   await page.evaluate(() => window.renderStageRulers?.());
 
   const result = await page.evaluate(() => {
@@ -260,7 +261,7 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
         calls,
         imported: Boolean(member),
         visibleInCast: Boolean(card),
-        cardDraggable: card?.getAttribute("draggable") === "true",
+        cardDraggable: card?.getAttribute("draggable") === "false",
         cardWithinCast: Boolean(castWindowRect && cardRect && cardRect.width <= 130 && cardRect.height <= 90 && cardRect.right <= castWindowRect.right + 1),
         mediaWithinCard: Boolean(cardRect && mediaRect && mediaRect.width <= cardRect.width && mediaRect.height <= cardRect.height),
         name: member?.name || "",
@@ -278,7 +279,43 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
     }
   });
 
-  const stageMemberBox = await page.locator(".stage-imported-member").first().boundingBox();
+  const castCard = await page.$(".director-cast-window .cast-member[data-cast-index]");
+  const castCardBox = await castCard?.boundingBox();
+  const stageCanvas = await page.$(".stage-canvas");
+  const stageCanvasBox = await stageCanvas?.boundingBox();
+  if (castCardBox && stageCanvasBox) {
+    await page.mouse.move(castCardBox.x + castCardBox.width / 2, castCardBox.y + castCardBox.height / 2);
+    await page.mouse.down();
+    await page.mouse.move(stageCanvasBox.x + stageCanvasBox.width * 0.56, stageCanvasBox.y + stageCanvasBox.height * 0.44, { steps: 8 });
+    await page.mouse.up();
+    await page.waitForTimeout(160);
+  }
+  const castCardForTimeline = await page.$(".director-cast-window .cast-member[data-cast-index]");
+  const castCardBoxForTimeline = await castCardForTimeline?.boundingBox();
+  const timelineTrack = await page.$(".score-track");
+  const timelineTrackBox = await timelineTrack?.boundingBox();
+  if (castCardBoxForTimeline && timelineTrackBox) {
+    await page.mouse.move(castCardBoxForTimeline.x + castCardBoxForTimeline.width / 2, castCardBoxForTimeline.y + castCardBoxForTimeline.height / 2);
+    await page.mouse.down();
+    await page.mouse.move(timelineTrackBox.x + timelineTrackBox.width * 0.68, timelineTrackBox.y + timelineTrackBox.height / 2, { steps: 8 });
+    await page.mouse.up();
+    await page.waitForTimeout(160);
+  }
+  result.pointerCastDrop = await page.evaluate(() => {
+    const plan = JSON.parse(localStorage.getItem("ainimation-film-plan") || "{}");
+    const member = (plan.cast || []).find((item) => item.stock);
+    return {
+      onStage: Boolean(member?.onStage),
+      startFrame: Number(member?.startFrame || 0),
+      stageX: Number(member?.stageX || 0),
+      stageY: Number(member?.stageY || 0),
+      playheadFrame: Number(document.querySelector(".score-playhead")?.dataset.frame || 0),
+      timelineVisible: Boolean(document.querySelector(".score-sprite[data-cast-index]")),
+    };
+  });
+
+  const stageMember = await page.$(".stage-imported-member");
+  const stageMemberBox = await stageMember?.boundingBox();
   if (stageMemberBox) {
     await page.mouse.move(stageMemberBox.x + stageMemberBox.width / 2, stageMemberBox.y + stageMemberBox.height / 2);
     await page.mouse.down();
@@ -314,7 +351,8 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
     selectedFrame: Number(document.querySelector(".score-keyframe-dot.is-selected")?.dataset.keyframeFrame || 0),
   }));
 
-  const selectedStageMemberBox = await page.locator(".stage-imported-member").first().boundingBox();
+  const selectedStageMember = await page.$(".stage-imported-member");
+  const selectedStageMemberBox = await selectedStageMember?.boundingBox();
   if (selectedStageMemberBox) {
     await page.mouse.move(selectedStageMemberBox.x + selectedStageMemberBox.width / 2, selectedStageMemberBox.y + selectedStageMemberBox.height / 2);
     await page.mouse.down();
@@ -389,7 +427,8 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
   await page.locator('[data-text-align="center"]').click();
   await page.waitForTimeout(120);
   await page.locator('[data-stage-tool="hand"]').click();
-  const textBox = await page.locator(".stage-text-item").first().boundingBox();
+  const textItem = await page.$(".stage-text-item");
+  const textBox = await textItem?.boundingBox();
   if (textBox) {
     await page.mouse.move(textBox.x + textBox.width / 2, textBox.y + textBox.height / 2);
     await page.mouse.down();
@@ -412,6 +451,8 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
     };
   });
 
+  await page.evaluate(() => document.querySelector('[data-score-bound="start"]')?.click());
+  await page.waitForTimeout(80);
   await page.evaluate(() => document.querySelector('[data-score-step="next"]')?.click());
   await page.waitForTimeout(80);
   const nextKeyframeFrame = await page.evaluate(() => Number(document.querySelector(".score-playhead")?.dataset.frame || 0));
@@ -423,6 +464,18 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
     nextKeyframeFrame,
     prevLabel: await page.locator('[data-score-step="prev"]').getAttribute("aria-label"),
     nextLabel: await page.locator('[data-score-step="next"]').getAttribute("aria-label"),
+  };
+  await page.evaluate(() => document.querySelector('[data-score-bound="start"]')?.click());
+  await page.waitForTimeout(80);
+  const startBoundFrame = await page.evaluate(() => Number(document.querySelector(".score-playhead")?.dataset.frame || 0));
+  await page.evaluate(() => document.querySelector('[data-score-bound="end"]')?.click());
+  await page.waitForTimeout(80);
+  result.timelineBounds = {
+    startFrame: startBoundFrame,
+    endFrame: await page.evaluate(() => Number(document.querySelector(".score-playhead")?.dataset.frame || 0)),
+    totalFrames: await page.evaluate(() => Number(document.querySelector(".score-playhead")?.getAttribute("aria-valuemax") || 0)),
+    startLabel: await page.locator('[data-score-bound="start"]').getAttribute("aria-label"),
+    endLabel: await page.locator('[data-score-bound="end"]').getAttribute("aria-label"),
   };
 
   await page.evaluate(() => {
@@ -476,8 +529,8 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
   const missingLabels = result.labels.length !== expectedYLabels || result.xLabels.length !== expectedXLabels;
   const hasWrongRotation = result.labels.some((label) => label.transform === "matrix(0, 1, -1, 0, 0, 0)");
 
-  if (!result.stylesheetHref.includes("aidirector-20260520-r14")) {
-    throw new Error(`Expected aidirector-20260520-r14 stylesheet cache key, got ${result.stylesheetHref}`);
+  if (!result.stylesheetHref.includes("aidirector-20260520-r15")) {
+    throw new Error(`Expected aidirector-20260520-r15 stylesheet cache key, got ${result.stylesheetHref}`);
   }
 
   if (
@@ -503,7 +556,7 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
     throw new Error(`Unexpected stage ruler toggle: ${JSON.stringify(result.rulerToggle)}`);
   }
 
-  if (result.brand.text !== "AiDirector v.2026.05.20 r14" || result.brand.rightGap > 20) {
+  if (result.brand.text !== "AiDirector v.2026.05.20 r15" || result.brand.rightGap > 20) {
     throw new Error(`Unexpected menu brand placement: ${JSON.stringify(result.brand)}`);
   }
 
@@ -541,12 +594,31 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
   }
 
   if (
-    result.keyframeNavigation.previousKeyframeFrame !== result.stageKeyframes.keyframes[0]?.frame ||
-    result.keyframeNavigation.nextKeyframeFrame !== result.stageKeyframes.keyframes[1]?.frame ||
+    result.keyframeNavigation.nextKeyframeFrame !== result.stageKeyframes.keyframes[0]?.frame ||
+    result.keyframeNavigation.previousKeyframeFrame > result.keyframeNavigation.nextKeyframeFrame ||
     result.keyframeNavigation.prevLabel !== "Previous keyframe" ||
     result.keyframeNavigation.nextLabel !== "Next keyframe"
   ) {
     throw new Error(`Unexpected keyframe navigation: ${JSON.stringify(result.keyframeNavigation)}`);
+  }
+
+  if (
+    result.timelineBounds.startFrame !== 1 ||
+    result.timelineBounds.endFrame !== result.timelineBounds.totalFrames ||
+    result.timelineBounds.startLabel !== "Go to start" ||
+    result.timelineBounds.endLabel !== "Go to end"
+  ) {
+    throw new Error(`Unexpected timeline bounds controls: ${JSON.stringify(result.timelineBounds)}`);
+  }
+
+  if (
+    !result.pointerCastDrop.onStage ||
+    !result.pointerCastDrop.timelineVisible ||
+    result.pointerCastDrop.startFrame <= result.stockImport.startFrameAfterTimelineDrop ||
+    result.pointerCastDrop.stageX <= 40 ||
+    result.pointerCastDrop.stageY <= 30
+  ) {
+    throw new Error(`Unexpected pointer Cast drop: ${JSON.stringify(result.pointerCastDrop)}`);
   }
 
   if (

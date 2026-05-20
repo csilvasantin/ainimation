@@ -909,6 +909,8 @@ function initScorePlayhead(totalFrames) {
   const fpsUpButton = transport?.querySelector("[data-score-fps-step='up']");
   const prevButton = transport?.querySelector("[data-score-step='prev']");
   const nextButton = transport?.querySelector("[data-score-step='next']");
+  const startButton = transport?.querySelector("[data-score-bound='start']");
+  const endButton = transport?.querySelector("[data-score-bound='end']");
   const playButton = transport?.querySelector("[data-score-play]");
   if (!ruler || !playhead) return;
 
@@ -1013,6 +1015,14 @@ function initScorePlayhead(totalFrames) {
   nextButton?.addEventListener("click", () => {
     stopPlayback();
     setFrame(nextKeyframeFrame(currentFrame, totalFrames, 1));
+  });
+  startButton?.addEventListener("click", () => {
+    stopPlayback();
+    setFrame(1);
+  });
+  endButton?.addEventListener("click", () => {
+    stopPlayback();
+    setFrame(totalFrames);
   });
   playButton?.addEventListener("click", () => {
     if (playTimer) stopPlayback();
@@ -1909,6 +1919,83 @@ function frameFromTimelineClientX(clientX, target = null) {
   return Math.round(ratio * (totalFrames - 1)) + 1;
 }
 
+function castDropTargetAt(clientX, clientY) {
+  const hiddenClass = "is-cast-pointer-dragging";
+  document.body.classList.add(hiddenClass);
+  const target = document.elementFromPoint(clientX, clientY);
+  document.body.classList.remove(hiddenClass);
+  const stage = target?.closest?.(".stage-canvas");
+  const timelineTarget = target?.closest?.(".director-score, .score-track, .score-ruler");
+  if (stage) {
+    return {
+      type: "stage",
+      options: { stagePoint: stagePointFromClient(stage, clientX, clientY) },
+    };
+  }
+  if (timelineTarget) {
+    return {
+      type: "timeline",
+      options: { startFrame: frameFromTimelineClientX(clientX, timelineTarget) },
+    };
+  }
+  return null;
+}
+
+function initCastPointerDrag(card, castIndex, toggleCastMember) {
+  let pointerDrag = null;
+  let suppressNextClick = false;
+  card.addEventListener("pointerdown", (event) => {
+    if (
+      event.button !== 0 ||
+      event.target.closest("input, textarea, [contenteditable='true']") ||
+      (event.target.closest("button") && event.target.closest("button") !== card)
+    ) return;
+    pointerDrag = {
+      id: event.pointerId,
+      startX: event.clientX,
+      startY: event.clientY,
+      active: false,
+    };
+    card.setPointerCapture(event.pointerId);
+  });
+  card.addEventListener("pointermove", (event) => {
+    if (!pointerDrag || pointerDrag.id !== event.pointerId) return;
+    const distance = Math.hypot(event.clientX - pointerDrag.startX, event.clientY - pointerDrag.startY);
+    if (distance < 8 && !pointerDrag.active) return;
+    pointerDrag.active = true;
+    card.classList.add("is-dragging");
+    event.preventDefault();
+  });
+  const finishPointerDrag = (event) => {
+    if (!pointerDrag || pointerDrag.id !== event.pointerId) return;
+    const wasActive = pointerDrag.active;
+    pointerDrag = null;
+    card.classList.remove("is-dragging");
+    try {
+      card.releasePointerCapture(event.pointerId);
+    } catch {}
+    if (!wasActive) return;
+    suppressNextClick = true;
+    event.preventDefault();
+    event.stopPropagation();
+    const target = castDropTargetAt(event.clientX, event.clientY);
+    if (target) activateCastMemberFromDrop(castIndex, target.options);
+  };
+  card.addEventListener("pointerup", finishPointerDrag);
+  card.addEventListener("pointercancel", finishPointerDrag);
+  card.addEventListener("click", (event) => {
+    if (!suppressNextClick) return;
+    suppressNextClick = false;
+    event.preventDefault();
+    event.stopPropagation();
+  }, true);
+  card.addEventListener("dblclick", (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    toggleCastMember();
+  });
+}
+
 function castIndexFromDrag(event) {
   const custom = event.dataTransfer?.getData("application/x-ainimation-cast-index");
   if (custom !== "") return Number(custom);
@@ -2007,7 +2094,7 @@ function renderFilmPlan(plan) {
             ? `<b class="cast-member-kind">${escapeHtml(member.mediaType || "asset")}</b>`
             : "";
       return `
-      <article class="cast-member ${member.imported ? "imported-member" : ""} ${member.onStage !== false ? "is-on-stage" : ""}" data-media-type="${escapeHtml(member.mediaType || "generated")}" data-cast-index="${index}" role="button" tabindex="0" draggable="true" aria-pressed="${member.onStage !== false}">
+      <article class="cast-member ${member.imported ? "imported-member" : ""} ${member.onStage !== false ? "is-on-stage" : ""}" data-media-type="${escapeHtml(member.mediaType || "generated")}" data-cast-index="${index}" role="button" tabindex="0" draggable="false" aria-pressed="${member.onStage !== false}">
         ${media}
         <span>${String(index + 1).padStart(2, "0")}</span>
         <div>
@@ -2019,8 +2106,8 @@ function renderFilmPlan(plan) {
     }).join("") : `<p class="cast-empty-state">Import cast members to begin</p>`;
 
     castBin.querySelectorAll("[data-cast-index]").forEach((item) => {
+      const castIndex = Number(item.dataset.castIndex);
       const toggleCastMember = () => {
-        const castIndex = Number(item.dataset.castIndex);
         const nextPlan = currentPlan();
         if (!Number.isInteger(castIndex) || !nextPlan.cast?.[castIndex]?.src) return;
         const wasSelected = nextPlan.cast[castIndex].onStage !== false;
@@ -2052,6 +2139,7 @@ function renderFilmPlan(plan) {
       item.addEventListener("dragend", () => {
         item.classList.remove("is-dragging");
       });
+      initCastPointerDrag(item, castIndex, toggleCastMember);
     });
   }
 
@@ -2129,7 +2217,11 @@ function renderFilmPlan(plan) {
     scoreGrid.innerHTML = `
       <div class="director-score">
         <div class="score-tools" aria-label="Timeline transport">
-          <button class="score-play-top" type="button" data-score-play aria-label="Play timeline" aria-pressed="false">▶</button>
+          <div class="score-play-cluster" role="group" aria-label="Timeline range controls">
+            <button class="score-bound-button" type="button" data-score-bound="start" aria-label="Go to start">|←</button>
+            <button class="score-play-top" type="button" data-score-play aria-label="Play timeline" aria-pressed="false">▶</button>
+            <button class="score-bound-button" type="button" data-score-bound="end" aria-label="Go to end">→|</button>
+          </div>
           <div class="score-transport" role="group" aria-label="Timeline frame controls">
             <button type="button" data-score-step="prev" aria-label="Previous keyframe">←</button>
             <div class="score-fps-stepper" aria-label="Timeline playback speed">
@@ -2495,7 +2587,7 @@ function exportStageVideo() {
 function makeExportPackage(plan) {
   return {
     package: "Admira Player Ready",
-    version: "AiDirector v2026.05.20 r14",
+    version: "AiDirector v2026.05.20 r15",
     includeMetadata: Boolean(includeMetadata?.checked),
     formats: {
       video: ["MP4", "MOV", "ProRes", "4K/8K", "PP Solving"],

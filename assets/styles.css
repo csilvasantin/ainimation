@@ -2349,6 +2349,10 @@ h2 {
   transform: scale(0.96);
 }
 
+body.is-cast-pointer-dragging .director-cast-window {
+  pointer-events: none;
+}
+
 .director-cast-window .cast-member.is-on-stage {
   box-shadow: inset 0 0 0 2px rgba(166, 255, 101, 0.82), 0 0 22px rgba(166, 255, 101, 0.18);
 }
@@ -4117,6 +4121,13 @@ body.studio-entered {
   padding: 4px 5px;
 }
 
+.score-play-cluster {
+  display: grid;
+  gap: 2px;
+  grid-template-columns: 22px 28px 22px;
+  justify-content: center;
+}
+
 .score-fps-stepper {
   align-items: center;
   display: grid;
@@ -4152,7 +4163,8 @@ body.studio-entered {
 }
 
 .score-transport button,
-.score-play-top {
+.score-play-top,
+.score-bound-button {
   align-items: center;
   appearance: none;
   background: linear-gradient(180deg, #ffffff, #d6dce7);
@@ -4178,8 +4190,14 @@ body.studio-entered {
   width: 28px;
 }
 
+.score-bound-button {
+  font-size: 0.58rem;
+  width: 22px;
+}
+
 .score-transport button:hover,
-.score-play-top:hover {
+.score-play-top:hover,
+.score-bound-button:hover {
   background: linear-gradient(180deg, #ffffff, #c8d7ef);
   color: #233047;
 }
