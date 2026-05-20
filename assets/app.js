@@ -1447,6 +1447,23 @@ function initScoreLabelEditing() {
 }
 
 function initTimelineAudioMute() {
+  const muteAllButton = scoreGrid.querySelector("[data-audio-mute-all]");
+  muteAllButton?.addEventListener("click", (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    const plan = currentPlan();
+    const audioIndexes = (plan.cast || [])
+      .map((member, index) => ({ member, index }))
+      .filter(({ member }) => member.imported && member.src && member.onStage !== false && memberHasAudio(member));
+    if (!audioIndexes.length) return;
+    const shouldMute = !audioIndexes.every(({ member }) => Boolean(member.muted));
+    audioIndexes.forEach(({ index }) => {
+      plan.cast[index] = { ...plan.cast[index], muted: shouldMute };
+    });
+    saveFilmPlan(plan);
+    renderFilmPlan(plan);
+    syncStageToFrame(currentTimelineFrame(), false);
+  });
   scoreGrid.querySelectorAll("[data-audio-mute][data-cast-index]").forEach((button) => {
     button.addEventListener("pointerdown", (event) => event.stopPropagation());
     button.addEventListener("click", (event) => {
@@ -2036,6 +2053,7 @@ function initCastPointerDrag(card, castIndex, toggleCastMember) {
   let pointerDrag = null;
   let suppressNextClick = false;
   card.addEventListener("pointerdown", (event) => {
+    if (event.target.closest(".cast-member img, .cast-member video, .cast-member-kind")) return;
     if (
       event.button !== 0 ||
       event.target.closest("input, textarea, [contenteditable='true']") ||
@@ -2185,7 +2203,7 @@ function renderFilmPlan(plan) {
             ? `<b class="cast-member-kind">${escapeHtml(member.mediaType || "asset")}</b>`
             : "";
       return `
-      <article class="cast-member ${member.imported ? "imported-member" : ""} ${member.onStage !== false ? "is-on-stage" : ""}" data-media-type="${escapeHtml(member.mediaType || "generated")}" data-cast-index="${index}" role="button" tabindex="0" draggable="false" aria-pressed="${member.onStage !== false}">
+      <article class="cast-member ${member.imported ? "imported-member" : ""} ${member.onStage !== false ? "is-on-stage" : ""}" data-media-type="${escapeHtml(member.mediaType || "generated")}" data-cast-index="${index}" role="button" tabindex="0" draggable="true" aria-pressed="${member.onStage !== false}">
         ${media}
         <span>${String(index + 1).padStart(2, "0")}</span>
         <div>
@@ -2283,6 +2301,8 @@ function renderFilmPlan(plan) {
     const displayFrames = timelineDisplayFrames(totalFrames, timelineZoom);
     const frameMarks = Array.from({ length: 9 }, (_, index) => Math.round(1 + (displayFrames - 1) * (index / 8)));
     const timelineMarkers = loadTimelineMarkers(totalFrames);
+    const timelineAudioMembers = importedTimelineMembers.filter((member) => memberHasAudio(member));
+    const allTimelineAudioMuted = timelineAudioMembers.length > 0 && timelineAudioMembers.every((member) => Boolean(member.muted));
     const scoreChannels = [
       ...importedTimelineMembers.map((member) => ({
         name: member.name,
@@ -2334,7 +2354,12 @@ function renderFilmPlan(plan) {
             <button type="button" data-score-zoom-step="up" aria-label="Make timeline smaller">+</button>
           </div>
         </div>
-        <div class="score-member-title">Member</div>
+        <div class="score-member-title">
+          <span>Member</span>
+          <button class="score-audio-mute-all ${allTimelineAudioMuted ? "is-muted" : ""}" type="button" data-audio-mute-all aria-pressed="${allTimelineAudioMuted ? "true" : "false"}" aria-label="${allTimelineAudioMuted ? "Unmute all timeline audio" : "Mute all timeline audio"}">
+            <i class="score-audio-icon" aria-hidden="true"></i>
+          </button>
+        </div>
         <div class="score-ruler">
           ${frameMarks.map((frame) => `<span style="left:${displayFrames <= 1 ? 0 : ((frame - 1) / (displayFrames - 1)) * 100}%">${frame}</span>`).join("")}
           <div class="score-marker-layer" aria-label="Timeline marks">
@@ -2800,7 +2825,7 @@ async function exportStageVideo() {
 function makeExportPackage(plan) {
   return {
     package: "Admira Player Ready",
-    version: "AiDirector v2026.05.20 r21",
+    version: "AiDirector v2026.05.20 r22",
     includeMetadata: Boolean(includeMetadata?.checked),
     formats: {
       video: ["MP4", "MOV", "ProRes", "4K/8K", "PP Solving"],
