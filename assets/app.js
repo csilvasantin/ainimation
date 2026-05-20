@@ -1122,11 +1122,7 @@ const admiraStockEndpoints = [
   "https://admira.studio/api/stock?limit=1&sort=latest",
 ];
 const admiraStockExportEndpoints = [
-  "https://pixer-eleven.csilvasantin.workers.dev/stock",
-  "https://pixer-eleven.csilvasantin.workers.dev/stock/upload",
-  "https://pixer-eleven.csilvasantin.workers.dev/stock/create",
-  "https://www.admira.studio/api/stock",
-  "https://www.admira.studio/api/stock/upload",
+  "https://pixer-eleven.csilvasantin.workers.dev/stock/publish",
 ];
 let activeDirectorWindow = null;
 let draggedDirectorWindow = null;
@@ -3159,25 +3155,45 @@ async function importLatestAdmiraStock() {
   }
 }
 
+function blobToBase64(blob) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      const res = String(reader.result || "");
+      const comma = res.indexOf(",");
+      resolve(comma >= 0 ? res.slice(comma + 1) : res);
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(blob);
+  });
+}
+
 async function postStageAnimationToStock(endpoint, blob, metadata) {
-  const fileName = `${planSlug(metadata.project)}-animation.webm`;
-  const formData = new FormData();
-  formData.append("file", blob, fileName);
-  formData.append("title", metadata.title);
-  formData.append("name", metadata.title);
-  formData.append("type", "animation");
-  formData.append("mediaType", "animation");
-  formData.append("mimeType", blob.type || "video/webm");
-  formData.append("fileName", fileName);
-  formData.append("metadata", JSON.stringify(metadata));
+  // El worker pixer-eleven /stock/publish espera JSON con base64 (o sourceUrl)
+  // y un type válido (audio|music|image|video). La animación se publica como
+  // "video", motor "ainimation". Aparece directamente en admira.studio/stock.
+  const base64 = await blobToBase64(blob);
+  const fpsTxt = metadata.fps ? `${metadata.fps} fps` : "";
+  const framesTxt = metadata.durationFrames ? `${metadata.durationFrames} frames` : "";
+  const payload = {
+    type: "video",
+    motor: "ainimation",
+    title: metadata.title || "ainimation",
+    prompt: metadata.source || "ainimation.studio AiDirector",
+    comment: [fpsTxt, framesTxt].filter(Boolean).join(" · ") || null,
+    mime: blob.type || "video/webm",
+    base64,
+  };
   const response = await fetch(endpoint, {
     method: "POST",
-    headers: { Accept: "application/json" },
-    body: formData,
+    headers: { "Content-Type": "application/json", Accept: "application/json" },
+    body: JSON.stringify(payload),
   });
-  if (!response.ok) throw new Error(`${response.status} ${response.statusText}`);
-  const contentType = response.headers.get("content-type") || "";
-  return contentType.includes("application/json") ? response.json() : { ok: true };
+  if (!response.ok) {
+    const t = await response.text().catch(() => "");
+    throw new Error(`${response.status} ${response.statusText} ${t.slice(0, 120)}`);
+  }
+  return response.json();
 }
 
 async function exportStageToAdmiraStock() {
