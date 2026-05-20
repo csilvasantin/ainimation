@@ -185,7 +185,7 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
 
     try {
       document.querySelector("[data-stock-import]")?.click();
-      await new Promise((resolve) => window.setTimeout(resolve, 80));
+      await new Promise((resolve) => window.setTimeout(resolve, window.__USE_LIVE_STOCK__ ? 3000 : 80));
       const plan = JSON.parse(localStorage.getItem("ainimation-film-plan") || "{}");
       const member = (plan.cast || []).find((item) => item.stock);
       const card = member
