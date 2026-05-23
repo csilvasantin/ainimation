@@ -3339,6 +3339,11 @@ body.is-cast-pointer-dragging .director-cast-window {
   color: #171a1f;
 }
 
+.home-page #work {
+  background: #f8f7f2;
+  color: #171a1f;
+}
+
 .home-section-head {
   display: grid;
   gap: 18px;
