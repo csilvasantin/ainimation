@@ -1386,6 +1386,7 @@ const scoreGrid = document.querySelector("#scoreGrid");
 const stageScript = document.querySelector("#stageScript");
 const aiCueList = document.querySelector("#aiCueList");
 const addSceneButton = document.querySelector("#addScene");
+const productionPassButton = document.querySelector("#productionPass");
 const copyMarkdownButton = document.querySelector("#copyMarkdown");
 const downloadJsonButton = document.querySelector("#downloadJson");
 const exportModal = document.querySelector("#exportModal");
@@ -1529,11 +1530,65 @@ function makeCast(film) {
   ];
 }
 
+function buildProductionManifest(film, scenes = []) {
+  const format = String(film.format || "").toLowerCase();
+  const longForm = /feature|22|90/.test(`${film.format} ${film.duration}`.toLowerCase());
+  const musicLed = /music/.test(format);
+  const launchLed = /launch|brand/.test(format) || /manifesto/.test(String(film.genre || "").toLowerCase());
+  const shotCount = scenes.length || sceneCounts[film.duration] || 5;
+  const frameBudget = shotCount * (longForm ? 96 : 48);
+  return {
+    generatedAt: new Date().toISOString(),
+    route: [
+      {
+        lane: "Image",
+        job: "Lock reusable cast references, world plates, style frames, and editable matte layers before video generation.",
+      },
+      {
+        lane: "Video",
+        job: `Generate ${shotCount} controlled clips from score rows with handles, camera notes, and subject continuity checks.`,
+      },
+      {
+        lane: "Sound",
+        job: musicLed
+          ? "Build the score first: beat grid, hook moments, stems, stingers, and visual cue points."
+          : "Create ambience, motif, transition stingers, and sparse timed voice takes attached to frames.",
+      },
+      {
+        lane: "Edit",
+        job: `Assemble a ${frameBudget}-frame working cut with JSON timing, prompt logs, markdown brief, and review notes.`,
+      },
+    ],
+    continuityRules: [
+      `Keep ${film.protagonist} visually consistent across all cast references and generated clips.`,
+      `Treat ${film.world} as a reusable stage with weather, light, prop, and camera states.`,
+      `Every generated asset must map back to one score row and one behavior function.`,
+      "Do not accept a clip unless it has edit handles and a clear first/last frame description.",
+    ],
+    deliverables: [
+      "Director board",
+      "Cast bible",
+      "Shot prompts",
+      "Timing map",
+      "Voice/music cue sheet",
+      "Production JSON",
+      launchLed ? "Campaign cutdown map" : "Review cut checklist",
+    ],
+    risks: [
+      "Identity drift between shots",
+      "Unusable clips without handles",
+      "Audio not locked to score rows",
+      "Prompts that describe mood but not behavior",
+    ],
+  };
+}
+
 function buildFilmPlan(extraScene = false) {
   const film = collectFilmData();
   const baseCount = sceneCounts[film.duration] || 5;
   const previous = loadFilmPlan();
   const count = extraScene ? Math.min((previous?.scenes?.length || baseCount) + 1, sceneBeats.length) : baseCount;
+  const scenes = makeScenes(film, count);
   return {
     ...film,
     createdAt: new Date().toISOString(),
@@ -1547,7 +1602,8 @@ function buildFilmPlan(extraScene = false) {
     },
     cast: makeCast(film),
     stageItems: [],
-    scenes: makeScenes(film, count),
+    scenes,
+    productionManifest: buildProductionManifest(film, scenes),
   };
 }
 
@@ -2108,6 +2164,10 @@ function normalizeFilmPlan(plan) {
     pipeline: {
       ...fallback.pipeline,
       ...(plan.pipeline || {}),
+    },
+    productionManifest: {
+      ...buildProductionManifest(plan, plan.scenes || fallback.scenes),
+      ...(plan.productionManifest || {}),
     },
     cast: plan.cast || makeCast(plan),
     stageItems: Array.isArray(plan.stageItems)
@@ -2806,6 +2866,21 @@ function renderFilmPlan(plan) {
   filmTreatment.innerHTML = `
     <p><strong>Authoring brief</strong><br>${plan.treatment}</p>
     <p><strong>Interaction theme</strong><br>${plan.theme}</p>
+    ${plan.productionManifest ? `
+      <div class="production-passport">
+        <strong>Production pass</strong>
+        <div class="passport-grid">
+          ${(plan.productionManifest.route || []).map((item) => `
+            <article>
+              <span>${escapeHtml(item.lane)}</span>
+              <p>${escapeHtml(item.job)}</p>
+            </article>
+          `).join("")}
+        </div>
+        <p><strong>Continuity rules</strong><br>${(plan.productionManifest.continuityRules || []).map(escapeHtml).join(" · ")}</p>
+        <p><strong>Deliverables</strong><br>${(plan.productionManifest.deliverables || []).map(escapeHtml).join(" · ")}</p>
+      </div>
+    ` : ""}
   `;
 
   pipelineGrid.innerHTML = [
@@ -3128,6 +3203,18 @@ function toMarkdown(plan) {
     `- **AI Video:** ${plan.pipeline.video}`,
     `- **AI Music:** ${plan.pipeline.music}`,
     `- **AI Voiceover:** ${plan.pipeline.voice}`,
+    "",
+    `## Production Pass`,
+    ...(plan.productionManifest?.route || []).map((item) => `- **${item.lane}:** ${item.job}`),
+    "",
+    `### Continuity Rules`,
+    ...(plan.productionManifest?.continuityRules || []).map((rule) => `- ${rule}`),
+    "",
+    `### Deliverables`,
+    ...(plan.productionManifest?.deliverables || []).map((item) => `- ${item}`),
+    "",
+    `### Risks`,
+    ...(plan.productionManifest?.risks || []).map((risk) => `- ${risk}`),
     "",
     `## Cast`,
     ...(plan.cast || makeCast(plan)).map((member) => `- **${member.name}:** ${member.prompt}`),
@@ -3510,6 +3597,7 @@ function makeExportPackage(plan) {
       controls: ["Play Video", "Play Animation", "Preview Audio", "View Image Sequence", "Read Script"],
     },
     project: plan,
+    productionManifest: plan.productionManifest || buildProductionManifest(plan, plan.scenes || []),
     markdown: toMarkdown(plan),
   };
 }
@@ -5366,6 +5454,17 @@ if (filmForm) {
     const plan = buildFilmPlan(true);
     saveFilmPlan(plan);
     renderFilmPlan(plan);
+    playUiTick("stage");
+  });
+
+  productionPassButton?.addEventListener("click", () => {
+    const plan = currentPlan();
+    plan.productionManifest = buildProductionManifest(plan, plan.scenes || []);
+    saveFilmPlan(plan);
+    renderFilmPlan(plan);
+    document.querySelector('[data-open-window="inspector"]')?.click();
+    productionPassButton.textContent = "Pass ready";
+    window.setTimeout(() => { productionPassButton.textContent = "Production pass"; }, 1400);
     playUiTick("stage");
   });
 

@@ -1157,6 +1157,41 @@ h2 {
   margin: 0;
 }
 
+.production-passport {
+  border-top: 1px solid rgba(220, 239, 255, 0.14);
+  display: grid;
+  gap: 10px;
+  margin-top: 14px;
+  padding-top: 14px;
+}
+
+.passport-grid {
+  display: grid;
+  gap: 8px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.passport-grid article {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(220, 239, 255, 0.12);
+  border-radius: 8px;
+  padding: 10px;
+}
+
+.passport-grid span {
+  color: #c8ff5f;
+  display: block;
+  font-size: 0.72rem;
+  font-weight: 900;
+  letter-spacing: 0;
+  margin-bottom: 4px;
+  text-transform: uppercase;
+}
+
+.passport-grid p {
+  margin: 0;
+}
+
 .director-shell.retro-director {
   background: #b9bec8;
   border: 1px solid #11151b;

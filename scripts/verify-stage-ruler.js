@@ -1371,8 +1371,8 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
   const missingLabels = result.labels.length !== expectedYLabels || result.xLabels.length !== expectedXLabels;
   const hasWrongRotation = result.labels.some((label) => label.transform === "matrix(0, 1, -1, 0, 0, 0)");
 
-  if (!result.stylesheetHref.includes("aidirector-20260520-r46")) {
-    throw new Error(`Expected aidirector-20260520-r46 stylesheet cache key, got ${result.stylesheetHref}`);
+  if (!result.stylesheetHref.includes("aidirector-20260530-r47")) {
+    throw new Error(`Expected aidirector-20260530-r47 stylesheet cache key, got ${result.stylesheetHref}`);
   }
 
   if (
@@ -1399,7 +1399,7 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
   }
 
   if (
-    result.brand.text !== "◆ AiDirector v.2026.05.20 r46" ||
+    result.brand.text !== "◆ AiDirector v.2026.05.30 r47" ||
     result.brand.rightGap > 20 ||
     result.brand.menuHeight > 50 ||
     result.brand.toolsTitlebarHeight > 31
