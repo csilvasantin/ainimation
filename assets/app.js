@@ -4109,6 +4109,86 @@ function stockMemberFromItem(item, endpoint, existingCount, timelineMemberCount)
   };
 }
 
+function stockMemberFromImportParams(params, existingCount, timelineMemberCount) {
+  const src = params.get("admiraStockUrl") || "";
+  if (!src) return null;
+  const rawType = (params.get("admiraStockType") || "").toLowerCase();
+  const mediaType = rawType === "audio" || rawType === "music"
+    ? "audio"
+    : rawType === "video" || rawType === "animation"
+      ? "video"
+      : rawType === "image"
+        ? "image"
+        : stockMediaType({
+    type: rawType,
+    mime: params.get("admiraStockMime") || "",
+  }, src);
+  const width = Number(params.get("admiraStockWidth") || 0) || null;
+  const height = Number(params.get("admiraStockHeight") || 0) || null;
+  const durationSeconds = Number(params.get("admiraStockDuration") || 0) || null;
+  const rawName = params.get("admiraStockTitle") || params.get("admiraStockId") || src.split("/").pop() || "Admira Stock asset";
+  const stockPrompt = params.get("admiraStockPrompt") || "";
+  return {
+    role: "Stock",
+    name: `${cleanMemberName(rawName)} ${String(existingCount + 1).padStart(2, "0")}`,
+    type: memberTypeLabel(mediaType),
+    mediaType,
+    fileName: rawName,
+    src,
+    imported: true,
+    stock: true,
+    source: "admira.studio Stock direct",
+    sourceUrl: src,
+    sourceWidth: width,
+    sourceHeight: height,
+    sourceDuration: durationSeconds,
+    thumbnail: params.get("admiraStockThumbnail") || "",
+    stockPrompt,
+    stockFingerprint: `admira stock direct ${rawType} ${rawName} ${stockPrompt}`.toLowerCase(),
+    onStage: false,
+    startFrame: 1 + timelineMemberCount * 24,
+    durationFrames: 96,
+    durationPending: isTimedMediaType(mediaType),
+    aspectRatio: width && height ? width / height : null,
+    aspectPending: isVisualMediaType(mediaType) && !(width && height),
+    prompt: "Imported directly from admira.studio Stock. Add to Stage from Cast to schedule it on the Timeline.",
+  };
+}
+
+function importAdmiraStockAssetFromQuery() {
+  const params = new URLSearchParams(window.location.search);
+  if (!params.has("admiraStockUrl")) return false;
+  const plan = currentPlan();
+  const existing = plan.cast || makeCast(plan);
+  const sourceUrl = params.get("admiraStockUrl") || "";
+  if (existing.some((member) => member.sourceUrl === sourceUrl || member.src === sourceUrl)) {
+    document.querySelector('[data-open-window="cast"]')?.click();
+    return true;
+  }
+  const timelineMemberCount = existing.filter((member) => member.imported && member.src).length;
+  const member = stockMemberFromImportParams(params, existing.length, timelineMemberCount);
+  if (!member) return false;
+  composeStockMembersIntoPlan([member]);
+  updateMemberMetadataFromMedia(existing.length, member.src, member.mediaType);
+  try {
+    const url = new URL(window.location.href);
+    [
+      "admiraStockUrl",
+      "admiraStockType",
+      "admiraStockTitle",
+      "admiraStockId",
+      "admiraStockPrompt",
+      "admiraStockThumbnail",
+      "admiraStockWidth",
+      "admiraStockHeight",
+      "admiraStockDuration",
+      "admiraStockMime",
+    ].forEach((key) => url.searchParams.delete(key));
+    window.history.replaceState({}, "", `${url.pathname}${url.search}${url.hash}`);
+  } catch {}
+  return true;
+}
+
 function composeImportedStockMembers(plan, startIndex, count) {
   const layouts = [
     { x: 10, y: 14, w: 42, h: 38, maxW: 42, maxH: 38 },
@@ -5232,6 +5312,7 @@ if (filmForm) {
   renderFilmPlan(initialPlan);
   initStageTools();
   window.requestAnimationFrame(() => window.requestAnimationFrame(renderStageRulers));
+  importAdmiraStockAssetFromQuery();
 
   fileNewButton?.addEventListener("click", () => {
     const plan = buildFilmPlan(false);
