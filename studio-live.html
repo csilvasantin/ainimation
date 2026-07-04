@@ -43,6 +43,13 @@
       .spinner { width:15px; height:15px; border:2px solid var(--line); border-top-color:var(--cyan); border-radius:50%; animation:spin 1s linear infinite; }
       @keyframes spin { to { transform:rotate(360deg); } }
       video { width:100%; border-radius:12px; display:block; background:#000; box-shadow:0 16px 50px rgba(0,0,0,.5); }
+      .gallery-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(210px,1fr)); gap:1rem; }
+      .gcard { background:var(--panel); border:1px solid var(--line); border-radius:12px; overflow:hidden; }
+      .gcard video { border-radius:0; box-shadow:none; aspect-ratio:16/9; object-fit:cover; }
+      .gcard .gmeta { display:flex; align-items:center; gap:.5rem; padding:.55rem .7rem; }
+      .gcard .gtitle { font-size:.82rem; color:var(--ink); flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+      .gcard .gcopy { background:transparent; color:var(--muted); border:1px solid var(--line); border-radius:6px; padding:.2rem .5rem; font-size:.72rem; font-weight:600; cursor:pointer; flex:0 0 auto; }
+      .gcard .gcopy.done { color:var(--lime); border-color:var(--lime); }
       .stage-title { font-size:.78rem; text-transform:uppercase; letter-spacing:.6px; color:var(--muted); }
       .empty { color:var(--muted); font-size:.9rem; padding:3rem 1rem; text-align:center; border:1px dashed var(--line); border-radius:12px; }
       .err { color:#ff8a8a; font-size:.85rem; margin-top:.8rem; white-space:pre-wrap; }
@@ -125,6 +132,11 @@
         <div id="output"><div class="empty">Your production will play here.</div></div>
       </div>
     </div>
+
+    <section id="gallery" hidden>
+      <p class="stage-title" style="margin:2rem 0 .8rem">🎞️ Recent productions</p>
+      <div id="galleryGrid" class="gallery-grid"></div>
+    </section>
 
     <script>
       const WORKER = 'https://ainimation-studio.csilvasantin.workers.dev';
@@ -224,6 +236,7 @@
             output.innerHTML =
               `<video controls autoplay muted src="${url}?t=${Date.now()}"></video>
                <a class="dl" href="${url}" download>Download mp4</a>`;
+            loadGallery();
           } else if (s.status === 'error') {
             clearInterval(poll);
             fail(s.error || 'Render error.');
@@ -237,6 +250,36 @@
         output.innerHTML = '<div class="empty">No cut yet — fix the brief and try again.</div>';
       }
       produceBtn.onclick = produce;
+
+      // Gallery of recent productions — permanent R2 links, shareable.
+      const gallery = document.getElementById('gallery');
+      const galleryGrid = document.getElementById('galleryGrid');
+      async function loadGallery() {
+        try {
+          const d = await (await fetch(WORKER + '/api/gallery')).json();
+          const items = d.items || [];
+          if (!items.length) { gallery.hidden = true; return; }
+          galleryGrid.innerHTML = items.map((it) => {
+            const url = WORKER + it.video;
+            const t = (it.title || 'Untitled').replace(/</g, '&lt;');
+            return `<div class="gcard">
+              <video muted preload="metadata" src="${url}#t=1" onclick="this.paused?this.play():this.pause()"></video>
+              <div class="gmeta"><span class="gtitle" title="${t}">${t}</span>
+                <button class="gcopy" data-url="${url}">🔗 Copy</button></div>
+            </div>`;
+          }).join('');
+          gallery.hidden = false;
+          galleryGrid.querySelectorAll('.gcopy').forEach((b) => {
+            b.onclick = async () => {
+              try { await navigator.clipboard.writeText(b.dataset.url); }
+              catch { const t = document.createElement('textarea'); t.value = b.dataset.url; document.body.appendChild(t); t.select(); document.execCommand('copy'); t.remove(); }
+              b.textContent = '✓ Copied'; b.classList.add('done');
+              setTimeout(() => { b.textContent = '🔗 Copy'; b.classList.remove('done'); }, 1600);
+            };
+          });
+        } catch { /* gallery is best-effort */ }
+      }
+      loadGallery();
     </script>
   </body>
 </html>
