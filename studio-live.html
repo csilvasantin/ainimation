@@ -288,7 +288,12 @@
             const url = WORKER + s.video;
             output.innerHTML =
               `<video controls autoplay muted src="${url}?t=${Date.now()}"></video>
-               <a class="dl" href="${url}" download>Download mp4</a>`;
+               <div class="row" style="margin-top:.6rem">
+                 <a class="dl" href="${url}" download style="margin:0">⬇ Download mp4</a>
+                 <button class="ghost" id="shareOut" type="button">📤 Share</button>
+               </div>`;
+            const so = document.getElementById('shareOut');
+            if (so) so.onclick = () => shareOrCopy(url, (readBrief().title || 'AInimation Studio'), so);
             loadGallery();
           } else if (s.status === 'error') {
             clearInterval(poll);
@@ -305,6 +310,17 @@
       produceBtn.onclick = produce;
 
       // Gallery of recent productions — permanent R2 links, shareable.
+      // Native share (Web Share API) with copy-to-clipboard fallback.
+      async function shareOrCopy(url, title, btn) {
+        if (navigator.share) {
+          try { await navigator.share({ title: title || 'AInimation Studio', url }); return; }
+          catch (e) { if (e && e.name === 'AbortError') return; }
+        }
+        try { await navigator.clipboard.writeText(url); }
+        catch { const t = document.createElement('textarea'); t.value = url; document.body.appendChild(t); t.select(); document.execCommand('copy'); t.remove(); }
+        if (btn) { const o = btn.textContent; btn.textContent = '✓ Copied'; btn.classList.add('done'); setTimeout(() => { btn.textContent = o; btn.classList.remove('done'); }, 1600); }
+      }
+
       const gallery = document.getElementById('gallery');
       const galleryGrid = document.getElementById('galleryGrid');
       async function loadGallery() {
@@ -318,17 +334,12 @@
             return `<div class="gcard">
               <video muted preload="metadata" src="${url}#t=1" onclick="this.paused?this.play():this.pause()"></video>
               <div class="gmeta"><span class="gtitle" title="${t}">${t}</span>
-                <button class="gcopy" data-url="${url}">🔗 Copy</button></div>
+                <button class="gcopy" data-url="${url}" data-title="${t}">📤 Share</button></div>
             </div>`;
           }).join('');
           gallery.hidden = false;
           galleryGrid.querySelectorAll('.gcopy').forEach((b) => {
-            b.onclick = async () => {
-              try { await navigator.clipboard.writeText(b.dataset.url); }
-              catch { const t = document.createElement('textarea'); t.value = b.dataset.url; document.body.appendChild(t); t.select(); document.execCommand('copy'); t.remove(); }
-              b.textContent = '✓ Copied'; b.classList.add('done');
-              setTimeout(() => { b.textContent = '🔗 Copy'; b.classList.remove('done'); }, 1600);
-            };
+            b.onclick = () => shareOrCopy(b.dataset.url, b.dataset.title, b);
           });
         } catch { /* gallery is best-effort */ }
       }
