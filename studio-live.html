@@ -125,6 +125,7 @@
         <div class="row">
           <button id="produce" type="button">Produce ▶</button>
           <button class="ghost" id="previewBtn" type="button">👁 Preview script</button>
+          <button class="ghost" id="shareBtn" type="button">🔗 Share brief</button>
           <span class="stage" id="stage"><span class="spinner"></span><span id="stageText">Working…</span></span>
         </div>
         <pre id="scriptPreview" hidden></pre>
@@ -213,6 +214,38 @@
         scriptPreview.textContent = `🗣️ ${voiceSel.value} · ${b.lang}\n\n${lines.join('.\n')}.`;
         scriptPreview.hidden = false;
       };
+
+      // ── Save / share the brief: encode it into the URL, reopen pre-filled ──
+      function applyBrief(b) {
+        if (!b || typeof b !== 'object') return;
+        const set = (id, v) => { const el = document.getElementById(id); if (el != null && v != null) el.value = v; };
+        set('title', b.title); set('subtitle', b.subtitle); set('closing', b.closing);
+        document.getElementById('narrate').checked = b.narrate !== false;
+        if (b.lang) { langSel.value = b.lang; populateVoices(); }
+        if (b.voice) set('voice', b.voice);
+        if (b.speed != null) set('speed', String(b.speed));
+        if (b.voice_volume != null) set('voiceVolume', String(b.voice_volume));
+        set('music', b.music || '');
+        document.getElementById('backgrounds').checked = b.backgrounds === true;
+        if (b.theme) set('theme', b.theme);
+        if (Array.isArray(b.beats)) {
+          beatsEl.innerHTML = '';
+          b.beats.slice(0, 5).forEach(x => beatRow(x.stat || '', x.label || ''));
+          if (!beatsEl.children.length) beatRow();
+        }
+      }
+      const encodeBrief = b => btoa(encodeURIComponent(JSON.stringify(b)));
+      const decodeBrief = s => { try { return JSON.parse(decodeURIComponent(atob(s))); } catch { return null; } };
+
+      const shareBtn = document.getElementById('shareBtn');
+      shareBtn.onclick = async () => {
+        const link = location.origin + location.pathname + '?b=' + encodeBrief(readBrief());
+        try { await navigator.clipboard.writeText(link); }
+        catch { const t = document.createElement('textarea'); t.value = link; document.body.appendChild(t); t.select(); document.execCommand('copy'); t.remove(); }
+        shareBtn.textContent = '✓ Link copied'; setTimeout(() => shareBtn.textContent = '🔗 Share brief', 1600);
+      };
+      // Pre-fill from a shared link on load.
+      (function () { const p = new URLSearchParams(location.search).get('b'); if (p) { const b = decodeBrief(p); if (b) applyBrief(b); } })();
 
       async function produce() {
         errEl.textContent = '';
