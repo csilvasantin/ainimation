@@ -113,6 +113,14 @@
           </select>
         </label>
         <label class="toggle"><input type="checkbox" id="backgrounds" /> 🖼️ Real image backgrounds (CC0)</label>
+        <label class="toggle" id="themeRow">🎨 Visual theme
+          <select id="theme">
+            <option value="flat-motion-graphics" selected>Dark</option>
+            <option value="minimalist-diagram">Light</option>
+            <option value="clean-professional">Clean</option>
+            <option value="anime-ghibli">Anime</option>
+          </select>
+        </label>
 
         <div class="row">
           <button id="produce" type="button">Produce ▶</button>
@@ -191,6 +199,7 @@
           voice_volume: parseFloat(document.getElementById('voiceVolume').value),
           music: document.getElementById('music').value,
           backgrounds: document.getElementById('backgrounds').checked,
+          theme: document.getElementById('theme').value,
         };
       }
 
