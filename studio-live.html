@@ -31,6 +31,10 @@
       label.toggle input { width:auto; margin:0; cursor:pointer; }
       label.toggle select { margin-left:auto; background:#1a1712; color:var(--fg,#ddd); border:1px solid var(--line); border-radius:6px; padding:.25rem .5rem; font:inherit; cursor:pointer; }
       #scriptPreview { margin-top:.8rem; padding:.7rem .8rem; background:#14110f; border:1px solid var(--line); border-radius:8px; color:var(--muted); font-size:.82rem; white-space:pre-wrap; line-height:1.5; }
+      .tpl-row { display:flex; flex-wrap:wrap; align-items:center; gap:.4rem; margin:.2rem 0 .4rem; }
+      .tpl-label { font-size:.72rem; text-transform:uppercase; letter-spacing:.6px; color:var(--muted); }
+      .tpl { background:#14110f; color:var(--ink); border:1px solid var(--line); border-radius:999px; padding:.3rem .7rem; font-size:.8rem; font-weight:600; cursor:pointer; }
+      .tpl:hover { border-color:var(--lime); color:var(--lime); }
       input { width:100%; background:#24201c; border:1px solid var(--line); color:var(--ink); border-radius:8px; padding:.6rem .7rem; font-size:.95rem; }
       input:focus { outline:none; border-color:var(--lime); }
       .beat { display:grid; grid-template-columns:90px 1fr; gap:.5rem; margin-bottom:.5rem; }
@@ -68,6 +72,13 @@
       <div class="panel">
         <h1>Direct the movie</h1>
         <p class="sub">A brief in, a real 1080p video out — rendered by the engine, zero API keys.</p>
+
+        <div class="tpl-row" id="templates">
+          <span class="tpl-label">Templates:</span>
+          <button class="tpl" data-tpl="pitch" type="button">📊 Pitch</button>
+          <button class="tpl" data-tpl="quote" type="button">💬 Cita</button>
+          <button class="tpl" data-tpl="product" type="button">🖼️ Producto</button>
+        </div>
 
         <label>Title</label>
         <input id="title" maxlength="60" value="AInimation Studio" />
@@ -170,6 +181,20 @@
         beatsEl.appendChild(d);
       }
       seed.forEach(([s, l]) => beatRow(s, l));
+
+      // One-click demo templates → applyBrief() showcases the engine's range.
+      const TEMPLATES = {
+        pitch: { title: 'FocusFlow', subtitle: 'La productividad, medible',
+          beats: [{ stat: '3×', label: 'más foco en los equipos piloto' }, { stat: '12', label: 'integraciones listas' }],
+          chart: 'Antes:40, Después:88', closing: 'Empieza gratis hoy.', theme: 'flat-motion-graphics', music: 'uplift', lang: 'es', narrate: true },
+        quote: { title: 'Inspiración', subtitle: '', beats: [], quote: 'La simplicidad es la máxima sofisticación',
+          image_scene: 'calm ocean horizon', closing: 'Menos, pero mejor.', theme: 'minimalist-diagram', music: 'calm', lang: 'es', narrate: true },
+        product: { title: 'Aurora', subtitle: 'Diseño que se siente', beats: [{ stat: '1', label: 'una pieza, mil detalles' }],
+          image_scene: 'modern product studio soft light', closing: 'Descúbrelo.', theme: 'clean-professional', music: 'calm', lang: 'es', narrate: true },
+      };
+      document.querySelectorAll('.tpl').forEach((b) => {
+        b.onclick = () => { const t = TEMPLATES[b.dataset.tpl]; if (t) applyBrief(t); };
+      });
       document.getElementById('addBeat').onclick = () => { if (beatsEl.children.length < 5) beatRow(); };
 
       // Voices per language — dropdown repopulates on language change.
