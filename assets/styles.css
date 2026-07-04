@@ -5958,3 +5958,8 @@ body.studio-page[data-interface-theme="light"] .score-row-label {
 .engine-cta { margin-top: 2.5rem; display: flex; justify-content: center; }
 #engine .work-card h3 { color: rgb(23, 26, 31); }
 #engine .work-card p { color: rgb(60, 64, 72); }
+
+/* Engine showcase video (first zero-key piece) — added 20260704 */
+.engine-showcase { margin: 2.5rem auto 0; max-width: 900px; }
+.engine-showcase video { width: 100%; display: block; border-radius: 14px; box-shadow: 0 20px 60px rgba(0,0,0,0.45); background: #14110f; }
+.engine-showcase figcaption { margin-top: 0.85rem; text-align: center; font-size: 0.9rem; color: rgba(248,247,242,0.66); }
