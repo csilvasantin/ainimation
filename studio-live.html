@@ -29,6 +29,7 @@
       label { display:block; font-size:.78rem; text-transform:uppercase; letter-spacing:.6px; color:var(--muted); margin:.9rem 0 .3rem; }
       label.toggle { display:flex; align-items:center; gap:.5rem; text-transform:none; letter-spacing:0; font-size:.85rem; color:var(--fg,#ddd); cursor:pointer; margin-top:1rem; }
       label.toggle input { width:auto; margin:0; cursor:pointer; }
+      label.toggle select { margin-left:auto; background:#1a1712; color:var(--fg,#ddd); border:1px solid var(--line); border-radius:6px; padding:.25rem .5rem; font:inherit; cursor:pointer; }
       input { width:100%; background:#24201c; border:1px solid var(--line); color:var(--ink); border-radius:8px; padding:.6rem .7rem; font-size:.95rem; }
       input:focus { outline:none; border-color:var(--lime); }
       .beat { display:grid; grid-template-columns:90px 1fr; gap:.5rem; margin-bottom:.5rem; }
@@ -71,9 +72,15 @@
         <button class="ghost" id="addBeat" type="button">+ add beat</button>
 
         <label>Closing line</label>
-        <input id="closing" maxlength="90" value="From intention to editable production." />
+        <input id="closing" maxlength="90" value="De la intención a una producción editable." />
 
         <label class="toggle"><input type="checkbox" id="narrate" checked /> 🎙️ Voiceover (zero-key, Piper)</label>
+        <label class="toggle" id="langRow">🌐 Voice language
+          <select id="lang">
+            <option value="es" selected>Castellano</option>
+            <option value="en">English</option>
+          </select>
+        </label>
 
         <div class="row">
           <button id="produce" type="button">Produce ▶</button>
@@ -96,9 +103,9 @@
       const WORKER = 'https://ainimation-studio.csilvasantin.workers.dev';
       const beatsEl = document.getElementById('beats');
       const seed = [
-        ['12', 'production pipelines, one AI Director'],
-        ['$0.00', 'zero-key: Piper + open archives + Remotion'],
-        ['1080p', 'real rendered video, not slides'],
+        ['12', 'pipelines de producción, un solo Director de IA'],
+        ['0 €', 'sin claves: Piper, archivos abiertos y Remotion'],
+        ['1080p', 'vídeo renderizado de verdad, no diapositivas'],
       ];
       function beatRow(stat = '', label = '') {
         const d = document.createElement('div');
@@ -129,6 +136,7 @@
           beats,
           closing: document.getElementById('closing').value.trim(),
           narrate: document.getElementById('narrate').checked,
+          lang: document.getElementById('lang').value,
         };
 
         produceBtn.disabled = true;
