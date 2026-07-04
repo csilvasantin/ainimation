@@ -5953,3 +5953,8 @@ body.studio-page[data-interface-theme="light"] .score-row-label {
   box-sizing: border-box;
   min-width: 0;
 }
+
+/* Engine section CTA (OpenMontage) — added 20260704 */
+.engine-cta { margin-top: 2.5rem; display: flex; justify-content: center; }
+#engine .work-card h3 { color: rgb(23, 26, 31); }
+#engine .work-card p { color: rgb(60, 64, 72); }
