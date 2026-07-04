@@ -82,6 +82,11 @@
         <label>Closing line</label>
         <input id="closing" maxlength="90" value="De la intención a una producción editable." />
 
+        <label>Quote scene · optional</label>
+        <input id="quote" maxlength="160" placeholder="una cita destacada…" />
+        <label>Full-screen image scene · optional (theme words)</label>
+        <input id="imageScene" maxlength="60" placeholder="p. ej. mountain sunrise" />
+
         <label class="toggle"><input type="checkbox" id="narrate" checked /> 🎙️ Voiceover (zero-key, Piper)</label>
         <label class="toggle" id="langRow">🌐 Voice language
           <select id="lang">
@@ -201,6 +206,8 @@
           music: document.getElementById('music').value,
           backgrounds: document.getElementById('backgrounds').checked,
           theme: document.getElementById('theme').value,
+          quote: document.getElementById('quote').value.trim(),
+          image_scene: document.getElementById('imageScene').value.trim(),
         };
       }
 
@@ -220,6 +227,7 @@
         if (!b || typeof b !== 'object') return;
         const set = (id, v) => { const el = document.getElementById(id); if (el != null && v != null) el.value = v; };
         set('title', b.title); set('subtitle', b.subtitle); set('closing', b.closing);
+        set('quote', b.quote || ''); set('imageScene', b.image_scene || '');
         document.getElementById('narrate').checked = b.narrate !== false;
         if (b.lang) { langSel.value = b.lang; populateVoices(); }
         if (b.voice) set('voice', b.voice);
