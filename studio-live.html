@@ -478,8 +478,10 @@
           galleryGrid.innerHTML = items.map((it) => {
             const url = WORKER + it.video;
             const t = (it.title || 'Untitled').replace(/</g, '&lt;');
+            // Lazy-load: el src real va en data-src; solo se asigna al entrar en viewport
+            // (evita ~12 peticiones de metadatos al worker de golpe al cargar la página).
             return `<div class="gcard">
-              <video muted preload="metadata" src="${url}#t=1" onclick="this.paused?this.play():this.pause()"></video>
+              <video muted preload="metadata" data-src="${url}#t=1" onclick="this.paused?this.play():this.pause()"></video>
               <div class="gmeta"><span class="gtitle" title="${t}">${t}</span>
                 <button class="gcopy" data-url="${url}" data-title="${t}">📤 Share</button></div>
             </div>`;
@@ -488,6 +490,23 @@
           galleryGrid.querySelectorAll('.gcopy').forEach((b) => {
             b.onclick = () => shareOrCopy(b.dataset.url, b.dataset.title, b);
           });
+
+          // Activa el src solo cuando el <video> se acerca al viewport.
+          const vids = galleryGrid.querySelectorAll('video[data-src]');
+          const activate = (v) => {
+            if (v.dataset.src) { v.src = v.dataset.src; v.removeAttribute('data-src'); }
+          };
+          if ('IntersectionObserver' in window) {
+            const io = new IntersectionObserver((entries, obs) => {
+              entries.forEach((e) => {
+                if (e.isIntersecting) { activate(e.target); obs.unobserve(e.target); }
+              });
+            }, { rootMargin: '300px 0px' }); // precarga un poco antes de ser visible
+            vids.forEach((v) => io.observe(v));
+          } else {
+            // Fallback sin IntersectionObserver: carga todo (comportamiento previo, sin regresión).
+            vids.forEach(activate);
+          }
         } catch { /* gallery is best-effort */ }
       }
       loadGallery();
