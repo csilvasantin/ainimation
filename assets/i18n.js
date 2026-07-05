@@ -151,10 +151,18 @@
     try { localStorage.setItem("ain_lang", lang); } catch (e) {}
   }
 
+  // Idioma de arranque: 1) elección guardada del usuario; si no hay, 2) idioma del navegador
+  //    (los hispanohablantes ven ES en su primera visita); si no, 3) EN (por defecto/canonical).
+  function detectLang() {
+    var stored = null;
+    try { stored = localStorage.getItem("ain_lang"); } catch (e) {}
+    if (stored === "es" || stored === "en") return stored;
+    var nav = (navigator.language || navigator.userLanguage || "en").toLowerCase();
+    return nav.indexOf("es") === 0 ? "es" : "en";
+  }
+
   function init() {
-    var lang = "en";
-    try { lang = localStorage.getItem("ain_lang") || "en"; } catch (e) {}
-    apply(lang);
+    apply(detectLang());
     var btn = document.getElementById("langToggle");
     if (btn) btn.addEventListener("click", function () {
       apply(document.documentElement.lang === "es" ? "en" : "es");
