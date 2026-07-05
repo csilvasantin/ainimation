@@ -100,10 +100,12 @@
     "Open a line to the studio.": "Abre una línea con el studio.",
     "For pilot productions, AI animation workflows, product partnerships, and early access to the authoring environment.":
       "Para producciones piloto, flujos de animación con IA, alianzas de producto y acceso anticipado al entorno de autoría.",
+    "Contact Node - Live": "Nodo de contacto · En vivo",
     "Invite Team": "Invitar al equipo",
     "Real-time concept pilots": "Pilotos de concepto en tiempo real",
     "Share Studio Link": "Compartir enlace del Studio",
     "Shared with Team - 4 online": "Compartido con el equipo · 4 en línea",
+    "Contact Space (45%)": "Espacio de contacto (45%)",
     "Projects": "Proyectos",
     "Stage": "Escenario",
     "Cast": "Cast",
