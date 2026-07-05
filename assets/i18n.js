@@ -117,7 +117,9 @@
     "This scene doesn't exist — or it hasn't been rendered yet. Head back to the studio.":
       "Esta escena no existe — o aún no se ha renderizado. Vuelve al studio.",
     "Error 404 — scene not found": "Error 404 — escena no encontrada",
-    "Back to home": "Volver al inicio"
+    "Back to home": "Volver al inicio",
+    // A11y
+    "Skip to content": "Saltar al contenido"
   };
 
   var norm = function (s) { return s.replace(/\s+/g, " ").trim(); };
