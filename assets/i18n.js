@@ -111,7 +111,13 @@
     "Director Commands": "Comandos del Director",
     // Footer
     "Director-style AI authoring environment": "Entorno de autoría con IA estilo Director",
-    "Email the studio": "Escribe al studio"
+    "Email the studio": "Escribe al studio",
+    // 404
+    "Lost in the montage.": "Perdido en el montaje.",
+    "This scene doesn't exist — or it hasn't been rendered yet. Head back to the studio.":
+      "Esta escena no existe — o aún no se ha renderizado. Vuelve al studio.",
+    "Error 404 — scene not found": "Error 404 — escena no encontrada",
+    "Back to home": "Volver al inicio"
   };
 
   var norm = function (s) { return s.replace(/\s+/g, " ").trim(); };
