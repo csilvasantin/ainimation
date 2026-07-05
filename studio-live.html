@@ -291,11 +291,17 @@
         shareBtn.textContent = '✓ Link copied'; setTimeout(() => shareBtn.textContent = '🔗 Share brief', 1600);
       };
       // Pre-fill from a shared link on load.
-      (function () { const p = new URLSearchParams(location.search).get('b'); if (p) { const b = decodeBrief(p); if (b) applyBrief(b); } })();
+      // Pre-fill priority: shared ?b= link > your last brief (localStorage) > seed defaults.
+      (function () {
+        const p = new URLSearchParams(location.search).get('b');
+        if (p) { const b = decodeBrief(p); if (b) applyBrief(b); return; }
+        try { const s = localStorage.getItem('ain_brief'); if (s) applyBrief(JSON.parse(s)); } catch {}
+      })();
 
       async function produce() {
         errEl.textContent = '';
         const brief = readBrief();
+        try { localStorage.setItem('ain_brief', JSON.stringify(brief)); } catch {}
 
         produceBtn.disabled = true;
         stage.style.display = 'flex';
