@@ -1,8 +1,13 @@
 {
   "name": "AInimation Studio",
   "short_name": "AInimation",
+  "description": "Director-style AI authoring environment: cast, stage, score, script, and generated media.",
+  "lang": "en",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#14110f",
-  "theme_color": "#14110f"
+  "theme_color": "#14110f",
+  "icons": [
+    { "src": "/assets/favicon.svg", "type": "image/svg+xml", "sizes": "any", "purpose": "any" }
+  ]
 }
