@@ -4696,13 +4696,36 @@ function audioStageKind(member) {
   return stockMemberCategory(member) === "music" ? "music" : "audio";
 }
 
+// El Stock vive en *.workers.dev, que varios ISP españoles estrangulan o
+// bloquean: medido desde Madrid, /stock/list responde 200 pero tarda ~14 s desde
+// el navegador, y desde la línea de comandos ni contesta. Sin límite de espera,
+// un fetch así deja la interfaz colgada sin explicar nada, que es exactamente lo
+// que parecía una avería de la app.
+const stockRequestTimeoutMs = 25000;
+
+async function fetchWithTimeout(url, options = {}, timeoutMs = stockRequestTimeoutMs) {
+  if (typeof AbortController === "undefined") return fetch(url, options);
+  const controller = new AbortController();
+  const timer = window.setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    return await fetch(url, { ...options, signal: controller.signal });
+  } catch (error) {
+    if (error?.name === "AbortError") {
+      throw new Error(`El Stock de Admira no respondió en ${Math.round(timeoutMs / 1000)} s. Suele ser el bloqueo de *.workers.dev de algunos operadores españoles: con VPN funciona.`);
+    }
+    throw error;
+  } finally {
+    window.clearTimeout(timer);
+  }
+}
+
 async function fetchLatestStockMembers(limit = stockImportBatchSize, category = "", options = {}) {
   let lastError = null;
   let hadUsableResponse = false;
   for (const endpoint of admiraStockEndpoints) {
     try {
       const requestUrl = stockEndpointUrl(endpoint, limit, category);
-      const response = await fetch(requestUrl, { headers: { Accept: "application/json" } });
+      const response = await fetchWithTimeout(requestUrl, { headers: { Accept: "application/json" } });
       if (!response.ok) throw new Error(`${response.status} ${response.statusText}`);
       hadUsableResponse = true;
       const items = stockItemsFromPayload(await response.json(), Math.max(limit, stockImportFetchLimit));
@@ -5123,7 +5146,7 @@ async function postStageAnimationToStock(endpoint, blob, metadata) {
     mime: blob.type || "video/webm",
     base64,
   };
-  const response = await fetch(endpoint, {
+  const response = await fetchWithTimeout(endpoint, {
     method: "POST",
     headers: { "Content-Type": "application/json", Accept: "application/json" },
     body: JSON.stringify(payload),
@@ -5178,7 +5201,14 @@ async function exportStageToAdmiraStock() {
     if (fallbackBlob && fallbackPlan) {
       downloadBlob(fallbackBlob, `${planSlug(fallbackPlan)}-stock-animation.webm`);
     }
-    window.alert("No se ha podido exportar la animación a admira.studio Stock. He generado el WebM local como respaldo; falta que Stock acepte subida autenticada o devuelva una URL pública usable.");
+    // Se dice la causa concreta cuando se conoce (el corte de *.workers.dev es
+    // la habitual desde España). Un "no se ha podido" a secas deja al usuario
+    // pensando que la culpa es de su pieza.
+    window.alert([
+      "No se ha podido exportar la animación al Stock de Admira.",
+      String(error?.message || "").slice(0, 180),
+      "El WebM local se ha guardado igualmente como respaldo.",
+    ].filter(Boolean).join("\n\n"));
     window.setTimeout(() => { stockExportButton.textContent = originalText; }, 1800);
   } finally {
     closeArchivoMenu();
