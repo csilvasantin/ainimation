@@ -3962,6 +3962,34 @@ body.is-cast-pointer-dragging .director-cast-window {
     position: relative !important;
   }
 
+  /* La barra de menú mide 925px de contenido en una pantalla de 390 y estaba en
+     overflow visible: de «Score» en adelante no había forma de llegar. Ahora se
+     desplaza con el dedo. */
+  .director-menubar {
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .director-menubar::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* El Stage se quedaba en 46px de alto con el lienzo a 0: la ventana existía
+     pero no había dónde ver la pieza. */
+  .director-stage-window .stage-canvas {
+    min-height: 46svh;
+  }
+
+  /* La paleta enseñaba 63px de sus 519: las herramientas de debajo eran
+     inalcanzables. Se le da altura y, si no cabe, se desplaza por dentro. */
+  .tool-palette .tool-palette-body {
+    /* Sin min-height la ventana se quedaba en 63px de sus 519 de contenido: se
+       podía desplazar, pero enseñando dos botones no sirve de nada. */
+    max-height: 40svh;
+    min-height: 220px;
+    overflow-y: auto;
+  }
+
   /* El Score y la regla de fotogramas se desplazan dentro de su ventana en vez
      de empujar el ancho de todo lo demás. */
   .score-panel .score-grid,
