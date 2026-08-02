@@ -2414,6 +2414,8 @@ h2 {
   border-radius: 8px;
   box-shadow: 0 12px 34px rgba(0, 0, 0, 0.42), 0 0 22px rgba(49, 190, 209, 0.2);
   margin: 0;
+  /* La opacidad la fija el keyframe; el fantasma la atenúa sin pisarla. */
+  opacity: var(--stage-opacity, 1);
   overflow: hidden;
   position: absolute;
   z-index: 4;
@@ -2436,7 +2438,7 @@ h2 {
 .stage-text-item.is-out-of-frame.is-ghost {
   display: block;
   filter: grayscale(0.4);
-  opacity: 0.32;
+  opacity: calc(var(--stage-opacity, 1) * 0.32);
   outline: 1px dashed rgba(255, 230, 92, 0.85);
   outline-offset: 2px;
 }
@@ -6319,3 +6321,55 @@ body.ain-play .stage-canvas { cursor: default; }
 body.ain-play .stage-imported-member,
 body.ain-play .stage-item { cursor: default; user-select: none; }
 body.ain-play [data-xpl-hot] { cursor: pointer !important; }
+
+/* ── Menú de propiedades (botón derecho sobre un miembro del Stage) ──────────
+   Escribe en el fotograma donde está el cabezal: cambiar un valor aquí y en
+   otro fotograma deja la animación hecha entre los dos. */
+.stage-properties-menu {
+  background: #101827;
+  border: 1px solid rgba(255, 230, 92, 0.55);
+  border-radius: 8px;
+  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.55);
+  color: #edf6ff;
+  font-size: 0.72rem;
+  min-width: 232px;
+  padding: 10px 12px 12px;
+  position: fixed;
+  z-index: 999;
+}
+
+.stage-properties-title {
+  align-items: baseline;
+  display: flex;
+  font-weight: 850;
+  gap: 8px;
+  justify-content: space-between;
+  margin: 0 0 8px;
+}
+
+.stage-properties-title small {
+  color: rgba(237, 246, 255, 0.6);
+  font-weight: 650;
+}
+
+.stage-properties-row {
+  align-items: center;
+  display: grid;
+  gap: 8px;
+  grid-template-columns: auto minmax(0, 1fr) 40px;
+}
+
+.stage-properties-row input[type="range"] {
+  accent-color: #ffe65c;
+  width: 100%;
+}
+
+.stage-properties-row output {
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.stage-properties-hint {
+  color: rgba(237, 246, 255, 0.55);
+  margin: 8px 0 0;
+}

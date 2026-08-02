@@ -1060,6 +1060,9 @@ function syncStageToFrame(frame = currentTimelineFrame(), shouldPlay = false) {
       figure.style.top = `${keyframe.y}%`;
       figure.style.width = `${keyframe.w}%`;
       figure.style.height = `${keyframe.h}%`;
+      // Va por variable, no por style.opacity, para que el fantasma pueda
+      // atenuarla sin pisarla (y para que la opacidad animada se siga viendo).
+      figure.style.setProperty("--stage-opacity", String(clampOpacity(keyframe.opacity)));
     }
     // Fuera de su tramo el miembro no se ve — es lo correcto en el Stage. Pero si
     // es el que se está editando, se deja como FANTASMA: así se puede agarrar
@@ -2360,6 +2363,14 @@ function keyframeWithMediaAspect(keyframe, aspectRatio) {
   };
 }
 
+// La opacidad viaja en el keyframe como una propiedad más, para que se pueda
+// animar igual que la posición o el tamaño. Sin valor = opaco.
+function clampOpacity(value) {
+  const number = Number(value);
+  if (!Number.isFinite(number)) return 1;
+  return Math.min(Math.max(number, 0), 1);
+}
+
 function defaultStageKeyframe(member, frame = Number(member?.startFrame || 1), index = 0) {
   return {
     frame: Number(frame) || 1,
@@ -2367,6 +2378,7 @@ function defaultStageKeyframe(member, frame = Number(member?.startFrame || 1), i
     y: clampPercent(member?.stageY ?? member?.y ?? (54 + Math.floor(index / 3) * 18)),
     w: clampStageSize(member?.stageW ?? member?.w, 12),
     h: clampStageSize(member?.stageH ?? member?.h, 10),
+    opacity: clampOpacity(member?.opacity),
     color: member?.color || "",
     text: member?.text || "",
     fontWeight: member?.fontWeight || "850",
@@ -2389,6 +2401,7 @@ function stageKeyframesFor(member, index = 0) {
       y: clampPercent(keyframe.y ?? fallback.y),
       w: clampStageSize(keyframe.w, fallback.w),
       h: clampStageSize(keyframe.h, fallback.h),
+      opacity: clampOpacity(keyframe.opacity ?? fallback.opacity),
       color: keyframe.color || member?.color || "",
       text: keyframe.text ?? member?.text ?? "",
       fontWeight: keyframe.fontWeight || member?.fontWeight || "850",
@@ -2420,6 +2433,7 @@ function interpolateStageKeyframe(member, frame, index = 0) {
     y: previous.y + (next.y - previous.y) * progress,
     w: previous.w + (next.w - previous.w) * progress,
     h: previous.h + (next.h - previous.h) * progress,
+    opacity: clampOpacity(previous.opacity) + (clampOpacity(next.opacity) - clampOpacity(previous.opacity)) * progress,
     color: previous.color || next.color || "",
     text: previous.text || next.text || "",
     fontWeight: previous.fontWeight || next.fontWeight || "850",
@@ -2439,6 +2453,7 @@ function upsertStageKeyframe(member, frame, values, index = 0) {
     y: clampPercent(values.y ?? base.y),
     w: clampStageSize(values.w, base.w),
     h: clampStageSize(values.h, base.h),
+    opacity: clampOpacity(values.opacity ?? base.opacity),
     color: values.color || base.color || member?.color || "",
     text: values.text ?? base.text ?? member?.text ?? "",
     fontWeight: values.fontWeight || base.fontWeight || member?.fontWeight || "850",
@@ -3075,6 +3090,7 @@ function renderFilmPlan(plan) {
       figure.style.top = `${keyframe.y}%`;
       figure.style.width = `${keyframe.w}%`;
       figure.style.height = `${keyframe.h}%`;
+      figure.style.setProperty("--stage-opacity", String(clampOpacity(keyframe.opacity)));
       const media = document.createElement(member.mediaType === "video" ? "video" : member.mediaType === "audio" ? "audio" : "img");
       if (member.stock || /^https?:\/\//i.test(member.src || "")) {
         media.crossOrigin = "anonymous";
@@ -5132,6 +5148,16 @@ function initStageTools() {
   setActiveTool(palette.dataset.stageTool || "hand");
   syncTextControlButtons();
 
+  // Botón derecho sobre un miembro: propiedades del fotograma actual. Lo que se
+  // toque aquí se guarda como keyframe en el fotograma donde está el cabezal,
+  // así que cambiarlo en dos fotogramas distintos lo anima entre ellos.
+  stage.addEventListener("contextmenu", (event) => {
+    const member = event.target.closest(".stage-imported-member");
+    if (!member) return;
+    event.preventDefault();
+    openStagePropertiesMenu(member, event.clientX, event.clientY);
+  });
+
   stage.addEventListener("pointerdown", (event) => {
     const tool = activeTool();
     const member = event.target.closest(".stage-imported-member");
@@ -5558,6 +5584,88 @@ function startExampleMovie() {
   });
   saveFilmPlan(plan);
   renderFilmPlan(plan);
+}
+
+// Menú de propiedades del botón derecho. Escribe en el fotograma donde está el
+// cabezal: subir la opacidad aquí y bajarla en otro fotograma deja el fundido
+// hecho, porque cada cambio queda como keyframe y el resto se interpola.
+function closeStagePropertiesMenu() {
+  document.querySelector(".stage-properties-menu")?.remove();
+}
+
+function openStagePropertiesMenu(memberEl, clientX, clientY) {
+  closeStagePropertiesMenu();
+  const castIndex = Number(memberEl.dataset.castIndex);
+  const stageIndex = Number(memberEl.dataset.stageIndex || 0);
+  const plan = currentPlan();
+  const member = plan.cast?.[castIndex];
+  if (!member) return;
+  const frame = currentTimelineFrame();
+  const current = interpolateStageKeyframe(member, frame, stageIndex) ||
+    defaultStageKeyframe(member, frame, stageIndex);
+  const percent = Math.round(clampOpacity(current.opacity) * 100);
+
+  const menu = document.createElement("div");
+  menu.className = "stage-properties-menu";
+  menu.setAttribute("role", "dialog");
+  menu.setAttribute("aria-label", `Properties of ${member.name || "cast member"}`);
+  menu.innerHTML = `
+    <p class="stage-properties-title">${escapeHtml(member.name || "Cast member")}<small>Frame ${frame}</small></p>
+    <label class="stage-properties-row">
+      <span>Opacity</span>
+      <input type="range" min="0" max="100" step="1" value="${percent}" data-stage-opacity />
+      <output data-stage-opacity-value>${percent}%</output>
+    </label>
+    <p class="stage-properties-hint">Change it on another frame and it animates between the two.</p>
+  `;
+  menu.style.left = `${clientX}px`;
+  menu.style.top = `${clientY}px`;
+  document.body.append(menu);
+
+  // Si se sale por la derecha o por abajo, se recoloca dentro de la ventana.
+  const rect = menu.getBoundingClientRect();
+  if (rect.right > window.innerWidth) menu.style.left = `${Math.max(8, window.innerWidth - rect.width - 8)}px`;
+  if (rect.bottom > window.innerHeight) menu.style.top = `${Math.max(8, window.innerHeight - rect.height - 8)}px`;
+
+  const slider = menu.querySelector("[data-stage-opacity]");
+  const readout = menu.querySelector("[data-stage-opacity-value]");
+  const applyOpacity = (commit) => {
+    const value = Number(slider.value) / 100;
+    readout.textContent = `${slider.value}%`;
+    // Mientras se arrastra sólo se previsualiza; el keyframe se escribe al soltar.
+    memberEl.style.setProperty("--stage-opacity", String(value));
+    if (!commit) return;
+    const nextPlan = currentPlan();
+    // A diferencia del arrastre, aquí el fotograma NO se desplaza: se escribe
+    // donde está el cabezal, que es lo que el usuario está mirando. El clip sólo
+    // se alarga si el cabezal ya estaba más allá de su final.
+    nextPlan.cast[castIndex].durationFrames = Math.max(
+      Number(nextPlan.cast[castIndex].durationFrames || 24),
+      frame - Number(nextPlan.cast[castIndex].startFrame || 1) + 1,
+    );
+    nextPlan.cast[castIndex].keyframes = upsertStageKeyframe(
+      nextPlan.cast[castIndex],
+      frame,
+      { opacity: value },
+      stageIndex,
+    );
+    saveFilmPlan(nextPlan);
+    renderFilmPlan(nextPlan);
+    setTimelineFrame(frame, false);
+  };
+  slider.addEventListener("input", () => applyOpacity(false));
+  slider.addEventListener("change", () => applyOpacity(true));
+  slider.focus();
+
+  const dismiss = (event) => {
+    if (menu.contains(event.target)) return;
+    closeStagePropertiesMenu();
+    document.removeEventListener("pointerdown", dismiss, true);
+  };
+  document.addEventListener("pointerdown", dismiss, true);
+  menu.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") closeStagePropertiesMenu();
+  });
 }
 
 function importCastAsset(name, kind) {
