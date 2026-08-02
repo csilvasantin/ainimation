@@ -3458,13 +3458,13 @@ function stageAnimationSignature(plan = currentPlan()) {
   });
 }
 
-function getStageAnimationCapture() {
+function getStageAnimationCapture(onProgress) {
   const signature = stageAnimationSignature();
   if (stageAnimationCaptureCache?.signature === signature) {
     if (stageAnimationCaptureCache.blob) return Promise.resolve(stageAnimationCaptureCache.blob);
     if (stageAnimationCaptureCache.promise) return stageAnimationCaptureCache.promise;
   }
-  const promise = renderStageAnimationBlob()
+  const promise = renderStageAnimationBlob(onProgress)
     .then((blob) => {
       stageAnimationCaptureCache = { signature, blob };
       return blob;
@@ -3653,7 +3653,7 @@ function drawStageDomFrame(ctx, stage, width, height) {
   });
 }
 
-function renderStageAnimationBlob() {
+function renderStageAnimationBlob(onProgress) {
   const stage = document.querySelector(".stage-canvas");
   const plan = currentPlan();
   const fps = Number(document.querySelector("[data-score-fps]")?.dataset.value || 24);
@@ -3689,34 +3689,42 @@ function renderStageAnimationBlob() {
       if (event.data?.size) chunks.push(event.data);
     });
     recorder.addEventListener("error", () => {
-      if (animationFrame) window.cancelAnimationFrame(animationFrame);
+      if (animationFrame) window.clearTimeout(animationFrame);
       syncStageToFrame(currentTimelineFrame(), false);
       reject(new Error("Could not record Stage animation."));
     });
     recorder.addEventListener("stop", () => {
-      if (animationFrame) window.cancelAnimationFrame(animationFrame);
+      if (animationFrame) window.clearTimeout(animationFrame);
       syncStageToFrame(currentTimelineFrame(), false);
       resolve(new Blob(chunks, { type: "video/webm" }));
     });
 
-    const renderAt = (timestamp) => {
+    // El reloj de la exportación NO puede ser requestAnimationFrame: el navegador
+    // lo congela en cuanto la pestaña pasa a segundo plano, y como la barra de
+    // progreso dependía de él, cambiar de pestaña a media exportación dejaba el
+    // proceso colgado para siempre con el botón en "Exportando...". Con
+    // setTimeout sigue avanzando (más despacio, pero avanza) y siempre termina.
+    const renderAt = () => {
+      if (stopped) return;
+      const timestamp = performance.now();
       if (!startedAt) startedAt = timestamp;
       const elapsed = Math.max(0, timestamp - startedAt);
       const frame = Math.min(totalFrames, 1 + (elapsed / 1000) * Math.max(1, fps));
       syncStageToFrame(frame, true);
       drawStageDomFrame(ctx, stage, canvas.width, canvas.height);
-      if (elapsed >= durationMs && !stopped) {
+      onProgress?.(Math.min(1, elapsed / Math.max(1, durationMs)));
+      if (elapsed >= durationMs) {
         stopped = true;
         recorder.stop();
         return;
       }
-      animationFrame = window.requestAnimationFrame(renderAt);
+      animationFrame = window.setTimeout(renderAt, 1000 / Math.max(1, exportFps));
     };
 
     syncStageToFrame(1, true);
     drawStageDomFrame(ctx, stage, canvas.width, canvas.height);
     recorder.start();
-    animationFrame = window.requestAnimationFrame(renderAt);
+    animationFrame = window.setTimeout(renderAt, 0);
   });
 }
 
@@ -3728,7 +3736,13 @@ async function exportStageVideo() {
     downloadStageVideoButton.textContent = "Exportando...";
   }
   try {
-    const blob = await getStageAnimationCapture();
+    // Con la pestaña en segundo plano la exportación va mucho más lenta, así que
+    // el porcentaje es lo que distingue "va despacio" de "se ha colgado".
+    const blob = await getStageAnimationCapture((ratio) => {
+      if (downloadStageVideoButton) {
+        downloadStageVideoButton.textContent = `Exportando ${Math.round(ratio * 100)}%`;
+      }
+    });
     downloadBlob(blob, `${planSlug(plan)}-stage.webm`);
   } catch (error) {
     window.alert(error.message || "Video export is not available in this browser yet.");
