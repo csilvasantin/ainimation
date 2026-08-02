@@ -382,6 +382,20 @@ function initDirectorWindowManager() {
     };
   }
 
+  // Alto que pide el contenido de una ventana (barra de título + cuerpo sin
+  // recortar). Devuelve el fallback si aún no está medible en el DOM.
+  function measuredWindowHeight(id, fallback) {
+    const win = windows.find((item) => item.dataset.window === id);
+    const body = win?.querySelector(".window-titlebar + *");
+    if (!win || !body || !body.scrollHeight) return fallback;
+    const titlebar = win.querySelector(".window-titlebar");
+    const styles = window.getComputedStyle(win);
+    const chrome = (titlebar?.offsetHeight || 0) +
+      parseFloat(styles.borderTopWidth || 0) +
+      parseFloat(styles.borderBottomWidth || 0);
+    return Math.ceil(body.scrollHeight + chrome);
+  }
+
   function defaultLayoutRect(win, fallbackRect) {
     if (isStackedLayout()) return fallbackRect;
     const bounds = workbench.getBoundingClientRect();
@@ -392,6 +406,16 @@ function initDirectorWindowManager() {
     const timelineTop = Math.max(0, bounds.height - timelineHeight);
     const lowerHeight = clamp(Math.round(bounds.height * 0.15), 140, 210);
     const lowerTop = Math.max(0, timelineTop - lowerHeight - gap);
+    // El AI Director no cabe en la banda "lower": con 210px el "Generate board"
+    // quedaba cortado bajo el borde. En vez de otro número mágico, se mide el
+    // contenido real del formulario (el CSS de la ventana oculta todos los campos
+    // salvo el intent y sus botones) y la ventana nace con esa altura.
+    const promptHeight = clamp(
+      measuredWindowHeight("prompt", 270),
+      250,
+      Math.max(250, timelineTop - gap),
+    );
+    const promptTop = Math.max(0, timelineTop - promptHeight - gap);
     const stageHeight = Math.max(360, timelineTop - gap);
     const sideLeft = stageWidth + gap;
     const castHeight = clamp(Math.round(bounds.height * 0.18), 190, 300);
@@ -418,9 +442,9 @@ function initDirectorWindowManager() {
       script: { left: 0, top: lowerTop, width: scriptWidth, height: lowerHeight },
       prompt: {
         left: promptLeft,
-        top: lowerTop,
+        top: promptTop,
         width: promptWidth,
-        height: lowerHeight,
+        height: promptHeight,
       },
     };
 
