@@ -3918,12 +3918,55 @@ body.is-cast-pointer-dragging .director-cast-window {
     overflow-x: auto;
   }
 
+  /* Un grid item nace con min-width:auto, así que NO se encoge por debajo de su
+     contenido: la banda de la Timeline (240 columnas de fotogramas) estiraba el
+     banco de trabajo a 939px dentro de una pantalla de 390 y todas las ventanas
+     heredaban ese ancho, cortadas por la mitad. Con min-width:0 vuelven a caber,
+     y la Timeline se desplaza dentro de lo suyo. */
+  /* `1fr` es `minmax(auto, 1fr)`, y ese mínimo *auto* crece con el contenido: la
+     regla de fotogramas (1646px) estiraba la columna y con ella el banco entero
+     a 939px dentro de una pantalla de 390, dejando todas las ventanas cortadas.
+     `minmax(0, 1fr)` le permite encogerse y que sea la Timeline la que se
+     desplace por dentro. */
+  /* El shell es quien define la columna: medía 390px de ancho pero su
+     grid-template-columns se resolvía a 939px, y el banco de trabajo, que es su
+     item, heredaba ese ancho. Por eso no bastaba con arreglar el banco. */
+  /* Va con las DOS clases a propósito: `.director-shell.retro-director` ya fija
+     `grid-template-columns: 1fr` en este mismo media query y, con una sola
+     clase, esta regla perdía por especificidad y no llegaba a aplicarse. */
+  .director-shell.retro-director,
+  .director-shell,
+  .director-workbench {
+    grid-template-columns: minmax(0, 1fr);
+    min-width: 0;
+  }
+
+  .director-workbench .score-ruler,
+  .director-workbench .score-grid {
+    min-width: 0;
+  }
+
   .director-window {
     height: auto !important;
     left: auto !important;
+    min-width: 0 !important;
     position: relative;
     top: auto !important;
     width: auto !important;
+  }
+
+  /* La paleta se declara absolute fuera del media query y ganaba por
+     especificidad: en móvil flotaba sobre el resto tapando media pantalla. */
+  .director-window.tool-palette,
+  .tool-palette {
+    position: relative !important;
+  }
+
+  /* El Score y la regla de fotogramas se desplazan dentro de su ventana en vez
+     de empujar el ancho de todo lo demás. */
+  .score-panel .score-grid,
+  .score-panel .score-ruler {
+    overflow-x: auto;
   }
 
   .resize-handle,
