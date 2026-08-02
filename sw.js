@@ -14,7 +14,9 @@
 // No hay precache: nada se guarda hasta que el usuario lo ha pedido al menos
 // una vez, así que instalar no dispara descargas por su cuenta.
 
-const CACHE = "ainimation-v1";
+// v2: la v1 se quedó con un HTML viejo dentro por servir sin revalidar. Al
+// cambiar el nombre, el activate de abajo borra el caché anterior entero.
+const CACHE = "ainimation-v2";
 
 self.addEventListener("install", () => {
   // Sin lista de precarga: se activa de inmediato y ya irá guardando lo que se use.
@@ -48,7 +50,13 @@ self.addEventListener("fetch", (event) => {
   if (esHTML(request)) {
     event.respondWith((async () => {
       try {
-        const respuesta = await fetch(request);
+        // `cache: "no-cache"` obliga a revalidar contra el servidor. Sin esto,
+        // fetch() respeta el caché HTTP del navegador y "red primero" acaba
+        // siendo "caché primero": se servía el HTML anterior, que pide assets
+        // sellados con la versión vieja, y el sitio se quedaba congelado en la
+        // publicación anterior aunque hubiera una nueva. No descarga de más:
+        // manda el If-None-Match y el servidor contesta 304 si no ha cambiado.
+        const respuesta = await fetch(request, { cache: "no-cache" });
         const cache = await caches.open(CACHE);
         cache.put(request, respuesta.clone());
         return respuesta;
