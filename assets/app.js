@@ -1196,6 +1196,7 @@ function initScorePlayhead(totalFrames) {
   const fpsValues = [12, 24, 25, 30, 60];
   let currentFps = Number(fpsReadout?.dataset.value || fpsReadout?.textContent || 24);
   let playTimer = null;
+  let playUntilFrame = null;
   const displayFrames = Math.max(1, Number(playhead.dataset.displayFrames || totalFrames));
   const clampFrame = (frame) => Math.min(Math.max(frame, 1), totalFrames);
   const setFrame = (frame) => {
@@ -1254,6 +1255,16 @@ function initScorePlayhead(totalFrames) {
     playButton.setAttribute("aria-pressed", "true");
     syncStageToFrame(currentFrame, true);
     playTimer = window.setInterval(() => {
+      // El playhead del DOM manda: si algo saltó de marca por fuera (una regla
+      // XPL con goToMarker), retomamos desde ahí en vez de pisar el salto con
+      // nuestro contador. Es lo que convierte el Score en un grafo navegable.
+      const domFrame = Number(playhead.dataset.frame || currentFrame);
+      if (domFrame !== currentFrame) currentFrame = clampFrame(domFrame);
+      if (playUntilFrame && currentFrame >= playUntilFrame) {
+        playUntilFrame = null;
+        stopPlayback();
+        return;
+      }
       if (currentFrame >= totalFrames) {
         stopPlayback();
         return;
@@ -1370,6 +1381,21 @@ function initScorePlayhead(totalFrames) {
     event.preventDefault();
     commitZoomInput();
   });
+
+  // Transporte accesible desde fuera (motor XPL / modo Play). El Score se
+  // re-renderiza a menudo, así que esto se reasigna en cada initScorePlayhead.
+  window.ainTransport = {
+    totalFrames,
+    isPlaying: () => Boolean(playTimer),
+    play: () => { if (!playTimer) startPlayback(); },
+    stop: () => { playUntilFrame = null; stopPlayback(); },
+    setFrame: (frame) => setFrame(clampFrame(Number(frame) || 1)),
+    // playSegment: reproducir desde donde estamos hasta un fotograma y parar.
+    playUntil: (frame) => {
+      playUntilFrame = clampFrame(Number(frame) || totalFrames);
+      if (!playTimer) startPlayback();
+    },
+  };
 }
 
 const filmForm = document.querySelector("#filmForm");
@@ -1496,7 +1522,6 @@ function makeScenes(film, count) {
       scene: `${film.protagonist} moves through ${film.world}, where ${purpose.toLowerCase()}`,
       visualPrompt: `${film.genre}, ${film.tone}, stage-ready frame, ${film.world}, ${film.protagonist}, cast continuity, clear silhouette, editable layers`,
       videoPrompt: `${beat}: camera movement, object behavior, blocking, and edit handles for ${film.duration} ${film.format.toLowerCase()}, ${film.tone}`,
-      script: `on ${behavior}\n  askAI("${purpose}", cast, stage, score)\n  updateStage(frame:${startFrame}, duration:${length})\nend`,
     };
   });
 }
@@ -1620,6 +1645,11 @@ function loadFilmPlan() {
 }
 
 function clearWorkingCastOnBoot() {
+  // El proyector NO limpia. Lo que abre un tótem con ?play=1 es la PIEZA, no una
+  // sesión de autoría: si al arrancar borrásemos el cast y los items del Stage,
+  // el modo Play proyectaría exactamente nada. (La persistencia compartible de
+  // verdad —enlace/D1— es otra tarea; esto solo evita que Play se autodestruya.)
+  if (new URLSearchParams(window.location.search).get("play") === "1") return;
   const saved = loadFilmPlan();
   if (!saved) return;
   const persistentCast = (saved.cast || []).filter((member) => !member.imported);
@@ -2190,8 +2220,10 @@ function normalizeFilmPlan(plan) {
     behavior: scene.behavior || fallback.scenes[index % fallback.scenes.length].behavior,
     startFrame: scene.startFrame || index * 48 + 1,
     length: scene.length || 48,
-    script: scene.script || fallback.scenes[index % fallback.scenes.length].script,
   }));
+  // Las reglas XPL viajan con el plan (las escribe el editor de la ventana
+  // Behaviour). Sin ellas la pieza es un vídeo lineal; con ellas, un interactivo.
+  merged.rules = Array.isArray(plan.rules) ? plan.rules : [];
   return merged;
 }
 
@@ -3153,13 +3185,9 @@ function renderFilmPlan(plan) {
     syncStageToFrame(currentTimelineFrame(), false);
   }
 
-  if (stageScript) {
-    const leadScene = plan.scenes[0];
-    stageScript.innerHTML = `
-      <strong>Selected behavior</strong>
-      <pre>${leadScene.script}</pre>
-    `;
-  }
+  // La ventana Behaviour la pinta el editor XPL (assets/xpl-studio.js): reglas
+  // reales que el motor ejecuta, no el texto Lingo de atrezzo de antes.
+  window.ainXPL?.renderBehaviourWindow?.(plan);
 
   if (aiCueList) {
     aiCueList.innerHTML = plan.scenes.slice(0, 4).map((scene) => `
@@ -3222,8 +3250,14 @@ function toMarkdown(plan) {
     `## Scenes`,
   ];
   for (const scene of plan.scenes) {
-    lines.push("", `### ${scene.number}. ${scene.beat}`, scene.scene, "", `Behavior: ${scene.behavior}()`, `Frames: ${scene.startFrame}-${scene.startFrame + scene.length}`, "", "```lingo", scene.script, "```", "", `Visual prompt: ${scene.visualPrompt}`, `Video prompt: ${scene.videoPrompt}`);
+    lines.push("", `### ${scene.number}. ${scene.beat}`, scene.scene, "", `Behavior: ${scene.behavior}()`, `Frames: ${scene.startFrame}-${scene.startFrame + scene.length}`, "", `Visual prompt: ${scene.visualPrompt}`, `Video prompt: ${scene.videoPrompt}`);
   }
+  // Las reglas XPL de verdad — las que ejecuta el motor, no una frase decorativa.
+  const rules = Array.isArray(plan.rules) ? plan.rules : [];
+  lines.push("", "## Behaviours (XPL)");
+  lines.push(rules.length
+    ? rules.map((rule) => `- ${rule.enabled === false ? "(off) " : ""}**${rule.name || rule.id}** — ${window.XPL?.ruleSentence(rule, "es") || ""}`).join("\n")
+    : "_Sin reglas: la pieza es lineal._");
   return lines.join("\n");
 }
 

@@ -5966,3 +5966,297 @@ body.studio-page[data-interface-theme="light"] .score-row-label {
 
 /* Engine CTA -> Studio Live */
 .engine-cta { text-align: center; margin-top: 1.1rem; }
+
+/* ============================================================================
+ * XPL — Director interactivo (editor de reglas · sprites · modo Play)
+ * ========================================================================== */
+
+/* El menú Control se comporta como los demás menús de la barra. */
+.control-menu {
+  display: inline-flex;
+  position: relative;
+  z-index: 5010;
+}
+
+.control-menu-list {
+  background: #f8fafc;
+  border: 1px solid #778292;
+  border-radius: 6px;
+  box-shadow: 0 18px 40px rgba(17, 21, 27, 0.2);
+  display: none;
+  gap: 2px;
+  left: 0;
+  min-width: 190px;
+  padding: 6px;
+  position: absolute;
+  top: calc(100% + 8px);
+  z-index: 7000;
+}
+
+.control-menu.open .control-menu-list,
+.control-menu:hover .control-menu-list,
+.control-menu:focus-within .control-menu-list {
+  display: grid;
+}
+
+.control-menu-list button {
+  background: transparent;
+  border: 0;
+  border-radius: 4px;
+  color: #11151b;
+  cursor: pointer;
+  display: block;
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 760;
+  padding: 8px 10px;
+  text-align: left;
+}
+
+.control-menu-list button:hover {
+  background: #e3e8f0;
+}
+
+.control-menu-list button[aria-pressed="true"] {
+  background: #1f6feb;
+  color: #fff;
+}
+
+/* --- Ventana Behaviour: el editor de reglas ------------------------------- */
+.stage-script.xpl-editor {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 0.78rem;
+  overflow: auto;
+  padding: 8px;
+}
+
+.xpl-tabs {
+  align-items: center;
+  border-bottom: 1px solid #c3cad6;
+  display: flex;
+  gap: 4px;
+  padding-bottom: 6px;
+  position: sticky;
+  top: 0;
+  background: inherit;
+  z-index: 2;
+}
+
+.xpl-spacer { flex: 1; }
+
+.xpl-tab {
+  background: #e7ebf2;
+  border: 1px solid #b6bfcd;
+  border-radius: 5px;
+  color: #11151b;
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.74rem;
+  font-weight: 760;
+  padding: 4px 9px;
+}
+
+.xpl-tab.is-active { background: #11151b; border-color: #11151b; color: #fff; }
+.xpl-tab.is-live { background: #d2372b; border-color: #a82a20; color: #fff; }
+
+.xpl-rules { display: grid; gap: 8px; }
+
+.xpl-rule {
+  background: #f2f5f9;
+  border: 1px solid #c3cad6;
+  border-left: 4px solid #1f6feb;
+  border-radius: 6px;
+  display: grid;
+  gap: 6px;
+  padding: 8px;
+}
+
+.xpl-rule.is-off { border-left-color: #9aa3b1; opacity: 0.62; }
+
+.xpl-rule-head { align-items: center; display: flex; gap: 6px; }
+
+.xpl-block { display: grid; gap: 4px; }
+
+.xpl-block-head {
+  align-items: center;
+  color: #485261;
+  display: flex;
+  gap: 6px;
+}
+
+.xpl-block-head b {
+  color: #1f6feb;
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+}
+
+.xpl-row { align-items: center; display: flex; flex-wrap: wrap; gap: 4px; }
+
+.xpl-select,
+.xpl-input,
+.xpl-name {
+  background: #fff;
+  border: 1px solid #b6bfcd;
+  border-radius: 4px;
+  color: #11151b;
+  font: inherit;
+  font-size: 0.74rem;
+  min-width: 0;
+  padding: 3px 5px;
+}
+
+.xpl-input { width: 82px; }
+.xpl-input.wide { width: 132px; }
+.xpl-name { flex: 1; font-weight: 760; }
+.xpl-check { accent-color: #1f6feb; }
+
+.xpl-mini {
+  background: #e7ebf2;
+  border: 1px solid #b6bfcd;
+  border-radius: 4px;
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.72rem;
+  line-height: 1;
+  padding: 3px 6px;
+}
+
+.xpl-mini.danger:hover { background: #f6d5d2; border-color: #d2372b; }
+
+.xpl-add {
+  background: transparent;
+  border: 1px dashed #9aa3b1;
+  border-radius: 4px;
+  color: #485261;
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.72rem;
+  font-weight: 700;
+  justify-self: start;
+  padding: 3px 8px;
+}
+
+.xpl-add.primary {
+  background: #11151b;
+  border-style: solid;
+  border-color: #11151b;
+  color: #fff;
+}
+
+.xpl-sentence {
+  background: #fff;
+  border-radius: 4px;
+  color: #2b3340;
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 0.7rem;
+  margin: 0;
+  padding: 5px 7px;
+}
+
+.xpl-empty,
+.xpl-hint { color: #5a6472; font-size: 0.74rem; margin: 0; }
+
+.xpl-sprites { display: grid; gap: 5px; }
+.xpl-sprite-row { background: #f2f5f9; border-radius: 5px; padding: 4px 6px; }
+
+.xpl-sprite-label {
+  flex: 1;
+  font-weight: 700;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.xpl-sprite-type { color: #6b7583; font-size: 0.68rem; }
+
+/* Un sprite interactivo se nota: es un hotspot, no decorado. */
+body.xpl-live .stage-imported-member[data-xpl-hot],
+body.xpl-live .stage-item[data-xpl-hot] { cursor: pointer; }
+
+.xpl-hidden { display: none !important; }
+
+/* --- A5 · MODO PLAY: el proyector ---------------------------------------- */
+/* Misma página, otra clase en el body — sin recarga, patrón portería. */
+body.ain-play { background: #000; margin: 0; overflow: hidden; }
+
+body.ain-play .site-header,
+body.ain-play .site-footer,
+body.ain-play .studio-hero,
+body.ain-play .studio-story-section,
+body.ain-play .studio-features,
+body.ain-play .workspace-heading,
+body.ain-play .studio-boot,
+body.ain-play .studio-collab-bar,
+body.ain-play .director-menubar,
+body.ain-play .studio-status,
+body.ain-play .window-taskbar,
+body.ain-play .stage-ruler,
+body.ain-play .stage-ruler-toggle,
+body.ain-play .stage-title-actions,
+body.ain-play .window-titlebar,
+body.ain-play .resize-handle,
+body.ain-play .stage-grid,
+body.ain-play .stage-imported-member figcaption,
+body.ain-play .stage-member-resize,
+body.ain-play .stage-shape-resize,
+body.ain-play .stage-text-remove,
+body.ain-play .director-window:not(.director-stage-window) { display: none !important; }
+
+/* Nada de marcos ni selección: en el proyector no hay nada que seleccionar. */
+body.ain-play .stage-imported-member,
+body.ain-play .stage-item {
+  border: 0 !important;
+  box-shadow: none !important;
+  outline: 0 !important;
+}
+
+body.ain-play .stage-imported-member.is-selected,
+body.ain-play .stage-item.is-selected { outline: 0 !important; }
+
+body.ain-play main,
+body.ain-play .studio-workspace,
+body.ain-play .studio-section { margin: 0 !important; padding: 0 !important; }
+
+body.ain-play .director-shell {
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+body.ain-play .director-workbench {
+  background: #000 !important;
+  display: block !important;
+  height: 100vh !important;
+  padding: 0 !important;
+}
+
+body.ain-play .director-stage-window {
+  background: #000 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  height: 100vh !important;
+  inset: 0 !important;
+  position: fixed !important;
+  transform: none !important;
+  width: 100vw !important;
+  z-index: 99999 !important;
+}
+
+body.ain-play .stage-window {
+  background: #000 !important;
+  height: 100vh !important;
+  padding: 0 !important;
+  width: 100vw !important;
+}
+
+/* Cursor de kiosko: el dedo solo aparece sobre lo que responde. */
+body.ain-play,
+body.ain-play .stage-canvas { cursor: default; }
+body.ain-play .stage-imported-member,
+body.ain-play .stage-item { cursor: default; user-select: none; }
+body.ain-play [data-xpl-hot] { cursor: pointer !important; }
