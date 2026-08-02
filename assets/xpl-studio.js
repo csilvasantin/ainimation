@@ -410,6 +410,10 @@
 
   const lang = () => (document.documentElement.lang || "es").startsWith("en") ? "en" : "es";
   const L = (obj) => XPL.label(obj, lang());
+  // Los textos sueltos del editor también siguen el idioma de la página. studio.html
+  // es lang="en", así que sin esto salían rótulos y tooltips en castellano ("▶ Probar",
+  // "Quitar condición"…) mezclados con el resto de la interfaz en inglés.
+  const T = (es, en) => (lang() === "en" ? en : es);
 
   function conditionRow(rule, cond, index, plan) {
     const fact = XPL.factById(cond.fact) || studioFacts()[0];
@@ -455,14 +459,14 @@
         lang() === "en" ? "(anything)" : "(lo que sea)"));
       if (fact.source === "qr") {
         row.append(el("input", {
-          class: "xpl-input", type: "text", value: String(cond.value || ""), placeholder: "código",
+          class: "xpl-input", type: "text", value: String(cond.value || ""), placeholder: T("código", "code"),
           onchange: (event) => { cond.value = event.target.value; commitPlan(plan); },
         }));
       }
     }
 
     row.append(el("button", {
-      class: "xpl-mini", type: "button", title: "Quitar condición", text: "×",
+      class: "xpl-mini", type: "button", title: T("Quitar condición", "Remove condition"), text: "×",
       onclick: () => {
         rule.when.conds.splice(index, 1);
         if (!rule.when.conds.length) rule.when.conds.push({ fact: "click", value: "" });
@@ -505,7 +509,7 @@
     }
 
     row.append(el("button", {
-      class: "xpl-mini", type: "button", title: "Quitar acción", text: "×",
+      class: "xpl-mini", type: "button", title: T("Quitar acción", "Remove action"), text: "×",
       onclick: () => {
         rule.do.splice(index, 1);
         if (!rule.do.length) rule.do.push({ id: "goToMarker", value: "" });
@@ -520,16 +524,16 @@
 
     const head = el("div", { class: "xpl-rule-head" });
     head.append(el("input", {
-      class: "xpl-check", type: "checkbox", title: "Activa",
+      class: "xpl-check", type: "checkbox", title: T("Activa", "Active"),
       ...(rule.enabled === false ? {} : { checked: "checked" }),
       onchange: (event) => { rule.enabled = event.target.checked; commitPlan(plan); },
     }));
     head.append(el("input", {
-      class: "xpl-name", type: "text", value: rule.name || "", placeholder: "Nombre de la regla",
+      class: "xpl-name", type: "text", value: rule.name || "", placeholder: T("Nombre de la regla", "Rule name"),
       onchange: (event) => { rule.name = event.target.value; commitPlan(plan); },
     }));
     head.append(el("button", {
-      class: "xpl-mini danger", type: "button", title: "Borrar regla", text: "🗑",
+      class: "xpl-mini danger", type: "button", title: T("Borrar regla", "Delete rule"), text: "🗑",
       onclick: () => {
         plan.rules = rulesOf(plan).filter((item) => item.id !== rule.id);
         commitPlan(plan);
@@ -593,14 +597,14 @@
     sprites.forEach((sprite) => {
       const row = el("div", { class: "xpl-row xpl-sprite-row" });
       row.append(el("input", {
-        class: "xpl-check", type: "checkbox", title: "Interactivo",
+        class: "xpl-check", type: "checkbox", title: T("Interactivo", "Interactive"),
         ...(sprite.interactive ? { checked: "checked" } : {}),
         onchange: (event) => updateSprite(sprite.ref, { interactive: event.target.checked }),
       }));
       row.append(el("span", { class: "xpl-sprite-label", title: sprite.label, text: sprite.label }));
       row.append(el("small", { class: "xpl-sprite-type", text: sprite.type }));
       row.append(el("input", {
-        class: "xpl-input wide", type: "text", value: sprite.name, placeholder: "nombre de sprite",
+        class: "xpl-input wide", type: "text", value: sprite.name, placeholder: T("nombre de sprite", "sprite name"),
         onchange: (event) => updateSprite(sprite.ref, { spriteName: slug(event.target.value) }),
       }));
       panel.append(row);
@@ -628,7 +632,7 @@
     tabs.append(el("span", { class: "xpl-spacer" }));
     tabs.append(el("button", {
       class: `xpl-tab ${previewOn ? "is-live" : ""}`, type: "button",
-      title: "Evaluar las reglas aquí mismo", text: previewOn ? "■ Probar" : "▶ Probar",
+      title: T("Evaluar las reglas aquí mismo", "Evaluate the rules right here"), text: previewOn ? T("■ Probar", "■ Test") : T("▶ Probar", "▶ Test"),
       onclick: () => {
         previewOn = !previewOn;
         if (previewOn) startEngine(); else if (!isPlayMode()) stopEngine();
@@ -636,7 +640,7 @@
       },
     }));
     tabs.append(el("button", {
-      class: "xpl-tab", type: "button", "data-play-toggle": "", title: "Modo Play (?play=1)", text: "⛶ Play",
+      class: "xpl-tab", type: "button", "data-play-toggle": "", title: T("Modo Play (?play=1)", "Play mode (?play=1)"), text: "⛶ Play",
     }));
     host.append(tabs);
 
