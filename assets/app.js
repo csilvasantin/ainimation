@@ -1475,6 +1475,9 @@ const downloadStageVideoButton = document.querySelector("[data-download-stage-vi
 const directorShell = document.querySelector(".director-shell");
 const directorWindows = document.querySelectorAll(".director-window");
 const filmStorageKey = "ainimation-film-plan";
+// Biblioteca de piezas guardadas con nombre. El plan "vivo" sigue en
+// filmStorageKey: esto es el archivador, no la mesa de trabajo.
+const projectsStorageKey = "ainimation-projects";
 const scoreLabelsStorageKey = "ainimation-score-labels";
 const timelineMarkersStorageKey = "ainimation-timeline-markers";
 const timelineZoomStorageKey = "ainimation-timeline-zoom";
@@ -5673,6 +5676,113 @@ function closeStagePropertiesMenu() {
   document.querySelector(".stage-properties-menu")?.remove();
 }
 
+// ── Biblioteca de proyectos ───────────────────────────────────────────────────
+function loadSavedProjects() {
+  try {
+    const list = JSON.parse(localStorage.getItem(projectsStorageKey));
+    return Array.isArray(list) ? list : [];
+  } catch {
+    return [];
+  }
+}
+
+function persistSavedProjects(list) {
+  try {
+    localStorage.setItem(projectsStorageKey, JSON.stringify(list));
+    return true;
+  } catch {
+    // Cuota llena: el plan vivo no se toca, así que no se pierde nada.
+    window.alert("No queda espacio en el navegador para guardar más proyectos.");
+    return false;
+  }
+}
+
+function saveCurrentProjectAs() {
+  const plan = currentPlan();
+  const suggested = plan.title || "Untitled";
+  const name = window.prompt("Nombre del proyecto:", suggested);
+  if (name === null) return;
+  const trimmed = name.trim() || suggested;
+  const list = loadSavedProjects();
+  const existing = list.find((item) => item.name.toLowerCase() === trimmed.toLowerCase());
+  if (existing && !window.confirm(`Ya hay un proyecto llamado «${trimmed}». ¿Sobrescribirlo?`)) return;
+  const entry = { name: trimmed, savedAt: new Date().toISOString(), plan };
+  const next = existing
+    ? list.map((item) => (item === existing ? entry : item))
+    : [entry, ...list];
+  if (persistSavedProjects(next)) lastSavedPlanSignature = JSON.stringify(plan);
+}
+
+// Firma del plan tal y como se guardó por última vez, para saber si hay trabajo
+// sin guardar antes de pisarlo con «Nuevo».
+let lastSavedPlanSignature = null;
+
+function hasUnsavedWork() {
+  const plan = currentPlan();
+  if (lastSavedPlanSignature !== null) return JSON.stringify(plan) !== lastSavedPlanSignature;
+  // Sin haber guardado nada todavía, lo que decide es si hay algo montado: un
+  // board recién generado no vale la pena defenderlo, media puesta en el Stage sí.
+  return (plan.cast || []).some((member) => member.imported && member.src) ||
+    (plan.stageItems || []).length > 0;
+}
+
+function openProjectsMenu(anchor) {
+  closeStagePropertiesMenu();
+  const list = loadSavedProjects();
+  const menu = document.createElement("div");
+  menu.className = "stage-properties-menu";
+  menu.setAttribute("role", "dialog");
+  menu.setAttribute("aria-label", "Saved projects");
+  menu.innerHTML = `
+    <p class="stage-properties-title">Proyectos<small>${list.length}</small></p>
+    ${list.length ? `<ul class="stage-properties-list">${list.map((item, index) => `
+      <li>
+        <button type="button" data-open-project="${index}">${escapeHtml(item.name)}</button>
+        <button type="button" class="stage-properties-remove" data-remove-project="${index}" aria-label="Borrar ${escapeHtml(item.name)}">×</button>
+      </li>
+    `).join("")}</ul>` : `<p class="stage-properties-hint">Todavía no hay ninguno guardado. Usa «Guardar como…».</p>`}
+  `;
+  const rect = anchor?.getBoundingClientRect();
+  menu.style.left = `${Math.round(rect?.left ?? 20)}px`;
+  menu.style.top = `${Math.round((rect?.bottom ?? 20) + 6)}px`;
+  document.body.append(menu);
+  const bounds = menu.getBoundingClientRect();
+  if (bounds.right > window.innerWidth) menu.style.left = `${Math.max(8, window.innerWidth - bounds.width - 8)}px`;
+  if (bounds.bottom > window.innerHeight) menu.style.top = `${Math.max(8, window.innerHeight - bounds.height - 8)}px`;
+
+  menu.querySelectorAll("[data-open-project]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const entry = loadSavedProjects()[Number(button.dataset.openProject)];
+      if (!entry) return;
+      if (hasUnsavedWork() && !window.confirm("Se perderá lo que no hayas guardado. ¿Abrir el proyecto?")) return;
+      const plan = normalizeFilmPlan(entry.plan);
+      saveFilmPlan(plan);
+      hydrateFilmForm(plan);
+      renderFilmPlan(plan);
+      lastSavedPlanSignature = JSON.stringify(currentPlan());
+      closeStagePropertiesMenu();
+    });
+  });
+  menu.querySelectorAll("[data-remove-project]").forEach((button) => {
+    button.addEventListener("click", (event) => {
+      event.stopPropagation();
+      const index = Number(button.dataset.removeProject);
+      const entry = loadSavedProjects()[index];
+      if (!entry || !window.confirm(`¿Borrar «${entry.name}»?`)) return;
+      persistSavedProjects(loadSavedProjects().filter((_, position) => position !== index));
+      closeStagePropertiesMenu();
+      openProjectsMenu(anchor);
+    });
+  });
+
+  const dismiss = (event) => {
+    if (menu.contains(event.target)) return;
+    closeStagePropertiesMenu();
+    document.removeEventListener("pointerdown", dismiss, true);
+  };
+  document.addEventListener("pointerdown", dismiss, true);
+}
+
 // Borra el keyframe de un asterisco del Score. Nunca deja al objeto sin ninguno:
 // sin keyframes no hay dónde colocarlo, así que el último no se puede quitar.
 function deleteKeyframeFromDot(dot) {
@@ -5896,11 +6006,29 @@ if (filmForm) {
   importAdmiraStockAssetFromQuery();
 
   fileNewButton?.addEventListener("click", () => {
+    // Antes esto pisaba la pieza en marcha sin decir nada y no había manera de
+    // recuperarla: el plan vivía en una única entrada de localStorage.
+    if (hasUnsavedWork() && !window.confirm("Se perderá lo que no hayas guardado. ¿Empezar una pieza nueva?")) {
+      closeArchivoMenu();
+      return;
+    }
     const plan = buildFilmPlan(false);
     saveFilmPlan(plan);
     hydrateFilmForm(plan);
     renderFilmPlan(plan);
+    lastSavedPlanSignature = JSON.stringify(currentPlan());
     closeArchivoMenu();
+  });
+
+  document.querySelector("[data-project-save]")?.addEventListener("click", () => {
+    saveCurrentProjectAs();
+    closeArchivoMenu();
+  });
+
+  document.querySelector("[data-project-list]")?.addEventListener("click", (event) => {
+    const anchor = event.currentTarget;
+    closeArchivoMenu();
+    openProjectsMenu(anchor);
   });
 
   projectOpenInput?.addEventListener("change", () => {
