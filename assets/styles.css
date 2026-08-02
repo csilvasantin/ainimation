@@ -2429,6 +2429,18 @@ h2 {
   display: none;
 }
 
+/* Fantasma: el miembro seleccionado sigue agarrable fuera de su tramo, para
+   poder llevarlo a un fotograma más allá del final del clip. Se ve translúcido
+   y punteado para que quede claro que ahí todavía no hay nada montado. */
+.stage-imported-member.is-out-of-frame.is-ghost,
+.stage-text-item.is-out-of-frame.is-ghost {
+  display: block;
+  filter: grayscale(0.4);
+  opacity: 0.32;
+  outline: 1px dashed rgba(255, 230, 92, 0.85);
+  outline-offset: 2px;
+}
+
 .stage-imported-member img,
 .stage-imported-member video,
 .stage-imported-member audio {

@@ -1061,8 +1061,15 @@ function syncStageToFrame(frame = currentTimelineFrame(), shouldPlay = false) {
       figure.style.width = `${keyframe.w}%`;
       figure.style.height = `${keyframe.h}%`;
     }
+    // Fuera de su tramo el miembro no se ve — es lo correcto en el Stage. Pero si
+    // es el que se está editando, se deja como FANTASMA: así se puede agarrar
+    // más allá del final del clip para llevarlo a un fotograma nuevo. Sin esto,
+    // al acabar el clip el objeto desaparecía y ya no había forma de seguir
+    // animándolo salvo alargarlo antes a mano.
+    const isGhost = !isActive && isSelectedCastTarget(Number(figure.dataset.castIndex));
     figure.classList.toggle("is-out-of-frame", !isActive);
-    figure.setAttribute("aria-hidden", String(!isActive));
+    figure.classList.toggle("is-ghost", isGhost);
+    figure.setAttribute("aria-hidden", String(!isActive && !isGhost));
     if (!media) return;
     if (!isActive || !shouldPlay) {
       media.pause();
@@ -5133,7 +5140,12 @@ function initStageTools() {
     if (tool === "hand" && member) {
       event.preventDefault();
       const castIndex = Number(member.dataset.castIndex);
-      const targetScope = selectedCastTargetScope(castIndex) === "clip" ? "clip" : "keyframe";
+      // Arrastrando el FANTASMA (cabezal fuera del clip) siempre se crea
+      // keyframe: mover el clip entero desde fuera de su tramo no significa
+      // nada, y es justo lo que impedía prolongar la animación más allá del
+      // final. Dentro del clip se respeta el modo elegido.
+      const isGhostDrag = member.classList.contains("is-ghost");
+      const targetScope = !isGhostDrag && selectedCastTargetScope(castIndex) === "clip" ? "clip" : "keyframe";
       setSelectedStageTarget({ castIndex, scope: targetScope });
       stage.querySelectorAll(".stage-imported-member").forEach((item) => {
         item.classList.toggle("is-selected", item === member);
