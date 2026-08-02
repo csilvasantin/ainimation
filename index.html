@@ -3,6 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml" />
     <title>AInimation Studio | Admira Director for the AI era</title>
     <meta
       name="description"
@@ -20,15 +21,42 @@
     <meta property="og:image:width" content="1920" />
     <meta property="og:image:height" content="1080" />
     <meta property="og:site_name" content="AInimation Studio" />
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:locale:alternate" content="es_ES" />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="AInimation Studio" />
     <meta name="twitter:description" content="A Director-style AI studio: a brief in, a real 1080p video out — voice, music, scenes, zero API keys." />
     <meta name="twitter:image" content="https://www.ainimation.studio/assets/ainimation-teaser-poster.jpg" />
     <link rel="canonical" href="https://www.ainimation.studio/" />
     <link rel="manifest" href="site.webmanifest" />
-    <link rel="stylesheet" href="assets/styles.css?v=5e38772" />
+    <link rel="stylesheet" href="assets/styles.css?v=5e38772-dirty" />
+    <link rel="preload" as="image" href="assets/director-ai-admira-transparent.png" fetchpriority="high" />
+    <style>
+      .nav-lang{background:transparent;border:1px solid currentColor;color:inherit;border-radius:6px;padding:2px 9px;font:inherit;font-size:.78rem;letter-spacing:.04em;cursor:pointer;opacity:.7;margin-left:.6rem;transition:opacity .15s}
+      .nav-lang:hover,.nav-lang:focus-visible{opacity:1}
+      .skip-link{position:absolute;left:12px;top:-56px;z-index:200;background:#c9f24e;color:#12130f;padding:10px 18px;border-radius:0 0 10px 10px;font:inherit;font-weight:700;text-decoration:none;transition:top .16s ease}
+      .skip-link:focus{top:0;outline:2px solid #12130f;outline-offset:2px}
+    </style>
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "AInimation Studio",
+      "applicationCategory": "MultimediaApplication",
+      "operatingSystem": "Web",
+      "url": "https://www.ainimation.studio/",
+      "image": "https://www.ainimation.studio/assets/ainimation-teaser-poster.jpg",
+      "description": "AInimation Studio is a Director-style AI authoring environment for building animated worlds with cast, stage, score, script, video, music, and voice.",
+      "publisher": {
+        "@type": "Organization",
+        "name": "Admira",
+        "url": "https://admira.live/"
+      }
+    }
+    </script>
   </head>
   <body class="home-page">
+    <a class="skip-link" href="#top">Skip to content</a>
     <header class="site-header" aria-label="Primary">
       <a class="brand" href="#top" aria-label="AInimation Studio home">
         <span class="brand-mark">AI</span>
@@ -46,6 +74,7 @@
         <a href="studio.html">Author</a>
         <a href="studio-live.html">Produce</a>
         <a href="#contact">Contact</a>
+        <button id="langToggle" class="nav-lang" type="button" aria-label="Cambiar idioma / Switch language">ES</button>
       </nav>
     </header>
 
@@ -66,7 +95,7 @@
         </div>
 
         <div id="film" class="hero-film hero-digital-twin" aria-label="Director AI powered by Admira concept image">
-          <img src="assets/director-ai-admira-transparent.png" alt="Director AI powered by Admira" />
+          <img src="assets/director-ai-admira-transparent.png" alt="Director AI powered by Admira" width="1195" height="649" fetchpriority="high" decoding="async" />
         </div>
       </section>
 
@@ -314,6 +343,8 @@
       <a href="#contact" data-contact-link>Email the studio</a>
     </footer>
 
-    <script src="assets/app.js?v=5e38772" defer></script>
+    <script src="assets/i18n.js" defer></script>
+    <script src="assets/app.js?v=5e38772-dirty" defer></script>
+    <script src="/assets/analytics.js" defer></script>
   </body>
 </html>
