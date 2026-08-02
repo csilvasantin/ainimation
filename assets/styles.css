@@ -5321,18 +5321,29 @@ body.studio-entered {
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.76), 0 0 0 2px rgba(32, 96, 255, 0.34), 0 8px 20px rgba(32, 96, 255, 0.18);
 }
 
+/* Marca de keyframe: un ASTERISCO, no un punto. Dice "aquí hay un cambio
+   guardado" y se distingue de las marcas de la regla de un vistazo. */
 .score-keyframe-dot {
+  align-items: center;
   background: #101827;
   border: 2px solid #ffe65c;
   border-radius: 999px;
   box-shadow: 0 0 0 1px rgba(16, 24, 39, 0.28), 0 2px 6px rgba(0, 0, 0, 0.2);
+  color: #ffe65c;
   cursor: pointer;
-  height: 11px;
-  margin-left: -5px;
-  padding: 0;
+  display: flex;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 900;
+  height: 14px;
+  justify-content: center;
+  line-height: 1;
+  margin-left: -7px;
+  /* El glifo "*" se dibuja alto en su caja; se baja para centrarlo óptimamente. */
+  padding: 3px 0 0;
   position: absolute;
-  top: 2px;
-  width: 11px;
+  top: 1px;
+  width: 14px;
   z-index: 12;
 }
 
@@ -5342,6 +5353,7 @@ body.studio-entered {
 .score-keyframe-dot.is-dragging {
   background: #ffe65c;
   border-color: #101827;
+  color: #101827;
   outline: 0;
 }
 

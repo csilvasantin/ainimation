@@ -1271,9 +1271,18 @@ function initScorePlayhead(totalFrames) {
       playButton.setAttribute("aria-pressed", "false");
     }
   };
+  // La regla mide siempre 240 fotogramas como mínimo, aunque la pieza acabe
+  // mucho antes: eso es sitio para seguir montando, no metraje. La reproducción
+  // termina donde termina el CONTENIDO, para no dejar al usuario mirando una
+  // cuenta atrás en vacío.
+  const playbackEndFrame = () => {
+    const contentEnd = totalTimelineFrames(currentPlan());
+    return contentEnd > 1 ? Math.min(contentEnd, totalFrames) : totalFrames;
+  };
+
   const startPlayback = () => {
     if (!playButton) return;
-    if (currentFrame >= totalFrames) setFrame(1);
+    if (currentFrame >= playbackEndFrame()) setFrame(1);
     playButton.textContent = "■";
     playButton.setAttribute("aria-label", "Stop timeline");
     playButton.setAttribute("aria-pressed", "true");
@@ -1289,7 +1298,7 @@ function initScorePlayhead(totalFrames) {
         stopPlayback();
         return;
       }
-      if (currentFrame >= totalFrames) {
+      if (currentFrame >= playbackEndFrame()) {
         stopPlayback();
         return;
       }
@@ -2479,6 +2488,10 @@ function stageTextValuesChanged(before, after) {
     ));
 }
 
+// Cuántos fotogramas dura el tramo que se añade al tocar algo con el cabezal ya
+// al final del clip: un segundo a 24 fps, que es lo que dura el recorrido.
+const keyframeStepFrames = 24;
+
 function nextStageKeyframeTiming(member, currentFrame, castIndex) {
   const start = Math.max(1, Number(member?.startFrame || 1));
   const duration = Math.max(1, Number(member?.durationFrames || 24));
@@ -2493,10 +2506,13 @@ function nextStageKeyframeTiming(member, currentFrame, castIndex) {
       isExisting: true,
     };
   }
-  const nextFrame = currentFrame > end ? currentFrame : end + 1;
+  // El keyframe nuevo va al FINAL del tramo que se añade, no pegado al último
+  // (end + 1): así el cambio se recorre a lo largo de esos fotogramas en vez de
+  // saltar de golpe en uno solo y quedarse quieto el resto del clip.
+  const nextFrame = currentFrame > end ? currentFrame : end + keyframeStepFrames;
   return {
     frame: nextFrame,
-    durationFrames: Math.max(duration + 24, nextFrame - start + 24),
+    durationFrames: Math.max(duration + keyframeStepFrames, nextFrame - start + 1),
     isExisting: false,
   };
 }
@@ -2514,10 +2530,11 @@ function nextStageItemKeyframeTiming(item, currentFrame) {
       isExisting: true,
     };
   }
-  const nextFrame = currentFrame > end ? currentFrame : end + 1;
+  // Mismo criterio que en los cast members: el keyframe cierra el tramo nuevo.
+  const nextFrame = currentFrame > end ? currentFrame : end + keyframeStepFrames;
   return {
     frame: nextFrame,
-    durationFrames: Math.max(duration + 24, nextFrame - start + 24),
+    durationFrames: Math.max(duration + keyframeStepFrames, nextFrame - start + 1),
     isExisting: false,
   };
 }
@@ -2530,8 +2547,11 @@ function keyframeDotButtons(keyframes, totalFrames, attributes, isSelected) {
       const dataAttributes = Object.entries({ ...attributes, keyframeFrame: frame })
         .map(([key, value]) => `data-${key.replace(/[A-Z]/g, (match) => `-${match.toLowerCase()}`)}="${escapeHtml(String(value))}"`)
         .join(" ");
+      // El asterisco es la señal de que en ese fotograma hay un cambio guardado:
+      // un punto se confunde con la marca de la regla, y lo que hay que ver de un
+      // vistazo es DÓNDE se ha tocado algo.
       return `
-        <button class="score-keyframe-dot ${isSelected(frame) ? "is-selected" : ""}" type="button" style="left:${left}%" ${dataAttributes} aria-label="Keyframe at frame ${frame}" title="Keyframe ${frame}"></button>
+        <button class="score-keyframe-dot ${isSelected(frame) ? "is-selected" : ""}" type="button" style="left:${left}%" ${dataAttributes} aria-label="Keyframe at frame ${frame}" title="Keyframe ${frame}">*</button>
       `;
     })
     .join("");
