@@ -18,7 +18,7 @@
     <meta property="og:url" content="https://www.ainimation.studio/studio.html" />
     <link rel="canonical" href="https://www.ainimation.studio/studio.html" />
     <link rel="manifest" href="site.webmanifest" />
-    <link rel="stylesheet" href="assets/styles.css?v=dbaa398" />
+    <link rel="stylesheet" href="assets/styles.css?v=dbaa398-dirty" />
   </head>
   <body class="studio-page">
     <header class="site-header studio-site-header" aria-label="Primary">
@@ -199,12 +199,12 @@
                   <kbd>Ctrl+Y</kbd>
                 </button>
                 <i role="separator"></i>
-                <button type="button" data-edit-command="cut" disabled>
+                <button type="button" data-edit-command="cut">
                   <span class="edit-menu-icon" aria-hidden="true">✂</span>
                   <span class="edit-menu-text">Cortar</span>
                   <kbd>Ctrl+X</kbd>
                 </button>
-                <button type="button" data-edit-command="copy" disabled>
+                <button type="button" data-edit-command="copy">
                   <span class="edit-menu-icon" aria-hidden="true">□</span>
                   <span class="edit-menu-text">Copiar</span>
                   <kbd>Ctrl+C</kbd>
@@ -229,7 +229,7 @@
                   <span class="edit-menu-icon" aria-hidden="true">⌫</span>
                   <span class="edit-menu-text">Eliminar</span>
                 </button>
-                <button type="button" data-edit-command="duplicate" disabled>
+                <button type="button" data-edit-command="duplicate">
                   <span class="edit-menu-icon" aria-hidden="true">⊕</span>
                   <span class="edit-menu-text">Duplicar</span>
                   <kbd>Ctrl+D</kbd>
@@ -565,12 +565,12 @@
 
     <!-- XPL: el Lingo ejecutable. El runtime va ANTES que app.js para que la
          ventana Behaviour ya tenga catálogo cuando se pinte el primer plan. -->
-    <script src="assets/xpl-runtime.js?v=dbaa398"></script>
-    <script src="assets/app.js?v=dbaa398" defer></script>
-    <script src="assets/xpl-studio.js?v=dbaa398" defer></script>
+    <script src="assets/xpl-runtime.js?v=dbaa398-dirty"></script>
+    <script src="assets/app.js?v=dbaa398-dirty" defer></script>
+    <script src="assets/xpl-studio.js?v=dbaa398-dirty" defer></script>
     <!-- Va el último: necesita el plan ya cargado para poder sobrescribirlo con
          el que venga en el enlace ?p= y repintar. -->
-    <script src="assets/share-plan.js?v=dbaa398" defer></script>
-    <script src="assets/publish-xperiencia.js?v=dbaa398" defer></script>
+    <script src="assets/share-plan.js?v=dbaa398-dirty" defer></script>
+    <script src="assets/publish-xperiencia.js?v=dbaa398-dirty" defer></script>
   </body>
 </html>

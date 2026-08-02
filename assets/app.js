@@ -906,6 +906,54 @@ function selectedStageTargetExists(plan = null) {
   return false;
 }
 
+// Primero se mira si hay selección y sólo después se lee el plan: leerlo en el
+// valor por defecto del parámetro lo evaluaba SIEMPRE, y en el arranque eso
+// dispara currentPlan() antes de que exista el formulario ("Cannot access
+// 'filmForm' before initialization"), lo que dejaba el Cast sin pintar.
+function selectedCastMember(plan = null) {
+  const index = selectedStageTarget?.castIndex;
+  if (!Number.isInteger(index)) return null;
+  const member = (plan || currentPlan()).cast?.[index];
+  return member?.src ? { index, member } : null;
+}
+
+function copySelectedStageTarget({ cut = false } = {}) {
+  const plan = currentPlan();
+  const selected = selectedCastMember(plan);
+  if (!selected) return false;
+  stageClipboard = JSON.parse(JSON.stringify(selected.member));
+  if (cut) removeCastMemberFromStage(selected.index);
+  updateEditMenuState();
+  return true;
+}
+
+function pasteStageClipboard() {
+  if (!stageClipboard) return false;
+  const plan = currentPlan();
+  const copy = JSON.parse(JSON.stringify(stageClipboard));
+  copy.name = `${stageClipboard.name || "Cast member"} copy`;
+  copy.onStage = true;
+  // Se pega desplazado para que se vea que hay dos y no parezca que no ha pasado nada.
+  copy.keyframes = stageKeyframesFor(stageClipboard).map((keyframe) => ({
+    ...keyframe,
+    x: clampPercent(keyframe.x + 4),
+    y: clampPercent(keyframe.y + 4),
+  }));
+  plan.cast = [...(plan.cast || []), copy];
+  saveFilmPlan(plan);
+  renderFilmPlan(plan);
+  setSelectedStageTarget({ castIndex: plan.cast.length - 1, scope: "keyframe" });
+  return true;
+}
+
+function duplicateSelectedStageTarget() {
+  const previous = stageClipboard;
+  if (!copySelectedStageTarget()) return false;
+  const done = pasteStageClipboard();
+  stageClipboard = previous ?? stageClipboard;
+  return done;
+}
+
 function updateEditMenuState() {
   const deleteButton = document.querySelector('[data-edit-command="delete"]');
   if (deleteButton) deleteButton.disabled = !selectedStageTargetExists();
@@ -913,6 +961,17 @@ function updateEditMenuState() {
   if (undoButton) undoButton.disabled = !canUndoPlan();
   const redoButton = document.querySelector('[data-edit-command="redo"]');
   if (redoButton) redoButton.disabled = !canRedoPlan();
+  // Cortar, Copiar y Duplicar dependen de que haya algo seleccionado; Pegar, de
+  // que haya algo copiado. Antes estaban deshabilitados a fuego en el HTML.
+  const hasSelection = Boolean(selectedCastMember());
+  for (const command of ["cut", "copy", "duplicate"]) {
+    const button = document.querySelector(`[data-edit-command="${command}"]`);
+    if (button) button.disabled = !hasSelection;
+  }
+  for (const command of ["paste", "pasteText"]) {
+    const button = document.querySelector(`[data-edit-command="${command}"]`);
+    if (button) button.disabled = !stageClipboard;
+  }
 }
 
 function setSelectedStageTarget(target) {
@@ -995,6 +1054,13 @@ function deleteSelectedStageTarget() {
 const planHistory = { stack: [], index: -1, restoring: false };
 const planHistoryLimit = 60;
 
+// Portapapeles propio del Studio. document.execCommand("copy"/"paste") sólo
+// entiende de texto seleccionado: sobre un miembro del Stage no copiaba nada, y
+// además Cortar, Copiar y Duplicar estaban puestos a disabled en el HTML, así
+// que ni siquiera se podían pulsar. Va aquí arriba por lo mismo que el
+// historial: updateEditMenuState() lo lee durante el arranque.
+let stageClipboard = null;
+
 function initEditMenu() {
   const menu = document.querySelector(".edit-menu");
   const button = menu?.querySelector("[data-edit-menu]");
@@ -1024,12 +1090,22 @@ function initEditMenu() {
         if (undoPlan()) playUiTick("select");
       } else if (command === "redo") {
         if (redoPlan()) playUiTick("select");
+      } else if (command === "cut") {
+        if (copySelectedStageTarget({ cut: true })) playUiTick("select");
+      } else if (command === "copy") {
+        if (copySelectedStageTarget()) playUiTick("select");
+      } else if (command === "paste" || command === "pasteText") {
+        if (pasteStageClipboard()) playUiTick("stage");
+      } else if (command === "duplicate") {
+        if (duplicateSelectedStageTarget()) playUiTick("stage");
       } else if (command === "delete" && deleteSelectedStageTarget()) {
         playUiTick("select");
       } else {
-        const execCommand = command === "pasteText" ? "paste" : command;
+        // Queda selectAll, que sigue siendo del navegador: el Stage sólo admite
+        // un objeto seleccionado a la vez, así que "seleccionar todo" no tiene
+        // hoy nada que seleccionar.
         try {
-          document.execCommand(execCommand);
+          document.execCommand(command);
         } catch {}
       }
       closeMenu();
@@ -6220,6 +6296,10 @@ document.addEventListener("keydown", (event) => {
       if (redoPlan()) playUiTick("select");
       return;
     }
+    if (key === "c" && copySelectedStageTarget()) { event.preventDefault(); return; }
+    if (key === "x" && copySelectedStageTarget({ cut: true })) { event.preventDefault(); return; }
+    if (key === "v" && pasteStageClipboard()) { event.preventDefault(); return; }
+    if (key === "d" && duplicateSelectedStageTarget()) { event.preventDefault(); return; }
   }
 
   // Con un asterisco del Score seleccionado, Suprimir borra ESE keyframe, no el
