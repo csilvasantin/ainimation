@@ -909,6 +909,10 @@ function selectedStageTargetExists(plan = null) {
 function updateEditMenuState() {
   const deleteButton = document.querySelector('[data-edit-command="delete"]');
   if (deleteButton) deleteButton.disabled = !selectedStageTargetExists();
+  const undoButton = document.querySelector('[data-edit-command="undo"]');
+  if (undoButton) undoButton.disabled = !canUndoPlan();
+  const redoButton = document.querySelector('[data-edit-command="redo"]');
+  if (redoButton) redoButton.disabled = !canRedoPlan();
 }
 
 function setSelectedStageTarget(target) {
@@ -980,6 +984,17 @@ function deleteSelectedStageTarget() {
   return false;
 }
 
+// Historial de la pieza. El menú Editar ofrecía Deshacer y Rehacer con
+// document.execCommand, que sólo actúa sobre campos de texto del navegador: en
+// el Stage y el Score no hacían absolutamente nada. Como TODOS los cambios pasan
+// por saveFilmPlan, el historial se lleva ahí y no en cada acción.
+//
+// Se declara AQUÍ, antes de initEditMenu, porque updateEditMenuState() se llama
+// durante el arranque y leer un `const` antes de su declaración lanza
+// ReferenceError, que tumbaba el script entero.
+const planHistory = { stack: [], index: -1, restoring: false };
+const planHistoryLimit = 60;
+
 function initEditMenu() {
   const menu = document.querySelector(".edit-menu");
   const button = menu?.querySelector("[data-edit-menu]");
@@ -1005,6 +1020,10 @@ function initEditMenu() {
       const command = item.dataset.editCommand;
       if (command === "find") {
         window.find?.("");
+      } else if (command === "undo") {
+        if (undoPlan()) playUiTick("select");
+      } else if (command === "redo") {
+        if (redoPlan()) playUiTick("select");
       } else if (command === "delete" && deleteSelectedStageTarget()) {
         playUiTick("select");
       } else {
@@ -1687,8 +1706,46 @@ function buildFilmPlan(extraScene = false) {
   };
 }
 
+function pushPlanHistory(snapshot) {
+  if (planHistory.restoring) return;
+  if (planHistory.stack[planHistory.index] === snapshot) return;
+  planHistory.stack = planHistory.stack.slice(0, planHistory.index + 1);
+  planHistory.stack.push(snapshot);
+  if (planHistory.stack.length > planHistoryLimit) planHistory.stack.shift();
+  planHistory.index = planHistory.stack.length - 1;
+  updateEditMenuState();
+}
+
+function canUndoPlan() { return planHistory.index > 0; }
+function canRedoPlan() { return planHistory.index >= 0 && planHistory.index < planHistory.stack.length - 1; }
+
+function restorePlanFromHistory(index) {
+  const snapshot = planHistory.stack[index];
+  if (typeof snapshot !== "string") return false;
+  planHistory.restoring = true;
+  try {
+    const plan = normalizeFilmPlan(JSON.parse(snapshot));
+    if (!plan) return false;
+    planHistory.index = index;
+    localStorage.setItem(filmStorageKey, snapshot);
+    hydrateFilmForm(plan);
+    renderFilmPlan(plan);
+    return true;
+  } catch {
+    return false;
+  } finally {
+    planHistory.restoring = false;
+    updateEditMenuState();
+  }
+}
+
+function undoPlan() { return canUndoPlan() && restorePlanFromHistory(planHistory.index - 1); }
+function redoPlan() { return canRedoPlan() && restorePlanFromHistory(planHistory.index + 1); }
+
 function saveFilmPlan(plan) {
-  localStorage.setItem(filmStorageKey, JSON.stringify(plan));
+  const snapshot = JSON.stringify(plan);
+  localStorage.setItem(filmStorageKey, snapshot);
+  pushPlanHistory(snapshot);
 }
 
 function loadFilmPlan() {
@@ -6149,6 +6206,22 @@ helpModal?.addEventListener("click", (event) => {
 document.addEventListener("keydown", (event) => {
   const activeTarget = event.target;
   const isEditingText = activeTarget?.closest?.("input, textarea, [contenteditable='true']");
+  // Ctrl/Cmd+Z y Ctrl/Cmd+Y sobre la pieza. Dentro de un campo de texto NO se
+  // tocan: ahí el deshacer del navegador es el que el usuario espera.
+  if ((event.metaKey || event.ctrlKey) && !isEditingText) {
+    const key = event.key.toLowerCase();
+    if (key === "z" && !event.shiftKey) {
+      event.preventDefault();
+      if (undoPlan()) playUiTick("select");
+      return;
+    }
+    if (key === "y" || (key === "z" && event.shiftKey)) {
+      event.preventDefault();
+      if (redoPlan()) playUiTick("select");
+      return;
+    }
+  }
+
   // Con un asterisco del Score seleccionado, Suprimir borra ESE keyframe, no el
   // objeto entero: es lo que el usuario tiene delante y acaba de señalar.
   if ((event.key === "Delete" || event.key === "Backspace") && !isEditingText) {
