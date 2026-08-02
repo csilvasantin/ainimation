@@ -3144,12 +3144,12 @@ function renderFilmPlan(plan) {
         <div class="score-ruler">
           <div class="score-tools" aria-label="Timeline transport"${timelineControlsStyle()}>
             <div class="score-play-cluster" role="group" aria-label="Timeline range controls">
-              <button class="score-bound-button" type="button" data-score-bound="start" aria-label="Go to start">|←</button>
-              <button class="score-play-top" type="button" data-score-play aria-label="Play timeline" aria-pressed="false">▶</button>
-              <button class="score-bound-button" type="button" data-score-bound="end" aria-label="Go to end">→|</button>
+              <button class="score-bound-button" type="button" data-score-bound="start" title="Go to start (Home)" aria-label="Go to start">|←</button>
+              <button class="score-play-top" type="button" data-score-play title="Play / stop (Space)" aria-label="Play timeline" aria-pressed="false">▶</button>
+              <button class="score-bound-button" type="button" data-score-bound="end" title="Go to end (End)" aria-label="Go to end">→|</button>
             </div>
             <div class="score-transport" role="group" aria-label="Timeline frame controls">
-              <button type="button" data-score-step="prev" aria-label="Previous mark">←</button>
+              <button type="button" data-score-step="prev" title="Previous mark (Shift+←) · one frame with ←" aria-label="Previous mark">←</button>
               <div class="score-fps-stepper" aria-label="Timeline playback speed">
                 <output class="score-fps-value" data-score-fps data-value="24" aria-label="24 frames per second">24</output>
                 <span class="score-fps-buttons" aria-label="Frames per second controls">
@@ -3157,7 +3157,7 @@ function renderFilmPlan(plan) {
                   <button type="button" data-score-fps-step="down" aria-label="Decrease FPS">▼</button>
                 </span>
               </div>
-              <button type="button" data-score-step="next" aria-label="Next mark">→</button>
+              <button type="button" data-score-step="next" title="Next mark (Shift+→) · one frame with →" aria-label="Next mark">→</button>
             </div>
             <div class="score-zoom-stepper" aria-label="Timeline zoom">
               <button type="button" data-score-zoom-step="down" aria-label="Make timeline larger">−</button>
@@ -5662,6 +5662,36 @@ document.addEventListener("keydown", (event) => {
     deleteSelectedStageTarget();
     playUiTick("select");
     return;
+  }
+
+  // Transporte con el teclado, como en Director: espacio reproduce y para, las
+  // flechas mueven fotograma a fotograma (con Shift, de marca en marca) y
+  // Inicio/Fin van a los extremos. Nunca mientras se escribe en un campo.
+  const transport = window.ainTransport;
+  if (transport && !isEditingText && !event.metaKey && !event.ctrlKey && !event.altKey) {
+    if (event.key === " " || event.key === "Spacebar") {
+      event.preventDefault();
+      if (transport.isPlaying()) transport.stop(); else transport.play();
+      playUiTick("stage");
+      return;
+    }
+    if (event.key === "ArrowLeft" || event.key === "ArrowRight") {
+      event.preventDefault();
+      const direction = event.key === "ArrowRight" ? 1 : -1;
+      const frame = currentTimelineFrame();
+      const total = transport.totalFrames;
+      transport.setFrame(event.shiftKey
+        ? nextKeyframeFrame(frame, total, direction)
+        : Math.min(Math.max(1, frame + direction), total));
+      playUiTick("select");
+      return;
+    }
+    if (event.key === "Home" || event.key === "End") {
+      event.preventDefault();
+      transport.setFrame(event.key === "Home" ? 1 : transport.totalFrames);
+      playUiTick("select");
+      return;
+    }
   }
 
   if (["F1", "F2", "F3"].includes(event.key) && getActiveDirectorWindow()) {
