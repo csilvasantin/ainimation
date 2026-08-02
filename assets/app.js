@@ -5462,6 +5462,8 @@ const exampleCastAssets = [
     mediaType: "image",
     src: "assets/director-ai-admira-transparent.png",
     stagePoint: { x: 32, y: 52 },
+    from: { x: 8, y: 52 },   // entra desde la izquierda
+    durationFrames: 72,
   },
   {
     name: "Digital Twin",
@@ -5470,6 +5472,8 @@ const exampleCastAssets = [
     mediaType: "image",
     src: "assets/digital-twin-transparent.png",
     stagePoint: { x: 68, y: 52 },
+    from: { x: 92, y: 52 },  // entra desde la derecha, a su encuentro
+    durationFrames: 72,
   },
   {
     name: "Teaser",
@@ -5478,6 +5482,8 @@ const exampleCastAssets = [
     mediaType: "video",
     src: "assets/ainimation-teaser.mp4",
     stagePoint: { x: 50, y: 22 },
+    from: { x: 50, y: 6 },   // baja desde arriba, como un rótulo que entra
+    durationFrames: 72,
   },
 ];
 
@@ -5496,10 +5502,27 @@ function startExampleMovie() {
     })),
   ];
   exampleCastAssets.forEach((asset, offset) => {
-    scheduleCastMember(plan, baseCast.length + offset, {
-      stagePoint: asset.stagePoint,
-      startFrame: 1 + (offset * 24),
-    });
+    const index = baseCast.length + offset;
+    const startFrame = 1 + (offset * 24);
+    plan.cast[index].durationFrames = asset.durationFrames;
+    scheduleCastMember(plan, index, { stagePoint: asset.stagePoint, startFrame });
+    // scheduleCastMember deja un único keyframe, y con uno solo el Play no mueve
+    // nada: se ve la pieza montada pero quieta. Se le añade el keyframe de
+    // llegada para que el ejemplo se pueda REPRODUCIR, no sólo mirar.
+    const placed = plan.cast[index];
+    const arrival = placed.keyframes[0];
+    // `from` y `stagePoint` se escriben los dos como CENTRO del objeto, que es
+    // como los lee scheduleCastMember; el keyframe guarda la esquina, así que
+    // hay que descontar la mitad del tamaño igual que hace él.
+    placed.keyframes = [
+      {
+        ...arrival,
+        frame: startFrame,
+        x: clampPercent(asset.from.x - (arrival.w / 2)),
+        y: clampPercent(asset.from.y - (arrival.h / 2)),
+      },
+      { ...arrival, frame: startFrame + asset.durationFrames - 1 },
+    ];
   });
   saveFilmPlan(plan);
   renderFilmPlan(plan);
