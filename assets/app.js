@@ -4696,11 +4696,11 @@ function audioStageKind(member) {
   return stockMemberCategory(member) === "music" ? "music" : "audio";
 }
 
-// El Stock vive en *.workers.dev, que varios ISP españoles estrangulan o
-// bloquean: medido desde Madrid, /stock/list responde 200 pero tarda ~14 s desde
-// el navegador, y desde la línea de comandos ni contesta. Sin límite de espera,
-// un fetch así deja la interfaz colgada sin explicar nada, que es exactamente lo
-// que parecía una avería de la app.
+// El listado del Stock tarda de 11 a 15 segundos en contestar. Medido hoy por
+// los dos hostnames del mismo worker —api.admira.store y el de workers.dev— y da
+// igual: no es el corte de *.workers.dev del que habla la nota vieja, porque la
+// raíz del worker responde en 0,07 s. Es esa ruta la que es lenta.
+// Sin límite de espera, un fetch así deja la interfaz colgada sin explicar nada.
 const stockRequestTimeoutMs = 25000;
 
 async function fetchWithTimeout(url, options = {}, timeoutMs = stockRequestTimeoutMs) {
@@ -4711,7 +4711,7 @@ async function fetchWithTimeout(url, options = {}, timeoutMs = stockRequestTimeo
     return await fetch(url, { ...options, signal: controller.signal });
   } catch (error) {
     if (error?.name === "AbortError") {
-      throw new Error(`El Stock de Admira no respondió en ${Math.round(timeoutMs / 1000)} s. Suele ser el bloqueo de *.workers.dev de algunos operadores españoles: con VPN funciona.`);
+      throw new Error(`El Stock de Admira no respondió en ${Math.round(timeoutMs / 1000)} s. Su listado tarda de 11 a 15 s incluso cuando va bien, así que puede ser sólo lentitud: vuelve a intentarlo.`);
     }
     throw error;
   } finally {
