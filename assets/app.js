@@ -1063,6 +1063,7 @@ function syncStageToFrame(frame = currentTimelineFrame(), shouldPlay = false) {
       // Va por variable, no por style.opacity, para que el fantasma pueda
       // atenuarla sin pisarla (y para que la opacidad animada se siga viendo).
       figure.style.setProperty("--stage-opacity", String(clampOpacity(keyframe.opacity)));
+      applyStageRotation(figure, keyframe.rotation);
     }
     // Fuera de su tramo el miembro no se ve — es lo correcto en el Stage. Pero si
     // es el que se está editando, se deja como FANTASMA: así se puede agarrar
@@ -2371,6 +2372,33 @@ function clampOpacity(value) {
   return Math.min(Math.max(number, 0), 1);
 }
 
+// La rotación se guarda en grados SIN normalizar a 0-360: así una vuelta entera
+// (0 → 360) se interpola como un giro completo en vez de quedarse quieta.
+function clampRotation(value) {
+  const number = Number(value);
+  if (!Number.isFinite(number)) return 0;
+  return Math.min(Math.max(number, -1440), 1440);
+}
+
+// El giro va en transform, aparte de left/top/width/height, y se quita del todo
+// cuando vale 0 para no dejar un contexto de apilado que no hace falta.
+function applyStageRotation(element, rotation) {
+  const degrees = clampRotation(rotation);
+  element.style.transform = degrees ? `rotate(${degrees}deg)` : "";
+}
+
+// Escala respecto al tamaño con el que se colocó el miembro, manteniendo el
+// centro: si sólo se cambiara w/h, el objeto crecería hacia abajo y a la
+// derecha y parecería que además se ha movido.
+function scaledBox(current, baseSize, percent) {
+  const factor = Math.max(0.1, Number(percent) / 100);
+  const w = clampStageSize(baseSize.w * factor, current.w);
+  const h = clampStageSize(baseSize.h * factor, current.h);
+  const centerX = Number(current.x) + (Number(current.w) / 2);
+  const centerY = Number(current.y) + (Number(current.h) / 2);
+  return { w, h, x: clampPercent(centerX - (w / 2)), y: clampPercent(centerY - (h / 2)) };
+}
+
 function defaultStageKeyframe(member, frame = Number(member?.startFrame || 1), index = 0) {
   return {
     frame: Number(frame) || 1,
@@ -2379,6 +2407,7 @@ function defaultStageKeyframe(member, frame = Number(member?.startFrame || 1), i
     w: clampStageSize(member?.stageW ?? member?.w, 12),
     h: clampStageSize(member?.stageH ?? member?.h, 10),
     opacity: clampOpacity(member?.opacity),
+    rotation: clampRotation(member?.rotation),
     color: member?.color || "",
     text: member?.text || "",
     fontWeight: member?.fontWeight || "850",
@@ -2402,6 +2431,7 @@ function stageKeyframesFor(member, index = 0) {
       w: clampStageSize(keyframe.w, fallback.w),
       h: clampStageSize(keyframe.h, fallback.h),
       opacity: clampOpacity(keyframe.opacity ?? fallback.opacity),
+      rotation: clampRotation(keyframe.rotation ?? fallback.rotation),
       color: keyframe.color || member?.color || "",
       text: keyframe.text ?? member?.text ?? "",
       fontWeight: keyframe.fontWeight || member?.fontWeight || "850",
@@ -2434,6 +2464,7 @@ function interpolateStageKeyframe(member, frame, index = 0) {
     w: previous.w + (next.w - previous.w) * progress,
     h: previous.h + (next.h - previous.h) * progress,
     opacity: clampOpacity(previous.opacity) + (clampOpacity(next.opacity) - clampOpacity(previous.opacity)) * progress,
+    rotation: clampRotation(previous.rotation) + (clampRotation(next.rotation) - clampRotation(previous.rotation)) * progress,
     color: previous.color || next.color || "",
     text: previous.text || next.text || "",
     fontWeight: previous.fontWeight || next.fontWeight || "850",
@@ -2454,6 +2485,7 @@ function upsertStageKeyframe(member, frame, values, index = 0) {
     w: clampStageSize(values.w, base.w),
     h: clampStageSize(values.h, base.h),
     opacity: clampOpacity(values.opacity ?? base.opacity),
+    rotation: clampRotation(values.rotation ?? base.rotation),
     color: values.color || base.color || member?.color || "",
     text: values.text ?? base.text ?? member?.text ?? "",
     fontWeight: values.fontWeight || base.fontWeight || member?.fontWeight || "850",
@@ -3091,6 +3123,7 @@ function renderFilmPlan(plan) {
       figure.style.width = `${keyframe.w}%`;
       figure.style.height = `${keyframe.h}%`;
       figure.style.setProperty("--stage-opacity", String(clampOpacity(keyframe.opacity)));
+      applyStageRotation(figure, keyframe.rotation);
       const media = document.createElement(member.mediaType === "video" ? "video" : member.mediaType === "audio" ? "audio" : "img");
       if (member.stock || /^https?:\/\//i.test(member.src || "")) {
         media.crossOrigin = "anonymous";
@@ -5604,6 +5637,11 @@ function openStagePropertiesMenu(memberEl, clientX, clientY) {
   const current = interpolateStageKeyframe(member, frame, stageIndex) ||
     defaultStageKeyframe(member, frame, stageIndex);
   const percent = Math.round(clampOpacity(current.opacity) * 100);
+  const degrees = Math.round(clampRotation(current.rotation));
+  // La escala se muestra respecto al tamaño con el que se colocó el miembro, no
+  // en porcentaje del Stage: "150%" significa metro y medio de lo que medía.
+  const baseSize = defaultStageKeyframe(member, frame, stageIndex);
+  const scalePercent = Math.round((current.w / (baseSize.w || current.w || 1)) * 100);
 
   const menu = document.createElement("div");
   menu.className = "stage-properties-menu";
@@ -5616,6 +5654,16 @@ function openStagePropertiesMenu(memberEl, clientX, clientY) {
       <input type="range" min="0" max="100" step="1" value="${percent}" data-stage-opacity />
       <output data-stage-opacity-value>${percent}%</output>
     </label>
+    <label class="stage-properties-row">
+      <span>Rotation</span>
+      <input type="range" min="-180" max="180" step="1" value="${degrees}" data-stage-rotation />
+      <output data-stage-rotation-value>${degrees}°</output>
+    </label>
+    <label class="stage-properties-row">
+      <span>Scale</span>
+      <input type="range" min="10" max="300" step="1" value="${scalePercent}" data-stage-scale />
+      <output data-stage-scale-value>${scalePercent}%</output>
+    </label>
     <p class="stage-properties-hint">Change it on another frame and it animates between the two.</p>
   `;
   menu.style.left = `${clientX}px`;
@@ -5627,35 +5675,65 @@ function openStagePropertiesMenu(memberEl, clientX, clientY) {
   if (rect.right > window.innerWidth) menu.style.left = `${Math.max(8, window.innerWidth - rect.width - 8)}px`;
   if (rect.bottom > window.innerHeight) menu.style.top = `${Math.max(8, window.innerHeight - rect.height - 8)}px`;
 
-  const slider = menu.querySelector("[data-stage-opacity]");
-  const readout = menu.querySelector("[data-stage-opacity-value]");
-  const applyOpacity = (commit) => {
-    const value = Number(slider.value) / 100;
-    readout.textContent = `${slider.value}%`;
-    // Mientras se arrastra sólo se previsualiza; el keyframe se escribe al soltar.
-    memberEl.style.setProperty("--stage-opacity", String(value));
-    if (!commit) return;
+  // Escribe el keyframe en el fotograma del cabezal. A diferencia del arrastre,
+  // aquí el fotograma NO se desplaza: se guarda donde el usuario está mirando, y
+  // el clip sólo se alarga si el cabezal ya estaba más allá de su final.
+  const commitValues = (values) => {
     const nextPlan = currentPlan();
-    // A diferencia del arrastre, aquí el fotograma NO se desplaza: se escribe
-    // donde está el cabezal, que es lo que el usuario está mirando. El clip sólo
-    // se alarga si el cabezal ya estaba más allá de su final.
     nextPlan.cast[castIndex].durationFrames = Math.max(
       Number(nextPlan.cast[castIndex].durationFrames || 24),
       frame - Number(nextPlan.cast[castIndex].startFrame || 1) + 1,
     );
     nextPlan.cast[castIndex].keyframes = upsertStageKeyframe(
-      nextPlan.cast[castIndex],
-      frame,
-      { opacity: value },
-      stageIndex,
+      nextPlan.cast[castIndex], frame, values, stageIndex,
     );
     saveFilmPlan(nextPlan);
     renderFilmPlan(nextPlan);
     setTimelineFrame(frame, false);
   };
-  slider.addEventListener("input", () => applyOpacity(false));
-  slider.addEventListener("change", () => applyOpacity(true));
-  slider.focus();
+
+  const controls = [
+    {
+      input: menu.querySelector("[data-stage-opacity]"),
+      output: menu.querySelector("[data-stage-opacity-value]"),
+      format: (raw) => `${raw}%`,
+      preview: (raw) => memberEl.style.setProperty("--stage-opacity", String(raw / 100)),
+      values: (raw) => ({ opacity: raw / 100 }),
+    },
+    {
+      input: menu.querySelector("[data-stage-rotation]"),
+      output: menu.querySelector("[data-stage-rotation-value]"),
+      format: (raw) => `${raw}°`,
+      preview: (raw) => applyStageRotation(memberEl, raw),
+      values: (raw) => ({ rotation: raw }),
+    },
+    {
+      input: menu.querySelector("[data-stage-scale]"),
+      output: menu.querySelector("[data-stage-scale-value]"),
+      format: (raw) => `${raw}%`,
+      preview: (raw) => {
+        const size = scaledBox(current, baseSize, raw);
+        memberEl.style.width = `${size.w}%`;
+        memberEl.style.height = `${size.h}%`;
+        memberEl.style.left = `${size.x}%`;
+        memberEl.style.top = `${size.y}%`;
+      },
+      values: (raw) => scaledBox(current, baseSize, raw),
+    },
+  ].filter((control) => control.input);
+
+  for (const control of controls) {
+    // Mientras se arrastra sólo se previsualiza; el keyframe se escribe al soltar.
+    control.input.addEventListener("input", () => {
+      const raw = Number(control.input.value);
+      control.output.textContent = control.format(raw);
+      control.preview(raw);
+    });
+    control.input.addEventListener("change", () => {
+      commitValues(control.values(Number(control.input.value)));
+    });
+  }
+  controls[0]?.input.focus();
 
   const dismiss = (event) => {
     if (menu.contains(event.target)) return;
