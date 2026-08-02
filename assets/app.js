@@ -1444,7 +1444,14 @@ const stageRulerStep = 100;
 const stockImportBatchSize = 3;
 const stockImportFetchLimit = 10;
 const stockCategoryFilters = ["audio", "music", "image", "video"];
+// C1 · el navegador sale de *.workers.dev. Los ISP españoles lo bloquean, así que
+// una visita desde España ve el Stock caído aunque el worker responda. La lista ya
+// se recorre en orden hasta que una responde, así que basta con poner DELANTE el
+// dominio propio: mientras su ruta de Worker no exista, falla y se sigue por
+// workers.dev igual que hasta ahora (sin día D, sin romper nada).
+// Para activarlo hace falta una ruta de Worker en Cloudflare — ver docs/dominios-propios.md.
 const admiraStockEndpoints = [
+  `https://api.pixeria.com/stock/list?limit=${stockImportFetchLimit}`,
   `https://pixer-eleven.csilvasantin.workers.dev/stock/list?limit=${stockImportFetchLimit}`,
   "https://www.admira.studio/api/stock/latest",
   `https://www.admira.studio/api/stock?limit=${stockImportFetchLimit}&sort=latest`,
@@ -1455,6 +1462,7 @@ const admiraStockEndpoints = [
   `https://admira.studio/api/stock?limit=${stockImportFetchLimit}&sort=latest`,
 ];
 const admiraStockExportEndpoints = [
+  "https://api.pixeria.com/stock/publish",
   "https://pixer-eleven.csilvasantin.workers.dev/stock/publish",
 ];
 let activeDirectorWindow = null;

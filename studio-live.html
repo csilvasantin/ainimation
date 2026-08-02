@@ -265,7 +265,33 @@
     </footer>
 
     <script>
-      const WORKER = 'https://ainimation-studio.csilvasantin.workers.dev';
+      // C1 · el navegador sale de *.workers.dev. Los ISP españoles lo bloquean, así que
+      // una visita desde España veía esto muerto aunque el worker respondiera. Se prueba
+      // primero el dominio propio y se cae al de siempre si aún no tiene ruta de Worker:
+      // así no hay día D. Activarlo es cosa de Cloudflare — ver docs/dominios-propios.md.
+      const WORKER_BASES = [
+        'https://api.ainimation.studio',
+        'https://ainimation-studio.csilvasantin.workers.dev',
+      ];
+      let WORKER = WORKER_BASES[WORKER_BASES.length - 1];
+      const workerReady = (async () => {
+        const cached = sessionStorage.getItem('ain_worker_base');
+        if (cached) return (WORKER = cached);
+        for (const base of WORKER_BASES) {
+          const stop = new AbortController();
+          const timer = setTimeout(() => stop.abort(), 2500);
+          try {
+            const res = await fetch(base + '/api/gallery', { signal: stop.signal, cache: 'no-store' });
+            // Un dominio sin ruta de Worker contesta una página de error, no JSON.
+            if (res.ok && /json/i.test(res.headers.get('content-type') || '')) {
+              try { sessionStorage.setItem('ain_worker_base', base); } catch {}
+              return (WORKER = base);
+            }
+          } catch { /* siguiente candidato */ }
+          finally { clearTimeout(timer); }
+        }
+        return WORKER;   // ninguno responde: que el error lo dé la petición real
+      })();
       const beatsEl = document.getElementById('beats');
       const seed = [
         ['12', 'pipelines de producción, un solo Director de IA'],
@@ -401,6 +427,7 @@
       })();
 
       async function produce() {
+        await workerReady;   // qué base usamos se decide una vez, al principio
         errEl.textContent = '';
         const brief = readBrief();
         try { localStorage.setItem('ain_brief', JSON.stringify(brief)); } catch {}
@@ -501,6 +528,7 @@
         return card;
       }
       async function loadGallery() {
+        await workerReady;
         try {
           const d = await (await fetch(WORKER + '/api/gallery')).json();
           const items = d.items || [];
