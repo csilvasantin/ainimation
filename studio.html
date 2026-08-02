@@ -172,6 +172,9 @@
                 <button type="button" data-stock-import>Importar</button>
                 <button type="button" data-stock-export>Exportar</button>
                 <button type="button" data-download-stage-video>Descargar</button>
+                <!-- C5 · la pieza deja de vivir solo en este navegador: se empaqueta
+                     en un enlace (plan + marcas del Score + reglas XPL). -->
+                <button type="button" data-share-piece>Compartir</button>
               </span>
             </span>
             <span class="edit-menu">
@@ -557,5 +560,8 @@
     <script src="assets/xpl-runtime.js?v=6cba8c2"></script>
     <script src="assets/app.js?v=6cba8c2" defer></script>
     <script src="assets/xpl-studio.js?v=6cba8c2" defer></script>
+    <!-- Va el último: necesita el plan ya cargado para poder sobrescribirlo con
+         el que venga en el enlace ?p= y repintar. -->
+    <script src="assets/share-plan.js?v=6cba8c2" defer></script>
   </body>
 </html>
