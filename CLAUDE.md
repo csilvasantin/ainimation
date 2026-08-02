@@ -33,7 +33,11 @@ espejo de producción **admira.tv** (–1 día). Capa "Emitir/Animar". Ver la me
 
 ## Deploy
 GitHub Pages sirve `main` (raíz). CNAME = `www.ainimation.studio`.
-- Al tocar `assets/styles.css` o `app.js`, **bumpea el `?v=` en index.html/studio.html**.
+- Al tocar cualquier cosa de `assets/`, **`npm run stamp`**: reescribe todos los
+  `?v=` de los `.html` con el sha del último commit que tocó `assets/`, así que
+  el token cambia solo cuando cambian los assets y es el MISMO en todas las
+  páginas (antes iba a mano y cada HTML llevaba el suyo → dos copias cacheadas
+  del mismo `app.js`). `npm run verify:stamp` comprueba sin escribir.
 - Preview local: `python3 -m http.server 9134` → http://127.0.0.1:9134/
 - HTTPS: el cert de Pages se aprovisiona solo tras fijar el custom domain; si
   `https_enforced` sigue en false, re-setear el cname vía API fuerza reintento.

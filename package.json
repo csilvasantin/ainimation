@@ -4,7 +4,9 @@
   "description": "Static website for `ainimation.studio`.",
   "private": true,
   "scripts": {
-    "verify:stage": "node scripts/verify-stage-ruler.js"
+    "verify:stage": "node scripts/verify-stage-ruler.js",
+    "stamp": "node scripts/stamp-version.mjs",
+    "verify:stamp": "node scripts/stamp-version.mjs --check"
   },
   "repository": {
     "type": "git",

@@ -4,6 +4,13 @@
     <loc>https://www.ainimation.studio/</loc>
     <priority>1.0</priority>
   </url>
+  <!-- El editor real: un brief entra, sale un vídeo 1080p. Faltaba en el sitemap,
+       así que se indexaba la superficie de autoría y no el producto al que apunta
+       la home. -->
+  <url>
+    <loc>https://www.ainimation.studio/studio-live.html</loc>
+    <priority>0.9</priority>
+  </url>
   <url>
     <loc>https://www.ainimation.studio/studio.html</loc>
     <priority>0.8</priority>
