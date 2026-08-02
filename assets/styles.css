@@ -6397,3 +6397,17 @@ body.ain-play [data-xpl-hot] { cursor: pointer !important; }
   cursor: default;
   opacity: 0.45;
 }
+
+.stage-properties-row-wide {
+  grid-template-columns: auto minmax(0, 1fr);
+}
+
+.stage-properties-row select {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(220, 239, 255, 0.24);
+  border-radius: 6px;
+  color: #edf6ff;
+  font: inherit;
+  padding: 4px 6px;
+  width: 100%;
+}

@@ -2378,6 +2378,26 @@ function clampOpacity(value) {
   return Math.min(Math.max(number, 0), 1);
 }
 
+// Curvas de entrada y salida. El easing lo lleva el keyframe de SALIDA: define
+// cómo se va de él hacia el siguiente, que es la convención de cualquier
+// herramienta de animación. Con "linear" todo va a velocidad constante, que es
+// lo que hace que un movimiento parezca de maqueta.
+const easingCurves = {
+  linear: (t) => t,
+  "ease-in": (t) => t * t,
+  "ease-out": (t) => 1 - ((1 - t) * (1 - t)),
+  "ease-in-out": (t) => (t < 0.5 ? 2 * t * t : 1 - (((-2 * t) + 2) ** 2) / 2),
+};
+
+function easingName(value) {
+  return Object.hasOwn(easingCurves, String(value)) ? String(value) : "linear";
+}
+
+function easeProgress(easing, progress) {
+  const clamped = Math.min(Math.max(Number(progress) || 0, 0), 1);
+  return easingCurves[easingName(easing)](clamped);
+}
+
 // La rotación se guarda en grados SIN normalizar a 0-360: así una vuelta entera
 // (0 → 360) se interpola como un giro completo en vez de quedarse quieta.
 function clampRotation(value) {
@@ -2414,6 +2434,7 @@ function defaultStageKeyframe(member, frame = Number(member?.startFrame || 1), i
     h: clampStageSize(member?.stageH ?? member?.h, 10),
     opacity: clampOpacity(member?.opacity),
     rotation: clampRotation(member?.rotation),
+    easing: easingName(member?.easing),
     color: member?.color || "",
     text: member?.text || "",
     fontWeight: member?.fontWeight || "850",
@@ -2438,6 +2459,7 @@ function stageKeyframesFor(member, index = 0) {
       h: clampStageSize(keyframe.h, fallback.h),
       opacity: clampOpacity(keyframe.opacity ?? fallback.opacity),
       rotation: clampRotation(keyframe.rotation ?? fallback.rotation),
+      easing: easingName(keyframe.easing ?? fallback.easing),
       color: keyframe.color || member?.color || "",
       text: keyframe.text ?? member?.text ?? "",
       fontWeight: keyframe.fontWeight || member?.fontWeight || "850",
@@ -2462,7 +2484,11 @@ function interpolateStageKeyframe(member, frame, index = 0) {
     }
   }
   if (!previous || !next || previous.frame === next.frame) return previous || next;
-  const progress = (currentFrame - previous.frame) / (next.frame - previous.frame);
+  // La curva la pone el keyframe del que se sale, no al que se llega.
+  const progress = easeProgress(
+    previous.easing,
+    (currentFrame - previous.frame) / (next.frame - previous.frame),
+  );
   return {
     frame: currentFrame,
     x: previous.x + (next.x - previous.x) * progress,
@@ -2492,6 +2518,7 @@ function upsertStageKeyframe(member, frame, values, index = 0) {
     h: clampStageSize(values.h, base.h),
     opacity: clampOpacity(values.opacity ?? base.opacity),
     rotation: clampRotation(values.rotation ?? base.rotation),
+    easing: easingName(values.easing ?? base.easing),
     color: values.color || base.color || member?.color || "",
     text: values.text ?? base.text ?? member?.text ?? "",
     fontWeight: values.fontWeight || base.fontWeight || member?.fontWeight || "850",
@@ -5743,11 +5770,22 @@ function openStagePropertiesMenu(memberEl, clientX, clientY) {
       <input type="range" min="10" max="300" step="1" value="${scalePercent}" data-stage-scale />
       <output data-stage-scale-value>${scalePercent}%</output>
     </label>
+    <label class="stage-properties-row stage-properties-row-wide">
+      <span>Easing</span>
+      <select data-stage-easing>
+        <option value="linear">Linear</option>
+        <option value="ease-in">Ease in</option>
+        <option value="ease-out">Ease out</option>
+        <option value="ease-in-out">Ease in-out</option>
+      </select>
+    </label>
     <p class="stage-properties-hint">Change it on another frame and it animates between the two.</p>
   `;
   menu.style.left = `${clientX}px`;
   menu.style.top = `${clientY}px`;
   document.body.append(menu);
+  const easingSelect = menu.querySelector("[data-stage-easing]");
+  if (easingSelect) easingSelect.value = easingName(current.easing);
 
   // Si se sale por la derecha o por abajo, se recoloca dentro de la ventana.
   const rect = menu.getBoundingClientRect();
@@ -5800,6 +5838,12 @@ function openStagePropertiesMenu(memberEl, clientX, clientY) {
       values: (raw) => scaledBox(current, baseSize, raw),
     },
   ].filter((control) => control.input);
+
+  // El easing no tiene previsualización en vivo: es una curva, no un valor, y
+  // sólo se aprecia reproduciendo. Se guarda directo al elegirlo.
+  easingSelect?.addEventListener("change", () => {
+    commitValues({ easing: easingSelect.value });
+  });
 
   for (const control of controls) {
     // Mientras se arrastra sólo se previsualiza; el keyframe se escribe al soltar.
