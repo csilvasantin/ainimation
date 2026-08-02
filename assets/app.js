@@ -2981,7 +2981,15 @@ function renderFilmPlan(plan) {
         </div>
       </article>
     `;
-    }).join("") : `<p class="cast-empty-state">${availableCastMembers.length ? "No cast members match this filter" : "Import cast members to begin"}</p>`;
+    }).join("") : (availableCastMembers.length
+      ? `<p class="cast-empty-state">No cast members match this filter</p>`
+      // Con el Cast vacío el cartel era una vía muerta: decía qué falta pero no
+      // daba por dónde empezar. Ahora el propio hueco arranca la película.
+      : `<div class="cast-empty-state">
+          <p>Nothing in the Cast yet.</p>
+          <button class="button primary" type="button" data-start-example>Start from an example</button>
+          <small>Or import your own from Tools.</small>
+        </div>`);
 
     castBin.querySelectorAll("[data-cast-index]").forEach((item) => {
       const castIndex = Number(item.dataset.castIndex);
@@ -3173,7 +3181,10 @@ function renderFilmPlan(plan) {
           </div>
           <i class="score-playhead" role="slider" aria-label="Timeline playhead" aria-valuemin="1" aria-valuemax="${totalFrames}" aria-valuenow="1" data-frame="1" data-display-frames="${displayFrames}"></i>
         </div>
-        ${scoreChannels.length ? "" : `<div class="score-empty-state">Import cast members to start the timeline</div>`}
+        ${scoreChannels.length ? "" : `<div class="score-empty-state">
+          <p>The Score is empty.</p>
+          <button class="button primary" type="button" data-start-example>Start from an example</button>
+        </div>`}
         ${scoreChannels.map((channel, channelIndex) => `
           <div class="score-row-label">
             <span contenteditable="true" spellcheck="false" role="textbox" aria-label="Edit timeline row label" data-score-label-index="${channelIndex}" ${Number.isInteger(channel.castIndex) ? `data-cast-index="${channel.castIndex}"` : ""} ${channel.stageItemId ? `data-stage-item-id="${escapeHtml(channel.stageItemId)}"` : ""}>${escapeHtml(channel.name)}</span>
@@ -5442,6 +5453,58 @@ function initStageTools() {
   });
 }
 
+// Media que ya vive en el repo, para que el ejemplo no dependa de nada externo.
+const exampleCastAssets = [
+  {
+    name: "Director AI",
+    role: "Lead",
+    type: "Image",
+    mediaType: "image",
+    src: "assets/director-ai-admira-transparent.png",
+    stagePoint: { x: 32, y: 52 },
+  },
+  {
+    name: "Digital Twin",
+    role: "Support",
+    type: "Image",
+    mediaType: "image",
+    src: "assets/digital-twin-transparent.png",
+    stagePoint: { x: 68, y: 52 },
+  },
+  {
+    name: "Teaser",
+    role: "Footage",
+    type: "Video",
+    mediaType: "video",
+    src: "assets/ainimation-teaser.mp4",
+    stagePoint: { x: 50, y: 22 },
+  },
+];
+
+// "Start from an example": genera el board y además mete media real en el Cast y
+// en el Score. Sin esto el board se creaba pero el Cast seguía vacío (sólo pinta
+// miembros con src), así que el arranque seguía siendo una vía muerta.
+function startExampleMovie() {
+  const plan = buildFilmPlan(false);
+  const baseCast = plan.cast || makeCast(plan);
+  plan.cast = [
+    ...baseCast,
+    ...exampleCastAssets.map(({ stagePoint, ...member }) => ({
+      ...member,
+      imported: true,
+      prompt: `Example cast member shipped with AInimation Studio (${member.mediaType}).`,
+    })),
+  ];
+  exampleCastAssets.forEach((asset, offset) => {
+    scheduleCastMember(plan, baseCast.length + offset, {
+      stagePoint: asset.stagePoint,
+      startFrame: 1 + (offset * 24),
+    });
+  });
+  saveFilmPlan(plan);
+  renderFilmPlan(plan);
+}
+
 function importCastAsset(name, kind) {
   const plan = currentPlan();
   const mode = document.querySelector(".tool-palette")?.dataset.importMode || "asset";
@@ -5514,6 +5577,15 @@ if (filmForm) {
     const plan = buildFilmPlan(false);
     saveFilmPlan(plan);
     renderFilmPlan(plan);
+  });
+
+  // Los huecos vacíos del Cast y del Score arrancan la película por el MISMO
+  // camino que "Generate board". Delegado en document porque esos botones se
+  // vuelven a pintar en cada render.
+  document.addEventListener("click", (event) => {
+    if (!event.target.closest("[data-start-example]")) return;
+    startExampleMovie();
+    playUiTick("stage");
   });
 
   addSceneButton?.addEventListener("click", () => {

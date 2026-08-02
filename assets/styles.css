@@ -2805,6 +2805,33 @@ body.is-cast-pointer-dragging .director-cast-window {
   text-align: center;
 }
 
+/* Los estados vacíos dejan de ser un cartel y pasan a ofrecer la entrada, así que
+   apilan texto + botón en vez de ir en una sola línea. */
+.cast-empty-state,
+.score-empty-state {
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+}
+
+.cast-empty-state p,
+.score-empty-state p,
+.cast-empty-state small {
+  margin: 0;
+}
+
+.cast-empty-state small {
+  font-size: 0.66rem;
+  font-weight: 650;
+  opacity: 0.72;
+}
+
+.cast-empty-state .button,
+.score-empty-state .button {
+  font-size: 0.72rem;
+  padding: 6px 14px;
+}
+
 .director-cast-window .cast-member img,
 .director-cast-window .cast-member video,
 .director-cast-window .cast-member-kind {
