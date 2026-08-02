@@ -1758,6 +1758,14 @@ h2 {
   margin-right: 12px;
 }
 
+/* El .treatment de la página es un grid de dos columnas cuya segunda pide 220px
+   de mínimo. Dentro de esta ventana quedan ~245px útiles, así que las dos
+   columnas no caben: se desbordaban una sobre otra y el texto salía superpuesto.
+   En un panel estrecho lo que toca es apilar. */
+.property-window .treatment {
+  grid-template-columns: minmax(0, 1fr);
+}
+
 .property-window .pipeline-grid {
   grid-template-columns: repeat(4, minmax(160px, 1fr));
   overflow-x: auto;
