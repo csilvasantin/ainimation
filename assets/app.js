@@ -382,6 +382,20 @@ function initDirectorWindowManager() {
     };
   }
 
+  // Alto que pide el contenido de una ventana (barra de título + cuerpo sin
+  // recortar). Devuelve el fallback si aún no está medible en el DOM.
+  function measuredWindowHeight(id, fallback) {
+    const win = windows.find((item) => item.dataset.window === id);
+    const body = win?.querySelector(".window-titlebar + *");
+    if (!win || !body || !body.scrollHeight) return fallback;
+    const titlebar = win.querySelector(".window-titlebar");
+    const styles = window.getComputedStyle(win);
+    const chrome = (titlebar?.offsetHeight || 0) +
+      parseFloat(styles.borderTopWidth || 0) +
+      parseFloat(styles.borderBottomWidth || 0);
+    return Math.ceil(body.scrollHeight + chrome);
+  }
+
   function defaultLayoutRect(win, fallbackRect) {
     if (isStackedLayout()) return fallbackRect;
     const bounds = workbench.getBoundingClientRect();
@@ -392,6 +406,16 @@ function initDirectorWindowManager() {
     const timelineTop = Math.max(0, bounds.height - timelineHeight);
     const lowerHeight = clamp(Math.round(bounds.height * 0.15), 140, 210);
     const lowerTop = Math.max(0, timelineTop - lowerHeight - gap);
+    // El AI Director no cabe en la banda "lower": con 210px el "Generate board"
+    // quedaba cortado bajo el borde. En vez de otro número mágico, se mide el
+    // contenido real del formulario (el CSS de la ventana oculta todos los campos
+    // salvo el intent y sus botones) y la ventana nace con esa altura.
+    const promptHeight = clamp(
+      measuredWindowHeight("prompt", 270),
+      250,
+      Math.max(250, timelineTop - gap),
+    );
+    const promptTop = Math.max(0, timelineTop - promptHeight - gap);
     const stageHeight = Math.max(360, timelineTop - gap);
     const sideLeft = stageWidth + gap;
     const castHeight = clamp(Math.round(bounds.height * 0.18), 190, 300);
@@ -418,9 +442,9 @@ function initDirectorWindowManager() {
       script: { left: 0, top: lowerTop, width: scriptWidth, height: lowerHeight },
       prompt: {
         left: promptLeft,
-        top: lowerTop,
+        top: promptTop,
         width: promptWidth,
-        height: lowerHeight,
+        height: promptHeight,
       },
     };
 
@@ -1196,6 +1220,7 @@ function initScorePlayhead(totalFrames) {
   const fpsValues = [12, 24, 25, 30, 60];
   let currentFps = Number(fpsReadout?.dataset.value || fpsReadout?.textContent || 24);
   let playTimer = null;
+  let playUntilFrame = null;
   const displayFrames = Math.max(1, Number(playhead.dataset.displayFrames || totalFrames));
   const clampFrame = (frame) => Math.min(Math.max(frame, 1), totalFrames);
   const setFrame = (frame) => {
@@ -1254,6 +1279,16 @@ function initScorePlayhead(totalFrames) {
     playButton.setAttribute("aria-pressed", "true");
     syncStageToFrame(currentFrame, true);
     playTimer = window.setInterval(() => {
+      // El playhead del DOM manda: si algo saltó de marca por fuera (una regla
+      // XPL con goToMarker), retomamos desde ahí en vez de pisar el salto con
+      // nuestro contador. Es lo que convierte el Score en un grafo navegable.
+      const domFrame = Number(playhead.dataset.frame || currentFrame);
+      if (domFrame !== currentFrame) currentFrame = clampFrame(domFrame);
+      if (playUntilFrame && currentFrame >= playUntilFrame) {
+        playUntilFrame = null;
+        stopPlayback();
+        return;
+      }
       if (currentFrame >= totalFrames) {
         stopPlayback();
         return;
@@ -1370,6 +1405,21 @@ function initScorePlayhead(totalFrames) {
     event.preventDefault();
     commitZoomInput();
   });
+
+  // Transporte accesible desde fuera (motor XPL / modo Play). El Score se
+  // re-renderiza a menudo, así que esto se reasigna en cada initScorePlayhead.
+  window.ainTransport = {
+    totalFrames,
+    isPlaying: () => Boolean(playTimer),
+    play: () => { if (!playTimer) startPlayback(); },
+    stop: () => { playUntilFrame = null; stopPlayback(); },
+    setFrame: (frame) => setFrame(clampFrame(Number(frame) || 1)),
+    // playSegment: reproducir desde donde estamos hasta un fotograma y parar.
+    playUntil: (frame) => {
+      playUntilFrame = clampFrame(Number(frame) || totalFrames);
+      if (!playTimer) startPlayback();
+    },
+  };
 }
 
 const filmForm = document.querySelector("#filmForm");
@@ -1418,7 +1468,14 @@ const stageRulerStep = 100;
 const stockImportBatchSize = 3;
 const stockImportFetchLimit = 10;
 const stockCategoryFilters = ["audio", "music", "image", "video"];
+// C1 · el navegador sale de *.workers.dev. Los ISP españoles lo bloquean, así que
+// una visita desde España ve el Stock caído aunque el worker responda. La lista ya
+// se recorre en orden hasta que una responde, así que basta con poner DELANTE el
+// dominio propio: mientras su ruta de Worker no exista, falla y se sigue por
+// workers.dev igual que hasta ahora (sin día D, sin romper nada).
+// Para activarlo hace falta una ruta de Worker en Cloudflare — ver docs/dominios-propios.md.
 const admiraStockEndpoints = [
+  `https://api.pixeria.com/stock/list?limit=${stockImportFetchLimit}`,
   `https://pixer-eleven.csilvasantin.workers.dev/stock/list?limit=${stockImportFetchLimit}`,
   "https://www.admira.studio/api/stock/latest",
   `https://www.admira.studio/api/stock?limit=${stockImportFetchLimit}&sort=latest`,
@@ -1429,6 +1486,7 @@ const admiraStockEndpoints = [
   `https://admira.studio/api/stock?limit=${stockImportFetchLimit}&sort=latest`,
 ];
 const admiraStockExportEndpoints = [
+  "https://api.pixeria.com/stock/publish",
   "https://pixer-eleven.csilvasantin.workers.dev/stock/publish",
 ];
 let activeDirectorWindow = null;
@@ -1496,7 +1554,6 @@ function makeScenes(film, count) {
       scene: `${film.protagonist} moves through ${film.world}, where ${purpose.toLowerCase()}`,
       visualPrompt: `${film.genre}, ${film.tone}, stage-ready frame, ${film.world}, ${film.protagonist}, cast continuity, clear silhouette, editable layers`,
       videoPrompt: `${beat}: camera movement, object behavior, blocking, and edit handles for ${film.duration} ${film.format.toLowerCase()}, ${film.tone}`,
-      script: `on ${behavior}\n  askAI("${purpose}", cast, stage, score)\n  updateStage(frame:${startFrame}, duration:${length})\nend`,
     };
   });
 }
@@ -1620,6 +1677,11 @@ function loadFilmPlan() {
 }
 
 function clearWorkingCastOnBoot() {
+  // El proyector NO limpia. Lo que abre un tótem con ?play=1 es la PIEZA, no una
+  // sesión de autoría: si al arrancar borrásemos el cast y los items del Stage,
+  // el modo Play proyectaría exactamente nada. (La persistencia compartible de
+  // verdad —enlace/D1— es otra tarea; esto solo evita que Play se autodestruya.)
+  if (new URLSearchParams(window.location.search).get("play") === "1") return;
   const saved = loadFilmPlan();
   if (!saved) return;
   const persistentCast = (saved.cast || []).filter((member) => !member.imported);
@@ -2190,8 +2252,10 @@ function normalizeFilmPlan(plan) {
     behavior: scene.behavior || fallback.scenes[index % fallback.scenes.length].behavior,
     startFrame: scene.startFrame || index * 48 + 1,
     length: scene.length || 48,
-    script: scene.script || fallback.scenes[index % fallback.scenes.length].script,
   }));
+  // Las reglas XPL viajan con el plan (las escribe el editor de la ventana
+  // Behaviour). Sin ellas la pieza es un vídeo lineal; con ellas, un interactivo.
+  merged.rules = Array.isArray(plan.rules) ? plan.rules : [];
   return merged;
 }
 
@@ -2917,7 +2981,15 @@ function renderFilmPlan(plan) {
         </div>
       </article>
     `;
-    }).join("") : `<p class="cast-empty-state">${availableCastMembers.length ? "No cast members match this filter" : "Import cast members to begin"}</p>`;
+    }).join("") : (availableCastMembers.length
+      ? `<p class="cast-empty-state">No cast members match this filter</p>`
+      // Con el Cast vacío el cartel era una vía muerta: decía qué falta pero no
+      // daba por dónde empezar. Ahora el propio hueco arranca la película.
+      : `<div class="cast-empty-state">
+          <p>Nothing in the Cast yet.</p>
+          <button class="button primary" type="button" data-start-example>Start from an example</button>
+          <small>Or import your own from Tools.</small>
+        </div>`);
 
     castBin.querySelectorAll("[data-cast-index]").forEach((item) => {
       const castIndex = Number(item.dataset.castIndex);
@@ -3072,12 +3144,12 @@ function renderFilmPlan(plan) {
         <div class="score-ruler">
           <div class="score-tools" aria-label="Timeline transport"${timelineControlsStyle()}>
             <div class="score-play-cluster" role="group" aria-label="Timeline range controls">
-              <button class="score-bound-button" type="button" data-score-bound="start" aria-label="Go to start">|←</button>
-              <button class="score-play-top" type="button" data-score-play aria-label="Play timeline" aria-pressed="false">▶</button>
-              <button class="score-bound-button" type="button" data-score-bound="end" aria-label="Go to end">→|</button>
+              <button class="score-bound-button" type="button" data-score-bound="start" title="Go to start (Home)" aria-label="Go to start">|←</button>
+              <button class="score-play-top" type="button" data-score-play title="Play / stop (Space)" aria-label="Play timeline" aria-pressed="false">▶</button>
+              <button class="score-bound-button" type="button" data-score-bound="end" title="Go to end (End)" aria-label="Go to end">→|</button>
             </div>
             <div class="score-transport" role="group" aria-label="Timeline frame controls">
-              <button type="button" data-score-step="prev" aria-label="Previous mark">←</button>
+              <button type="button" data-score-step="prev" title="Previous mark (Shift+←) · one frame with ←" aria-label="Previous mark">←</button>
               <div class="score-fps-stepper" aria-label="Timeline playback speed">
                 <output class="score-fps-value" data-score-fps data-value="24" aria-label="24 frames per second">24</output>
                 <span class="score-fps-buttons" aria-label="Frames per second controls">
@@ -3085,7 +3157,7 @@ function renderFilmPlan(plan) {
                   <button type="button" data-score-fps-step="down" aria-label="Decrease FPS">▼</button>
                 </span>
               </div>
-              <button type="button" data-score-step="next" aria-label="Next mark">→</button>
+              <button type="button" data-score-step="next" title="Next mark (Shift+→) · one frame with →" aria-label="Next mark">→</button>
             </div>
             <div class="score-zoom-stepper" aria-label="Timeline zoom">
               <button type="button" data-score-zoom-step="down" aria-label="Make timeline larger">−</button>
@@ -3109,7 +3181,10 @@ function renderFilmPlan(plan) {
           </div>
           <i class="score-playhead" role="slider" aria-label="Timeline playhead" aria-valuemin="1" aria-valuemax="${totalFrames}" aria-valuenow="1" data-frame="1" data-display-frames="${displayFrames}"></i>
         </div>
-        ${scoreChannels.length ? "" : `<div class="score-empty-state">Import cast members to start the timeline</div>`}
+        ${scoreChannels.length ? "" : `<div class="score-empty-state">
+          <p>The Score is empty.</p>
+          <button class="button primary" type="button" data-start-example>Start from an example</button>
+        </div>`}
         ${scoreChannels.map((channel, channelIndex) => `
           <div class="score-row-label">
             <span contenteditable="true" spellcheck="false" role="textbox" aria-label="Edit timeline row label" data-score-label-index="${channelIndex}" ${Number.isInteger(channel.castIndex) ? `data-cast-index="${channel.castIndex}"` : ""} ${channel.stageItemId ? `data-stage-item-id="${escapeHtml(channel.stageItemId)}"` : ""}>${escapeHtml(channel.name)}</span>
@@ -3153,13 +3228,9 @@ function renderFilmPlan(plan) {
     syncStageToFrame(currentTimelineFrame(), false);
   }
 
-  if (stageScript) {
-    const leadScene = plan.scenes[0];
-    stageScript.innerHTML = `
-      <strong>Selected behavior</strong>
-      <pre>${leadScene.script}</pre>
-    `;
-  }
+  // La ventana Behaviour la pinta el editor XPL (assets/xpl-studio.js): reglas
+  // reales que el motor ejecuta, no el texto Lingo de atrezzo de antes.
+  window.ainXPL?.renderBehaviourWindow?.(plan);
 
   if (aiCueList) {
     aiCueList.innerHTML = plan.scenes.slice(0, 4).map((scene) => `
@@ -3222,8 +3293,14 @@ function toMarkdown(plan) {
     `## Scenes`,
   ];
   for (const scene of plan.scenes) {
-    lines.push("", `### ${scene.number}. ${scene.beat}`, scene.scene, "", `Behavior: ${scene.behavior}()`, `Frames: ${scene.startFrame}-${scene.startFrame + scene.length}`, "", "```lingo", scene.script, "```", "", `Visual prompt: ${scene.visualPrompt}`, `Video prompt: ${scene.videoPrompt}`);
+    lines.push("", `### ${scene.number}. ${scene.beat}`, scene.scene, "", `Behavior: ${scene.behavior}()`, `Frames: ${scene.startFrame}-${scene.startFrame + scene.length}`, "", `Visual prompt: ${scene.visualPrompt}`, `Video prompt: ${scene.videoPrompt}`);
   }
+  // Las reglas XPL de verdad — las que ejecuta el motor, no una frase decorativa.
+  const rules = Array.isArray(plan.rules) ? plan.rules : [];
+  lines.push("", "## Behaviours (XPL)");
+  lines.push(rules.length
+    ? rules.map((rule) => `- ${rule.enabled === false ? "(off) " : ""}**${rule.name || rule.id}** — ${window.XPL?.ruleSentence(rule, "es") || ""}`).join("\n")
+    : "_Sin reglas: la pieza es lineal._");
   return lines.join("\n");
 }
 
@@ -5376,6 +5453,58 @@ function initStageTools() {
   });
 }
 
+// Media que ya vive en el repo, para que el ejemplo no dependa de nada externo.
+const exampleCastAssets = [
+  {
+    name: "Director AI",
+    role: "Lead",
+    type: "Image",
+    mediaType: "image",
+    src: "assets/director-ai-admira-transparent.png",
+    stagePoint: { x: 32, y: 52 },
+  },
+  {
+    name: "Digital Twin",
+    role: "Support",
+    type: "Image",
+    mediaType: "image",
+    src: "assets/digital-twin-transparent.png",
+    stagePoint: { x: 68, y: 52 },
+  },
+  {
+    name: "Teaser",
+    role: "Footage",
+    type: "Video",
+    mediaType: "video",
+    src: "assets/ainimation-teaser.mp4",
+    stagePoint: { x: 50, y: 22 },
+  },
+];
+
+// "Start from an example": genera el board y además mete media real en el Cast y
+// en el Score. Sin esto el board se creaba pero el Cast seguía vacío (sólo pinta
+// miembros con src), así que el arranque seguía siendo una vía muerta.
+function startExampleMovie() {
+  const plan = buildFilmPlan(false);
+  const baseCast = plan.cast || makeCast(plan);
+  plan.cast = [
+    ...baseCast,
+    ...exampleCastAssets.map(({ stagePoint, ...member }) => ({
+      ...member,
+      imported: true,
+      prompt: `Example cast member shipped with AInimation Studio (${member.mediaType}).`,
+    })),
+  ];
+  exampleCastAssets.forEach((asset, offset) => {
+    scheduleCastMember(plan, baseCast.length + offset, {
+      stagePoint: asset.stagePoint,
+      startFrame: 1 + (offset * 24),
+    });
+  });
+  saveFilmPlan(plan);
+  renderFilmPlan(plan);
+}
+
 function importCastAsset(name, kind) {
   const plan = currentPlan();
   const mode = document.querySelector(".tool-palette")?.dataset.importMode || "asset";
@@ -5448,6 +5577,15 @@ if (filmForm) {
     const plan = buildFilmPlan(false);
     saveFilmPlan(plan);
     renderFilmPlan(plan);
+  });
+
+  // Los huecos vacíos del Cast y del Score arrancan la película por el MISMO
+  // camino que "Generate board". Delegado en document porque esos botones se
+  // vuelven a pintar en cada render.
+  document.addEventListener("click", (event) => {
+    if (!event.target.closest("[data-start-example]")) return;
+    startExampleMovie();
+    playUiTick("stage");
   });
 
   addSceneButton?.addEventListener("click", () => {
@@ -5524,6 +5662,36 @@ document.addEventListener("keydown", (event) => {
     deleteSelectedStageTarget();
     playUiTick("select");
     return;
+  }
+
+  // Transporte con el teclado, como en Director: espacio reproduce y para, las
+  // flechas mueven fotograma a fotograma (con Shift, de marca en marca) y
+  // Inicio/Fin van a los extremos. Nunca mientras se escribe en un campo.
+  const transport = window.ainTransport;
+  if (transport && !isEditingText && !event.metaKey && !event.ctrlKey && !event.altKey) {
+    if (event.key === " " || event.key === "Spacebar") {
+      event.preventDefault();
+      if (transport.isPlaying()) transport.stop(); else transport.play();
+      playUiTick("stage");
+      return;
+    }
+    if (event.key === "ArrowLeft" || event.key === "ArrowRight") {
+      event.preventDefault();
+      const direction = event.key === "ArrowRight" ? 1 : -1;
+      const frame = currentTimelineFrame();
+      const total = transport.totalFrames;
+      transport.setFrame(event.shiftKey
+        ? nextKeyframeFrame(frame, total, direction)
+        : Math.min(Math.max(1, frame + direction), total));
+      playUiTick("select");
+      return;
+    }
+    if (event.key === "Home" || event.key === "End") {
+      event.preventDefault();
+      transport.setFrame(event.key === "Home" ? 1 : transport.totalFrames);
+      playUiTick("select");
+      return;
+    }
   }
 
   if (["F1", "F2", "F3"].includes(event.key) && getActiveDirectorWindow()) {

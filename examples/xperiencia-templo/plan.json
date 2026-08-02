@@ -1,0 +1,118 @@
+{
+  "title": "Templo de la Soledad",
+  "fps": 24,
+  "totalFrames": 240,
+  "cast": [],
+  "markers": [
+    {
+      "id": "in",
+      "frame": 1,
+      "label": "IN"
+    },
+    {
+      "id": "turn",
+      "frame": 120,
+      "label": "MID"
+    },
+    {
+      "id": "holo",
+      "frame": 180,
+      "label": "HOLO"
+    },
+    {
+      "id": "out",
+      "frame": 240,
+      "label": "OUT"
+    }
+  ],
+  "stageItems": [
+    {
+      "id": "krypto",
+      "type": "rect-fill",
+      "x": 20,
+      "y": 40,
+      "w": 16,
+      "h": 20,
+      "color": "#7CFC00",
+      "startFrame": 1,
+      "durationFrames": 240,
+      "spriteName": "kryptonita",
+      "interactive": true,
+      "keyframes": [
+        {
+          "frame": 1,
+          "x": 20,
+          "y": 40,
+          "w": 16,
+          "h": 20,
+          "color": "#7CFC00",
+          "text": "",
+          "fontWeight": "850",
+          "fontStyle": "normal",
+          "textDecoration": "none",
+          "textAlign": "left",
+          "fontSize": ""
+        }
+      ]
+    },
+    {
+      "id": "escudo",
+      "type": "rect-fill",
+      "x": 62,
+      "y": 40,
+      "w": 16,
+      "h": 20,
+      "color": "#c6f24e",
+      "startFrame": 1,
+      "durationFrames": 240,
+      "spriteName": "escudo",
+      "interactive": true,
+      "keyframes": [
+        {
+          "frame": 1,
+          "x": 62,
+          "y": 40,
+          "w": 16,
+          "h": 20,
+          "color": "#c6f24e",
+          "text": "",
+          "fontWeight": "850",
+          "fontStyle": "normal",
+          "textDecoration": "none",
+          "textAlign": "left",
+          "fontSize": ""
+        }
+      ]
+    },
+    {
+      "id": "rotulo",
+      "type": "text",
+      "x": 8,
+      "y": 8,
+      "w": 60,
+      "h": 12,
+      "color": "#22d3ee",
+      "text": "Toca la kryptonita",
+      "startFrame": 1,
+      "durationFrames": 240,
+      "spriteName": "rotulo",
+      "fontSize": "3vw",
+      "keyframes": [
+        {
+          "frame": 1,
+          "x": 8,
+          "y": 8,
+          "w": 60,
+          "h": 12,
+          "color": "#22d3ee",
+          "text": "Toca la kryptonita",
+          "fontWeight": "850",
+          "fontStyle": "normal",
+          "textDecoration": "none",
+          "textAlign": "left",
+          "fontSize": "3vw"
+        }
+      ]
+    }
+  ]
+}

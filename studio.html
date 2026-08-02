@@ -18,7 +18,7 @@
     <meta property="og:url" content="https://www.ainimation.studio/studio.html" />
     <link rel="canonical" href="https://www.ainimation.studio/studio.html" />
     <link rel="manifest" href="site.webmanifest" />
-    <link rel="stylesheet" href="assets/styles.css?v=aidirector-20260530-r47" />
+    <link rel="stylesheet" href="assets/styles.css?v=a21d539" />
   </head>
   <body class="studio-page">
     <header class="site-header studio-site-header" aria-label="Primary">
@@ -30,7 +30,8 @@
         <a href="index.html#blocks">Blocks</a>
         <a href="index.html#work">Formats</a>
         <a href="index.html#process">Process</a>
-        <a href="studio.html" aria-current="page">Studio</a>
+        <a href="studio.html" aria-current="page">Author</a>
+        <a href="studio-live.html">Produce</a>
         <a href="mailto:hello@ainimation.studio">Contact</a>
       </nav>
     </header>
@@ -171,6 +172,12 @@
                 <button type="button" data-stock-import>Importar</button>
                 <button type="button" data-stock-export>Exportar</button>
                 <button type="button" data-download-stage-video>Descargar</button>
+                <!-- C5 · la pieza deja de vivir solo en este navegador: se empaqueta
+                     en un enlace (plan + marcas del Score + reglas XPL). -->
+                <button type="button" data-share-piece>Compartir</button>
+                <!-- B1 · la carpeta Xperiencia (index.html + plan.json + rules.json),
+                     con la misma forma que xpaceos/xperiencias/<slug>/. -->
+                <button type="button" data-publish-xperiencia>Publicar Xperiencia</button>
               </span>
             </span>
             <span class="edit-menu">
@@ -260,6 +267,13 @@
             <button class="menubar-action" type="button" data-open-window="cast">Assets</button>
             <button class="menubar-action" type="button" data-open-window="inspector">Score</button>
             <button class="menubar-action" type="button" data-open-window="prompt">AI Director</button>
+            <span class="control-menu">
+              <button class="menu-button" type="button" aria-expanded="false">Control</button>
+              <span class="control-menu-list" aria-label="Control">
+                <button type="button" data-play-toggle aria-pressed="false">▶ Play (proyector)</button>
+                <button type="button" data-open-window="script">Behaviour · reglas XPL</button>
+              </span>
+            </span>
             <button class="menubar-action" type="button" data-collab-open>Collaborate</button>
             <button class="menubar-action tools-menu-label" type="button" data-open-window="tools">Tools</button>
             <span class="window-menu">
@@ -394,7 +408,7 @@
               <span class="resize-handle" aria-hidden="true"></span>
             </aside>
 
-            <section class="director-window intent-window is-hidden" aria-label="AI authoring intent" data-window="prompt" data-window-title="AI Director" data-x="560" data-y="1170" data-w="780" data-h="210">
+            <section class="director-window intent-window" aria-label="AI authoring intent" data-window="prompt" data-window-title="AI Director" data-x="560" data-y="1110" data-w="780" data-h="270">
               <div class="window-titlebar">
                 <span class="window-controls">
                   <button type="button" data-window-action="close" aria-label="Close AI Director"></button>
@@ -511,7 +525,7 @@
               <span class="resize-handle" aria-hidden="true"></span>
             </section>
 
-            <aside class="director-window inspector-panel film-output property-window is-hidden" aria-live="polite" data-window="inspector" data-window-title="Score" data-x="1598" data-y="840" data-w="430" data-h="560">
+            <aside class="director-window inspector-panel film-output property-window" aria-live="polite" data-window="inspector" data-window-title="Score" data-x="1598" data-y="840" data-w="430" data-h="560">
               <div class="window-titlebar">
                 <span class="window-controls">
                   <button type="button" data-window-action="close" aria-label="Close Score"></button>
@@ -544,6 +558,14 @@
       <a href="mailto:hello@ainimation.studio">hello@ainimation.studio</a>
     </footer>
 
-    <script src="assets/app.js?v=aidirector-20260530-r47" defer></script>
+    <!-- XPL: el Lingo ejecutable. El runtime va ANTES que app.js para que la
+         ventana Behaviour ya tenga catálogo cuando se pinte el primer plan. -->
+    <script src="assets/xpl-runtime.js?v=a21d539"></script>
+    <script src="assets/app.js?v=a21d539" defer></script>
+    <script src="assets/xpl-studio.js?v=a21d539" defer></script>
+    <!-- Va el último: necesita el plan ya cargado para poder sobrescribirlo con
+         el que venga en el enlace ?p= y repintar. -->
+    <script src="assets/share-plan.js?v=a21d539" defer></script>
+    <script src="assets/publish-xperiencia.js?v=a21d539" defer></script>
   </body>
 </html>

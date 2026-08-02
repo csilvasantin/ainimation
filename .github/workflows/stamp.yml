@@ -1,0 +1,58 @@
+# ============================================================================
+# stamp.yml — el token de caché se pone SOLO al hacer push (C6)
+# ----------------------------------------------------------------------------
+# `npm run stamp` deriva el ?v= del sha del último commit que tocó assets/, pero
+# hasta ahora había que acordarse de ejecutarlo a mano: el mismo problema que
+# venía a resolver, solo que movido de sitio. Un JS caducado en un kiosko no se
+# nota hasta que alguien está delante de la pantalla.
+#
+# Aquí se sella en el push:
+#   · en main            → sella y devuelve el commit del sello (Pages sirve main)
+#   · en cualquier otra  → solo comprueba, y falla si el ?v= está desfasado
+#
+# No hay bucle: el commit del sello solo toca *.html, así que el sha del último
+# commit sobre assets/ no cambia → la siguiente ejecución no encuentra nada que
+# sellar y no commitea.
+# ============================================================================
+name: stamp
+
+on:
+  push:
+    paths: ["assets/**", "**/*.html", "scripts/stamp-version.mjs", ".github/workflows/stamp.yml"]
+  pull_request:
+    paths: ["assets/**", "**/*.html", "scripts/stamp-version.mjs"]
+
+permissions:
+  contents: write
+
+jobs:
+  stamp:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # el script mira el historial de assets/: sin él, git log no ve nada
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      # Fuera de main no escribimos en el repo de nadie: solo avisamos.
+      - name: Comprobar el sello
+        if: github.ref != 'refs/heads/main' || github.event_name == 'pull_request'
+        run: npm run verify:stamp
+
+      - name: Sellar y devolver el commit
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        run: |
+          npm run stamp
+          if git diff --quiet -- '*.html'; then
+            echo "✓ los ?v= ya estaban al día"
+            exit 0
+          fi
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add ./*.html
+          git commit -m "chore: sellar ?v= con el sha del commit de assets (automático)"
+          git push

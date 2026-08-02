@@ -1579,8 +1579,10 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
   }
 
   if (
-    result.stockExport.calls[0]?.url !== "https://pixer-eleven.csilvasantin.workers.dev/stock/publish" ||
-    result.stockExport.calls[0]?.method !== "POST" ||
+    // C1: se prueban varias bases en orden (dominio propio primero, workers.dev de
+    // respaldo), así que se comprueba que ALGUNA llamada sea el publish por POST,
+    // no que lo sea la primera.
+    !result.stockExport.calls.some((call) => /\/stock\/publish$/.test(call.url || "") && call.method === "POST") ||
     !result.stockExport.formEntries.some(([key, value]) => key === "type" && value === "animation") ||
     !result.stockExport.formEntries.some(([key, value]) => key === "motor" && value === "ainimation") ||
     !result.stockExport.formEntries.some(([key, value]) => key === "mime" && value === "video/webm") ||
@@ -1623,9 +1625,9 @@ const targetUrl = process.env.STUDIO_URL || "http://127.0.0.1:8097/studio.html";
   }
 
   if (
-    !result.stockImport.calls[0]?.includes("pixer-eleven.csilvasantin.workers.dev/stock/list?limit=10") ||
+    !result.stockImport.calls.some((url) => url.includes("/stock/list?limit=10")) ||
     !["audio", "music", "image", "video"].every((category) => result.stockImport.categoryCalls.some((url) => (
-      url.includes("pixer-eleven.csilvasantin.workers.dev/stock/list") &&
+      url.includes("/stock/list") &&
       url.includes("limit=10") &&
       url.includes(`category=${category}`)
     ))) ||

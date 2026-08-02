@@ -1,0 +1,42 @@
+[
+  {
+    "id": "r1",
+    "name": "Kryptonita → holograma",
+    "enabled": true,
+    "when": {
+      "join": "and",
+      "conds": [
+        {
+          "fact": "click",
+          "value": "kryptonita"
+        }
+      ]
+    },
+    "do": [
+      {
+        "id": "goToMarker",
+        "value": "HOLO"
+      }
+    ]
+  },
+  {
+    "id": "r2",
+    "name": "Escudo → cierre",
+    "enabled": true,
+    "when": {
+      "join": "and",
+      "conds": [
+        {
+          "fact": "click",
+          "value": "escudo"
+        }
+      ]
+    },
+    "do": [
+      {
+        "id": "goToMarker",
+        "value": "OUT"
+      }
+    ]
+  }
+]

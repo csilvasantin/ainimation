@@ -133,7 +133,8 @@
         <a href="/#film">Film</a>
         <a href="/#blocks">Blocks</a>
         <a href="/#engine">Engine</a>
-        <a href="studio-live.html" aria-current="page">Studio</a>
+        <a href="studio.html">Author</a>
+        <a href="studio-live.html" aria-current="page">Produce</a>
         <a href="/#contact">Contact</a>
       </nav>
       <div class="rail-toggles" aria-label="Paneles">
@@ -264,18 +265,54 @@
     </footer>
 
     <script>
-      const WORKER = 'https://ainimation-studio.csilvasantin.workers.dev';
+      // C1 · el navegador sale de *.workers.dev. Los ISP españoles lo bloquean, así que
+      // una visita desde España veía esto muerto aunque el worker respondiera. Se prueba
+      // primero el dominio propio y se cae al de siempre si aún no tiene ruta de Worker:
+      // así no hay día D. Activarlo es cosa de Cloudflare — ver docs/dominios-propios.md.
+      const WORKER_BASES = [
+        'https://api.ainimation.studio',
+        'https://ainimation-studio.csilvasantin.workers.dev',
+      ];
+      let WORKER = WORKER_BASES[WORKER_BASES.length - 1];
+      const workerReady = (async () => {
+        const cached = sessionStorage.getItem('ain_worker_base');
+        if (cached) return (WORKER = cached);
+        for (const base of WORKER_BASES) {
+          const stop = new AbortController();
+          const timer = setTimeout(() => stop.abort(), 2500);
+          try {
+            const res = await fetch(base + '/api/gallery', { signal: stop.signal, cache: 'no-store' });
+            // Un dominio sin ruta de Worker contesta una página de error, no JSON.
+            if (res.ok && /json/i.test(res.headers.get('content-type') || '')) {
+              try { sessionStorage.setItem('ain_worker_base', base); } catch {}
+              return (WORKER = base);
+            }
+          } catch { /* siguiente candidato */ }
+          finally { clearTimeout(timer); }
+        }
+        return WORKER;   // ninguno responde: que el error lo dé la petición real
+      })();
       const beatsEl = document.getElementById('beats');
       const seed = [
         ['12', 'pipelines de producción, un solo Director de IA'],
         ['0 €', 'sin claves: Piper, archivos abiertos y Remotion'],
         ['1080p', 'vídeo renderizado de verdad, no diapositivas'],
       ];
+      // Mismo criterio que la galería: nodos, no innerHTML. Estos valores llegan de
+      // un enlace ?b= compartido (lo escribe quien manda el enlace), así que nunca
+      // se interpolan en HTML.
+      function beatInput(maxLength, placeholder, value) {
+        const i = document.createElement('input');
+        i.maxLength = maxLength;
+        i.placeholder = placeholder;
+        i.value = value;
+        return i;
+      }
       function beatRow(stat = '', label = '') {
         const d = document.createElement('div');
         d.className = 'beat';
-        d.innerHTML = `<input maxlength="24" placeholder="12" value="${stat.replace(/"/g,'&quot;')}">
-                       <input maxlength="80" placeholder="what it means" value="${label.replace(/"/g,'&quot;')}">`;
+        d.append(beatInput(24, '12', String(stat)),
+                 beatInput(80, 'what it means', String(label)));
         beatsEl.appendChild(d);
       }
       seed.forEach(([s, l]) => beatRow(s, l));
@@ -390,6 +427,7 @@
       })();
 
       async function produce() {
+        await workerReady;   // qué base usamos se decide una vez, al principio
         errEl.textContent = '';
         const brief = readBrief();
         try { localStorage.setItem('ain_brief', JSON.stringify(brief)); } catch {}
@@ -455,24 +493,48 @@
 
       const gallery = document.getElementById('gallery');
       const galleryGrid = document.getElementById('galleryGrid');
+      // Las tarjetas se construyen con NODOS (textContent / propiedades), nunca con
+      // innerHTML: la galería es global, así que los títulos vienen de briefs de otras
+      // personas. Antes solo se escapaba «<» y el título se metía en title="…" y
+      // data-title="…", de modo que una comilla se salía del atributo → XSS almacenado.
+      function galleryCard(it) {
+        const url = WORKER + String(it.video || '');
+        const title = String(it.title || 'Untitled');
+
+        const card = document.createElement('div');
+        card.className = 'gcard';
+
+        const video = document.createElement('video');
+        video.muted = true;
+        video.preload = 'metadata';
+        video.src = url + '#t=1';
+        video.onclick = () => { video.paused ? video.play() : video.pause(); };
+
+        const label = document.createElement('span');
+        label.className = 'gtitle';
+        label.textContent = title;
+        label.title = title;
+
+        const share = document.createElement('button');
+        share.className = 'gcopy';
+        share.type = 'button';
+        share.textContent = '📤 Share';
+        share.onclick = () => shareOrCopy(url, title, share);
+
+        const meta = document.createElement('div');
+        meta.className = 'gmeta';
+        meta.append(label, share);
+        card.append(video, meta);
+        return card;
+      }
       async function loadGallery() {
+        await workerReady;
         try {
           const d = await (await fetch(WORKER + '/api/gallery')).json();
           const items = d.items || [];
           if (!items.length) { gallery.hidden = true; return; }
-          galleryGrid.innerHTML = items.map((it) => {
-            const url = WORKER + it.video;
-            const t = (it.title || 'Untitled').replace(/</g, '&lt;');
-            return `<div class="gcard">
-              <video muted preload="metadata" src="${url}#t=1" onclick="this.paused?this.play():this.pause()"></video>
-              <div class="gmeta"><span class="gtitle" title="${t}">${t}</span>
-                <button class="gcopy" data-url="${url}" data-title="${t}">📤 Share</button></div>
-            </div>`;
-          }).join('');
+          galleryGrid.replaceChildren(...items.map(galleryCard));
           gallery.hidden = false;
-          galleryGrid.querySelectorAll('.gcopy').forEach((b) => {
-            b.onclick = () => shareOrCopy(b.dataset.url, b.dataset.title, b);
-          });
         } catch { /* gallery is best-effort */ }
       }
       loadGallery();
