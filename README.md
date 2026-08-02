@@ -22,9 +22,12 @@ python3 -m http.server 9134
 
 ## Deploy
 GitHub Pages serves `main` at the root, custom domain `www.ainimation.studio`.
-After changing anything under `assets/`, run `npm run stamp` — it rewrites every
-`?v=` in the HTML with the sha of the last commit that touched `assets/`, so all
-pages share one cache token. `npm run verify:stamp` checks without writing.
+Cache tokens are stamped by the push, not by hand: `.github/workflows/stamp.yml`
+stamps on every push to `main` and commits the result, and only verifies (failing
+on a stale token) on other branches and pull requests. The token is the sha of the
+last commit that touched `assets/`, so every page shares one token and it changes
+exactly when the assets do. Locally you can run `npm run stamp` to get ahead of it,
+or `npm run verify:stamp` to check without writing — both are shortcuts, not chores.
 
 ## Note on OpenMontage (AGPLv3)
 OpenMontage powers the engine but is **not vendored into this repo** — it stays a
