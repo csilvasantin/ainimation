@@ -2234,6 +2234,12 @@ function initTimelineKeyframeDots() {
       const frame = Number(dot.dataset.keyframeFrame || 1);
       selectDot(dot, frame);
     });
+    dot.addEventListener("contextmenu", (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      selectDot(dot, Number(dot.dataset.keyframeFrame || 1));
+      openKeyframeMenu(dot, event.clientX, event.clientY);
+    });
   });
 }
 
@@ -5626,6 +5632,65 @@ function closeStagePropertiesMenu() {
   document.querySelector(".stage-properties-menu")?.remove();
 }
 
+// Borra el keyframe de un asterisco del Score. Nunca deja al objeto sin ninguno:
+// sin keyframes no hay dónde colocarlo, así que el último no se puede quitar.
+function deleteKeyframeFromDot(dot) {
+  const frame = Number(dot?.dataset.keyframeFrame || 0);
+  if (!frame) return false;
+  const castIndex = Number(dot.dataset.castIndex);
+  const stageItemId = dot.dataset.stageItemId;
+  const plan = currentPlan();
+  const target = Number.isInteger(castIndex) && !Number.isNaN(castIndex)
+    ? plan.cast?.[castIndex]
+    : (plan.stageItems || []).find((item) => item.id === stageItemId);
+  if (!target) return false;
+  const keyframes = stageKeyframesFor(target).filter((keyframe) => keyframe.frame !== frame);
+  if (!keyframes.length) return false;
+  target.keyframes = keyframes;
+  selectedStageKeyframe = null;
+  saveFilmPlan(plan);
+  renderFilmPlan(plan);
+  return true;
+}
+
+// Menú del botón derecho sobre un asterisco del Score.
+function openKeyframeMenu(dot, clientX, clientY) {
+  closeStagePropertiesMenu();
+  const frame = Number(dot.dataset.keyframeFrame || 1);
+  const isLast = document.querySelectorAll(
+    `.score-keyframe-dot[data-cast-index="${dot.dataset.castIndex}"]`,
+  ).length <= 1;
+
+  const menu = document.createElement("div");
+  menu.className = "stage-properties-menu";
+  menu.setAttribute("role", "dialog");
+  menu.setAttribute("aria-label", `Keyframe at frame ${frame}`);
+  menu.innerHTML = `
+    <p class="stage-properties-title">Keyframe<small>Frame ${frame}</small></p>
+    <button class="stage-properties-action" type="button" data-delete-keyframe ${isLast ? "disabled" : ""}>Delete keyframe</button>
+    <p class="stage-properties-hint">${isLast
+      ? "This is the only keyframe left: it can't be deleted."
+      : "Or drag the asterisk along the track to move it."}</p>
+  `;
+  menu.style.left = `${clientX}px`;
+  menu.style.top = `${clientY}px`;
+  document.body.append(menu);
+  const rect = menu.getBoundingClientRect();
+  if (rect.right > window.innerWidth) menu.style.left = `${Math.max(8, window.innerWidth - rect.width - 8)}px`;
+  if (rect.bottom > window.innerHeight) menu.style.top = `${Math.max(8, window.innerHeight - rect.height - 8)}px`;
+
+  menu.querySelector("[data-delete-keyframe]")?.addEventListener("click", () => {
+    deleteKeyframeFromDot(dot);
+    closeStagePropertiesMenu();
+  });
+  const dismiss = (event) => {
+    if (menu.contains(event.target)) return;
+    closeStagePropertiesMenu();
+    document.removeEventListener("pointerdown", dismiss, true);
+  };
+  document.addEventListener("pointerdown", dismiss, true);
+}
+
 function openStagePropertiesMenu(memberEl, clientX, clientY) {
   closeStagePropertiesMenu();
   const castIndex = Number(memberEl.dataset.castIndex);
@@ -5898,6 +5963,17 @@ helpModal?.addEventListener("click", (event) => {
 document.addEventListener("keydown", (event) => {
   const activeTarget = event.target;
   const isEditingText = activeTarget?.closest?.("input, textarea, [contenteditable='true']");
+  // Con un asterisco del Score seleccionado, Suprimir borra ESE keyframe, no el
+  // objeto entero: es lo que el usuario tiene delante y acaba de señalar.
+  if ((event.key === "Delete" || event.key === "Backspace") && !isEditingText) {
+    const selectedDot = document.querySelector(".score-keyframe-dot.is-selected");
+    if (selectedDot && deleteKeyframeFromDot(selectedDot)) {
+      event.preventDefault();
+      playUiTick("select");
+      return;
+    }
+  }
+
   if ((event.key === "Delete" || event.key === "Backspace") && !isEditingText && selectedStageTargetExists()) {
     event.preventDefault();
     deleteSelectedStageTarget();

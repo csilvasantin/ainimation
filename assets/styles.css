@@ -6373,3 +6373,27 @@ body.ain-play [data-xpl-hot] { cursor: pointer !important; }
   color: rgba(237, 246, 255, 0.55);
   margin: 8px 0 0;
 }
+
+.stage-properties-action {
+  background: rgba(255, 230, 92, 0.14);
+  border: 1px solid rgba(255, 230, 92, 0.55);
+  border-radius: 6px;
+  color: #ffe65c;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 850;
+  padding: 6px 10px;
+  width: 100%;
+}
+
+.stage-properties-action:hover:not(:disabled),
+.stage-properties-action:focus-visible:not(:disabled) {
+  background: #ffe65c;
+  color: #101827;
+  outline: 0;
+}
+
+.stage-properties-action:disabled {
+  cursor: default;
+  opacity: 0.45;
+}
