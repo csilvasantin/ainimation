@@ -1265,39 +1265,40 @@ h2 {
 }
 
 .studio-entering .studio-boot {
-  animation: bootExit 0.9s ease forwards;
+  /* Boot corto (antes ~0.9s): el Director debe sentirse al instante. */
+  animation: bootExit 0.42s ease forwards;
   display: flex;
 }
 
 .studio-entering .boot-card {
-  animation: bootCard 0.78s ease forwards;
+  animation: bootCard 0.36s ease forwards;
 }
 
 .studio-entering .boot-steps span {
-  animation: bootStep 0.66s ease forwards;
+  animation: bootStep 0.3s ease forwards;
   opacity: 0.32;
 }
 
-.studio-entering .boot-steps span:nth-child(2) { animation-delay: 0.08s; }
-.studio-entering .boot-steps span:nth-child(3) { animation-delay: 0.16s; }
-.studio-entering .boot-steps span:nth-child(4) { animation-delay: 0.24s; }
+.studio-entering .boot-steps span:nth-child(2) { animation-delay: 0.04s; }
+.studio-entering .boot-steps span:nth-child(3) { animation-delay: 0.08s; }
+.studio-entering .boot-steps span:nth-child(4) { animation-delay: 0.12s; }
 
 .studio-entering .director-menubar,
 .studio-entering .tool-palette,
 .studio-entering .director-window,
 .studio-entering .studio-status {
-  animation: windowEnter 0.26s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  animation: windowEnter 0.18s cubic-bezier(0.2, 0.8, 0.2, 1) both;
 }
 
-.studio-entering .director-menubar { animation-delay: 0.28s; }
-.studio-entering .tool-palette { animation-delay: 0.32s; }
-.studio-entering .director-stage-window { animation-delay: 0.35s; }
-.studio-entering .director-cast-window { animation-delay: 0.38s; }
-.studio-entering .intent-window { animation-delay: 0.41s; }
-.studio-entering .director-score-window { animation-delay: 0.44s; }
-.studio-entering .script-window { animation-delay: 0.47s; }
-.studio-entering .property-window { animation-delay: 0.5s; }
-.studio-entering .studio-status { animation-delay: 0.53s; }
+.studio-entering .director-menubar { animation-delay: 0.12s; }
+.studio-entering .tool-palette { animation-delay: 0.14s; }
+.studio-entering .director-stage-window { animation-delay: 0.16s; }
+.studio-entering .director-cast-window { animation-delay: 0.18s; }
+.studio-entering .intent-window { animation-delay: 0.2s; }
+.studio-entering .director-score-window { animation-delay: 0.22s; }
+.studio-entering .script-window { animation-delay: 0.24s; }
+.studio-entering .property-window { animation-delay: 0.26s; }
+.studio-entering .studio-status { animation-delay: 0.28s; }
 
 .studio-entered .studio-boot {
   display: none;
@@ -3539,19 +3540,19 @@ body.is-cast-pointer-dragging .director-cast-window {
 }
 
 @keyframes bootExit {
-  0%, 78% { opacity: 1; visibility: visible; }
+  0%, 55% { opacity: 1; visibility: visible; }
   100% { opacity: 0; visibility: hidden; }
 }
 
 @keyframes bootCard {
-  0% { transform: translateY(18px) scale(0.96); }
-  16%, 72% { transform: translateY(0) scale(1); }
-  100% { transform: translateY(-12px) scale(0.98); }
+  0% { transform: translateY(12px) scale(0.97); }
+  30%, 70% { transform: translateY(0) scale(1); }
+  100% { transform: translateY(-8px) scale(0.99); }
 }
 
 @keyframes bootStep {
   0% { background: #e6ebf3; opacity: 0.32; }
-  42%, 100% { background: #c8ff5f; opacity: 1; }
+  50%, 100% { background: #c8ff5f; opacity: 1; }
 }
 
 @keyframes windowEnter {

@@ -187,23 +187,52 @@ reduceMotion.addEventListener("change", () => {
 });
 
 const params = new URLSearchParams(window.location.search);
-const enterStudio = document.body.classList.contains("studio-page") && params.get("intro") !== "1";
+// Entrada al Director por defecto. Solo se queda en la landing de marketing con
+// ?intro=1. ?enter=1 (y #workspace) fuerzan el shell aunque se mezclen query params.
+const wantsIntro = params.get("intro") === "1" && params.get("enter") !== "1";
+const wantsEnter =
+  document.body.classList.contains("studio-page") &&
+  (!wantsIntro || location.hash === "#workspace" || params.get("enter") === "1");
 
-if (enterStudio) {
-  document.body.classList.add("studio-entering", "studio-entered");
-  const jumpToWorkspace = () => {
-    const workspace = document.querySelector("#workspace");
-    if (!workspace) return;
-    workspace.scrollIntoView({ block: "start" });
-    document.documentElement.scrollTop = 0;
-    document.body.scrollTop = 0;
-  };
-  window.addEventListener("load", jumpToWorkspace);
-  window.setTimeout(jumpToWorkspace, 80);
-  window.setTimeout(jumpToWorkspace, 420);
-  window.setTimeout(jumpToWorkspace, 900);
-  window.setTimeout(jumpToWorkspace, 1600);
+function jumpToWorkspace() {
+  const workspace = document.querySelector("#workspace");
+  if (!workspace) return;
+  workspace.scrollIntoView({ block: "start" });
+  document.documentElement.scrollTop = 0;
+  document.body.scrollTop = 0;
 }
+
+function enterDirectorShell({ replaceUrl = true } = {}) {
+  if (!document.body.classList.contains("studio-page")) return;
+  document.body.classList.add("studio-entering", "studio-entered");
+  jumpToWorkspace();
+  // Un solo reintento tras layout: antes había 5 timeouts hasta 1.6s.
+  window.requestAnimationFrame(jumpToWorkspace);
+  window.setTimeout(jumpToWorkspace, 120);
+  if (replaceUrl) {
+    try {
+      const url = new URL(window.location.href);
+      url.searchParams.delete("intro");
+      if (!url.searchParams.has("enter")) url.searchParams.set("enter", "1");
+      url.hash = "workspace";
+      window.history.replaceState({}, "", `${url.pathname}${url.search}${url.hash}`);
+    } catch (_) {
+      /* ignore */
+    }
+  }
+}
+
+if (wantsEnter) {
+  enterDirectorShell({ replaceUrl: params.get("intro") === "1" || location.hash === "#workspace" });
+}
+
+// CTA «Enter Studio» en la intro: entra al shell sin recargar en bucle.
+document.querySelectorAll("[data-enter-studio]").forEach((el) => {
+  el.addEventListener("click", (event) => {
+    event.preventDefault();
+    enterDirectorShell({ replaceUrl: true });
+  });
+});
 
 function initDirectorWindowManager() {
   const workbench = document.querySelector(".director-workbench");

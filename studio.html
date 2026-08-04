@@ -10,6 +10,7 @@
       content="AInimation Studio is an AI authoring environment for building animated worlds with cast members, stages, scores, scripts, scenes, sound, and video."
     />
     <meta name="theme-color" content="#0f1115" />
+    <meta name="admiranext-version" content="v.04.08.2026.r2.18:00">
     <meta property="og:title" content="AInimation Studio" />
     <meta
       property="og:description"
@@ -70,8 +71,10 @@
             into editable assets, timing, prompts, and production logic.
           </p>
           <div class="hero-actions" aria-label="Studio actions">
-            <a class="button primary" href="studio.html">Enter Studio</a>
+            <!-- Enter debe abrir el workspace Director, no recargar la misma landing. -->
+            <a class="button primary" href="#workspace" data-enter-studio>Enter Studio</a>
             <a class="button secondary" href="#workflow">See model</a>
+            <a class="button secondary" href="studio.html?intro=1">Show intro</a>
           </div>
         </div>
 
@@ -575,6 +578,7 @@
             <span>Movie: The Last Signal.dir</span>
             <span>Model: AInimation Director Board</span>
             <span>Export: Markdown / JSON / Prompts / Timing map</span>
+            <span data-studio-version>v.04.08.2026.r2.18:00</span>
           </div>
         </div>
       </section>

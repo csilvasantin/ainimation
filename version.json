@@ -1,15 +1,15 @@
 {
-  "version": "v.04.08.2026.r1.17:51",
-  "deployedAt": "2026-08-04T15:51:35Z",
+  "version": "v.04.08.2026.r2.18:00",
+  "deployedAt": "2026-08-04T16:02:12Z",
   "deployer": "SmithMacMini",
   "machine": "Mac Mini",
   "signature": "SmithMacMini · Mac Mini",
-  "git": "53fe7d1a3fd534388861f37f065bb6747ac74680",
-  "gitShort": "53fe7d1",
-  "gitFull": "53fe7d1a3fd534388861f37f065bb6747ac74680",
+  "git": "PENDING",
+  "gitShort": "PENDING",
+  "gitFull": "PENDING",
   "dirty": false,
-  "returnTag": "AInimation-v.04.08.2026.r1",
-  "previousTag": "AInimation-v.03.08.2026.r1",
-  "previousVersion": "v.03.08.2026.r1",
-  "note": "Alta operativa SmithMacMini: sello canónico + firma + punto de retorno en webmaster."
+  "returnTag": "AInimation-v.04.08.2026.r2",
+  "previousTag": "AInimation-v.04.08.2026.r1",
+  "previousVersion": "v.04.08.2026.r1.17:51",
+  "note": "DEC-mseudbe7w0mz expired → ★ Entrada al Director sin fricción (CTA #workspace, deep-link, sello, boot corto)."
 }
