@@ -1,0 +1,15 @@
+{
+  "version": "v.04.08.2026.r1.17:51",
+  "deployedAt": "2026-08-04T15:51:35Z",
+  "deployer": "SmithMacMini",
+  "machine": "Mac Mini",
+  "signature": "SmithMacMini · Mac Mini",
+  "git": "80c286bcf8c6a0b5fe391a14f20db04b5f3ecdce",
+  "gitShort": "80c286b",
+  "gitFull": "80c286bcf8c6a0b5fe391a14f20db04b5f3ecdce",
+  "dirty": false,
+  "returnTag": "AInimation-v.04.08.2026.r1",
+  "previousTag": "AInimation-v.03.08.2026.r1",
+  "previousVersion": "v.03.08.2026.r1",
+  "note": "Alta operativa SmithMacMini: sello canónico + firma + punto de retorno en webmaster."
+}
