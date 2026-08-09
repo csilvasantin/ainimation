@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>AInimation Studio · Ayuda — qué es y cómo se usa</title>
+  <meta name="description" content="AInimation Studio explicado para personas: qué es, las tres puertas (Author, Generate, Control), dónde acaba lo que creas y a quién se avisa.">
+  <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+  <style>
+    :root{--ink:#17120f;--muted:#6e6257;--paper:#f5eee2;--panel:#fffaf0;--line:rgba(23,18,15,.14);--line2:rgba(23,18,15,.28);--lime:#c8ff5f;--coral:#ff654f;--cyan:#31bed1;--violet:#7c5cff;--gold:#f0b84f;--mono:ui-monospace,SFMono-Regular,Menlo,monospace;--sans:-apple-system,BlinkMacSystemFont,"Inter","Segoe UI",Roboto,sans-serif}
+    *{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);line-height:1.65;-webkit-font-smoothing:antialiased}
+    .wrap{width:min(100% - 36px,900px);margin:0 auto;padding:28px 0 72px}
+    a{color:var(--ink);text-decoration:underline;text-decoration-color:var(--line2);text-underline-offset:3px}a:hover{text-decoration-color:var(--ink)}
+    .kicker{margin:0;font:10px var(--mono);letter-spacing:.18em;text-transform:uppercase;color:var(--muted)}
+    h1{font-size:clamp(26px,4vw,38px);letter-spacing:-.025em;margin:14px 0 10px;line-height:1.12}
+    .lede{color:var(--muted);font-size:16.5px;max-width:70ch}
+    .puertas{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px;margin:24px 0}
+    .puerta{padding:15px 17px;border:1px solid var(--line);border-radius:14px;background:var(--panel)}
+    .puerta b{display:block;font:10px var(--mono);letter-spacing:.12em;text-transform:uppercase;margin-bottom:5px}
+    .puerta span{color:var(--muted);font-size:13.5px}
+    h2{font-size:21px;margin:34px 0 10px;letter-spacing:-.015em}
+    p{color:var(--muted);max-width:72ch;margin:0 0 11px}b{color:var(--ink)}
+    ol,ul{margin:0 0 12px 22px;color:var(--muted)}li{margin-bottom:8px}
+    code{font:12.5px var(--mono);background:var(--panel);border:1px solid var(--line);border-radius:5px;padding:1px 5px}
+    table{width:100%;border-collapse:collapse;margin:12px 0;font-size:13.5px}
+    th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+    th{font:10px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+    td.d{color:var(--muted)}
+    .nota{margin:16px 0;padding:14px 16px;border-left:3px solid var(--gold);background:var(--panel);color:var(--muted)}
+    .nota b{color:var(--ink)}
+    footer{margin-top:44px;padding-top:16px;border-top:1px solid var(--line);color:var(--muted);font:11px var(--mono)}
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <p class="kicker">● AInimation Studio · ayuda</p>
+  <h1>Qué es AInimation Studio<br>y cómo se usa</h1>
+  <p class="lede">Es la <b>capa de autoría</b> de la suite AdmiraNeXT: trabajo de dirección de
+  animación, rehecho con IA. Aquí se crea lo que después se guarda, se emite y se mide en el
+  resto de la casa.</p>
+
+  <div class="puertas">
+    <div class="puerta"><b style="color:var(--coral)">Para personas · esta página</b>
+      <span>Qué es, qué hace cada puerta y dónde acaba lo que creas.</span></div>
+    <div class="puerta"><b style="color:var(--violet)">Para máquinas</b>
+      <span>Contratos y estado real: <a href="/mcp/">ainimation.studio/mcp</a></span></div>
+  </div>
+
+  <h2>Las tres puertas</h2>
+  <table>
+    <tr><th>Puerta</th><th>Qué hace</th></tr>
+    <tr><td><b>Author</b></td><td class="d">Escribir la intención: qué se cuenta y cómo se
+      cuenta, antes de que exista un solo fotograma.</td></tr>
+    <tr><td><b>Generate</b></td><td class="d">Convertir esa intención en material, con IA, sin
+      salir de la pieza que estás montando.</td></tr>
+    <tr><td><b>Control</b></td><td class="d">Quedarte al mando: lo que sale es
+      <b>editable</b>, no un resultado que hay que aceptar tal cual.</td></tr>
+  </table>
+  <p>La interfaz completa vive en <a href="/studio.html">/studio.html</a>. La portada es el
+  escaparate; el trabajo, ahí dentro.</p>
+
+  <h2>Dónde acaba lo que creas</h2>
+  <ul>
+    <li><b>Pixeria</b> guarda la pieza, etiquetada, para que el resto de la casa la use.</li>
+    <li><b>admira.tv</b> la emite, y deja constancia de cada pase.</li>
+    <li><b>clearchannel.tv</b> cruza esa emisión con la audiencia que la vio.</li>
+    <li><b>Yokup</b> es donde se declara el trabajo y donde puntúa.</li>
+  </ul>
+
+  <div class="nota"><b>Esto es una web, no una aplicación instalada.</b> Se publica sola al
+  empujar los cambios: no hay botón de desplegar, y por eso un cambio pequeño llega enseguida.</div>
+
+  <h2>Si algo se rompe</h2>
+  <p>Avísalo en el grupo <b>AgoraMatrix</b> de Telegram, que es la única bandeja del equipo. Di
+  qué esperabas ver y en qué puerta estabas. El responsable del proyecto en el censo de Yokup es
+  <b>SmithMacMini</b>.</p>
+
+  <footer>
+    ainimation.studio/help · la puerta de carbono · para agentes,
+    <a href="/mcp/">ainimation.studio/mcp</a> · esta página existe por la regla 24 de la
+    <a href="https://www.admiranext.com/normativa">normativa</a>
+  </footer>
+</div>
+</body>
+</html>

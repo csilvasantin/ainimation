@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>AInimation Studio · MCP — la puerta de silicio</title>
+  <meta name="description" content="Lo que un agente necesita saber de ainimation.studio: qué hay hoy, qué NO hay todavía, y dónde vive el dato de lo que se crea aquí.">
+  <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+  <style>
+    :root{--ink:#17120f;--muted:#6e6257;--paper:#f5eee2;--panel:#fffaf0;--line:rgba(23,18,15,.14);--line2:rgba(23,18,15,.28);--lime:#c8ff5f;--coral:#ff654f;--cyan:#31bed1;--violet:#7c5cff;--gold:#f0b84f;--mono:ui-monospace,SFMono-Regular,Menlo,monospace;--sans:-apple-system,BlinkMacSystemFont,"Inter","Segoe UI",Roboto,sans-serif}
+    *{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);line-height:1.65;-webkit-font-smoothing:antialiased}
+    .wrap{width:min(100% - 36px,900px);margin:0 auto;padding:28px 0 72px}
+    a{color:var(--ink);text-decoration:underline;text-decoration-color:var(--line2);text-underline-offset:3px}a:hover{text-decoration-color:var(--ink)}
+    .kicker{margin:0;font:10px var(--mono);letter-spacing:.18em;text-transform:uppercase;color:var(--muted)}
+    h1{font-size:clamp(26px,4vw,38px);letter-spacing:-.025em;margin:14px 0 10px;line-height:1.12}
+    .lede{color:var(--muted);font-size:16.5px;max-width:70ch}
+    .puertas{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px;margin:24px 0}
+    .puerta{padding:15px 17px;border:1px solid var(--line);border-radius:14px;background:var(--panel)}
+    .puerta b{display:block;font:10px var(--mono);letter-spacing:.12em;text-transform:uppercase;margin-bottom:5px}
+    .puerta span{color:var(--muted);font-size:13.5px}
+    h2{font-size:21px;margin:34px 0 10px;letter-spacing:-.015em}
+    p{color:var(--muted);max-width:72ch;margin:0 0 11px}b{color:var(--ink)}
+    ol,ul{margin:0 0 12px 22px;color:var(--muted)}li{margin-bottom:8px}
+    code{font:12.5px var(--mono);background:var(--panel);border:1px solid var(--line);border-radius:5px;padding:1px 5px}
+    table{width:100%;border-collapse:collapse;margin:12px 0;font-size:13.5px}
+    th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+    th{font:10px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+    td.d{color:var(--muted)}
+    .nota{margin:16px 0;padding:14px 16px;border-left:3px solid var(--gold);background:var(--panel);color:var(--muted)}
+    .nota b{color:var(--ink)}
+    footer{margin-top:44px;padding-top:16px;border-top:1px solid var(--line);color:var(--muted);font:11px var(--mono)}
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <p class="kicker">● AInimation Studio · puerta de silicio</p>
+  <h1>Trabajar con AInimation Studio<br>sin preguntarle a nadie</h1>
+  <p class="lede">La capa de autoría de la suite: dirección de animación rehecha con IA, por tres
+  puertas — Author, Generate, Control.</p>
+
+  <div class="nota"><b>Lo primero, para no hacerte perder el rato:</b> hoy <b>no hay API pública
+  ni servidor MCP</b> en este dominio. Es una web estática. Lo digo aquí en vez de inventarme un
+  contrato que no existe — cuando lo haya, se declara en esta misma página y en su
+  <a href="/mcp/manifest.json">manifest.json</a>.</div>
+
+  <div class="puertas">
+    <div class="puerta"><b style="color:var(--violet)">Para máquinas · esta página</b>
+      <span>En crudo: <a href="/mcp/manifest.json">manifest.json</a> ·
+      <a href="/mcp/llms.txt">llms.txt</a></span></div>
+    <div class="puerta"><b style="color:var(--coral)">Para personas</b>
+      <span>Qué es y cómo se usa: <a href="/help/">ainimation.studio/help</a></span></div>
+  </div>
+
+  <h2>Qué hay hoy en este dominio</h2>
+  <table>
+    <tr><th>Ruta</th><th>Qué es</th></tr>
+        <tr><td><code>/</code></td><td class="d">La portada: qué es Admira Director en la era de la IA y las tres puertas.</td></tr>
+        <tr><td><code>/studio.html</code></td><td class="d">El entorno de autoría — la interfaz completa (proyecto DirectorInteractivo).</td></tr>
+        <tr><td><code>/version.json</code></td><td class="d">El sello de la última publicación, con su firma agente · máquina.</td></tr>
+  </table>
+
+  <h2>Dónde vive el dato de lo que se crea aquí</h2>
+  <p>Este sitio autora; el dato acaba en sus hermanos, y ahí sí hay contrato:</p>
+  <ul>
+    <li><b>Trabajo y puntos</b> → <a href="https://www.yokup.com/mcp">yokup.com/mcp</a>
+      (<code>https://api.yokup.com</code>). Todo lo que se hace aquí
+      se declara y puntúa en Yokup.</li>
+    <li><b>Biblioteca</b> → <a href="https://www.pixeria.com/mcp/">pixeria.com/mcp</a>. El
+      contenido creado se guarda ahí, etiquetado.</li>
+    <li><b>Emisión</b> → <a href="https://admira.tv/mcp/">admira.tv/mcp</a>, con su proof-of-play
+      y sus tres herramientas MCP vivas.</li>
+  </ul>
+
+  <h2>Trampas</h2>
+  <ul>
+      <li>El sitio se publica al empujar a main: no hay deploy.sh. Un push es una publicación.</li>
+      <li>El ?v= de los assets lo sella un workflow de GitHub al hacer push; no lo pongas a mano.</li>
+      <li>director-interactivo es un proyecto distinto en el censo de Yokup, pero vive en /studio.html de este mismo dominio: hereda estas dos puertas.</li>
+  </ul>
+
+  <footer>
+    ainimation.studio/mcp · la puerta de silicio · el crudo en
+    <a href="/mcp/manifest.json">manifest.json</a> y <a href="/mcp/llms.txt">llms.txt</a> ·
+    para personas, <a href="/help/">ainimation.studio/help</a> · regla 24
+  </footer>
+</div>
+</body>
+</html>

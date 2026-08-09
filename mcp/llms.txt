@@ -1,0 +1,37 @@
+# AInimation Studio · ainimation.studio
+
+> La capa de autoría de la suite AdmiraNeXT: dirección de animación rehecha con IA,
+> por tres puertas — Author (escribir la intención), Generate (convertirla en material)
+> y Control (que lo que salga sea editable, no un resultado que aceptar).
+
+**Hoy no hay API pública ni servidor MCP en este dominio.** Es una web estática servida
+por Cloudflare Pages desde `main`. Lo digo antes que nada para no hacerte perder el
+rato buscando un contrato que no existe; cuando lo haya se declarará aquí.
+
+## Qué hay
+
+| Ruta | Qué es |
+|---|---|
+| `/` | La portada: qué es Admira Director en la era de la IA y las tres puertas. |
+| `/studio.html` | El entorno de autoría — la interfaz completa (proyecto DirectorInteractivo). |
+| `/version.json` | El sello de la última publicación, con su firma agente · máquina. |
+
+## Dónde vive el dato
+
+Este sitio autora; el dato acaba en sus hermanos, y ahí sí hay contrato:
+
+- **Trabajo y puntos** → `https://api.yokup.com` · [yokup.com/mcp](https://www.yokup.com/mcp)
+- **Biblioteca** → [pixeria.com/mcp](https://www.pixeria.com/mcp/)
+- **Emisión** → [admira.tv/mcp](https://admira.tv/mcp/)
+
+## Trampas
+
+- **Un push a `main` es una publicación**: no hay `deploy.sh`.
+- **El `?v=` de los assets lo sella un workflow de GitHub** al hacer push; no lo pongas
+  a mano.
+- **`director-interactivo` es otro proyecto** en el censo de Yokup, pero vive en
+  `/studio.html` de este mismo dominio: hereda estas dos puertas.
+
+## Para personas
+
+[ainimation.studio/help](https://www.ainimation.studio/help/).
