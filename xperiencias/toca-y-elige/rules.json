@@ -1,0 +1,120 @@
+[
+  {
+    "id": "r-ofertas",
+    "name": "Toca zona-ofertas → OFERTAS",
+    "enabled": true,
+    "when": {
+      "join": "and",
+      "conds": [
+        {
+          "fact": "click",
+          "value": "zona-ofertas"
+        }
+      ]
+    },
+    "do": [
+      {
+        "id": "goToMarker",
+        "value": "OFERTAS"
+      },
+      {
+        "id": "playSegment",
+        "value": "FIN-OFERTAS"
+      }
+    ]
+  },
+  {
+    "id": "r-novedades",
+    "name": "Toca zona-novedades → NOVEDADES",
+    "enabled": true,
+    "when": {
+      "join": "and",
+      "conds": [
+        {
+          "fact": "click",
+          "value": "zona-novedades"
+        }
+      ]
+    },
+    "do": [
+      {
+        "id": "goToMarker",
+        "value": "NOVEDADES"
+      },
+      {
+        "id": "playSegment",
+        "value": "FIN-NOVEDADES"
+      }
+    ]
+  },
+  {
+    "id": "r-llegar",
+    "name": "Toca zona-llegar → LLEGAR",
+    "enabled": true,
+    "when": {
+      "join": "and",
+      "conds": [
+        {
+          "fact": "click",
+          "value": "zona-llegar"
+        }
+      ]
+    },
+    "do": [
+      {
+        "id": "goToMarker",
+        "value": "LLEGAR"
+      },
+      {
+        "id": "playSegment",
+        "value": "FIN-LLEGAR"
+      }
+    ]
+  },
+  {
+    "id": "r-bucle-atraccion",
+    "name": "La atracción se repite sola",
+    "enabled": true,
+    "when": {
+      "join": "and",
+      "conds": [
+        {
+          "fact": "markerReached",
+          "value": "FIN-ATRACCION"
+        }
+      ]
+    },
+    "do": [
+      {
+        "id": "goToMarker",
+        "value": "INICIO"
+      }
+    ]
+  },
+  {
+    "id": "r-vuelta-sola",
+    "name": "12 s sin tocar → vuelve a la atracción",
+    "enabled": true,
+    "when": {
+      "join": "and",
+      "conds": [
+        {
+          "fact": "idleSeconds",
+          "op": ">=",
+          "value": 12
+        },
+        {
+          "fact": "frame",
+          "op": ">=",
+          "value": 170
+        }
+      ]
+    },
+    "do": [
+      {
+        "id": "goToMarker",
+        "value": "INICIO"
+      }
+    ]
+  }
+]

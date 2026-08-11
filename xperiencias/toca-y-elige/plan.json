@@ -1,0 +1,628 @@
+{
+  "title": "Admira Toca y Elige",
+  "fps": 24,
+  "totalFrames": 720,
+  "markers": [
+    {
+      "id": "m-inicio",
+      "frame": 1,
+      "label": "INICIO"
+    },
+    {
+      "id": "m-fin-atrac",
+      "frame": 158,
+      "label": "FIN-ATRACCION"
+    },
+    {
+      "id": "m-ofertas",
+      "frame": 180,
+      "label": "OFERTAS"
+    },
+    {
+      "id": "m-fin-of",
+      "frame": 320,
+      "label": "FIN-OFERTAS"
+    },
+    {
+      "id": "m-novedades",
+      "frame": 340,
+      "label": "NOVEDADES"
+    },
+    {
+      "id": "m-fin-nv",
+      "frame": 480,
+      "label": "FIN-NOVEDADES"
+    },
+    {
+      "id": "m-llegar",
+      "frame": 500,
+      "label": "LLEGAR"
+    },
+    {
+      "id": "m-fin-ll",
+      "frame": 640,
+      "label": "FIN-LLEGAR"
+    }
+  ],
+  "cast": [],
+  "stageItems": [
+    {
+      "id": "stage-item-1",
+      "type": "text",
+      "spriteName": "titulo",
+      "interactive": false,
+      "startFrame": 1,
+      "durationFrames": 160,
+      "text": "TOCA UNA OPCIÓN",
+      "color": "#f8f7f2",
+      "keyframes": [
+        {
+          "frame": 1,
+          "x": 6,
+          "y": 9,
+          "w": 88,
+          "h": 14,
+          "opacity": 1,
+          "rotation": 0,
+          "easing": "linear",
+          "color": "#f8f7f2",
+          "text": "TOCA UNA OPCIÓN",
+          "fontWeight": "850",
+          "fontStyle": "normal",
+          "textDecoration": "none",
+          "textAlign": "center",
+          "fontSize": "5.4vw"
+        }
+      ]
+    },
+    {
+      "id": "stage-item-2",
+      "type": "rect-fill",
+      "spriteName": "subrayado",
+      "interactive": false,
+      "startFrame": 1,
+      "durationFrames": 160,
+      "color": "#c6f24e",
+      "keyframes": [
+        {
+          "frame": 1,
+          "x": 47,
+          "y": 26,
+          "w": 6,
+          "h": 1.1,
+          "opacity": 1,
+          "rotation": 0,
+          "easing": "linear",
+          "color": "#c6f24e",
+          "text": "",
+          "fontWeight": "850",
+          "fontStyle": "normal",
+          "textDecoration": "none",
+          "textAlign": "left",
+          "fontSize": ""
+        },
+        {
+          "frame": 80,
+          "x": 20,
+          "y": 26,
+          "w": 60,
+          "h": 1.1,
+          "opacity": 1,
+          "rotation": 0,
+          "easing": "linear",
+          "color": "#c6f24e",
+          "text": "",
+          "fontWeight": "850",
+          "fontStyle": "normal",
+          "textDecoration": "none",
+          "textAlign": "left",
+          "fontSize": ""
+        },
+        {
+          "frame": 158,
+          "x": 47,
+          "y": 26,
+          "w": 6,
+          "h": 1.1,
+          "opacity": 1,
+          "rotation": 0,
+          "easing": "linear",
+          "color": "#c6f24e",
+          "text": "",
+          "fontWeight": "850",
+          "fontStyle": "normal",
+          "textDecoration": "none",
+          "textAlign": "left",
+          "fontSize": ""
+        }
+      ]
+    },
+    {
+      "id": "stage-item-3",
+      "type": "text",
+      "spriteName": "claim",
+      "interactive": false,
+      "startFrame": 1,
+      "durationFrames": 160,
+      "text": "Admira · pantalla interactiva",
+      "color": "#8a8f98",
+      "keyframes": [
+        {
+          "frame": 1,
+          "x": 6,
+          "y": 30,
+          "w": 88,
+          "h": 7,
+          "opacity": 1,
+          "rotation": 0,
+          "easing": "linear",
+          "color": "#8a8f98",
+          "text": "Admira · pantalla interactiva",
+          "fontWeight": "850",
+          "fontStyle": "normal",
+          "textDecoration": "none",
+          "textAlign": "center",
+          "fontSize": "1.9vw"
+        }
+      ]
+    },
+    {
+      "id": "stage-item-4",
+      "type": "rect-fill",
+      "spriteName": "zona-ofertas",
+      "interactive": true,
+      "startFrame": 1,
+      "durationFrames": 160,
+      "color": "#c6f24e",
+      "keyframes": [
+        {
+          "frame": 1,
+          "x": 6,
+          "y": 42,
+          "w": 26,
+          "h": 36,
+          "opacity": 1,
+          "rotation": 0,
+          "easing": "linear",
+          "color": "#c6f24e",
+          "text": "",
+          "fontWeight": "850",
+          "fontStyle": "normal",
+          "textDecoration": "none",
+          "textAlign": "left",
+          "fontSize": ""
+        }
+      ]
+    },
+    {
+      "id": "stage-item-5",
+      "type": "rect-fill",
+      "spriteName": "zona-novedades",
+      "interactive": true,
+      "startFrame": 1,
+      "durationFrames": 160,
+      "color": "#7ad7f0",
+      "keyframes": [
+        {
+          "frame": 1,
+          "x": 37,
+          "y": 42,
+          "w": 26,
+          "h": 36,
+          "opacity": 1,
+          "rotation": 0,
+          "easing": "linear",
+          "color": "#7ad7f0",
+          "text": "",
+          "fontWeight": "850",
+          "fontStyle": "normal",
+          "textDecoration": "none",
+          "textAlign": "left",
+          "fontSize": ""
+        }
+      ]
+    },
+    {
+      "id": "stage-item-6",
+      "type": "rect-fill",
+      "spriteName": "zona-llegar",
+      "interactive": true,
+      "startFrame": 1,
+      "durationFrames": 160,
+      "color": "#f2a25c",
+      "keyframes": [
+        {
+          "frame": 1,
+          "x": 68,
+          "y": 42,
+          "w": 26,
+          "h": 36,
+          "opacity": 1,
+          "rotation": 0,
+          "easing": "linear",
+          "color": "#f2a25c",
+          "text": "",
+          "fontWeight": "850",
+          "fontStyle": "normal",
+          "textDecoration": "none",
+          "textAlign": "left",
+          "fontSize": ""
+        }
+      ]
+    },
+    {
+      "id": "stage-item-7",
+      "type": "text",
+      "spriteName": "zona-ofertas",
+      "interactive": true,
+      "startFrame": 1,
+      "durationFrames": 160,
+      "text": "OFERTAS",
+      "color": "#05070c",
+      "keyframes": [
+        {
+          "frame": 1,
+          "x": 6,
+          "y": 55,
+          "w": 26,
+          "h": 10,
+          "opacity": 1,
+          "rotation": 0,
+          "easing": "linear",
+          "color": "#05070c",
+          "text": "OFERTAS",
+          "fontWeight": "850",
+          "fontStyle": "normal",
+          "textDecoration": "none",
+          "textAlign": "center",
+          "fontSize": "2.4vw"
+        }
+      ]
+    },
+    {
+      "id": "stage-item-8",
+      "type": "text",
+      "spriteName": "zona-novedades",
+      "interactive": true,
+      "startFrame": 1,
+      "durationFrames": 160,
+      "text": "NOVEDADES",
+      "color": "#05070c",
+      "keyframes": [
+        {
+          "frame": 1,
+          "x": 37,
+          "y": 55,
+          "w": 26,
+          "h": 10,
+          "opacity": 1,
+          "rotation": 0,
+          "easing": "linear",
+          "color": "#05070c",
+          "text": "NOVEDADES",
+          "fontWeight": "850",
+          "fontStyle": "normal",
+          "textDecoration": "none",
+          "textAlign": "center",
+          "fontSize": "2.4vw"
+        }
+      ]
+    },
+    {
+      "id": "stage-item-9",
+      "type": "text",
+      "spriteName": "zona-llegar",
+      "interactive": true,
+      "startFrame": 1,
+      "durationFrames": 160,
+      "text": "CÓMO LLEGAR",
+      "color": "#05070c",
+      "keyframes": [
+        {
+          "frame": 1,
+          "x": 68,
+          "y": 55,
+          "w": 26,
+          "h": 10,
+          "opacity": 1,
+          "rotation": 0,
+          "easing": "linear",
+          "color": "#05070c",
+          "text": "CÓMO LLEGAR",
+          "fontWeight": "850",
+          "fontStyle": "normal",
+          "textDecoration": "none",
+          "textAlign": "center",
+          "fontSize": "2.4vw"
+        }
+      ]
+    },
+    {
+      "id": "stage-item-10",
+      "type": "text",
+      "spriteName": "pie",
+      "interactive": false,
+      "startFrame": 1,
+      "durationFrames": 160,
+      "text": "Vuelve sola a esta pantalla tras 12 s sin tocar",
+      "color": "#8a8f98",
+      "keyframes": [
+        {
+          "frame": 1,
+          "x": 6,
+          "y": 86,
+          "w": 88,
+          "h": 6,
+          "opacity": 1,
+          "rotation": 0,
+          "easing": "linear",
+          "color": "#8a8f98",
+          "text": "Vuelve sola a esta pantalla tras 12 s sin tocar",
+          "fontWeight": "850",
+          "fontStyle": "normal",
+          "textDecoration": "none",
+          "textAlign": "center",
+          "fontSize": "1.4vw"
+        }
+      ]
+    },
+    {
+      "id": "stage-item-11",
+      "type": "rect-fill",
+      "spriteName": "panel-ofertas",
+      "interactive": false,
+      "startFrame": 170,
+      "durationFrames": 160,
+      "color": "#c6f24e",
+      "keyframes": [
+        {
+          "frame": 170,
+          "x": 6,
+          "y": 14,
+          "w": 88,
+          "h": 72,
+          "opacity": 1,
+          "rotation": 0,
+          "easing": "linear",
+          "color": "#c6f24e",
+          "text": "",
+          "fontWeight": "850",
+          "fontStyle": "normal",
+          "textDecoration": "none",
+          "textAlign": "left",
+          "fontSize": ""
+        }
+      ]
+    },
+    {
+      "id": "stage-item-12",
+      "type": "text",
+      "spriteName": "t-ofertas",
+      "interactive": false,
+      "startFrame": 170,
+      "durationFrames": 160,
+      "text": "OFERTAS DE HOY",
+      "color": "#05070c",
+      "keyframes": [
+        {
+          "frame": 170,
+          "x": 10,
+          "y": 26,
+          "w": 80,
+          "h": 16,
+          "opacity": 1,
+          "rotation": 0,
+          "easing": "linear",
+          "color": "#05070c",
+          "text": "OFERTAS DE HOY",
+          "fontWeight": "850",
+          "fontStyle": "normal",
+          "textDecoration": "none",
+          "textAlign": "center",
+          "fontSize": "4.6vw"
+        }
+      ]
+    },
+    {
+      "id": "stage-item-13",
+      "type": "text",
+      "spriteName": "b-ofertas",
+      "interactive": false,
+      "startFrame": 170,
+      "durationFrames": 160,
+      "text": "2×1 en toda la sección · hasta el domingo",
+      "color": "#05070c",
+      "keyframes": [
+        {
+          "frame": 170,
+          "x": 10,
+          "y": 47,
+          "w": 80,
+          "h": 20,
+          "opacity": 1,
+          "rotation": 0,
+          "easing": "linear",
+          "color": "#05070c",
+          "text": "2×1 en toda la sección · hasta el domingo",
+          "fontWeight": "850",
+          "fontStyle": "normal",
+          "textDecoration": "none",
+          "textAlign": "center",
+          "fontSize": "2.2vw"
+        }
+      ]
+    },
+    {
+      "id": "stage-item-14",
+      "type": "rect-fill",
+      "spriteName": "panel-novedades",
+      "interactive": false,
+      "startFrame": 330,
+      "durationFrames": 160,
+      "color": "#7ad7f0",
+      "keyframes": [
+        {
+          "frame": 330,
+          "x": 6,
+          "y": 14,
+          "w": 88,
+          "h": 72,
+          "opacity": 1,
+          "rotation": 0,
+          "easing": "linear",
+          "color": "#7ad7f0",
+          "text": "",
+          "fontWeight": "850",
+          "fontStyle": "normal",
+          "textDecoration": "none",
+          "textAlign": "left",
+          "fontSize": ""
+        }
+      ]
+    },
+    {
+      "id": "stage-item-15",
+      "type": "text",
+      "spriteName": "t-novedades",
+      "interactive": false,
+      "startFrame": 330,
+      "durationFrames": 160,
+      "text": "NOVEDADES",
+      "color": "#05070c",
+      "keyframes": [
+        {
+          "frame": 330,
+          "x": 10,
+          "y": 26,
+          "w": 80,
+          "h": 16,
+          "opacity": 1,
+          "rotation": 0,
+          "easing": "linear",
+          "color": "#05070c",
+          "text": "NOVEDADES",
+          "fontWeight": "850",
+          "fontStyle": "normal",
+          "textDecoration": "none",
+          "textAlign": "center",
+          "fontSize": "4.6vw"
+        }
+      ]
+    },
+    {
+      "id": "stage-item-16",
+      "type": "text",
+      "spriteName": "b-novedades",
+      "interactive": false,
+      "startFrame": 330,
+      "durationFrames": 160,
+      "text": "Lo que ha entrado esta semana, antes que en ningún sitio",
+      "color": "#05070c",
+      "keyframes": [
+        {
+          "frame": 330,
+          "x": 10,
+          "y": 47,
+          "w": 80,
+          "h": 20,
+          "opacity": 1,
+          "rotation": 0,
+          "easing": "linear",
+          "color": "#05070c",
+          "text": "Lo que ha entrado esta semana, antes que en ningún sitio",
+          "fontWeight": "850",
+          "fontStyle": "normal",
+          "textDecoration": "none",
+          "textAlign": "center",
+          "fontSize": "2.2vw"
+        }
+      ]
+    },
+    {
+      "id": "stage-item-17",
+      "type": "rect-fill",
+      "spriteName": "panel-llegar",
+      "interactive": false,
+      "startFrame": 490,
+      "durationFrames": 160,
+      "color": "#f2a25c",
+      "keyframes": [
+        {
+          "frame": 490,
+          "x": 6,
+          "y": 14,
+          "w": 88,
+          "h": 72,
+          "opacity": 1,
+          "rotation": 0,
+          "easing": "linear",
+          "color": "#f2a25c",
+          "text": "",
+          "fontWeight": "850",
+          "fontStyle": "normal",
+          "textDecoration": "none",
+          "textAlign": "left",
+          "fontSize": ""
+        }
+      ]
+    },
+    {
+      "id": "stage-item-18",
+      "type": "text",
+      "spriteName": "t-llegar",
+      "interactive": false,
+      "startFrame": 490,
+      "durationFrames": 160,
+      "text": "CÓMO LLEGAR",
+      "color": "#05070c",
+      "keyframes": [
+        {
+          "frame": 490,
+          "x": 10,
+          "y": 26,
+          "w": 80,
+          "h": 16,
+          "opacity": 1,
+          "rotation": 0,
+          "easing": "linear",
+          "color": "#05070c",
+          "text": "CÓMO LLEGAR",
+          "fontWeight": "850",
+          "fontStyle": "normal",
+          "textDecoration": "none",
+          "textAlign": "center",
+          "fontSize": "4.6vw"
+        }
+      ]
+    },
+    {
+      "id": "stage-item-19",
+      "type": "text",
+      "spriteName": "b-llegar",
+      "interactive": false,
+      "startFrame": 490,
+      "durationFrames": 160,
+      "text": "Planta 0 · frente a la entrada norte · 2 min andando",
+      "color": "#05070c",
+      "keyframes": [
+        {
+          "frame": 490,
+          "x": 10,
+          "y": 47,
+          "w": 80,
+          "h": 20,
+          "opacity": 1,
+          "rotation": 0,
+          "easing": "linear",
+          "color": "#05070c",
+          "text": "Planta 0 · frente a la entrada norte · 2 min andando",
+          "fontWeight": "850",
+          "fontStyle": "normal",
+          "textDecoration": "none",
+          "textAlign": "center",
+          "fontSize": "2.2vw"
+        }
+      ]
+    }
+  ]
+}

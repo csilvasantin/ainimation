@@ -1,2 +1,5 @@
 node_modules/
 .claude/
+
+# artefactos locales de wrangler (id de cuenta, cachés): nunca al repo público
+.wrangler/
