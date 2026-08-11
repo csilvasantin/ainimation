@@ -1,5 +1,5 @@
 {
-  "version": "v.11.08.2026.r3.20:49",
+  "version": "v.11.08.2026.r4.21:16",
   "deployedAt": "2026-08-11T16:19:24Z",
   "deployer": "NeoMBP14",
   "machine": "MacBookProNegro14",
@@ -8,8 +8,8 @@
   "gitShort": "383478b",
   "gitFull": "383478bb9809fbe73964dbf15d6878e211f035ca",
   "dirty": false,
-  "returnTag": "AInimation-v.11.08.2026.r3",
-  "previousTag": "AInimation-v.11.08.2026.r2",
-  "previousVersion": "v.11.08.2026.r2.19:00",
-  "note": "Dialogo de publicacion: la animacion se NOMBRA al exportar y puede darse de alta sola en el Stock (animaciones). Sello del pie enganchado a la meta. Endpoints del Stock arreglados."
+  "returnTag": "AInimation-v.11.08.2026.r4",
+  "previousTag": "AInimation-v.11.08.2026.r3",
+  "previousVersion": "v.11.08.2026.r3.20:49",
+  "note": "Subir una animacion tiene su propio timeout (3 min): 25 s eran los del listado y cortaban la subida a medias con un aviso que hablaba de otra cosa. El peso se ve mientras sube."
 }

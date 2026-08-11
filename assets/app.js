@@ -4741,6 +4741,13 @@ function audioStageKind(member) {
 // raíz del worker responde en 0,07 s. Es esa ruta la que es lenta.
 // Sin límite de espera, un fetch así deja la interfaz colgada sin explicar nada.
 const stockRequestTimeoutMs = 25000;
+// Subir una animación NO es consultar el listado. El WebM del Stage son varios
+// megas, viaja en base64 (+33 %) dentro de un JSON, y por una línea doméstica
+// eso pasa de 25 s con facilidad: el corte llegaba cuando la subida iba por la
+// mitad y el aviso hablaba de «lentitud del listado», que no era lo que estaba
+// pasando. Tres minutos son de sobra para lo que graba el Stage y siguen
+// cortando si la red está muerta de verdad.
+const stockUploadTimeoutMs = 180000;
 
 async function fetchWithTimeout(url, options = {}, timeoutMs = stockRequestTimeoutMs) {
   if (typeof AbortController === "undefined") return fetch(url, options);
@@ -4750,7 +4757,13 @@ async function fetchWithTimeout(url, options = {}, timeoutMs = stockRequestTimeo
     return await fetch(url, { ...options, signal: controller.signal });
   } catch (error) {
     if (error?.name === "AbortError") {
-      throw new Error(`El Stock de Admira no respondió en ${Math.round(timeoutMs / 1000)} s. Su listado tarda de 11 a 15 s incluso cuando va bien, así que puede ser sólo lentitud: vuelve a intentarlo.`);
+      // El mismo corte significa cosas distintas según lo que se estuviera
+      // haciendo: decir «el listado tarda» mientras se subía un vídeo manda a
+      // buscar el problema donde no está.
+      const subiendo = timeoutMs >= stockUploadTimeoutMs;
+      throw new Error(subiendo
+        ? `La subida al Stock de Admira se cortó a los ${Math.round(timeoutMs / 1000)} s. La animación viaja entera en la petición, así que si pesa mucho o la red va justa no llega: acorta la pieza o vuelve a intentarlo con mejor conexión.`
+        : `El Stock de Admira no respondió en ${Math.round(timeoutMs / 1000)} s. Su listado tarda de 11 a 15 s incluso cuando va bien, así que puede ser sólo lentitud: vuelve a intentarlo.`);
     }
     throw error;
   } finally {
@@ -5189,7 +5202,7 @@ async function postStageAnimationToStock(endpoint, blob, metadata) {
     method: "POST",
     headers: { "Content-Type": "application/json", Accept: "application/json" },
     body: JSON.stringify(payload),
-  });
+  }, stockUploadTimeoutMs);
   if (!response.ok) {
     const t = await response.text().catch(() => "");
     throw new Error(`${response.status} ${response.statusText} ${t.slice(0, 120)}`);
@@ -5210,6 +5223,11 @@ async function exportStageToAdmiraStock() {
     const fps = Number(document.querySelector("[data-score-fps]")?.dataset.value || 24);
     const blob = await getStageAnimationCapture();
     fallbackBlob = blob;
+    // El peso decide si esto va a tardar dos segundos o dos minutos, y es lo
+    // único que el usuario puede cambiar (acortar la pieza). Se enseña mientras
+    // sube, en vez de dejar un «Exportando…» mudo.
+    const megas = blob.size / (1024 * 1024);
+    stockExportButton.textContent = `Subiendo ${megas.toFixed(1)} MB…`;
     const metadata = {
       title: `${plan.title || "AiDirector Stage"} animation`,
       source: "ainimation.studio AiDirector",
