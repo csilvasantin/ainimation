@@ -6530,3 +6530,141 @@ body.ain-play [data-xpl-hot] { cursor: pointer !important; }
   border-color: rgba(255, 106, 106, 0.7) !important;
   color: #fff !important;
 }
+
+/* ============================================================================
+ * Diálogo de «Publicar Xperiencia». Una sola ventana para las tres decisiones
+ * que hay que tomar al exportar —cómo se llama, cuánto dura y si va al Stock—
+ * en vez de tres prompts encadenados del sistema. La carpeta de destino se
+ * pinta mientras se escribe el nombre: el slug deja de ser una sorpresa.
+ * Fondo oscuro a propósito, como el Stage: se publica desde la sala, no desde
+ * la web.
+ * ========================================================================== */
+.xp-pub-fondo {
+  position: fixed;
+  inset: 0;
+  z-index: 9000;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: rgba(5, 7, 12, 0.72);
+  backdrop-filter: blur(3px);
+}
+
+.xp-pub {
+  width: min(520px, 100%);
+  max-height: 100%;
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 26px 26px 22px;
+  border: 1px solid rgba(200, 255, 95, 0.34);
+  border-radius: 18px;
+  background: #0f1115;
+  color: #f5eee2;
+  box-shadow: 0 30px 90px rgba(0, 0, 0, 0.6);
+  font: 14px/1.45 system-ui, -apple-system, sans-serif;
+}
+
+.xp-pub h2 {
+  margin: 0;
+  font-size: 19px;
+  letter-spacing: 0.01em;
+}
+
+.xp-pub label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 12px;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: #9aa2ad;
+}
+
+.xp-pub input[type="text"],
+.xp-pub input[type="number"] {
+  padding: 11px 13px;
+  border: 1px solid rgba(245, 238, 226, 0.22);
+  border-radius: 10px;
+  background: #05070c;
+  color: #f5eee2;
+  font: 600 16px/1.2 system-ui, sans-serif;
+  letter-spacing: normal;
+  text-transform: none;
+}
+
+.xp-pub input:focus-visible {
+  outline: 2px solid var(--lime);
+  outline-offset: 1px;
+}
+
+.xp-pub-ruta {
+  margin: -6px 0 0;
+  font-size: 13px;
+  color: #9aa2ad;
+}
+
+.xp-pub-ruta code {
+  color: var(--lime);
+  font-weight: 700;
+}
+
+.xp-pub-nota {
+  margin: -4px 0 0;
+  font-size: 12.5px;
+  line-height: 1.4;
+  color: #8a8f98;
+}
+
+.xp-pub-nota:empty {
+  display: none;
+}
+
+.xp-pub label.xp-pub-check {
+  flex-direction: row;
+  align-items: center;
+  gap: 9px;
+  font-size: 13.5px;
+  letter-spacing: normal;
+  text-transform: none;
+  color: #f5eee2;
+  cursor: pointer;
+}
+
+.xp-pub label.xp-pub-check input {
+  width: 17px;
+  height: 17px;
+  accent-color: var(--lime);
+}
+
+.xp-pub-pie {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.xp-pub-pie button {
+  padding: 10px 18px;
+  border: 1px solid rgba(245, 238, 226, 0.28);
+  border-radius: 10px;
+  background: transparent;
+  color: #f5eee2;
+  font: 700 14px/1 system-ui, sans-serif;
+  cursor: pointer;
+}
+
+.xp-pub-pie .xp-pub-ok {
+  border-color: var(--lime);
+  background: var(--lime);
+  color: #05070c;
+}
+
+.xp-pub-pie button:hover {
+  filter: brightness(1.12);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .xp-pub-fondo { backdrop-filter: none; }
+}

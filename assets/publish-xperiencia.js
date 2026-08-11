@@ -338,28 +338,132 @@
     };
   }
 
-  // Se pregunta al exportar, no al dar de alta el item: la duración es una
-  // decisión de la pieza y quien la monta es quien sabe cuánto hay que mirarla.
-  // La respuesta se guarda en el plan, así que la siguiente exportación ya la
-  // propone y nadie la teclea dos veces.
-  function preguntaDuracion() {
-    const plan = window.currentPlan?.();
-    if (!plan) return SEGUNDOS_POR_DEFECTO;
-    const actual = limitaSegundos(plan.durationSeconds);
-    const dicho = window.prompt(
-      `¿Cuántos segundos ocupa esta Xperiencia en pantalla?\n` +
-      `(entre ${SEGUNDOS_MIN} y ${SEGUNDOS_MAX}; el canal la retira al acabar)`,
-      String(actual),
-    );
-    if (dicho === null) return null;                  // cancelar = no publicar
-    const segundos = limitaSegundos(dicho);
-    plan.durationSeconds = segundos;
-    window.saveFilmPlan?.(plan);
-    return segundos;
+  /* ---------------------------------------------------------------------------
+   * EL DIÁLOGO DE PUBLICACIÓN. Se pregunta al exportar, no al dar de alta el item
+   * en el catálogo: el nombre y la duración son decisiones de la PIEZA, y quien la
+   * monta es quien sabe cómo se llama y cuánto hay que mirarla. Antes el título
+   * era el del plan («The Last Signal» si nadie lo cambiaba) y el slug se deducía
+   * de él sin que nadie lo viera; la animación llegaba al Stock con el nombre de
+   * la plantilla.
+   * Tres prompts encadenados serían tres ventanas del sistema para una sola
+   * decisión, así que esto es un diálogo propio, con la carpeta de destino a la
+   * vista mientras se escribe el nombre.
+   * ------------------------------------------------------------------------- */
+  const CLAVE_TOKEN = "ainimation-stock-token";
+  const STOCK_API = "https://api.admira.store/stock/interactive";
+  const BASE_PUBLICA = "https://www.ainimation.studio/xperiencias/";
+
+  const leeToken = () => { try { return localStorage.getItem(CLAVE_TOKEN) || ""; } catch { return ""; } };
+  const guardaToken = (v) => { try { localStorage.setItem(CLAVE_TOKEN, v); } catch {} };
+
+  function dialogoPublicacion(plan) {
+    return new Promise((resolve) => {
+      const fondo = document.createElement("div");
+      fondo.className = "xp-pub-fondo";
+      fondo.innerHTML = `
+        <form class="xp-pub" role="dialog" aria-modal="true" aria-labelledby="xp-pub-t">
+          <h2 id="xp-pub-t">Publicar Xperiencia</h2>
+          <label>Nombre de la animación
+            <input name="nombre" type="text" maxlength="80" required autocomplete="off">
+          </label>
+          <p class="xp-pub-ruta">Carpeta: <code data-ruta>…</code></p>
+          <label>Segundos en pantalla
+            <input name="segundos" type="number" min="${SEGUNDOS_MIN}" max="${SEGUNDOS_MAX}" step="1" required>
+          </label>
+          <p class="xp-pub-nota">El canal la retira al acabar. Un minuto es lo que tarda
+            alguien en acercarse, mirar, tocar y leer lo que ha elegido.</p>
+          <label class="xp-pub-check">
+            <input name="stock" type="checkbox">
+            Darla de alta en pixeria.com/stock · categoría <b>animaciones</b>
+          </label>
+          <p class="xp-pub-nota" data-aviso></p>
+          <div class="xp-pub-pie">
+            <button type="button" data-cancelar>Cancelar</button>
+            <button type="submit" class="xp-pub-ok">Publicar</button>
+          </div>
+        </form>`;
+
+      const form = fondo.querySelector("form");
+      const nombre = form.nombre, segundos = form.segundos, stock = form.stock;
+      const ruta = form.querySelector("[data-ruta]");
+      const aviso = form.querySelector("[data-aviso]");
+
+      nombre.value = plan.title && plan.title !== "The Last Signal" ? plan.title : "";
+      segundos.value = String(limitaSegundos(plan.durationSeconds));
+
+      const pintaRuta = () => {
+        const slug = slugify(nombre.value || "xperiencia");
+        ruta.textContent = `xperiencias/${slug}/`;
+        // El alta apunta a la URL pública: la pieza tiene que estar AHÍ para que
+        // el canal la encuentre. Decirlo aquí evita dar de alta un enlace muerto.
+        aviso.textContent = stock.checked
+          ? `Se dará de alta apuntando a ${BASE_PUBLICA}${slug}/ — sube ahí la carpeta exportada.`
+          : "";
+      };
+      nombre.addEventListener("input", pintaRuta);
+      stock.addEventListener("change", () => {
+        if (stock.checked && !leeToken()) {
+          const dicho = window.prompt(
+            "Credencial para dar de alta en el Stock.\n" +
+            "Se guarda solo en este navegador; nunca viaja al repositorio.");
+          if (dicho) guardaToken(dicho.trim());
+          else stock.checked = false;
+        }
+        pintaRuta();
+      });
+      pintaRuta();
+
+      const cerrar = (valor) => { fondo.remove(); document.removeEventListener("keydown", esc); resolve(valor); };
+      const esc = (e) => { if (e.key === "Escape") cerrar(null); };
+      document.addEventListener("keydown", esc);
+      form.querySelector("[data-cancelar]").addEventListener("click", () => cerrar(null));
+      fondo.addEventListener("mousedown", (e) => { if (e.target === fondo) cerrar(null); });
+      form.addEventListener("submit", (e) => {
+        e.preventDefault();
+        const texto = nombre.value.trim();
+        if (!texto) { nombre.focus(); return; }
+        cerrar({ nombre: texto, segundos: limitaSegundos(segundos.value), alStock: stock.checked });
+      });
+
+      document.body.appendChild(fondo);
+      nombre.focus();
+    });
+  }
+
+  // Alta en el catálogo. Vive aquí y no en el canal porque el Stock es el sitio
+  // donde se BUSCAN las piezas; el canal solo las emite.
+  async function altaEnStock({ nombre, slug, segundos }) {
+    const token = leeToken();
+    if (!token) return { ok: false, error: "sin credencial" };
+    try {
+      const r = await fetch(STOCK_API, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          secret: token,
+          url: `${BASE_PUBLICA}${slug}/`,
+          title: nombre,
+          motor: "AInimation Studio",
+          comment: `Xperiencia interactiva · ${segundos} s en pantalla.`,
+          tags: ["dooh", "xperiencia"],
+        }),
+      });
+      const d = await r.json().catch(() => ({}));
+      return r.ok && d.ok ? { ok: true, id: d.id, actualizado: d.actualizado } : { ok: false, error: d.error || r.status };
+    } catch (e) { return { ok: false, error: String(e) }; }
   }
 
   async function publish(button) {
-    if (preguntaDuracion() === null) return null;     // cancelar el diálogo cancela la publicación
+    const plan = window.currentPlan?.();
+    if (!plan) return null;
+    const dicho = await dialogoPublicacion(plan);
+    if (!dicho) return null;                          // cancelar el diálogo cancela la publicación
+    // El nombre manda: es el título de la pieza, el de la carpeta y el que se verá
+    // en el Stock. Se guarda en el plan para que la próxima exportación lo proponga.
+    plan.title = dicho.nombre;
+    plan.durationSeconds = dicho.segundos;
+    window.saveFilmPlan?.(plan);
+
     const gathered = collect();
     if (!gathered) return null;
     const { piece, rules, dropped } = gathered;
@@ -384,18 +488,29 @@
     link.remove();
     window.setTimeout(() => URL.revokeObjectURL(url), 4000);
 
+    // El alta en el catálogo va DESPUÉS de exportar: si el zip no sale, no se
+    // registra nada. Un fallo aquí no invalida la exportación — se dice y ya.
+    let stock = null;
+    if (dicho.alStock) {
+      stock = await altaEnStock({ nombre: piece.title, slug, segundos: piece.durationSeconds });
+      if (!stock.ok) console.warn("[xperiencia] no se pudo dar de alta en el Stock:", stock.error);
+    }
+
     // Lo que no ha viajado se dice.
     if (dropped.length) console.warn("[xperiencia] media local que no viaja (impórtala desde el Stock):", dropped);
     if (!rules.length) console.warn("[xperiencia] la pieza no lleva reglas activas: será lineal, no interactiva.");
     if (button) {
       const original = button.textContent;
-      button.textContent = dropped.length ? `✓ ${slug} (sin ${dropped.length} media)` : `✓ ${slug} · ${piece.durationSeconds}s`;
-      window.setTimeout(() => { button.textContent = original; }, 2600);
+      button.textContent = dropped.length ? `✓ ${slug} (sin ${dropped.length} media)`
+        : stock && stock.ok ? `✓ ${slug} · en el Stock`
+        : stock ? `✓ ${slug} · Stock ✖`
+        : `✓ ${slug} · ${piece.durationSeconds}s`;
+      window.setTimeout(() => { button.textContent = original; }, 3200);
     }
-    return { slug, dropped, rules: rules.length, bytes: blob.size, seconds: piece.durationSeconds };
+    return { slug, dropped, rules: rules.length, bytes: blob.size, seconds: piece.durationSeconds, stock };
   }
 
-  window.ainXperiencia = { publish, collect, zip, indexHtml, PLAYER_JS, preguntaDuracion, limitaSegundos };
+  window.ainXperiencia = { publish, collect, zip, indexHtml, PLAYER_JS, dialogoPublicacion, altaEnStock, limitaSegundos, slugify };
 
   function bind() {
     document.querySelector("[data-publish-xperiencia]")

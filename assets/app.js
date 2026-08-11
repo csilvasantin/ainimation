@@ -1632,8 +1632,14 @@ const admiraStockEndpoints = [
   "https://admira.studio/api/stock/latest",
   `https://admira.studio/api/stock?limit=${stockImportFetchLimit}&sort=latest`,
 ];
+// El orden importa: se prueban en fila y el primero que conteste gana.
+// - api.admira.store es el dominio CANÓNICO del worker del Stock. Faltaba.
+// - api.pixeria.com NO RESUELVE (curl da 000): estaba el primero, así que cada
+//   exportación empezaba gastando el timeout contra un host muerto.
+// - workers.dev queda de último recurso: está BLOQUEADO en varios ISP españoles
+//   (da 404/1042 desde España), así que no puede ser el camino principal.
 const admiraStockExportEndpoints = [
-  "https://api.pixeria.com/stock/publish",
+  "https://api.admira.store/stock/publish",
   "https://pixer-eleven.csilvasantin.workers.dev/stock/publish",
 ];
 let activeDirectorWindow = null;
@@ -6527,3 +6533,19 @@ contactLinks.forEach((link) => {
     window.setTimeout(() => renderContactCommand("/email"), 120);
   });
 });
+
+/* ============================================================================
+ * El sello del pie lo dicta la meta, no una constante escrita a mano.
+ * ----------------------------------------------------------------------------
+ * El pie del Studio llevaba el sello literal en el HTML y nadie lo tocaba al
+ * publicar: el 11-ago servía la r2 de ese día y seguía enseñando la del 4-ago.
+ * Un sello que miente es peor que no tenerlo — se lee para saber qué versión
+ * estás mirando cuando algo no cuadra. Ahora se copia del <meta> canónico, que
+ * SÍ se sella en cada release, así que no pueden volver a divergir.
+ * ========================================================================== */
+(() => {
+  const hueco = document.querySelector("[data-studio-version]");
+  if (!hueco) return;
+  const sello = document.querySelector('meta[name="admiranext-version"]')?.content;
+  if (sello) hueco.textContent = sello;
+})();
