@@ -1,0 +1,654 @@
+{
+  "title": "Admira en 3 pasos",
+  "fps": 24,
+  "totalFrames": 720,
+  "durationSeconds": 60,
+  "markers": [
+    {
+      "id": "m-inicio",
+      "frame": 1,
+      "label": "INICIO"
+    },
+    {
+      "id": "m-fin-portada",
+      "frame": 98,
+      "label": "FIN-PORTADA"
+    },
+    {
+      "id": "m-p1",
+      "frame": 120,
+      "label": "PASO1"
+    },
+    {
+      "id": "m-f1",
+      "frame": 255,
+      "label": "FIN1"
+    },
+    {
+      "id": "m-p2",
+      "frame": 310,
+      "label": "PASO2"
+    },
+    {
+      "id": "m-f2",
+      "frame": 445,
+      "label": "FIN2"
+    },
+    {
+      "id": "m-p3",
+      "frame": 500,
+      "label": "PASO3"
+    },
+    {
+      "id": "m-f3",
+      "frame": 635,
+      "label": "FIN3"
+    }
+  ],
+  "cast": [],
+  "stageItems": [
+    {
+      "id": "stage-item-1",
+      "type": "text",
+      "spriteName": "portada-t",
+      "interactive": false,
+      "startFrame": 1,
+      "durationFrames": 96,
+      "text": "ADMIRA EN 3 PASOS",
+      "color": "#f8f7f2",
+      "keyframes": [
+        {
+          "frame": 1,
+          "x": 5,
+          "y": 14,
+          "w": 90,
+          "h": 16,
+          "opacity": 1,
+          "rotation": 0,
+          "easing": "linear",
+          "color": "#f8f7f2",
+          "text": "ADMIRA EN 3 PASOS",
+          "fontWeight": "850",
+          "fontStyle": "normal",
+          "textDecoration": "none",
+          "textAlign": "center",
+          "fontSize": "5vw"
+        }
+      ]
+    },
+    {
+      "id": "stage-item-2",
+      "type": "text",
+      "spriteName": "portada-c",
+      "interactive": false,
+      "startFrame": 1,
+      "durationFrames": 96,
+      "text": "Toca un número para ir directo · o mira el minuto entero",
+      "color": "#8a8f98",
+      "keyframes": [
+        {
+          "frame": 1,
+          "x": 5,
+          "y": 34,
+          "w": 90,
+          "h": 10,
+          "opacity": 1,
+          "rotation": 0,
+          "easing": "linear",
+          "color": "#8a8f98",
+          "text": "Toca un número para ir directo · o mira el minuto entero",
+          "fontWeight": "850",
+          "fontStyle": "normal",
+          "textDecoration": "none",
+          "textAlign": "center",
+          "fontSize": "1.9vw"
+        }
+      ]
+    },
+    {
+      "id": "stage-item-3",
+      "type": "rect-fill",
+      "spriteName": "panel-1",
+      "interactive": false,
+      "startFrame": 110,
+      "durationFrames": 150,
+      "color": "#c6f24e",
+      "keyframes": [
+        {
+          "frame": 110,
+          "x": 5,
+          "y": 8,
+          "w": 90,
+          "h": 66,
+          "opacity": 1,
+          "rotation": 0,
+          "easing": "linear",
+          "color": "#c6f24e",
+          "text": "",
+          "fontWeight": "850",
+          "fontStyle": "normal",
+          "textDecoration": "none",
+          "textAlign": "left",
+          "fontSize": ""
+        }
+      ]
+    },
+    {
+      "id": "stage-item-4",
+      "type": "text",
+      "spriteName": "n-1",
+      "interactive": false,
+      "startFrame": 110,
+      "durationFrames": 150,
+      "text": "PASO 1 DE 3",
+      "color": "#05070c",
+      "keyframes": [
+        {
+          "frame": 110,
+          "x": 9,
+          "y": 11,
+          "w": 82,
+          "h": 8,
+          "opacity": 1,
+          "rotation": 0,
+          "easing": "linear",
+          "color": "#05070c",
+          "text": "PASO 1 DE 3",
+          "fontWeight": "850",
+          "fontStyle": "normal",
+          "textDecoration": "none",
+          "textAlign": "center",
+          "fontSize": "1.5vw"
+        }
+      ]
+    },
+    {
+      "id": "stage-item-5",
+      "type": "text",
+      "spriteName": "t-1",
+      "interactive": false,
+      "startFrame": 110,
+      "durationFrames": 150,
+      "text": "SE CREA",
+      "color": "#05070c",
+      "keyframes": [
+        {
+          "frame": 110,
+          "x": 9,
+          "y": 20,
+          "w": 82,
+          "h": 16,
+          "opacity": 1,
+          "rotation": 0,
+          "easing": "linear",
+          "color": "#05070c",
+          "text": "SE CREA",
+          "fontWeight": "850",
+          "fontStyle": "normal",
+          "textDecoration": "none",
+          "textAlign": "center",
+          "fontSize": "4.4vw"
+        }
+      ]
+    },
+    {
+      "id": "stage-item-6",
+      "type": "text",
+      "spriteName": "c-1",
+      "interactive": false,
+      "startFrame": 110,
+      "durationFrames": 150,
+      "text": "La pieza se monta en el Studio: escenario, partitura y reglas.",
+      "color": "#05070c",
+      "keyframes": [
+        {
+          "frame": 110,
+          "x": 9,
+          "y": 42,
+          "w": 82,
+          "h": 22,
+          "opacity": 1,
+          "rotation": 0,
+          "easing": "linear",
+          "color": "#05070c",
+          "text": "La pieza se monta en el Studio: escenario, partitura y reglas.",
+          "fontWeight": "850",
+          "fontStyle": "normal",
+          "textDecoration": "none",
+          "textAlign": "center",
+          "fontSize": "2.1vw"
+        }
+      ]
+    },
+    {
+      "id": "stage-item-7",
+      "type": "rect-fill",
+      "spriteName": "panel-2",
+      "interactive": false,
+      "startFrame": 300,
+      "durationFrames": 150,
+      "color": "#7ad7f0",
+      "keyframes": [
+        {
+          "frame": 300,
+          "x": 5,
+          "y": 8,
+          "w": 90,
+          "h": 66,
+          "opacity": 1,
+          "rotation": 0,
+          "easing": "linear",
+          "color": "#7ad7f0",
+          "text": "",
+          "fontWeight": "850",
+          "fontStyle": "normal",
+          "textDecoration": "none",
+          "textAlign": "left",
+          "fontSize": ""
+        }
+      ]
+    },
+    {
+      "id": "stage-item-8",
+      "type": "text",
+      "spriteName": "n-2",
+      "interactive": false,
+      "startFrame": 300,
+      "durationFrames": 150,
+      "text": "PASO 2 DE 3",
+      "color": "#05070c",
+      "keyframes": [
+        {
+          "frame": 300,
+          "x": 9,
+          "y": 11,
+          "w": 82,
+          "h": 8,
+          "opacity": 1,
+          "rotation": 0,
+          "easing": "linear",
+          "color": "#05070c",
+          "text": "PASO 2 DE 3",
+          "fontWeight": "850",
+          "fontStyle": "normal",
+          "textDecoration": "none",
+          "textAlign": "center",
+          "fontSize": "1.5vw"
+        }
+      ]
+    },
+    {
+      "id": "stage-item-9",
+      "type": "text",
+      "spriteName": "t-2",
+      "interactive": false,
+      "startFrame": 300,
+      "durationFrames": 150,
+      "text": "SE EMITE",
+      "color": "#05070c",
+      "keyframes": [
+        {
+          "frame": 300,
+          "x": 9,
+          "y": 20,
+          "w": 82,
+          "h": 16,
+          "opacity": 1,
+          "rotation": 0,
+          "easing": "linear",
+          "color": "#05070c",
+          "text": "SE EMITE",
+          "fontWeight": "850",
+          "fontStyle": "normal",
+          "textDecoration": "none",
+          "textAlign": "center",
+          "fontSize": "4.4vw"
+        }
+      ]
+    },
+    {
+      "id": "stage-item-10",
+      "type": "text",
+      "spriteName": "c-2",
+      "interactive": false,
+      "startFrame": 300,
+      "durationFrames": 150,
+      "text": "Entra en el bucle del canal. La pantalla es suya el tiempo que ella pida.",
+      "color": "#05070c",
+      "keyframes": [
+        {
+          "frame": 300,
+          "x": 9,
+          "y": 42,
+          "w": 82,
+          "h": 22,
+          "opacity": 1,
+          "rotation": 0,
+          "easing": "linear",
+          "color": "#05070c",
+          "text": "Entra en el bucle del canal. La pantalla es suya el tiempo que ella pida.",
+          "fontWeight": "850",
+          "fontStyle": "normal",
+          "textDecoration": "none",
+          "textAlign": "center",
+          "fontSize": "2.1vw"
+        }
+      ]
+    },
+    {
+      "id": "stage-item-11",
+      "type": "rect-fill",
+      "spriteName": "panel-3",
+      "interactive": false,
+      "startFrame": 490,
+      "durationFrames": 150,
+      "color": "#f2a25c",
+      "keyframes": [
+        {
+          "frame": 490,
+          "x": 5,
+          "y": 8,
+          "w": 90,
+          "h": 66,
+          "opacity": 1,
+          "rotation": 0,
+          "easing": "linear",
+          "color": "#f2a25c",
+          "text": "",
+          "fontWeight": "850",
+          "fontStyle": "normal",
+          "textDecoration": "none",
+          "textAlign": "left",
+          "fontSize": ""
+        }
+      ]
+    },
+    {
+      "id": "stage-item-12",
+      "type": "text",
+      "spriteName": "n-3",
+      "interactive": false,
+      "startFrame": 490,
+      "durationFrames": 150,
+      "text": "PASO 3 DE 3",
+      "color": "#05070c",
+      "keyframes": [
+        {
+          "frame": 490,
+          "x": 9,
+          "y": 11,
+          "w": 82,
+          "h": 8,
+          "opacity": 1,
+          "rotation": 0,
+          "easing": "linear",
+          "color": "#05070c",
+          "text": "PASO 3 DE 3",
+          "fontWeight": "850",
+          "fontStyle": "normal",
+          "textDecoration": "none",
+          "textAlign": "center",
+          "fontSize": "1.5vw"
+        }
+      ]
+    },
+    {
+      "id": "stage-item-13",
+      "type": "text",
+      "spriteName": "t-3",
+      "interactive": false,
+      "startFrame": 490,
+      "durationFrames": 150,
+      "text": "SE TOCA",
+      "color": "#05070c",
+      "keyframes": [
+        {
+          "frame": 490,
+          "x": 9,
+          "y": 20,
+          "w": 82,
+          "h": 16,
+          "opacity": 1,
+          "rotation": 0,
+          "easing": "linear",
+          "color": "#05070c",
+          "text": "SE TOCA",
+          "fontWeight": "850",
+          "fontStyle": "normal",
+          "textDecoration": "none",
+          "textAlign": "center",
+          "fontSize": "4.4vw"
+        }
+      ]
+    },
+    {
+      "id": "stage-item-14",
+      "type": "text",
+      "spriteName": "c-3",
+      "interactive": false,
+      "startFrame": 490,
+      "durationFrames": 150,
+      "text": "Quien pasa decide qué ve. Y sin nadie delante, vuelve a empezar.",
+      "color": "#05070c",
+      "keyframes": [
+        {
+          "frame": 490,
+          "x": 9,
+          "y": 42,
+          "w": 82,
+          "h": 22,
+          "opacity": 1,
+          "rotation": 0,
+          "easing": "linear",
+          "color": "#05070c",
+          "text": "Quien pasa decide qué ve. Y sin nadie delante, vuelve a empezar.",
+          "fontWeight": "850",
+          "fontStyle": "normal",
+          "textDecoration": "none",
+          "textAlign": "center",
+          "fontSize": "2.1vw"
+        }
+      ]
+    },
+    {
+      "id": "stage-item-15",
+      "type": "rect-fill",
+      "spriteName": "ir-1",
+      "interactive": true,
+      "startFrame": 1,
+      "durationFrames": 720,
+      "color": "#c6f24e",
+      "keyframes": [
+        {
+          "frame": 1,
+          "x": 6,
+          "y": 80,
+          "w": 26,
+          "h": 13,
+          "opacity": 1,
+          "rotation": 0,
+          "easing": "linear",
+          "color": "#c6f24e",
+          "text": "",
+          "fontWeight": "850",
+          "fontStyle": "normal",
+          "textDecoration": "none",
+          "textAlign": "left",
+          "fontSize": ""
+        }
+      ]
+    },
+    {
+      "id": "stage-item-16",
+      "type": "text",
+      "spriteName": "ir-1",
+      "interactive": true,
+      "startFrame": 1,
+      "durationFrames": 720,
+      "text": "1",
+      "color": "#05070c",
+      "keyframes": [
+        {
+          "frame": 1,
+          "x": 6,
+          "y": 83.5,
+          "w": 26,
+          "h": 7,
+          "opacity": 1,
+          "rotation": 0,
+          "easing": "linear",
+          "color": "#05070c",
+          "text": "1",
+          "fontWeight": "850",
+          "fontStyle": "normal",
+          "textDecoration": "none",
+          "textAlign": "center",
+          "fontSize": "2.6vw"
+        }
+      ]
+    },
+    {
+      "id": "stage-item-17",
+      "type": "rect-fill",
+      "spriteName": "ir-2",
+      "interactive": true,
+      "startFrame": 1,
+      "durationFrames": 720,
+      "color": "#7ad7f0",
+      "keyframes": [
+        {
+          "frame": 1,
+          "x": 37,
+          "y": 80,
+          "w": 26,
+          "h": 13,
+          "opacity": 1,
+          "rotation": 0,
+          "easing": "linear",
+          "color": "#7ad7f0",
+          "text": "",
+          "fontWeight": "850",
+          "fontStyle": "normal",
+          "textDecoration": "none",
+          "textAlign": "left",
+          "fontSize": ""
+        }
+      ]
+    },
+    {
+      "id": "stage-item-18",
+      "type": "text",
+      "spriteName": "ir-2",
+      "interactive": true,
+      "startFrame": 1,
+      "durationFrames": 720,
+      "text": "2",
+      "color": "#05070c",
+      "keyframes": [
+        {
+          "frame": 1,
+          "x": 37,
+          "y": 83.5,
+          "w": 26,
+          "h": 7,
+          "opacity": 1,
+          "rotation": 0,
+          "easing": "linear",
+          "color": "#05070c",
+          "text": "2",
+          "fontWeight": "850",
+          "fontStyle": "normal",
+          "textDecoration": "none",
+          "textAlign": "center",
+          "fontSize": "2.6vw"
+        }
+      ]
+    },
+    {
+      "id": "stage-item-19",
+      "type": "rect-fill",
+      "spriteName": "ir-3",
+      "interactive": true,
+      "startFrame": 1,
+      "durationFrames": 720,
+      "color": "#f2a25c",
+      "keyframes": [
+        {
+          "frame": 1,
+          "x": 68,
+          "y": 80,
+          "w": 26,
+          "h": 13,
+          "opacity": 1,
+          "rotation": 0,
+          "easing": "linear",
+          "color": "#f2a25c",
+          "text": "",
+          "fontWeight": "850",
+          "fontStyle": "normal",
+          "textDecoration": "none",
+          "textAlign": "left",
+          "fontSize": ""
+        }
+      ]
+    },
+    {
+      "id": "stage-item-20",
+      "type": "text",
+      "spriteName": "ir-3",
+      "interactive": true,
+      "startFrame": 1,
+      "durationFrames": 720,
+      "text": "3",
+      "color": "#05070c",
+      "keyframes": [
+        {
+          "frame": 1,
+          "x": 68,
+          "y": 83.5,
+          "w": 26,
+          "h": 7,
+          "opacity": 1,
+          "rotation": 0,
+          "easing": "linear",
+          "color": "#05070c",
+          "text": "3",
+          "fontWeight": "850",
+          "fontStyle": "normal",
+          "textDecoration": "none",
+          "textAlign": "center",
+          "fontSize": "2.6vw"
+        }
+      ]
+    },
+    {
+      "id": "stage-item-21",
+      "type": "text",
+      "spriteName": "pie",
+      "interactive": false,
+      "startFrame": 1,
+      "durationFrames": 720,
+      "text": "ainimation.studio · admira.tv",
+      "color": "#8a8f98",
+      "keyframes": [
+        {
+          "frame": 1,
+          "x": 5,
+          "y": 95,
+          "w": 90,
+          "h": 5,
+          "opacity": 1,
+          "rotation": 0,
+          "easing": "linear",
+          "color": "#8a8f98",
+          "text": "ainimation.studio · admira.tv",
+          "fontWeight": "850",
+          "fontStyle": "normal",
+          "textDecoration": "none",
+          "textAlign": "center",
+          "fontSize": "1.2vw"
+        }
+      ]
+    }
+  ]
+}

@@ -76,6 +76,26 @@
   }
 
   /* ---------------------------------------------------------------------------
+   * DURACIÓN. Una Xperiencia no dura lo que dura su timeline: el timeline es un
+   * bucle de atracción de segundos, y lo que hay que decidir es cuánto tiempo le
+   * pertenece la PANTALLA — cuánto aguanta el canal antes de seguir con la
+   * siguiente pieza. Eso no se puede deducir del plan, así que se pregunta al
+   * exportar y viaja DENTRO de la pieza: quien la emita no tiene que adivinarlo
+   * ni que alguien lo teclee otra vez al dar de alta el item.
+   * Un minuto por defecto: lo que tarda un transeúnte en acercarse, mirar, tocar
+   * y leer lo que ha elegido.
+   * ------------------------------------------------------------------------- */
+  const SEGUNDOS_POR_DEFECTO = 60;
+  const SEGUNDOS_MIN = 5;
+  const SEGUNDOS_MAX = 600;
+
+  const limitaSegundos = (valor) => {
+    const n = Math.round(Number(valor));
+    if (!Number.isFinite(n) || n <= 0) return SEGUNDOS_POR_DEFECTO;
+    return Math.min(Math.max(n, SEGUNDOS_MIN), SEGUNDOS_MAX);
+  };
+
+  /* ---------------------------------------------------------------------------
    * El reproductor embebido. Vive aquí como texto porque tiene que viajar DENTRO
    * del index.html exportado: una Xperiencia no puede depender de este dominio.
    * ------------------------------------------------------------------------- */
@@ -228,7 +248,25 @@
   }
   paint();
   requestAnimationFrame(loop);
-  window.XPERIENCIA = { goToFrame: goToFrame, frame: function () { return frame; }, world: world, plan: plan, rules: rules };
+
+  /* --- la pieza anuncia cuánto dura ---------------------------------------
+   * Quien la emite (el canal de admira.tv) no puede leer nada de dentro de un
+   * iframe de otro dominio, así que la pieza lo DICE. Se repite un par de veces
+   * por si el que escucha llega tarde; es un mensaje idempotente. */
+  var segundos = Number(plan.durationSeconds) || 60;
+  function anunciaDuracion() {
+    if (window.parent === window) return;
+    try {
+      window.parent.postMessage({ source: "ainimation-xperiencia", event: "duration",
+        seconds: segundos, title: plan.title || "" }, "*");
+    } catch (e) {}
+  }
+  anunciaDuracion();
+  setTimeout(anunciaDuracion, 400);
+  setTimeout(anunciaDuracion, 1500);
+
+  window.XPERIENCIA = { goToFrame: goToFrame, frame: function () { return frame; },
+    world: world, plan: plan, rules: rules, seconds: segundos };
 })();
 `;
 
@@ -290,6 +328,8 @@
         title: plan.title || "Xperiencia",
         fps: 24,
         totalFrames,
+        // Cuánto le pertenece la pantalla, no cuánto dura el timeline.
+        durationSeconds: limitaSegundos(plan.durationSeconds),
         markers: window.loadTimelineMarkers?.(totalFrames) || [],
         cast,
         stageItems: plan.stageItems || [],
@@ -298,7 +338,28 @@
     };
   }
 
+  // Se pregunta al exportar, no al dar de alta el item: la duración es una
+  // decisión de la pieza y quien la monta es quien sabe cuánto hay que mirarla.
+  // La respuesta se guarda en el plan, así que la siguiente exportación ya la
+  // propone y nadie la teclea dos veces.
+  function preguntaDuracion() {
+    const plan = window.currentPlan?.();
+    if (!plan) return SEGUNDOS_POR_DEFECTO;
+    const actual = limitaSegundos(plan.durationSeconds);
+    const dicho = window.prompt(
+      `¿Cuántos segundos ocupa esta Xperiencia en pantalla?\n` +
+      `(entre ${SEGUNDOS_MIN} y ${SEGUNDOS_MAX}; el canal la retira al acabar)`,
+      String(actual),
+    );
+    if (dicho === null) return null;                  // cancelar = no publicar
+    const segundos = limitaSegundos(dicho);
+    plan.durationSeconds = segundos;
+    window.saveFilmPlan?.(plan);
+    return segundos;
+  }
+
   async function publish(button) {
+    if (preguntaDuracion() === null) return null;     // cancelar el diálogo cancela la publicación
     const gathered = collect();
     if (!gathered) return null;
     const { piece, rules, dropped } = gathered;
@@ -328,13 +389,13 @@
     if (!rules.length) console.warn("[xperiencia] la pieza no lleva reglas activas: será lineal, no interactiva.");
     if (button) {
       const original = button.textContent;
-      button.textContent = dropped.length ? `✓ ${slug} (sin ${dropped.length} media)` : `✓ ${slug}.zip`;
+      button.textContent = dropped.length ? `✓ ${slug} (sin ${dropped.length} media)` : `✓ ${slug} · ${piece.durationSeconds}s`;
       window.setTimeout(() => { button.textContent = original; }, 2600);
     }
-    return { slug, dropped, rules: rules.length, bytes: blob.size };
+    return { slug, dropped, rules: rules.length, bytes: blob.size, seconds: piece.durationSeconds };
   }
 
-  window.ainXperiencia = { publish, collect, zip, indexHtml, PLAYER_JS };
+  window.ainXperiencia = { publish, collect, zip, indexHtml, PLAYER_JS, preguntaDuracion, limitaSegundos };
 
   function bind() {
     document.querySelector("[data-publish-xperiencia]")

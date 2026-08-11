@@ -1,0 +1,192 @@
+[
+  {
+    "id": "r-ir-1",
+    "name": "Toca 1 → PASO 1",
+    "enabled": true,
+    "when": {
+      "join": "and",
+      "conds": [
+        {
+          "fact": "click",
+          "value": "ir-1"
+        }
+      ]
+    },
+    "do": [
+      {
+        "id": "goToMarker",
+        "value": "PASO1"
+      },
+      {
+        "id": "playSegment",
+        "value": "FIN1"
+      }
+    ]
+  },
+  {
+    "id": "r-ir-2",
+    "name": "Toca 2 → PASO 2",
+    "enabled": true,
+    "when": {
+      "join": "and",
+      "conds": [
+        {
+          "fact": "click",
+          "value": "ir-2"
+        }
+      ]
+    },
+    "do": [
+      {
+        "id": "goToMarker",
+        "value": "PASO2"
+      },
+      {
+        "id": "playSegment",
+        "value": "FIN2"
+      }
+    ]
+  },
+  {
+    "id": "r-ir-3",
+    "name": "Toca 3 → PASO 3",
+    "enabled": true,
+    "when": {
+      "join": "and",
+      "conds": [
+        {
+          "fact": "click",
+          "value": "ir-3"
+        }
+      ]
+    },
+    "do": [
+      {
+        "id": "goToMarker",
+        "value": "PASO3"
+      },
+      {
+        "id": "playSegment",
+        "value": "FIN3"
+      }
+    ]
+  },
+  {
+    "id": "r-portada-p1",
+    "name": "Fin de la portada → paso 1",
+    "enabled": true,
+    "when": {
+      "join": "and",
+      "conds": [
+        {
+          "fact": "markerReached",
+          "value": "FIN-PORTADA"
+        }
+      ]
+    },
+    "do": [
+      {
+        "id": "goToMarker",
+        "value": "PASO1"
+      },
+      {
+        "id": "playSegment",
+        "value": "FIN1"
+      }
+    ]
+  },
+  {
+    "id": "r-p1-p2",
+    "name": "Fin del paso 1 → paso 2",
+    "enabled": true,
+    "when": {
+      "join": "and",
+      "conds": [
+        {
+          "fact": "markerReached",
+          "value": "FIN1"
+        }
+      ]
+    },
+    "do": [
+      {
+        "id": "goToMarker",
+        "value": "PASO2"
+      },
+      {
+        "id": "playSegment",
+        "value": "FIN2"
+      }
+    ]
+  },
+  {
+    "id": "r-p2-p3",
+    "name": "Fin del paso 2 → paso 3",
+    "enabled": true,
+    "when": {
+      "join": "and",
+      "conds": [
+        {
+          "fact": "markerReached",
+          "value": "FIN2"
+        }
+      ]
+    },
+    "do": [
+      {
+        "id": "goToMarker",
+        "value": "PASO3"
+      },
+      {
+        "id": "playSegment",
+        "value": "FIN3"
+      }
+    ]
+  },
+  {
+    "id": "r-p3-inicio",
+    "name": "Fin del paso 3 → portada",
+    "enabled": true,
+    "when": {
+      "join": "and",
+      "conds": [
+        {
+          "fact": "markerReached",
+          "value": "FIN3"
+        }
+      ]
+    },
+    "do": [
+      {
+        "id": "goToMarker",
+        "value": "INICIO"
+      }
+    ]
+  },
+  {
+    "id": "r-vuelta-sola",
+    "name": "20 s sin tocar → vuelve a la portada",
+    "enabled": true,
+    "when": {
+      "join": "and",
+      "conds": [
+        {
+          "fact": "idleSeconds",
+          "op": ">=",
+          "value": 20
+        },
+        {
+          "fact": "frame",
+          "op": ">=",
+          "value": 110
+        }
+      ]
+    },
+    "do": [
+      {
+        "id": "goToMarker",
+        "value": "INICIO"
+      }
+    ]
+  }
+]

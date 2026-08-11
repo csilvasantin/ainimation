@@ -45,12 +45,17 @@ El canal la reproduce como un item más del bucle, con `type: "interactive"`:
 ```json
 { "id": "xp-toca-y-elige", "type": "interactive", "title": "Admira · Toca y Elige",
   "url": "https://www.ainimation.studio/xperiencias/toca-y-elige/",
-  "tags": ["horizontal"], "dur": 40 }
+  "tags": ["horizontal"] }
 ```
 
-`canal.html` la abre en un iframe, la deja tocar y a los `dur` segundos (40 por
-defecto, `?inter=` lo cambia) sigue el bucle. No se precachea —es una página, no un
-asset— y cada pase estrena el iframe, así que siempre empieza en su atracción.
+`canal.html` la abre en un iframe, la deja tocar y al acabar su tiempo sigue el
+bucle. No se precachea —es una página, no un asset— y cada pase estrena el iframe,
+así que siempre empieza en su atracción.
+
+**La duración la dice la pieza**, no el item: `plan.json` lleva `durationSeconds: 60`
+(el exportador lo pregunta al publicar) y el reproductor lo anuncia por
+`postMessage` a quien la emita. Ya no hace falta `dur` en el alta. Ver
+[«Admira en 3 pasos»](../admira-en-3-pasos/) para el detalle del contrato.
 
 ## Tocarla aquí
 

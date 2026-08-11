@@ -2,6 +2,7 @@
   "title": "Admira Toca y Elige",
   "fps": 24,
   "totalFrames": 720,
+  "durationSeconds": 60,
   "markers": [
     {
       "id": "m-inicio",
