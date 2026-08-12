@@ -142,6 +142,9 @@
       .err { color:#ff8a8a; font-size:.85rem; margin-top:.8rem; white-space:pre-wrap; }
       a.dl { display:inline-block; margin-top:.8rem; color:var(--cyan); font-size:.85rem; }
       .note { color:var(--muted); font-size:.78rem; margin-top:0; line-height:1.5; }
+      .payment-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.2rem 1rem}
+      .payment-grid .payment-wide{grid-column:1/-1}.payment-grid select{width:100%;background:#24201c;border:1px solid var(--line);color:var(--ink);border-radius:8px;padding:.6rem .7rem;font-size:.95rem}
+      @media(max-width:720px){.payment-grid{grid-template-columns:1fr}.payment-grid .payment-wide{grid-column:auto}}
     </style>
   </head>
   <body>
@@ -158,7 +161,7 @@
         <a href="/#engine">Engine</a>
         <a href="studio.html">Author</a>
         <a href="studio-live.html" aria-current="page">Produce</a>
-        <a href="/#contact">Contact</a>
+        <a href="#payment">Payment</a>
       </nav>
       <div class="rail-toggles" aria-label="Paneles">
         <button class="rtoggle" data-rail="left" type="button" title="Opciones — panel izquierdo">◧</button>
@@ -250,6 +253,21 @@
             <p class="stage-title">🎞️ Recent productions</p>
             <div id="galleryGrid" class="gallery-grid"></div>
           </section>
+
+          <section id="payment" class="card full payment-card" data-payment-panel>
+            <p class="stage-title">💳 Payment · final interactivo</p>
+            <p class="note">Añade un checkout alojado al final de la Xperiencia. AInimation no captura ni almacena datos de tarjeta.</p>
+            <div class="payment-grid">
+              <label class="toggle payment-wide"><input type="checkbox" name="payment-enabled"> Añadir pago al final</label>
+              <label>Proveedor<select name="payment-provider"><option value="square">Square</option><option value="visa">Visa · checkout alojado</option><option value="hosted">Otro checkout alojado</option></select></label>
+              <label>Importe<input name="payment-amount" type="number" min="0" max="999999" step="0.01" placeholder="12.50"></label>
+              <label>Moneda<input name="payment-currency" maxlength="3" value="EUR"></label>
+              <label>Botón<input name="payment-label" maxlength="40" value="Pagar ahora"></label>
+              <label class="payment-wide">URL HTTPS del checkout<input name="payment-url" type="url" placeholder="https://square.link/u/…" autocomplete="off"></label>
+              <label>Mostrar<select name="payment-trigger"><option value="end">Al finalizar</option><option value="marker">En una marca</option></select></label>
+              <label>Marca<input name="payment-marker" maxlength="14" value="PAYMENT"></label>
+            </div>
+          </section>
         </div>
       </main>
 
@@ -287,6 +305,7 @@
         spoken narration before producing.</p>
     </footer>
 
+    <script src="assets/payment-authoring.js"></script>
     <script>
       // C1 · el navegador sale de *.workers.dev. Los ISP españoles lo bloquean, así que
       // una visita desde España veía esto muerto aunque el worker respondiera. Se prueba
@@ -378,6 +397,7 @@
           const [s, l] = r.querySelectorAll('input');
           return { stat: s.value.trim(), label: l.value.trim() };
         }).filter(b => b.stat && b.label);
+        const paymentForm = document.querySelector('[data-payment-panel]');
         return {
           title: document.getElementById('title').value.trim() || 'AInimation Studio',
           subtitle: document.getElementById('subtitle').value.trim(),
@@ -394,6 +414,7 @@
           quote: document.getElementById('quote').value.trim(),
           image_scene: document.getElementById('imageScene').value.trim(),
           chart: document.getElementById('chart').value.trim(),
+          payment: paymentForm && window.AINPayment ? window.AINPayment.read(paymentForm) : undefined,
         };
       }
 
@@ -425,12 +446,21 @@
         set('music', b.music || '');
         document.getElementById('backgrounds').checked = b.backgrounds === true;
         if (b.theme) set('theme', b.theme);
+        const paymentForm = document.querySelector('[data-payment-panel]');
+        if (paymentForm && window.AINPayment) window.AINPayment.hydrate(paymentForm, b.payment);
         if (Array.isArray(b.beats)) {
           beatsEl.innerHTML = '';
           b.beats.slice(0, 5).forEach(x => beatRow(x.stat || '', x.label || ''));
           if (!beatsEl.children.length) beatRow();
         }
       }
+      // Payment se inicializa antes que este script; el brief guardado debe
+      // hidratarlo también en la carga inicial, no solo al pulsar una plantilla.
+      try {
+        const savedPayment = JSON.parse(localStorage.getItem('ain_brief') || 'null')?.payment;
+        const paymentForm = document.querySelector('[data-payment-panel]');
+        if (paymentForm && window.AINPayment) window.AINPayment.hydrate(paymentForm, savedPayment);
+      } catch {}
       const encodeBrief = b => btoa(encodeURIComponent(JSON.stringify(b)));
       const decodeBrief = s => { try { return JSON.parse(decodeURIComponent(atob(s))); } catch { return null; } };
 

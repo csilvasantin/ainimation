@@ -4144,6 +4144,14 @@ function currentPlan() {
   return normalizeFilmPlan(loadFilmPlan()) || buildFilmPlan();
 }
 
+// Contrato público mínimo para Behaviour, compartir, publicar y Payment.
+// Se expone después de inicializar todo el módulo para no entrar en la zona
+// temporal de `normalizeFilmPlan` durante el arranque del script.
+window.currentPlan = currentPlan;
+window.saveFilmPlan = saveFilmPlan;
+window.normalizeFilmPlan = normalizeFilmPlan;
+window.loadTimelineMarkers = loadTimelineMarkers;
+
 function renderStageRulers() {
   const xRuler = document.querySelector(".stage-ruler-x");
   const yRuler = document.querySelector(".stage-ruler-y");

@@ -5909,6 +5909,15 @@ body.studio-page[data-interface-theme="light"] .settings-menu-row button {
   color: rgba(23, 32, 48, 0.72);
 }
 
+/* Payment es una ventana Director real, nunca un formulario de tarjeta. */
+.payment-window{min-width:420px}.payment-editor{padding:12px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px 12px;overflow:auto;height:calc(100% - 29px)}
+.payment-editor label{display:grid;gap:4px;color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.05em}
+.payment-editor input,.payment-editor select{width:100%;min-width:0;border:1px solid var(--director-line,#344052);background:var(--director-panel,#151a22);color:inherit;border-radius:4px;padding:7px 8px;font:12px/1.2 inherit}
+.payment-editor .payment-wide,.payment-editor .payment-note,.payment-editor .payment-switch{grid-column:1/-1}
+.payment-editor .payment-switch{display:flex;grid-auto-flow:column;justify-content:start;align-items:center;text-transform:none;font-size:12px;color:inherit}.payment-editor .payment-switch input{width:auto}
+.payment-editor .payment-note{margin:0;color:var(--muted);font-size:10px;line-height:1.4}
+@media(max-width:700px){.payment-window{min-width:0}.payment-editor{grid-template-columns:1fr}}
+
 body.studio-page[data-interface-theme="light"] .director-window,
 body.studio-page[data-interface-theme="light"].studio-entering .tool-palette,
 body.studio-page[data-interface-theme="light"].studio-entered .tool-palette {

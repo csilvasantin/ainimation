@@ -105,9 +105,34 @@
   var plan  = JSON.parse(document.getElementById("xp-plan").textContent);
   var rules = JSON.parse(document.getElementById("xp-rules").textContent);
   var marks = plan.markers || [];
+  var payment = plan.payment || null;
   var fps   = Number(plan.fps || 24);
   var total = Number(plan.totalFrames || 240);
   var stage = document.getElementById("stage");
+
+  /* --- Payment: checkout alojado, nunca campos de tarjeta en la pieza. --- */
+  var payLayer = null;
+  function showPayment() {
+    if (!payment || payment.enabled !== true || !/^https:\/\//i.test(payment.checkoutUrl || "")) return;
+    if (!payLayer) {
+      payLayer = document.createElement("section");
+      payLayer.className = "xp-payment";
+      var title = document.createElement("strong"); title.textContent = payment.label || "Pagar ahora";
+      var amount = document.createElement("span");
+      amount.textContent = Number(payment.amount || 0) > 0
+        ? new Intl.NumberFormat(undefined,{style:"currency",currency:payment.currency||"EUR"}).format(payment.amount) : "Checkout seguro";
+      var button = document.createElement("button"); button.type = "button"; button.textContent = payment.label || "Pagar ahora";
+      button.addEventListener("click", function () {
+        var message = { source:"ainimation-xperiencia", event:"payment", checkoutUrl:payment.checkoutUrl,
+          provider:payment.provider||"hosted", amount:Number(payment.amount||0), currency:payment.currency||"EUR", title:plan.title||"" };
+        var opened = window.open(payment.checkoutUrl,"_blank","noopener");
+        message.opened = !!opened;
+        if (window.parent !== window) window.parent.postMessage(message,"*");
+      });
+      payLayer.append(title, amount, button); stage.appendChild(payLayer);
+    }
+    payLayer.hidden = false; playing = false;
+  }
 
   /* --- tiempo --- */
   var frame = 1, playing = true, until = null, last = 0;
@@ -233,6 +258,7 @@
   function loop(ts) {
     if (playing && ts - last >= 1000 / fps) {
       last = ts;
+      if (frame >= total && payment && payment.trigger !== "marker") showPayment();
       frame = frame >= total ? 1 : frame + 1;
       if (until && frame >= until) { until = null; playing = false; }
     }
@@ -240,6 +266,7 @@
     for (var i = 0; i < marks.length; i += 1) {
       if (marks[i].frame > seen && marks[i].frame <= frame) bus.marker = marks[i].label;
     }
+    if (payment && payment.trigger === "marker" && bus.marker === payment.marker) showPayment();
     seen = frame;
     if (engine) engine.tick();
     paint();
@@ -290,6 +317,9 @@
       #stage{position:relative;width:min(100vw,177.78vh);aspect-ratio:16/9;background:#0f1115;overflow:hidden}
       .xp-item{position:absolute}
       .xp-hot{cursor:pointer}
+      .xp-payment{position:absolute;inset:0;z-index:50;display:grid;place-content:center;justify-items:center;gap:1rem;text-align:center;background:rgba(5,7,12,.88);backdrop-filter:blur(12px)}
+      .xp-payment strong{font-size:clamp(2rem,5vw,5rem)}.xp-payment span{font-size:clamp(1rem,2vw,2rem);opacity:.8}
+      .xp-payment button{border:0;border-radius:999px;padding:.9em 1.5em;background:#c6f24e;color:#10231f;font:800 clamp(1rem,2vw,2rem)/1 system-ui;cursor:pointer}
       @media (prefers-reduced-motion:reduce){.xp-item{transition:none}}
     </style>
   </head>
@@ -322,6 +352,7 @@
       dropped.push(member.name || "cast");   // data:/blob: no sale de este navegador
       return false;
     });
+    const payment = window.AINPayment?.clean(plan.payment) || plan.payment || null;
     return {
       dropped,
       piece: {
@@ -333,6 +364,7 @@
         markers: window.loadTimelineMarkers?.(totalFrames) || [],
         cast,
         stageItems: plan.stageItems || [],
+        payment: payment?.enabled && payment.checkoutUrl ? payment : null,
       },
       rules: (plan.rules || []).filter((rule) => rule.enabled !== false),
     };
@@ -350,7 +382,10 @@
    * vista mientras se escribe el nombre.
    * ------------------------------------------------------------------------- */
   const CLAVE_TOKEN = "ainimation-stock-token";
-  const STOCK_API = "https://api.admira.store/stock/interactive";
+  const STOCK_APIS = [
+    "https://api.pixeria.com/stock/interactive",
+    "https://api.admira.store/stock/interactive",
+  ];
   const BASE_PUBLICA = "https://www.ainimation.studio/xperiencias/";
 
   const leeToken = () => { try { return localStorage.getItem(CLAVE_TOKEN) || ""; } catch { return ""; } };
@@ -374,7 +409,7 @@
             alguien en acercarse, mirar, tocar y leer lo que ha elegido.</p>
           <label class="xp-pub-check">
             <input name="stock" type="checkbox">
-            Darla de alta en pixeria.com/stock · categoría <b>animaciones</b>
+            Guardarla en pixeria.com/stock · categoría <b>animaciones</b>
           </label>
           <p class="xp-pub-nota" data-aviso></p>
           <div class="xp-pub-pie">
@@ -397,7 +432,7 @@
         // El alta apunta a la URL pública: la pieza tiene que estar AHÍ para que
         // el canal la encuentre. Decirlo aquí evita dar de alta un enlace muerto.
         aviso.textContent = stock.checked
-          ? `Se dará de alta apuntando a ${BASE_PUBLICA}${slug}/ — sube ahí la carpeta exportada.`
+          ? `Pixeria guardará el HTML autocontenido y devolverá una URL lista para Admira.tv.`
           : "";
       };
       nombre.addEventListener("input", pintaRuta);
@@ -432,25 +467,38 @@
 
   // Alta en el catálogo. Vive aquí y no en el canal porque el Stock es el sitio
   // donde se BUSCAN las piezas; el canal solo las emite.
-  async function altaEnStock({ nombre, slug, segundos }) {
+  async function altaEnStock({ nombre, slug, segundos, html }) {
     const token = leeToken();
     if (!token) return { ok: false, error: "sin credencial" };
-    try {
-      const r = await fetch(STOCK_API, {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({
-          secret: token,
-          url: `${BASE_PUBLICA}${slug}/`,
-          title: nombre,
-          motor: "AInimation Studio",
-          comment: `Xperiencia interactiva · ${segundos} s en pantalla.`,
-          tags: ["dooh", "xperiencia"],
-        }),
-      });
-      const d = await r.json().catch(() => ({}));
-      return r.ok && d.ok ? { ok: true, id: d.id, actualizado: d.actualizado } : { ok: false, error: d.error || r.status };
-    } catch (e) { return { ok: false, error: String(e) }; }
+    const body = JSON.stringify({
+      secret: token,
+      url: `${BASE_PUBLICA}${slug}/`,
+      slug,
+      html,
+      title: nombre,
+      motor: "AInimation Studio",
+      comment: `Xperiencia interactiva · ${segundos} s en pantalla.`,
+      tags: ["dooh", "xperiencia", ...(html && /\"payment\"\s*:\s*\{/.test(html) ? ["payment"] : [])],
+    });
+    let lastError = "Pixeria no disponible";
+    for (const endpoint of STOCK_APIS) {
+      try {
+        const controller = new AbortController();
+        const timer = setTimeout(() => controller.abort(), 8000);
+        const r = await fetch(endpoint, {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body,
+          signal: controller.signal,
+        });
+        clearTimeout(timer);
+        const d = await r.json().catch(() => ({}));
+        if (r.ok && d.ok) return { ok: true, id: d.id, url: d.url, actualizado: d.actualizado };
+        lastError = d.error || String(r.status);
+        if (r.status < 500 && r.status !== 404) break;
+      } catch (e) { lastError = String(e); }
+    }
+    return { ok: false, error: lastError };
   }
 
   async function publish(button) {
@@ -475,8 +523,9 @@
 
     const planJson = JSON.stringify(piece, null, 2);
     const rulesJson = JSON.stringify(rules, null, 2);
+    const exportedHtml = indexHtml({ title: piece.title, runtime, planJson, rulesJson });
     const blob = zip([
-      { name: "index.html", text: indexHtml({ title: piece.title, runtime, planJson, rulesJson }) },
+      { name: "index.html", text: exportedHtml },
       { name: "plan.json", text: planJson },
       { name: "rules.json", text: rulesJson },
     ]);
@@ -492,7 +541,7 @@
     // registra nada. Un fallo aquí no invalida la exportación — se dice y ya.
     let stock = null;
     if (dicho.alStock) {
-      stock = await altaEnStock({ nombre: piece.title, slug, segundos: piece.durationSeconds });
+      stock = await altaEnStock({ nombre: piece.title, slug, segundos: piece.durationSeconds, html: exportedHtml });
       if (!stock.ok) console.warn("[xperiencia] no se pudo dar de alta en el Stock:", stock.error);
     }
 

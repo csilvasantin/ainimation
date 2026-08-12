@@ -10,7 +10,7 @@
       content="AInimation Studio is an AI authoring environment for building animated worlds with cast members, stages, scores, scripts, scenes, sound, and video."
     />
     <meta name="theme-color" content="#0f1115" />
-    <meta name="admiranext-version" content="v.11.08.2026.r4.21:16">
+    <meta name="admiranext-version" content="v.12.08.2026.r1.17:50">
     <meta property="og:title" content="AInimation Studio" />
     <meta
       property="og:description"
@@ -56,7 +56,7 @@
         <a href="index.html#process">Process</a>
         <a href="studio.html" aria-current="page">Author</a>
         <a href="studio-live.html">Produce</a>
-        <a href="mailto:hello@ainimation.studio">Contact</a>
+        <a href="#payment">Payment</a>
       </nav>
     </header>
 
@@ -298,6 +298,7 @@
             <button class="menubar-action" type="button" data-open-window="cast">Assets</button>
             <button class="menubar-action" type="button" data-open-window="inspector">Score</button>
             <button class="menubar-action" type="button" data-open-window="prompt">AI Director</button>
+            <button class="menubar-action" type="button" data-open-window="payment">Payment</button>
             <span class="control-menu">
               <button class="menu-button" type="button" aria-expanded="false">Control</button>
               <span class="control-menu-list" aria-label="Control">
@@ -316,6 +317,7 @@
                 <button type="button" data-open-window="script">Behaviour</button>
                 <button type="button" data-open-window="inspector">Score</button>
                 <button type="button" data-open-window="prompt">AI Director</button>
+                <button type="button" data-open-window="payment">Payment</button>
                 <button type="button" data-open-window="tools">Tools</button>
               </span>
             </span>
@@ -528,6 +530,29 @@
               <span class="resize-handle" aria-hidden="true"></span>
             </section>
 
+            <section id="payment" class="director-window payment-window" aria-label="Payment" data-window="payment" data-window-title="Payment" data-x="1480" data-y="1110" data-w="548" data-h="300">
+              <div class="window-titlebar">
+                <span class="window-controls">
+                  <button type="button" data-window-action="close" aria-label="Close Payment"></button>
+                  <button type="button" data-window-action="minimize" aria-label="Minimize Payment"></button>
+                  <button type="button" data-window-action="maximize" aria-label="Maximize Payment"></button>
+                </span>
+                <strong>Payment</strong><small>Hosted checkout · PCI-safe</small>
+              </div>
+              <form class="payment-editor" data-payment-panel>
+                <label class="payment-switch"><input type="checkbox" name="payment-enabled"> Añadir pago al final</label>
+                <label>Proveedor<select name="payment-provider"><option value="square">Square</option><option value="visa">Visa · checkout alojado</option><option value="hosted">Otro checkout alojado</option></select></label>
+                <label class="payment-wide">URL HTTPS del checkout<input name="payment-url" type="url" inputmode="url" placeholder="https://square.link/u/…" autocomplete="off"></label>
+                <label>Importe<input name="payment-amount" type="number" min="0" max="999999" step="0.01" placeholder="12.50"></label>
+                <label>Moneda<input name="payment-currency" maxlength="3" value="EUR"></label>
+                <label>Botón<input name="payment-label" maxlength="40" value="Pagar ahora"></label>
+                <label>Mostrar<select name="payment-trigger"><option value="end">Al finalizar</option><option value="marker">En una marca</option></select></label>
+                <label>Marca<input name="payment-marker" maxlength="14" value="PAYMENT"></label>
+                <p class="payment-note">AInimation guarda solo la URL del checkout. Los datos de tarjeta se introducen en Square/Visa y nunca pasan por AInimation, Pixeria ni Admira.tv.</p>
+              </form>
+              <span class="resize-handle" aria-hidden="true"></span>
+            </section>
+
             <section class="director-window script-window is-hidden" aria-label="Behaviour window" data-window="script" data-window-title="Behaviour" data-x="0" data-y="1200" data-w="540" data-h="150">
               <div class="window-titlebar">
                 <span class="window-controls">
@@ -578,7 +603,7 @@
             <span>Movie: The Last Signal.dir</span>
             <span>Model: AInimation Director Board</span>
             <span>Export: Markdown / JSON / Prompts / Timing map</span>
-            <span data-studio-version>v.11.08.2026.r4.21:16</span>
+            <span data-studio-version>v.12.08.2026.r1.17:50</span>
           </div>
         </div>
       </section>
@@ -594,6 +619,7 @@
          ventana Behaviour ya tenga catálogo cuando se pinte el primer plan. -->
     <script src="assets/xpl-runtime.js?v=30e6865"></script>
     <script src="assets/app.js?v=30e6865" defer></script>
+    <script src="assets/payment-authoring.js?v=30e6865" defer></script>
     <script src="assets/xpl-studio.js?v=30e6865" defer></script>
     <!-- Va el último: necesita el plan ya cargado para poder sobrescribirlo con
          el que venga en el enlace ?p= y repintar. -->
