@@ -1,15 +1,15 @@
 {
-  "version": "v.13.08.2026.r1.17:29",
-  "deployedAt": "2026-08-13T15:30:05Z",
+  "version": "v.13.08.2026.r2.17:46",
+  "deployedAt": "2026-08-13T15:46:20Z",
   "deployer": "MorfeoMacMini",
   "machine": "MacMini",
   "signature": "MorfeoMacMini · MacMini",
-  "git": "325e2893dc5f6b3e8e066af6e93c7f2538eeec8f",
-  "gitShort": "325e289",
-  "gitFull": "325e2893dc5f6b3e8e066af6e93c7f2538eeec8f",
+  "git": "d015f47761748c6ade30b4dcde42865618c36da3",
+  "gitShort": "d015f47",
+  "gitFull": "d015f47761748c6ade30b4dcde42865618c36da3",
   "dirty": false,
-  "returnTag": "AInimation-v.13.08.2026.r1",
-  "previousTag": "AInimation-v.12.08.2026.r1",
-  "previousVersion": "v.12.08.2026.r1.17:50",
-  "note": "Galería pública /xperiencias/: preview en vivo de cada Xperiencia (iframe real a media escala), meta leída de plan.json/rules.json y botón «Emitir en admira.tv» que copia el item de canal. Nav + sitemap + i18n ES."
+  "returnTag": "AInimation-v.13.08.2026.r2",
+  "previousTag": "AInimation-v.13.08.2026.r1",
+  "previousVersion": "v.13.08.2026.r1.17:29",
+  "note": "Cast con IA real: ✨ Generate image en el menú Cast y en la paleta (pixer-eleven · grok-imagine-image); la media generada viaja como data URI dentro de la Xperiencia exportada."
 }
