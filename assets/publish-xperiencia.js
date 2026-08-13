@@ -349,7 +349,12 @@
     const cast = (plan.cast || []).filter((member) => {
       if (!member?.src) return false;
       if (/^(https?:)?\/\//i.test(member.src)) return true;
-      dropped.push(member.name || "cast");   // data:/blob: no sale de este navegador
+      // Un data: URI viaja perfectamente dentro del HTML exportado — es justo
+      // lo que hace autocontenida a la pieza (media generada del Cast IA
+      // incluida). Lo que sigue sin poder salir es un blob:, que solo existe
+      // en la sesión de este navegador.
+      if (/^data:/i.test(member.src)) return true;
+      dropped.push(member.name || "cast");   // blob: no sale de este navegador
       return false;
     });
     const payment = window.AINPayment?.clean(plan.payment) || plan.payment || null;

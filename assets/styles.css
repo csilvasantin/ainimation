@@ -6677,3 +6677,18 @@ body.ain-play [data-xpl-hot] { cursor: pointer !important; }
 @media (prefers-reduced-motion: reduce) {
   .xp-pub-fondo { backdrop-filter: none; }
 }
+
+/* ── Cast IA (✨ Generate image) — diálogo del generador ─────────────────── */
+.cast-ai-dialog { min-width: 280px; max-width: min(360px, calc(100vw - 24px)); }
+.cast-ai-row { align-items: flex-start; flex-direction: column; gap: 4px; }
+.cast-ai-prompt {
+  background: #0b1220;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 6px;
+  color: #edf6ff;
+  font: inherit;
+  padding: 6px 8px;
+  resize: vertical;
+  width: 100%;
+}
+.cast-ai-prompt:focus-visible { border-color: rgba(255, 230, 92, 0.55); outline: none; }

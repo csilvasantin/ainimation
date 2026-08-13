@@ -4151,6 +4151,7 @@ window.currentPlan = currentPlan;
 window.saveFilmPlan = saveFilmPlan;
 window.normalizeFilmPlan = normalizeFilmPlan;
 window.loadTimelineMarkers = loadTimelineMarkers;
+window.renderFilmPlan = renderFilmPlan;
 
 function renderStageRulers() {
   const xRuler = document.querySelector(".stage-ruler-x");
