@@ -28,7 +28,16 @@ let version = git("log", "-1", "--format=%h", "--", "assets");
 if (!version) version = "dev";
 if (git("status", "--porcelain", "--", "assets")) version += "-dirty";
 
+// La galería vive en subcarpeta y referencia los assets con ruta absoluta
+// (/assets/…): entra en el mismo token único. Las PIEZAS (xperiencias/<slug>/)
+// quedan fuera a propósito — son la salida literal del Studio, autocontenidas,
+// y no se reescriben.
 const htmlFiles = readdirSync(root).filter((f) => f.endsWith(".html"));
+try {
+  if (readdirSync(join(root, "xperiencias")).includes("index.html")) {
+    htmlFiles.push("xperiencias/index.html");
+  }
+} catch {}
 let changed = 0;
 let stale = [];
 
@@ -37,7 +46,7 @@ for (const file of htmlFiles) {
   const before = readFileSync(path, "utf8");
   // Solo los assets propios versionados; no tocamos enlaces externos.
   const after = before.replace(
-    /(\bhref="assets\/[^"?]+|\bsrc="assets\/[^"?]+)\?v=[^"]*/g,
+    /(\bhref="\/?assets\/[^"?]+|\bsrc="\/?assets\/[^"?]+)\?v=[^"]*/g,
     (_m, head) => `${head}?v=${version}`,
   );
   if (after === before) continue;

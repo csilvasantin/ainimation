@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml" />
+    <title>Xperiencias | AInimation Studio</title>
+    <meta
+      name="description"
+      content="Interactive Xperiencias published by AInimation Studio: self-contained touch pieces ready to air on admira.tv screens and to browse on pixeria.com."
+    />
+    <meta name="theme-color" content="#14110f" />
+    <meta property="og:title" content="Xperiencias — AInimation Studio" />
+    <meta property="og:description" content="Interactive pieces published by the Studio, ready to air on admira.tv." />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://www.ainimation.studio/xperiencias/" />
+    <meta property="og:image" content="https://www.ainimation.studio/assets/ainimation-teaser-poster.jpg" />
+    <meta property="og:site_name" content="AInimation Studio" />
+    <link rel="canonical" href="https://www.ainimation.studio/xperiencias/" />
+    <link rel="stylesheet" href="/assets/styles.css?v=e163e0d" />
+    <style>
+      .nav-lang{background:transparent;border:1px solid currentColor;color:inherit;border-radius:6px;padding:2px 9px;font:inherit;font-size:.78rem;letter-spacing:.04em;cursor:pointer;opacity:.7;margin-left:.6rem;transition:opacity .15s}
+      .nav-lang:hover,.nav-lang:focus-visible{opacity:1}
+      .skip-link{position:absolute;left:12px;top:-56px;z-index:200;background:#c9f24e;color:#12130f;padding:10px 18px;border-radius:0 0 10px 10px;font:inherit;font-weight:700;text-decoration:none;transition:top .16s ease}
+      .skip-link:focus{top:0;outline:2px solid #12130f;outline-offset:2px}
+      /* Galería — todo relativo: cero scroll horizontal es ley de la casa. */
+      .xp-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(340px,100%),1fr));gap:2rem;margin-top:2.5rem}
+      .xp-card{border:1px solid rgba(255,255,255,.12);border-radius:16px;overflow:hidden;background:rgba(255,255,255,.03);display:flex;flex-direction:column}
+      .xp-preview{position:relative;aspect-ratio:16/9;overflow:hidden;background:#0b0a09}
+      /* La preview es la Xperiencia REAL en un iframe a media escala, no una captura:
+         lo que se ve en la galería es exactamente lo que emitirá la pantalla. */
+      .xp-preview iframe{width:200%;height:200%;transform:scale(.5);transform-origin:0 0;border:0;pointer-events:none}
+      .xp-preview a.xp-open{position:absolute;inset:0;z-index:2;display:block;color:transparent}
+      .xp-body{padding:1.1rem 1.25rem 1.35rem;display:flex;flex-direction:column;gap:.75rem;flex:1}
+      .xp-body h3{margin:0;font-size:1.15rem}
+      .xp-meta{display:flex;flex-wrap:wrap;gap:.45rem;list-style:none;margin:0;padding:0}
+      .xp-meta li{border:1px solid rgba(255,255,255,.18);border-radius:999px;padding:.15rem .7rem;font-size:.74rem;letter-spacing:.05em;opacity:.85}
+      .xp-actions{display:flex;flex-wrap:wrap;gap:.6rem;margin-top:auto}
+      .xp-actions .button{font-size:.82rem;padding:.55rem 1rem}
+      .xp-emit-note{font-size:.75rem;opacity:.6;margin:0}
+      .xp-crosslinks{display:flex;flex-wrap:wrap;gap:1rem;align-items:center;margin-top:3rem}
+    </style>
+      <meta name="admiranext-version" content="v.13.08.2026.r1.17:29">
+</head>
+  <body class="home-page">
+    <a class="skip-link" href="#top">Skip to content</a>
+    <header class="site-header" aria-label="Primary">
+      <a class="brand" href="/" aria-label="AInimation Studio home">
+        <span class="brand-mark">AI</span>
+        <span>AInimation Studio</span>
+      </a>
+      <nav class="nav-links" aria-label="Site">
+        <a href="/#idea">Idea</a>
+        <a href="/#engine">Engine</a>
+        <a href="/xperiencias/" aria-current="page">Xperiencias</a>
+        <a href="/studio.html">Author</a>
+        <a href="/studio-live.html">Produce</a>
+        <button id="langToggle" class="nav-lang" type="button" aria-label="Cambiar idioma / Switch language">ES</button>
+      </nav>
+    </header>
+
+    <main id="top">
+      <section class="section" aria-labelledby="xp-title">
+        <div class="section-heading">
+          <div>
+            <p class="section-kicker">Xperiencias</p>
+            <h2 id="xp-title">Interactive pieces, ready to air.</h2>
+          </div>
+          <p>
+            Every Xperiencia is the literal output of the Studio: one
+            self-contained page with its plan, its rules, and no remote media.
+            What you see below is the real piece, not a screenshot — and the
+            emit button gives you the exact channel item admira.tv plays.
+          </p>
+        </div>
+
+        <div class="xp-grid" id="xpGrid"></div>
+
+        <div class="xp-crosslinks" aria-label="Where these pieces live">
+          <a class="button secondary" href="https://www.pixeria.com/" target="_blank" rel="noopener">Editorial view on pixeria.com</a>
+          <a class="button secondary" href="https://www.admira.tv/" target="_blank" rel="noopener">On air at admira.tv</a>
+          <a class="button primary" href="/studio.html">Publish yours from the Studio</a>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <span>AInimation Studio</span>
+      <span>Director-style AI authoring environment</span>
+      <span>v.13.08.2026.r1.17:29</span>
+      <a href="/#contact">Email the studio</a>
+    </footer>
+
+    <script>
+      // La galería se alimenta de los ficheros REALES de cada Xperiencia
+      // (plan.json + rules.json), no de datos copiados a mano: si una pieza
+      // cambia su duración, la ficha cambia sola en la siguiente visita.
+      (function () {
+        "use strict";
+        var XPS = [
+          { slug: "toca-y-elige", title: "Toca y Elige", blurb: "Three touch doors and the street rule: the screen always comes back on its own." },
+          { slug: "admira-en-3-pasos", title: "Admira en 3 pasos", blurb: "The Admira pitch as a touch walk-through, one step per touch." }
+        ];
+        var grid = document.getElementById("xpGrid");
+        XPS.forEach(function (xp) {
+          var base = "/xperiencias/" + xp.slug + "/";
+          var card = document.createElement("article");
+          card.className = "xp-card";
+          card.innerHTML =
+            '<div class="xp-preview">' +
+              '<iframe src="' + base + '" title="' + xp.title + ' — live preview" loading="lazy" tabindex="-1" aria-hidden="true"></iframe>' +
+              '<a class="xp-open" href="' + base + '" aria-label="Open ' + xp.title + '">Open</a>' +
+            "</div>" +
+            '<div class="xp-body">' +
+              "<h3>" + xp.title + "</h3>" +
+              "<p>" + xp.blurb + "</p>" +
+              '<ul class="xp-meta" data-meta></ul>' +
+              '<div class="xp-actions">' +
+                '<a class="button secondary" href="' + base + '" target="_blank" rel="noopener">Open live</a>' +
+                '<button class="button primary" type="button" data-emit>Emit on admira.tv</button>' +
+              "</div>" +
+              '<p class="xp-emit-note">Copies the channel item JSON for the admira.tv loop.</p>' +
+            "</div>";
+          grid.appendChild(card);
+
+          var meta = card.querySelector("[data-meta]");
+          function chip(text) {
+            var li = document.createElement("li");
+            li.textContent = text;
+            meta.appendChild(li);
+          }
+          Promise.all([
+            fetch(base + "plan.json").then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; }),
+            fetch(base + "rules.json").then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; })
+          ]).then(function (res) {
+            var plan = res[0], rules = res[1];
+            if (plan) {
+              if (plan.durationSeconds) chip(plan.durationSeconds + " s");
+              if (plan.fps) chip(plan.fps + " fps");
+              if (plan.totalFrames) chip(plan.totalFrames + " frames");
+            }
+            var n = rules && (Array.isArray(rules) ? rules.length : (rules.rules || []).length);
+            if (n) chip(n + " rules");
+            chip("self-contained");
+          });
+
+          card.querySelector("[data-emit]").addEventListener("click", function () {
+            var btn = this;
+            var item = {
+              id: "xp-" + xp.slug,
+              type: "interactive",
+              title: "Admira · " + xp.title,
+              url: "https://www.ainimation.studio" + base,
+              tags: ["horizontal"]
+            };
+            var txt = JSON.stringify(item, null, 2);
+            (navigator.clipboard && navigator.clipboard.writeText
+              ? navigator.clipboard.writeText(txt)
+              : Promise.reject())
+              .then(function () { flash("Copied ✓"); })
+              .catch(function () { window.prompt("Channel item JSON:", txt); });
+            function flash(msg) {
+              var prev = btn.textContent;
+              btn.textContent = msg;
+              btn.disabled = true;
+              setTimeout(function () { btn.textContent = prev; btn.disabled = false; }, 1600);
+            }
+          });
+        });
+      })();
+    </script>
+    <script src="/assets/i18n.js" defer></script>
+    <script src="/assets/analytics.js" defer></script>
+    <script src="/assets/register-sw.js" defer></script>
+  </body>
+</html>

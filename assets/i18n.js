@@ -114,6 +114,21 @@
     // Footer
     "Director-style AI authoring environment": "Entorno de autoría con IA estilo Director",
     "Email the studio": "Escribe al studio",
+    // Xperiencias (galería)
+    "Interactive pieces, ready to air.": "Piezas interactivas, listas para emitir.",
+    "Every Xperiencia is the literal output of the Studio: one self-contained page with its plan, its rules, and no remote media. What you see below is the real piece, not a screenshot — and the emit button gives you the exact channel item admira.tv plays.":
+      "Cada Xperiencia es la salida literal del Studio: una página autocontenida con su plan, sus reglas y sin media remota. Lo de abajo es la pieza real, no una captura — y el botón de emitir te da el item de canal exacto que reproduce admira.tv.",
+    "Three touch doors and the street rule: the screen always comes back on its own.":
+      "Tres puertas táctiles y la regla de la calle: la pantalla siempre vuelve sola.",
+    "The Admira pitch as a touch walk-through, one step per touch.":
+      "El pitch de Admira como recorrido táctil, un paso por toque.",
+    "Open live": "Abrir en vivo",
+    "Emit on admira.tv": "Emitir en admira.tv",
+    "Copies the channel item JSON for the admira.tv loop.":
+      "Copia el JSON del item de canal para el bucle de admira.tv.",
+    "Editorial view on pixeria.com": "Vista editorial en pixeria.com",
+    "On air at admira.tv": "En antena en admira.tv",
+    "Publish yours from the Studio": "Publica la tuya desde el Studio",
     // 404
     "Lost in the montage.": "Perdido en el montaje.",
     "This scene doesn't exist — or it hasn't been rendered yet. Head back to the studio.":
