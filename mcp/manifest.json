@@ -2,7 +2,7 @@
   "name": "ainimation-studio",
   "title": "AInimation Studio · ainimation.studio — Admira Director for the AI era",
   "description": "MCP hub for ainimation.studio, the authoring layer of the AdmiraNeXT suite: director-style animation work rebuilt with AI, through three doors — Author, Generate, Control. This page is the machine-readable side; there is no public API yet and this manifest says so instead of inventing one.",
-  "version": "v.09.08.2026.r1",
+  "version": "v.03.09.2026.r1.20:51",
   "site": "https://www.ainimation.studio",
   "hub": "https://www.ainimation.studio/mcp/",
   "llms_txt": "https://www.ainimation.studio/mcp/llms.txt",
@@ -10,9 +10,9 @@
   "repo": "https://github.com/csilvasantin/ainimation",
   "contact": {
     "telegram_group": "AgoraMatrix",
-    "signature": "SmithMacMini · project owner"
+    "signature": "NeoMBP16 · MacBookPro16 · project owner"
   },
-  "estado": "Las dos puertas nacen hoy (regla 24). El sitio es una web estática servida por Cloudflare Pages desde la rama main; el entorno de autoría vive en /studio.html. No hay todavía API pública ni servidor MCP propio: cuando los haya, se declaran aquí.",
+  "estado": "Las dos puertas nacen hoy (regla 24). El sitio es una web estática servida por GitHub Pages desde la rama main; el entorno de autoría vive en /studio.html. No hay todavía API pública ni servidor MCP propio: cuando los haya, se declaran aquí.",
   "http_api": null,
   "mcp_server": null,
   "que_hay_hoy": [

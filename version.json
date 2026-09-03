@@ -1,15 +1,15 @@
 {
-  "version": "v.13.08.2026.r2.17:46",
-  "deployedAt": "2026-08-13T15:46:20Z",
-  "deployer": "MorfeoMacMini",
-  "machine": "MacMini",
-  "signature": "MorfeoMacMini · MacMini",
-  "git": "d015f47761748c6ade30b4dcde42865618c36da3",
-  "gitShort": "d015f47",
-  "gitFull": "d015f47761748c6ade30b4dcde42865618c36da3",
+  "version": "v.03.09.2026.r1.20:51",
+  "deployedAt": "2026-09-03T18:51:00Z",
+  "deployer": "NeoMBP16",
+  "machine": "MacBookPro16",
+  "signature": "NeoMBP16 · MacBookPro16",
+  "git": "9976d521431034cba81317faa0f7fade4f5cbf01",
+  "gitShort": "9976d52",
+  "gitFull": "9976d521431034cba81317faa0f7fade4f5cbf01",
   "dirty": false,
-  "returnTag": "AInimation-v.13.08.2026.r2",
-  "previousTag": "AInimation-v.13.08.2026.r1",
-  "previousVersion": "v.13.08.2026.r1.17:29",
-  "note": "Cast con IA real: ✨ Generate image en el menú Cast y en la paleta (pixer-eleven · grok-imagine-image); la media generada viaja como data URI dentro de la Xperiencia exportada."
+  "returnTag": "AInimation-v.03.09.2026.r1",
+  "previousTag": "AInimation-v.13.08.2026.r2",
+  "previousVersion": "v.13.08.2026.r2.17:46",
+  "note": "Sanear la puerta de silicio: /mcp con versión de la release, GitHub Pages y firma NeoMBP16 · MacBookPro16; /llms.txt en raíz; sitemap con /help/, /mcp/ y las dos Xperiencias; sello de versión en studio-live y help. (Anterior: Cast con IA real: ✨ Generate image en el menú Cast y en la paleta (pixer-eleven · grok-imagine-image); la media generada viaja como data URI dentro de la Xperiencia exportada."
 }

@@ -19,4 +19,24 @@
     <loc>https://www.ainimation.studio/xperiencias/</loc>
     <priority>0.8</priority>
   </url>
+  <url>
+    <loc>https://www.ainimation.studio/help/</loc>
+    <lastmod>2026-09-03</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://www.ainimation.studio/mcp/</loc>
+    <lastmod>2026-09-03</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://www.ainimation.studio/xperiencias/toca-y-elige/</loc>
+    <lastmod>2026-09-03</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.ainimation.studio/xperiencias/admira-en-3-pasos/</loc>
+    <lastmod>2026-09-03</lastmod>
+    <priority>0.7</priority>
+  </url>
 </urlset>
