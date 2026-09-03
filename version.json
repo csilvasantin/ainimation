@@ -1,15 +1,15 @@
 {
-  "version": "v.03.09.2026.r1.20:51",
-  "deployedAt": "2026-09-03T18:51:00Z",
+  "version": "v.03.09.2026.r2.21:01",
+  "deployedAt": "2026-09-03T19:01:00Z",
   "deployer": "NeoMBP16",
   "machine": "MacBookPro16",
   "signature": "NeoMBP16 · MacBookPro16",
-  "git": "9976d521431034cba81317faa0f7fade4f5cbf01",
-  "gitShort": "9976d52",
-  "gitFull": "9976d521431034cba81317faa0f7fade4f5cbf01",
+  "git": "bc64eb1a38463ed1018413fc432210ccd07d74fb",
+  "gitShort": "bc64eb1",
+  "gitFull": "bc64eb1a38463ed1018413fc432210ccd07d74fb",
   "dirty": false,
-  "returnTag": "AInimation-v.03.09.2026.r1",
-  "previousTag": "AInimation-v.13.08.2026.r2",
-  "previousVersion": "v.13.08.2026.r2.17:46",
-  "note": "Sanear la puerta de silicio: /mcp con versión de la release, GitHub Pages y firma NeoMBP16 · MacBookPro16; /llms.txt en raíz; sitemap con /help/, /mcp/ y las dos Xperiencias; sello de versión en studio-live y help. (Anterior: Cast con IA real: ✨ Generate image en el menú Cast y en la paleta (pixer-eleven · grok-imagine-image); la media generada viaja como data URI dentro de la Xperiencia exportada."
+  "returnTag": "AInimation-v.03.09.2026.r2",
+  "previousTag": "AInimation-v.03.09.2026.r1",
+  "previousVersion": "v.03.09.2026.r1.20:51",
+  "note": "r2: firma del manifest /mcp sin el «project owner» sobrante (el responsable del censo sigue siendo SmithMacMini). (Anterior r1: sanear la puerta de silicio, /llms.txt en raíz, sitemap completo, sellos en studio-live y help.)"
 }
