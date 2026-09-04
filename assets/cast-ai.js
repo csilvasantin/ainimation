@@ -15,7 +15,8 @@
 (function () {
   "use strict";
 
-  const WORKER = "https://pixer-eleven.csilvasantin.workers.dev";
+  // dominio propio: LaLiga bloquea workers.dev en horas de fútbol, FLT-1633
+  const WORKER = "https://api.admira.store";
   let busy = false;
 
   // Misma tabla de motivos humanos que el anonimizador de Pixeria: el motor

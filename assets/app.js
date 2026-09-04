@@ -1622,6 +1622,8 @@ const stockCategoryFilters = ["audio", "music", "image", "video"];
 // workers.dev igual que hasta ahora (sin día D, sin romper nada).
 // Para activarlo hace falta una ruta de Worker en Cloudflare — ver docs/dominios-propios.md.
 const admiraStockEndpoints = [
+  // dominio propio: LaLiga bloquea workers.dev en horas de fútbol, FLT-1633
+  `https://api.admira.store/stock/list?limit=${stockImportFetchLimit}`,
   `https://api.pixeria.com/stock/list?limit=${stockImportFetchLimit}`,
   `https://pixer-eleven.csilvasantin.workers.dev/stock/list?limit=${stockImportFetchLimit}`,
   "https://www.admira.studio/api/stock/latest",
