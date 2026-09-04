@@ -2,7 +2,7 @@
   "name": "ainimation-studio",
   "title": "AInimation Studio · ainimation.studio — Admira Director for the AI era",
   "description": "MCP hub for ainimation.studio, the authoring layer of the AdmiraNeXT suite: director-style animation work rebuilt with AI, through three doors — Author, Generate, Control. This page is the machine-readable side; there is no public API yet and this manifest says so instead of inventing one.",
-  "version": "v.03.09.2026.r2.21:01",
+  "version": "v.04.09.2026.r1.22:35",
   "site": "https://www.ainimation.studio",
   "hub": "https://www.ainimation.studio/mcp/",
   "llms_txt": "https://www.ainimation.studio/mcp/llms.txt",

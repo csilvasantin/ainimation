@@ -1,15 +1,15 @@
 {
-  "version": "v.03.09.2026.r2.21:01",
-  "deployedAt": "2026-09-03T19:01:00Z",
-  "deployer": "NeoMBP16",
-  "machine": "MacBookPro16",
-  "signature": "NeoMBP16 · MacBookPro16",
-  "git": "bc64eb1a38463ed1018413fc432210ccd07d74fb",
-  "gitShort": "bc64eb1",
-  "gitFull": "bc64eb1a38463ed1018413fc432210ccd07d74fb",
+  "version": "v.04.09.2026.r1.22:35",
+  "deployedAt": "2026-09-04T20:35:52Z",
+  "deployer": "MorfeoMacMini",
+  "machine": "MacMini",
+  "signature": "MorfeoMacMini · MacMini",
+  "git": "353bb982a9268524eaa46e44f813b62471dc8361",
+  "gitShort": "353bb98",
+  "gitFull": "353bb982a9268524eaa46e44f813b62471dc8361",
   "dirty": false,
-  "returnTag": "AInimation-v.03.09.2026.r2",
-  "previousTag": "AInimation-v.03.09.2026.r1",
-  "previousVersion": "v.03.09.2026.r1.20:51",
-  "note": "r2: firma del manifest /mcp sin el «project owner» sobrante (el responsable del censo sigue siendo SmithMacMini). (Anterior r1: sanear la puerta de silicio, /llms.txt en raíz, sitemap completo, sellos en studio-live y help.)"
+  "returnTag": "AInimation-v.04.09.2026.r1",
+  "previousTag": "AInimation-v.03.09.2026.r2",
+  "previousVersion": "v.03.09.2026.r2.21:01",
+  "note": "Dominios propios en vez de workers.dev (FLT-1633): Studio Live por ainimation.admira.store, Cast IA e importación del Stock por api.admira.store; workers.dev queda como último recurso. LaLiga bloquea *.workers.dev en horas de fútbol."
 }
