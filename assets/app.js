@@ -1615,34 +1615,19 @@ const stageRulerStep = 100;
 const stockImportBatchSize = 3;
 const stockImportFetchLimit = 10;
 const stockCategoryFilters = ["audio", "music", "image", "video"];
-// C1 · el navegador sale de *.workers.dev. Los ISP españoles lo bloquean, así que
-// una visita desde España ve el Stock caído aunque el worker responda. La lista ya
-// se recorre en orden hasta que una responde, así que basta con poner DELANTE el
-// dominio propio: mientras su ruta de Worker no exista, falla y se sigue por
-// workers.dev igual que hasta ahora (sin día D, sin romper nada).
-// Para activarlo hace falta una ruta de Worker en Cloudflare — ver docs/dominios-propios.md.
+// LIMPIEZA (Carlos, 8-sep-2026: «limpia para que nada falle»). Medido ese día desde el Mac Mini:
+//  · api.admira.store/stock/list → 200 (dominio propio del worker del Stock). Es el ÚNICO que vale.
+//  · api.pixeria.com → no resuelve (000); pixer-eleven.csilvasantin.workers.dev → LaLiga lo bloquea
+//    en horas de fútbol (FLT-1633); www.admira.studio/api/stock* → 302 a la verja de Google
+//    (no sirve sin sesión); stock.json / latest.json → 404. Cada uno de esos gastaba un timeout
+//    antes de que el Stock cargara o la exportación fallara «sin causa».
+// Una sola URL, honesta: si api.admira.store no responde, se dice y no se disimula con fallbacks
+// muertos. El worker es el mismo (pixer-eleven) tras su dominio propio.
 const admiraStockEndpoints = [
-  // dominio propio: LaLiga bloquea workers.dev en horas de fútbol, FLT-1633
   `https://api.admira.store/stock/list?limit=${stockImportFetchLimit}`,
-  `https://api.pixeria.com/stock/list?limit=${stockImportFetchLimit}`,
-  `https://pixer-eleven.csilvasantin.workers.dev/stock/list?limit=${stockImportFetchLimit}`,
-  "https://www.admira.studio/api/stock/latest",
-  `https://www.admira.studio/api/stock?limit=${stockImportFetchLimit}&sort=latest`,
-  "https://www.admira.studio/api/stock",
-  "https://www.admira.studio/stock/latest.json",
-  "https://www.admira.studio/stock.json",
-  "https://admira.studio/api/stock/latest",
-  `https://admira.studio/api/stock?limit=${stockImportFetchLimit}&sort=latest`,
 ];
-// El orden importa: se prueban en fila y el primero que conteste gana.
-// - api.admira.store es el dominio CANÓNICO del worker del Stock. Faltaba.
-// - api.pixeria.com NO RESUELVE (curl da 000): estaba el primero, así que cada
-//   exportación empezaba gastando el timeout contra un host muerto.
-// - workers.dev queda de último recurso: está BLOQUEADO en varios ISP españoles
-//   (da 404/1042 desde España), así que no puede ser el camino principal.
 const admiraStockExportEndpoints = [
   "https://api.admira.store/stock/publish",
-  "https://pixer-eleven.csilvasantin.workers.dev/stock/publish",
 ];
 let activeDirectorWindow = null;
 let draggedDirectorWindow = null;

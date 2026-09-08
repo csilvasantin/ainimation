@@ -309,17 +309,15 @@
 
     <script src="assets/payment-authoring.js"></script>
     <script>
-      // C1 · el navegador sale de *.workers.dev. Los ISP españoles lo bloquean, así que
-      // una visita desde España veía esto muerto aunque el worker respondiera. Se prueba
-      // primero el dominio propio y se cae al de siempre si aún no tiene ruta de Worker:
-      // así no hay día D. Activarlo es cosa de Cloudflare — ver docs/dominios-propios.md.
+      // LIMPIEZA (Carlos, 8-sep-2026): el worker de Produce vive en su dominio propio
+      // https://ainimation.admira.store (/api/health, /api/gallery, /api/produce, /api/job/:id).
+      // Fuera api.ainimation.studio (no resuelve en DNS) y *.workers.dev (LaLiga lo bloquea):
+      // cada uno gastaba 2,5 s de sondeo antes de que la página encontrara el worker de verdad,
+      // y desde España caía en el bloqueado y decía «Could not reach the studio queue».
       const WORKER_BASES = [
-        // dominio propio: LaLiga bloquea workers.dev en horas de fútbol, FLT-1633
         'https://ainimation.admira.store',
-        'https://api.ainimation.studio',
-        'https://ainimation-studio.csilvasantin.workers.dev',
       ];
-      let WORKER = WORKER_BASES[WORKER_BASES.length - 1];
+      let WORKER = WORKER_BASES[0];
       const workerReady = (async () => {
         const cached = sessionStorage.getItem('ain_worker_base');
         if (cached) return (WORKER = cached);
@@ -503,11 +501,22 @@
           job = (await res.json()).job_id;
         } catch (e) { fail('Could not reach the studio queue.'); return; }
 
+        // HONESTIDAD (Carlos, 8-sep-2026: «limpia para que nada falle»): la cola acepta el encargo
+        // aunque no haya renderizador escuchando, y la página se quedaba en «Rendering…» para
+        // siempre. Si en 90 s el trabajo sigue en cola, se dice tal cual y se deja el id.
+        const enCola = Date.now();
         const poll = setInterval(async () => {
           let s;
           try { s = await (await fetch(WORKER + '/api/job/' + job)).json(); }
           catch { return; }
           stageText.textContent = s.stage || s.status;
+          if (s.status === 'queued' && Date.now() - enCola > 90000) {
+            clearInterval(poll);
+            stage.style.display = 'none';
+            produceBtn.disabled = false;
+            output.innerHTML = '<div class="empty">Tu encargo ha entrado en la cola (id <code>' + job + '</code>), pero ahora mismo no hay ningún renderizador activo que lo recoja. No es tu brief: es la sala de producción, que está apagada. Guarda el id; cuando la sala vuelva, el vídeo aparecerá en la galería.</div>';
+            return;
+          }
           if (s.status === 'done') {
             clearInterval(poll);
             stage.style.display = 'none';
