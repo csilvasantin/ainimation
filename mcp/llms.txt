@@ -4,9 +4,31 @@
 > por tres puertas — Author (escribir la intención), Generate (convertirla en material)
 > y Control (que lo que salga sea editable, no un resultado que aceptar).
 
-**Hoy no hay API pública ni servidor MCP en este dominio.** Es una web estática servida
-por GitHub Pages desde `main`. Lo digo antes que nada para no hacerte perder el
-rato buscando un contrato que no existe; cuando lo haya se declarará aquí.
+**Servidor MCP propio desde el 8-sep-2026:** `https://mcp-ainimation.admira.store/mcp` (Streamable HTTP).
+Lecturas sin clave; `xperiencia_publicar` exige la clave de flota AdmiraNeXT
+(`Authorization: Bearer <clave>`, la misma que mcp.admira.store). Salud: `/salud`.
+No hay API HTTP propia todavía: lo que hay es el MCP. El sitio sigue siendo estático.
+
+## Herramientas MCP
+
+| Herramienta | Qué hace |
+|---|---|
+| `quien_soy` | con qué identidad entras (clave de flota → persona y equipo) o anónimo de solo lectura |
+| `sitio_estado` | sello vivo del sitio y si responden /help, /mcp y el índice de Xperiencias |
+| `xperiencias_listar` | las Xperiencias publicadas, con duración, fps, marcadores y URL viva (fuente: /xperiencias/index.json) |
+| `xperiencia_detalle` | plan.json (cast, score, marcadores) y rules.json (reglas XPL) de una Xperiencia |
+| `xperiencia_canal_item` | el JSON de item de canal que admira.tv entiende para emitirla (el mismo que copia la galería) |
+| `stock_animaciones` | lo que ainimation ya publicó en el stock de Pixeria |
+| `xperiencia_publicar` | ESCRITURA · clave de flota: lleva una Xperiencia al stock de Pixeria (api.admira.store/stock/publish) |
+
+Fuente única de la lista: `https://www.ainimation.studio/xperiencias/index.json`.
+Ejemplo (initialize → tools/list → xperiencias_listar):
+
+```
+curl -s -H 'Content-Type: application/json' -H 'Accept: application/json, text/event-stream' \
+  -d '{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"xperiencias_listar","arguments":{}}}' \
+  https://mcp-ainimation.admira.store/mcp
+```
 
 ## Qué hay
 
@@ -14,6 +36,8 @@ rato buscando un contrato que no existe; cuando lo haya se declarará aquí.
 |---|---|
 | `/` | La portada: qué es Admira Director en la era de la IA y las tres puertas. |
 | `/studio.html` | El entorno de autoría — la interfaz completa (proyecto DirectorInteractivo). |
+| `/xperiencias/` | La galería de Xperiencias (piezas interactivas), con preview y emisión a admira.tv. |
+| `/xperiencias/index.json` | ÚNICA fuente de la galería y del MCP. |
 | `/version.json` | El sello de la última publicación, con su firma agente · máquina. |
 
 ## Dónde vive el dato
@@ -29,6 +53,7 @@ Este sitio autora; el dato acaba en sus hermanos, y ahí sí hay contrato:
 - **Un push a `main` es una publicación**: no hay `deploy.sh`.
 - **El `?v=` de los assets lo sella un workflow de GitHub** al hacer push; no lo pongas
   a mano.
+- **Añadir una Xperiencia** = carpeta `/xperiencias/<slug>/` + entrada en `index.json`; sin la entrada, ni la galería ni el MCP la ven.
 - **`director-interactivo` es otro proyecto** en el censo de Yokup, pero vive en
   `/studio.html` de este mismo dominio: hereda estas dos puertas.
 

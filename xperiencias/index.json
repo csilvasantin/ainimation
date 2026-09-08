@@ -1,0 +1,22 @@
+{
+  "nota": "Índice de las Xperiencias publicadas en ainimation.studio. ÚNICA fuente de la galería /xperiencias/ y del MCP (mcp-ainimation.admira.store). Cada entrada apunta a su plan.json (cast, score, marcadores, duración) y rules.json (reglas XPL). Añadir una Xperiencia = añadir su carpeta y una entrada aquí.",
+  "actualizado": "2026-09-08",
+  "xperiencias": [
+    {
+      "slug": "toca-y-elige",
+      "title": "Toca y Elige",
+      "blurb": "Three touch doors and the street rule: the screen always comes back on its own.",
+      "url": "https://www.ainimation.studio/xperiencias/toca-y-elige/",
+      "plan": "https://www.ainimation.studio/xperiencias/toca-y-elige/plan.json",
+      "rules": "https://www.ainimation.studio/xperiencias/toca-y-elige/rules.json"
+    },
+    {
+      "slug": "admira-en-3-pasos",
+      "title": "Admira en 3 pasos",
+      "blurb": "The Admira pitch as a touch walk-through, one step per touch.",
+      "url": "https://www.ainimation.studio/xperiencias/admira-en-3-pasos/",
+      "plan": "https://www.ainimation.studio/xperiencias/admira-en-3-pasos/plan.json",
+      "rules": "https://www.ainimation.studio/xperiencias/admira-en-3-pasos/rules.json"
+    }
+  ]
+}

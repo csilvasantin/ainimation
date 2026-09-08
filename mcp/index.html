@@ -51,11 +51,36 @@
       <span>Qué es y cómo se usa: <a href="/help/">ainimation.studio/help</a></span></div>
   </div>
 
+  <h2>Servidor MCP · <code>mcp-ainimation.admira.store</code></h2>
+  <p>Desde el 8 de septiembre de 2026 este dominio tiene puerta de silicio de verdad: un servidor
+  MCP (Streamable HTTP) que expone las Xperiencias del estudio. Endpoint
+  <code>https://mcp-ainimation.admira.store/mcp</code> · salud <code>/salud</code> · código en
+  <a href="https://github.com/csilvasantin/ainimation/tree/main/mcp/server">mcp/server</a>.
+  Las lecturas van sin clave; <code>xperiencia_publicar</code> exige la clave de flota AdmiraNeXT
+  (<code>Authorization: Bearer</code>, la misma que <a href="https://www.xpaceos.com/mcp/">mcp.admira.store</a>).</p>
+  <table>
+    <tr><th>Herramienta</th><th>Qué hace</th></tr>
+        <tr><td><code>quien_soy</code></td><td class="d">con qué identidad entras (clave de flota → persona y equipo) o anónimo de solo lectura</td></tr>
+        <tr><td><code>sitio_estado</code></td><td class="d">sello vivo del sitio y si responden /help, /mcp y el índice de Xperiencias</td></tr>
+        <tr><td><code>xperiencias_listar</code></td><td class="d">las Xperiencias publicadas, con duración, fps, marcadores y URL viva (fuente: /xperiencias/index.json)</td></tr>
+        <tr><td><code>xperiencia_detalle</code></td><td class="d">plan.json (cast, score, marcadores) y rules.json (reglas XPL) de una Xperiencia</td></tr>
+        <tr><td><code>xperiencia_canal_item</code></td><td class="d">el JSON de item de canal que admira.tv entiende para emitirla (el mismo que copia la galería)</td></tr>
+        <tr><td><code>stock_animaciones</code></td><td class="d">lo que ainimation ya publicó en el stock de Pixeria</td></tr>
+        <tr><td><code>xperiencia_publicar</code> <span class="tag">clave</span></td><td class="d">ESCRITURA · clave de flota: lleva una Xperiencia al stock de Pixeria (api.admira.store/stock/publish)</td></tr>
+  </table>
+  <p>La lista de Xperiencias sale de <a href="/xperiencias/index.json">/xperiencias/index.json</a>, la
+  misma fuente que pinta la <a href="/xperiencias/">galería</a>. El servidor no guarda estado: lee el
+  sitio y escribe en el stock de Pixeria. Conectar desde Claude Code:
+  <code>claude mcp add --transport http ainimation https://mcp-ainimation.admira.store/mcp</code>
+  (con <code>--header "Authorization: Bearer …"</code> para publicar).</p>
+
   <h2>Qué hay hoy en este dominio</h2>
   <table>
     <tr><th>Ruta</th><th>Qué es</th></tr>
         <tr><td><code>/</code></td><td class="d">La portada: qué es Admira Director en la era de la IA y las tres puertas.</td></tr>
         <tr><td><code>/studio.html</code></td><td class="d">El entorno de autoría — la interfaz completa (proyecto DirectorInteractivo).</td></tr>
+        <tr><td><code>/xperiencias/</code></td><td class="d">La galería de Xperiencias (piezas interactivas) con preview en vivo y emisión a admira.tv.</td></tr>
+        <tr><td><code>/xperiencias/index.json</code></td><td class="d">ÚNICA fuente de la galería y del MCP.</td></tr>
         <tr><td><code>/version.json</code></td><td class="d">El sello de la última publicación, con su firma agente · máquina.</td></tr>
   </table>
 
@@ -75,6 +100,7 @@
   <ul>
       <li>El sitio se publica al empujar a main: no hay deploy.sh. Un push es una publicación.</li>
       <li>El ?v= de los assets lo sella un workflow de GitHub al hacer push; no lo pongas a mano.</li>
+      <li>Añadir una Xperiencia = su carpeta en /xperiencias/&lt;slug&gt;/ + una entrada en /xperiencias/index.json; sin la entrada ni la galería ni el MCP la ven.</li>
       <li>director-interactivo es un proyecto distinto en el censo de Yokup, pero vive en /studio.html de este mismo dominio: hereda estas dos puertas.</li>
   </ul>
 

@@ -12,9 +12,47 @@
     "telegram_group": "AgoraMatrix",
     "signature": "NeoMBP16 · MacBookPro16"
   },
-  "estado": "Las dos puertas nacen hoy (regla 24). El sitio es una web estática servida por GitHub Pages desde la rama main; el entorno de autoría vive en /studio.html. No hay todavía API pública ni servidor MCP propio: cuando los haya, se declaran aquí.",
+  "estado": "Puerta de silicio con servidor propio desde el 8-sep-2026 (Carlos, ventana 0124 · vía 3): las Xperiencias del estudio como herramientas MCP. El sitio sigue siendo una web estática (GitHub Pages, rama main); el servidor MCP es un worker aparte en admira.store que lee el sitio y escribe en Pixeria. Todavía no hay API HTTP propia: lo que hay es el MCP.",
   "http_api": null,
-  "mcp_server": null,
+  "mcp_server": {
+    "name": "ainimation-mcp",
+    "endpoint": "https://mcp-ainimation.admira.store/mcp",
+    "transport": "streamable-http",
+    "salud": "https://mcp-ainimation.admira.store/salud",
+    "auth": "lecturas abiertas; xperiencia_publicar con clave de flota AdmiraNeXT (Authorization: Bearer), identidad derivada como en mcp.admira.store",
+    "code": "https://github.com/csilvasantin/ainimation/tree/main/mcp/server",
+    "tools": [
+      {
+        "name": "quien_soy",
+        "desc": "con qué identidad entras (clave de flota → persona y equipo) o anónimo de solo lectura"
+      },
+      {
+        "name": "sitio_estado",
+        "desc": "sello vivo del sitio y si responden /help, /mcp y el índice de Xperiencias"
+      },
+      {
+        "name": "xperiencias_listar",
+        "desc": "las Xperiencias publicadas, con duración, fps, marcadores y URL viva (fuente: /xperiencias/index.json)"
+      },
+      {
+        "name": "xperiencia_detalle",
+        "desc": "plan.json (cast, score, marcadores) y rules.json (reglas XPL) de una Xperiencia"
+      },
+      {
+        "name": "xperiencia_canal_item",
+        "desc": "el JSON de item de canal que admira.tv entiende para emitirla (el mismo que copia la galería)"
+      },
+      {
+        "name": "stock_animaciones",
+        "desc": "lo que ainimation ya publicó en el stock de Pixeria"
+      },
+      {
+        "name": "xperiencia_publicar",
+        "desc": "ESCRITURA · clave de flota: lleva una Xperiencia al stock de Pixeria (api.admira.store/stock/publish)"
+      }
+    ],
+    "fuente_unica": "https://www.ainimation.studio/xperiencias/index.json"
+  },
   "que_hay_hoy": [
     {
       "ruta": "/",
@@ -27,6 +65,18 @@
     {
       "ruta": "/version.json",
       "desc": "El sello de la última publicación, con su firma agente · máquina."
+    },
+    {
+      "ruta": "/xperiencias/",
+      "desc": "La galería de Xperiencias (piezas interactivas) con preview en vivo y emisión a admira.tv."
+    },
+    {
+      "ruta": "/xperiencias/index.json",
+      "desc": "ÚNICA fuente de la galería y del MCP: la lista de Xperiencias con su plan.json y rules.json."
+    },
+    {
+      "ruta": "/help/",
+      "desc": "La puerta para personas (regla 24)."
     }
   ],
   "donde_esta_el_dato": {
@@ -37,7 +87,9 @@
   "trampas": [
     "El sitio se publica al empujar a main: no hay deploy.sh. Un push es una publicación.",
     "El ?v= de los assets lo sella un workflow de GitHub al hacer push; no lo pongas a mano.",
-    "director-interactivo es un proyecto distinto en el censo de Yokup, pero vive en /studio.html de este mismo dominio: hereda estas dos puertas."
+    "director-interactivo es un proyecto distinto en el censo de Yokup, pero vive en /studio.html de este mismo dominio: hereda estas dos puertas.",
+    "Añadir una Xperiencia = su carpeta en /xperiencias/<slug>/ (index.html, plan.json, rules.json) + una entrada en /xperiencias/index.json; sin la entrada ni la galería ni el MCP la ven.",
+    "El MCP no crea Xperiencias ni guarda estado: lee el sitio y publica en Pixeria. Lo que hagas con él se declara en yokup (mcp.admira.live · yokup_alta / yokup_paso)."
   ],
   "federation": [
     {

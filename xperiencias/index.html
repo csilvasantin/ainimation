@@ -97,12 +97,21 @@
       // cambia su duración, la ficha cambia sola en la siguiente visita.
       (function () {
         "use strict";
-        var XPS = [
+        var XPS_RESPALDO = [
           { slug: "toca-y-elige", title: "Toca y Elige", blurb: "Three touch doors and the street rule: the screen always comes back on its own." },
           { slug: "admira-en-3-pasos", title: "Admira en 3 pasos", blurb: "The Admira pitch as a touch walk-through, one step per touch." }
         ];
+        // ÚNICA FUENTE (8-sep-2026): /xperiencias/index.json — la misma lista que sirve el MCP de
+        // ainimation (mcp-ainimation.admira.store · xperiencias_listar). El array de arriba es solo
+        // respaldo si el fetch falla; añadir una Xperiencia = su carpeta + una entrada en index.json.
+        var XPS = XPS_RESPALDO;
         var grid = document.getElementById("xpGrid");
-        XPS.forEach(function (xp) {
+        function pinta(lista) { lista.forEach(pintaUna); }
+        fetch("/xperiencias/index.json", { cache: "no-store" })
+          .then(function (r) { return r.ok ? r.json() : null; })
+          .then(function (d) { pinta(d && Array.isArray(d.xperiencias) && d.xperiencias.length ? d.xperiencias : XPS); })
+          .catch(function () { pinta(XPS); });
+        function pintaUna(xp) {
           var base = "/xperiencias/" + xp.slug + "/";
           var card = document.createElement("article");
           card.className = "xp-card";
@@ -166,7 +175,7 @@
               setTimeout(function () { btn.textContent = prev; btn.disabled = false; }, 1600);
             }
           });
-        });
+        }
       })();
     </script>
     <script src="/assets/i18n.js" defer></script>

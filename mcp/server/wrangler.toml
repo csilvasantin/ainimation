@@ -1,0 +1,19 @@
+name = "ainimation-mcp"
+main = "src/index.js"
+compatibility_date = "2026-08-01"
+compatibility_flags = ["nodejs_compat"]
+workers_dev = true
+
+# Dominio propio (LaLiga bloquea *.workers.dev en horas de fútbol, FLT-1633): mismo patrón que
+# mcp-pixeria.admira.store y mcp-tv.admira.store.
+[[routes]]
+pattern = "mcp-ainimation.admira.store"
+custom_domain = true
+
+[observability]
+enabled = true
+
+[vars]
+SITIO = "https://www.ainimation.studio"
+STOCK_API = "https://api.admira.store"
+VERSION = "v.08.09.2026.r1.17:22"
