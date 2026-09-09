@@ -23,8 +23,8 @@ python3 -m http.server 9134
 ## Deploy
 GitHub Pages serves `main` at the root, custom domain `www.ainimation.studio`.
 Cache tokens are stamped by the push, not by hand: `.github/workflows/stamp.yml`
-stamps on every push to `main` and commits the result, and only verifies (failing
-on a stale token) on other branches and pull requests. The token is the sha of the
+stamps on every push (to `main` or to any branch) and commits the result, and only
+verifies (failing on a stale token) on pull requests. The token is the sha of the
 last commit that touched `assets/`, so every page shares one token and it changes
 exactly when the assets do. Locally you can run `npm run stamp` to get ahead of it,
 or `npm run verify:stamp` to check without writing — both are shortcuts, not chores.

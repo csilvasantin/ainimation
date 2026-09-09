@@ -6,9 +6,12 @@
 # venía a resolver, solo que movido de sitio. Un JS caducado en un kiosko no se
 # nota hasta que alguien está delante de la pantalla.
 #
-# Aquí se sella en el push:
-#   · en main            → sella y devuelve el commit del sello (Pages sirve main)
-#   · en cualquier otra  → solo comprueba, y falla si el ?v= está desfasado
+# Aquí se sella en el push (Carlos vía Jobs, 9-sep-2026, encargos #2908/#2909):
+#   · en CUALQUIER push (main o rama) → sella y devuelve el commit del sello
+#   · en pull_request                 → solo comprueba que la rama llega sellada
+# Antes solo sellaba main y en las ramas comprobaba: cada push a una rama con el ?v=
+# desfasado fallaba y mandaba un correo «Run failed: stamp». Ahora el push a una rama
+# se sella solo y sale verde; el PR verifica.
 #
 # No hay bucle: el commit del sello solo toca *.html, así que el sha del último
 # commit sobre assets/ no cambia → la siguiente ejecución no encuentra nada que
