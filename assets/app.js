@@ -1178,6 +1178,16 @@ function isSelectedStageItemTarget(stageItemId) {
 function removeCastMemberFromStage(castIndex) {
   const plan = currentPlan();
   if (!Number.isInteger(castIndex) || !plan.cast?.[castIndex]) return false;
+  if (plan.cast[castIndex].instanceOf) {
+    // Una instancia no vuelve al Cast: se va.
+    plan.cast.splice(castIndex, 1);
+    selectedStageKeyframe = null;
+    clearSelectedStageTarget();
+    saveFilmPlan(plan);
+    renderFilmPlan(plan);
+    syncStageToFrame(currentTimelineFrame(), false);
+    return true;
+  }
   plan.cast[castIndex] = {
     ...plan.cast[castIndex],
     onStage: false,
@@ -3145,6 +3155,32 @@ function hydrateFilmForm(plan) {
   }
 }
 
+// MULTI-INSTANCIA (Jobs, #2906 · FLT-100152): un miembro del Cast puede estar varias veces en el
+// Stage, como los sprites de Director; hasta hoy onStage era un booleano y un miembro solo podía
+// ocupar un tramo. Cada instancia es una entrada más de plan.cast que apunta a su miembro de
+// origen (instanceOf, clave estable) con su propio tramo y sus propios keyframes: el Cast no la
+// pinta como miembro nuevo (cuenta las instancias en la tarjeta del origen), el Score la pinta
+// como canal propio «Nombre ·2» y el Stage como sprite propio.
+function castInstanceKey(member, index) {
+  return String(member?.id || member?.src || `cast-${index}`);
+}
+function castInstancesOf(plan, index) {
+  const key = castInstanceKey(plan.cast?.[index], index);
+  return (plan.cast || []).filter((m) => m.instanceOf === key);
+}
+function addCastInstance(plan, sourceIndex, options = {}) {
+  const source = plan.cast?.[sourceIndex];
+  if (!source?.src) return null;
+  const originIndex = source.instanceOf ? plan.cast.findIndex((m, i) => !m.instanceOf && castInstanceKey(m, i) === source.instanceOf) : sourceIndex;
+  const origin = plan.cast[originIndex >= 0 ? originIndex : sourceIndex];
+  const key = castInstanceKey(origin, originIndex >= 0 ? originIndex : sourceIndex);
+  const clone = { ...origin, instanceOf: key, instanceIndex: castInstancesOf(plan, originIndex >= 0 ? originIndex : sourceIndex).length + 2, onStage: true, keyframes: undefined, stageX: undefined, stageY: undefined, stageW: undefined, stageH: undefined };
+  delete clone.id;
+  plan.cast.push(clone);
+  const castIndex = plan.cast.length - 1;
+  return scheduleCastMember(plan, castIndex, { startFrame: options.startFrame || currentTimelineFrame(), stagePoint: options.stagePoint });
+}
+
 function scheduleCastMember(plan, castIndex, options = {}) {
   if (!Number.isInteger(castIndex) || !plan.cast?.[castIndex]?.src) return null;
   const selectedCount = plan.cast.filter((member) => member.imported && member.src && member.onStage !== false).length;
@@ -3312,7 +3348,11 @@ function initCastDropTargets() {
 
 function activateCastMemberFromDrop(castIndex, options = {}) {
   const plan = currentPlan();
-  const member = scheduleCastMember(plan, castIndex, options);
+  const current = plan.cast?.[castIndex];
+  // Ya está en el Stage y lo vuelven a soltar: es OTRA instancia (sprite), como en Director.
+  const member = current?.src && current.onStage !== false && current.imported
+    ? addCastInstance(plan, castIndex, options)
+    : scheduleCastMember(plan, castIndex, options);
   if (!member) return false;
   saveFilmPlan(plan);
   renderFilmPlan(plan);
@@ -3380,6 +3420,8 @@ function renderFilmPlan(plan) {
     castBin.dataset.castFilter = castFilter.join(",");
     renderCastToolbar(availableCastMembers.length, visibleCastMembers.length, castFilter, castViewMode);
     castBin.innerHTML = visibleCastMembers.length ? visibleCastMembers.map(({ member, index }) => {
+      if (member.instanceOf) return "";
+      const instanceCount = member.src ? castInstancesOf(plan, index).length : 0;
       const media = member.src && ["animation", "image"].includes(member.mediaType)
         ? `<img src="${escapeHtml(member.src)}" alt="" crossorigin="anonymous" />`
         : member.src && member.mediaType === "video"
@@ -3395,6 +3437,7 @@ function renderFilmPlan(plan) {
           <strong>${escapeHtml(member.name)}</strong>
           <small>${escapeHtml(member.role)} · ${escapeHtml(member.type)}</small>
         </div>
+        ${member.src && member.imported ? `<span class="cast-instance-tools">${instanceCount ? `<em class="cast-instances" title="${instanceCount + 1} sprites en el Stage">×${instanceCount + 1}</em>` : ""}<button type="button" class="cast-add-instance" data-cast-instance="${index}" title="Otro sprite de este miembro en el Stage" aria-label="Añadir otra instancia de ${escapeHtml(member.name)}">＋</button></span>` : ""}
       </article>
     `;
     }).join("") : (availableCastMembers.length
@@ -3407,6 +3450,19 @@ function renderFilmPlan(plan) {
           <small>Or import your own from Tools.</small>
         </div>`);
 
+    castBin.querySelectorAll("[data-cast-instance]").forEach((button) => {
+      button.addEventListener("click", (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        const nextPlan = currentPlan();
+        const sourceIndex = Number(button.dataset.castInstance);
+        if (nextPlan.cast?.[sourceIndex]?.onStage === false) scheduleCastMember(nextPlan, sourceIndex, { startFrame: currentTimelineFrame() });
+        else addCastInstance(nextPlan, sourceIndex, { startFrame: currentTimelineFrame() });
+        playUiTick("stage");
+        saveFilmPlan(nextPlan);
+        renderFilmPlan(nextPlan);
+      });
+    });
     castBin.querySelectorAll("[data-cast-index]").forEach((item) => {
       const castIndex = Number(item.dataset.castIndex);
       const toggleCastMember = () => {
@@ -3448,7 +3504,8 @@ function renderFilmPlan(plan) {
   const stageWindow = document.querySelector(".stage-canvas") || document.querySelector(".stage-window");
   if (stageWindow) {
     stageWindow.querySelectorAll(".stage-imported-member, .stage-item").forEach((member) => member.remove());
-    importedStageMembers.slice(0, 6).forEach((member, index) => {
+    // Sin tope (Jobs, #2906): antes solo se pintaban 6 miembros en el Stage.
+    importedStageMembers.forEach((member, index) => {
       const castIndex = castMembers.indexOf(member);
       const figure = document.createElement("figure");
       const stageMediaClass = member.mediaType === "video"
@@ -3527,7 +3584,7 @@ function renderFilmPlan(plan) {
     const allTimelineAudioMuted = timelineAudioMembers.length > 0 && timelineAudioMembers.every((member) => Boolean(member.muted));
     const scoreChannels = [
       ...importedTimelineMembers.map((member) => ({
-        name: member.name,
+        name: member.instanceOf ? `${member.name} ·${member.instanceIndex || 2}` : member.name,
         lane: member.mediaType === "video" || member.mediaType === "animation" ? "video" : member.mediaType === "audio" ? "music" : "cast",
         member,
         castIndex: castMembers.indexOf(member),

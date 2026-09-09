@@ -35,3 +35,14 @@ test("Corte 2 · el Score es canales × fotogramas con playhead y sprites del Ca
   assert.match(js, /function interpolateStageKeyframe\(member, frame/, "sprite = instancia del Cast con propiedades en el tiempo");
   assert.match(js, /function saveFilmPlan\(plan\)/, "persistencia JSON de la película");
 });
+
+// Corrección de Jobs (#2906 · FLT-100152): no reinventar, y cinco puntos concretos.
+test("Corrección · sin tope de 6 en el Stage, sprites multi-instancia desde el Cast y el inspector ya no se llama Score", () => {
+  assert.doesNotMatch(js, /importedStageMembers\.slice\(0, 6\)/, "el Stage pinta todos los miembros");
+  assert.match(js, /function addCastInstance\(plan, sourceIndex/); assert.match(js, /instanceOf: key/);
+  assert.match(js, /current\.onStage !== false && current\.imported\s*\? addCastInstance/, "soltar otra vez un miembro que ya está en el Stage crea otro sprite");
+  assert.match(js, /if \(plan\.cast\[castIndex\]\.instanceOf\) \{[\s\S]*plan\.cast\.splice\(castIndex, 1\)/, "quitar una instancia la elimina, no la devuelve al Cast");
+  assert.match(js, /if \(member\.instanceOf\) return "";/, "las instancias no son tarjetas nuevas del Cast");
+  assert.match(js, /data-cast-instance=/); assert.match(js, /name: member\.instanceOf \? `\$\{member\.name\} ·\$\{member\.instanceIndex \|\| 2\}` : member\.name/, "cada instancia es un canal propio del Score");
+  assert.match(html, /data-window-title="Brief"/); assert.match(html, /<strong>Brief<\/strong>/); assert.doesNotMatch(html, /data-open-window="inspector">Score</);
+});

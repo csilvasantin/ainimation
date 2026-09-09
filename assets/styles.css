@@ -6792,3 +6792,8 @@ body.ain-play [data-xpl-hot] { cursor: pointer !important; }
 .produce-status.is-done { background: #eefbf1; border-color: #b9e6c4; color: #14532d; }
 .produce-status a { color: inherit; text-decoration: underline; }
 
+/* Multi-instancia (Jobs, #2906): contador de sprites y «＋» en la tarjeta del Cast. */
+.cast-member .cast-instance-tools { align-items: center; display: inline-flex; gap: 4px; margin-left: auto; }
+.cast-member .cast-instances { color: #3b4656; font: 800 0.66rem/1 ui-monospace, SFMono-Regular, Menlo, monospace; }
+.cast-member .cast-add-instance { background: #c8ff5f; border: 1px solid #7aa52a; border-radius: 4px; color: #11151b; cursor: pointer; font: 800 0.8rem/1 ui-monospace, monospace; height: 20px; padding: 0; width: 20px; }
+
