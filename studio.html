@@ -309,6 +309,7 @@
               <button class="menu-button" type="button" aria-expanded="false">Control</button>
               <span class="control-menu-list" aria-label="Control">
                 <button type="button" data-play-toggle aria-pressed="false">▶ Play (proyector)</button>
+                <button type="button" data-produce-video title="Manda la película a la sala de producción (ainimation.admira.store) y devuelve un vídeo real">🎬 Producir vídeo (Produce)</button>
                 <button type="button" data-open-window="script">Behaviour · reglas XPL</button>
               </span>
             </span>
@@ -325,6 +326,8 @@
                 <button type="button" data-open-window="prompt">AI Director</button>
                 <button type="button" data-open-window="payment">Payment</button>
                 <button type="button" data-open-window="tools">Tools</button>
+                <button type="button" data-layout-toggle aria-pressed="true">Modo Director (fijo)</button>
+                <button type="button" data-inspector-toggle aria-pressed="true">Inspector a la derecha</button>
               </span>
             </span>
             <span class="settings-menu">
@@ -342,7 +345,7 @@
             </span>
           </div>
 
-          <div class="director-workbench">
+          <div class="director-workbench is-docked" data-layout="docked">
             <aside class="director-window tool-palette" aria-label="Import tools" data-window="tools" data-window-title="Tools" data-x="1598" data-y="320" data-w="132" data-h="620">
               <div class="window-titlebar">
                 <span class="window-controls">

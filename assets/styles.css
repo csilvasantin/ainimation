@@ -6692,3 +6692,103 @@ body.ain-play [data-xpl-hot] { cursor: pointer !important; }
   width: 100%;
 }
 .cast-ai-prompt:focus-visible { border-color: rgba(255, 230, 92, 0.55); outline: none; }
+
+/* ══════════════════════════════════════════════════════════════════════════
+   MODO DIRECTOR (Cortes 1+2 · FLT-100150, Carlos vía Jobs, 9-sep-2026): UNA sola
+   superficie fija, como el Director original — Cast a la izquierda, Stage en el
+   centro, Score abajo a todo el ancho, inspector a la derecha (plegable). Las
+   ventanas flotantes siguen existiendo (Window → «Modo Director (fijo)» las
+   suelta): aquí solo se les quita la geometría inline y se les da su área.
+   ══════════════════════════════════════════════════════════════════════════ */
+.director-workbench.is-docked {
+  display: grid;
+  gap: 10px;
+  grid-template-areas: "tools cast stage side" "tools score score score";
+  grid-template-columns: 108px minmax(220px, 0.26fr) minmax(0, 1fr) minmax(250px, 0.3fr);
+  grid-template-rows: minmax(0, 1fr) minmax(220px, 0.4fr);
+  height: min(92vh, 1000px);
+  overflow: hidden;
+}
+.director-workbench.is-docked.is-inspector-collapsed {
+  grid-template-columns: 108px minmax(220px, 0.26fr) minmax(0, 1fr) 0;
+  gap: 10px 0;
+}
+.director-workbench.is-docked.is-inspector-collapsed > .docked-side { display: none; }
+.director-workbench.is-docked > .director-window,
+.director-workbench.is-docked > .docked-side > .director-window {
+  height: auto !important;
+  left: auto !important;
+  max-height: 100%;
+  min-height: 0;
+  position: relative !important;
+  top: auto !important;
+  width: auto !important;
+  z-index: auto !important;
+}
+.director-workbench.is-docked > [data-window="cast"] { grid-area: cast; display: grid; grid-template-rows: auto auto auto minmax(0, 1fr); }
+.director-workbench.is-docked > [data-window="stage"] { grid-area: stage; }
+.director-workbench.is-docked > [data-window="score"] { grid-area: score; }
+.director-workbench.is-docked > .docked-side {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  grid-area: side;
+  min-height: 0;
+  overflow: auto;
+}
+.director-workbench.is-docked > .docked-side > .director-window { flex: 0 0 auto; max-height: 56%; overflow: auto; }
+.director-workbench.is-docked > .docked-side > .director-window.is-hidden { display: none; }
+.director-workbench.is-docked .resize-handle { display: none; }
+/* La paleta de herramientas tiene su propia columna (como en el Director original), en
+   vez de flotar encima del Cast y de los números de canal. */
+.director-workbench.is-docked > [data-window="tools"] {
+  align-content: start;
+  bottom: auto;
+  grid-area: tools;
+  height: auto !important;
+  left: auto !important;
+  overflow: auto hidden;
+  padding: 8px 6px;
+  position: relative !important;
+  top: auto !important;
+  width: auto !important;
+  z-index: auto !important;
+}
+.director-workbench.is-docked > [data-window="tools"] .window-titlebar { display: none; }
+.director-workbench.is-docked .window-taskbar { bottom: 8px; position: absolute; right: 14px; z-index: 25; }
+.director-workbench.is-docked .window-titlebar { cursor: default; }
+
+/* SCORE = canales × fotogramas (Corte 2): número de canal delante de cada fila y una
+   rejilla de fotogramas real, un carril por fotograma (línea fina) y uno más marcado
+   cada cinco, calculada del zoom del Score (--timeline-display-frames). */
+.score-channel-number {
+  background: #dfe5ef;
+  border-radius: 3px;
+  color: #3b4656;
+  display: inline-block;
+  font: 800 0.66rem/1 ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  margin-right: 6px;
+  min-width: 1.7em;
+  padding: 3px 4px;
+  text-align: center;
+}
+.score-track {
+  background:
+    repeating-linear-gradient(90deg, rgba(91, 101, 116, 0.10) 0 1px, transparent 1px calc(100% / var(--timeline-display-frames, 240))),
+    repeating-linear-gradient(90deg, rgba(91, 101, 116, 0.22) 0 1px, transparent 1px calc(500% / var(--timeline-display-frames, 240))),
+    linear-gradient(180deg, #fbfcff, #f3f5f9);
+}
+.produce-status {
+  background: #eef4ff;
+  border: 1px solid #c7d6f2;
+  border-radius: 6px;
+  color: #1b2a44;
+  font: 600 0.76rem/1.25 system-ui, -apple-system, "Segoe UI", sans-serif;
+  margin-left: 8px;
+  max-width: 46ch;
+  padding: 4px 8px;
+}
+.produce-status.is-error { background: #fff0ee; border-color: #f3b8ae; color: #7a2418; }
+.produce-status.is-done { background: #eefbf1; border-color: #b9e6c4; color: #14532d; }
+.produce-status a { color: inherit; text-decoration: underline; }
+

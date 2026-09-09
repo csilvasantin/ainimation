@@ -258,7 +258,7 @@ function initDirectorWindowManager() {
   }
 
   function applyRect(win, rect) {
-    if (isStackedLayout()) return;
+    if (isStackedLayout() || workbench.classList.contains("is-docked")) return;
     const bounds = workbench.getBoundingClientRect();
     const isTools = win.dataset.window === "tools";
     const minWidth = isTools ? 96 : 220;
@@ -592,12 +592,12 @@ function initDirectorWindowManager() {
 
     const titlebar = win.querySelector(".window-titlebar");
     titlebar?.addEventListener("dblclick", (event) => {
-      if (event.target.closest("button") || isStackedLayout()) return;
+      if (event.target.closest("button") || isStackedLayout() || workbench.classList.contains("is-docked")) return;
       event.preventDefault();
       toggleMaximize(win);
     });
     titlebar?.addEventListener("pointerdown", (event) => {
-      if (event.target.closest("button") || isStackedLayout() || win.classList.contains("is-maximized")) return;
+      if (event.target.closest("button") || isStackedLayout() || win.classList.contains("is-maximized") || workbench.classList.contains("is-docked")) return;
       event.preventDefault();
       bringToFront(win);
       win.classList.add("dragging");
@@ -722,7 +722,158 @@ function initDirectorWindowManager() {
   });
 }
 
+// ── MODO DIRECTOR (Cortes 1+2 · FLT-100150, Carlos vía Jobs, 9-sep-2026) ──────────────
+// Una sola superficie fija: Cast izq · Stage centro · Score abajo full-width · inspector der
+// plegable. Es el modo por defecto; Window → «Modo Director (fijo)» vuelve a las ventanas
+// flotantes de siempre (la preferencia se guarda en el navegador).
+const layoutStorageKey = "ainimation-layout";
+const inspectorStorageKey = "ainimation-inspector";
+const dockedSideWindows = ["inspector", "prompt", "script", "payment"];
+function loadLayoutMode() {
+  try { return localStorage.getItem(layoutStorageKey) === "floating" ? "floating" : "docked"; } catch { return "docked"; }
+}
+function applyLayoutMode(mode) {
+  const workbench = document.querySelector(".director-workbench");
+  if (!workbench) return;
+  const docked = mode !== "floating";
+  workbench.classList.toggle("is-docked", docked);
+  workbench.dataset.layout = docked ? "docked" : "floating";
+  let side = workbench.querySelector(".docked-side");
+  if (docked) {
+    if (!side) {
+      side = document.createElement("div");
+      side.className = "docked-side";
+      side.setAttribute("aria-label", "Inspector");
+      const score = workbench.querySelector('[data-window="score"]');
+      workbench.insertBefore(side, score || null);
+    }
+    dockedSideWindows.forEach((id) => {
+      const win = workbench.querySelector(`.director-window[data-window="${id}"]`);
+      if (win && win.parentElement !== side) side.append(win);
+    });
+    let collapsed = false;
+    try { collapsed = localStorage.getItem(inspectorStorageKey) === "collapsed"; } catch { /* sin almacenamiento */ }
+    workbench.classList.toggle("is-inspector-collapsed", collapsed);
+  } else {
+    if (side) {
+      [...side.children].forEach((win) => workbench.insertBefore(win, side));
+      side.remove();
+    }
+    workbench.classList.remove("is-inspector-collapsed");
+    workbench.querySelectorAll(".director-window[data-window]").forEach((win) => {
+      win.style.left = `${Number(win.dataset.x || 20)}px`;
+      win.style.top = `${Number(win.dataset.y || 20)}px`;
+      win.style.width = `${Number(win.dataset.w || 320)}px`;
+      win.style.height = `${Number(win.dataset.h || 240)}px`;
+    });
+  }
+  document.querySelectorAll("[data-layout-toggle]").forEach((button) => {
+    button.setAttribute("aria-pressed", String(docked));
+    button.textContent = docked ? "Modo Director (fijo)" : "Ventanas flotantes";
+  });
+  document.querySelectorAll("[data-inspector-toggle]").forEach((button) => {
+    button.setAttribute("aria-pressed", String(!workbench.classList.contains("is-inspector-collapsed")));
+  });
+  window.requestAnimationFrame(() => { if (typeof renderStageRulers === "function") renderStageRulers(); });
+}
+function initDirectorLayout() {
+  applyLayoutMode(loadLayoutMode());
+  document.querySelectorAll("[data-layout-toggle]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const next = loadLayoutMode() === "docked" ? "floating" : "docked";
+      try { localStorage.setItem(layoutStorageKey, next); } catch { /* sin almacenamiento */ }
+      applyLayoutMode(next);
+    });
+  });
+  document.querySelectorAll("[data-inspector-toggle]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const workbench = document.querySelector(".director-workbench");
+      const collapsed = !workbench.classList.contains("is-inspector-collapsed");
+      workbench.classList.toggle("is-inspector-collapsed", collapsed);
+      try { localStorage.setItem(inspectorStorageKey, collapsed ? "collapsed" : "open"); } catch { /* sin almacenamiento */ }
+      button.setAttribute("aria-pressed", String(!collapsed));
+      window.requestAnimationFrame(() => { if (typeof renderStageRulers === "function") renderStageRulers(); });
+    });
+  });
+}
+initDirectorLayout();
 initDirectorWindowManager();
+
+// ── PRODUCE detrás de ▶ Play (Corte 1: «absorber lo útil de studio-live como motor») ──────
+// La película que hay en el Score se manda a la sala de producción (el worker de
+// ainimation.admira.store, el mismo que usaba studio-live) y el estado se cuenta en la
+// barra del Score. Sin renderizador escuchando, a los 90 s se dice tal cual, con el id.
+const produceWorkerBase = "https://ainimation.admira.store";
+function produceStatusElement() {
+  let el = document.querySelector(".produce-status");
+  if (!el) {
+    el = document.createElement("span");
+    el.className = "produce-status";
+    el.setAttribute("role", "status");
+    const host = document.querySelector('[data-window="score"] .window-titlebar') || document.querySelector(".score-tools");
+    host?.append(el);
+  }
+  return el;
+}
+function briefFromPlan(plan) {
+  const scenes = Array.isArray(plan.scenes) ? plan.scenes : [];
+  return {
+    title: String(plan.title || "AInimation Studio").slice(0, 120),
+    subtitle: String(plan.treatment || plan.logline || "").slice(0, 200),
+    beats: scenes.slice(0, 8).map((scene, index) => ({ stat: String(scene.number || index + 1), label: String(scene.title || scene.beat || scene.behavior || `Escena ${index + 1}`).slice(0, 80) })),
+    closing: String(plan.closing || "").slice(0, 120),
+    narrate: false,
+    lang: "es",
+    fps: timelineFps(),
+    totalFrames: totalTimelineFrames(plan),
+    source: "studio.html · ▶ Producir",
+  };
+}
+let produceJobTimer = null;
+async function produceVideoFromPlan() {
+  const status = produceStatusElement();
+  const plan = currentPlan();
+  status.className = "produce-status";
+  status.textContent = "Enviando la película a la sala de producción…";
+  if (produceJobTimer) { window.clearInterval(produceJobTimer); produceJobTimer = null; }
+  let job;
+  try {
+    const res = await fetch(`${produceWorkerBase}/api/produce`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(briefFromPlan(plan)) });
+    const data = await res.json();
+    if (!res.ok || !data.job_id) throw new Error(data.error || `HTTP ${res.status}`);
+    job = data.job_id;
+  } catch (error) {
+    status.className = "produce-status is-error";
+    status.textContent = `La sala de producción no acepta el encargo: ${error.message || error}`;
+    return;
+  }
+  const started = Date.now();
+  status.textContent = `En cola (${job})…`;
+  produceJobTimer = window.setInterval(async () => {
+    let s;
+    try { s = await (await fetch(`${produceWorkerBase}/api/job/${job}`)).json(); } catch { return; }
+    if (s.status === "done") {
+      window.clearInterval(produceJobTimer); produceJobTimer = null;
+      status.className = "produce-status is-done";
+      status.innerHTML = `Vídeo listo: <a href="${escapeHtml(produceWorkerBase + s.video)}" target="_blank" rel="noopener">abrir</a>`;
+      return;
+    }
+    if (s.status === "error") {
+      window.clearInterval(produceJobTimer); produceJobTimer = null;
+      status.className = "produce-status is-error";
+      status.textContent = `La producción falló: ${s.error || "sin detalle"}`;
+      return;
+    }
+    if (s.status === "queued" && Date.now() - started > 90000) {
+      window.clearInterval(produceJobTimer); produceJobTimer = null;
+      status.className = "produce-status is-error";
+      status.textContent = `Encargo ${job} en cola, pero ahora mismo no hay ningún renderizador activo: la sala está apagada. Guarda el id; cuando vuelva, el vídeo saldrá en la galería.`;
+      return;
+    }
+    status.textContent = `${s.stage || s.status} (${job})…`;
+  }, 3000);
+}
+document.querySelectorAll("[data-produce-video]").forEach((button) => button.addEventListener("click", produceVideoFromPlan));
 window.setTimeout(() => window.refreshDirectorWindows?.(true), 80);
 window.setTimeout(() => window.refreshDirectorWindows?.(true), 320);
 
@@ -3403,7 +3554,7 @@ function renderFilmPlan(plan) {
     scoreGrid.innerHTML = `
       <div class="director-score">
         <div class="score-member-title">
-          <span>Member</span>
+          <span>Canal · Member</span>
           <button class="score-audio-mute-all ${allTimelineAudioMuted ? "is-muted" : ""}" type="button" data-audio-mute-all aria-pressed="${allTimelineAudioMuted ? "true" : "false"}" aria-label="${allTimelineAudioMuted ? "Unmute all timeline audio" : "Mute all timeline audio"}">
             <i class="score-audio-icon" aria-hidden="true"></i>
           </button>
@@ -3454,6 +3605,7 @@ function renderFilmPlan(plan) {
         </div>`}
         ${scoreChannels.map((channel, channelIndex) => `
           <div class="score-row-label">
+            <b class="score-channel-number" aria-label="Canal ${channelIndex + 1}">${channelIndex + 1}</b>
             <span contenteditable="true" spellcheck="false" role="textbox" aria-label="Edit timeline row label" data-score-label-index="${channelIndex}" ${Number.isInteger(channel.castIndex) ? `data-cast-index="${channel.castIndex}"` : ""} ${channel.stageItemId ? `data-stage-item-id="${escapeHtml(channel.stageItemId)}"` : ""}>${escapeHtml(channel.name)}</span>
             ${channel.hasAudio ? `<button class="score-audio-mute ${channel.member.muted ? "is-muted" : ""}" type="button" data-audio-mute data-cast-index="${channel.castIndex}" aria-pressed="${channel.member.muted ? "true" : "false"}" aria-label="${channel.member.muted ? "Unmute audio" : "Mute audio"}">${channel.member.muted ? "M" : "S"}</button>` : ""}
           </div>
