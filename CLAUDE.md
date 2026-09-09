@@ -34,11 +34,10 @@ espejo de producción **admira.tv** (–1 día). Capa "Emitir/Animar". Ver la me
 ## Deploy
 GitHub Pages sirve `main` (raíz). CNAME = `www.ainimation.studio`.
 - **El `?v=` NO se toca a mano: lo pone el push.** `.github/workflows/stamp.yml`
-  sella en cada push a `main` (y devuelve el commit del sello), y en cualquier
-  otra rama o PR solo comprueba y falla si está desfasado. El token es el sha del
+  sella en cada push a `main` o a cualquier rama (y devuelve el commit del sello), y en
+  los pull requests solo comprueba que la rama llegue sellada. El token es el sha del
   último commit que tocó `assets/`: cambia exactamente cuando cambian los assets
-  y es el MISMO en todas las páginas (antes iba a mano y cada HTML llevaba el
-  suyo → dos copias cacheadas del mismo `app.js`).
+  y es el MISMO en todas las páginas.
 - En local, si quieres adelantarlo: `npm run stamp` (o `npm run verify:stamp`
   para solo comprobar). Es un atajo, no una obligación — si se te olvida, el
   push lo arregla.
