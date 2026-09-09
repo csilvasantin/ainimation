@@ -40,11 +40,14 @@ jobs:
 
       # Fuera de main no escribimos en el repo de nadie: solo avisamos.
       - name: Comprobar el sello
-        if: github.ref != 'refs/heads/main' || github.event_name == 'pull_request'
+        # Solo en PR: comprueba que la rama llega sellada (Jobs/Carlos, 9-sep-2026, encargo #2908).
+        if: github.event_name == 'pull_request'
         run: npm run verify:stamp
 
       - name: Sellar y devolver el commit
-        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        # En CUALQUIER push (main o rama): se sella y se devuelve el commit. Antes solo main, y cada
+        # push a una rama con ?v= desfasado fallaba en «Comprobar» y mandaba un correo (encargo #2908).
+        if: github.event_name == 'push'
         run: |
           npm run stamp
           if git diff --quiet -- '*.html'; then
