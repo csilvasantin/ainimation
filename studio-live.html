@@ -162,7 +162,7 @@
         <a href="/#engine">Engine</a>
         <a href="studio.html">Author</a>
         <a href="studio-live.html" aria-current="page">Produce</a>
-        <a href="#payment">Payment</a>
+        <a href="#payment">Payment (opcional)</a>
       </nav>
       <div class="rail-toggles" aria-label="Paneles">
         <button class="rtoggle" data-rail="left" type="button" title="Opciones — panel izquierdo">◧</button>
@@ -255,8 +255,8 @@
             <div id="galleryGrid" class="gallery-grid"></div>
           </section>
 
-          <section id="payment" class="card full payment-card" data-payment-panel>
-            <p class="stage-title">💳 Payment · final interactivo</p>
+          <details id="payment" class="card full payment-card" data-payment-panel>
+            <summary class="stage-title" style="cursor:pointer;list-style:none">💳 Payment · final interactivo <span style="opacity:.7;font-weight:400">(opcional · abrir)</span></summary>
             <p class="note">Añade un checkout alojado al final de la Xperiencia. AInimation no captura ni almacena datos de tarjeta.</p>
             <div class="payment-grid">
               <label class="toggle payment-wide"><input type="checkbox" name="payment-enabled"> Añadir pago al final</label>
@@ -268,7 +268,7 @@
               <label>Mostrar<select name="payment-trigger"><option value="end">Al finalizar</option><option value="marker">En una marca</option></select></label>
               <label>Marca<input name="payment-marker" maxlength="14" value="PAYMENT"></label>
             </div>
-          </section>
+          </details>
         </div>
       </main>
 
