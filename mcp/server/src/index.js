@@ -315,7 +315,7 @@ export function crearServidor(env = {}, deps = {}, identidad = null) {
 
   server.registerTool('admirito_voz', {
     title: 'Voz de Admirito (ElevenLabs)',
-    description: 'URL de audio MP3 con la voz de Admirito (ElevenLabs, castellano) para un texto: GET https://mcp-ainimation.admira.store/voz?texto=...&voz=daniela. Caché de 30 días por frase; la clave nunca sale del servidor. Úsala en el iPad (/cola/ipad.html), el gemelo (ipad-cola.js, totem-kiosko.js) y el quiosco; si devuelve 503 el cliente usa la voz del navegador (es-ES).',
+    description: 'URL de audio MP3 con la voz de Admirito (ElevenLabs, castellano) para un texto: GET https://mcp-ainimation.admira.store/voz?texto=...&voz=santiago. Caché de 30 días por frase; la clave nunca sale del servidor. Úsala en el iPad (/cola/ipad.html), el gemelo (ipad-cola.js, totem-kiosko.js) y el quiosco; si devuelve 503 el cliente usa la voz del navegador (es-ES).',
     inputSchema: { texto: z.string().max(MAX_TEXTO).optional(), voz: z.string().max(40).optional() },
     annotations: { readOnlyHint: true, openWorldHint: true },
   }, seguro(async ({ texto: t = '', voz: v = '' }) => {

@@ -1,6 +1,6 @@
 {
-  "version": "v.07.10.2026.r24.16:24",
-  "deployedAt": "2026-10-07T14:24:21Z",
+  "version": "v.07.10.2026.r25.16:31",
+  "deployedAt": "2026-10-07T14:31:57Z",
   "deployer": "OraculoMacMini",
   "machine": "MacMini",
   "signature": "OraculoMacMini · MacMini",
@@ -10,12 +10,11 @@
   "dirty": false,
   "returnTag": "AInimation-v.04.09.2026.r1",
   "previousTag": "AInimation-v.03.09.2026.r2",
-  "previousVersion": "v.07.10.2026.r23.15:21",
-  "note": "Voz de Admirito con ElevenLabs",
+  "previousVersion": "v.07.10.2026.r24.16:24",
+  "note": "Admirito habla con la voz Santiago",
   "novedades": [
-    "Admirito habla con voz de ElevenLabs en castellano (voz joven y dulce «Daniela») en el iPad del mostrador",
-    "Nuevo proxy /voz en mcp-ainimation con caché de las frases frecuentes; la clave nunca llega al navegador",
-    "Si ElevenLabs no responde, Admirito usa la voz es-ES del navegador",
-    "Nueva herramienta MCP admirito_voz y ayuda actualizada"
+    "Admirito habla por defecto con la voz «Santiago» de ElevenLabs (elegida por Carlos)",
+    "Daniela y Raquel siguen disponibles con ?vozid=daniela o ?vozid=raquel",
+    "Ayuda y MCP admirito_voz actualizados"
   ]
 }
