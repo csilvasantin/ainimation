@@ -84,7 +84,10 @@
     { id: 'frame',         type: 'num', es: 'el fotograma',        en: 'the frame',            icon: '🎞️', min: 1, max: 9999 },
     { id: 'markerReached', type: 'ref', source: 'marker', es: 'se llega a la marca',  en: 'the mark is reached',  icon: '🚩' },
     { id: 'idleSeconds',   type: 'num', es: 'los segundos sin tocar', en: 'seconds idle',      icon: '⏳', min: 0, max: 900, unit: 's' },
-    { id: 'qrScanned',     type: 'ref', source: 'qr',     es: 'se escanea el QR',     en: 'the QR is scanned',    icon: '📱' }
+    { id: 'qrScanned',     type: 'ref', source: 'qr',     es: 'se escanea el QR',     en: 'the QR is scanned',    icon: '📱' },
+    // Quiosco (miembro Carta): el pedido, el carrito y las variables de la pieza.
+    { id: 'orderPaid',     type: 'bool', es: 'el pedido está cerrado (pagado o en barra)', en: 'the order is closed (paid or at counter)', icon: '🧾' },
+    { id: 'cartCount',     type: 'num',  es: 'los productos del carrito', en: 'items in the cart', icon: '🛒', min: 0, max: 99 }
   ];
 
   const DIRECTOR_ACTIONS = [
@@ -102,7 +105,14 @@
     { id: 'playSound',   scope: 'stage', mode: 'on',    es: 'sonar',               en: 'play',
       param: { kind: 'ref', source: 'sound', es: 'sonido', en: 'sound' } },
     { id: 'openUrl',     scope: 'stage', mode: 'on',    es: 'abrir la dirección',  en: 'open the address',
-      param: { kind: 'text', es: 'url', en: 'url', placeholder: 'https://…' } }
+      param: { kind: 'text', es: 'url', en: 'url', placeholder: 'https://…' } },
+    { id: 'stop',        scope: 'stage', mode: 'on',    es: 'parar el cabezal',    en: 'stop the playhead' },
+    { id: 'setVar',      scope: 'stage', mode: 'on',    es: 'fijar la variable',   en: 'set the variable',
+      param: { kind: 'text', es: 'nombre=valor', en: 'name=value', placeholder: 'lang=en' } },
+    { id: 'addToCart',   scope: 'stage', mode: 'on',    es: 'añadir al carrito el producto elegido', en: 'add the chosen product to the cart' },
+    { id: 'clearCart',   scope: 'stage', mode: 'on',    es: 'vaciar el carrito y el pedido', en: 'clear the cart and order' },
+    { id: 'openCheckout',scope: 'stage', mode: 'on',    es: 'abrir el pago (checkout simulado)', en: 'open checkout (simulated)' },
+    { id: 'payAtCounter',scope: 'stage', mode: 'on',    es: 'cerrar el pedido: pagar en barra', en: 'close the order: pay at counter' }
   ];
 
   // Resolución por id contra AMBOS catálogos: una regla puede mezclar hechos de

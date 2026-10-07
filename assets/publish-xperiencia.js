@@ -109,6 +109,12 @@
   var fps   = Number(plan.fps || 24);
   var total = Number(plan.totalFrames || 240);
   var stage = document.getElementById("stage");
+  var EXT = window.XP_EXT || null;          // miembro Carta/Quiosco y sprites de Director (botón)
+  if (plan.stage && plan.stage.w && plan.stage.h) {
+    stage.style.aspectRatio = plan.stage.w + " / " + plan.stage.h;
+    stage.style.width = "min(100vw, " + (100 * plan.stage.w / plan.stage.h).toFixed(3) + "vh)";
+  }
+  if (EXT && EXT.init) EXT.init(plan, stage);
 
   /* --- Payment: checkout alojado, nunca campos de tarjeta en la pieza. --- */
   var payLayer = null;
@@ -169,7 +175,7 @@
   function paintOne(obj, id, kind) {
     var start = Number(obj.startFrame || 1);
     var end   = start + Number(obj.durationFrames || total);
-    var live  = frame >= start && frame <= end && !hidden[obj.spriteName];
+    var live  = frame >= start && frame < end && !hidden[obj.spriteName];
     var k = at(obj, frame);
     var node = ensure(id, function () {
       var n = document.createElement(kind === "cast" ? (obj.mediaType === "video" ? "video" : "img") : "div");
@@ -182,6 +188,7 @@
     if (!live) return;
     node.style.left = k.x + "%"; node.style.top = k.y + "%";
     node.style.width = k.w + "%"; node.style.height = k.h + "%";
+    if (kind === "item" && EXT && EXT.paint && (obj.type === "button" || obj.type === "kiosk")) { EXT.paint(node, obj, texts); return; }
     if (kind === "item") {
       var type = obj.type || "rect-fill";
       var filled = /-fill$/.test(type);
@@ -224,7 +231,7 @@
         case "night": return h >= 21 || h < 7;
         case "weekend": var d = new Date().getDay(); return d === 0 || d === 6;
         case "dayPart": return h < 12 ? "morning" : h < 15 ? "noon" : h < 21 ? "afternoon" : "night";
-        default: return undefined;
+        default: return EXT && EXT.fact ? EXT.fact(id) : undefined;
       }
     },
     act: function (id, value) {
@@ -237,6 +244,8 @@
         case "setText":     texts[value] = arguments[3] && arguments[3].value2 || ""; break;
         case "playSound":   var a = document.querySelector('[data-sound="' + value + '"]'); if (a) { a.currentTime = 0; a.play(); } break;
         case "openUrl":     if (value) window.open(value, "_blank", "noopener"); break;
+        case "stop":        playing = false; until = null; break;
+        default:            if (EXT && EXT.act) EXT.act(id, value, arguments[3]);
       }
     }
   };
@@ -248,6 +257,7 @@
     lastInput = Date.now();
     var hot = event.target.closest("[data-sprite]");
     if (hot) bus.click = hot.dataset.sprite;
+    if (EXT && EXT.tap) { var name = EXT.tap(event.target); if (name) bus.click = name; }
   }, true);
   stage.addEventListener("pointermove", function (event) {
     var hot = event.target.closest("[data-sprite]");
@@ -263,8 +273,10 @@
       if (until && frame >= until) { until = null; playing = false; }
     }
     bus.marker = "";
+    // Como en Director: «llega a la marca» cuando la reproducción ENTRA en ella; un salto
+    // (go to marker) no cuenta, si no el bucle de reposo devolvía cada salto al inicio.
     for (var i = 0; i < marks.length; i += 1) {
-      if (marks[i].frame > seen && marks[i].frame <= frame) bus.marker = marks[i].label;
+      if (frame - seen === 1 && marks[i].frame > seen && marks[i].frame <= frame) bus.marker = marks[i].label;
     }
     if (payment && payment.trigger === "marker" && bus.marker === payment.marker) showPayment();
     seen = frame;
@@ -298,6 +310,59 @@
 `;
 
   const esc = (text) => String(text).replace(/</g, "\\u003c");
+  const gatheredPlanItems = () => (window.currentPlan?.()?.stageItems || []);
+
+  /* ---------------------------------------------------------------------------
+   * EXT_JS — puente del reproductor con los sprites de Director: botón (texto
+   * sobre color, en unidades del Stage) y quiosco (AINKiosk, miembro Carta).
+   * ------------------------------------------------------------------------- */
+  const EXT_JS = String.raw`
+(function () {
+  var K = null, plan = null, stage = null;
+  function post(event, extra) {
+    var msg = { source: "ainimation-xperiencia", piece: plan && plan.title, event: event, order: K && K.state.order };
+    for (var k in (extra || {})) msg[k] = extra[k];
+    (window.__xpEvents = window.__xpEvents || []).push(msg);
+    try { if (window.parent !== window) window.parent.postMessage(msg, "*"); } catch (e) {}
+  }
+  var overlay = null;
+  function openCheckout(url) {
+    if (!overlay) { overlay = document.createElement("div"); overlay.className = "xp-checkout"; overlay.innerHTML = '<iframe title="Checkout simulado"></iframe><button type="button" aria-label="Cerrar">✕</button>';
+      overlay.querySelector("button").onclick = function () { overlay.hidden = true; }; stage.appendChild(overlay); }
+    overlay.querySelector("iframe").src = url + "&embed=1"; overlay.hidden = false;
+  }
+  setInterval(function () { if (!K) return; var o = K.state.order; if (o && o.number && !o.posted) { o.posted = true; if (overlay) overlay.hidden = true; if (o.status === "paid-simulated") post("payment", { status: "paid" }); post("order", { status: o.status }); } }, 200);
+  window.XP_EXT = {
+    init: function (p, s) {
+      plan = p; stage = s; stage.style.containerType = "inline-size";
+      var css = document.createElement("style"); css.textContent = (window.AINKiosk ? window.AINKiosk.CSS : "") +
+        ".xp-btn{display:flex;align-items:center;padding:0 .4em;line-height:1.1;text-align:center;font-family:Inter,system-ui,sans-serif;white-space:pre-wrap;overflow:hidden}.aink,.aink *{color:#1e2a25}.aink-cta,.aink-opt.on{color:#fff!important}.aink-cta.alt{color:#1e2a25!important}.xp-checkout{position:absolute;inset:0;z-index:60;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center}.xp-checkout[hidden]{display:none}.xp-checkout iframe{width:86%;height:80%;border:0;border-radius:16px;background:#fff}.xp-checkout button{position:absolute;top:8%;right:5%;width:2.4em;height:2.4em;border-radius:50%;border:0;background:#fff}";
+      document.head.appendChild(css);
+      if (window.AINKiosk) K = window.AINKiosk.create({ menu: p.menu, base: (p.menu && p.menu.imageBase) || "", lang: (navigator.language || "es").slice(0, 2) === "en" ? "en" : "es", emit: post, openCheckout: openCheckout });
+      var q = new URLSearchParams(location.search); if (K && q.get("lang")) K.setLang(q.get("lang"));
+    },
+    paint: function (node, obj, texts) {
+      node.style.zIndex = "2";
+      if (obj.type === "button") {
+        node.className = "xp-item xp-btn" + (obj.interactive ? " xp-hot" : "");
+        if (obj.interactive) node.dataset.sprite = obj.spriteName;
+        node.style.background = obj.color || "transparent"; node.style.color = obj.textColor || "#fff";
+        node.style.fontSize = Number(obj.fontSize || 4) + "cqw"; node.style.borderRadius = Number(obj.radius == null ? 2 : obj.radius) + "cqw";
+        node.style.fontWeight = obj.bold === false ? "500" : "800"; node.style.justifyContent = obj.align === "left" ? "flex-start" : "center";
+        var txt = texts[obj.spriteName] != null ? texts[obj.spriteName] : (obj.text || "");
+        if (node.textContent !== txt) node.textContent = txt;
+      } else if (K) { node.dataset.kiosk = obj.id; K.render(node, obj, true); }
+    },
+    tap: function (target) {
+      var node = target.closest && target.closest("[data-kiosk]"); if (!node || !K) return "";
+      var obj = (plan.stageItems || []).filter(function (i) { return i.id === node.dataset.kiosk; })[0];
+      return obj ? K.tap(target, obj) : "";
+    },
+    fact: function (id) { return K ? K.fact(id) : undefined; },
+    act: function (id, value, action) { if (!K) return; K.act(id, value, action); if (id === "clearCart" && overlay) overlay.hidden = true; }
+  };
+})();
+`;
 
   function indexHtml({ title, runtime, planJson, rulesJson }) {
     return `<!doctype html>
@@ -369,6 +434,8 @@
         markers: window.loadTimelineMarkers?.(totalFrames) || [],
         cast,
         stageItems: plan.stageItems || [],
+        stage: plan.stage || null,
+        menu: plan.menu || null,
         payment: payment?.enabled && payment.checkoutUrl ? payment : null,
       },
       rules: (plan.rules || []).filter((rule) => rule.enabled !== false),
@@ -525,6 +592,15 @@
     let runtime = "";
     try { runtime = await (await fetch("assets/xpl-runtime.js")).text(); }
     catch { console.warn("[xperiencia] no se pudo incrustar el runtime XPL: la pieza saldrá sin reglas."); }
+    // Sprites de Director (botón / quiosco) y miembro Carta: viajan DENTRO de la pieza.
+    const usesDirector = (gatheredPlanItems()).some((i) => i.type === "button" || i.type === "kiosk");
+    if (usesDirector) {
+      try {
+        const [qr, kiosk] = await Promise.all(["assets/qrcode.min.js", "assets/kiosk-sprite.js"].map(async (u) => (await fetch(u)).text()));
+        runtime += "\n" + qr + "\n" + kiosk + "\n" + EXT_JS;
+      } catch { console.warn("[xperiencia] no se pudo incrustar el quiosco."); }
+    }
+    runtime = runtime.replace(/<\/script/gi, "<\\/script");
 
     const planJson = JSON.stringify(piece, null, 2);
     const rulesJson = JSON.stringify(rules, null, 2);
@@ -533,6 +609,7 @@
       { name: "index.html", text: exportedHtml },
       { name: "plan.json", text: planJson },
       { name: "rules.json", text: rulesJson },
+      ...(piece.menu ? [{ name: "menu.json", text: JSON.stringify(piece.menu, null, 2) }] : []),
     ]);
 
     const url = URL.createObjectURL(blob);

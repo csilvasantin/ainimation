@@ -184,11 +184,12 @@
         case "night": { const hour = new Date().getHours(); return hour >= 21 || hour < 7; }
         case "weekend": { const day = new Date().getDay(); return day === 0 || day === 6; }
         case "dayPart": return dayPartNow();
-        default: return undefined;
+        default: return window.ainXplExt?.fact?.(id);
       }
     },
     act(id, value, _npc, action) {
-      ACTIONS_IMPL[id]?.(value, action);
+      if (ACTIONS_IMPL[id]) ACTIONS_IMPL[id](value, action);
+      else window.ainXplExt?.act?.(id, value, action);
     },
   };
 

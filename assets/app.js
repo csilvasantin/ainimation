@@ -1014,8 +1014,10 @@ function initFileImportMenu(menuSelector, buttonSelector, inputSelector) {
     fileInput.addEventListener("change", () => {
       if (fileInput.dataset.memberImportMode) {
         importMemberFiles(fileInput.files, fileInput.dataset.memberImportMode || "image");
+        fileInput.value = "";
       }
-      fileInput.value = "";
+      // Sin modo (p. ej. «Abrir JSON»): lo vacía su propio manejador después de leerlo.
+      // Antes se vaciaba aquí primero y «Abrir JSON» no abría nada.
       menu.classList.remove("open");
       button.setAttribute("aria-expanded", "false");
     });
@@ -1770,8 +1772,20 @@ const timelineControlsWidthStorageKey = "ainimation-timeline-controls-width";
 const castViewStorageKey = "ainimation-cast-view";
 const castFilterStorageKey = "ainimation-cast-filters";
 const castFilterTypes = ["image", "video", "audio", "music"];
-const stageWidthPixels = 1920;
-const stageHeightPixels = 1080;
+// Resolución del Stage: ya no es fija. 16:9 (1920×1080) por defecto; tótem vertical 1080×1920
+// y otras se eligen en el chip de tamaño del Stage (assets/director-kiosk.js) y viajan en plan.stage.
+let stageWidthPixels = 1920;
+let stageHeightPixels = 1080;
+window.ainStageSize = {
+  get: () => ({ w: stageWidthPixels, h: stageHeightPixels }),
+  set(w, h) {
+    stageWidthPixels = Math.max(16, Number(w) || 1920);
+    stageHeightPixels = Math.max(16, Number(h) || 1080);
+    try { renderStageRulers(); } catch { /* aún sin Stage */ }
+    const chip = document.getElementById("sceneCount");
+    if (chip) chip.textContent = `${stageWidthPixels} × ${stageHeightPixels}`;
+  },
+};
 const stageRulerStep = 100;
 const stockImportBatchSize = 3;
 const stockImportFetchLimit = 10;
@@ -2023,11 +2037,12 @@ function clearWorkingCastOnBoot() {
   if (new URLSearchParams(window.location.search).get("play") === "1") return;
   const saved = loadFilmPlan();
   if (!saved) return;
-  const persistentCast = (saved.cast || []).filter((member) => !member.imported);
+  // Solo se descarta lo que NO sobrevive a una recarga: media blob: (vive en la sesión).
+  // Textos, formas, botones, quioscos y media data:/https se quedan: el proyecto es del usuario.
+  const persistentCast = (saved.cast || []).filter((member) => !member.imported || (member.src && !/^blob:/i.test(member.src)));
   localStorage.setItem(filmStorageKey, JSON.stringify({
     ...saved,
     cast: persistentCast,
-    stageItems: [],
   }));
 }
 
@@ -2077,6 +2092,14 @@ function loadTimelineMarkers(totalFrames) {
     return fallback;
   }
 }
+
+// Marcas del Score y tamaño del Stage guardados DENTRO del proyecto: al abrirlo vuelven.
+function applyProjectExtras(plan) {
+  if (Array.isArray(plan?.markers) && plan.markers.length) saveTimelineMarkers(plan.markers);
+  if (plan?.stage?.w && plan?.stage?.h) window.ainStageSize?.set(plan.stage.w, plan.stage.h);
+  window.dispatchEvent(new CustomEvent("ain:project-opened", { detail: { plan } }));
+}
+window.applyProjectExtras = applyProjectExtras;
 
 function saveTimelineMarkers(markers) {
   localStorage.setItem(timelineMarkersStorageKey, JSON.stringify(markers));
@@ -3377,12 +3400,13 @@ function renderFilmPlan(plan) {
   ));
   const timelineTextItems = (plan.stageItems || []).filter((item) => item.type === "text");
   const timelineShapeItems = (plan.stageItems || []).filter((item) => isShapeStageItem(item));
+  const timelineDirectorItems = (plan.stageItems || []).filter((item) => item.type === "button" || item.type === "kiosk");
   const importedStageMembers = importedTimelineMembers.filter((member) => (
     member.onStage !== false &&
     ["animation", "audio", "image", "video"].includes(member.mediaType)
   ));
   outputTitle.textContent = plan.title;
-  sceneCount.textContent = "1920 × 1080";
+  sceneCount.textContent = `${stageWidthPixels} × ${stageHeightPixels}`;
   filmTreatment.innerHTML = `
     <p><strong>Authoring brief</strong><br>${plan.treatment}</p>
     <p><strong>Interaction theme</strong><br>${plan.theme}</p>
@@ -3574,8 +3598,9 @@ function renderFilmPlan(plan) {
       ...importedTimelineMembers.map((member) => Number(member.startFrame || 1) + Number(member.durationFrames || 24) - 1),
       ...timelineTextItems.map((item) => Number(item.startFrame || 1) + Number(item.durationFrames || 24) - 1),
       ...timelineShapeItems.map((item) => Number(item.startFrame || 1) + Number(item.durationFrames || 24) - 1),
+      ...timelineDirectorItems.map((item) => Number(item.startFrame || 1) + Number(item.durationFrames || 24) - 1),
     ];
-    const totalFrames = Math.max(...importedEndFrames, 240);
+    const totalFrames = Math.max(...importedEndFrames, Number(plan.totalFrames || 0), 240);
     const timelineZoom = loadTimelineZoom();
     const displayFrames = timelineDisplayFrames(totalFrames, timelineZoom);
     const frameMarks = timelineFrameMarks(displayFrames);
@@ -3599,6 +3624,14 @@ function renderFilmPlan(plan) {
       })),
       ...timelineShapeItems.map((item, index) => ({
         name: item.type.startsWith("oval") ? `Oval ${index + 1}` : `Rectangle ${index + 1}`,
+        lane: "stage",
+        member: item,
+        stageItemId: item.id,
+        hasAudio: false,
+      })),
+      // Sprites de Director (botón, etiqueta, quiosco): un canal cada uno, como en el Score de 1996.
+      ...timelineDirectorItems.map((item) => ({
+        name: `${item.type === "kiosk" ? "🍽" : "▭"} ${item.spriteName || item.text || item.type}`,
         lane: "stage",
         member: item,
         stageItemId: item.id,
@@ -3812,7 +3845,7 @@ function totalTimelineFrames(plan) {
       ? item.keyframes.map((keyframe) => Number(keyframe.frame || 1))
       : []
   ));
-  return Math.max(1, ...castEnds, ...stageItemEnds, ...keyframeEnds);
+  return Math.max(1, Number(plan.totalFrames || 0), ...castEnds, ...stageItemEnds, ...keyframeEnds);
 }
 
 window.totalTimelineFrames = totalTimelineFrames;
@@ -6131,6 +6164,7 @@ function saveCurrentProjectAs() {
   const list = loadSavedProjects();
   const existing = list.find((item) => item.name.toLowerCase() === trimmed.toLowerCase());
   if (existing && !window.confirm(`Ya hay un proyecto llamado «${trimmed}». ¿Sobrescribirlo?`)) return;
+  plan.markers = loadTimelineMarkers(Number(window.ainTransport?.totalFrames) || totalTimelineFrames(plan));
   const entry = { name: trimmed, savedAt: new Date().toISOString(), plan };
   const next = existing
     ? list.map((item) => (item === existing ? entry : item))
@@ -6181,6 +6215,7 @@ function openProjectsMenu(anchor) {
       if (!entry) return;
       if (hasUnsavedWork() && !window.confirm("Se perderá lo que no hayas guardado. ¿Abrir el proyecto?")) return;
       const plan = normalizeFilmPlan(entry.plan);
+      applyProjectExtras(plan);
       saveFilmPlan(plan);
       hydrateFilmForm(plan);
       renderFilmPlan(plan);
@@ -6438,6 +6473,8 @@ if (filmForm) {
       return;
     }
     const plan = buildFilmPlan(false);
+    try { localStorage.removeItem(timelineMarkersStorageKey); } catch { /* sin almacenamiento */ }
+    window.ainStageSize?.set(1920, 1080);
     saveFilmPlan(plan);
     hydrateFilmForm(plan);
     renderFilmPlan(plan);
@@ -6462,8 +6499,10 @@ if (filmForm) {
     const reader = new FileReader();
     reader.addEventListener("load", () => {
       try {
-        const plan = normalizeFilmPlan(JSON.parse(String(reader.result || "{}")));
+        const raw = JSON.parse(String(reader.result || "{}"));
+        const plan = normalizeFilmPlan(raw.plan && raw.format === "ainimation-project" ? raw.plan : raw);
         if (!plan) throw new Error("Empty project");
+        applyProjectExtras(plan);
         saveFilmPlan(plan);
         hydrateFilmForm(plan);
         renderFilmPlan(plan);
