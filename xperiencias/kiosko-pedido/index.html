@@ -229,12 +229,23 @@ function nextNumber(){const k="kiosko:n:"+M.establishment.id;let n=0;try{n=(+loc
 function makeOrder(){const id="ped-"+Date.now().toString(36)+"-"+Math.random().toString(36).slice(2,6);
   order={id:id,number:null,simulated:true,store:storeId||M.establishment.id,establishment:M.establishment.name,brand:marca||M.establishment.brandId,currency:M.establishment.currency,lang:lang,
    lines:cart.map(l=>({id:l.id,name:tr(l.name),qty:l.qty,unitPrice:l.unitPrice,options:l.options.map(o=>tr(o.label))})),total:sum(),status:"pending-payment",createdAt:new Date().toISOString()};return order;}
+// Gestor de colas (7-oct-2026): el pedido vive en un relé (Durable Object por tienda) para que el
+// móvil que escanea el QR —otro dispositivo— pague (SIMULADO) y siga su número en /cola/, y el quiosco
+// se entere del pago. Sin relé (offline) sigue el flujo local de antes.
+const relay=()=>((M&&M.orderFlow&&M.orderFlow.queue&&M.orderFlow.queue.relay)||"https://mcp-ainimation.admira.store").replace(/\/+$/,"");
+const colaStore=()=>(storeId||M.establishment.id||"tienda").toLowerCase().replace(/[^a-z0-9-]/g,"-").slice(0,80);
+let colaPoll=0;
+function colaApi(op,body){const q=relay()+"/cola/"+op+"?store="+encodeURIComponent(colaStore());return fetch(q,body?{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify(body)}:{cache:"no-store"}).then(r=>r.ok?r.json():Promise.reject(r.status));}
+function colaCrear(o){return colaApi("pedido",{id:o.id,total:o.total,moneda:o.currency,prefijo:(M.orderFlow.prefix||"A")}).then(r=>{if(order===o){o.queueNumber=r.numero;window.__kioskCola={id:o.id,numero:r.numero,store:colaStore()};}return r;}).catch(()=>null);}
+function colaVigilar(o){clearInterval(colaPoll);colaPoll=setInterval(()=>{if(order!==o||o.number||screen!=="pay"){clearInterval(colaPoll);return;}
+  colaApi("pedido?id="+encodeURIComponent(o.id)).catch(()=>null).then(r=>{if(r&&r.estado&&r.estado!=="pendiente"&&order===o){o.queueNumber=r.numero;finish("paid");}});},2000);}
+function colaUrl(n){const u=new URL("../../cola/",document.baseURI);u.searchParams.set("store",colaStore());if(n)u.searchParams.set("pedido",n);u.searchParams.set("lang",lang);return u.href;}
 function checkoutUrl(){const base=new URL(M.orderFlow.payment.checkoutUrl||"pago-simulado.html",document.baseURI);
-  base.searchParams.set("pedido",order.id);base.searchParams.set("total",order.total.toFixed(2));base.searchParams.set("moneda",order.currency);if(marca)base.searchParams.set("marca",marca);base.searchParams.set("lang",lang);return base.href;}
-function toPay(){makeOrder();go("pay");const url=checkoutUrl();order.checkoutUrl=url;$("#payTotal").textContent=t("total")+": "+money(order.total);
+  base.searchParams.set("pedido",order.id);base.searchParams.set("store",colaStore());base.searchParams.set("total",order.total.toFixed(2));base.searchParams.set("moneda",order.currency);if(marca)base.searchParams.set("marca",marca);base.searchParams.set("lang",lang);return base.href;}
+function toPay(){makeOrder();go("pay");colaCrear(order);colaVigilar(order);const url=checkoutUrl();order.checkoutUrl=url;$("#payTotal").textContent=t("total")+": "+money(order.total);
   const q=$("#qr");q.innerHTML="";q.dataset.url=url;try{new QRCode(q,{text:url,width:560,height:560,correctLevel:QRCode.CorrectLevel.M});}catch(e){q.textContent=url;}
   host("payment",{status:"started",checkoutUrl:url,simulated:true});}
-function finish(how){if(!order||order.number)return;order.number=nextNumber();order.status=how==="paid"?"paid-simulated":"pay-at-counter";order.paidAt=how==="paid"?new Date().toISOString():null;
+function finish(how){if(!order||order.number)return;clearInterval(colaPoll);order.number=order.queueNumber||nextNumber();order.queueUrl=colaUrl(order.number);if(how!=="paid"){const o=order;(o.queueNumber?Promise.resolve():colaCrear(o)).then(r=>{if(!o.queueNumber&&r)return;return colaApi("pagar",{id:o.id,via:"caja"});}).catch(()=>{});}order.status=how==="paid"?"paid-simulated":"pay-at-counter";order.paidAt=how==="paid"?new Date().toISOString():null;
   closeOverlay();$("#orderNum").textContent=order.number;$("#doneMsg").textContent=t(how==="paid"?"paid":"payAtCounter");go("done");
   if(how==="paid")host("payment",{status:"paid",simulated:true});host("order",{status:order.status});
   say(lang==="en"?"Thank you! Your order number is "+order.number:"¡Gracias! Tu pedido es el "+order.number);
@@ -259,7 +270,7 @@ document.addEventListener("click",e=>{const el=e.target.closest("button,[data-zo
   if(el.dataset.del){cart.splice(+el.dataset.del,1);return renderCart();}
   if(el.id==="addBtn"){addLine();return go("cart");}
   if(el.id==="toPay"&&cart.length)return toPay();
-  if(el.id==="payCounter"){if(!order)makeOrder();return finish("counter");}
+  if(el.id==="payCounter"){if(!order)makeOrder();const o=order;return (o.queueNumber?Promise.resolve():Promise.race([colaCrear(o),new Promise(r=>setTimeout(r,1500))])).then(()=>finish("counter"));}
   if(el.id==="qr"){$("#payFrame").src=el.dataset.url+"&embed=1";$("#overlay").classList.add("on");}
 });
 // ── regla XPL de calle: 12 s sin tocar → vuelta a la atracción (en Pago, 60 s: se paga con el móvil) ──

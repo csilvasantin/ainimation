@@ -17,10 +17,12 @@ import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { WebStandardStreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/webStandardStreamableHttp.js';
 import * as z from 'zod/v4';
 import { identidadPorClave, claveDeRequest } from './identidad-flota.mjs';
+import { ColaTienda, STORE } from './cola.js';
+export { ColaTienda };
 import { Admingo, PLANTILLAS, proyectoVacio, compilar, validarEsquema, coherenciaMenu, urlKiosko, TWIN_BASE, TWIN_STARBUCKS, MARCAS } from './suite.js';
 
 export const NOMBRE = 'ainimation';
-export const HERRAMIENTAS = ['quien_soy', 'sitio_estado', 'xperiencias_listar', 'xperiencia_detalle', 'xperiencia_canal_item', 'stock_animaciones', 'xperiencia_publicar', 'listar_xperiencias', 'plantillas', 'crear_proyecto', 'validar_admingo', 'compilar_admingo', 'publicar_xperiencia', 'menu_validar', 'enviar_a_admiratv', 'fijar_en_totem', 'marca_aplicar'];
+export const HERRAMIENTAS = ['quien_soy', 'sitio_estado', 'xperiencias_listar', 'xperiencia_detalle', 'xperiencia_canal_item', 'stock_animaciones', 'xperiencia_publicar', 'listar_xperiencias', 'plantillas', 'crear_proyecto', 'validar_admingo', 'compilar_admingo', 'publicar_xperiencia', 'menu_validar', 'enviar_a_admiratv', 'fijar_en_totem', 'marca_aplicar', 'cola_estado', 'cola_avanzar'];
 const limpiar = (s) => String(s || '').replace(/\/+$/, '');
 const texto = (o) => ({ content: [{ type: 'text', text: typeof o === 'string' ? o : JSON.stringify(o, null, 2) }] });
 const fallo = (e) => ({ isError: true, content: [{ type: 'text', text: 'Error: ' + (e && e.message || e) }] });
@@ -70,6 +72,7 @@ export function crearServidor(env = {}, deps = {}, identidad = null) {
       'Lecturas sin clave: sitio_estado, xperiencias_listar, xperiencia_detalle, xperiencia_canal_item, stock_animaciones. Escritura con clave de flota AdmiraNeXT (Authorization: Bearer): xperiencia_publicar. quien_soy te dice con qué identidad entras.',
       'Este servidor no guarda estado: lee el sitio (index.json es la única fuente de la galería) y escribe en el stock de Pixeria. Crear una Xperiencia nueva sigue siendo trabajo del repo (carpeta + entrada en index.json): el MCP te dice qué hay y publica lo que ya existe.',
       'Suite (desde 7-oct-2026): listar_xperiencias, plantillas, crear_proyecto (proyecto del Director desde plantilla), validar_admingo y compilar_admingo (el Lingo de AdmiraNeXT → reglas XPL), publicar_xperiencia (URL + ficheros; ZIP próximamente), menu_validar (carta de quiosco), enviar_a_admiratv (item de playlist type interactive), fijar_en_totem (comando /totem del gemelo) y marca_aplicar (marcablanca de admiranext). Son cálculos y lecturas: no escriben.',
+      'Gestor de colas (7-oct-2026): cola_estado (pedidos en preparación / listos de una tienda) y cola_avanzar (el barista de la demo). Pago siempre simulado; relé público en /cola/* de este mismo worker.',
       'Ritual de la flota: lo que hagas aquí se declara en yokup (mcp.admira.live · yokup_alta/yokup_paso) — este MCP no puntúa por sí mismo.',
     ].join(' '),
   });
@@ -284,6 +287,25 @@ export function crearServidor(env = {}, deps = {}, identidad = null) {
     return texto({ marca, nombre: (f && f.nombre) || e.nombre, sector: e.sector, colores: f && (f.colores || f.colors) || null, logo: f && f.logo ? new URL(f.logo.svg || '', MARCAS).href : null, modo: f && f.modo, tipografia: f && f.tipografia, url: base + (base.includes('?') ? '&' : '?') + 'marca=' + marca, gemelo: `/marca ${marca}`, ficha: MARCAS + marca + '.json' });
   }));
 
+  // ── Gestor de colas (7-oct-2026): el mismo relé que usan el quiosco, el móvil y la pantalla /cola/ ─
+  const relevo = (env.COLA_API || 'https://mcp-ainimation.admira.store').replace(/\/+$/, '');
+  const STO = z.string().regex(/^[a-z0-9-]{2,80}$/).default('starbucks-paseo-de-gracia');
+  server.registerTool('cola_estado', {
+    title: 'Estado de la cola de pedidos',
+    description: 'Pedidos de una tienda en «En preparación» y «¡Listo para recoger!» (gestor de colas del quiosco; pago siempre SIMULADO), con la URL de la pantalla pública. Con «pedido» (A001 o id) devuelve solo ese.',
+    inputSchema: { store: STO, pedido: z.string().max(64).optional() },
+    annotations: { readOnlyHint: true, openWorldHint: true },
+  }, seguro(async ({ store = 'starbucks-paseo-de-gracia', pedido }) => {
+    const r = pedido ? await llamar(`${relevo}/cola/pedido?store=${store}&pedido=${encodeURIComponent(pedido)}`) : await llamar(`${relevo}/cola/estado?store=${store}`);
+    return texto({ store, ...r, pantalla: `${sitio}/cola/?store=${store}`, barista: `${sitio}/cola/barista.html?store=${store}` });
+  }));
+  server.registerTool('cola_avanzar', {
+    title: 'Avanzar un pedido en la cola',
+    description: 'El «barista» de la demo: pasa un pedido (A001 o id) al siguiente estado (preparando → listo → recogido) o al que digas. Pedidos de demostración, sin dinero real.',
+    inputSchema: { store: STO, pedido: z.string().min(1).max(64), a: z.enum(['preparando', 'listo', 'recogido']).optional() },
+    annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: true },
+  }, seguro(async ({ store = 'starbucks-paseo-de-gracia', pedido, a }) => texto(await llamar(`${relevo}/cola/avanzar?store=${store}`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ numero: pedido, a }) }))));
+
   return server;
 }
 
@@ -315,7 +337,15 @@ export async function manejar(request, env = {}, deps = {}) {
       return new Response(res.body, { status: res.status, headers: h });
     } finally { Promise.resolve().then(() => server.close()).catch(() => {}); }
   }
-  return json({ ok: false, error: 'ruta desconocida', rutas: ['/', '/salud', '/mcp'] }, 404);
+  if (ruta.startsWith('/cola/')) {
+    const store = u.searchParams.get('store') || '';
+    if (!STORE.test(store)) return json({ ok: false, error: 'store inválida (slug)' }, 400);
+    if (!env.COLA) return json({ ok: false, error: 'cola no configurada' }, 503);
+    const stub = env.COLA.get(env.COLA.idFromName(store));
+    const r = await stub.fetch(new Request('https://cola' + ruta + u.search, { method: request.method, headers: { 'content-type': 'application/json' }, body: request.method === 'POST' ? await request.text() : undefined }));
+    return new Response(r.body, { status: r.status, headers: { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store', ...CORS } });
+  }
+  return json({ ok: false, error: 'ruta desconocida', rutas: ['/', '/salud', '/mcp', '/cola/estado', '/cola/pedido', '/cola/pagar', '/cola/avanzar'] }, 404);
 }
 
 export default { fetch: (request, env) => manejar(request, env) };

@@ -30,6 +30,8 @@ No hay API HTTP propia todavía: lo que hay es el MCP. El sitio sigue siendo est
 | `enviar_a_admiratv` | item de playlist type interactive + relevo a XpaceOS playlist_add; envío directo: próximamente |
 | `fijar_en_totem` | comando del gemelo (/totem kiosko · /totem url …) y enlace al gemelo con el quiosco |
 | `marca_aplicar` | ficha de marcablanca de admiranext → URL con ?marca= y comando /marca del gemelo |
+| `cola_estado` | gestor de colas: pedidos en preparación / listos de una tienda (o uno: A001) + pantalla /cola/ |
+| `cola_avanzar` | barista de la demo: pasa un pedido a listo / recogido (pago simulado) |
 
 Fuente única de la lista: `https://www.ainimation.studio/xperiencias/index.json`.
 Ejemplo (initialize → tools/list → xperiencias_listar):

@@ -12,7 +12,7 @@
     "telegram_group": "AgoraMatrix",
     "signature": "NeoMBP16 · MacBookPro16"
   },
-  "estado": "Puerta de silicio con servidor propio desde el 8-sep-2026 (Carlos, ventana 0124 · vía 3): las Xperiencias del estudio como herramientas MCP. El sitio sigue siendo una web estática (GitHub Pages, rama main); el servidor MCP es un worker aparte en admira.store que lee el sitio y escribe en Pixeria. Todavía no hay API HTTP propia: lo que hay es el MCP. Desde el 7-oct-2026 el MCP también expone el Director (plantillas, crear_proyecto), Admingo (validar/compilar), la carta del quiosco (menu_validar), admira.tv (enviar_a_admiratv), el tótem del gemelo (fijar_en_totem) y la marca blanca (marca_aplicar).",
+  "estado": "Puerta de silicio con servidor propio desde el 8-sep-2026 (Carlos, ventana 0124 · vía 3): las Xperiencias del estudio como herramientas MCP. El sitio sigue siendo una web estática (GitHub Pages, rama main); el servidor MCP es un worker aparte en admira.store que lee el sitio y escribe en Pixeria. Todavía no hay API HTTP propia: lo que hay es el MCP. Desde el 7-oct-2026 el MCP también expone el Director (plantillas, crear_proyecto), Admingo (validar/compilar), la carta del quiosco (menu_validar), admira.tv (enviar_a_admiratv), el tótem del gemelo (fijar_en_totem) y la marca blanca (marca_aplicar). Desde el 7-oct-2026 (tarde) también el gestor de colas del quiosco: relé /cola/* en este worker (Durable Object por tienda) y herramientas cola_estado / cola_avanzar.",
   "http_api": null,
   "mcp_server": {
     "name": "ainimation-mcp",
@@ -106,10 +106,20 @@
         "name": "marca_aplicar",
         "estado": "vivo",
         "desc": "ficha de marcablanca de admiranext → URL con ?marca= y comando /marca del gemelo"
+      },
+      {
+        "name": "cola_estado",
+        "estado": "vivo",
+        "desc": "gestor de colas: pedidos en preparación / listos de una tienda (o uno: A001) + pantalla /cola/"
+      },
+      {
+        "name": "cola_avanzar",
+        "estado": "vivo",
+        "desc": "barista de la demo: pasa un pedido a listo / recogido (pago simulado)"
       }
     ],
     "fuente_unica": "https://www.ainimation.studio/xperiencias/index.json",
-    "tool_count": 17,
+    "tool_count": 19,
     "proximamente": [
       {
         "que": "ZIP de publicar_xperiencia generado por el servidor",

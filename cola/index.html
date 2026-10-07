@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Cola de pedidos · ainimation</title>
+<meta name="description" content="Gestor de colas del quiosco de pedido: pedidos «En preparación» y «¡Listo para recoger!» en vivo, en el móvil o en una pantalla grande. Demo: pago siempre simulado.">
+<meta name="theme-color" content="#00704A">
+<style>
+:root{--verde:#00704A;--verde-osc:#1E3932;--crema:#F2F0EB;--listo:#00A862;--txt:#1E2A25}
+*{box-sizing:border-box}html,body{margin:0;height:100%}
+body{font-family:Inter,-apple-system,'Segoe UI',Roboto,sans-serif;background:var(--crema);color:var(--txt);display:flex;flex-direction:column;min-height:100dvh}
+header{background:var(--verde-osc);color:#fff;display:flex;align-items:center;gap:14px;padding:14px max(18px,env(safe-area-inset-left));}
+header .logo{width:42px;height:42px;border-radius:50%;background:var(--verde);display:grid;place-items:center;font-weight:900;font-size:22px}
+header h1{font-size:clamp(17px,2.4vw,34px);margin:0;letter-spacing:.06em;text-transform:uppercase;flex:1}
+header small{display:block;font-size:.55em;letter-spacing:0;text-transform:none;opacity:.8;font-weight:500}
+#lang{font:inherit;font-weight:800;border:2px solid #fff8;background:none;color:#fff;border-radius:999px;padding:6px 14px;cursor:pointer}
+#mio{margin:14px;padding:16px 20px;border-radius:18px;background:#fff;border:3px solid var(--verde);display:none;align-items:center;gap:16px;box-shadow:0 8px 30px #0001}
+#mio.on{display:flex}#mio b{font-size:clamp(34px,7vw,72px);font-weight:900;color:var(--verde)}
+#mio .t{font-size:clamp(17px,2.6vw,30px);font-weight:800}#mio .s{font-size:clamp(13px,1.6vw,18px);opacity:.75}
+#mio.listo{background:var(--listo);border-color:var(--listo);color:#fff;animation:latido 1.2s ease-in-out 4}#mio.listo b{color:#fff}
+@keyframes latido{50%{transform:scale(1.03)}}
+main{flex:1;display:grid;grid-template-columns:1fr 1fr;gap:14px;padding:0 14px 14px}
+section{background:#fff;border-radius:18px;padding:14px 16px;min-height:0;overflow:hidden;box-shadow:0 4px 18px #0000000d}
+section h2{margin:4px 0 12px;font-size:clamp(17px,2.6vw,38px);display:flex;align-items:center;gap:10px}
+section.listo h2{color:var(--listo)}
+.nums{display:flex;flex-wrap:wrap;gap:10px;align-content:flex-start}
+.n{font-size:clamp(26px,5vw,84px);font-weight:900;padding:.12em .42em;border-radius:14px;background:var(--crema);font-variant-numeric:tabular-nums}
+section.listo .n{background:#E3F5EC;color:#0b5d3b}
+.n.yo{outline:5px solid var(--verde);outline-offset:2px;background:#FFF6D5!important}
+.vacio{opacity:.55;font-size:clamp(14px,1.8vw,22px)}
+footer{background:#FFE58A;color:#3A2E00;text-align:center;font-weight:700;font-size:13px;padding:8px}
+@media (max-width:640px){main{grid-template-columns:1fr}section.listo{order:-1}}
+</style>
+</head>
+<body>
+<header><div class="logo" id="logo">★</div><h1 id="titulo">Starbucks<small id="tienda"></small></h1><button id="lang" type="button">EN</button></header>
+<div id="mio" role="status" aria-live="polite"><b id="mioN"></b><div><div class="t" id="mioT"></div><div class="s" id="mioS"></div></div></div>
+<main>
+  <section class="prep"><h2>⏳ <span id="hPrep">En preparación</span></h2><div class="nums" id="prep"></div></section>
+  <section class="listo"><h2>✅ <span id="hListo">¡Listo para recoger!</span></h2><div class="nums" id="listo"></div></section>
+</main>
+<footer id="pie">DEMO · pedidos de ejemplo y pago SIMULADO: no se cobra nada</footer>
+<script>
+(function(){
+const P=new URLSearchParams(location.search);
+const store=(P.get('store')||'starbucks-paseo-de-gracia').replace(/[^a-z0-9-]/g,'').slice(0,80)||'starbucks-paseo-de-gracia';
+const relay=(P.get('relay')&&/^https:\/\/[a-z0-9.-]+\.(admira\.store|ainimation\.studio)$/.test(P.get('relay'))?P.get('relay'):'https://mcp-ainimation.admira.store');
+let yo=(P.get('pedido')||'').toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,8);
+let lang=(P.get('lang')||navigator.language||'es').slice(0,2)==='en'?'en':'es';
+const T={es:{prep:'En preparación',listo:'¡Listo para recoger!',vacio:'Ningún pedido ahora',pie:'DEMO · pedidos de ejemplo y pago SIMULADO: no se cobra nada',tu:'Tu pedido',enPrep:'Lo estamos preparando…',enListo:'¡Ya puedes recogerlo en la barra!',recogido:'Recogido. ¡Que lo disfrutes!',pendiente:'Esperando el pago (simulado)…',noEsta:'No encontramos este pedido',off:'Sin conexión, reintentando…',btn:'EN',espera:'Te avisaremos aquí cuando esté listo'},
+         en:{prep:'Preparing',listo:'Ready for pick-up!',vacio:'No orders right now',pie:'DEMO · sample orders and SIMULATED payment: nothing is charged',tu:'Your order',enPrep:'We are preparing it…',enListo:'Pick it up at the counter!',recogido:'Collected. Enjoy!',pendiente:'Waiting for the (simulated) payment…',noEsta:'We cannot find this order',off:'Offline, retrying…',btn:'ES',espera:'We will let you know here when it is ready'}};
+const nombre=store.split('-').map(w=>w[0].toUpperCase()+w.slice(1)).join(' ').replace(/^Starbucks /,'');
+const $=id=>document.getElementById(id);let ultimo=null,yaAvisado=false;
+function textos(){const t=T[lang];document.documentElement.lang=lang;$('hPrep').textContent=t.prep;$('hListo').textContent=t.listo;$('pie').textContent=t.pie;$('lang').textContent=t.btn;$('tienda').textContent=nombre;if(ultimo)pintar(ultimo);}
+function chips(l){if(!l.length)return '<span class="vacio">'+T[lang].vacio+'</span>';return l.map(p=>'<span class="n'+(p.numero===yo?' yo':'')+'">'+p.numero+'</span>').join('');}
+function pintar(d){ultimo=d;$('prep').innerHTML=chips(d.preparando||[]);$('listo').innerHTML=chips(d.listo||[]);}
+function pintarMio(p){const t=T[lang],m=$('mio');if(!yo){m.className='';return;}m.className='on';$('mioN').textContent=yo;
+  if(!p){$('mioT').textContent=t.noEsta;$('mioS').textContent='';return;}
+  const e=p.estado;$('mioT').textContent=t.tu+' · '+(e==='listo'?t.listo:e==='recogido'?t.recogido:e==='pendiente'?t.pendiente:t.prep);
+  $('mioS').textContent=e==='listo'?t.enListo:e==='preparando'?t.espera:'';if(e==='listo'){m.classList.add('listo');if(!yaAvisado){yaAvisado=true;try{navigator.vibrate&&navigator.vibrate([200,100,200]);}catch(_){}try{const a=new AudioContext(),o=a.createOscillator(),g=a.createGain();o.frequency.value=880;g.gain.value=.08;o.connect(g).connect(a.destination);o.start();o.stop(a.currentTime+.35);}catch(_){}}}}
+async function tic(){try{const r=await fetch(relay+'/cola/estado?store='+store,{cache:'no-store'});const d=await r.json();pintar(d);
+  if(yo){const todos=[...(d.preparando||[]),...(d.listo||[])];let p=todos.find(x=>x.numero===yo);if(!p){const q=await fetch(relay+'/cola/pedido?store='+store+'&pedido='+yo,{cache:'no-store'});p=q.ok?await q.json():null;}pintarMio(p);}
+  document.body.dataset.ok='1';}catch(e){document.body.dataset.ok='0';$('pie').textContent=T[lang].off;}}
+$('lang').onclick=()=>{lang=lang==='es'?'en':'es';textos();tic();};
+window.__cola={store,relay,get yo(){return yo;}};
+textos();tic();setInterval(tic,2000);
+})();
+</script>
+</body>
+</html>
