@@ -31,4 +31,4 @@ enabled = true
 [vars]
 SITIO = "https://www.ainimation.studio"
 STOCK_API = "https://api.admira.store"
-VERSION = "v.07.10.2026.r24.16:24"
+VERSION = "v.07.10.2026.r25.16:31"

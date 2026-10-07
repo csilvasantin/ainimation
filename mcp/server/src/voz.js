@@ -2,11 +2,11 @@
 // La clave NUNCA llega al navegador: o es un secret de este worker (ELEVENLABS_API_KEY,
 // `wrangler secret put`), o se usa el binding de servicio OMNI (omnipublicity-api, que ya
 // guarda el secret de la flota). Sin ninguno, 503 y el cliente usa la voz del navegador.
-export const VOZ_ADMIRITO = 'ajOR9IDAaubDK5qtLUqQ'; // Daniela · joven, dulce y brillante
+export const VOZ_ADMIRITO = 'nuzVc5hpXBWZjFEe4izg'; // Santiago · elegida por Carlos (7-oct-2026)
 export const VOCES = {
-  daniela: { id: 'ajOR9IDAaubDK5qtLUqQ', por: 'joven, cálida y expresiva; la más aguda y dulce de las probadas' },
+  santiago: { id: 'nuzVc5hpXBWZjFEe4izg', por: 'voz por defecto de Admirito (elegida por Carlos): chico joven en castellano' },
+  daniela: { id: 'ajOR9IDAaubDK5qtLUqQ', por: 'joven, cálida y expresiva; la más aguda de las probadas' },
   raquel: { id: '1eHrpOW5l98cxiSRjbzJ', por: 'joven, brillante y alegre' },
-  santiago: { id: 'nuzVc5hpXBWZjFEe4izg', por: 'chico joven, voz masculina alternativa' },
 };
 export const MAX_TEXTO = 240;
 const ORIGENES = /^https:\/\/([a-z0-9-]+\.)*(ainimation\.studio|admira\.store|xpaceos\.com|digitalavatar\.ai|admira\.biz|admira\.tv|clearchannel\.tv)(\/|$)/i;
@@ -39,7 +39,7 @@ export async function voz(request, env = {}, deps = {}) {
   if (request.method === 'POST') { const b = await request.json().catch(() => ({})); texto = b.texto || b.text || texto; v = b.voz || b.voiceId || v; }
   texto = limpiaTexto(texto); const id = vozId(v);
   const cors = { 'Access-Control-Allow-Origin': '*', 'content-type': 'application/json; charset=utf-8' };
-  if (u.searchParams.has('info') || !texto) return new Response(JSON.stringify({ ok: true, voz_por_defecto: VOZ_ADMIRITO, voces: VOCES, max_texto: MAX_TEXTO, motor: env.ELEVENLABS_API_KEY ? 'elevenlabs (secret)' : env.OMNI ? 'elevenlabs (servicio omnipublicity)' : 'ninguno', uso: 'GET /voz?texto=...&voz=daniela → audio/mpeg (caché 30 días); sin motor → 503 y el cliente usa la voz del navegador' }), { headers: cors });
+  if (u.searchParams.has('info') || !texto) return new Response(JSON.stringify({ ok: true, voz_por_defecto: VOZ_ADMIRITO, voces: VOCES, max_texto: MAX_TEXTO, motor: env.ELEVENLABS_API_KEY ? 'elevenlabs (secret)' : env.OMNI ? 'elevenlabs (servicio omnipublicity)' : 'ninguno', uso: 'GET /voz?texto=...&voz=santiago → audio/mpeg (caché 30 días); sin motor → 503 y el cliente usa la voz del navegador' }), { headers: cors });
   const cache = deps.cache || (typeof caches !== 'undefined' ? caches.default : null);
   const key = new Request('https://voz-cache.ainimation/' + await clave(id, texto));
   if (cache) { const hit = await cache.match(key); if (hit) { const h = new Headers(hit.headers); h.set('x-voz-cache', 'hit'); return new Response(hit.body, { status: 200, headers: h }); } }
