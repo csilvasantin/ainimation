@@ -30,6 +30,12 @@ aside h2{margin:0;font-size:clamp(18px,2.4vw,32px);color:#9EE6C4}
 footer{grid-column:1/-1;background:#FFE58A;color:#3A2E00;text-align:center;font-weight:700;font-size:13px;padding:7px}
 #activar{position:fixed;inset:0;background:#1E3932ee;display:grid;place-items:center;z-index:9;cursor:pointer;text-align:center;font-size:clamp(20px,3vw,34px);font-weight:800}
 #activar.off{display:none}#activar span{display:block;font-size:.55em;font-weight:500;opacity:.8;margin-top:10px}
+#avatar.gracia-salto iframe{animation:gSalto 1.1s ease-in-out 2}#avatar.gracia-giro iframe{animation:gGiro 1.6s ease-in-out 1}#avatar.gracia-latido iframe{animation:gLatido .9s ease-in-out 3}#avatar.gracia-baile iframe{animation:gBaile 1.4s ease-in-out 2}
+@keyframes gSalto{0%,100%{transform:none}40%{transform:translateY(-9%) scale(1.03,.97)}60%{transform:translateY(-11%)}}
+@keyframes gGiro{0%{transform:none}50%{transform:rotate(-8deg) scale(1.05)}100%{transform:none}}
+@keyframes gLatido{50%{transform:scale(1.07)}}
+@keyframes gBaile{0%,100%{transform:none}25%{transform:translateX(-5%) rotate(-5deg)}75%{transform:translateX(5%) rotate(5deg)}}
+#bocadillo.demo{background:#F2F0EB}#bocadillo.demo b{color:#00704A}
 @media (orientation:portrait){body{grid-template-columns:1fr;grid-template-rows:auto 1.2fr 1fr auto}}
 </style>
 </head>
@@ -74,7 +80,22 @@ function decir(p){
     }catch(_){cerrar();}
   });
 }
-async function siguiente(){if(hablando)return;hablando=true;while(cola.length){await decir(cola.shift());}hablando=false;}
+// ── Modo demo (Carlos, 7-oct-2026): sin pedidos pendientes, Admirito hace gracias e invita a pedir ──
+const FRASES=['¡Hola, hola! Soy Admirito, la nube más cafetera de Paseo de Gracia ☁️☕','¿Un café? Pídelo en el quiosco y te llamo por tu nombre','Hoy el Caffè Latte está de rechupete, ¡palabra de nube!','¡Qué buen día para un Frappuccino! Bueno… para una nube, todos','Toca el quiosco, elige, paga con el móvil… ¡y yo te aviso aquí!','¿Sabías que las nubes también hacemos cola? Pero aquí no, que va rapidísimo','Si llueve, que sea de cookies 🍪','Pide en el quiosco y escribe tu nombre: me encanta decirlo bien alto','¡Estoy aquí arriba! Bueno, en el iPad. Pero me siento en las nubes','Un cortado, un latte, un té… yo me apunto a todo, ¡venga, pide!'];
+const GRACIAS=['gracia-salto','gracia-giro','gracia-latido','gracia-baile'];
+const demoLog=window.__admiritoDemo=[];let fi=Math.floor(Math.random()*FRASES.length),gi=0,pendientes=0,demoN=0,enAviso=false;
+function demo(){
+  if(hablando||enAviso||cola.length||pendientes>0)return;
+  const av=$('avatar'),b=$('bocadillo'),f=FRASES[fi++%FRASES.length],g=GRACIAS[gi++%GRACIAS.length];
+  GRACIAS.forEach(c=>av.classList.remove(c));void av.offsetWidth;av.classList.add(g);
+  b.classList.add('demo');b.textContent=f;b.classList.add('on');demoN++;
+  let via='pantalla';
+  if(vozOk&&demoN%3===1){try{const ss=window.speechSynthesis;if(ss&&!ss.speaking){const u=new SpeechSynthesisUtterance(f.replace(/[☁️☕🍪]/gu,''));u.lang='es-ES';u.rate=1.02;u.pitch=1.15;const v=(ss.getVoices()||[]).find(x=>(x.lang||'').replace('_','-')==='es-ES');if(v)u.voice=v;ss.speak(u);via='voz-es-ES';}}catch(_){}}
+  demoLog.push({frase:f,gracia:g,via,at:Date.now()});if(demoLog.length>50)demoLog.shift();
+  setTimeout(()=>{if(b.classList.contains('demo'))b.classList.remove('on');},6000);
+}
+setInterval(demo,9000);setTimeout(demo,2500);
+async function siguiente(){if(hablando)return;hablando=true;try{$('bocadillo').classList.remove('demo');window.speechSynthesis&&window.speechSynthesis.cancel();}catch(_){}while(cola.length){await decir(cola.shift());}hablando=false;}
 const chips=(a,nuevos)=>a.length?a.map(p=>'<span class="n'+(nuevos&&nuevos.has(p.numero)?' nuevo':'')+'">'+String(p.numero).replace(/[^A-Z0-9]/gi,'')+(p.nombre?' <small style="font-size:.45em">'+esc(p.nombre)+'</small>':'')+'</span>').join(''):'<span class="vacio">—</span>';
 const recientes=new Set();
 async function tic(){
@@ -83,7 +104,7 @@ async function tic(){
     const listos=d.listo||[];
     listos.forEach(p=>{if(!vistos.has(p.numero)){vistos.add(p.numero);if(!primera||P.get('anunciar')==='todos'){cola.push(p);recientes.add(p.numero);setTimeout(()=>recientes.delete(p.numero),15000);}}});
     primera=false;
-    $('listo').innerHTML=chips(listos,recientes);$('prep').innerHTML=chips(d.preparando||[]);
+    pendientes=listos.length+(d.preparando||[]).length;$('listo').innerHTML=chips(listos,recientes);$('prep').innerHTML=chips(d.preparando||[]);
     $('estado').textContent='En vivo · '+new Date().toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
     siguiente();
   }catch(_){$('estado').textContent='Sin conexión, reintentando…';}
