@@ -136,10 +136,10 @@ test('Director: quiosco montado con la interfaz → Play → guardar → publica
     await pub.setViewportSize({ width: 540, height: 960 });
     await pub.goto(`${base}/tmp-publicada/index.html?lang=es`); await pub.waitForTimeout(1200);
     await shot(pub, '5-publicada-inicio');
-    await pub.click('text=Toca para empezar'); await pub.waitForTimeout(500);
-    await pub.click('[data-aink=cat] >> nth=1'); await pub.waitForTimeout(500);
-    await pub.click('[data-aink=item] >> nth=0'); await pub.waitForTimeout(500);
-    await pub.click('[data-aink=add]'); await pub.waitForTimeout(500);
+    await pub.click('text=Toca para empezar'); await pub.waitForTimeout(900);
+    await pub.click('[data-aink=cat] >> nth=1'); await pub.waitForTimeout(900);
+    await pub.click('[data-aink=item] >> nth=0'); await pub.waitForTimeout(900);
+    await pub.click('[data-aink=add]'); await pub.waitForTimeout(900);
     await pub.click('[data-aink=pay]'); await pub.waitForTimeout(800);
     await shot(pub, '6-publicada-qr');
     assert.ok(await pub.locator('.aink-qrbox img, .aink-qrbox canvas').count() > 0, 'hay QR');

@@ -110,7 +110,7 @@
       if (k === "cat") { st.category = v; adv = true; }
       else if (k === "item") { pickItem(v); adv = true; }
       else if (k === "opt") { var it = cur(), g = it && (it.optionGroups || []).filter(function (x) { return x.id === b.dataset.g; })[0]; if (g) { if (g.type === "single") st.sel[g.id] = (st.sel[g.id] === v && !g.required) ? null : v; else { var a = st.sel[g.id] || (st.sel[g.id] = []), i = a.indexOf(v); if (i >= 0) a.splice(i, 1); else if (!g.max || a.length < g.max) a.push(v); } } }
-      else if (k === "add") { adv = addToCart(); }
+      else if (k === "add") { adv = opts.deferAdd && opts.deferAdd(item.spriteName) ? !!cur() : addToCart(); }
       else if (k === "del") { st.cart.splice(Number(v), 1); }
       else if (k === "pay") { if (st.cart.length) { makeOrder(); emit("payment", { status: "started", checkoutUrl: checkoutUrl() }); adv = true; } }
       else if (k === "counter") { finish("counter"); adv = true; }
@@ -120,9 +120,22 @@
     return {
       state: st, render: render, tap: tap, reset: reset, addToCart: addToCart, finish: finish, checkoutUrl: checkoutUrl, makeOrder: makeOrder, onPaid: onPaid,
       setMenu: function (m) { menu = m; }, setLang: function (l) { st.lang = l === "en" ? "en" : "es"; },
-      fact: function (id) { if (id === "orderPaid") return !!st.paid; if (id === "cartCount") return st.cart.reduce(function (a, l) { return a + l.qty; }, 0); if (id === "cartTotal") return total(); return undefined; },
+      fact: function (id) {
+        // Consultas de Admingo: the orderNumber / the selectedItem / the selectedSize
+        if (id === "orderNumber") return st.order && st.order.number || "";
+        if (id === "selectedItem") { var ci = cur(); return ci ? tr(ci.name) : ""; }
+        if (id === "selectedSize") { var cs = cur(); if (!cs) return ""; var gs = (cs.optionGroups || []).filter(function (g) { return g.type === "single"; }); var g0 = gs.filter(function (g) { return /size|tama|talla/i.test(g.id); })[0] || gs[0]; if (!g0) return ""; var ch = g0.choices.filter(function (c) { return c.id === st.sel[g0.id]; })[0]; return ch ? tr(ch.label) : ""; }
+        if (id === "orderPaid") return !!st.paid; if (id === "cartCount") return st.cart.reduce(function (a, l) { return a + l.qty; }, 0); if (id === "cartTotal") return total(); return undefined; },
       act: function (id, value, action) {
-        if (id === "addToCart") return addToCart();
+        if (id === "addToCart") {
+          // «añadir al carrito "latte" talla "grande"»: elige producto y talla por id o por nombre
+          if (value && typeof value === "object" && value.item && menu) {
+            var want = String(value.item).toLowerCase(), it = menu.items.filter(function (i) { return i.id.toLowerCase() === want || tr(i.name).toLowerCase() === want || (i.name.es || "").toLowerCase() === want || (i.name.en || "").toLowerCase() === want; })[0];
+            if (it && it.id !== st.item) pickItem(it.id);
+            if (it && value.size) { var sw = String(value.size).toLowerCase(); (it.optionGroups || []).forEach(function (g) { if (g.type !== "single") return; g.choices.forEach(function (c) { if (c.id.toLowerCase() === sw || tr(c.label).toLowerCase() === sw || (c.label.es || "").toLowerCase() === sw || (c.label.en || "").toLowerCase() === sw) st.sel[g.id] = c.id; }); }); }
+          }
+          return addToCart();
+        }
         if (id === "clearCart") return reset();
         if (id === "setVar") { var kv = String(value || "").split("="); st.vars[kv[0].trim()] = (kv[1] || "").trim(); if (kv[0].trim() === "lang") st.lang = (kv[1] || "").trim() === "en" ? "en" : "es"; return; }
         if (id === "openCheckout") { makeOrder(); var u = checkoutUrl(); emit("payment", { status: "started", checkoutUrl: u }); if (opts.openCheckout) opts.openCheckout(u); return; }

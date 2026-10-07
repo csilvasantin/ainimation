@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Admingo · el Lingo de AdmiraNeXT — Ayuda de AInimation Studio</title>
+  <meta name="description" content="Admingo: lenguaje de autor bilingüe (español/inglés) del Director de ainimation.studio. Manejadores, marcas, sprites, carrito y pago simulado.">
+  <meta name="admiranext-version" content="v.07.10.2026.r4.09:07">
+  <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+  <link rel="canonical" href="https://www.ainimation.studio/help/admingo.html">
+  <style>
+    :root{--ink:#17120f;--muted:#6e6257;--paper:#f5eee2;--panel:#fffaf0;--line:rgba(23,18,15,.14);--line2:rgba(23,18,15,.28);--lime:#c8ff5f;--coral:#ff654f;--cyan:#31bed1;--violet:#7c5cff;--gold:#f0b84f;--mono:ui-monospace,SFMono-Regular,Menlo,monospace;--sans:-apple-system,BlinkMacSystemFont,"Inter","Segoe UI",Roboto,sans-serif}
+    *{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);line-height:1.65;-webkit-font-smoothing:antialiased}
+    .wrap{width:min(100% - 36px,900px);margin:0 auto;padding:28px 0 72px}
+    a{color:var(--ink);text-decoration:underline;text-decoration-color:var(--line2);text-underline-offset:3px}a:hover{text-decoration-color:var(--ink)}
+    .kicker{margin:0;font:10px var(--mono);letter-spacing:.18em;text-transform:uppercase;color:var(--muted)}
+    h1{font-size:clamp(26px,4vw,38px);letter-spacing:-.025em;margin:14px 0 10px;line-height:1.12}
+    .lede{color:var(--muted);font-size:16.5px;max-width:70ch}
+    .puertas{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px;margin:24px 0}
+    .puerta{padding:15px 17px;border:1px solid var(--line);border-radius:14px;background:var(--panel)}
+    .puerta b{display:block;font:10px var(--mono);letter-spacing:.12em;text-transform:uppercase;margin-bottom:5px}
+    .puerta span{color:var(--muted);font-size:13.5px}
+    h2{font-size:21px;margin:34px 0 10px;letter-spacing:-.015em}
+    p{color:var(--muted);max-width:72ch;margin:0 0 11px}b{color:var(--ink)}
+    ol,ul{margin:0 0 12px 22px;color:var(--muted)}li{margin-bottom:8px}
+    code{font:12.5px var(--mono);background:var(--panel);border:1px solid var(--line);border-radius:5px;padding:1px 5px}
+    table{width:100%;border-collapse:collapse;margin:12px 0;font-size:13.5px}
+    th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+    th{font:10px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+    td.d{color:var(--muted)}
+    .nota{margin:16px 0;padding:14px 16px;border-left:3px solid var(--gold);background:var(--panel);color:var(--muted)}
+    .nota b{color:var(--ink)}
+    footer{margin-top:44px;padding-top:16px;border-top:1px solid var(--line);color:var(--muted);font:11px var(--mono)}
+  
+    pre{font:12.5px/1.55 var(--mono);background:#14110f;color:#e8e2d6;border-radius:10px;padding:14px 16px;overflow:auto}
+    pre .k{color:#c6f24e;font-weight:700}pre .s{color:#f0b84f}pre .c{color:#8f857a;font-style:italic}
+  </style>
+</head>
+<body data-admira-sello>
+<main class="wrap">
+  <p class="kicker"><a href="/help/">Ayuda</a> · Admingo</p>
+  <h1>Admingo, el Lingo de AdmiraNeXT</h1>
+  <p class="lede">Un lenguaje pequeño para dar comportamiento a una pieza del Director de <a href="/studio.html">AInimation Studio</a>, como el Lingo de Macromedia Director. Se escribe en <b>español o en inglés</b> (se pueden mezclar) y viaja dentro de la Xperiencia publicada.</p>
+
+  <h2>Dónde se escribe</h2>
+  <ul>
+    <li><b>Ventana ▸ Script · Admingo</b> (<code>Ctrl+0</code>): un ámbito por desplegable — <b>Película</b> (movie script), <b>Fotograma · marca</b> (frame script) y <b>Comportamiento de sprite</b>. Resalta la sintaxis, autocompleta con <code>Tab</code> (palabras clave, sprites, marcas, productos de la Carta) y marca los errores con su número de línea.</li>
+    <li><b>Ventana ▸ Mensaje · Admingo</b> (<code>Ctrl+M</code>): órdenes sueltas al momento, también durante Play: <code>put the marker</code>, <code>ir a marca "PAGO"</code>, <code>decir "hola"</code>.</li>
+    <li>En el <b>Inspector de propiedades</b> de un sprite: «✎ Comportamiento · Admingo».</li>
+    <li><b>ES⇄EN</b> traduce las palabras clave; <b>⬇/⬆</b> exporta e importa el archivo <code>.admingo</code>.</li>
+  </ul>
+
+  <h2>Manejadores (eventos)</h2>
+  <table><tr><th>Español</th><th>English</th><th>Cuándo</th></tr>
+    <tr><td><code>al soltar</code> · <code>al tocar</code></td><td><code>on mouseUp</code></td><td class="d">al tocar el sprite (o cualquier sprite, en la película)</td></tr>
+    <tr><td><code>al entrar en el fotograma</code></td><td><code>on enterFrame</code></td><td class="d">cada vez que el cabezal llega a un fotograma</td></tr>
+    <tr><td><code>al salir del fotograma</code></td><td><code>on exitFrame</code></td><td class="d">al avanzar la reproducción (no en los saltos)</td></tr>
+    <tr><td><code>en reposo</code></td><td><code>on idle</code></td><td class="d">unas diez veces por segundo</td></tr>
+    <tr><td><code>al empezar la película</code></td><td><code>on startMovie</code></td><td class="d">al arrancar Play o la pieza publicada</td></tr>
+    <tr><td><code>al pagar</code></td><td><code>on orderPaid</code></td><td class="d">cuando el pedido queda cerrado (pago simulado o en barra)</td></tr>
+  </table>
+  <p>Los eventos van del <b>sprite</b> al <b>fotograma</b> y a la <b>película</b>; <code>pasar</code>/<code>pass</code> lo deja seguir subiendo. Se pueden escribir manejadores propios (<code>on cobrar total</code> … <code>end</code>) y llamarlos por su nombre.</p>
+
+  <h2>Órdenes</h2>
+  <table><tr><th>Español</th><th>English</th></tr>
+    <tr><td><code>ir a marca "CARRITO"</code> · <code>ir al fotograma 25</code> · <code>quedarse</code> · <code>parar</code></td><td><code>go to marker "CARRITO"</code> · <code>go to frame 25</code> · <code>go to the frame</code> · <code>stop</code></td></tr>
+    <tr><td><code>poner 3 en n</code> · <code>fijar n a 3</code> · <code>n = 3</code> · <code>poner n</code> (a Mensaje)</td><td><code>put 3 into n</code> · <code>set n to 3</code> · <code>put n</code></td></tr>
+    <tr><td><code>fijar el texto del sprite "precio" a "3 €"</code></td><td><code>set the text of sprite "precio" to …</code> · <code>set sprite("precio").text to …</code></td></tr>
+    <tr><td><code>fijar visible del sprite "aviso" a falso</code></td><td><code>set sprite("aviso").visible to FALSE</code></td></tr>
+    <tr><td><code>si … entonces … si no … fin si</code> · <code>repetir con i = 1 hasta 3 … fin repetir</code> · <code>repetir mientras …</code> · <code>salir</code></td><td><code>if … then … else … end if</code> · <code>repeat with i = 1 to 3 … end repeat</code> · <code>repeat while …</code> · <code>exit</code></td></tr>
+    <tr><td><code>añadir al carrito</code> [<code>"latte" talla "grande"</code>] · <code>vaciar carrito</code> · <code>abrir pago</code> · <code>cobrar en barra</code></td><td><code>add to cart</code> [<code>… size …</code>] · <code>clear cart</code> · <code>open checkout</code> · <code>pay at counter</code></td></tr>
+    <tr><td><code>sonar "campana"</code> · <code>abrir url "https://…"</code> · <code>decir "¡Hola!"</code> · <code>reiniciar reposo</code></td><td><code>play sound</code> · <code>open url</code> · <code>say "Hello!"</code> · <code>start timer</code></td></tr>
+  </table>
+  <p><b>Consultas:</b> <code>the orderNumber</code>, <code>the selectedItem</code>, <code>the selectedSize</code>, <code>the marker</code> (<code>la marca</code>), <code>the idleSeconds</code>, <code>the cartCount</code>, <code>the cartTotal</code>, <code>the frame</code>, <code>the orderPaid</code>. <b>Expresiones:</b> <code>+ - * / mod</code>, <code>&amp;</code> y <code>&amp;&amp;</code> (unir texto), <code>= &lt;&gt; &lt; &gt; &lt;= &gt;=</code>, <code>and/or/not</code> (<code>y/o/no</code>), funciones <code>length()</code>, <code>random(n)</code>, <code>format(n, "€")</code>.</p>
+  <p class="nota"><b>Variables:</b> las de un manejador son locales; <code>global pedido</code> las comparte en toda la película. Las globales se reinician en cada <b>sesión nueva</b> del quiosco (al arrancar y al volver a la primera pantalla). <b>«decir»</b> hace hablar al avatar del tótem si la pieza está dentro del gemelo digital; si no, habla el navegador con voz es-ES (o en-GB en inglés).</p>
+
+  <h2>Ejemplo: el quiosco de pedidos</h2>
+  <pre><span class="c">-- Script de película</span>
+<span class="k">global</span> pedido
+<span class="k">al empezar la película</span>
+  <span class="k">vaciar carrito</span>
+  <span class="k">ir a marca</span> <span class="s">"INICIO"</span>
+<span class="k">fin</span>
+<span class="k">al salir del fotograma</span>
+  <span class="k">quedarse</span>              <span class="c">-- cada pantalla espera al cliente</span>
+<span class="k">fin</span>
+<span class="k">on idle</span>
+  <span class="k">if</span> the marker &lt;&gt; <span class="s">"INICIO"</span> <span class="k">and</span> the idleSeconds &gt; 12 <span class="k">then</span>
+    <span class="k">vaciar carrito</span>
+    <span class="k">ir a marca</span> <span class="s">"INICIO"</span>
+  <span class="k">end if</span>
+<span class="k">end</span>
+<span class="k">al pagar</span>
+  <span class="k">fijar</span> pedido <span class="k">a</span> the orderNumber
+  <span class="k">ir a marca</span> <span class="s">"NUMERO"</span>
+  <span class="k">decir</span> <span class="s">"¡Gracias! Tu pedido es el "</span> &amp; pedido
+<span class="k">fin</span>
+
+<span class="c">-- Comportamiento del sprite "opciones"</span>
+<span class="k">al soltar</span>
+  <span class="k">añadir al carrito</span> the selectedItem <span class="k">talla</span> the selectedSize
+  <span class="k">fijar el texto del sprite</span> <span class="s">"hCarrito"</span> <span class="k">a</span> <span class="s">"Tu pedido ("</span> &amp; the cartCount &amp; <span class="s">")"</span>
+  <span class="k">ir a marca</span> <span class="s">"CARRITO"</span>
+<span class="k">fin</span></pre>
+  <p>Ábrelo entero con <b>Plantillas ▸ Quiosco de pedidos</b> o en <a href="/studio.html?plantilla=quiosco">studio.html?plantilla=quiosco</a>, y mira sus scripts en <b>Ventana ▸ Script · Admingo</b>.</p>
+
+  <h2>Cómo funciona (y por qué es seguro)</h2>
+  <ul>
+    <li>Admingo no usa <code>eval</code> ni toca la página: se analiza a un árbol y lo ejecuta un intérprete con tope de pasos (10 000 por evento, 1 000 vueltas por bucle). Un error se ve en Mensaje con su línea y la pieza sigue.</li>
+    <li>Lo que cabe en una regla (un <code>al soltar</code> que solo salta, para, vacía o cobra) se <b>baja a reglas XPL</b>, el mismo motor de la ventana Behaviour. Si un script y una regla escuchan el mismo toque, <b>gana el script</b>.</li>
+    <li><b>Publicar Xperiencia</b> incluye el intérprete y un <code>scripts.admingo</code> legible dentro del zip: la pieza funciona sola, sin el Studio.</li>
+  </ul>
+  <p><a href="/help/">← Volver a la ayuda</a></p>
+</main>
+<script defer src="https://www.admiranext.com/assets/sello-novedades.js?v=20261006-sello-1"></script>
+</body>
+</html>

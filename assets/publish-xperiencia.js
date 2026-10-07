@@ -253,7 +253,25 @@
   };
 
   var engine = window.XPL && window.XPL.createEngine ? window.XPL.createEngine(world) : null;
-  if (engine) engine.setRules(rules);
+  // Admingo: los scripts viajan en plan.scripts y corren con el mismo intérprete que el Studio
+  var VM = null;
+  if (window.Admingo && plan.scripts) {
+    VM = window.Admingo.createVM(plan.scripts, {
+      fact: world.fact,
+      act: function (id, v, v2) { if (id === "resetIdle") { lastInput = Date.now(); return; } world.act(id, v, null, { id: id, value: v, value2: v2 }); },
+      frame: function () { return frame; },
+      markers: function () { return marks; },
+      goFrame: function (f) { goToFrame(f); seen = frame; },
+      stay: function () { goToFrame(VM.stayFrame()); playing = false; until = null; seen = frame; },
+      say: function (t) { window.Admingo.speak(t, XP_LANG); },
+      log: function (m) { (window.__admingoLog = window.__admingoLog || []).push(m); if (m.level === "error") console.warn("[admingo]", m.es); },
+      lang: function () { return XP_LANG; },
+      spriteText: function (n) { var it = (plan.stageItems || []).filter(function (i) { return i.spriteName === n; })[0]; return it ? ((it.texts && it.texts[XP_LANG]) || it.text || "") : ""; }
+    });
+    window.__admingoVM = VM;
+    if (VM.errors.length) console.warn("[admingo] errores:", VM.errors);
+  }
+  if (engine) engine.setRules(VM ? VM.mergeRules(rules) : rules);
 
   stage.addEventListener("pointerdown", function (event) {
     lastInput = Date.now();
@@ -280,8 +298,10 @@
     for (var i = 0; i < marks.length; i += 1) {
       if (frame - seen === 1 && marks[i].frame > seen && marks[i].frame <= frame) bus.marker = marks[i].label;
     }
+    if (bus.click) bus.marker = ""; // un toque del cliente manda sobre el bucle de la marca en el mismo tick
     if (payment && payment.trigger === "marker" && bus.marker === payment.marker) showPayment();
     seen = frame;
+    if (VM) VM.tick({ click: bus.click, marker: bus.marker });
     if (engine) engine.tick();
     paint();
     bus.click = "";
@@ -341,7 +361,7 @@
       var css = document.createElement("style"); css.textContent = (window.AINKiosk ? window.AINKiosk.CSS : "") +
         ".xp-btn{display:flex;align-items:center;padding:0 .4em;line-height:1.1;text-align:center;font-family:Inter,system-ui,sans-serif;white-space:pre-wrap;overflow:hidden}.aink,.aink *{color:#1e2a25}.aink-cta,.aink-opt.on{color:#fff!important}.aink-cta.alt{color:#1e2a25!important}.xp-checkout{position:absolute;inset:0;z-index:60;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center}.xp-checkout[hidden]{display:none}.xp-checkout iframe{width:86%;height:80%;border:0;border-radius:16px;background:#fff}.xp-checkout button{position:absolute;top:8%;right:5%;width:2.4em;height:2.4em;border-radius:50%;border:0;background:#fff}";
       document.head.appendChild(css);
-      if (window.AINKiosk) K = window.AINKiosk.create({ menu: p.menu, base: (p.menu && p.menu.imageBase) || "", lang: XP_LANG, emit: post, openCheckout: openCheckout });
+      if (window.AINKiosk) K = window.AINKiosk.create({ menu: p.menu, base: (p.menu && p.menu.imageBase) || "", lang: XP_LANG, emit: post, openCheckout: openCheckout, deferAdd: function (n) { return !!(window.__admingoVM && window.__admingoVM.defersAdd(n)); } });
       var q = new URLSearchParams(location.search); if (K && q.get("lang")) K.setLang(q.get("lang"));
     },
     paint: function (node, obj, texts) {
@@ -439,6 +459,7 @@
         stageItems: plan.stageItems || [],
         stage: plan.stage || null,
         menu: plan.menu || null,
+        scripts: plan.scripts || null,
         payment: payment?.enabled && payment.checkoutUrl ? payment : null,
       },
       rules: (plan.rules || []).filter((rule) => rule.enabled !== false),
@@ -597,6 +618,9 @@
     catch { console.warn("[xperiencia] no se pudo incrustar el runtime XPL: la pieza saldrá sin reglas."); }
     // Sprites de Director (botón / quiosco) y miembro Carta: viajan DENTRO de la pieza.
     const usesDirector = (gatheredPlanItems()).some((i) => i.type === "button" || i.type === "kiosk");
+    // Admingo viaja dentro de la pieza (intérprete + scripts.admingo legible en el zip)
+    const scripts = piece.scripts && (piece.scripts.movie || Object.keys(piece.scripts.frames || {}).length || Object.keys(piece.scripts.sprites || {}).length) ? piece.scripts : null;
+    if (scripts) { try { runtime += "\n" + await (await fetch("assets/admingo.js")).text(); } catch { console.warn("[xperiencia] no se pudo incrustar Admingo."); } }
     if (usesDirector) {
       try {
         const [qr, kiosk] = await Promise.all(["assets/qrcode.min.js", "assets/kiosk-sprite.js"].map(async (u) => (await fetch(u)).text()));
@@ -613,6 +637,7 @@
       { name: "plan.json", text: planJson },
       { name: "rules.json", text: rulesJson },
       ...(piece.menu ? [{ name: "menu.json", text: JSON.stringify(piece.menu, null, 2) }] : []),
+      ...(scripts && window.Admingo ? [{ name: "scripts.admingo", text: window.Admingo.toFile(scripts) }] : []),
     ]);
 
     const url = URL.createObjectURL(blob);

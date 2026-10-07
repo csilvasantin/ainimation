@@ -40,7 +40,7 @@ test('Director: tramo, keyframes, Inspector universal e idioma publicado', { tim
     assert.equal(await page.evaluate(() => currentPlan().stageItems.find((i) => i.id === 'forma1').color), '#00ff00');
     await page.locator('.dk-inspector [data-k="durationFrames"]').fill('40'); await page.locator('.dk-inspector [data-k="durationFrames"]').press('Tab'); await page.waitForTimeout(250);
     assert.equal(await page.evaluate(() => currentPlan().stageItems.find((i) => i.id === 'forma1').durationFrames), 40);
-    await page.screenshot({ path: SHOTS ? path.join(SHOTS, 'director-11-inspector-forma.png') : '/dev/null' });
+    if (SHOTS) await page.screenshot({ path: path.join(SHOTS, 'director-11-inspector-forma.png') });
     // 3 · botón con keyframes: ◆ en el 1, x=60 en el 21 → a mitad camino en el 11
     await page.evaluate(() => window.ainTransport.setFrame(1)); await page.waitForTimeout(150);
     await page.click('.dk-insert > .menu-button'); await page.click('[data-dk-insert-button]'); await page.waitForTimeout(250);
@@ -54,7 +54,7 @@ test('Director: tramo, keyframes, Inspector universal e idioma publicado', { tim
     await page.evaluate(() => window.ainTransport.setFrame(11)); await page.waitForTimeout(400);
     const left = await page.evaluate(() => parseFloat(document.querySelector('.dk-item[data-dk-type=button]').style.left));
     assert.ok(Math.abs(left - (x0 + 60) / 2) < 3, `interpolado ${left}`);
-    await page.screenshot({ path: SHOTS ? path.join(SHOTS, 'director-12-keyframes-boton.png') : '/dev/null' });
+    if (SHOTS) await page.screenshot({ path: path.join(SHOTS, 'director-12-keyframes-boton.png') });
     // 4 · plantilla publicada sigue ?lang=es/en
     await page.click('.dk-plantillas > .menu-button'); await page.click('[data-dk-template-kiosk]'); await page.waitForTimeout(1200);
     const [dl] = await Promise.all([page.waitForEvent('download'), (async () => { await page.click('[data-member-menu]'); await page.click('[data-publish-xperiencia]'); await page.fill('form [name=nombre]', 'Quiosco idiomas'); await page.click('form .xp-pub-ok'); })()]);
