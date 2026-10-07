@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Pago SIMULADO · Quiosco de pedido</title>
+<style>
+body{margin:0;font-family:Inter,-apple-system,'Segoe UI',Roboto,sans-serif;background:#F2F0EB;color:#1E2A25;display:flex;min-height:100vh;align-items:center;justify-content:center}
+.box{background:#fff;max-width:520px;width:92%;border-radius:22px;padding:34px;box-shadow:0 12px 40px rgba(0,0,0,.12);text-align:center}
+.warn{background:#FFE58A;color:#3A2E00;font-weight:800;padding:14px;border-radius:12px;font-size:17px}
+h1{font-size:30px;margin:22px 0 8px}.total{font-size:46px;font-weight:900;margin:12px 0 22px}
+button{font:inherit;font-size:22px;font-weight:800;border:0;border-radius:14px;padding:20px;width:100%;background:#00704A;color:#fff;cursor:pointer}
+.ok{display:none;font-size:24px;font-weight:800;color:#2F7D4F;margin-top:20px}
+small{display:block;color:#6b6b6b;margin-top:18px;font-size:14px}
+</style>
+</head>
+<body>
+<div class="box">
+  <div class="warn" id="warn">DEMO · PAGO SIMULADO · no se cobra nada y no se piden datos de tarjeta</div>
+  <h1 id="h">Pedido</h1>
+  <div class="total" id="total"></div>
+  <button id="pay">Confirmar pago simulado</button>
+  <div class="ok" id="ok">✓ Pago simulado completado. Vuelve al quiosco.</div>
+  <small id="id"></small>
+</div>
+<script>
+(function(){
+const P=new URLSearchParams(location.search),en=(P.get("lang")||"").startsWith("en");
+const pedido=(P.get("pedido")||"").slice(0,64),total=+P.get("total")||0,moneda=(P.get("moneda")||"EUR").replace(/[^A-Z]/g,"").slice(0,3)||"EUR";
+if(en){document.documentElement.lang="en";warn.textContent="DEMO · SIMULATED PAYMENT · nothing is charged and no card data is asked";h.textContent="Order";pay.textContent="Confirm simulated payment";ok.textContent="✓ Simulated payment completed. Back to the kiosk.";}
+document.getElementById("total").textContent=new Intl.NumberFormat(en?"en-IE":"es-ES",{style:"currency",currency:moneda}).format(total);
+document.getElementById("id").textContent=pedido;
+document.getElementById("pay").onclick=function(){
+  const msg={source:"kiosko-pago-simulado",pedido:pedido,estado:"pagado",total:total,moneda:moneda,simulado:true,at:new Date().toISOString()};
+  try{new BroadcastChannel("kiosko-pedido").postMessage(msg);}catch(e){}
+  try{localStorage.setItem("kiosko:pago",JSON.stringify(msg));}catch(e){}
+  try{if(window.parent!==window)window.parent.postMessage(msg,"*");}catch(e){}
+  try{if(window.opener)window.opener.postMessage(msg,"*");}catch(e){}
+  this.style.display="none";document.getElementById("ok").style.display="block";
+};
+})();
+</script>
+</body>
+</html>

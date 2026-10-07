@@ -1,15 +1,21 @@
 {
-  "version": "v.09.09.2026.r1.09:00",
-  "deployedAt": "2026-09-09T07:00:55Z",
-  "deployer": "MorfeoMacMini",
+  "version": "v.07.10.2026.r1.08:02",
+  "deployedAt": "2026-10-07T06:02:12Z",
+  "deployer": "GrokBot",
   "machine": "MacMini",
-  "signature": "MorfeoMacMini · MacMini",
-  "git": "81041cce03aa3a3de1dc045daa851b4afd992efe",
-  "gitShort": "81041cc",
-  "gitFull": "81041cce03aa3a3de1dc045daa851b4afd992efe",
+  "signature": "GrokBot · MacMini",
+  "git": "180d439b7aff4ddd91f246fa9a81387f9812b3b1",
+  "gitShort": "180d439",
+  "gitFull": "180d439b7aff4ddd91f246fa9a81387f9812b3b1",
   "dirty": false,
   "returnTag": "AInimation-v.04.09.2026.r1",
   "previousTag": "AInimation-v.03.09.2026.r2",
-  "previousVersion": "v.03.09.2026.r2.21:01",
-  "note": "Dominios propios en vez de workers.dev (FLT-1633): Studio Live por ainimation.admira.store, Cast IA e importación del Stock por api.admira.store; workers.dev queda como último recurso. LaLiga bloquea *.workers.dev en horas de fútbol."
+  "previousVersion": "v.09.09.2026.r1.09:00",
+  "note": "Nueva Xperiencia «Quiosco de pedido»: autopedido vertical 1080×1920 para tótems (carta, opciones, carrito, pago QR simulado y número de pedido)",
+  "novedades": [
+    "Nueva Xperiencia «Quiosco de pedido»: autopedido vertical 1080×1920 para tótems (carta, opciones, carrito, pago QR simulado y número de pedido)",
+    "Carta genérica por establecimiento (menu.schema.json) con ejemplo Starbucks de precios ficticios",
+    "Habla con el gemelo por postMessage (order · payment) y vuelve sola a los 12 s sin tocar",
+    "El sello enseña sus novedades al pasar el ratón"
+  ]
 }

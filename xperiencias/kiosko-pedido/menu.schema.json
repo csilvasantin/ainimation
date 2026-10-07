@@ -1,0 +1,290 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://www.ainimation.studio/xperiencias/kiosko-pedido/menu.schema.json",
+  "title": "Menú de quiosco de pedido · AInimation Xperiencia",
+  "description": "Carta genérica para cualquier tipo de establecimiento (cafetería, fast food, panadería, farmacia, tienda). Textos localizados {es,en}; precios en la moneda del establecimiento; opciones con suplemento.",
+  "type": "object",
+  "required": [
+    "schemaVersion",
+    "establishment",
+    "categories",
+    "items",
+    "orderFlow"
+  ],
+  "$defs": {
+    "loc": {
+      "type": "object",
+      "required": [
+        "es"
+      ],
+      "properties": {
+        "es": {
+          "type": "string"
+        },
+        "en": {
+          "type": "string"
+        }
+      }
+    },
+    "choice": {
+      "type": "object",
+      "required": [
+        "id",
+        "label"
+      ],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "label": {
+          "$ref": "#/$defs/loc"
+        },
+        "priceDelta": {
+          "type": "number"
+        },
+        "allergens": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "group": {
+      "type": "object",
+      "required": [
+        "id",
+        "label",
+        "type",
+        "choices"
+      ],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "label": {
+          "$ref": "#/$defs/loc"
+        },
+        "type": {
+          "enum": [
+            "single",
+            "multi"
+          ]
+        },
+        "required": {
+          "type": "boolean"
+        },
+        "default": {
+          "type": "string"
+        },
+        "max": {
+          "type": "integer"
+        },
+        "choices": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/choice"
+          }
+        }
+      }
+    }
+  },
+  "properties": {
+    "schemaVersion": {
+      "const": 1
+    },
+    "example": {
+      "type": "boolean",
+      "description": "true = datos de ejemplo (precios ficticios)."
+    },
+    "disclaimer": {
+      "$ref": "#/$defs/loc"
+    },
+    "establishment": {
+      "type": "object",
+      "required": [
+        "id",
+        "name",
+        "type",
+        "currency"
+      ],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string",
+          "description": "cafeteria · fast-food · panaderia · farmacia · tienda · estanco …"
+        },
+        "brandId": {
+          "type": "string",
+          "description": "id de marca blanca (admiranext.com/marcablanca/clientes/<id>.json)"
+        },
+        "locale": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "currency": {
+          "type": "string",
+          "pattern": "^[A-Z]{3}$"
+        },
+        "taxIncluded": {
+          "type": "boolean"
+        }
+      }
+    },
+    "attract": {
+      "type": "object",
+      "properties": {
+        "title": {
+          "$ref": "#/$defs/loc"
+        },
+        "subtitle": {
+          "$ref": "#/$defs/loc"
+        },
+        "images": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "categories": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "name"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "$ref": "#/$defs/loc"
+          },
+          "image": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "items": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "category",
+          "name",
+          "basePrice"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "category": {
+            "type": "string"
+          },
+          "name": {
+            "$ref": "#/$defs/loc"
+          },
+          "description": {
+            "$ref": "#/$defs/loc"
+          },
+          "image": {
+            "type": "string"
+          },
+          "basePrice": {
+            "type": "number",
+            "minimum": 0
+          },
+          "allergens": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "available": {
+            "type": "boolean"
+          },
+          "optionGroups": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/group"
+            }
+          }
+        }
+      }
+    },
+    "upsells": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "orderFlow": {
+      "type": "object",
+      "required": [
+        "mode"
+      ],
+      "properties": {
+        "mode": {
+          "enum": [
+            "simulated",
+            "pos"
+          ],
+          "description": "simulated = demo, sin TPV ni dinero real"
+        },
+        "prefix": {
+          "type": "string"
+        },
+        "payment": {
+          "type": "object",
+          "properties": {
+            "qr": {
+              "type": "boolean"
+            },
+            "counter": {
+              "type": "boolean"
+            },
+            "checkoutUrl": {
+              "type": "string",
+              "description": "Checkout ALOJADO (HTTPS o relativo). El quiosco nunca pide datos de tarjeta."
+            },
+            "note": {
+              "$ref": "#/$defs/loc"
+            }
+          }
+        }
+      }
+    },
+    "idle": {
+      "type": "object",
+      "properties": {
+        "resetSeconds": {
+          "type": "integer",
+          "minimum": 5
+        },
+        "warnSeconds": {
+          "type": "integer"
+        }
+      }
+    }
+  }
+}
