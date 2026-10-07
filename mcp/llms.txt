@@ -30,8 +30,8 @@ No hay API HTTP propia todavía: lo que hay es el MCP. El sitio sigue siendo est
 | `enviar_a_admiratv` | item de playlist type interactive + relevo a XpaceOS playlist_add; envío directo: próximamente |
 | `fijar_en_totem` | comando del gemelo (/totem kiosko · /totem url …) y enlace al gemelo con el quiosco |
 | `marca_aplicar` | ficha de marcablanca de admiranext → URL con ?marca= y comando /marca del gemelo |
-| `cola_estado` | gestor de colas: pedidos en preparación / listos de una tienda (o uno: A001) + pantalla /cola/ |
-| `cola_avanzar` | barista de la demo: pasa un pedido a listo / recogido (pago simulado) |
+| `cola_estado` | gestor de colas: pedidos en preparación / listos de una tienda (o uno: A001) + pantalla /cola/; con clave de flota o de barra (`clave`), las líneas de cada comanda y el nombre completo |
+| `cola_avanzar` | barista de la demo: pasa un pedido a listo / recogido (pago simulado); con la cola cerrada exige clave de flota o de barra |
 | `cola_avisos` | fases recibido → preparando → preparado (1 min cada una) · pedidos listos con el aviso «NOMBRE, tu pedido Starbucks está preparado» + URL del iPad del mostrador (starbucks-ipad-01 → /cola/ipad.html), móvil y taza |
 | `admirito_voz` | voz de Admirito con ElevenLabs (voz «Santiago», chico joven, castellano): `GET https://mcp-ainimation.admira.store/voz?texto=…&voz=santiago` → audio/mpeg, caché 30 días por frase, clave solo en el servidor; `?info=1` lista voces; si responde 503 usa speechSynthesis es-ES |
 
