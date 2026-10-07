@@ -26,6 +26,9 @@ small{display:block;color:#6b6b6b;margin-top:18px;font-size:14px}
 <script>
 (function(){
 const P=new URLSearchParams(location.search),en=(P.get("lang")||"").startsWith("en");
+const OK=/^https:\/\/([a-z0-9-]+\.)*(ainimation\.studio|admira\.store|xpaceos\.com|admira\.tv)$|^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/;
+function destino(w){try{if(w.location.origin===location.origin)return location.origin;}catch(e){}
+  let o="";try{const a=location.ancestorOrigins;o=(w===window.parent&&a&&a.length)?a[0]:(document.referrer?new URL(document.referrer).origin:"");}catch(e){}return OK.test(o)?o:"";}
 const pedido=(P.get("pedido")||"").slice(0,64),total=+P.get("total")||0,moneda=(P.get("moneda")||"EUR").replace(/[^A-Z]/g,"").slice(0,3)||"EUR";
 if(en){document.documentElement.lang="en";warn.textContent="DEMO · SIMULATED PAYMENT · nothing is charged and no card data is asked";h.textContent="Order";pay.textContent="Confirm simulated payment";ok.textContent="✓ Simulated payment completed.";}
 document.getElementById("total").textContent=new Intl.NumberFormat(en?"en-IE":"es-ES",{style:"currency",currency:moneda}).format(total);
@@ -34,15 +37,18 @@ document.getElementById("pay").onclick=function(){
   const msg={source:"kiosko-pago-simulado",pedido:pedido,estado:"pagado",total:total,moneda:moneda,simulado:true,at:new Date().toISOString()};
   try{new BroadcastChannel("kiosko-pedido").postMessage(msg);}catch(e){}
   try{localStorage.setItem("kiosko:pago",JSON.stringify(msg));}catch(e){}
-  try{if(window.parent!==window)window.parent.postMessage(msg,"*");}catch(e){}
-  try{if(window.opener)window.opener.postMessage(msg,"*");}catch(e){}
+  // orígenes explícitos (7-oct-2026): el quiosco (mismo origen) o un anfitrión permitido; nunca "*"
+  try{if(window.parent!==window){const o=destino(window.parent);if(o)window.parent.postMessage(msg,o);}}catch(e){}
+  try{if(window.opener){const o=destino(window.opener);if(o)window.opener.postMessage(msg,o);}}catch(e){}
   this.style.display="none";document.getElementById("ok").style.display="block";
   // Gestor de colas: el pago (SIMULADO) se apunta en el relé para que el quiosco —otro dispositivo— se
   // entere, y el móvil salta a la pantalla de la cola con su número resaltado. En el overlay del
   // propio quiosco (embed=1) no se redirige.
   const store=(P.get("store")||"").replace(/[^a-z0-9-]/g,"").slice(0,80),relay="https://mcp-ainimation.admira.store";
   if(!store||!pedido)return;
-  const api=(op,b)=>fetch(relay+"/cola/"+op+"?store="+store,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify(b)}).then(r=>r.ok?r.json():Promise.reject(r.status));
+  // token de pago del pedido (&t=, lo da la cola al crear la comanda): autoriza a ESTE móvil a pagar ese pedido
+  const tk=(P.get("t")||"").replace(/[^A-Za-z0-9_-]/g,"").slice(0,64);
+  const api=(op,b)=>fetch(relay+"/cola/"+op+"?store="+store,{method:"POST",headers:Object.assign({"content-type":"application/json"},tk?{"x-cola-pago":tk}:{}),body:JSON.stringify(b)}).then(r=>r.ok?r.json():Promise.reject(r.status));
   api("pedido",{id:pedido,total:total,moneda:moneda}).then(()=>api("pagar",{id:pedido,via:"qr"})).then(r=>{
     window.__colaPago=r;if(P.get("embed")==="1")return;
     ok.textContent=(en?"✓ Simulated payment done. Your order: ":"✓ Pago simulado hecho. Tu pedido: ")+r.numero;

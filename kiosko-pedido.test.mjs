@@ -44,6 +44,22 @@ function serve() {
   return new Promise((r) => srv.listen(0, () => r(srv)));
 }
 
+// Cola simulada: intercepta el relé (mcp-ainimation.admira.store/cola/*) para que los tests no creen
+// pedidos reales. Devuelve el registro de llamadas ({op, body}).
+async function colaSimulada(page) {
+  const calls = []; let n = 0; const pedidos = {};
+  await page.route(/^https:\/\/mcp-ainimation\.admira\.store\//, async (route) => {
+    const req = route.request(); const u = new URL(req.url()); const op = u.pathname.replace(/^\/cola\//, '');
+    let body = null; try { body = req.postDataJSON(); } catch { body = null; }
+    calls.push({ op, body, store: u.searchParams.get('store') });
+    if (op === 'pedido' && req.method() === 'POST') { n += 1; pedidos[body.id] = { id: body.id, numero: (body.prefijo || 'A') + String(n).padStart(3, '0'), estado: 'pendiente' }; return route.fulfill({ json: { ok: true, ...pedidos[body.id] } }); }
+    if (op === 'pedido') return route.fulfill({ json: pedidos[u.searchParams.get('id')] || { ok: false } });
+    if (op === 'pagar') { const p = pedidos[body?.id]; if (p) p.estado = 'recibido'; return route.fulfill({ json: { ok: true, ...(p || {}) } }); }
+    return route.fulfill({ json: { ok: true } });
+  });
+  return calls;
+}
+
 test('E2E: atracción → producto con opciones → carrito → QR → pago simulado → número', async (t) => {
   let chromium; try { ({ chromium } = await import('playwright')); } catch { return t.skip('sin playwright'); }
   const exe = ['/usr/bin/google-chrome', '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'].find((p) => fs.existsSync(p));
@@ -51,7 +67,8 @@ test('E2E: atracción → producto con opciones → carrito → QR → pago simu
   const srv = await serve(); const base = `http://127.0.0.1:${srv.address().port}/${dir}/`;
   try {
     const page = await browser.newPage({ viewport: { width: 540, height: 960 } });
-    await page.goto(base + '?store=starbucks-qa');
+    await colaSimulada(page); // nunca la cola de producción en los tests
+    await page.goto(base + '?store=starbucks-qa&avatar=off'); // quiosco clásico: igual que antes del avatar
     await page.waitForFunction(() => window.__kioskReady);
     await page.click('#s-attract');
     await page.click('[data-item="caffe-latte"]');
@@ -60,7 +77,9 @@ test('E2E: atracción → producto con opciones → carrito → QR → pago simu
     await page.click('#addBtn');
     await page.click('[data-up="cookie"]');
     assert.equal((await page.$$('#lines .line')).length, 2);
+    assert.equal(await page.evaluate(() => document.documentElement.classList.contains('av-can')), false, 'sin avatar');
     await page.click('#toPay');
+    await page.waitForSelector('#s-name.on'); await page.fill('#custName', 'Ana'); await page.click('#toName');
     await page.waitForSelector('#qr img', { state: 'attached' });
     const url = await page.getAttribute('#qr', 'data-url');
     assert.match(url, /pago-simulado\.html\?pedido=ped-/);
