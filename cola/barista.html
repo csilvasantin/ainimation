@@ -2,6 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex">
+<link rel="icon" href="/favicon.ico" sizes="any">
 <title>Barista · cola de pedidos (demo)</title>
 <style>
 body{margin:0;font-family:Inter,-apple-system,'Segoe UI',Roboto,sans-serif;background:#1E3932;color:#fff;padding:16px}
@@ -23,9 +24,10 @@ const P=new URLSearchParams(location.search),store=(P.get('store')||'starbucks-p
 const L=en?{prep:'Preparing',listo:'Ready',btnL:'Mark ready',btnR:'Collected',h:'Barista · advance orders',w:'DEMO · sample orders, SIMULATED payment. Orders also turn «ready» by themselves after ~20 s.',v:'No open orders'}:{prep:'En preparación',listo:'Listo',btnL:'Marcar listo',btnR:'Recogido',h:'Barista · avanzar pedidos',w:'DEMO · pedidos de ejemplo, pago SIMULADO. Los pedidos también pasan solos a «listo» a los ~20 s.',v:'No hay pedidos abiertos'};
 h.textContent=L.h;w.textContent=L.w;s.textContent=store;
 async function av(n,a){await fetch(relay+'/cola/avanzar?store='+store,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({numero:n,a})});tic();}
+let ultimo='';
 async function tic(){const d=await (await fetch(relay+'/cola/estado?store='+store,{cache:'no-store'})).json();
   const f=(p,e)=>'<div class="p"><b>'+p.numero+'</b><span>'+(e==='listo'?L.listo:L.prep)+'</span>'+(e==='listo'?'':'<button data-n="'+p.numero+'" data-a="listo">'+L.btnL+'</button>')+'<button class="r" data-n="'+p.numero+'" data-a="recogido">'+L.btnR+'</button></div>';
-  const html=(d.preparando||[]).map(p=>f(p,'preparando')).join('')+(d.listo||[]).map(p=>f(p,'listo')).join('');l.innerHTML=html||'<p>'+L.v+'</p>';}
+  const html=(d.preparando||[]).map(p=>f(p,'preparando')).join('')+(d.listo||[]).map(p=>f(p,'listo')).join('');const nuevo=html||'<p>'+L.v+'</p>';if(nuevo!==ultimo){ultimo=nuevo;l.innerHTML=nuevo;window.__baristaRenders=(window.__baristaRenders||0)+1;}}
 l.onclick=e=>{const b=e.target.closest('button');if(b)av(b.dataset.n,b.dataset.a);};
 tic();setInterval(tic,2500);
 })();
