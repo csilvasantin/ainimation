@@ -12,10 +12,32 @@
     header { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 10px 16px; border-bottom: 1px solid #263342; }
     header a { color: #b8d9ff; font-size: 13px; }
     iframe { display: block; flex: 1; width: 100%; border: 0; min-height: 0; }
+    main { position: relative; flex: 1; min-height: 0; display: flex; }
+    #aviso { position: absolute; left: 50%; top: 50%; transform: translate(-50%,-50%) scale(.9); width: min(86vw, 86vh); aspect-ratio: 1; border-radius: 50%; background: radial-gradient(circle at 50% 40%, #00A862, #00704A 70%, #1E3932); color: #fff; display: grid; place-items: center; text-align: center; padding: 9%; box-sizing: border-box; font-weight: 900; font-size: clamp(22px, 5vmin, 64px); line-height: 1.1; box-shadow: 0 0 0 10px #fff2, 0 20px 60px #0009; opacity: 0; pointer-events: none; transition: .4s; }
+    #aviso.on { opacity: 1; transform: translate(-50%,-50%) scale(1); }
+    #aviso small { display: block; font-size: .45em; font-weight: 600; opacity: .9; margin-top: .6em; }
   </style>
 </head>
 <body>
   <header><strong>PlayerTaza · AInimation</strong><a href="https://playertaza.csilvasantin.workers.dev/" target="_blank" rel="noopener">Abrir player</a></header>
-  <iframe src="https://playertaza.csilvasantin.workers.dev/" title="PlayerTaza: player y configuración de stores" allow="camera; bluetooth; autoplay; fullscreen" allowfullscreen></iframe>
+  <main><iframe src="https://playertaza.csilvasantin.workers.dev/" title="PlayerTaza: player y configuración de stores" allow="camera; bluetooth; autoplay; fullscreen" allowfullscreen></iframe><div id="aviso" role="status" aria-live="assertive"></div></main>
+  <script>
+  // Taza + cola (7-oct-2026): cuando un pedido con nombre pasa a «listo», la taza lo muestra:
+  // «NOMBRE, tu pedido Starbucks está preparado». Pedidos de demo, pago SIMULADO.
+  (function(){
+    var P=new URLSearchParams(location.search),store=(P.get('store')||'starbucks-paseo-de-gracia').replace(/[^a-z0-9-]/g,'')||'starbucks-paseo-de-gracia';
+    var relay='https://mcp-ainimation.admira.store',vistos={},primera=true,cola=[],ocupada=false,el=document.getElementById('aviso');
+    var esc=function(x){return String(x||'').replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});};
+    window.__tazaAvisos=[];
+    function mostrar(){ if(ocupada||!cola.length) return; ocupada=true; var p=cola.shift();
+      var txt=p.nombre?p.nombre+', tu pedido Starbucks está preparado':'Pedido '+p.numero+', tu pedido Starbucks está preparado';
+      el.innerHTML=(p.nombre?esc(p.nombre)+',<br>':'')+'tu pedido Starbucks está preparado ☕<small>Pedido '+esc(p.numero)+' · recógelo en barra</small>';
+      el.classList.add('on'); window.__tazaAvisos.push({numero:p.numero,nombre:p.nombre||null,text:txt,at:Date.now()});
+      setTimeout(function(){ el.classList.remove('on'); setTimeout(function(){ ocupada=false; mostrar(); },500); },8000); }
+    function tic(){ fetch(relay+'/cola/estado?store='+store,{cache:'no-store'}).then(function(r){return r.json();}).then(function(d){
+      (d.listo||[]).forEach(function(p){ if(!vistos[p.numero]){ vistos[p.numero]=1; if(!primera) cola.push(p); } }); primera=false; mostrar(); }).catch(function(){}); }
+    tic(); setInterval(tic,2000);
+  })();
+  </script>
 </body>
 </html>

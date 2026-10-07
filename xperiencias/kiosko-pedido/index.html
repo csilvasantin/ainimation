@@ -135,7 +135,7 @@ html[data-formato="horizontal"] #s-done .num{font-size:200px;margin:10px 0}
   <section class="screen" id="s-cart" data-marker="CARRITO">
     <header class="bar"><div class="logo" data-logo></div><button class="lang" data-lang></button></header>
     <main><h2 data-t="yourOrder"></h2><div id="lines"></div><div class="total"><span data-t="total"></span><span id="total"></span></div>
-      <div class="upsell"><h3 class="big" data-t="addSomething"></h3><div class="grid" id="ups"></div></div></main>
+      <label class="nombre" style="display:block;margin:14px 0;font-size:1.15em;font-weight:700"><span data-t="askName"></span><input id="custName" autocomplete="given-name" maxlength="24" style="display:block;width:100%;margin-top:8px;font:inherit;font-size:1.3em;padding:.45em .6em;border-radius:14px;border:3px solid currentColor;background:#fff;color:#1E2A25"></label><div class="upsell"><h3 class="big" data-t="addSomething"></h3><div class="grid" id="ups"></div></div></main>
     <div class="foot"><button class="btn alt" data-go="menu" data-t="more"></button><button class="btn" id="toPay" data-t="pay"></button></div>
   </section>
 
@@ -161,8 +161,8 @@ html[data-formato="horizontal"] #s-done .num{font-size:200px;margin:10px 0}
 "use strict";
 const P=new URLSearchParams(location.search);
 const T={
- es:{start:"Toca para empezar",cancel:"Salir",back:"Atrás",cart:"Ver pedido",add:"Añadir",yourOrder:"Tu pedido",total:"Total",addSomething:"¿Algo para acompañar?",more:"Añadir más",pay:"Pagar",scan:"Escanea para pagar",tapQr:"Demo: toca el QR para abrir el pago simulado en esta pantalla.",counter:"Pagar en barra",thanks:"¡Gracias!",watch:"Te avisamos en la pantalla de la barra.",paid:"Pago simulado completado. Recoge tu pedido en barra.",payAtCounter:"Paga en barra al recoger tu pedido.",empty:"Aún no has elegido nada.",idle:"¿Sigues ahí? Volvemos al inicio en ",lang:"EN",required:"Elige ",units:"uds"},
- en:{start:"Touch to start",cancel:"Exit",back:"Back",cart:"View order",add:"Add",yourOrder:"Your order",total:"Total",addSomething:"Anything else?",more:"Add more",pay:"Pay",scan:"Scan to pay",tapQr:"Demo: tap the QR to open the simulated payment on this screen.",counter:"Pay at the counter",thanks:"Thank you!",watch:"We'll call you on the counter screen.",paid:"Simulated payment completed. Pick up your order at the counter.",payAtCounter:"Pay at the counter when you pick up.",empty:"Nothing selected yet.",idle:"Still there? Back to start in ",lang:"ES",required:"Choose ",units:"pcs"}};
+ es:{askName:"¿A qué nombre ponemos tu pedido?",start:"Toca para empezar",cancel:"Salir",back:"Atrás",cart:"Ver pedido",add:"Añadir",yourOrder:"Tu pedido",total:"Total",addSomething:"¿Algo para acompañar?",more:"Añadir más",pay:"Pagar",scan:"Escanea para pagar",tapQr:"Demo: toca el QR para abrir el pago simulado en esta pantalla.",counter:"Pagar en barra",thanks:"¡Gracias!",watch:"Te avisamos en la pantalla de la barra.",paid:"Pago simulado completado. Recoge tu pedido en barra.",payAtCounter:"Paga en barra al recoger tu pedido.",empty:"Aún no has elegido nada.",idle:"¿Sigues ahí? Volvemos al inicio en ",lang:"EN",required:"Elige ",units:"uds"},
+ en:{askName:"What name should we call?",start:"Touch to start",cancel:"Exit",back:"Back",cart:"View order",add:"Add",yourOrder:"Your order",total:"Total",addSomething:"Anything else?",more:"Add more",pay:"Pay",scan:"Scan to pay",tapQr:"Demo: tap the QR to open the simulated payment on this screen.",counter:"Pay at the counter",thanks:"Thank you!",watch:"We'll call you on the counter screen.",paid:"Simulated payment completed. Pick up your order at the counter.",payAtCounter:"Pay at the counter when you pick up.",empty:"Nothing selected yet.",idle:"Still there? Back to start in ",lang:"ES",required:"Choose ",units:"pcs"}};
 let lang=(P.get("lang")||"es").slice(0,2)==="en"?"en":"es";
 const marca=(P.get("marca")||"").toLowerCase().replace(/[^a-z0-9-]/g,"");
 const storeId=P.get("store")||"";
@@ -239,7 +239,7 @@ function renderCart(){$("#lines").innerHTML=cart.length?cart.map((l,k)=>'<div cl
 function nextNumber(){const k="kiosko:n:"+M.establishment.id;let n=0;try{n=(+localStorage.getItem(k)||0)+1;if(n>999)n=1;localStorage.setItem(k,n);}catch(e){n=1+Math.floor(Math.random()*999);}return (M.orderFlow.prefix||"A")+String(n).padStart(3,"0");}
 function makeOrder(){const id="ped-"+Date.now().toString(36)+"-"+Math.random().toString(36).slice(2,6);
   order={id:id,number:null,simulated:true,store:storeId||M.establishment.id,establishment:M.establishment.name,brand:marca||M.establishment.brandId,currency:M.establishment.currency,lang:lang,
-   lines:cart.map(l=>({id:l.id,name:tr(l.name),qty:l.qty,unitPrice:l.unitPrice,options:l.options.map(o=>tr(o.label))})),total:sum(),status:"pending-payment",createdAt:new Date().toISOString()};return order;}
+   lines:cart.map(l=>({id:l.id,name:tr(l.name),qty:l.qty,unitPrice:l.unitPrice,options:l.options.map(o=>tr(o.label))})),total:sum(),customerName:custName(),status:"pending-payment",createdAt:new Date().toISOString()};return order;}
 // Gestor de colas (7-oct-2026): el pedido vive en un relé (Durable Object por tienda) para que el
 // móvil que escanea el QR —otro dispositivo— pague (SIMULADO) y siga su número en /cola/, y el quiosco
 // se entere del pago. Sin relé (offline) sigue el flujo local de antes.
@@ -247,7 +247,8 @@ const relay=()=>((M&&M.orderFlow&&M.orderFlow.queue&&M.orderFlow.queue.relay)||"
 const colaStore=()=>(storeId||M.establishment.id||"tienda").toLowerCase().replace(/[^a-z0-9-]/g,"-").slice(0,80);
 let colaPoll=0;
 function colaApi(op,body,extra){const q=relay()+"/cola/"+op+"?store="+encodeURIComponent(colaStore())+(extra||"");return fetch(q,body?{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify(body)}:{cache:"no-store"}).then(r=>r.ok?r.json():Promise.reject(r.status));}
-function colaCrear(o){return colaApi("pedido",{id:o.id,total:o.total,moneda:o.currency,prefijo:(M.orderFlow.prefix||"A")}).then(r=>{if(order===o){o.queueNumber=r.numero;window.__kioskCola={id:o.id,numero:r.numero,store:colaStore()};}return r;}).catch(()=>null);}
+function custName(){const i=document.getElementById("custName");return i?i.value.replace(/[^\p{L} '\-]/gu,"").replace(/\s+/g," ").trim().slice(0,24):"";}
+function colaCrear(o){return colaApi("pedido",{id:o.id,nombre:o.customerName||"",total:o.total,moneda:o.currency,prefijo:(M.orderFlow.prefix||"A")}).then(r=>{if(order===o){o.queueNumber=r.numero;window.__kioskCola={id:o.id,numero:r.numero,store:colaStore()};}return r;}).catch(()=>null);}
 function colaVigilar(o){clearInterval(colaPoll);colaPoll=setInterval(()=>{if(order!==o||o.number||screen!=="pay"){clearInterval(colaPoll);return;}
   colaApi("pedido",null,"&id="+encodeURIComponent(o.id)).catch(()=>null).then(r=>{if(r&&r.estado&&r.estado!=="pendiente"&&order===o){o.queueNumber=r.numero;finish("paid");}});},2000);}
 function colaUrl(n){const u=new URL("../../cola/",document.baseURI);u.searchParams.set("store",colaStore());if(n)u.searchParams.set("pedido",n);u.searchParams.set("lang",lang);return u.href;}
@@ -257,7 +258,7 @@ function toPay(){makeOrder();go("pay");colaCrear(order);colaVigilar(order);const
   const q=$("#qr");q.innerHTML="";q.dataset.url=url;try{new QRCode(q,{text:url,width:560,height:560,correctLevel:QRCode.CorrectLevel.M});}catch(e){q.textContent=url;}
   host("payment",{status:"started",checkoutUrl:url,simulated:true});}
 function finish(how){if(!order||order.number)return;clearInterval(colaPoll);order.number=order.queueNumber||nextNumber();order.queueUrl=colaUrl(order.number);if(how!=="paid"){const o=order;(o.queueNumber?Promise.resolve():colaCrear(o)).then(r=>{if(!o.queueNumber&&r)return;return colaApi("pagar",{id:o.id,via:"caja"});}).catch(()=>{});}order.status=how==="paid"?"paid-simulated":"pay-at-counter";order.paidAt=how==="paid"?new Date().toISOString():null;
-  closeOverlay();$("#orderNum").textContent=order.number;const dq=$("#doneQr"),df=$("#doneFollow");dq.innerHTML="";dq.classList.remove("on");df.hidden=true;
+  closeOverlay();try{document.getElementById("custName").value="";}catch(_){}$("#orderNum").textContent=order.number;const dq=$("#doneQr"),df=$("#doneFollow");dq.innerHTML="";dq.classList.remove("on");df.hidden=true;
   if(how!=="paid"&&order.queueNumber){try{new QRCode(dq,{text:order.queueUrl,width:260,height:260,correctLevel:QRCode.CorrectLevel.M});dq.classList.add("on");dq.dataset.url=order.queueUrl;df.textContent=lang==="en"?"Scan to follow your order on your phone":"Escanea para seguir tu pedido en el móvil";df.hidden=false;}catch(_){}}$("#doneMsg").textContent=t(how==="paid"?"paid":"payAtCounter");go("done");
   if(how==="paid")host("payment",{status:"paid",simulated:true});host("order",{status:order.status});
   say(lang==="en"?"Thank you! Your order number is "+order.number:"¡Gracias! Tu pedido es el "+order.number);

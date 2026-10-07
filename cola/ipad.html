@@ -55,13 +55,15 @@ const act=$('activar');if(vozOk)act.classList.add('off');
 function activar(){vozOk=true;act.classList.add('off');try{const u=new SpeechSynthesisUtterance(' ');u.volume=0;speechSynthesis.speak(u);}catch(_){}}
 act.addEventListener('click',activar);act.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' ')activar();});
 // Admirito «dice»: bocadillo visible siempre + la nube (si entiende «say») + voz es-ES del navegador
-function decir(num){
-  const texto='Pedido '+num+', tu café está listo, recógelo en barra';
-  const b=$('bocadillo');b.innerHTML='Pedido <b>'+num+'</b>, tu café está listo. ¡Recógelo en barra! ☕';b.classList.add('on');
+const esc=x=>String(x||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function decir(p){
+  const num=p.numero,nom=p.nombre;
+  const texto=nom?nom+', tu pedido Starbucks está preparado. Pedido '+num+', recógelo en barra':'Pedido '+num+', tu café está listo, recógelo en barra';
+  const b=$('bocadillo');b.innerHTML=nom?'<b>'+esc(nom)+'</b>, tu pedido Starbucks está preparado ☕<br><small>Pedido '+esc(num)+' · recógelo en barra</small>':'Pedido <b>'+esc(num)+'</b>, tu café está listo. ¡Recógelo en barra! ☕';b.classList.add('on');
   try{$('nube').contentWindow.postMessage({source:'ainimation-xperiencia',type:'say',text:texto,lang:'es-ES'},'https://digitalavatar.ai');}catch(_){}
   let via='pantalla';
   return new Promise(fin=>{
-    const cerrar=()=>{said.push({numero:num,text:texto,via,at:Date.now()});setTimeout(()=>{b.classList.remove('on');fin();},2500);};
+    const cerrar=()=>{said.push({numero:num,nombre:nom||null,text:texto,via,at:Date.now()});setTimeout(()=>{b.classList.remove('on');fin();},2500);};
     try{
       const ss=window.speechSynthesis;
       if(!vozOk||!ss||typeof SpeechSynthesisUtterance!=='function')return cerrar();
@@ -73,13 +75,13 @@ function decir(num){
   });
 }
 async function siguiente(){if(hablando)return;hablando=true;while(cola.length){await decir(cola.shift());}hablando=false;}
-const chips=(a,nuevos)=>a.length?a.map(p=>'<span class="n'+(nuevos&&nuevos.has(p.numero)?' nuevo':'')+'">'+String(p.numero).replace(/[^A-Z0-9]/gi,'')+'</span>').join(''):'<span class="vacio">—</span>';
+const chips=(a,nuevos)=>a.length?a.map(p=>'<span class="n'+(nuevos&&nuevos.has(p.numero)?' nuevo':'')+'">'+String(p.numero).replace(/[^A-Z0-9]/gi,'')+(p.nombre?' <small style="font-size:.45em">'+esc(p.nombre)+'</small>':'')+'</span>').join(''):'<span class="vacio">—</span>';
 const recientes=new Set();
 async function tic(){
   try{
     const d=await (await fetch(relay+'/cola/estado?store='+store,{cache:'no-store'})).json();
     const listos=d.listo||[];
-    listos.forEach(p=>{if(!vistos.has(p.numero)){vistos.add(p.numero);if(!primera||P.get('anunciar')==='todos'){cola.push(p.numero);recientes.add(p.numero);setTimeout(()=>recientes.delete(p.numero),15000);}}});
+    listos.forEach(p=>{if(!vistos.has(p.numero)){vistos.add(p.numero);if(!primera||P.get('anunciar')==='todos'){cola.push(p);recientes.add(p.numero);setTimeout(()=>recientes.delete(p.numero),15000);}}});
     primera=false;
     $('listo').innerHTML=chips(listos,recientes);$('prep').innerHTML=chips(d.preparando||[]);
     $('estado').textContent='En vivo · '+new Date().toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
