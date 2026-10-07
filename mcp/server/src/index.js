@@ -358,11 +358,13 @@ export async function manejar(request, env = {}, deps = {}) {
     const store = u.searchParams.get('store') || '';
     if (!STORE.test(store)) return json({ ok: false, error: 'store inválida (slug)' }, 400);
     if (!env.COLA) return json({ ok: false, error: 'cola no configurada' }, 503);
+    // llamar / reiniciar (gestor de colas de admira.tv/gestorColas): solo con la clave de servicio compartida.
+    if (/\/(llamar|reiniciar)$/.test(ruta) && (!env.COLA_ADMIN || request.headers.get('x-cola-admin') !== env.COLA_ADMIN)) return json({ ok: false, error: 'requiere clave de servicio' }, 403);
     const stub = env.COLA.get(env.COLA.idFromName(store));
     const r = await stub.fetch(new Request('https://cola' + ruta + u.search, { method: request.method, headers: { 'content-type': 'application/json' }, body: request.method === 'POST' ? await request.text() : undefined }));
     return new Response(r.body, { status: r.status, headers: { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store', ...CORS } });
   }
-  return json({ ok: false, error: 'ruta desconocida', rutas: ['/', '/salud', '/mcp', '/cola/estado', '/cola/pedido', '/cola/pagar', '/cola/avanzar'] }, 404);
+  return json({ ok: false, error: 'ruta desconocida', rutas: ['/', '/salud', '/mcp', '/cola/estado', '/cola/pedido', '/cola/pagar', '/cola/avanzar', '/cola/llamar', '/cola/reiniciar'] }, 404);
 }
 
 export default { fetch: (request, env) => manejar(request, env) };
