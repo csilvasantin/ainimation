@@ -1,0 +1,1946 @@
+{
+ "format": "ainimation-project",
+ "version": 1,
+ "savedAt": "2026-10-07T08:09:38.682Z",
+ "plan": {
+  "title": "Ordering kiosk",
+  "format": "Short film",
+  "duration": "3 minutes",
+  "genre": "Sci-fi fable",
+  "tone": "Wonder with tension",
+  "protagonist": "a young signal archivist",
+  "world": "a coastal city where memories arrive as radio weather",
+  "logline": "When a forbidden transmission predicts tomorrow's emotions, an archivist must decide whether to preserve the city as it is or let everyone hear the truth.",
+  "createdAt": "2026-10-07T08:09:38.596Z",
+  "treatment": "The Last Signal is a 3 minutes short film in the shape of a sci-fi fable. It follows a young signal archivist inside a coastal city where memories arrive as radio weather. The emotional movement is wonder with tension: each scene should feel designed, musical, and ready for AI-assisted production.",
+  "theme": "What deserves to be preserved, and what must be transformed?",
+  "pipeline": {
+   "image": "Create cast-ready visual members: key art, character reference, world textures, color script, and layered stage plates for The Last Signal.",
+   "video": "Generate score-aware clips with controlled object behavior, consistent subject identity, and edit handles for transitions.",
+   "music": "Compose score channels: loop beds, scene stingers, pressure ramps, and a final motif locked to frame ranges.",
+   "voice": "Create voice cast, sparse narration, and timed reads attached to score rows rather than loose audio files."
+  },
+  "cast": [],
+  "stageItems": [
+   {
+    "id": "dk-muxtu4o3-dhbj",
+    "type": "button",
+    "spriteName": "fondo1",
+    "text": "",
+    "x": 0,
+    "y": 0,
+    "w": 100,
+    "h": 100,
+    "startFrame": 1,
+    "durationFrames": 24,
+    "color": "#1E3932",
+    "textColor": "#ffffff",
+    "fontSize": 4.5,
+    "radius": 0,
+    "interactive": false
+   },
+   {
+    "id": "dk-muxtu4o3-e68l",
+    "type": "button",
+    "spriteName": "fondoCarta",
+    "text": "",
+    "x": 0,
+    "y": 0,
+    "w": 100,
+    "h": 100,
+    "startFrame": 25,
+    "durationFrames": 120,
+    "color": "#FFFFFF",
+    "textColor": "#ffffff",
+    "fontSize": 4.5,
+    "radius": 0,
+    "interactive": false
+   },
+   {
+    "id": "dk-muxtu4o4-htap",
+    "type": "button",
+    "spriteName": "titulo",
+    "text": "Order here, skip the queue",
+    "texts": {
+     "es": "Pide aquí, sin colas",
+     "en": "Order here, skip the queue"
+    },
+    "x": 5,
+    "y": 30,
+    "w": 90,
+    "h": 18,
+    "startFrame": 1,
+    "durationFrames": 24,
+    "color": "transparent",
+    "textColor": "#ffffff",
+    "fontSize": 9,
+    "radius": 2,
+    "interactive": false
+   },
+   {
+    "id": "dk-muxtu4o4-vzly",
+    "type": "button",
+    "spriteName": "subtitulo",
+    "text": "Touch the screen to start",
+    "texts": {
+     "es": "Toca la pantalla para empezar",
+     "en": "Touch the screen to start"
+    },
+    "x": 5,
+    "y": 50,
+    "w": 90,
+    "h": 9,
+    "startFrame": 1,
+    "durationFrames": 24,
+    "color": "transparent",
+    "textColor": "#cba258",
+    "fontSize": 4.5,
+    "radius": 2,
+    "interactive": false
+   },
+   {
+    "id": "dk-muxtu4o4-f5qq",
+    "type": "button",
+    "spriteName": "btnEmpezar",
+    "text": "Touch to start",
+    "texts": {
+     "es": "Toca para empezar",
+     "en": "Touch to start"
+    },
+    "x": 20,
+    "y": 66,
+    "w": 60,
+    "h": 8,
+    "startFrame": 1,
+    "durationFrames": 24,
+    "color": "#00704A",
+    "textColor": "#ffffff",
+    "fontSize": 5,
+    "radius": 6,
+    "interactive": true
+   },
+   {
+    "id": "dk-muxtu4o4-2oxe",
+    "type": "button",
+    "spriteName": "hCategorias",
+    "text": "What would you like?",
+    "texts": {
+     "es": "¿Qué te apetece?",
+     "en": "What would you like?"
+    },
+    "x": 5,
+    "y": 3,
+    "w": 90,
+    "h": 12,
+    "startFrame": 25,
+    "durationFrames": 24,
+    "color": "transparent",
+    "textColor": "#1E3932",
+    "fontSize": 6,
+    "radius": 2,
+    "interactive": false
+   },
+   {
+    "id": "dk-muxtu4o4-n6ru",
+    "type": "kiosk",
+    "spriteName": "carta",
+    "view": "categories",
+    "x": 4,
+    "y": 12,
+    "w": 92,
+    "h": 74,
+    "startFrame": 25,
+    "durationFrames": 24
+   },
+   {
+    "id": "dk-muxtu4o4-vmqb",
+    "type": "button",
+    "spriteName": "hProductos",
+    "text": "Choose your drink",
+    "texts": {
+     "es": "Elige tu bebida",
+     "en": "Choose your drink"
+    },
+    "x": 5,
+    "y": 3,
+    "w": 90,
+    "h": 12,
+    "startFrame": 49,
+    "durationFrames": 24,
+    "color": "transparent",
+    "textColor": "#1E3932",
+    "fontSize": 6,
+    "radius": 2,
+    "interactive": false
+   },
+   {
+    "id": "dk-muxtu4o4-tae2",
+    "type": "kiosk",
+    "spriteName": "productos",
+    "view": "items",
+    "x": 4,
+    "y": 12,
+    "w": 92,
+    "h": 74,
+    "startFrame": 49,
+    "durationFrames": 24
+   },
+   {
+    "id": "dk-muxtu4o4-mpko",
+    "type": "button",
+    "spriteName": "btnAtras",
+    "text": "Back",
+    "texts": {
+     "es": "Atrás",
+     "en": "Back"
+    },
+    "x": 4,
+    "y": 89,
+    "w": 40,
+    "h": 7,
+    "startFrame": 49,
+    "durationFrames": 24,
+    "color": "#EDEBE6",
+    "textColor": "#1E2A25",
+    "fontSize": 4.5,
+    "radius": 2,
+    "interactive": true
+   },
+   {
+    "id": "dk-muxtu4o4-qx9x",
+    "type": "kiosk",
+    "spriteName": "opciones",
+    "view": "options",
+    "x": 4,
+    "y": 4,
+    "w": 92,
+    "h": 84,
+    "startFrame": 73,
+    "durationFrames": 24
+   },
+   {
+    "id": "dk-muxtu4o4-woe8",
+    "type": "button",
+    "spriteName": "hCarrito",
+    "text": "Your order",
+    "texts": {
+     "es": "Tu pedido",
+     "en": "Your order"
+    },
+    "x": 5,
+    "y": 3,
+    "w": 90,
+    "h": 12,
+    "startFrame": 97,
+    "durationFrames": 24,
+    "color": "transparent",
+    "textColor": "#1E3932",
+    "fontSize": 6,
+    "radius": 2,
+    "interactive": false
+   },
+   {
+    "id": "dk-muxtu4o4-jwb5",
+    "type": "kiosk",
+    "spriteName": "carrito",
+    "view": "cart",
+    "x": 4,
+    "y": 12,
+    "w": 92,
+    "h": 70,
+    "startFrame": 97,
+    "durationFrames": 24
+   },
+   {
+    "id": "dk-muxtu4o4-wr24",
+    "type": "button",
+    "spriteName": "btnMas",
+    "text": "Add more",
+    "texts": {
+     "es": "Añadir más",
+     "en": "Add more"
+    },
+    "x": 4,
+    "y": 88,
+    "w": 92,
+    "h": 7,
+    "startFrame": 97,
+    "durationFrames": 24,
+    "color": "#EDEBE6",
+    "textColor": "#1E2A25",
+    "fontSize": 4.5,
+    "radius": 2,
+    "interactive": true
+   },
+   {
+    "id": "dk-muxtu4o4-z3x1",
+    "type": "kiosk",
+    "spriteName": "pago",
+    "view": "qr",
+    "x": 4,
+    "y": 6,
+    "w": 92,
+    "h": 86,
+    "startFrame": 121,
+    "durationFrames": 24
+   },
+   {
+    "id": "dk-muxtu4o4-1mg6",
+    "type": "button",
+    "spriteName": "fondo145",
+    "text": "",
+    "x": 0,
+    "y": 0,
+    "w": 100,
+    "h": 100,
+    "startFrame": 145,
+    "durationFrames": 24,
+    "color": "#00704A",
+    "textColor": "#ffffff",
+    "fontSize": 4.5,
+    "radius": 0,
+    "interactive": false
+   },
+   {
+    "id": "dk-muxtu4o4-tb5w",
+    "type": "kiosk",
+    "spriteName": "numero",
+    "view": "number",
+    "x": 4,
+    "y": 15,
+    "w": 92,
+    "h": 60,
+    "startFrame": 145,
+    "durationFrames": 24
+   },
+   {
+    "id": "dk-muxtu4o4-u3oy",
+    "type": "button",
+    "spriteName": "aviso",
+    "text": "DEMO · example data · simulated payment",
+    "texts": {
+     "es": "DEMO · datos de ejemplo · pago simulado",
+     "en": "DEMO · example data · simulated payment"
+    },
+    "x": 5,
+    "y": 96.5,
+    "w": 90,
+    "h": 3.5,
+    "startFrame": 1,
+    "durationFrames": 168,
+    "color": "#FFE58A",
+    "textColor": "#3A2E00",
+    "fontSize": 2.4,
+    "radius": 0,
+    "interactive": false
+   }
+  ],
+  "scenes": [
+   {
+    "number": 1,
+    "act": "Act I",
+    "beat": "Cold Open",
+    "purpose": "A striking image introduces the world before anyone explains it.",
+    "behavior": "fadeInWorld",
+    "startFrame": 1,
+    "length": 64,
+    "scene": "a young signal archivist moves through a coastal city where memories arrive as radio weather, where a striking image introduces the world before anyone explains it.",
+    "visualPrompt": "Sci-fi fable, Wonder with tension, stage-ready frame, a coastal city where memories arrive as radio weather, a young signal archivist, cast continuity, clear silhouette, editable layers",
+    "videoPrompt": "Cold Open: camera movement, object behavior, blocking, and edit handles for 3 minutes short film, Wonder with tension"
+   },
+   {
+    "number": 2,
+    "act": "Act I",
+    "beat": "Inciting Signal",
+    "purpose": "The protagonist receives a message that changes the rules of the story.",
+    "behavior": "listenForSignal",
+    "startFrame": 49,
+    "length": 48,
+    "scene": "a young signal archivist moves through a coastal city where memories arrive as radio weather, where the protagonist receives a message that changes the rules of the story.",
+    "visualPrompt": "Sci-fi fable, Wonder with tension, stage-ready frame, a coastal city where memories arrive as radio weather, a young signal archivist, cast continuity, clear silhouette, editable layers",
+    "videoPrompt": "Inciting Signal: camera movement, object behavior, blocking, and edit handles for 3 minutes short film, Wonder with tension"
+   },
+   {
+    "number": 3,
+    "act": "Act II",
+    "beat": "First Choice",
+    "purpose": "They make a decision that costs something visible.",
+    "behavior": "branchOnChoice",
+    "startFrame": 97,
+    "length": 72,
+    "scene": "a young signal archivist moves through a coastal city where memories arrive as radio weather, where they make a decision that costs something visible.",
+    "visualPrompt": "Sci-fi fable, Wonder with tension, stage-ready frame, a coastal city where memories arrive as radio weather, a young signal archivist, cast continuity, clear silhouette, editable layers",
+    "videoPrompt": "First Choice: camera movement, object behavior, blocking, and edit handles for 3 minutes short film, Wonder with tension"
+   },
+   {
+    "number": 4,
+    "act": "Act II",
+    "beat": "Pressure Builds",
+    "purpose": "The world pushes back and the emotional stakes become public.",
+    "behavior": "raiseSystemPressure",
+    "startFrame": 145,
+    "length": 64,
+    "scene": "a young signal archivist moves through a coastal city where memories arrive as radio weather, where the world pushes back and the emotional stakes become public.",
+    "visualPrompt": "Sci-fi fable, Wonder with tension, stage-ready frame, a coastal city where memories arrive as radio weather, a young signal archivist, cast continuity, clear silhouette, editable layers",
+    "videoPrompt": "Pressure Builds: camera movement, object behavior, blocking, and edit handles for 3 minutes short film, Wonder with tension"
+   },
+   {
+    "number": 5,
+    "act": "Act III",
+    "beat": "Mirror Moment",
+    "purpose": "A quiet scene reveals what the protagonist is afraid to admit.",
+    "behavior": "holdOnFace",
+    "startFrame": 193,
+    "length": 48,
+    "scene": "a young signal archivist moves through a coastal city where memories arrive as radio weather, where a quiet scene reveals what the protagonist is afraid to admit.",
+    "visualPrompt": "Sci-fi fable, Wonder with tension, stage-ready frame, a coastal city where memories arrive as radio weather, a young signal archivist, cast continuity, clear silhouette, editable layers",
+    "videoPrompt": "Mirror Moment: camera movement, object behavior, blocking, and edit handles for 3 minutes short film, Wonder with tension"
+   }
+  ],
+  "productionManifest": {
+   "generatedAt": "2026-10-07T08:09:38.597Z",
+   "route": [
+    {
+     "lane": "Image",
+     "job": "Lock reusable cast references, world plates, style frames, and editable matte layers before video generation."
+    },
+    {
+     "lane": "Video",
+     "job": "Generate 5 controlled clips from score rows with handles, camera notes, and subject continuity checks."
+    },
+    {
+     "lane": "Sound",
+     "job": "Create ambience, motif, transition stingers, and sparse timed voice takes attached to frames."
+    },
+    {
+     "lane": "Edit",
+     "job": "Assemble a 240-frame working cut with JSON timing, prompt logs, markdown brief, and review notes."
+    }
+   ],
+   "continuityRules": [
+    "Keep a young signal archivist visually consistent across all cast references and generated clips.",
+    "Treat a coastal city where memories arrive as radio weather as a reusable stage with weather, light, prop, and camera states.",
+    "Every generated asset must map back to one score row and one behavior function.",
+    "Do not accept a clip unless it has edit handles and a clear first/last frame description."
+   ],
+   "deliverables": [
+    "Director board",
+    "Cast bible",
+    "Shot prompts",
+    "Timing map",
+    "Voice/music cue sheet",
+    "Production JSON",
+    "Review cut checklist"
+   ],
+   "risks": [
+    "Identity drift between shots",
+    "Unusable clips without handles",
+    "Audio not locked to score rows",
+    "Prompts that describe mood but not behavior"
+   ]
+  },
+  "rules": [],
+  "scripts": {
+   "movie": "-- Quiosco de pedidos · script de película (Admingo)\nglobal pedido\n\nal empezar la película\n  vaciar carrito\n  ir a marca \"INICIO\"\nfin\n\n-- cada pantalla se queda quieta hasta que alguien toca, como en Director\nal salir del fotograma\n  quedarse\nfin\n\non idle\n  if the marker <> \"INICIO\" and the idleSeconds > 12 then\n    if the marker = \"PAGO\" and the idleSeconds < 60 then exit\n    vaciar carrito\n    ir a marca \"INICIO\"\n  end if\nend\n\nal pagar\n  fijar pedido a the orderNumber\n  reiniciar reposo\n  ir a marca \"NUMERO\"\n  decir \"¡Gracias! Tu pedido es el \" & pedido\nfin",
+   "frames": {},
+   "sprites": {
+    "btnEmpezar": "al soltar\n  ir a marca \"CATEGORIAS\"\nfin",
+    "carta": "al soltar\n  ir a marca \"PRODUCTOS\"\nfin",
+    "productos": "al soltar\n  ir a marca \"OPCIONES\"\nfin",
+    "btnAtras": "al soltar\n  ir a marca \"CATEGORIAS\"\nfin",
+    "opciones": "al soltar\n  añadir al carrito the selectedItem talla the selectedSize\n  fijar el texto del sprite \"hCarrito\" a \"Tu pedido (\" & the cartCount & \")\"\n  ir a marca \"CARRITO\"\nfin",
+    "btnMas": "al soltar\n  ir a marca \"CATEGORIAS\"\nfin",
+    "carrito": "al soltar\n  si the cartCount = 0 entonces\n    decir \"Tu carrito está vacío\"\n  si no\n    ir a marca \"PAGO\"\n  fin si\nfin"
+   }
+  },
+  "menu": {
+   "$schema": "./menu.schema.json",
+   "schemaVersion": 1,
+   "example": true,
+   "disclaimer": {
+    "es": "DATOS DE EJEMPLO · precios ficticios · demo simulada, no se cobra nada",
+    "en": "EXAMPLE DATA · fictitious prices · simulated demo, nothing is charged"
+   },
+   "establishment": {
+    "id": "starbucks-paseo-de-gracia",
+    "name": "Starbucks · Paseo de Gracia 103",
+    "type": "cafeteria",
+    "brandId": "starbucks",
+    "locale": [
+     "es",
+     "en"
+    ],
+    "currency": "EUR",
+    "taxIncluded": true
+   },
+   "attract": {
+    "title": {
+     "es": "Pide aquí, sin colas",
+     "en": "Order here, skip the queue"
+    },
+    "subtitle": {
+     "es": "Toca la pantalla para empezar",
+     "en": "Touch the screen to start"
+    },
+    "images": [
+     "img/frappe.svg",
+     "img/latte.svg",
+     "img/refresher.svg"
+    ]
+   },
+   "categories": [
+    {
+     "id": "calientes",
+     "name": {
+      "es": "Cafés calientes",
+      "en": "Hot coffees"
+     },
+     "image": "img/latte.svg"
+    },
+    {
+     "id": "frios",
+     "name": {
+      "es": "Bebidas frías",
+      "en": "Cold drinks"
+     },
+     "image": "img/frappe.svg"
+    },
+    {
+     "id": "tes",
+     "name": {
+      "es": "Tés y otras",
+      "en": "Teas & more"
+     },
+     "image": "img/te.svg"
+    },
+    {
+     "id": "comida",
+     "name": {
+      "es": "Para comer",
+      "en": "Food"
+     },
+     "image": "img/croissant.svg"
+    }
+   ],
+   "items": [
+    {
+     "id": "caffe-latte",
+     "category": "calientes",
+     "name": {
+      "es": "Caffè Latte",
+      "en": "Caffè Latte"
+     },
+     "description": {
+      "es": "Espresso con leche vaporizada.",
+      "en": "Espresso with steamed milk."
+     },
+     "image": "img/latte.svg",
+     "basePrice": 3.6,
+     "allergens": [
+      "leche"
+     ],
+     "tags": [
+      "popular"
+     ],
+     "optionGroups": [
+      {
+       "id": "tamano",
+       "label": {
+        "es": "Tamaño",
+        "en": "Size"
+       },
+       "type": "single",
+       "required": true,
+       "default": "grande",
+       "choices": [
+        {
+         "id": "alto",
+         "label": {
+          "es": "Alto (Tall)",
+          "en": "Tall"
+         },
+         "priceDelta": 0
+        },
+        {
+         "id": "grande",
+         "label": {
+          "es": "Grande",
+          "en": "Grande"
+         },
+         "priceDelta": 0.4
+        },
+        {
+         "id": "venti",
+         "label": {
+          "es": "Venti",
+          "en": "Venti"
+         },
+         "priceDelta": 0.8
+        }
+       ]
+      },
+      {
+       "id": "leche",
+       "label": {
+        "es": "Leche",
+        "en": "Milk"
+       },
+       "type": "single",
+       "required": true,
+       "default": "entera",
+       "choices": [
+        {
+         "id": "entera",
+         "label": {
+          "es": "Entera",
+          "en": "Whole"
+         },
+         "priceDelta": 0
+        },
+        {
+         "id": "desnatada",
+         "label": {
+          "es": "Desnatada",
+          "en": "Skimmed"
+         },
+         "priceDelta": 0
+        },
+        {
+         "id": "sin-lactosa",
+         "label": {
+          "es": "Sin lactosa",
+          "en": "Lactose-free"
+         },
+         "priceDelta": 0
+        },
+        {
+         "id": "avena",
+         "label": {
+          "es": "Avena",
+          "en": "Oat"
+         },
+         "priceDelta": 0.5,
+         "allergens": [
+          "gluten"
+         ]
+        },
+        {
+         "id": "soja",
+         "label": {
+          "es": "Soja",
+          "en": "Soy"
+         },
+         "priceDelta": 0.5,
+         "allergens": [
+          "soja"
+         ]
+        },
+        {
+         "id": "almendra",
+         "label": {
+          "es": "Almendra",
+          "en": "Almond"
+         },
+         "priceDelta": 0.5,
+         "allergens": [
+          "frutos-de-cascara"
+         ]
+        }
+       ]
+      },
+      {
+       "id": "temperatura",
+       "label": {
+        "es": "Temperatura",
+        "en": "Temperature"
+       },
+       "type": "single",
+       "required": true,
+       "default": "normal",
+       "choices": [
+        {
+         "id": "normal",
+         "label": {
+          "es": "Normal",
+          "en": "Regular"
+         },
+         "priceDelta": 0
+        },
+        {
+         "id": "extra-caliente",
+         "label": {
+          "es": "Extra caliente",
+          "en": "Extra hot"
+         },
+         "priceDelta": 0
+        },
+        {
+         "id": "templado",
+         "label": {
+          "es": "Templado",
+          "en": "Warm"
+         },
+         "priceDelta": 0
+        }
+       ]
+      },
+      {
+       "id": "extras",
+       "label": {
+        "es": "Extras",
+        "en": "Extras"
+       },
+       "type": "multi",
+       "required": false,
+       "max": 4,
+       "choices": [
+        {
+         "id": "shot",
+         "label": {
+          "es": "Shot extra de espresso",
+          "en": "Extra espresso shot"
+         },
+         "priceDelta": 0.7
+        },
+        {
+         "id": "vainilla",
+         "label": {
+          "es": "Sirope de vainilla",
+          "en": "Vanilla syrup"
+         },
+         "priceDelta": 0.5
+        },
+        {
+         "id": "caramelo",
+         "label": {
+          "es": "Sirope de caramelo",
+          "en": "Caramel syrup"
+         },
+         "priceDelta": 0.5
+        },
+        {
+         "id": "nata",
+         "label": {
+          "es": "Nata montada",
+          "en": "Whipped cream"
+         },
+         "priceDelta": 0.5,
+         "allergens": [
+          "leche"
+         ]
+        },
+        {
+         "id": "descafeinado",
+         "label": {
+          "es": "Descafeinado",
+          "en": "Decaf"
+         },
+         "priceDelta": 0
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "id": "capuchino",
+     "category": "calientes",
+     "name": {
+      "es": "Capuchino",
+      "en": "Cappuccino"
+     },
+     "description": {
+      "es": "Espresso, leche y mucha espuma.",
+      "en": "Espresso, milk and lots of foam."
+     },
+     "image": "img/capuchino.svg",
+     "basePrice": 3.6,
+     "allergens": [
+      "leche"
+     ],
+     "tags": [],
+     "optionGroups": [
+      {
+       "id": "tamano",
+       "label": {
+        "es": "Tamaño",
+        "en": "Size"
+       },
+       "type": "single",
+       "required": true,
+       "default": "grande",
+       "choices": [
+        {
+         "id": "alto",
+         "label": {
+          "es": "Alto (Tall)",
+          "en": "Tall"
+         },
+         "priceDelta": 0
+        },
+        {
+         "id": "grande",
+         "label": {
+          "es": "Grande",
+          "en": "Grande"
+         },
+         "priceDelta": 0.4
+        },
+        {
+         "id": "venti",
+         "label": {
+          "es": "Venti",
+          "en": "Venti"
+         },
+         "priceDelta": 0.8
+        }
+       ]
+      },
+      {
+       "id": "leche",
+       "label": {
+        "es": "Leche",
+        "en": "Milk"
+       },
+       "type": "single",
+       "required": true,
+       "default": "entera",
+       "choices": [
+        {
+         "id": "entera",
+         "label": {
+          "es": "Entera",
+          "en": "Whole"
+         },
+         "priceDelta": 0
+        },
+        {
+         "id": "desnatada",
+         "label": {
+          "es": "Desnatada",
+          "en": "Skimmed"
+         },
+         "priceDelta": 0
+        },
+        {
+         "id": "sin-lactosa",
+         "label": {
+          "es": "Sin lactosa",
+          "en": "Lactose-free"
+         },
+         "priceDelta": 0
+        },
+        {
+         "id": "avena",
+         "label": {
+          "es": "Avena",
+          "en": "Oat"
+         },
+         "priceDelta": 0.5,
+         "allergens": [
+          "gluten"
+         ]
+        },
+        {
+         "id": "soja",
+         "label": {
+          "es": "Soja",
+          "en": "Soy"
+         },
+         "priceDelta": 0.5,
+         "allergens": [
+          "soja"
+         ]
+        },
+        {
+         "id": "almendra",
+         "label": {
+          "es": "Almendra",
+          "en": "Almond"
+         },
+         "priceDelta": 0.5,
+         "allergens": [
+          "frutos-de-cascara"
+         ]
+        }
+       ]
+      },
+      {
+       "id": "temperatura",
+       "label": {
+        "es": "Temperatura",
+        "en": "Temperature"
+       },
+       "type": "single",
+       "required": true,
+       "default": "normal",
+       "choices": [
+        {
+         "id": "normal",
+         "label": {
+          "es": "Normal",
+          "en": "Regular"
+         },
+         "priceDelta": 0
+        },
+        {
+         "id": "extra-caliente",
+         "label": {
+          "es": "Extra caliente",
+          "en": "Extra hot"
+         },
+         "priceDelta": 0
+        },
+        {
+         "id": "templado",
+         "label": {
+          "es": "Templado",
+          "en": "Warm"
+         },
+         "priceDelta": 0
+        }
+       ]
+      },
+      {
+       "id": "extras",
+       "label": {
+        "es": "Extras",
+        "en": "Extras"
+       },
+       "type": "multi",
+       "required": false,
+       "max": 4,
+       "choices": [
+        {
+         "id": "shot",
+         "label": {
+          "es": "Shot extra de espresso",
+          "en": "Extra espresso shot"
+         },
+         "priceDelta": 0.7
+        },
+        {
+         "id": "vainilla",
+         "label": {
+          "es": "Sirope de vainilla",
+          "en": "Vanilla syrup"
+         },
+         "priceDelta": 0.5
+        },
+        {
+         "id": "caramelo",
+         "label": {
+          "es": "Sirope de caramelo",
+          "en": "Caramel syrup"
+         },
+         "priceDelta": 0.5
+        },
+        {
+         "id": "nata",
+         "label": {
+          "es": "Nata montada",
+          "en": "Whipped cream"
+         },
+         "priceDelta": 0.5,
+         "allergens": [
+          "leche"
+         ]
+        },
+        {
+         "id": "descafeinado",
+         "label": {
+          "es": "Descafeinado",
+          "en": "Decaf"
+         },
+         "priceDelta": 0
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "id": "americano",
+     "category": "calientes",
+     "name": {
+      "es": "Caffè Americano",
+      "en": "Caffè Americano"
+     },
+     "description": {
+      "es": "Espresso alargado con agua caliente.",
+      "en": "Espresso topped with hot water."
+     },
+     "image": "img/cafe-caliente.svg",
+     "basePrice": 2.9,
+     "allergens": [],
+     "tags": [],
+     "optionGroups": [
+      {
+       "id": "tamano",
+       "label": {
+        "es": "Tamaño",
+        "en": "Size"
+       },
+       "type": "single",
+       "required": true,
+       "default": "grande",
+       "choices": [
+        {
+         "id": "alto",
+         "label": {
+          "es": "Alto (Tall)",
+          "en": "Tall"
+         },
+         "priceDelta": 0
+        },
+        {
+         "id": "grande",
+         "label": {
+          "es": "Grande",
+          "en": "Grande"
+         },
+         "priceDelta": 0.4
+        },
+        {
+         "id": "venti",
+         "label": {
+          "es": "Venti",
+          "en": "Venti"
+         },
+         "priceDelta": 0.8
+        }
+       ]
+      },
+      {
+       "id": "extras",
+       "label": {
+        "es": "Extras",
+        "en": "Extras"
+       },
+       "type": "multi",
+       "required": false,
+       "max": 4,
+       "choices": [
+        {
+         "id": "shot",
+         "label": {
+          "es": "Shot extra de espresso",
+          "en": "Extra espresso shot"
+         },
+         "priceDelta": 0.7
+        },
+        {
+         "id": "vainilla",
+         "label": {
+          "es": "Sirope de vainilla",
+          "en": "Vanilla syrup"
+         },
+         "priceDelta": 0.5
+        },
+        {
+         "id": "caramelo",
+         "label": {
+          "es": "Sirope de caramelo",
+          "en": "Caramel syrup"
+         },
+         "priceDelta": 0.5
+        },
+        {
+         "id": "nata",
+         "label": {
+          "es": "Nata montada",
+          "en": "Whipped cream"
+         },
+         "priceDelta": 0.5,
+         "allergens": [
+          "leche"
+         ]
+        },
+        {
+         "id": "descafeinado",
+         "label": {
+          "es": "Descafeinado",
+          "en": "Decaf"
+         },
+         "priceDelta": 0
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "id": "mocha",
+     "category": "calientes",
+     "name": {
+      "es": "Caffè Mocha",
+      "en": "Caffè Mocha"
+     },
+     "description": {
+      "es": "Espresso, chocolate y leche.",
+      "en": "Espresso, chocolate and milk."
+     },
+     "image": "img/mocha.svg",
+     "basePrice": 4.2,
+     "allergens": [
+      "leche"
+     ],
+     "tags": [],
+     "optionGroups": [
+      {
+       "id": "tamano",
+       "label": {
+        "es": "Tamaño",
+        "en": "Size"
+       },
+       "type": "single",
+       "required": true,
+       "default": "grande",
+       "choices": [
+        {
+         "id": "alto",
+         "label": {
+          "es": "Alto (Tall)",
+          "en": "Tall"
+         },
+         "priceDelta": 0
+        },
+        {
+         "id": "grande",
+         "label": {
+          "es": "Grande",
+          "en": "Grande"
+         },
+         "priceDelta": 0.4
+        },
+        {
+         "id": "venti",
+         "label": {
+          "es": "Venti",
+          "en": "Venti"
+         },
+         "priceDelta": 0.8
+        }
+       ]
+      },
+      {
+       "id": "leche",
+       "label": {
+        "es": "Leche",
+        "en": "Milk"
+       },
+       "type": "single",
+       "required": true,
+       "default": "entera",
+       "choices": [
+        {
+         "id": "entera",
+         "label": {
+          "es": "Entera",
+          "en": "Whole"
+         },
+         "priceDelta": 0
+        },
+        {
+         "id": "desnatada",
+         "label": {
+          "es": "Desnatada",
+          "en": "Skimmed"
+         },
+         "priceDelta": 0
+        },
+        {
+         "id": "sin-lactosa",
+         "label": {
+          "es": "Sin lactosa",
+          "en": "Lactose-free"
+         },
+         "priceDelta": 0
+        },
+        {
+         "id": "avena",
+         "label": {
+          "es": "Avena",
+          "en": "Oat"
+         },
+         "priceDelta": 0.5,
+         "allergens": [
+          "gluten"
+         ]
+        },
+        {
+         "id": "soja",
+         "label": {
+          "es": "Soja",
+          "en": "Soy"
+         },
+         "priceDelta": 0.5,
+         "allergens": [
+          "soja"
+         ]
+        },
+        {
+         "id": "almendra",
+         "label": {
+          "es": "Almendra",
+          "en": "Almond"
+         },
+         "priceDelta": 0.5,
+         "allergens": [
+          "frutos-de-cascara"
+         ]
+        }
+       ]
+      },
+      {
+       "id": "extras",
+       "label": {
+        "es": "Extras",
+        "en": "Extras"
+       },
+       "type": "multi",
+       "required": false,
+       "max": 4,
+       "choices": [
+        {
+         "id": "shot",
+         "label": {
+          "es": "Shot extra de espresso",
+          "en": "Extra espresso shot"
+         },
+         "priceDelta": 0.7
+        },
+        {
+         "id": "vainilla",
+         "label": {
+          "es": "Sirope de vainilla",
+          "en": "Vanilla syrup"
+         },
+         "priceDelta": 0.5
+        },
+        {
+         "id": "caramelo",
+         "label": {
+          "es": "Sirope de caramelo",
+          "en": "Caramel syrup"
+         },
+         "priceDelta": 0.5
+        },
+        {
+         "id": "nata",
+         "label": {
+          "es": "Nata montada",
+          "en": "Whipped cream"
+         },
+         "priceDelta": 0.5,
+         "allergens": [
+          "leche"
+         ]
+        },
+        {
+         "id": "descafeinado",
+         "label": {
+          "es": "Descafeinado",
+          "en": "Decaf"
+         },
+         "priceDelta": 0
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "id": "frappe-caramelo",
+     "category": "frios",
+     "name": {
+      "es": "Frappé de caramelo",
+      "en": "Caramel frappé"
+     },
+     "description": {
+      "es": "Café granizado con caramelo.",
+      "en": "Blended iced coffee with caramel."
+     },
+     "image": "img/frappe.svg",
+     "basePrice": 4.9,
+     "allergens": [
+      "leche"
+     ],
+     "tags": [
+      "popular"
+     ],
+     "optionGroups": [
+      {
+       "id": "tamano",
+       "label": {
+        "es": "Tamaño",
+        "en": "Size"
+       },
+       "type": "single",
+       "required": true,
+       "default": "grande",
+       "choices": [
+        {
+         "id": "alto",
+         "label": {
+          "es": "Alto (Tall)",
+          "en": "Tall"
+         },
+         "priceDelta": 0
+        },
+        {
+         "id": "grande",
+         "label": {
+          "es": "Grande",
+          "en": "Grande"
+         },
+         "priceDelta": 0.4
+        },
+        {
+         "id": "venti",
+         "label": {
+          "es": "Venti",
+          "en": "Venti"
+         },
+         "priceDelta": 0.8
+        }
+       ]
+      },
+      {
+       "id": "leche",
+       "label": {
+        "es": "Leche",
+        "en": "Milk"
+       },
+       "type": "single",
+       "required": true,
+       "default": "entera",
+       "choices": [
+        {
+         "id": "entera",
+         "label": {
+          "es": "Entera",
+          "en": "Whole"
+         },
+         "priceDelta": 0
+        },
+        {
+         "id": "desnatada",
+         "label": {
+          "es": "Desnatada",
+          "en": "Skimmed"
+         },
+         "priceDelta": 0
+        },
+        {
+         "id": "sin-lactosa",
+         "label": {
+          "es": "Sin lactosa",
+          "en": "Lactose-free"
+         },
+         "priceDelta": 0
+        },
+        {
+         "id": "avena",
+         "label": {
+          "es": "Avena",
+          "en": "Oat"
+         },
+         "priceDelta": 0.5,
+         "allergens": [
+          "gluten"
+         ]
+        },
+        {
+         "id": "soja",
+         "label": {
+          "es": "Soja",
+          "en": "Soy"
+         },
+         "priceDelta": 0.5,
+         "allergens": [
+          "soja"
+         ]
+        },
+        {
+         "id": "almendra",
+         "label": {
+          "es": "Almendra",
+          "en": "Almond"
+         },
+         "priceDelta": 0.5,
+         "allergens": [
+          "frutos-de-cascara"
+         ]
+        }
+       ]
+      },
+      {
+       "id": "extras",
+       "label": {
+        "es": "Extras",
+        "en": "Extras"
+       },
+       "type": "multi",
+       "required": false,
+       "max": 4,
+       "choices": [
+        {
+         "id": "shot",
+         "label": {
+          "es": "Shot extra de espresso",
+          "en": "Extra espresso shot"
+         },
+         "priceDelta": 0.7
+        },
+        {
+         "id": "vainilla",
+         "label": {
+          "es": "Sirope de vainilla",
+          "en": "Vanilla syrup"
+         },
+         "priceDelta": 0.5
+        },
+        {
+         "id": "caramelo",
+         "label": {
+          "es": "Sirope de caramelo",
+          "en": "Caramel syrup"
+         },
+         "priceDelta": 0.5
+        },
+        {
+         "id": "nata",
+         "label": {
+          "es": "Nata montada",
+          "en": "Whipped cream"
+         },
+         "priceDelta": 0.5,
+         "allergens": [
+          "leche"
+         ]
+        },
+        {
+         "id": "descafeinado",
+         "label": {
+          "es": "Descafeinado",
+          "en": "Decaf"
+         },
+         "priceDelta": 0
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "id": "cold-brew",
+     "category": "frios",
+     "name": {
+      "es": "Cold Brew",
+      "en": "Cold Brew"
+     },
+     "description": {
+      "es": "Café infusionado en frío 20 horas.",
+      "en": "Coffee steeped cold for 20 hours."
+     },
+     "image": "img/frio.svg",
+     "basePrice": 3.9,
+     "allergens": [],
+     "tags": [],
+     "optionGroups": [
+      {
+       "id": "tamano",
+       "label": {
+        "es": "Tamaño",
+        "en": "Size"
+       },
+       "type": "single",
+       "required": true,
+       "default": "grande",
+       "choices": [
+        {
+         "id": "alto",
+         "label": {
+          "es": "Alto (Tall)",
+          "en": "Tall"
+         },
+         "priceDelta": 0
+        },
+        {
+         "id": "grande",
+         "label": {
+          "es": "Grande",
+          "en": "Grande"
+         },
+         "priceDelta": 0.4
+        },
+        {
+         "id": "venti",
+         "label": {
+          "es": "Venti",
+          "en": "Venti"
+         },
+         "priceDelta": 0.8
+        }
+       ]
+      },
+      {
+       "id": "extras",
+       "label": {
+        "es": "Extras",
+        "en": "Extras"
+       },
+       "type": "multi",
+       "required": false,
+       "max": 4,
+       "choices": [
+        {
+         "id": "shot",
+         "label": {
+          "es": "Shot extra de espresso",
+          "en": "Extra espresso shot"
+         },
+         "priceDelta": 0.7
+        },
+        {
+         "id": "vainilla",
+         "label": {
+          "es": "Sirope de vainilla",
+          "en": "Vanilla syrup"
+         },
+         "priceDelta": 0.5
+        },
+        {
+         "id": "caramelo",
+         "label": {
+          "es": "Sirope de caramelo",
+          "en": "Caramel syrup"
+         },
+         "priceDelta": 0.5
+        },
+        {
+         "id": "nata",
+         "label": {
+          "es": "Nata montada",
+          "en": "Whipped cream"
+         },
+         "priceDelta": 0.5,
+         "allergens": [
+          "leche"
+         ]
+        },
+        {
+         "id": "descafeinado",
+         "label": {
+          "es": "Descafeinado",
+          "en": "Decaf"
+         },
+         "priceDelta": 0
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "id": "refresher-fresa",
+     "category": "frios",
+     "name": {
+      "es": "Refresher de fresa",
+      "en": "Strawberry refresher"
+     },
+     "description": {
+      "es": "Bebida fría de fruta con hielo.",
+      "en": "Iced fruit drink."
+     },
+     "image": "img/refresher.svg",
+     "basePrice": 4.3,
+     "allergens": [],
+     "tags": [],
+     "optionGroups": [
+      {
+       "id": "tamano",
+       "label": {
+        "es": "Tamaño",
+        "en": "Size"
+       },
+       "type": "single",
+       "required": true,
+       "default": "grande",
+       "choices": [
+        {
+         "id": "alto",
+         "label": {
+          "es": "Alto (Tall)",
+          "en": "Tall"
+         },
+         "priceDelta": 0
+        },
+        {
+         "id": "grande",
+         "label": {
+          "es": "Grande",
+          "en": "Grande"
+         },
+         "priceDelta": 0.4
+        },
+        {
+         "id": "venti",
+         "label": {
+          "es": "Venti",
+          "en": "Venti"
+         },
+         "priceDelta": 0.8
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "id": "chai-latte",
+     "category": "tes",
+     "name": {
+      "es": "Chai Tea Latte",
+      "en": "Chai Tea Latte"
+     },
+     "description": {
+      "es": "Té especiado con leche.",
+      "en": "Spiced tea with milk."
+     },
+     "image": "img/te.svg",
+     "basePrice": 3.9,
+     "allergens": [
+      "leche"
+     ],
+     "tags": [],
+     "optionGroups": [
+      {
+       "id": "tamano",
+       "label": {
+        "es": "Tamaño",
+        "en": "Size"
+       },
+       "type": "single",
+       "required": true,
+       "default": "grande",
+       "choices": [
+        {
+         "id": "alto",
+         "label": {
+          "es": "Alto (Tall)",
+          "en": "Tall"
+         },
+         "priceDelta": 0
+        },
+        {
+         "id": "grande",
+         "label": {
+          "es": "Grande",
+          "en": "Grande"
+         },
+         "priceDelta": 0.4
+        },
+        {
+         "id": "venti",
+         "label": {
+          "es": "Venti",
+          "en": "Venti"
+         },
+         "priceDelta": 0.8
+        }
+       ]
+      },
+      {
+       "id": "leche",
+       "label": {
+        "es": "Leche",
+        "en": "Milk"
+       },
+       "type": "single",
+       "required": true,
+       "default": "entera",
+       "choices": [
+        {
+         "id": "entera",
+         "label": {
+          "es": "Entera",
+          "en": "Whole"
+         },
+         "priceDelta": 0
+        },
+        {
+         "id": "desnatada",
+         "label": {
+          "es": "Desnatada",
+          "en": "Skimmed"
+         },
+         "priceDelta": 0
+        },
+        {
+         "id": "sin-lactosa",
+         "label": {
+          "es": "Sin lactosa",
+          "en": "Lactose-free"
+         },
+         "priceDelta": 0
+        },
+        {
+         "id": "avena",
+         "label": {
+          "es": "Avena",
+          "en": "Oat"
+         },
+         "priceDelta": 0.5,
+         "allergens": [
+          "gluten"
+         ]
+        },
+        {
+         "id": "soja",
+         "label": {
+          "es": "Soja",
+          "en": "Soy"
+         },
+         "priceDelta": 0.5,
+         "allergens": [
+          "soja"
+         ]
+        },
+        {
+         "id": "almendra",
+         "label": {
+          "es": "Almendra",
+          "en": "Almond"
+         },
+         "priceDelta": 0.5,
+         "allergens": [
+          "frutos-de-cascara"
+         ]
+        }
+       ]
+      },
+      {
+       "id": "temperatura",
+       "label": {
+        "es": "Temperatura",
+        "en": "Temperature"
+       },
+       "type": "single",
+       "required": true,
+       "default": "normal",
+       "choices": [
+        {
+         "id": "normal",
+         "label": {
+          "es": "Normal",
+          "en": "Regular"
+         },
+         "priceDelta": 0
+        },
+        {
+         "id": "extra-caliente",
+         "label": {
+          "es": "Extra caliente",
+          "en": "Extra hot"
+         },
+         "priceDelta": 0
+        },
+        {
+         "id": "templado",
+         "label": {
+          "es": "Templado",
+          "en": "Warm"
+         },
+         "priceDelta": 0
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "id": "te-verde",
+     "category": "tes",
+     "name": {
+      "es": "Té verde",
+      "en": "Green tea"
+     },
+     "description": {
+      "es": "Infusión de té verde.",
+      "en": "Green tea infusion."
+     },
+     "image": "img/te.svg",
+     "basePrice": 2.6,
+     "allergens": [],
+     "tags": [],
+     "optionGroups": [
+      {
+       "id": "tamano",
+       "label": {
+        "es": "Tamaño",
+        "en": "Size"
+       },
+       "type": "single",
+       "required": true,
+       "default": "grande",
+       "choices": [
+        {
+         "id": "alto",
+         "label": {
+          "es": "Alto (Tall)",
+          "en": "Tall"
+         },
+         "priceDelta": 0
+        },
+        {
+         "id": "grande",
+         "label": {
+          "es": "Grande",
+          "en": "Grande"
+         },
+         "priceDelta": 0.4
+        },
+        {
+         "id": "venti",
+         "label": {
+          "es": "Venti",
+          "en": "Venti"
+         },
+         "priceDelta": 0.8
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "id": "croissant",
+     "category": "comida",
+     "name": {
+      "es": "Croissant de mantequilla",
+      "en": "Butter croissant"
+     },
+     "description": {
+      "es": "Recién horneado.",
+      "en": "Freshly baked."
+     },
+     "image": "img/croissant.svg",
+     "basePrice": 2.2,
+     "allergens": [
+      "gluten",
+      "leche",
+      "huevo"
+     ],
+     "tags": [],
+     "optionGroups": []
+    },
+    {
+     "id": "muffin",
+     "category": "comida",
+     "name": {
+      "es": "Muffin de chocolate",
+      "en": "Chocolate muffin"
+     },
+     "description": {
+      "es": "Con trozos de chocolate.",
+      "en": "With chocolate chunks."
+     },
+     "image": "img/muffin.svg",
+     "basePrice": 2.9,
+     "allergens": [
+      "gluten",
+      "leche",
+      "huevo"
+     ],
+     "tags": [],
+     "optionGroups": []
+    },
+    {
+     "id": "cookie",
+     "category": "comida",
+     "name": {
+      "es": "Cookie",
+      "en": "Cookie"
+     },
+     "description": {
+      "es": "Galleta con pepitas de chocolate.",
+      "en": "Chocolate chip cookie."
+     },
+     "image": "img/cookie.svg",
+     "basePrice": 2.1,
+     "allergens": [
+      "gluten",
+      "leche",
+      "huevo"
+     ],
+     "tags": [],
+     "optionGroups": []
+    }
+   ],
+   "upsells": [
+    "croissant",
+    "cookie"
+   ],
+   "orderFlow": {
+    "mode": "simulated",
+    "prefix": "A",
+    "payment": {
+     "qr": true,
+     "counter": true,
+     "checkoutUrl": "pago-simulado.html",
+     "note": {
+      "es": "Pago SIMULADO: no se cobra nada ni se piden datos de tarjeta",
+      "en": "SIMULATED payment: nothing is charged and no card data is asked"
+     }
+    }
+   },
+   "idle": {
+    "resetSeconds": 12,
+    "warnSeconds": 4
+   },
+   "imageBase": "https://www.ainimation.studio/xperiencias/kiosko-pedido/"
+  },
+  "stage": {
+   "w": 1080,
+   "h": 1920
+  },
+  "totalFrames": 168,
+  "markers": [
+   {
+    "id": "m-inicio",
+    "frame": 1,
+    "label": "INICIO"
+   },
+   {
+    "id": "m-categorias",
+    "frame": 25,
+    "label": "CATEGORIAS"
+   },
+   {
+    "id": "m-productos",
+    "frame": 49,
+    "label": "PRODUCTOS"
+   },
+   {
+    "id": "m-opciones",
+    "frame": 73,
+    "label": "OPCIONES"
+   },
+   {
+    "id": "m-carrito",
+    "frame": 97,
+    "label": "CARRITO"
+   },
+   {
+    "id": "m-pago",
+    "frame": 121,
+    "label": "PAGO"
+   },
+   {
+    "id": "m-numero",
+    "frame": 145,
+    "label": "NUMERO"
+   },
+   {
+    "id": "m-fin",
+    "frame": 168,
+    "label": "FIN"
+   }
+  ],
+  "durationSeconds": 90,
+  "template": "quiosco-de-pedidos"
+ }
+}

@@ -2,15 +2,20 @@ import base from 'node:test';
 import assert from 'node:assert/strict';
 // Sin `npm ci` en mcp/server (p. ej. `node --test` desde la raíz del sitio) se SALTA en vez
 // de romper toda la batería: es un paquete aparte con sus propias dependencias.
-let Client, InMemoryTransport, crearServidor, manejar, claveFlota, SIN_SDK = false;
+let Client, InMemoryTransport, crearServidor, manejar, HERRAMIENTAS, claveFlota, SIN_SDK = false;
 try {
   ({ Client } = await import('@modelcontextprotocol/sdk/client/index.js'));
   ({ InMemoryTransport } = await import('@modelcontextprotocol/sdk/inMemory.js'));
-  ({ crearServidor, manejar } = await import('../src/index.js'));
+  ({ crearServidor, manejar, HERRAMIENTAS } = await import('../src/index.js'));
   ({ claveFlota } = await import('../src/identidad-flota.mjs'));
 } catch (e) { if (e?.code !== 'ERR_MODULE_NOT_FOUND') throw e; SIN_SDK = true; }
 const test = (name, ...rest) => (SIN_SDK ? base(name, { skip: 'faltan dependencias: npm ci en mcp/server' }, () => {}) : base(name, ...rest));
 
+import { readFileSync } from 'node:fs';
+const raiz = new URL('../../../', import.meta.url);
+const PLANTILLA = readFileSync(new URL('plantillas/quiosco-de-pedidos.json', raiz), 'utf8');
+const ESQUEMA = readFileSync(new URL('xperiencias/kiosko-pedido/menu.schema.json', raiz), 'utf8');
+const CARTA = readFileSync(new URL('xperiencias/kiosko-pedido/menu.starbucks.json', raiz), 'utf8');
 const SITIO = 'https://sitio.test', STOCK = 'https://stock.test';
 const ENV = { SITIO, STOCK_API: STOCK, VERSION: 'v.08.09.2026.r1.12:00', MCP_FLOTA_SEED: 'semilla-de-prueba' };
 const ok = (o, status = 200) => new Response(JSON.stringify(o), { status, headers: { 'content-type': 'application/json' } });
@@ -26,6 +31,11 @@ function fetchFalso(peticiones) {
     if (u.startsWith(`${SITIO}/help/`) || u.startsWith(`${SITIO}/mcp/`)) return new Response('<html>', { status: 200 });
     if (u.startsWith(`${STOCK}/stock/list`)) return ok({ items: [{ id: 'a1', title: 'Toca y Elige animation', type: 'animation', motor: 'ainimation', category: 'animaciones' }, { id: 'l1', title: 'Enlace', type: 'link', category: 'enlace' }] });
     if (u === `${STOCK}/stock/publish`) return ok({ ok: true, id: 'stock-9' });
+    if (u === `${SITIO}/plantillas/quiosco-de-pedidos.json`) return new Response(PLANTILLA, { status: 200 });
+    if (u === `${SITIO}/xperiencias/kiosko-pedido/menu.schema.json`) return new Response(ESQUEMA, { status: 200 });
+    if (u === `${SITIO}/xperiencias/kiosko-pedido/menu.starbucks.json`) return new Response(CARTA, { status: 200 });
+    if (u === 'https://www.admiranext.com/marcablanca/clientes/index.json') return ok({ clientes: [{ id: 'starbucks', nombre: 'Starbucks', sector: 'Cafeterías' }] });
+    if (u === 'https://www.admiranext.com/marcablanca/clientes/starbucks.json') return ok({ id: 'starbucks', nombre: 'Starbucks', modo: 'claro', colores: { primario: '#00704A' }, logo: { svg: '../logos/starbucks.svg' } });
     return new Response('Not found', { status: 404 });
   };
 }
@@ -40,10 +50,10 @@ async function cliente(identidad = null) {
 }
 const res = (r) => JSON.parse(r.content[0].text);
 
-test('las siete herramientas están y las instrucciones dicen qué es', async () => {
+test('las diecisiete herramientas están y las instrucciones dicen qué es', async () => {
   const { client } = await cliente();
   const { tools } = await client.listTools();
-  assert.deepEqual(tools.map((t) => t.name).sort(), ['quien_soy', 'sitio_estado', 'stock_animaciones', 'xperiencia_canal_item', 'xperiencia_detalle', 'xperiencia_publicar', 'xperiencias_listar']);
+  assert.deepEqual(tools.map((t) => t.name).sort(), [...HERRAMIENTAS].sort()); assert.equal(tools.length, 17);
   assert.match(client.getInstructions(), /Xperiencias/);
 });
 
@@ -100,7 +110,7 @@ test('sitio_estado lee el sello y las puertas', async () => {
 test('HTTP: / describe el servicio, /mcp por GET dice 405 con la documentación, y la clave de flota da identidad', async () => {
   const deps = { fetch: fetchFalso([]) };
   const raiz = await (await manejar(new Request('https://mcp.test/'), ENV, deps)).json();
-  assert.equal(raiz.endpoint_mcp, 'https://mcp.test/mcp'); assert.equal(raiz.herramientas.length, 7);
+  assert.equal(raiz.endpoint_mcp, 'https://mcp.test/mcp'); assert.equal(raiz.herramientas.length, 17);
   const get = await manejar(new Request('https://mcp.test/mcp'), ENV, deps);
   assert.equal(get.status, 405); assert.equal(get.headers.get('x-documentacion'), `${SITIO}/mcp/`);
   const clave = await claveFlota(ENV.MCP_FLOTA_SEED, 'Morfeo', 'MacMini');
@@ -109,4 +119,55 @@ test('HTTP: / describe el servicio, /mcp por GET dice 405 con la documentación,
   assert.equal(init.status, 200);
   const j = await init.json();
   assert.equal(j.result.serverInfo.name, 'ainimation');
+});
+
+test('plantillas y crear_proyecto: el Quiosco de pedidos sale como proyecto del Director con su Admingo', async () => {
+  const { client } = await cliente();
+  const t = res(await client.callTool({ name: 'plantillas', arguments: {} }));
+  assert.deepEqual(t.plantillas.map((x) => x.id), ['quiosco-de-pedidos', 'vacio']);
+  assert.equal(t.plantillas[0].studio, `${SITIO}/studio.html?plantilla=quiosco`);
+  const d = res(await client.callTool({ name: 'crear_proyecto', arguments: { plantilla: 'quiosco-de-pedidos', titulo: 'Mi quiosco' } }));
+  assert.equal(d.proyecto.format, 'ainimation-project'); assert.equal(d.proyecto.plan.title, 'Mi quiosco');
+  assert.deepEqual(d.proyecto.plan.stage, { w: 1080, h: 1920 }); assert.match(d.proyecto.plan.scripts.movie, /al empezar la película/);
+  const v = res(await client.callTool({ name: 'crear_proyecto', arguments: { plantilla: 'vacio' } }));
+  assert.equal(v.proyecto.plan.stageItems.length, 0);
+});
+
+test('validar_admingo y compilar_admingo usan el compilador del Studio (errores con línea, reglas XPL)', async () => {
+  const { client } = await cliente();
+  const mal = res(await client.callTool({ name: 'validar_admingo', arguments: { fuente: 'al empezar la película\n  ir a marca "X"\n' } }));
+  assert.equal(mal.ok, false); assert.equal(mal.errores[0].line, 3); assert.match(mal.errores[0].es, /fin/);
+  const plan = JSON.parse(PLANTILLA).plan;
+  const ok2 = res(await client.callTool({ name: 'compilar_admingo', arguments: { scripts: plan.scripts } }));
+  assert.equal(ok2.ok, true); assert.ok(ok2.reglas_total >= 3); assert.equal(ok2.reglas_xpl[0].origin, 'admingo');
+  assert.deepEqual(ok2.globales, ['pedido']); assert.ok(ok2.manejadores.movie.length >= 3);
+  const fich = res(await client.callTool({ name: 'compilar_admingo', arguments: { fuente: '--@ sprite "b"\non mouseUp\n  go to marker "FIN"\nend\n' } }));
+  assert.equal(fich.reglas_xpl[0].do[0].value, 'FIN');
+});
+
+test('menu_validar: la carta Starbucks pasa; una carta rota da errores claros', async () => {
+  const { client } = await cliente();
+  const d = res(await client.callTool({ name: 'menu_validar', arguments: {} }));
+  assert.equal(d.ok, true, JSON.stringify(d.errores)); assert.ok(d.resumen.productos > 3);
+  const m = JSON.parse(CARTA); m.items.push({ ...m.items[0] }); delete m.orderFlow;
+  const e = res(await client.callTool({ name: 'menu_validar', arguments: { menu: m } }));
+  assert.equal(e.ok, false); assert.ok(e.errores.some((x) => /orderFlow/.test(x))); assert.ok(e.errores.some((x) => /repetido/.test(x)));
+});
+
+test('publicar_xperiencia, enviar_a_admiratv, fijar_en_totem y marca_aplicar no inventan: URL, item interactive, /totem y ?marca', async () => {
+  const { client } = await cliente();
+  const p = res(await client.callTool({ name: 'publicar_xperiencia', arguments: { slug: 'toca-y-elige' } }));
+  assert.equal(p.url, `${SITIO}/xperiencias/toca-y-elige/`); assert.equal(p.zip.estado, 'próximamente'); assert.equal(p.pixeria, null);
+  const sin = await client.callTool({ name: 'publicar_xperiencia', arguments: { slug: 'toca-y-elige', pixeria: true } });
+  assert.equal(sin.isError, true);
+  const tv = res(await client.callTool({ name: 'enviar_a_admiratv', arguments: { slug: 'toca-y-elige', orientacion: 'vertical' } }));
+  assert.equal(tv.item.type, 'interactive'); assert.deepEqual(tv.item.tags, ['vertical']); assert.equal(tv.envio_directo, 'próximamente');
+  const k = res(await client.callTool({ name: 'fijar_en_totem', arguments: {} }));
+  assert.equal(k.comando, '/totem kiosko'); assert.match(k.gemelo, /kiosko=1/); assert.match(k.url_en_totem, /store=starbucks-paseo-de-gracia&marca=starbucks/);
+  const u = res(await client.callTool({ name: 'fijar_en_totem', arguments: { slug: 'toca-y-elige' } }));
+  assert.equal(u.comando, `/totem url ${SITIO}/xperiencias/toca-y-elige/`);
+  const m = res(await client.callTool({ name: 'marca_aplicar', arguments: { marca: 'starbucks' } }));
+  assert.equal(m.url, `${SITIO}/xperiencias/kiosko-pedido/?marca=starbucks`); assert.equal(m.gemelo, '/marca starbucks'); assert.equal(m.logo, 'https://www.admiranext.com/marcablanca/logos/starbucks.svg');
+  const no = await client.callTool({ name: 'marca_aplicar', arguments: { marca: 'nadie' } });
+  assert.equal(no.isError, true);
 });

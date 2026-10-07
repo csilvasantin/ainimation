@@ -17,12 +17,15 @@ import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { WebStandardStreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/webStandardStreamableHttp.js';
 import * as z from 'zod/v4';
 import { identidadPorClave, claveDeRequest } from './identidad-flota.mjs';
+import { Admingo, PLANTILLAS, proyectoVacio, compilar, validarEsquema, coherenciaMenu, urlKiosko, TWIN_BASE, TWIN_STARBUCKS, MARCAS } from './suite.js';
 
 export const NOMBRE = 'ainimation';
+export const HERRAMIENTAS = ['quien_soy', 'sitio_estado', 'xperiencias_listar', 'xperiencia_detalle', 'xperiencia_canal_item', 'stock_animaciones', 'xperiencia_publicar', 'listar_xperiencias', 'plantillas', 'crear_proyecto', 'validar_admingo', 'compilar_admingo', 'publicar_xperiencia', 'menu_validar', 'enviar_a_admiratv', 'fijar_en_totem', 'marca_aplicar'];
 const limpiar = (s) => String(s || '').replace(/\/+$/, '');
 const texto = (o) => ({ content: [{ type: 'text', text: typeof o === 'string' ? o : JSON.stringify(o, null, 2) }] });
 const fallo = (e) => ({ isError: true, content: [{ type: 'text', text: 'Error: ' + (e && e.message || e) }] });
 const seguro = (fn) => async (args) => { try { return await fn(args || {}); } catch (e) { return fallo(e); } };
+const Admingo_fromFile = (t) => Admingo.fromFile(t);
 const SLUG = z.string().min(2).max(80).regex(/^[a-z0-9-]+$/, 'slug en minúsculas, dígitos y guiones');
 
 export function crearServidor(env = {}, deps = {}, identidad = null) {
@@ -66,6 +69,7 @@ export function crearServidor(env = {}, deps = {}, identidad = null) {
       `Eres el acceso MCP a AInimation Studio (${sitio}), la capa de autoría de la suite AdmiraNeXT: piezas interactivas («Xperiencias», plan.json + rules.json) que se crean en /studio.html, se guardan en Pixeria y se emiten en admira.tv.`,
       'Lecturas sin clave: sitio_estado, xperiencias_listar, xperiencia_detalle, xperiencia_canal_item, stock_animaciones. Escritura con clave de flota AdmiraNeXT (Authorization: Bearer): xperiencia_publicar. quien_soy te dice con qué identidad entras.',
       'Este servidor no guarda estado: lee el sitio (index.json es la única fuente de la galería) y escribe en el stock de Pixeria. Crear una Xperiencia nueva sigue siendo trabajo del repo (carpeta + entrada en index.json): el MCP te dice qué hay y publica lo que ya existe.',
+      'Suite (desde 7-oct-2026): listar_xperiencias, plantillas, crear_proyecto (proyecto del Director desde plantilla), validar_admingo y compilar_admingo (el Lingo de AdmiraNeXT → reglas XPL), publicar_xperiencia (URL + ficheros; ZIP próximamente), menu_validar (carta de quiosco), enviar_a_admiratv (item de playlist type interactive), fijar_en_totem (comando /totem del gemelo) y marca_aplicar (marcablanca de admiranext). Son cálculos y lecturas: no escriben.',
       'Ritual de la flota: lo que hagas aquí se declara en yokup (mcp.admira.live · yokup_alta/yokup_paso) — este MCP no puntúa por sí mismo.',
     ].join(' '),
   });
@@ -157,6 +161,129 @@ export function crearServidor(env = {}, deps = {}, identidad = null) {
     return texto({ ok: true, publicado_por: identidad.agente, slug, stock: r, siguiente: 'declara el trabajo en yokup (mcp.admira.live · yokup_paso) y, si toca emitir, xperiencia_canal_item(slug) para admira.tv' });
   }));
 
+  // ── Suite (7-oct-2026): Director, Admingo, carta, admira.tv, tótem del gemelo y marca ──────────
+  const ESC = z.object({ movie: z.string().max(60000).optional(), frames: z.record(z.string(), z.string().max(30000)).optional(), sprites: z.record(z.string(), z.string().max(30000)).optional() });
+  const scriptsDe = (fuente, scripts) => { if (scripts) return scripts; if (typeof fuente === 'string') return (fuente.includes('--@') ? Admingo_fromFile(fuente) : fuente); throw new Error('manda «fuente» (texto Admingo o fichero .admingo) o «scripts» {movie, frames, sprites}'); };
+  const listar = seguro(async () => {
+    const { actualizado, xperiencias } = await indice();
+    const lista = await Promise.all(xperiencias.map(async (x) => ({ slug: x.slug, titulo: x.title, resumen: x.blurb || '', url: url(x.slug), plan: resumenPlan(await plan(x.slug).catch(() => null)) })));
+    return texto({ sitio, actualizado, total: lista.length, xperiencias: lista, siguiente: 'xperiencia_detalle(slug) · publicar_xperiencia(slug) · enviar_a_admiratv(slug) · fijar_en_totem(slug)' });
+  });
+
+  server.registerTool('listar_xperiencias', {
+    title: 'Listar Xperiencias (nombre de suite)',
+    description: 'Igual que xperiencias_listar: las Xperiencias publicadas (fuente única /xperiencias/index.json) con duración, fps, marcadores y URL viva.',
+    inputSchema: {}, annotations: { readOnlyHint: true, openWorldHint: true },
+  }, listar);
+
+  server.registerTool('plantillas', {
+    title: 'Plantillas del Director',
+    description: 'Las plantillas del menú «Plantillas» del Studio (p. ej. «Quiosco de pedidos», tótem vertical 1080×1920 con su lógica Admingo) con el enlace que las abre editables.',
+    inputSchema: {}, annotations: { readOnlyHint: true, openWorldHint: false },
+  }, seguro(async () => texto({ plantillas: PLANTILLAS.map((t) => ({ ...t, proyecto: t.proyecto && sitio + t.proyecto, studio: sitio + t.studio, pieza: t.pieza && sitio + t.pieza })), siguiente: 'crear_proyecto(plantilla)' })));
+
+  server.registerTool('crear_proyecto', {
+    title: 'Crear proyecto desde plantilla',
+    description: 'Devuelve un proyecto del Director ({format:"ainimation-project", plan}) a partir de una plantilla, listo para Archivo → Abrir JSON en /studio.html, más el enlace que abre la plantilla directamente. No guarda nada en servidor.',
+    inputSchema: { plantilla: z.enum(PLANTILLAS.map((t) => t.id)), titulo: z.string().max(120).optional(), marca: z.string().max(40).regex(/^[a-z0-9-]+$/).optional() },
+    annotations: { readOnlyHint: true, openWorldHint: true },
+  }, seguro(async ({ plantilla, titulo, marca }) => {
+    const t = PLANTILLAS.find((x) => x.id === plantilla);
+    const proyecto = t.proyecto ? await llamar(sitio + t.proyecto) : proyectoVacio(titulo);
+    if (titulo) proyecto.plan.title = titulo;
+    if (marca) proyecto.plan.marca = marca;
+    proyecto.savedAt = new Date().toISOString();
+    return texto({ plantilla, abrir_en_studio: sitio + t.studio, como_abrir: 'Studio → Archivo → Abrir JSON con este «proyecto»', proyecto });
+  }));
+
+  server.registerTool('validar_admingo', {
+    title: 'Validar Admingo',
+    description: 'Comprueba scripts Admingo (ES/EN, como en la ventana Script del Director) y devuelve los errores con línea y columna en castellano e inglés. Mismo compilador que el Studio.',
+    inputSchema: { fuente: z.string().max(200000).optional().describe('Texto Admingo (script de película) o fichero .admingo con marcas --@'), scripts: ESC.optional() },
+    annotations: { readOnlyHint: true, openWorldHint: false },
+  }, seguro(async ({ fuente, scripts }) => { const r = compilar(scriptsDe(fuente, scripts)); return texto({ ok: r.ok, errores: r.errores, manejadores: r.manejadores }); }));
+
+  server.registerTool('compilar_admingo', {
+    title: 'Compilar Admingo a XPL',
+    description: 'Compila Admingo: los manejadores simples salen como reglas XPL (origin "admingo", las que el motor de reglas ejecuta) y el resto queda para la VM con sandbox de la pieza. Devuelve reglas, globales y manejadores.',
+    inputSchema: { fuente: z.string().max(200000).optional(), scripts: ESC.optional() },
+    annotations: { readOnlyHint: true, openWorldHint: false },
+  }, seguro(async ({ fuente, scripts }) => texto(compilar(scriptsDe(fuente, scripts)))));
+
+  server.registerTool('publicar_xperiencia', {
+    title: 'Publicar Xperiencia (URL y paquete)',
+    description: 'Para una Xperiencia ya en el sitio: URL viva, ficheros (index.html, plan.json, rules.json, menu.json si hay) y el item de admira.tv. Con clave de flota y pixeria:true también la lleva al stock de Pixeria (como xperiencia_publicar). El ZIP de un proyecto propio se genera en el Studio (Publicar Xperiencia); el ZIP desde el MCP está próximamente.',
+    inputSchema: { slug: SLUG, pixeria: z.boolean().optional() },
+    annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: true, openWorldHint: true },
+  }, seguro(async ({ slug, pixeria = false }) => {
+    const x = await entrada(slug);
+    const p = await plan(slug).catch(() => null);
+    const base = url(slug);
+    const ficheros = { 'index.html': base, 'plan.json': base + 'plan.json', 'rules.json': base + 'rules.json' };
+    try { const r = await doFetch(base + 'menu.json', { method: 'HEAD' }); if (r.ok) ficheros['menu.json'] = base + 'menu.json'; } catch { /* sin carta */ }
+    let stockR = null;
+    if (pixeria) {
+      if (!identidad) throw new Error('no autorizado: pixeria:true exige la clave de flota (Authorization: Bearer). Sin ella, publicar_xperiencia solo devuelve la URL.');
+      stockR = await llamar(`${stock}/stock/publish`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ type: 'animation', motor: 'ainimation', category: 'animaciones', title: x.title || slug, prompt: base, sourceUrl: base, mime: 'text/html', tags: ['xperiencia', 'interactivo', 'ainimation'], by: identidad.agente, via: 'ainimation-mcp' }) }, { timeoutMs: 30_000 });
+    }
+    return texto({ slug, url: base, ficheros, zip: { estado: 'próximamente', hoy: `${sitio}/studio.html → Publicar Xperiencia (descarga el ZIP)` }, admiratv_item: canalItem(x, p), pixeria: stockR });
+  }));
+
+  server.registerTool('menu_validar', {
+    title: 'Validar carta (menu.json)',
+    description: 'Valida una carta de quiosco contra el esquema publicado (/xperiencias/kiosko-pedido/menu.schema.json) y su coherencia (ids únicos, categorías existentes, precios). Sin carta, valida la de ejemplo de Starbucks.',
+    inputSchema: { menu: z.record(z.string(), z.any()).optional(), url_menu: z.string().url().optional() },
+    annotations: { readOnlyHint: true, openWorldHint: true },
+  }, seguro(async ({ menu, url_menu }) => {
+    const esquema = await llamar(`${sitio}/xperiencias/kiosko-pedido/menu.schema.json`);
+    const m = menu || await llamar(url_menu || `${sitio}/xperiencias/kiosko-pedido/menu.starbucks.json`);
+    const e1 = validarEsquema(esquema, m); const { errs, avisos } = coherenciaMenu(m);
+    return texto({ ok: !e1.length && !errs.length, esquema: esquema.$id, errores: [...e1, ...errs], avisos, resumen: { establecimiento: m.establishment && m.establishment.name, categorias: (m.categories || []).length, productos: (m.items || []).length, moneda: m.establishment && m.establishment.currency } });
+  }));
+
+  server.registerTool('enviar_a_admiratv', {
+    title: 'Item de playlist para admira.tv',
+    description: 'El item de playlist (type "interactive") de una Xperiencia, o de cualquier URL https de ainimation.studio, para emitirla en admira.tv, con el relevo a XpaceOS (playlist_add) que lo añade. El envío directo desde este MCP está próximamente: hoy entrega el JSON y la llamada exacta.',
+    inputSchema: { slug: SLUG.optional(), url: z.string().url().optional(), titulo: z.string().max(120).optional(), orientacion: z.enum(['horizontal', 'vertical']).optional(), duracion_s: z.number().int().min(5).max(3600).optional() },
+    annotations: { readOnlyHint: true, openWorldHint: true },
+  }, seguro(async ({ slug, url: u, titulo, orientacion, duracion_s }) => {
+    let item;
+    if (slug) { const x = await entrada(slug); const p = await plan(slug).catch(() => null); item = canalItem(x, p); }
+    else if (u) { if (!/^https:\/\//.test(u)) throw new Error('url https'); item = { id: 'xp-' + u.replace(/^https:\/\//, '').replace(/[^a-z0-9]+/gi, '-').slice(0, 60), type: 'interactive', title: 'Admira · ' + (titulo || u), url: u, tags: ['horizontal'] }; }
+    else throw new Error('manda slug o url');
+    if (titulo) item.title = 'Admira · ' + titulo;
+    if (orientacion) item.tags = [orientacion];
+    if (duracion_s) item.durationSeconds = duracion_s;
+    return texto({ item, envio_directo: 'próximamente', relevo: { mcp: 'https://mcp.admira.store/mcp', herramienta: 'playlist_add', nota: 'con clave de flota; o pégalo en el CMS de admira.tv' }, comprobar: { mcp: 'https://mcp-tv.admira.store/mcp', herramienta: 'on_air' } });
+  }));
+
+  server.registerTool('fijar_en_totem', {
+    title: 'Fijar en el tótem del gemelo',
+    description: 'El comando del gemelo XpaceOS/admira.store para poner en el tótem vertical el Quiosco de pedido (/totem kiosko) o cualquier Xperiencia/URL https (/totem url …), con el enlace que abre el gemelo ya con el quiosco. Se ejecuta en Experto del gemelo; este MCP no lo pulsa por ti.',
+    inputSchema: { slug: SLUG.optional(), url: z.string().url().optional(), store: z.string().max(80).optional(), marca: z.string().max(40).optional(), lang: z.enum(['es', 'en']).optional() },
+    annotations: { readOnlyHint: true, openWorldHint: false },
+  }, seguro(async ({ slug, url: u, store, marca, lang }) => {
+    const kiosko = !u && (!slug || slug === 'kiosko-pedido');
+    const destino = kiosko ? urlKiosko(sitio, { store: store || 'starbucks-paseo-de-gracia', marca: marca || 'starbucks', lang }) : (u || url(slug));
+    if (!/^https:\/\//.test(destino)) throw new Error('el tótem solo acepta https');
+    const twin = kiosko ? `${TWIN_BASE}?autostart=xtanco&visual=matrix&${TWIN_STARBUCKS}&kiosko=1` : `${TWIN_BASE}?autostart=xtanco&visual=matrix&${TWIN_STARBUCKS}`;
+    return texto({ comando: kiosko ? '/totem kiosko' : `/totem url ${destino}`, url_en_totem: destino, gemelo: twin, espejo: twin.replace('https://www.xpaceos.com', 'https://admira.store'), quitar: '/totem off', contrato_postmessage: { pedido: "{source:'ainimation-xperiencia', event:'order', order}", voz: "{source:'admingo', type:'say', id, text, lang} → {type:'say-ack', id}", origen: 'solo https://www.ainimation.studio' } });
+  }));
+
+  server.registerTool('marca_aplicar', {
+    title: 'Aplicar marca blanca',
+    description: 'Lee la ficha de la marca en el catálogo marcablanca de admiranext (colores, logo, tipografía, modo) y devuelve la URL de la Xperiencia/quiosco con ?marca=… y el comando /marca del gemelo.',
+    inputSchema: { marca: z.string().min(2).max(40).regex(/^[a-z0-9-]+$/), slug: SLUG.optional() },
+    annotations: { readOnlyHint: true, openWorldHint: true },
+  }, seguro(async ({ marca, slug }) => {
+    const idx = await llamar(MARCAS + 'index.json');
+    const e = (idx.clientes || []).find((c) => c.id === marca);
+    if (!e) throw new Error(`«${marca}» no está en el catálogo (${(idx.clientes || []).map((c) => c.id).join(', ')})`);
+    const f = await llamar(MARCAS + marca + '.json').catch(() => null);
+    const base = slug ? url(slug) : `${sitio}/xperiencias/kiosko-pedido/`;
+    return texto({ marca, nombre: (f && f.nombre) || e.nombre, sector: e.sector, colores: f && (f.colores || f.colors) || null, logo: f && f.logo ? new URL(f.logo.svg || '', MARCAS).href : null, modo: f && f.modo, tipografia: f && f.tipografia, url: base + (base.includes('?') ? '&' : '?') + 'marca=' + marca, gemelo: `/marca ${marca}`, ficha: MARCAS + marca + '.json' });
+  }));
+
   return server;
 }
 
@@ -170,9 +297,9 @@ export async function manejar(request, env = {}, deps = {}) {
   const sitio = limpiar(env.SITIO || 'https://www.ainimation.studio');
   if (ruta === '/' || ruta === '/salud') {
     return json({ nombre: NOMBRE, version: env.VERSION || '', sitio, endpoint_mcp: `${u.origin}/mcp`, transport: 'streamable-http',
-      que_es: 'MCP de ainimation.studio: las Xperiencias del estudio como herramientas (listar, leer, item de canal, stock, publicar).',
+      que_es: 'MCP de ainimation.studio: Xperiencias, plantillas del Director, Admingo, carta, admira.tv, tótem del gemelo y marca blanca como herramientas.',
       auth: 'lecturas abiertas; xperiencia_publicar con clave de flota AdmiraNeXT (Authorization: Bearer)', secretos: { MCP_FLOTA_SEED: !!env.MCP_FLOTA_SEED },
-      herramientas: ['quien_soy', 'sitio_estado', 'xperiencias_listar', 'xperiencia_detalle', 'xperiencia_canal_item', 'stock_animaciones', 'xperiencia_publicar'],
+      herramientas: HERRAMIENTAS,
       documentacion: `${sitio}/mcp/`, llms: `${sitio}/mcp/llms.txt`, help_humanos: `${sitio}/help/` });
   }
   if (ruta === '/mcp') {

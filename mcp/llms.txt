@@ -20,6 +20,16 @@ No hay API HTTP propia todavía: lo que hay es el MCP. El sitio sigue siendo est
 | `xperiencia_canal_item` | el JSON de item de canal que admira.tv entiende para emitirla (el mismo que copia la galería) |
 | `stock_animaciones` | lo que ainimation ya publicó en el stock de Pixeria |
 | `xperiencia_publicar` | ESCRITURA · clave de flota: lleva una Xperiencia al stock de Pixeria (api.admira.store/stock/publish) |
+| `listar_xperiencias` | nombre de suite de xperiencias_listar: Xperiencias publicadas con URL viva |
+| `plantillas` | plantillas del Director (Quiosco de pedidos 1080×1920, proyecto vacío) con el enlace que las abre |
+| `crear_proyecto` | proyecto del Director {format:'ainimation-project', plan} desde una plantilla, para Archivo → Abrir JSON |
+| `validar_admingo` | errores Admingo con línea y columna (ES/EN), mismo compilador que el Studio |
+| `compilar_admingo` | Admingo → reglas XPL (origin admingo) + manejadores para la VM con sandbox |
+| `publicar_xperiencia` | URL viva + ficheros (index.html, plan.json, rules.json, menu.json) + item admira.tv; pixeria:true lo lleva al stock (clave de flota). ZIP desde el MCP: próximamente (hoy, botón Publicar Xperiencia del Studio) |
+| `menu_validar` | valida una carta contra /xperiencias/kiosko-pedido/menu.schema.json y su coherencia |
+| `enviar_a_admiratv` | item de playlist type interactive + relevo a XpaceOS playlist_add; envío directo: próximamente |
+| `fijar_en_totem` | comando del gemelo (/totem kiosko · /totem url …) y enlace al gemelo con el quiosco |
+| `marca_aplicar` | ficha de marcablanca de admiranext → URL con ?marca= y comando /marca del gemelo |
 
 Fuente única de la lista: `https://www.ainimation.studio/xperiencias/index.json`.
 Ejemplo (initialize → tools/list → xperiencias_listar):
@@ -60,3 +70,14 @@ Este sitio autora; el dato acaba en sus hermanos, y ahí sí hay contrato:
 ## Para personas
 
 [ainimation.studio/help](https://www.ainimation.studio/help/).
+
+## Próximamente (no existe todavía)
+
+- ZIP de publicar_xperiencia generado por el servidor — hoy: Studio → Publicar Xperiencia descarga el ZIP
+- enviar_a_admiratv con envío directo al canal — hoy: el item + XpaceOS playlist_add (clave de flota) o el CMS de admira.tv
+- API HTTP propia del sitio — hoy: no existe; solo este MCP (http_api: null)
+
+## Ecosistema
+
+Manual humano ES/EN con el contrato postMessage (pedidos y voz `say` del tótem): https://www.ainimation.studio/help/#ecosistema
+Registro: https://www.xpaceos.com/mcp/galaxia.json
