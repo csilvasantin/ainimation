@@ -116,6 +116,17 @@
     stage.style.aspectRatio = plan.stage.w + " / " + plan.stage.h;
     stage.style.width = "min(100vw, " + (100 * plan.stage.w / plan.stage.h).toFixed(3) + "vh)";
   }
+  // Formatos (7-oct-2026): ?ajuste=fit (por defecto, letterbox) | fill (cubre el player, recorta bordes).
+  // El anfitrión puede pasar ?formato=vertical|horizontal|cuadrado&w=&h=; aquí solo se anotan: el ajuste
+  // real se calcula con el tamaño vivo del iframe, así que vale para cualquier player (tótem, pared, móvil).
+  (function () {
+    var q = new URLSearchParams(window.__XP_Q || location.search), ajuste = q.get("ajuste") === "fill" ? "fill" : "fit";
+    var ar = plan.stage && plan.stage.w && plan.stage.h ? plan.stage.w / plan.stage.h : 16 / 9;
+    document.documentElement.dataset.ajuste = ajuste;
+    if (q.get("formato")) document.documentElement.dataset.formato = q.get("formato");
+    if (ajuste === "fill") stage.style.width = "max(100vw, " + (100 * ar).toFixed(3) + "vh)";
+    window.XP_FORMATO = { ajuste: ajuste, formato: q.get("formato") || "", stage: ar };
+  })();
   if (EXT && EXT.init) EXT.init(plan, stage);
 
   /* --- Payment: checkout alojado, nunca campos de tarjeta en la pieza. --- */
@@ -597,22 +608,11 @@
     return { ok: false, error: lastError };
   }
 
-  async function publish(button) {
-    const plan = window.currentPlan?.();
-    if (!plan) return null;
-    const dicho = await dialogoPublicacion(plan);
-    if (!dicho) return null;                          // cancelar el diálogo cancela la publicación
-    // El nombre manda: es el título de la pieza, el de la carpeta y el que se verá
-    // en el Stock. Se guarda en el plan para que la próxima exportación lo proponga.
-    plan.title = dicho.nombre;
-    plan.durationSeconds = dicho.segundos;
-    window.saveFilmPlan?.(plan);
-
+  // Construye la pieza (sin diálogo ni descarga): la usan Publicar y la Vista responsive.
+  async function build() {
     const gathered = collect();
     if (!gathered) return null;
     const { piece, rules, dropped } = gathered;
-    const slug = slugify(piece.title);
-
     let runtime = "";
     try { runtime = await (await fetch("assets/xpl-runtime.js")).text(); }
     catch { console.warn("[xperiencia] no se pudo incrustar el runtime XPL: la pieza saldrá sin reglas."); }
@@ -632,6 +632,31 @@
     const planJson = JSON.stringify(piece, null, 2);
     const rulesJson = JSON.stringify(rules, null, 2);
     const exportedHtml = indexHtml({ title: piece.title, runtime, planJson, rulesJson });
+    return { piece, rules, dropped, scripts, planJson, rulesJson, exportedHtml };
+  }
+
+  // Vista responsive (7-oct-2026): la pieza tal cual saldría, en varios players a la vez.
+  async function previewHtml(query = "") {
+    const b = await build(); if (!b) return null;
+    return b.exportedHtml.replace("<head>", "<head><script>window.__XP_Q=" + JSON.stringify(query) + "<\/script>");
+  }
+
+  async function publish(button) {
+    const plan = window.currentPlan?.();
+    if (!plan) return null;
+    const dicho = await dialogoPublicacion(plan);
+    if (!dicho) return null;                          // cancelar el diálogo cancela la publicación
+    // El nombre manda: es el título de la pieza, el de la carpeta y el que se verá
+    // en el Stock. Se guarda en el plan para que la próxima exportación lo proponga.
+    plan.title = dicho.nombre;
+    plan.durationSeconds = dicho.segundos;
+    window.saveFilmPlan?.(plan);
+
+    const built = await build();
+    if (!built) return null;
+    const { piece, rules, dropped, scripts, planJson, rulesJson, exportedHtml } = built;
+    const slug = slugify(piece.title);
+
     const blob = zip([
       { name: "index.html", text: exportedHtml },
       { name: "plan.json", text: planJson },
@@ -669,7 +694,7 @@
     return { slug, dropped, rules: rules.length, bytes: blob.size, seconds: piece.durationSeconds, stock };
   }
 
-  window.ainXperiencia = { publish, collect, zip, indexHtml, PLAYER_JS, dialogoPublicacion, altaEnStock, limitaSegundos, slugify };
+  window.ainXperiencia = { publish, build, previewHtml, collect, zip, indexHtml, PLAYER_JS, dialogoPublicacion, altaEnStock, limitaSegundos, slugify };
 
   function bind() {
     document.querySelector("[data-publish-xperiencia]")
