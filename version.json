@@ -1,21 +1,21 @@
 {
-  "version": "v.07.10.2026.r4.09:07",
-  "deployedAt": "2026-10-07T07:07:41Z",
+  "version": "v.07.10.2026.r5.09:53",
+  "deployedAt": "2026-10-07T07:53:14Z",
   "deployer": "GrokBot",
   "machine": "MacMini",
   "signature": "GrokBot · MacMini",
-  "git": "d44c17d962bbaa3744c4577e39ed54bdfb418f2e",
-  "gitShort": "d44c17d",
-  "gitFull": "d44c17d962bbaa3744c4577e39ed54bdfb418f2e",
+  "git": "5aa6f89c7ab2d5da515c67d68eefcbc894649f03",
+  "gitShort": "5aa6f89",
+  "gitFull": "5aa6f89c7ab2d5da515c67d68eefcbc894649f03",
   "dirty": false,
   "returnTag": "AInimation-v.04.09.2026.r1",
   "previousTag": "AInimation-v.03.09.2026.r2",
-  "previousVersion": "v.07.10.2026.r3.08:53",
-  "note": "Inspector de propiedades estilo Director para todos los sprites: texto, formas, líneas, botones, quiosco y miembros del Cast",
+  "previousVersion": "v.07.10.2026.r4.09:07",
+  "note": "Admingo, el Lingo de AdmiraNeXT: scripts en español o inglés (al soltar / on mouseUp, ir a marca, si…entonces, repetir con)",
   "novedades": [
-    "Inspector de propiedades estilo Director para todos los sprites: texto, formas, líneas, botones, quiosco y miembros del Cast",
-    "Keyframes en botones y vistas del quiosco: añadir/quitar en el fotograma y curva desde aquí",
-    "Texto, formas y líneas se ocultan fuera de su tramo en el Stage (el seleccionado queda como fantasma)",
-    "Textos ES/EN por sprite: la pieza publicada sigue ?lang=es / ?lang=en"
+    "Admingo, el Lingo de AdmiraNeXT: scripts en español o inglés (al soltar / on mouseUp, ir a marca, si…entonces, repetir con)",
+    "Ventana Script con resaltado, autocompletado con Tab y errores por número de línea; ventana Mensaje en vivo durante Play",
+    "Carrito, pago simulado y decir/say (avatar del tótem o voz es-ES / en-GB); lo simple se baja a reglas XPL y el script gana",
+    "La plantilla Quiosco de pedidos viene en Admingo, viaja al publicar (scripts.admingo) y tiene ayuda en /help/admingo.html"
   ]
 }

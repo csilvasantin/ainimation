@@ -227,6 +227,8 @@
     setText(name, action) {
       const element = elementForSprite(name);
       if (!element) return;
+      // Botones/etiquetas del Director: su texto lo pinta director-kiosk.js desde ainXplTexts
+      if (element.classList.contains("dk-item")) { (window.ainXplTexts = window.ainXplTexts || {})[name] = String(action?.value2 ?? ""); return; }
       const target = element.querySelector(".stage-text-content") || element;
       if (document.activeElement === target) return; // no pisar al autor escribiendo
       const next = String(action?.value2 ?? "");
@@ -252,8 +254,45 @@
   let tickTimer = null;
   let previewOn = false;
 
+  /* ------------------------------------------------------------------------
+   * ADMINGO — el Lingo de AdmiraNeXT. Sus scripts (plan.scripts) corren aquí,
+   * en el MISMO tick que las reglas: lo que se puede se baja a reglas XPL y el
+   * resto lo interpreta assets/admingo.js (sin eval). Si un script y una regla
+   * escuchan el mismo clic, gana el script.
+   * ---------------------------------------------------------------------- */
+  const adm = (window.ainAdmingo = window.ainAdmingo || {});
+  let admVM = null, admKey = "";
+  const admLang = () => ((document.documentElement.lang || "es").startsWith("en") ? "en" : "es");
+  adm.host = {
+    fact: (id) => world.fact(id),
+    act(id, value, value2) {
+      if (id === "resetIdle") { lastInteractionAt = Date.now(); return; }
+      if (id === "setText") { (window.ainXplTexts = window.ainXplTexts || {})[value] = String(value2 ?? ""); }
+      world.act(id, value, null, { id, value, value2 });
+    },
+    frame: () => Number(window.currentTimelineFrame?.() || 1),
+    markers: () => listMarkers(),
+    goFrame(frame) { const f = Math.max(1, Math.round(Number(frame) || 1)); window.ainTransport?.setFrame(f); lastSeenFrame = f; },
+    stay() { const f = admVM ? admVM.stayFrame() : Number(window.currentTimelineFrame?.() || 1); window.ainTransport?.setFrame(f); window.ainTransport?.stop?.(); lastSeenFrame = f; },
+    say: (text) => window.Admingo?.speak(text, admLang()),
+    log: (m) => { (adm.logs = adm.logs || []).push(m); adm.onLog?.(m); },
+    lang: admLang,
+    spriteText(name) { const it = (getPlan()?.stageItems || []).find((i) => i.spriteName === name); return it ? (it.texts?.[admLang()] || it.text || "") : ""; },
+  };
+  function admingoVM(plan = getPlan()) {
+    if (!window.Admingo || !plan?.scripts) { admVM = null; adm.vm = null; return null; }
+    const key = JSON.stringify(plan.scripts);
+    if (admVM && key === admKey) return admVM;
+    admKey = key; admVM = window.Admingo.createVM(plan.scripts, adm.host); adm.vm = admVM;
+    return admVM;
+  }
+  adm.freshVM = () => (window.Admingo ? window.Admingo.createVM(getPlan()?.scripts || {}, adm.host) : null);
+  adm.running = () => engineRunning();
+
   function syncRulesIntoEngine() {
-    engine.setRules(rulesOf(getPlan()));
+    const plan = getPlan();
+    const vm = engineRunning() ? admingoVM(plan) : null;
+    engine.setRules(vm ? vm.mergeRules(rulesOf(plan)) : rulesOf(plan));
   }
 
   function detectMarkerReached() {
@@ -282,6 +321,9 @@
     detectMarkerReached();
     syncRulesIntoEngine();
     markHotspots();
+    if (bus.click) bus.marker = "";   // el toque manda sobre «se llega a la marca» en el mismo tick
+    const vm = admingoVM();
+    if (vm) vm.tick({ click: bus.click, marker: bus.marker });
     engine.tick();
     bus.click = "";   // los eventos duran UN tick: así 'on' vuelve a armarse
     bus.marker = "";
@@ -293,13 +335,15 @@
     if (tickTimer) return;
     lastSeenFrame = Number(window.currentTimelineFrame?.() || 1);
     lastInteractionAt = Date.now();
-    syncRulesIntoEngine();
+    admVM = null; admKey = "";   // cada Play es una película nueva: on startMovie
     tickTimer = window.setInterval(tick, 100);
+    syncRulesIntoEngine();
     document.body.classList.add("xpl-live");
   }
   function stopEngine() {
     if (tickTimer) window.clearInterval(tickTimer);
     tickTimer = null;
+    admVM = null; adm.vm = null; window.ainXplTexts = {};
     document.body.classList.remove("xpl-live");
     document.querySelectorAll(".xpl-hidden").forEach((el) => el.classList.remove("xpl-hidden"));
   }

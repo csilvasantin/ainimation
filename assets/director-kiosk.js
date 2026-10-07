@@ -24,6 +24,33 @@
     { w: 1280, h: 720, es: "16:9 · 1280 × 720", en: "16:9 · 1280 × 720" },
     { w: 1080, h: 1080, es: "Cuadrado · 1080 × 1080", en: "Square · 1080 × 1080" },
   ];
+  const ADMINGO_MOVIE = `-- Quiosco de pedidos · script de película (Admingo)
+global pedido
+
+al empezar la película
+  vaciar carrito
+  ir a marca "INICIO"
+fin
+
+-- cada pantalla se queda quieta hasta que alguien toca, como en Director
+al salir del fotograma
+  quedarse
+fin
+
+on idle
+  if the marker <> "INICIO" and the idleSeconds > 12 then
+    if the marker = "PAGO" and the idleSeconds < 60 then exit
+    vaciar carrito
+    ir a marca "INICIO"
+  end if
+end
+
+al pagar
+  fijar pedido a the orderNumber
+  reiniciar reposo
+  ir a marca "NUMERO"
+  decir "¡Gracias! Tu pedido es el " & pedido
+fin`;
   const VIEWS = { categories: ["Categorías", "Categories"], items: ["Productos", "Products"], options: ["Opciones", "Options"], cart: ["Carrito", "Cart"], qr: ["Pago QR", "QR payment"], number: ["Número de pedido", "Order number"] };
 
   /* --------------------------------------------------------------- plan --- */
@@ -48,7 +75,7 @@
     const p = plan(); const m = p?.menu || null; const sig = m ? (m.establishment?.id || "") + m.items?.length : "";
     if (!K) {
       K = window.AINKiosk.create({ menu: m, base: m?.imageBase || "", lang: lang(),
-        notify: () => sync(true), emit: (event, extra) => post(event, extra), openCheckout: openCheckout });
+        notify: () => sync(true), emit: (event, extra) => post(event, extra), openCheckout: openCheckout, deferAdd: (name) => !!window.ainAdmingo?.vm?.defersAdd(name) });
       kMenuSig = sig;
     } else if (sig !== kMenuSig) { K.setMenu(m); kMenuSig = sig; }
     return K;
@@ -118,7 +145,8 @@
       node.style.opacity = String(kf ? kf.opacity : (item.opacity ?? 1)); node.style.transform = (kf ? kf.rotation : item.rotation) ? `rotate(${kf ? kf.rotation : item.rotation}deg)` : "";
       node.classList.toggle("is-selected", selected === item.id && !live);
       node.dataset.dkType = item.type;
-      const body = node.firstChild;
+      let body = node.querySelector(".dk-body");
+      if (!body) { node.innerHTML = '<div class="dk-body"></div><span class="dk-resize" aria-hidden="true"></span>'; body = node.firstChild; }
       if (item.type === "button") {
         body.className = "dk-body dk-button";
         body.style.background = item.color || "transparent"; body.style.color = item.textColor || "#ffffff";
@@ -249,7 +277,7 @@
     if (t.kind === "cast") typeBody += `<p class="dk-hint">${L("Miembro", "Member")}: <b>${String(o.name || o.title || o.fileName || "").replace(/</g, "&lt;")}</b> · ${o.mediaType || "image"}</p>${/video|audio/.test(o.mediaType || "") ? `<label class="dk-check"><input data-k="muted" type="checkbox" ${o.muted ? "checked" : ""}> ${L("Silenciado", "Muted")}</label>` : ""}`;
     panel.innerHTML = `${head}
       <div class="dk-ins-kind"><span>${kind[0]}</span><b>${kind[1] && t.kind !== "cast" ? L(kind[1], kind[2]) : kind[1]}</b><small>${L("fotograma", "frame")} ${f}</small></div>
-      ${sec(L("Sprite", "Sprite"), fld("spriteName", L("Nombre de sprite", "Sprite name"), o.spriteName || ""))}
+      ${sec(L("Sprite", "Sprite"), fld("spriteName", L("Nombre de sprite", "Sprite name"), o.spriteName || "") + (o.spriteName ? `<div class="dk-kf"><button type="button" data-adm-edit-sprite>✎ ${L("Comportamiento · Admingo", "Behaviour · Admingo")}</button>${plan()?.scripts?.sprites?.[o.spriteName] ? "<small>●</small>" : ""}</div>` : ""))}
       ${g ? sec(L("Geometría", "Geometry") + (hasKeys(o) ? ` <em>◆ ${L("en este fotograma", "at this frame")}</em>` : ""), `<div class="dk-row">${fld("x", "X %", r1(g.x), "number", 'step="0.5"')}${fld("y", "Y %", r1(g.y), "number", 'step="0.5"')}</div><div class="dk-row">${fld("w", L("Ancho %", "Width %"), r1(g.w), "number", 'step="0.5"')}${fld("h", L("Alto %", "Height %"), r1(g.h), "number", 'step="0.5"')}</div><div class="dk-row">${fld("opacity", L("Opacidad", "Opacity"), r1(g.opacity), "number", 'step="0.1" min="0" max="1"')}${fld("rotation", L("Giro °", "Rotation °"), r1(g.rotation), "number", 'step="1"')}</div>`) : ""}
       ${sec(L("Tiempo", "Timing"), `<div class="dk-row">${fld("startFrame", L("Fotograma", "Frame"), o.startFrame || 1, "number", 'min="1"')}${fld("durationFrames", L("Duración", "Duration"), o.durationFrames || 24, "number", 'min="1"')}</div>
         ${g ? `<div class="dk-kf"><button type="button" data-kf-add>◆ ${kfAtFrame ? L("Keyframe aquí ✓", "Keyframe here ✓") : L("Añadir keyframe", "Add keyframe")}</button>${kfAtFrame ? `<button type="button" data-kf-del>✕ ${L("Quitar", "Remove")}</button>` : ""}<small>${hasKeys(o) ? o.keyframes.length : 0} keyframes</small></div>${kfAtFrame ? `<label><span>${L("Curva desde aquí", "Ease from here")}</span><select data-k="easing">${["linear", "ease-in", "ease-out", "ease-in-out"].map((e) => `<option ${(g.easing || "linear") === e ? "selected" : ""}>${e}</option>`).join("")}</select></label>` : ""}` : ""}`)}
@@ -258,6 +286,7 @@
     wireClose();
     panel.querySelector("[data-del]")?.addEventListener("click", () => { if (t.kind === "item") { if (isMine(o)) removeItem(o.id); else window.removeStageItem?.(o.id); } });
     const GEO = ["x", "y", "w", "h", "opacity", "rotation", "easing"];
+    panel.querySelector("[data-adm-edit-sprite]")?.addEventListener("click", () => window.ainAdmingo?.openScript?.(`sprite:${o.spriteName}`));
     panel.querySelector("[data-kf-add]")?.addEventListener("click", () => { const f = frameNow(); mutate(t, (m) => { const v = geom(m, t, f); m.keyframes = window.upsertStageKeyframe(m, f, v); return m; }); });
     panel.querySelector("[data-kf-del]")?.addEventListener("click", () => mutate(t, (m) => { m.keyframes = (m.keyframes || []).filter((k) => Number(k.frame) !== f); if (!m.keyframes.length) delete m.keyframes; return m; }));
     panel.querySelectorAll("[data-k]").forEach((input) => input.addEventListener("change", () => {
@@ -284,6 +313,12 @@
   }
   function wireClose() { panel.querySelector("[data-close]").onclick = () => { inspOpen = false; selected = null; panel.hidden = true; sync(true); }; }
   setInterval(() => refreshInspector(false), 250);
+  // Como una ventana más: pasa detrás cuando se usa otra ventana del Studio y vuelve delante al tocarla
+  document.addEventListener("pointerdown", (e) => {
+    if (!panel) return;
+    if (panel.contains(e.target) || e.target.closest?.(".dk-item, .stage-item, .stage-imported-member")) panel.style.zIndex = "";
+    else if (e.target.closest?.(".director-window, .window-menu-list, .menubar-action")) panel.style.zIndex = "-1";
+  }, true);
   // Arrastrar la ventana por su barra, como las demás del Studio
   document.addEventListener("pointerdown", (e) => {
     const h = e.target.closest?.(".dk-ins-head"); if (!h || e.target.closest("button")) return;
@@ -374,8 +409,18 @@
       r(L("60 s en el pago → inicio", "60 s on payment → start"), [{ fact: "idleSeconds", op: ">", value: 60 }, { fact: "frame", op: ">=", value: 121 }, { fact: "frame", op: "<", value: 145 }], [{ id: "clearCart" }, { id: "goToMarker", value: "INICIO" }]),
       r(L("Número → inicio a los 12 s", "Number → start after 12 s"), [{ fact: "idleSeconds", op: ">", value: 12 }, { fact: "frame", op: ">=", value: 145 }], [{ id: "clearCart" }, { id: "goToMarker", value: "INICIO" }]),
     ];
+    // Admingo: la lógica de la plantilla vive en scripts (el Lingo de AdmiraNeXT), no en reglas
+    const scripts = { movie: ADMINGO_MOVIE, frames: {}, sprites: {
+      btnEmpezar: 'al soltar\n  ir a marca "CATEGORIAS"\nfin',
+      carta: 'al soltar\n  ir a marca "PRODUCTOS"\nfin',
+      productos: 'al soltar\n  ir a marca "OPCIONES"\nfin',
+      btnAtras: 'al soltar\n  ir a marca "CATEGORIAS"\nfin',
+      opciones: 'al soltar\n  añadir al carrito the selectedItem talla the selectedSize\n  fijar el texto del sprite "hCarrito" a "Tu pedido (" & the cartCount & ")"\n  ir a marca "CARRITO"\nfin',
+      btnMas: 'al soltar\n  ir a marca "CATEGORIAS"\nfin',
+      carrito: 'al soltar\n  si the cartCount = 0 entonces\n    decir "Tu carrito está vacío"\n  si no\n    ir a marca "PAGO"\n  fin si\nfin',
+    } };
     const markers = [["INICIO", 1], ["CATEGORIAS", 25], ["PRODUCTOS", 49], ["OPCIONES", 73], ["CARRITO", 97], ["PAGO", 121], ["NUMERO", 145], ["FIN", 168]].map(([label, frame]) => ({ id: `m-${label.toLowerCase()}`, label, frame }));
-    const p = window.normalizeFilmPlan({ ...(plan() || {}), title: L("Quiosco de pedidos", "Ordering kiosk"), cast: [], stageItems: items, rules, menu, stage: { w: 1080, h: 1920 }, totalFrames: 168, markers, durationSeconds: 90, template: "quiosco-de-pedidos" });
+    const p = window.normalizeFilmPlan({ ...(plan() || {}), title: L("Quiosco de pedidos", "Ordering kiosk"), cast: [], stageItems: items, rules: [], scripts, menu, stage: { w: 1080, h: 1920 }, totalFrames: 168, markers, durationSeconds: 90, template: "quiosco-de-pedidos" });
     window.saveTimelineMarkers?.(markers);
     applyStageSize(1080, 1920); K = null; commit(p); badge();
     return p;
@@ -410,7 +455,7 @@
       body.xpl-live .dk-item .dk-resize{display:none!important}
       .dk-menu{position:relative;display:inline-block}.dk-menu-list{display:none;position:absolute;top:100%;left:0;z-index:200;min-width:250px;flex-direction:column;background:#14110f;border:1px solid #3a3a3a;border-radius:8px;padding:6px;box-shadow:0 12px 30px rgba(0,0,0,.4)}
       .dk-menu.open .dk-menu-list{display:flex}.dk-menu-list button{all:unset;cursor:pointer;padding:7px 10px;border-radius:6px;color:#f3f1ea;font:13px Inter,system-ui,sans-serif}.dk-menu-list button:hover{background:#2a2622}.dk-menu-list i{height:1px;background:#3a3a3a;margin:4px 0}
-      .dk-inspector{position:fixed;right:14px;top:84px;z-index:300;width:290px;max-height:calc(100vh - 110px);overflow:auto;background:#14110f;color:#f3f1ea;border:1px solid #3a3a3a;border-radius:10px;padding:0 10px 10px;font:12px Inter,system-ui,sans-serif;box-shadow:0 14px 34px rgba(0,0,0,.45)}
+      .dk-inspector{position:fixed;right:14px;top:84px;z-index:300;width:290px;max-height:min(640px,calc(100vh - 110px));overflow:auto;background:#14110f;color:#f3f1ea;border:1px solid #3a3a3a;border-radius:10px;padding:0 10px 10px;font:12px Inter,system-ui,sans-serif;box-shadow:0 14px 34px rgba(0,0,0,.45)}
       .dk-inspector .dk-ins-head{position:sticky;top:0;display:flex;gap:6px;align-items:center;margin:0 -10px 8px;padding:8px 10px;background:#1d1916;border-bottom:1px solid #3a3a3a;cursor:move;text-transform:uppercase;letter-spacing:.04em}.dk-ins-head i{width:9px;height:9px;border-radius:50%;background:#ff5f57}.dk-ins-head i+i{background:#febc2e}.dk-ins-head i+i+i{background:#28c840}.dk-ins-head b{flex:1;margin-left:6px}.dk-ins-head button{all:unset;cursor:pointer}
       .dk-ins-kind{display:flex;gap:8px;align-items:center;margin-bottom:6px}.dk-ins-kind span{font-size:18px}.dk-ins-kind b{flex:1}.dk-ins-kind small{opacity:.65}
       .dk-inspector section{border-top:1px solid #2c2724;padding-top:6px;margin-top:6px}.dk-inspector h4{margin:0 0 6px;font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:#c6f24e}.dk-inspector h4 em{color:#febc2e;font-style:normal;text-transform:none}
