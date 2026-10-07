@@ -180,7 +180,7 @@ let M=null,cat=null,cur=null,cart=[],order=null,screen="attract",lastTouch=Date.
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
 const tr=o=>o?(o[lang]||o.es||""):"";const t=k=>T[lang][k]||k;
 const money=n=>new Intl.NumberFormat(lang==="en"?"en-IE":"es-ES",{style:"currency",currency:(M&&M.establishment.currency)||"EUR"}).format(n);
-function host(event,extra){const msg=Object.assign({source:"ainimation-xperiencia",piece:"kiosko-pedido",event:event,order:order},extra||{});
+function host(event,extra){const msg=Object.assign({source:"ainimation-xperiencia",piece:"kiosko-pedido",event:event,order:order?Object.fromEntries(Object.entries(order).filter(([key])=>!key.startsWith("_"))):null},extra||{});
   try{if(window.parent!==window)window.parent.postMessage(msg,"*");}catch(e){} window.__kioskEvents=(window.__kioskEvents||[]).concat([msg]);}
 // «say»: el avatar del tótem del gemelo dice el número; sin acuse en 500 ms, voz del navegador (es-ES / en-GB)
 function say(text){const l=lang==="en"?"en-GB":"es-ES";window.__kioskSaid=(window.__kioskSaid||[]).concat([{text:text,lang:l}]);
