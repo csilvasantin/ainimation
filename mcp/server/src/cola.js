@@ -9,6 +9,8 @@
  */
 export const PREP_S = 20, RECOGER_S = 120, MAX = 300, VIDA_MS = 3 * 3600_000;
 export const STORE = /^[a-z0-9-]{2,80}$/, ID = /^[A-Za-z0-9._-]{4,64}$/;
+/** Nombre de pila para llamar al cliente: solo letras, espacios, guion y apóstrofo; máx. 24. */
+export const limpiaNombre = (n) => String(n || '').normalize('NFC').replace(/[^\p{L} '\-]/gu, '').replace(/\s+/g, ' ').trim().slice(0, 24) || null;
 const ORDEN = ['pendiente', 'preparando', 'listo', 'recogido'];
 
 /** Estado efectivo de un pedido en el instante `ahora` (ms). */
@@ -20,7 +22,7 @@ export function estadoDe(p, ahora = Date.now()) {
   if (p.auto !== false && ahora >= listo + RECOGER_S * 1000) return 'recogido';
   return 'listo';
 }
-export const vista = (p, ahora = Date.now()) => ({ id: p.id, numero: p.numero, estado: estadoDe(p, ahora), total: p.total, moneda: p.moneda, via: p.via || null, creado: new Date(p.creadoAt).toISOString(), pagado: p.pagadoAt ? new Date(p.pagadoAt).toISOString() : null, simulado: true });
+export const vista = (p, ahora = Date.now()) => ({ id: p.id, numero: p.numero, estado: estadoDe(p, ahora), total: p.total, moneda: p.moneda, via: p.via || null, nombre: p.nombre || null, creado: new Date(p.creadoAt).toISOString(), pagado: p.pagadoAt ? new Date(p.pagadoAt).toISOString() : null, simulado: true });
 
 /** Lógica pura sobre un mapa {id → pedido} y un contador; la usa el DO y los tests. */
 export function crearCola(datos = { pedidos: {}, n: 0 }) {
@@ -29,11 +31,11 @@ export function crearCola(datos = { pedidos: {}, n: 0 }) {
   const buscar = (k) => d.pedidos[k] || Object.values(d.pedidos).filter((p) => p.numero === k).sort((a, b) => b.creadoAt - a.creadoAt)[0];
   return {
     datos: d,
-    crear({ id, total = 0, moneda = 'EUR', prefijo = 'A', prep } = {}, ahora = Date.now()) {
+    crear({ id, total = 0, moneda = 'EUR', prefijo = 'A', prep, nombre } = {}, ahora = Date.now()) {
       if (!ID.test(String(id || ''))) throw new Error('id de pedido inválido');
       if (d.pedidos[id]) return vista(d.pedidos[id], ahora);
       podar(ahora); d.n = d.n >= 999 ? 1 : d.n + 1;
-      const p = { id, numero: String(prefijo || 'A').replace(/[^A-Z]/g, '').slice(0, 2) + String(d.n).padStart(3, '0'), total: Math.max(0, Math.min(9999, +total || 0)), moneda: String(moneda).replace(/[^A-Z]/g, '').slice(0, 3) || 'EUR', creadoAt: ahora, prep: prep ? Math.max(3, Math.min(600, +prep)) : PREP_S };
+      const p = { id, numero: String(prefijo || 'A').replace(/[^A-Z]/g, '').slice(0, 2) + String(d.n).padStart(3, '0'), total: Math.max(0, Math.min(9999, +total || 0)), moneda: String(moneda).replace(/[^A-Z]/g, '').slice(0, 3) || 'EUR', creadoAt: ahora, prep: prep ? Math.max(3, Math.min(600, +prep)) : PREP_S, nombre: limpiaNombre(nombre) };
       d.pedidos[id] = p; return vista(p, ahora);
     },
     pagar(k, via = 'qr', ahora = Date.now()) { const p = buscar(k); if (!p) throw new Error('pedido no encontrado'); if (!p.pagadoAt) { p.pagadoAt = ahora; p.via = via === 'caja' ? 'caja' : 'qr'; } return vista(p, ahora); },

@@ -58,13 +58,16 @@ function pintar(d){ultimo=d;$('prep').innerHTML=chips(d.preparando||[]);$('listo
 function pintarMio(p){const t=T[lang],m=$('mio');if(!yo){m.className='';return;}m.className='on';$('mioN').textContent=yo;
   if(!p){$('mioT').textContent=t.noEsta;$('mioS').textContent='';return;}
   const e=p.estado;$('mioT').textContent=t.tu+' · '+(e==='listo'?t.listo:e==='recogido'?t.recogido:e==='pendiente'?t.pendiente:t.prep);
-  $('mioS').textContent=e==='listo'?t.enListo:e==='preparando'?t.espera:'';if(e==='listo'){m.classList.add('listo');if(!yaAvisado){yaAvisado=true;try{navigator.vibrate&&navigator.vibrate([200,100,200]);}catch(_){}try{const a=new AudioContext(),o=a.createOscillator(),g=a.createGain();o.frequency.value=880;g.gain.value=.08;o.connect(g).connect(a.destination);o.start();o.stop(a.currentTime+.35);}catch(_){}}}}
+  const aviso=p.nombre?(lang==='en'?p.nombre+', your Starbucks order is ready':p.nombre+', tu pedido Starbucks está preparado'):'';window.__colaAviso=e==='listo'?(aviso||t.enListo):'';
+  $('mioS').textContent=e==='listo'?(aviso?aviso+' · '+t.enListo:t.enListo):e==='preparando'?t.espera:'';if(e==='listo'){m.classList.add('listo');if(!yaAvisado){yaAvisado=true;try{if(window.Notification&&Notification.permission==='granted')new Notification('☕ '+yo,{body:aviso||t.enListo,tag:'pedido-'+yo});}catch(_){}try{document.title='☕ '+(aviso||t.enListo);}catch(_){}try{navigator.vibrate&&navigator.vibrate([200,100,200]);}catch(_){}try{const a=new AudioContext(),o=a.createOscillator(),g=a.createGain();o.frequency.value=880;g.gain.value=.08;o.connect(g).connect(a.destination);o.start();o.stop(a.currentTime+.35);}catch(_){}}}}
 async function tic(){try{const r=await fetch(relay+'/cola/estado?store='+store,{cache:'no-store'});const d=await r.json();pintar(d);
   if(yo){const todos=[...(d.preparando||[]),...(d.listo||[])];let p=todos.find(x=>x.numero===yo);if(!p){const q=await fetch(relay+'/cola/pedido?store='+store+'&pedido='+yo,{cache:'no-store'});p=q.ok?await q.json():null;}pintarMio(p);}
   document.body.dataset.ok='1';}catch(e){document.body.dataset.ok='0';$('pie').textContent=T[lang].off;}}
 $('lang').onclick=()=>{lang=lang==='es'?'en':'es';textos();tic();};
 window.__cola={store,relay,get yo(){return yo;}};
 textos();tic();setInterval(tic,2000);
+// Aviso del sistema (si el navegador lo permite): se pide con el primer toque, como exige iOS.
+if(yo&&window.Notification&&Notification.permission==='default')document.addEventListener('click',function pide(){try{Notification.requestPermission();}catch(_){}document.removeEventListener('click',pide);},{once:true});
 })();
 </script>
 </body>
