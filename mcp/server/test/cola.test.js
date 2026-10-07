@@ -31,3 +31,13 @@ test('HTTP /cola/*: Durable Object por tienda, store validada, CORS', async () =
   assert.equal((await manejar(new Request('https://w.test/cola/estado?store=../x'), env)).status, 400);
   assert.equal((await manejar(new Request('https://w.test/cola/pedido?store=sb-test&pedido=A009'), env)).status, 404);
 });
+test('MCP cola_estado / cola_avanzar hablan con el Durable Object (sin pedirse a sí mismo por HTTP)', async () => {
+  const mem = new Map(); const obj = new ColaTienda({ storage: { get: async (k) => mem.get(k), put: async (k, v) => { mem.set(k, structuredClone(v)); } } });
+  const env = { COLA: { idFromName: (n) => n, get: () => ({ fetch: (r) => obj.fetch(r) }) } };
+  await manejar(new Request('https://w.test/cola/pedido?store=sb-mcp', { method: 'POST', body: JSON.stringify({ id: 'ped-mcp1' }) }), env);
+  const { crearServidor } = await import('../src/index.js');
+  const s = crearServidor(env, { fetch: () => { throw new Error('no debe salir a la red'); } });
+  const call = (n, a) => s._registeredTools[n].handler(a);
+  const r = JSON.parse((await call('cola_avanzar', { store: 'sb-mcp', pedido: 'A001', a: 'listo' })).content[0].text); assert.equal(r.estado, 'listo');
+  const e = JSON.parse((await call('cola_estado', { store: 'sb-mcp' })).content[0].text); assert.equal(e.listo[0].numero, 'A001'); assert.match(e.pantalla, /\/cola\/\?store=sb-mcp/);
+});

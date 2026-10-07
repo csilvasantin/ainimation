@@ -289,6 +289,12 @@ export function crearServidor(env = {}, deps = {}, identidad = null) {
 
   // ── Gestor de colas (7-oct-2026): el mismo relé que usan el quiosco, el móvil y la pantalla /cola/ ─
   const relevo = (env.COLA_API || 'https://mcp-ainimation.admira.store').replace(/\/+$/, '');
+  // Dentro del worker se habla con el Durable Object directamente: pedirse a sí mismo por su dominio da 522.
+  const cola = async (op, store, { query = '', body } = {}) => {
+    if (!env.COLA) return llamar(`${relevo}/cola/${op}?store=${store}${query}`, body ? { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) } : {});
+    const r = await env.COLA.get(env.COLA.idFromName(store)).fetch(new Request(`https://cola/cola/${op}?store=${store}${query}`, body ? { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) } : {}));
+    const d = await r.json(); if (!r.ok) throw new Error(d.error || r.status); return d;
+  };
   const STO = z.string().regex(/^[a-z0-9-]{2,80}$/).default('starbucks-paseo-de-gracia');
   server.registerTool('cola_estado', {
     title: 'Estado de la cola de pedidos',
@@ -296,7 +302,7 @@ export function crearServidor(env = {}, deps = {}, identidad = null) {
     inputSchema: { store: STO, pedido: z.string().max(64).optional() },
     annotations: { readOnlyHint: true, openWorldHint: true },
   }, seguro(async ({ store = 'starbucks-paseo-de-gracia', pedido }) => {
-    const r = pedido ? await llamar(`${relevo}/cola/pedido?store=${store}&pedido=${encodeURIComponent(pedido)}`) : await llamar(`${relevo}/cola/estado?store=${store}`);
+    const r = pedido ? await cola('pedido', store, { query: '&pedido=' + encodeURIComponent(pedido) }) : await cola('estado', store);
     return texto({ store, ...r, pantalla: `${sitio}/cola/?store=${store}`, barista: `${sitio}/cola/barista.html?store=${store}` });
   }));
   server.registerTool('cola_avanzar', {
@@ -304,7 +310,7 @@ export function crearServidor(env = {}, deps = {}, identidad = null) {
     description: 'El «barista» de la demo: pasa un pedido (A001 o id) al siguiente estado (preparando → listo → recogido) o al que digas. Pedidos de demostración, sin dinero real.',
     inputSchema: { store: STO, pedido: z.string().min(1).max(64), a: z.enum(['preparando', 'listo', 'recogido']).optional() },
     annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: true },
-  }, seguro(async ({ store = 'starbucks-paseo-de-gracia', pedido, a }) => texto(await llamar(`${relevo}/cola/avanzar?store=${store}`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ numero: pedido, a }) }))));
+  }, seguro(async ({ store = 'starbucks-paseo-de-gracia', pedido, a }) => texto(await cola('avanzar', store, { body: { numero: pedido, a } }))));
 
   return server;
 }
