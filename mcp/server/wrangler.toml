@@ -25,10 +25,18 @@ new_sqlite_classes = ["ColaTienda"]
 binding = "OMNI"
 service = "omnipublicity-api"
 
+# Audiencia del quiosco segmentado (8-oct-2026): recuentos anónimos por visita, 90 días, sin imágenes.
+# La misma base la lee el backoffice de admira.tv (/audiencia, Pages Functions con sesión).
+[[d1_databases]]
+binding = "AUDIENCIA_DB"
+database_name = "kiosko-audiencia"
+database_id = "4b5f2c81-aadf-4b1a-a363-f991c5240613"
+migrations_dir = "migrations"
+
 [observability]
 enabled = true
 
 [vars]
 SITIO = "https://www.ainimation.studio"
 STOCK_API = "https://api.admira.store"
-VERSION = "v.07.10.2026.r27.22:42"
+VERSION = "v.08.10.2026.r29.00:16"

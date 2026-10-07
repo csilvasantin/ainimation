@@ -53,7 +53,7 @@ const res = (r) => JSON.parse(r.content[0].text);
 test('las veinte herramientas están y las instrucciones dicen qué es', async () => {
   const { client } = await cliente();
   const { tools } = await client.listTools();
-  assert.deepEqual(tools.map((t) => t.name).sort(), [...HERRAMIENTAS].sort()); assert.equal(tools.length, 21);
+  assert.deepEqual(tools.map((t) => t.name).sort(), [...HERRAMIENTAS].sort()); assert.equal(tools.length, 25);
   assert.match(client.getInstructions(), /Xperiencias/);
 });
 
@@ -110,7 +110,7 @@ test('sitio_estado lee el sello y las puertas', async () => {
 test('HTTP: / describe el servicio, /mcp por GET dice 405 con la documentación, y la clave de flota da identidad', async () => {
   const deps = { fetch: fetchFalso([]) };
   const raiz = await (await manejar(new Request('https://mcp.test/'), ENV, deps)).json();
-  assert.equal(raiz.endpoint_mcp, 'https://mcp.test/mcp'); assert.equal(raiz.herramientas.length, 21);
+  assert.equal(raiz.endpoint_mcp, 'https://mcp.test/mcp'); assert.equal(raiz.herramientas.length, 25);
   const get = await manejar(new Request('https://mcp.test/mcp'), ENV, deps);
   assert.equal(get.status, 405); assert.equal(get.headers.get('x-documentacion'), `${SITIO}/mcp/`);
   const clave = await claveFlota(ENV.MCP_FLOTA_SEED, 'Morfeo', 'MacMini');

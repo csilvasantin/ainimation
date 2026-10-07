@@ -21,10 +21,11 @@ import { identidadPorClave, claveDeRequest } from './identidad-flota.mjs';
 import { ColaTienda, STORE } from './cola.js';
 import { acceso, avisoAbierta, corsCola, origenPermitido } from './cola-acceso.js';
 export { ColaTienda };
+import * as AUD from './audiencia.js';
 import { Admingo, PLANTILLAS, proyectoVacio, compilar, validarEsquema, coherenciaMenu, urlKiosko, TWIN_BASE, TWIN_STARBUCKS, MARCAS } from './suite.js';
 
 export const NOMBRE = 'ainimation';
-export const HERRAMIENTAS = ['quien_soy', 'sitio_estado', 'xperiencias_listar', 'xperiencia_detalle', 'xperiencia_canal_item', 'stock_animaciones', 'xperiencia_publicar', 'listar_xperiencias', 'plantillas', 'crear_proyecto', 'validar_admingo', 'compilar_admingo', 'publicar_xperiencia', 'menu_validar', 'enviar_a_admiratv', 'fijar_en_totem', 'marca_aplicar', 'cola_estado', 'cola_avanzar', 'cola_avisos', 'admirito_voz'];
+export const HERRAMIENTAS = ['quien_soy', 'sitio_estado', 'xperiencias_listar', 'xperiencia_detalle', 'xperiencia_canal_item', 'stock_animaciones', 'xperiencia_publicar', 'listar_xperiencias', 'plantillas', 'crear_proyecto', 'validar_admingo', 'compilar_admingo', 'publicar_xperiencia', 'menu_validar', 'enviar_a_admiratv', 'fijar_en_totem', 'marca_aplicar', 'cola_estado', 'cola_avanzar', 'cola_avisos', 'admirito_voz', 'audiencia_estado', 'audiencia_reglas', 'audiencia_resumen', 'audiencia_simular'];
 const limpiar = (s) => String(s || '').replace(/\/+$/, '');
 const texto = (o) => ({ content: [{ type: 'text', text: typeof o === 'string' ? o : JSON.stringify(o, null, 2) }] });
 const fallo = (e) => ({ isError: true, content: [{ type: 'text', text: 'Error: ' + (e && e.message || e) }] });
@@ -75,6 +76,7 @@ export function crearServidor(env = {}, deps = {}, identidad = null) {
       'Este servidor no guarda estado: lee el sitio (index.json es la única fuente de la galería) y escribe en el stock de Pixeria. Crear una Xperiencia nueva sigue siendo trabajo del repo (carpeta + entrada en index.json): el MCP te dice qué hay y publica lo que ya existe.',
       'Suite (desde 7-oct-2026): listar_xperiencias, plantillas, crear_proyecto (proyecto del Director desde plantilla), validar_admingo y compilar_admingo (el Lingo de AdmiraNeXT → reglas XPL), publicar_xperiencia (URL + ficheros; ZIP próximamente), menu_validar (carta de quiosco), enviar_a_admiratv (item de playlist type interactive), fijar_en_totem (comando /totem del gemelo) y marca_aplicar (marcablanca de admiranext). Son cálculos y lecturas: no escriben.',
       'Gestor de colas (7-oct-2026): cola_estado (pedidos en preparación / listos de una tienda; con clave de flota o de barra, las líneas de cada comanda) y cola_avanzar (el barista de la demo; con la cola cerrada exige clave de flota o de barra) y cola_avisos (pedidos listos con el texto que dicen Admirito, el móvil y la taza: «NOMBRE, tu pedido Starbucks está preparado»). Los pedidos llevan «nombre» si el cliente lo dio en el quiosco. Pago siempre simulado; relé público en /cola/* de este mismo worker.',
+      'Audiencia del tótem (8-oct-2026): el quiosco en modo «Segmentado» estima en el navegador cuántas personas tiene delante, su franja de edad y su género (sin guardar ni enviar imágenes) y cambia la carta según reglas. audiencia_estado (quién hay ahora), audiencia_reglas (variantes y reglas; con genero/edad/personas te dice qué variante saldría), audiencia_resumen (agregados por género, edad, grupo, hora de Madrid y variante; tiendas reales con clave de flota, starbucks-qa abierta) y audiencia_simular (visitas sintéticas, SOLO en tiendas *-qa con origen demo). Backoffice con sesión: https://admira.tv/audiencia/.',
       'Ritual de la flota: lo que hagas aquí se declara en yokup (mcp.admira.live · yokup_alta/yokup_paso) — este MCP no puntúa por sí mismo.',
     ].join(' '),
   });
@@ -339,6 +341,50 @@ export function crearServidor(env = {}, deps = {}, identidad = null) {
     return texto({ store, fases: { recibido: (r.recibido || []).length, preparando: (r.preparando || []).length, preparado: (r.listo || []).length, segundos: { recibido: r.recibido_s, preparando: r.prep_s, recoger: r.recoger_s } }, avisos, pantallas: { ipad: `${sitio}/cola/ipad.html?store=${store}`, ipad_sin_toque: `${sitio}/cola/ipad.html?store=${store}&voz=1`, movil: `${sitio}/cola/?store=${store}&pedido=<numero>`, taza: `${sitio}/taza/?store=${store}`, ipad_mostrador: { url: `${sitio}/cola/ipad.html?store=${store}`, dispositivo: 'starbucks-ipad-01', nota: 'el iPad del mostrador del gemelo enseña esta cola y al pulsarlo abre esta URL en grande' }, gemelo: 'https://www.xpaceos.com/admira-xp/ (Starbucks en escena)' }, simulado: true });
   }));
 
+  // ── Audiencia del tótem (Carlos, 8-oct-2026): contenidos segmentados por sexo, edad y número de personas ──────────
+  const TIENDA_A = z.string().regex(/^[a-z0-9-]{2,80}$/).default('starbucks-paseo-de-gracia');
+  const sinDB = () => { throw new Error('audiencia sin base de datos (binding AUDIENCIA_DB)'); };
+  server.registerTool('audiencia_estado', {
+    title: 'Audiencia del tótem ahora',
+    description: 'Quién hay delante del tótem/quiosco segmentado de una tienda AHORA (por dispositivo: cámara, personas, individuo/grupo, género y franja de edad estimados, regla y variante de carta que se está enseñando) y las últimas visitas. Solo estimaciones agregadas: nunca imágenes ni datos biométricos.',
+    inputSchema: { tienda: TIENDA_A },
+    annotations: { readOnlyHint: true, openWorldHint: false },
+  }, seguro(async ({ tienda = 'starbucks-paseo-de-gracia' }) => { const db = env.AUDIENCIA_DB || sinDB(); return texto({ ...(await AUD.leerEstado(db, tienda)), backoffice: 'https://admira.tv/audiencia/?tienda=' + tienda }); }));
+  server.registerTool('audiencia_reglas', {
+    title: 'Reglas de segmentación del quiosco',
+    description: 'Variantes de carta (general, grupo, joven, adulto, senior, mujer, hombre…) y reglas (género, edad, individuo/grupo, franja horaria → variante, con prioridad) de una tienda. Si pasas personas/genero/edad dice qué regla y variante saldrían. Se editan en https://admira.tv/audiencia/ (sesión AdmiraNeXT).',
+    inputSchema: { tienda: TIENDA_A, personas: z.number().int().min(0).max(20).optional(), genero: z.enum(['m', 'f', 'mixto']).optional(), edad: z.enum(['nino', 'joven', 'adulto', 'senior']).optional(), franja: z.enum(['manana', 'mediodia', 'tarde', 'noche']).optional() },
+    annotations: { readOnlyHint: true, openWorldHint: false },
+  }, seguro(async ({ tienda = 'starbucks-paseo-de-gracia', personas, genero, edad, franja }) => {
+    const doc = await AUD.leerReglas(env.AUDIENCIA_DB, tienda);
+    let prueba = null;
+    if (personas != null) { const s = { personas, grupo: personas >= 2 ? 'grupo' : personas ? 'individuo' : null, genero: genero || null, edad: edad || null, franja: franja || AUD.franjaDe(Date.now()) }; prueba = { segmento: s, ...AUD.elegir(doc, s) }; }
+    return texto({ tienda, reglas: doc, prueba, editar: 'https://admira.tv/audiencia/?tienda=' + tienda + '#reglas' });
+  }));
+  server.registerTool('audiencia_resumen', {
+    title: 'Resumen de audiencia',
+    description: 'Agregados de las visitas al tótem: KPIs (visitas, personas, permanencia media, % grupos, conversión a pedido), género, franjas de edad, tamaño del grupo, visitas por hora de Madrid, por día y por variante/regla. Tiendas reales con clave de flota (Authorization: Bearer); starbucks-qa y demás *-qa abiertas.',
+    inputSchema: { tienda: TIENDA_A, dias: z.number().int().min(1).max(90).optional(), origen: z.string().max(20).optional().describe('real,demo,qa separados por comas (por defecto real,demo)') },
+    annotations: { readOnlyHint: true, openWorldHint: false },
+  }, seguro(async ({ tienda = 'starbucks-paseo-de-gracia', dias = 7, origen }) => {
+    const db = env.AUDIENCIA_DB || sinDB();
+    if (!AUD.esQA(tienda) && !identidad) throw new Error('el resumen de una tienda real exige la clave de flota (Authorization: Bearer) o la sesión de https://admira.tv/audiencia/. starbucks-qa está abierta.');
+    const f = AUD.filtrosDe({ tienda, dias, origen: origen || (AUD.esQA(tienda) ? 'qa,demo' : 'real,demo') });
+    return texto({ ...AUD.agregar(await AUD.visitas(db, f), f), panel: 'https://admira.tv/audiencia/?tienda=' + tienda });
+  }));
+  server.registerTool('audiencia_simular', {
+    title: 'Simular audiencia (QA)',
+    description: 'Inyecta visitas sintéticas (personas, género, edad, permanencia, pedido) para probar el panel sin cámara. SOLO en tiendas de pruebas *-qa (por defecto starbucks-qa) y con origen «demo»: nunca escribe en starbucks-paseo-de-gracia. Hasta 200 por llamada, repartidas en las últimas «horas».',
+    inputSchema: { tienda: z.string().regex(/^[a-z0-9-]{2,80}-qa$/).default('starbucks-qa'), visitas: z.number().int().min(1).max(200).optional(), horas: z.number().int().min(1).max(720).optional(), demo_run: z.string().max(40).optional() },
+    annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: false },
+  }, seguro(async ({ tienda = 'starbucks-qa', visitas: n = 30, horas = 12, demo_run }) => {
+    const db = env.AUDIENCIA_DB || sinDB();
+    const doc = await AUD.leerReglas(db, tienda);
+    const sim = AUD.simular({ tienda, n, horas, demo_run, doc });
+    for (const v of sim.visitas) await AUD.guardarEvento(db, AUD.validarEvento(v));
+    return texto({ ok: true, tienda, demo_run: sim.demo_run, insertadas: sim.visitas.length, por_variante: AUD.agregar(sim.visitas.map((v) => AUD.validarEvento(v))).por_variante, panel: 'https://admira.tv/audiencia/?tienda=' + tienda + '&origen=demo,qa' });
+  }));
+
   return server;
 }
 
@@ -353,7 +399,7 @@ export async function manejar(request, env = {}, deps = {}) {
   if (ruta === '/' || ruta === '/salud') {
     return json({ nombre: NOMBRE, version: env.VERSION || '', sitio, endpoint_mcp: `${u.origin}/mcp`, transport: 'streamable-http',
       que_es: 'MCP de ainimation.studio: Xperiencias, plantillas del Director, Admingo, carta, admira.tv, tótem del gemelo y marca blanca como herramientas.',
-      auth: 'lecturas abiertas; xperiencia_publicar con clave de flota AdmiraNeXT (Authorization: Bearer)', secretos: { MCP_FLOTA_SEED: !!env.MCP_FLOTA_SEED, COLA_KIOSKO_KEY: !!env.COLA_KIOSKO_KEY, COLA_BARRA_KEY: !!env.COLA_BARRA_KEY, COLAS_SEED: !!env.COLAS_SEED, COLA_ADMIN: !!env.COLA_ADMIN }, cola: avisoAbierta(env) || 'cerrada (quiosco y barra con clave)',
+      auth: 'lecturas abiertas; xperiencia_publicar con clave de flota AdmiraNeXT (Authorization: Bearer)', secretos: { MCP_FLOTA_SEED: !!env.MCP_FLOTA_SEED, COLA_KIOSKO_KEY: !!env.COLA_KIOSKO_KEY, COLA_BARRA_KEY: !!env.COLA_BARRA_KEY, COLAS_SEED: !!env.COLAS_SEED, COLA_ADMIN: !!env.COLA_ADMIN, REGISTRO_KEY: !!env.REGISTRO_KEY }, audiencia: { d1: !!env.AUDIENCIA_DB, backoffice: 'https://admira.tv/audiencia/', privacidad: 'solo estimaciones agregadas; nunca imágenes ni datos biométricos; 90 días' }, cola: avisoAbierta(env) || 'cerrada (quiosco y barra con clave)',
       herramientas: HERRAMIENTAS,
       documentacion: `${sitio}/mcp/`, llms: `${sitio}/mcp/llms.txt`, help_humanos: `${sitio}/help/` });
   }
@@ -395,8 +441,61 @@ export async function manejar(request, env = {}, deps = {}) {
     }
     return new Response(r.body, { status: r.status, headers: { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store', ...cors } });
   }
+  if (ruta.startsWith('/audiencia/')) return audienciaHttp(request, env, u, ruta);
   if (ruta === '/voz') return voz(request, env, deps);
-  return json({ ok: false, error: 'ruta desconocida', rutas: ['/', '/salud', '/mcp', '/voz', '/cola/estado', '/cola/pedido', '/cola/pagar', '/cola/avanzar', '/cola/comandas', '/cola/llamar', '/cola/reiniciar'] }, 404);
+  return json({ ok: false, error: 'ruta desconocida', rutas: ['/', '/salud', '/mcp', '/voz', '/cola/estado', '/cola/pedido', '/cola/pagar', '/cola/avanzar', '/cola/comandas', '/cola/llamar', '/cola/reiniciar', '/audiencia/reglas', '/audiencia/evento', '/audiencia/estado', '/audiencia/resumen', '/audiencia/simular'] }, 404);
+}
+
+/*
+ * /audiencia/* (8-oct-2026): relé público del tótem segmentado. Lecturas abiertas (reglas, estado; resumen solo *-qa
+ * sin clave); escrituras (evento, simular) solo desde orígenes de la casa o servidor a servidor. Lista blanca estricta.
+ */
+async function audienciaHttp(request, env, u, ruta) {
+  const cors = corsCola(request, env);
+  const resp = (o, status = 200, extra = {}) => new Response(JSON.stringify(o, null, 2), { status, headers: { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store', ...cors, ...extra } });
+  if (request.method === 'OPTIONS') return new Response(null, { status: 204, headers: cors });
+  const origin = request.headers.get('origin');
+  if (request.method === 'POST' && origin && !origenPermitido(origin, env)) return resp({ ok: false, error: 'origen no permitido para escribir audiencia' }, 403);
+  const db = env.AUDIENCIA_DB;
+  const tienda = String(u.searchParams.get('tienda') || u.searchParams.get('store') || '');
+  try {
+    if (ruta === '/audiencia/reglas' && request.method === 'GET') {
+      if (!AUD.TIENDA.test(tienda)) return resp({ ok: false, error: 'tienda inválida (slug)' }, 400);
+      return resp({ ok: true, ...(await AUD.leerReglas(db, tienda)) }, 200, { 'cache-control': 'public, max-age=20' });
+    }
+    if (!db) return resp({ ok: false, error: 'audiencia sin base de datos (AUDIENCIA_DB)' }, 503);
+    if (ruta === '/audiencia/evento' && request.method === 'POST') {
+      const raw = await request.text();
+      if (raw.length > 8192) return resp({ ok: false, error: 'evento demasiado grande (máx. 8 KB): solo estimaciones agregadas' }, 413);
+      let b; try { b = JSON.parse(raw); } catch { return resp({ ok: false, error: 'JSON inválido' }, 400); }
+      let ev; try { ev = AUD.validarEvento(b); } catch (e) { return resp({ ok: false, error: String(e.message || e) }, 400); }
+      return resp(await AUD.guardarEvento(db, ev));
+    }
+    if (ruta === '/audiencia/estado' && request.method === 'GET') {
+      if (!AUD.TIENDA.test(tienda)) return resp({ ok: false, error: 'tienda inválida (slug)' }, 400);
+      return resp({ ok: true, ...(await AUD.leerEstado(db, tienda)) });
+    }
+    if (ruta === '/audiencia/resumen' && request.method === 'GET') {
+      if (!AUD.TIENDA.test(tienda)) return resp({ ok: false, error: 'tienda inválida (slug)' }, 400);
+      if (!AUD.esQA(tienda)) {
+        let id = null; try { id = await identidadPorClave(claveDeRequest(request), env.MCP_FLOTA_SEED); } catch { id = null; }
+        if (!id) return resp({ ok: false, error: 'resumen de tienda real: sesión en https://admira.tv/audiencia/ o clave de flota. Las tiendas *-qa están abiertas.' }, 401);
+      }
+      const q = new URLSearchParams(u.search); if (!q.get('origen')) q.set('origen', AUD.esQA(tienda) ? 'qa,demo' : 'real,demo'); q.set('tienda', tienda);
+      const f = AUD.filtrosDe(q); const filas = await AUD.visitas(db, f);
+      return resp({ ok: true, ...AUD.agregar(filas, f), recientes: filas.slice(0, 50).map((v) => ({ ...v, caras: (() => { try { return JSON.parse(v.caras || '[]'); } catch { return []; } })() })) });
+    }
+    if (ruta === '/audiencia/simular' && request.method === 'POST') {
+      let b = {}; try { b = await request.json(); } catch { b = {}; }
+      const t = String(b.tienda || tienda || AUD.QA_TIENDA);
+      if (!AUD.TIENDA.test(t) || !AUD.esQA(t)) return resp({ ok: false, error: 'la simulación solo escribe en tiendas *-qa (p. ej. starbucks-qa)' }, 400);
+      const caras = Array.isArray(b.caras) ? b.caras.slice(0, 10).map((c) => ({ g: c && c.g === 'm' ? 'm' : 'f', e: AUD.BANDAS.includes(c && c.e) ? c.e : 'adulto' })) : null;
+      const sim = AUD.simular({ tienda: t, n: Math.min(100, +b.visitas || +b.n || 20), horas: b.horas, demo_run: b.demo_run, doc: await AUD.leerReglas(db, t), caras: caras && caras.length ? caras : null });
+      for (const v of sim.visitas) await AUD.guardarEvento(db, AUD.validarEvento(v));
+      return resp({ ok: true, tienda: t, demo_run: sim.demo_run, insertadas: sim.visitas.length });
+    }
+  } catch (e) { return resp({ ok: false, error: String(e.message || e) }, 500); }
+  return resp({ ok: false, error: 'ruta de audiencia desconocida', rutas: ['GET /audiencia/reglas?tienda=', 'POST /audiencia/evento', 'GET /audiencia/estado?tienda=', 'GET /audiencia/resumen?tienda=*-qa', 'POST /audiencia/simular'] }, 404);
 }
 
 export default { fetch: (request, env, ctx) => manejar(request, env, { ctx }) };

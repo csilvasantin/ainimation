@@ -52,6 +52,35 @@ const igual = (a, b) => { a = String(a || ''); b = String(b || ''); if (!a || a.
 const ORDEN = ['pendiente', 'recibido', 'preparando', 'listo', 'recogido'];
 export const FASES = { pendiente: ['Pendiente de pago', 'Awaiting payment'], recibido: ['Recibido', 'Received'], preparando: ['En preparación', 'Preparing'], listo: ['Preparado', 'Ready'], recogido: ['Recogido', 'Collected'] };
 
+/*
+ * Registro (GrokBot · MacMini, 7-oct-2026, contrato «registro v1» con Morfeo, encargo #5367): campos OPCIONALES del
+ * alta que no cambian la cola pero viajan al registro de digitalavatar.ai/metricas: conv (id de la conversación con
+ * el avatar), origen ('real' | 'demo' | 'qa'), demo_run (tanda de /demo pedido), canal, avatar y t (hora simulada,
+ * solo con origen 'demo'; la cola sigue en tiempo real, el registro la usa para colocar el pedido en su hora).
+ */
+const REG_CANALES = ['kiosko', 'ipad', 'gemelo', 'web', 'movil', 'mcp', 'tv'];
+export function metaRegistro(b = {}) {
+  const s = (v, n) => String(v || '').toLowerCase().replace(/[^a-z0-9_.-]/g, '').slice(0, n);
+  const m = {};
+  if (s(b.conv, 40).length >= 6) m.conv = s(b.conv, 40);
+  if (['real', 'demo', 'qa'].includes(s(b.origen, 8))) m.origen = s(b.origen, 8);
+  if (s(b.demo_run, 40)) m.demo_run = s(b.demo_run, 40);
+  if (REG_CANALES.includes(s(b.canal, 10))) m.canal = s(b.canal, 10);
+  if (['admirito', 'luna', 'neo'].includes(s(b.avatar, 12))) m.avatar = s(b.avatar, 12);
+  const t = Math.round(Number(b.t));
+  if (m.origen === 'demo' && Number.isFinite(t) && t > 0) m.t_sim = t;
+  return Object.keys(m).length ? m : null;
+}
+/** Foto del pedido para el registro: horas de cada fase (las automáticas, previstas, aunque aún no hayan llegado). */
+export function fotoRegistro(p, store, evento, ahora = Date.now()) {
+  const auto = p.auto !== false;
+  const rec = p.pagadoAt || null;
+  const prep = rec ? (p.prepAt || rec + RECIBIDO_S * 1000) : null;
+  const listo = rec ? (p.listoAt || (auto ? prep + (p.prep || PREP_S) * 1000 : null)) : null;
+  const recog = p.recogidoAt || (auto && listo ? listo + RECOGER_S * 1000 : null);
+  return { v: 1, tienda: store, id: p.id, numero: p.numero, nombre: p.nombre || null, ...(p.reg || {}), creado: p.creadoAt, pagado: rec, t_recibido: rec, t_preparando: prep, t_listo: listo, t_recogido: rec ? recog : (p.recogidoAt || null), total: p.total, moneda: p.moneda, via: p.via || null, lineas: (p.lineas || []).map((l) => ({ name: l.name, qty: l.qty, optionsText: l.optionsText || '' })), llamadas: p.llamadas || 0, evento, estado: estadoDe(p, ahora) };
+}
+
 /** Estado efectivo de un pedido en el instante `ahora` (ms). */
 export function estadoDe(p, ahora = Date.now()) {
   if (p.recogidoAt) return 'recogido';
@@ -82,13 +111,13 @@ export function crearCola(datos = { pedidos: {}, n: 0 }) {
   return {
     datos: d,
     /** Alta (idempotente por id). Devuelve la vista completa y `pago`: el token que el QR lleva al móvil para pagar sin clave. */
-    crear({ id, total = 0, moneda = 'EUR', prefijo = 'A', prep, nombre, lines, lineas } = {}, ahora = Date.now()) {
+    crear({ id, total = 0, moneda = 'EUR', prefijo = 'A', prep, nombre, lines, lineas, ...resto } = {}, ahora = Date.now()) {
       if (!ID.test(String(id || ''))) throw new Error('id de pedido inválido');
       const l = limpiaLineas(lines || lineas);
-      const ya = d.pedidos[id];
-      if (ya) { if (!(ya.lineas || []).length && l.lineas.length) { ya.lineas = l.lineas; ya.mas = l.mas; } ya.pago ||= tokenPago(); return { ...vista(ya, ahora), pago: ya.pago }; }
+      const ya = d.pedidos[id], reg = metaRegistro(resto);
+      if (ya) { if (reg && !ya.reg) ya.reg = reg; if (!(ya.lineas || []).length && l.lineas.length) { ya.lineas = l.lineas; ya.mas = l.mas; } ya.pago ||= tokenPago(); return { ...vista(ya, ahora), pago: ya.pago }; }
       podar(ahora); d.n = d.n >= 999 ? 1 : d.n + 1;
-      const p = { id, numero: String(prefijo || 'A').replace(/[^A-Z]/g, '').slice(0, 2) + String(d.n).padStart(3, '0'), total: Math.max(0, Math.min(9999, +total || 0)), moneda: String(moneda).replace(/[^A-Z]/g, '').slice(0, 3) || 'EUR', creadoAt: ahora, prep: prep ? Math.max(3, Math.min(600, +prep)) : PREP_S, nombre: limpiaNombre(nombre), lineas: l.lineas, mas: l.mas, pago: tokenPago() };
+      const p = { id, numero: String(prefijo || 'A').replace(/[^A-Z]/g, '').slice(0, 2) + String(d.n).padStart(3, '0'), total: Math.max(0, Math.min(9999, +total || 0)), moneda: String(moneda).replace(/[^A-Z]/g, '').slice(0, 3) || 'EUR', creadoAt: ahora, prep: prep ? Math.max(3, Math.min(600, +prep)) : PREP_S, nombre: limpiaNombre(nombre), lineas: l.lineas, mas: l.mas, pago: tokenPago(), ...(reg ? { reg } : {}) };
       d.pedidos[id] = p; return { ...vista(p, ahora), pago: p.pago };
     },
     /** ¿Este token de pago es el del pedido `k`? (el móvil que escaneó el QR paga sin clave de quiosco) */
@@ -108,6 +137,8 @@ export function crearCola(datos = { pedidos: {}, n: 0 }) {
     llamar(k, ahora = Date.now()) { const p = buscar(k); if (!p) throw new Error('pedido no encontrado'); if (estadoDe(p, ahora) !== 'listo') this.avanzar(p.id, 'listo', ahora); p.llamadoAt = ahora; p.llamadas = (p.llamadas || 0) + 1; return vista(p, ahora); },
     /** Vaciar la cola de la tienda y volver a numerar desde 001. */
     reiniciar() { const n = Object.keys(d.pedidos).length; d.pedidos = {}; d.n = 0; return { borrados: n }; },
+    /** El pedido tal cual (para la foto del registro). */
+    crudo(k) { return buscar(k) || null; },
     uno(k, ahora = Date.now(), detalle = true) { const p = buscar(k); return p ? vista(p, ahora, detalle) : null; },
     /** Vista de barra (KDS): comandas abiertas (pagadas, sin recoger) por orden de llegada, con líneas. */
     comandas(ahora = Date.now()) {
@@ -135,7 +166,16 @@ export function crearCola(datos = { pedidos: {}, n: 0 }) {
  */
 const NO = (msg) => Response.json({ ok: false, error: msg }, { status: 401 });
 export class ColaTienda {
-  constructor(ctx) { this.ctx = ctx; }
+  constructor(ctx, env) { this.ctx = ctx; this.env = env || {}; }
+  /** Empuja la foto del pedido al registro (omnipublicity-api por service binding). Nunca rompe la cola. */
+  async registrar(p, store, evento) {
+    const env = this.env;
+    if (!p || !env.OMNI || !env.REGISTRO_KEY) return false;
+    try {
+      const r = await env.OMNI.fetch('https://brain.digitalavatar.ai/registro/pedido', { method: 'POST', headers: { 'content-type': 'application/json', 'x-registro-clave': env.REGISTRO_KEY }, body: JSON.stringify(fotoRegistro(p, store, evento)), signal: AbortSignal.timeout(2500) });
+      return r.ok;
+    } catch { return false; }
+  }
   async fetch(request) {
     const u = new URL(request.url), op = u.pathname.split('/').pop();
     const puede = new Set(String(request.headers.get('x-cola-puede') || '').split(',').map((x) => x.trim()).filter(Boolean));
@@ -164,6 +204,8 @@ export class ColaTienda {
       else return Response.json({ ok: false, error: 'operación desconocida' }, { status: 404 });
     } catch (e) { return Response.json({ ok: false, error: String(e.message || e) }, { status: 400 }); }
     if (cambia) await this.ctx.storage.put('cola', c.datos);
+    // registro: alta, pago, avance y llamada (reiniciar no borra lo ya registrado)
+    if (cambia && op !== 'reiniciar') { const store = String(u.searchParams.get('store') || '').slice(0, 80); const p = c.crudo(op === 'pedido' ? String(body.id || '') : k); const ev = op === 'pedido' ? 'alta' : op === 'pagar' ? 'pago' : op; await this.registrar(p, store, ev); }
     return Response.json({ ok: true, ...r });
   }
 }

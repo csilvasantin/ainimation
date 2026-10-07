@@ -1,20 +1,21 @@
 {
-  "version": "v.07.10.2026.r26.17:27",
-  "deployedAt": "2026-10-07T15:27:23Z",
-  "deployer": "NeoMBP16",
-  "machine": "MacBookPro16",
-  "signature": "NeoMBP16 · MacBookPro16",
-  "git": "59148df4f6668bb968473724e95d1e3b2f5192b4",
-  "gitShort": "59148df",
-  "gitFull": "59148df4f6668bb968473724e95d1e3b2f5192b4",
+  "version": "v.08.10.2026.r29.00:16",
+  "deployedAt": "2026-10-07T22:16:32Z",
+  "deployer": "GrokBot",
+  "machine": "MacMini",
+  "signature": "GrokBot · MacMini",
+  "git": "bb5e18794e2a2d5b80718f3a074a0c890d14b313",
+  "gitShort": "bb5e187",
+  "gitFull": "bb5e18794e2a2d5b80718f3a074a0c890d14b313",
   "dirty": false,
-  "returnTag": "AInimation-v.04.09.2026.r1",
-  "previousTag": "AInimation-v.03.09.2026.r2",
-  "previousVersion": "v.07.10.2026.r25.16:31",
-  "note": "Recibido dura 30 segundos",
+  "returnTag": "retorno/pre-audiencia-20261008",
+  "previousTag": "retorno/pre-voz-fix-20261007",
+  "previousVersion": "v.07.10.2026.r26.17:27",
+  "note": "Quiosco segmentado por cámara (audiencia)",
   "novedades": [
-    "La fase Recibido de la cola pasa de 1 minuto a 30 segundos",
-    "Es lo que dura la barra con el vaso en la pantalla de pedidos de admira.tv",
-    "Ayuda, barista y MCP actualizados"
+    "Quiosco segmentado: con ?seg=1 la cámara cuenta personas, género, edad e individuo/grupo y elige la carta (grupo, joven, adulto, senior, mujer, hombre)",
+    "Audiencia anónima en D1: recuentos por visita con el pedido, sin imágenes ni huellas faciales, 90 días; aviso «Cámara en uso» siempre visible",
+    "Reglas y panel en admira.tv/audiencia; MCP audiencia_estado, audiencia_reglas, audiencia_resumen y audiencia_simular",
+    "Simulación QA sin cámara con ?simaud=, siempre en starbucks-qa"
   ]
 }

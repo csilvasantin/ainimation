@@ -44,3 +44,14 @@ GitHub Pages sirve `main` (raíz). CNAME = `www.ainimation.studio`.
 - Preview local: `python3 -m http.server 9134` → http://127.0.0.1:9134/
 - HTTPS: el cert de Pages se aprovisiona solo tras fijar el custom domain; si
   `https_enforced` sigue en false, re-setear el cname vía API fuerza reintento.
+
+
+## Registro (7-oct-2026)
+La cola (`mcp/server/src/cola.js`) empuja cada pedido al registro de digitalavatar.ai/metricas. Campos opcionales del alta y reglas de `/demo pedido` (origen demo, demo_run, conv, t): `docs/registro-v1.md`.
+
+## Audiencia / quiosco segmentado (8-oct-2026)
+`xperiencias/kiosko-pedido/segmento.js` (`?seg=1`, `?simaud=` para QA) + face-api vendorizado en `assets/face-api/`
+(solo detector + edad/género, sin reconocimiento). Worker: `mcp/server/src/audiencia.js` + D1 `kiosko-audiencia`
+(binding AUDIENCIA_DB, migración `mcp/server/migrations/0001_audiencia.sql`). admira.tv guarda una copia del módulo en
+`functions/audiencia/_audiencia.js`: si cambias uno, cambia el otro. Nunca imágenes ni embeddings; 90 días; QA solo en
+`starbucks-qa`. Contrato: `docs/audiencia-v1.md`.
