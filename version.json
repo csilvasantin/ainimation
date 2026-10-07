@@ -1,20 +1,20 @@
 {
-  "version": "v.07.10.2026.r25.16:31",
-  "deployedAt": "2026-10-07T14:31:57Z",
-  "deployer": "OraculoMacMini",
-  "machine": "MacMini",
-  "signature": "OraculoMacMini · MacMini",
+  "version": "v.07.10.2026.r26.17:27",
+  "deployedAt": "2026-10-07T15:27:23Z",
+  "deployer": "NeoMBP16",
+  "machine": "MacBookPro16",
+  "signature": "NeoMBP16 · MacBookPro16",
   "git": "59148df4f6668bb968473724e95d1e3b2f5192b4",
   "gitShort": "59148df",
   "gitFull": "59148df4f6668bb968473724e95d1e3b2f5192b4",
   "dirty": false,
   "returnTag": "AInimation-v.04.09.2026.r1",
   "previousTag": "AInimation-v.03.09.2026.r2",
-  "previousVersion": "v.07.10.2026.r24.16:24",
-  "note": "Admirito habla con la voz Santiago",
+  "previousVersion": "v.07.10.2026.r25.16:31",
+  "note": "Recibido dura 30 segundos",
   "novedades": [
-    "Admirito habla por defecto con la voz «Santiago» de ElevenLabs (elegida por Carlos)",
-    "Daniela y Raquel siguen disponibles con ?vozid=daniela o ?vozid=raquel",
-    "Ayuda y MCP admirito_voz actualizados"
+    "La fase Recibido de la cola pasa de 1 minuto a 30 segundos",
+    "Es lo que dura la barra con el vaso en la pantalla de pedidos de admira.tv",
+    "Ayuda, barista y MCP actualizados"
   ]
 }
