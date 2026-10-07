@@ -1,21 +1,21 @@
 {
-  "version": "v.07.10.2026.r5.09:53",
-  "deployedAt": "2026-10-07T07:53:14Z",
+  "version": "v.07.10.2026.r6.10:17",
+  "deployedAt": "2026-10-07T08:17:51Z",
   "deployer": "GrokBot",
   "machine": "MacMini",
   "signature": "GrokBot · MacMini",
-  "git": "5aa6f89c7ab2d5da515c67d68eefcbc894649f03",
-  "gitShort": "5aa6f89",
-  "gitFull": "5aa6f89c7ab2d5da515c67d68eefcbc894649f03",
+  "git": "fc3edbb2d13e5b6244f1cf2171aaacb5aa003657",
+  "gitShort": "fc3edbb",
+  "gitFull": "fc3edbb2d13e5b6244f1cf2171aaacb5aa003657",
   "dirty": false,
   "returnTag": "AInimation-v.04.09.2026.r1",
   "previousTag": "AInimation-v.03.09.2026.r2",
-  "previousVersion": "v.07.10.2026.r4.09:07",
-  "note": "Admingo, el Lingo de AdmiraNeXT: scripts en español o inglés (al soltar / on mouseUp, ir a marca, si…entonces, repetir con)",
+  "previousVersion": "v.07.10.2026.r5.09:53",
+  "note": "Ecosistema: /help manual ES/EN del Director y /mcp con herramientas de suite",
   "novedades": [
-    "Admingo, el Lingo de AdmiraNeXT: scripts en español o inglés (al soltar / on mouseUp, ir a marca, si…entonces, repetir con)",
-    "Ventana Script con resaltado, autocompletado con Tab y errores por número de línea; ventana Mensaje en vivo durante Play",
-    "Carrito, pago simulado y decir/say (avatar del tótem o voz es-ES / en-GB); lo simple se baja a reglas XPL y el script gana",
-    "La plantilla Quiosco de pedidos viene en Admingo, viaja al publicar (scripts.admingo) y tiene ayuda en /help/admingo.html"
+    "Ayuda nueva en /help: manual completo del Director en español e inglés (Cast, Stage, Score, Inspector, Behaviour, Admingo, Mensaje, plantillas, publicar, quiosco y pago)",
+    "Sección Ecosistema: cómo llega lo que creas a Pixeria, admira.tv, los tótems de XpaceOS, la marca blanca, Yokup y admira.biz",
+    "El MCP suma 10 herramientas: plantillas, crear proyecto, validar y compilar Admingo, validar carta, item de admira.tv, fijar en el tótem y aplicar marca",
+    "El quiosco pide al avatar del tótem que diga el número de pedido; si nadie responde, habla el navegador"
   ]
 }
