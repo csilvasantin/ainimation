@@ -735,6 +735,42 @@
           ]
         },
         {
+          "id": "temperatura",
+          "label": {
+            "es": "Temperatura",
+            "en": "Temperature"
+          },
+          "type": "single",
+          "required": true,
+          "default": "normal",
+          "choices": [
+            {
+              "id": "normal",
+              "label": {
+                "es": "Normal",
+                "en": "Regular"
+              },
+              "priceDelta": 0
+            },
+            {
+              "id": "extra-caliente",
+              "label": {
+                "es": "Extra caliente",
+                "en": "Extra hot"
+              },
+              "priceDelta": 0
+            },
+            {
+              "id": "templado",
+              "label": {
+                "es": "Templado",
+                "en": "Warm"
+              },
+              "priceDelta": 0
+            }
+          ]
+        },
+        {
           "id": "extras",
           "label": {
             "es": "Extras",
