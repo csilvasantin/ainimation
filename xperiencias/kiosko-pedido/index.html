@@ -1,0 +1,249 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+<title>Quiosco de pedido · AInimation Xperiencia</title>
+<meta name="description" content="Xperiencia de quiosco de pedido vertical 1080×1920 para tótems Retail OS: carta por establecimiento, opciones, carrito, pago QR simulado y número de pedido.">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<style>
+:root{--mb-primario:#00704A;--mb-primario-texto:#fff;--mb-secundario:#1E3932;--mb-secundario-texto:#fff;--mb-acento:#CBA258;--mb-acento-texto:#1E1A12;--mb-fondo:#fff;--mb-fondo-alt:#F2F0EB;--mb-superficie:#fff;--mb-superficie-alt:#EDEBE6;--mb-borde:#D9D6CF;--mb-texto:#1E2A25;--mb-texto-suave:#55605B;--mb-ok:#2F7D4F;--mb-error:#C0392B;--mb-font:Inter,-apple-system,'Segoe UI',Roboto,sans-serif;--r:22px}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;background:#000;overflow:hidden;font-family:var(--mb-font);user-select:none;-webkit-user-select:none}
+#stage{position:absolute;left:50%;top:50%;width:1080px;height:1920px;transform-origin:center;background:var(--mb-fondo);color:var(--mb-texto);overflow:hidden}
+.screen{position:absolute;inset:0;display:none;flex-direction:column}
+.screen.on{display:flex}
+header.bar{height:150px;display:flex;align-items:center;justify-content:space-between;padding:0 48px;background:var(--mb-secundario);color:var(--mb-secundario-texto)}
+.logo{height:56px;display:flex;align-items:center;font-weight:800;font-size:40px;letter-spacing:3px}
+.logo img{height:56px;max-width:420px}
+.logo svg{height:56px;width:auto}
+button{font:inherit;cursor:pointer;border:0;touch-action:manipulation}
+.lang{background:transparent;color:inherit;border:3px solid currentColor;border-radius:999px;padding:12px 26px;font-size:28px;font-weight:700}
+.demo{position:absolute;left:0;right:0;bottom:0;padding:14px 20px;text-align:center;font-size:22px;background:#FFE58A;color:#3A2E00;font-weight:700;z-index:50}
+/* atracción */
+#s-attract{background:var(--mb-secundario);color:var(--mb-secundario-texto);align-items:center;justify-content:center;text-align:center}
+#s-attract .hero{width:720px;height:720px;position:relative;margin:40px 0}
+#s-attract .hero img{position:absolute;inset:0;width:100%;height:100%;opacity:0;transition:opacity 1s,transform 3s;transform:scale(.92);border-radius:60px}
+#s-attract .hero img.on{opacity:1;transform:scale(1)}
+#s-attract h1{font-size:92px;line-height:1.02;margin:0 60px}
+#s-attract p{font-size:44px;opacity:.85;margin:30px 0}
+.pulse{margin-top:30px;background:var(--mb-primario);color:var(--mb-primario-texto);font-size:48px;font-weight:800;padding:34px 80px;border-radius:999px;animation:pulse 1.6s infinite}
+@keyframes pulse{50%{transform:scale(1.06)}}
+/* categorías / items */
+main{flex:1;overflow:auto;padding:36px 44px 220px}
+h2{font-size:60px;margin:10px 0 30px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:30px}
+.card{background:var(--mb-superficie);border:3px solid var(--mb-borde);border-radius:var(--r);padding:24px;text-align:left;color:var(--mb-texto);display:flex;flex-direction:column;gap:12px;min-height:200px}
+.card:active{transform:scale(.97)}
+.card img{width:100%;aspect-ratio:1;border-radius:18px;background:var(--mb-fondo-alt)}
+.card b{font-size:38px}.card span{font-size:28px;color:var(--mb-texto-suave)}
+.card .price{font-size:36px;color:var(--mb-primario);font-weight:800}
+.tabs{display:flex;gap:16px;overflow:auto;padding:24px 44px 0}
+.tab{white-space:nowrap;padding:20px 34px;border-radius:999px;font-size:30px;font-weight:700;background:var(--mb-superficie-alt);color:var(--mb-texto)}
+.tab.on{background:var(--mb-primario);color:var(--mb-primario-texto)}
+.foot{position:absolute;left:0;right:0;bottom:56px;padding:24px 44px;display:flex;gap:24px;background:linear-gradient(transparent,var(--mb-fondo) 30%)}
+.btn{flex:1;padding:34px;border-radius:var(--r);font-size:40px;font-weight:800;background:var(--mb-primario);color:var(--mb-primario-texto)}
+.btn.alt{background:var(--mb-superficie-alt);color:var(--mb-texto);flex:.6}
+.btn[disabled]{opacity:.4}
+/* detalle */
+.detail-top{display:flex;gap:34px;align-items:center}
+.detail-top img{width:330px;height:330px;border-radius:30px}
+.detail-top h2{margin:0 0 10px}.detail-top p{font-size:30px;color:var(--mb-texto-suave);margin:0}
+fieldset{border:0;margin:34px 0 0;padding:0}
+legend{font-size:36px;font-weight:800;margin-bottom:16px}
+.opts{display:flex;flex-wrap:wrap;gap:16px}
+.opt{padding:24px 30px;border-radius:18px;font-size:30px;background:var(--mb-superficie);border:3px solid var(--mb-borde);color:var(--mb-texto);min-width:200px}
+.opt.on{border-color:var(--mb-primario);background:var(--mb-primario);color:var(--mb-primario-texto)}
+.opt small{display:block;font-size:24px;opacity:.8}
+.qty{display:flex;align-items:center;gap:30px;font-size:48px;font-weight:800;margin-top:36px}
+.qty button{width:96px;height:96px;border-radius:50%;font-size:52px;background:var(--mb-superficie-alt);color:var(--mb-texto)}
+/* carrito */
+.line{display:flex;gap:24px;align-items:center;padding:22px 0;border-bottom:2px solid var(--mb-borde)}
+.line img{width:130px;height:130px;border-radius:16px}
+.line div{flex:1}.line b{font-size:34px}.line span{display:block;font-size:24px;color:var(--mb-texto-suave)}
+.line .lp{font-size:34px;font-weight:800}
+.line button{width:72px;height:72px;border-radius:50%;font-size:36px;background:var(--mb-superficie-alt);color:var(--mb-texto)}
+.total{display:flex;justify-content:space-between;font-size:52px;font-weight:800;margin-top:30px}
+.upsell{margin-top:40px}.upsell .grid{grid-template-columns:1fr 1fr 1fr}
+.upsell .card{min-height:0}.upsell .card b{font-size:28px}
+/* pago */
+#s-pay main{text-align:center}
+#qr{display:inline-block;padding:30px;background:#fff;border-radius:30px;border:4px solid var(--mb-borde);cursor:pointer}
+#qr img,#qr canvas{width:560px!important;height:560px!important}
+.paynote{font-size:28px;color:var(--mb-texto-suave);margin:20px 60px}
+.big{font-size:44px;font-weight:800}
+/* número */
+#s-done{background:var(--mb-primario);color:var(--mb-primario-texto);align-items:center;justify-content:center;text-align:center}
+#s-done .num{font-size:300px;font-weight:900;line-height:1;margin:30px 0}
+#s-done h2{font-size:64px}#s-done p{font-size:40px;margin:10px 60px}
+#overlay{position:absolute;inset:0;background:rgba(0,0,0,.55);display:none;align-items:center;justify-content:center;z-index:40}
+#overlay.on{display:flex}
+#overlay iframe{width:860px;height:1400px;border:0;border-radius:30px;background:#fff}
+#idle{position:absolute;left:50%;top:40%;transform:translate(-50%,-50%);background:var(--mb-secundario);color:var(--mb-secundario-texto);padding:50px 70px;border-radius:30px;font-size:44px;font-weight:800;text-align:center;display:none;z-index:45}
+#idle.on{display:block}
+</style>
+</head>
+<body>
+<div id="stage" role="application" aria-label="Quiosco de pedido">
+  <section class="screen on" id="s-attract" data-marker="ATRACCION" data-zone="pantalla-atraccion">
+    <div class="logo" data-logo></div>
+    <div class="hero" id="hero"></div>
+    <h1 data-t="attractTitle"></h1>
+    <p data-t="attractSub"></p>
+    <div class="pulse" data-t="start"></div>
+  </section>
+
+  <section class="screen" id="s-menu" data-marker="CATEGORIAS">
+    <header class="bar"><div class="logo" data-logo></div><button class="lang" data-lang></button></header>
+    <nav class="tabs" id="tabs"></nav>
+    <main><h2 id="catTitle"></h2><div class="grid" id="items"></div></main>
+    <div class="foot"><button class="btn alt" data-go="attract" data-t="cancel"></button><button class="btn" id="toCart" data-go="cart"></button></div>
+  </section>
+
+  <section class="screen" id="s-item" data-marker="PRODUCTO">
+    <header class="bar"><div class="logo" data-logo></div><button class="lang" data-lang></button></header>
+    <main id="itemBody"></main>
+    <div class="foot"><button class="btn alt" data-go="menu" data-t="back"></button><button class="btn" id="addBtn"></button></div>
+  </section>
+
+  <section class="screen" id="s-cart" data-marker="CARRITO">
+    <header class="bar"><div class="logo" data-logo></div><button class="lang" data-lang></button></header>
+    <main><h2 data-t="yourOrder"></h2><div id="lines"></div><div class="total"><span data-t="total"></span><span id="total"></span></div>
+      <div class="upsell"><h3 class="big" data-t="addSomething"></h3><div class="grid" id="ups"></div></div></main>
+    <div class="foot"><button class="btn alt" data-go="menu" data-t="more"></button><button class="btn" id="toPay" data-t="pay"></button></div>
+  </section>
+
+  <section class="screen" id="s-pay" data-marker="PAGO">
+    <header class="bar"><div class="logo" data-logo></div><button class="lang" data-lang></button></header>
+    <main><h2 data-t="scan"></h2><div class="big" id="payTotal"></div><br>
+      <div id="qr" title="Toca para abrir el pago simulado aquí"></div>
+      <p class="paynote" data-t="payNote"></p><p class="paynote" data-t="tapQr"></p></main>
+    <div class="foot"><button class="btn alt" data-go="cart" data-t="back"></button><button class="btn" id="payCounter" data-t="counter"></button></div>
+  </section>
+
+  <section class="screen" id="s-done" data-marker="NUMERO">
+    <h2 data-t="thanks"></h2><div class="num" id="orderNum"></div><p id="doneMsg"></p><p data-t="watch"></p>
+  </section>
+
+  <div id="overlay"><iframe id="payFrame" title="Pago simulado"></iframe></div>
+  <div id="idle"></div>
+  <div class="demo" id="demo"></div>
+</div>
+<script src="qrcode.min.js"></script>
+<script>
+(function(){
+"use strict";
+const P=new URLSearchParams(location.search);
+const T={
+ es:{start:"Toca para empezar",cancel:"Salir",back:"Atrás",cart:"Ver pedido",add:"Añadir",yourOrder:"Tu pedido",total:"Total",addSomething:"¿Algo para acompañar?",more:"Añadir más",pay:"Pagar",scan:"Escanea para pagar",tapQr:"Demo: toca el QR para abrir el pago simulado en esta pantalla.",counter:"Pagar en barra",thanks:"¡Gracias!",watch:"Te avisamos en la pantalla de la barra.",paid:"Pago simulado completado. Recoge tu pedido en barra.",payAtCounter:"Paga en barra al recoger tu pedido.",empty:"Aún no has elegido nada.",idle:"¿Sigues ahí? Volvemos al inicio en ",lang:"EN",required:"Elige ",units:"uds"},
+ en:{start:"Touch to start",cancel:"Exit",back:"Back",cart:"View order",add:"Add",yourOrder:"Your order",total:"Total",addSomething:"Anything else?",more:"Add more",pay:"Pay",scan:"Scan to pay",tapQr:"Demo: tap the QR to open the simulated payment on this screen.",counter:"Pay at the counter",thanks:"Thank you!",watch:"We'll call you on the counter screen.",paid:"Simulated payment completed. Pick up your order at the counter.",payAtCounter:"Pay at the counter when you pick up.",empty:"Nothing selected yet.",idle:"Still there? Back to start in ",lang:"ES",required:"Choose ",units:"pcs"}};
+let lang=(P.get("lang")||"es").slice(0,2)==="en"?"en":"es";
+const marca=(P.get("marca")||"").toLowerCase().replace(/[^a-z0-9-]/g,"");
+const storeId=P.get("store")||"";
+const menuUrl=P.get("menu")||("menu."+(marca||"starbucks")+".json");
+let M=null,cat=null,cur=null,cart=[],order=null,screen="attract",lastTouch=Date.now();
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+const tr=o=>o?(o[lang]||o.es||""):"";const t=k=>T[lang][k]||k;
+const money=n=>new Intl.NumberFormat(lang==="en"?"en-IE":"es-ES",{style:"currency",currency:(M&&M.establishment.currency)||"EUR"}).format(n);
+function host(event,extra){const msg=Object.assign({source:"ainimation-xperiencia",piece:"kiosko-pedido",event:event,order:order},extra||{});
+  try{if(window.parent!==window)window.parent.postMessage(msg,"*");}catch(e){} window.__kioskEvents=(window.__kioskEvents||[]).concat([msg]);}
+function fit(){const s=Math.min(innerWidth/1080,innerHeight/1920);$("#stage").style.transform="translate(-50%,-50%) scale("+s+")";}
+addEventListener("resize",fit);fit();
+// ── marca blanca: tokens --mb-* del catálogo admiranext.com/marcablanca ──
+const kebab=k=>k.replace(/[A-Z]/g,c=>"-"+c.toLowerCase());
+async function brand(){
+  if(!marca||marca==="off")return;
+  const base="https://www.admiranext.com/marcablanca/clientes/";
+  try{const r=await fetch(base+marca+".json",{cache:"no-cache"});if(!r.ok)throw 0;const b=await r.json();
+    const pal=b.colores[b.modo]||b.colores.claro;const st=document.documentElement.style;
+    for(const[k,v]of Object.entries(pal))st.setProperty("--mb-"+kebab(k),v);
+    if(b.tipografia&&b.tipografia.texto)st.setProperty("--mb-font",b.tipografia.texto);
+    const src=new URL(b.logo.svg||b.logo.imagen,base+marca+".json").href;
+    if(b.logo.svg){const svg=await (await fetch(src)).text();$$("[data-logo]").forEach(e=>e.innerHTML=svg);}
+    else $$("[data-logo]").forEach(e=>e.innerHTML='<img alt="" src="'+src+'">');
+    document.documentElement.dataset.marca=b.id;
+  }catch(e){$$("[data-logo]").forEach(x=>x.textContent=(marca||"").toUpperCase());}
+}
+// ── pantallas ──
+function go(s){screen=s;$$(".screen").forEach(x=>x.classList.toggle("on",x.id==="s-"+s));lastTouch=Date.now();$("#idle").classList.remove("on");
+  if(s==="menu")renderMenu();if(s==="cart")renderCart();if(s==="attract"){cart=[];order=null;closeOverlay();}
+  document.body.dataset.screen=s;}
+function texts(){document.documentElement.lang=lang;$$("[data-t]").forEach(e=>{const k=e.dataset.t;e.textContent=k==="attractTitle"?tr(M.attract.title):k==="attractSub"?tr(M.attract.subtitle):k==="payNote"?tr(M.orderFlow.payment.note):t(k);});
+  $$("[data-lang]").forEach(b=>b.textContent=t("lang"));$("#demo").textContent=tr(M.disclaimer)||"DEMO";cartBtn();}
+function cartBtn(){const n=cart.reduce((a,l)=>a+l.qty,0);$("#toCart").textContent=t("cart")+(n?" · "+n+" · "+money(sum()):"");$("#toCart").disabled=!n;}
+function renderMenu(){if(!cat)cat=M.categories[0].id;
+  $("#tabs").innerHTML=M.categories.map(c=>'<button class="tab'+(c.id===cat?" on":"")+'" data-cat="'+c.id+'">'+tr(c.name)+'</button>').join("");
+  $("#catTitle").textContent=tr(M.categories.find(c=>c.id===cat).name);
+  $("#items").innerHTML=M.items.filter(i=>i.category===cat&&i.available!==false).map(i=>'<button class="card" data-item="'+i.id+'"><img alt="" src="'+i.image+'"><b>'+tr(i.name)+'</b><span>'+tr(i.description)+'</span><span class="price">'+money(i.basePrice)+'</span></button>').join("");
+  cartBtn();}
+function openItem(id){const i=M.items.find(x=>x.id===id);cur={item:i,qty:1,sel:{}};
+  (i.optionGroups||[]).forEach(g=>cur.sel[g.id]=g.type==="single"?(g.default||(g.required?g.choices[0].id:null)):[]);
+  if(!(i.optionGroups||[]).length){addLine();go("cart");return;}
+  go("item");renderItem();}
+function unit(c){let p=c.item.basePrice;(c.item.optionGroups||[]).forEach(g=>{const s=c.sel[g.id];g.choices.forEach(ch=>{if(s===ch.id||(Array.isArray(s)&&s.includes(ch.id)))p+=ch.priceDelta||0;});});return Math.round(p*100)/100;}
+function renderItem(){const i=cur.item;
+  $("#itemBody").innerHTML='<div class="detail-top"><img alt="" src="'+i.image+'"><div><h2>'+tr(i.name)+'</h2><p>'+tr(i.description)+'</p></div></div>'+
+   (i.optionGroups||[]).map(g=>'<fieldset data-group="'+g.id+'"><legend>'+tr(g.label)+'</legend><div class="opts">'+g.choices.map(ch=>{const s=cur.sel[g.id];const on=s===ch.id||(Array.isArray(s)&&s.includes(ch.id));
+     return '<button class="opt'+(on?" on":"")+'" data-opt="'+g.id+'|'+ch.id+'">'+tr(ch.label)+(ch.priceDelta?'<small>+'+money(ch.priceDelta)+'</small>':'')+'</button>';}).join("")+'</div></fieldset>').join("")+
+   '<div class="qty"><button data-qty="-1">−</button><span>'+cur.qty+'</span><button data-qty="1">+</button></div>';
+  $("#addBtn").textContent=t("add")+" · "+money(unit(cur)*cur.qty);}
+function pick(gid,cid){const g=cur.item.optionGroups.find(x=>x.id===gid);
+  if(g.type==="single")cur.sel[gid]=(cur.sel[gid]===cid&&!g.required)?null:cid;
+  else{const a=cur.sel[gid];const k=a.indexOf(cid);if(k>=0)a.splice(k,1);else if(!g.max||a.length<g.max)a.push(cid);}renderItem();}
+function addLine(){const c=cur||{item:null};const opts=[];(c.item.optionGroups||[]).forEach(g=>{const s=c.sel[g.id];g.choices.forEach(ch=>{if(s===ch.id||(Array.isArray(s)&&s.includes(ch.id)))opts.push({group:g.id,id:ch.id,label:ch.label,priceDelta:ch.priceDelta||0});});});
+  cart.push({id:c.item.id,name:c.item.name,image:c.item.image,options:opts,qty:c.qty,unitPrice:unit(c)});cur=null;}
+const sum=()=>Math.round(cart.reduce((a,l)=>a+l.qty*l.unitPrice,0)*100)/100;
+function renderCart(){$("#lines").innerHTML=cart.length?cart.map((l,k)=>'<div class="line"><img alt="" src="'+l.image+'"><div><b>'+l.qty+' × '+tr(l.name)+'</b><span>'+l.options.map(o=>tr(o.label)).join(" · ")+'</span></div><span class="lp">'+money(l.qty*l.unitPrice)+'</span><button data-del="'+k+'" aria-label="Quitar">✕</button></div>').join(""):'<p class="big">'+t("empty")+'</p>';
+  $("#total").textContent=money(sum());$("#toPay").disabled=!cart.length;
+  $("#ups").innerHTML=(M.upsells||[]).map(id=>M.items.find(i=>i.id===id)).filter(Boolean).map(i=>'<button class="card" data-up="'+i.id+'"><img alt="" src="'+i.image+'"><b>'+tr(i.name)+'</b><span class="price">'+money(i.basePrice)+'</span></button>').join("");}
+function nextNumber(){const k="kiosko:n:"+M.establishment.id;let n=0;try{n=(+localStorage.getItem(k)||0)+1;if(n>999)n=1;localStorage.setItem(k,n);}catch(e){n=1+Math.floor(Math.random()*999);}return (M.orderFlow.prefix||"A")+String(n).padStart(3,"0");}
+function makeOrder(){const id="ped-"+Date.now().toString(36)+"-"+Math.random().toString(36).slice(2,6);
+  order={id:id,number:null,simulated:true,store:storeId||M.establishment.id,establishment:M.establishment.name,brand:marca||M.establishment.brandId,currency:M.establishment.currency,lang:lang,
+   lines:cart.map(l=>({id:l.id,name:tr(l.name),qty:l.qty,unitPrice:l.unitPrice,options:l.options.map(o=>tr(o.label))})),total:sum(),status:"pending-payment",createdAt:new Date().toISOString()};return order;}
+function checkoutUrl(){const base=new URL(M.orderFlow.payment.checkoutUrl||"pago-simulado.html",location.href);
+  base.searchParams.set("pedido",order.id);base.searchParams.set("total",order.total.toFixed(2));base.searchParams.set("moneda",order.currency);if(marca)base.searchParams.set("marca",marca);base.searchParams.set("lang",lang);return base.href;}
+function toPay(){makeOrder();go("pay");const url=checkoutUrl();order.checkoutUrl=url;$("#payTotal").textContent=t("total")+": "+money(order.total);
+  const q=$("#qr");q.innerHTML="";q.dataset.url=url;try{new QRCode(q,{text:url,width:560,height:560,correctLevel:QRCode.CorrectLevel.M});}catch(e){q.textContent=url;}
+  host("payment",{status:"started",checkoutUrl:url,simulated:true});}
+function finish(how){if(!order||order.number)return;order.number=nextNumber();order.status=how==="paid"?"paid-simulated":"pay-at-counter";order.paidAt=how==="paid"?new Date().toISOString():null;
+  closeOverlay();$("#orderNum").textContent=order.number;$("#doneMsg").textContent=t(how==="paid"?"paid":"payAtCounter");go("done");
+  if(how==="paid")host("payment",{status:"paid",simulated:true});host("order",{status:order.status});
+  setTimeout(()=>{if(screen==="done")go("attract");},(M.idle.resetSeconds||12)*1000);}
+function closeOverlay(){$("#overlay").classList.remove("on");$("#payFrame").src="about:blank";}
+// pago simulado: mismo navegador (BroadcastChannel / storage) o el overlay (postMessage)
+function onPaid(d){if(d&&d.pedido&&order&&d.pedido===order.id&&d.estado==="pagado")finish("paid");}
+try{new BroadcastChannel("kiosko-pedido").onmessage=e=>onPaid(e.data);}catch(e){}
+addEventListener("storage",e=>{if(e.key==="kiosko:pago"&&e.newValue)try{onPaid(JSON.parse(e.newValue));}catch(_){}} );
+addEventListener("message",e=>{const d=e.data;if(d&&d.source==="kiosko-pago-simulado")onPaid(d);});
+// ── toques ──
+document.addEventListener("pointerdown",()=>{lastTouch=Date.now();$("#idle").classList.remove("on");},true);
+document.addEventListener("click",e=>{const el=e.target.closest("button,[data-zone],#qr");if(!el)return;
+  if(el.id==="s-attract"||el.closest("#s-attract"))return go("menu");
+  if(el.dataset.lang!==undefined){lang=lang==="es"?"en":"es";texts();if(screen==="menu")renderMenu();if(screen==="item")renderItem();if(screen==="cart")renderCart();return;}
+  if(el.dataset.go){if(el.dataset.go==="attract")cart=[];return go(el.dataset.go);}
+  if(el.dataset.cat){cat=el.dataset.cat;return renderMenu();}
+  if(el.dataset.item)return openItem(el.dataset.item);
+  if(el.dataset.up){cur={item:M.items.find(i=>i.id===el.dataset.up),qty:1,sel:{}};addLine();return renderCart();}
+  if(el.dataset.opt){const[g,c]=el.dataset.opt.split("|");return pick(g,c);}
+  if(el.dataset.qty){cur.qty=Math.max(1,Math.min(9,cur.qty+(+el.dataset.qty)));return renderItem();}
+  if(el.dataset.del){cart.splice(+el.dataset.del,1);return renderCart();}
+  if(el.id==="addBtn"){addLine();return go("cart");}
+  if(el.id==="toPay"&&cart.length)return toPay();
+  if(el.id==="payCounter"){if(!order)makeOrder();return finish("counter");}
+  if(el.id==="qr"){$("#payFrame").src=el.dataset.url+"&embed=1";$("#overlay").classList.add("on");}
+});
+// ── regla XPL de calle: 12 s sin tocar → vuelta a la atracción (en Pago, 60 s: se paga con el móvil) ──
+setInterval(()=>{if(screen==="attract"||screen==="done")return;const lim=(screen==="pay"?60:(M.idle.resetSeconds||12))*1000,warn=(M.idle.warnSeconds||4)*1000,idle=Date.now()-lastTouch;
+  if(idle>=lim){host("reset",{reason:"idle"});go("attract");}else if(idle>=lim-warn){const el=$("#idle");el.textContent=t("idle")+Math.ceil((lim-idle)/1000)+" s";el.classList.add("on");}},250);
+// atracción en bucle
+let h=0;setInterval(()=>{const im=$$("#hero img");if(!im.length)return;im.forEach(x=>x.classList.remove("on"));im[h++%im.length].classList.add("on");},2500);
+// ── arranque ──
+(async function(){try{M=await (await fetch(menuUrl,{cache:"no-cache"})).json();}catch(e){M=await (await fetch("menu.starbucks.json")).json();}
+  $("#hero").innerHTML=(M.attract.images||[]).map((s,k)=>'<img alt="" class="'+(k?"":"on")+'" src="'+s+'">').join("");
+  $$("[data-logo]").forEach(e=>e.textContent=(marca||M.establishment.brandId||"").toUpperCase());
+  texts();await brand();window.__kioskReady=true;host("ready",{store:storeId,marca:marca});})();
+window.kiosko={go:go,get state(){return{screen:screen,cart:cart,order:order};}};
+})();
+</script>
+</body>
+</html>

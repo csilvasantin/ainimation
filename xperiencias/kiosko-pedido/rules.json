@@ -1,0 +1,60 @@
+{
+  "engine": "xpl",
+  "version": 1,
+  "piece": "kiosko-pedido",
+  "rules": [
+    {
+      "id": "tocar-atraccion",
+      "when": {
+        "event": "click",
+        "target": "pantalla-atraccion"
+      },
+      "then": [
+        {
+          "action": "goto",
+          "marker": "CATEGORIAS"
+        }
+      ]
+    },
+    {
+      "id": "vuelta-sola",
+      "when": {
+        "event": "idle",
+        "seconds": 12,
+        "and": {
+          "screenNot": "ATRACCION"
+        }
+      },
+      "then": [
+        {
+          "action": "clearCart"
+        },
+        {
+          "action": "goto",
+          "marker": "ATRACCION"
+        }
+      ]
+    },
+    {
+      "id": "pedido-hecho",
+      "when": {
+        "event": "enter",
+        "marker": "NUMERO"
+      },
+      "then": [
+        {
+          "action": "postMessage",
+          "event": "order"
+        },
+        {
+          "action": "wait",
+          "seconds": 12
+        },
+        {
+          "action": "goto",
+          "marker": "ATRACCION"
+        }
+      ]
+    }
+  ]
+}

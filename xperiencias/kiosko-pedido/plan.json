@@ -1,0 +1,10 @@
+{
+  "title": "Quiosco de pedido",
+  "format": "vertical-1080x1920",
+  "durationSeconds": 90,
+  "markers": ["ATRACCION", "CATEGORIAS", "PRODUCTO", "CARRITO", "PAGO", "NUMERO"],
+  "menu": "menu.starbucks.json",
+  "menuSchema": "menu.schema.json",
+  "simulated": true,
+  "note": "Pieza de datos: la carta (menu.json) manda; el reproductor pinta pantallas, no fotogramas."
+}
