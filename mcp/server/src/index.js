@@ -14,6 +14,7 @@
  * Identidad: clave de flota derivada (identidad-flota.mjs, MCP_FLOTA_SEED), como en XpaceOS.
  */
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
+import { voz, VOCES, VOZ_ADMIRITO, MAX_TEXTO, limpiaTexto, vozId } from './voz.js';
 import { WebStandardStreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/webStandardStreamableHttp.js';
 import * as z from 'zod/v4';
 import { identidadPorClave, claveDeRequest } from './identidad-flota.mjs';
@@ -22,7 +23,7 @@ export { ColaTienda };
 import { Admingo, PLANTILLAS, proyectoVacio, compilar, validarEsquema, coherenciaMenu, urlKiosko, TWIN_BASE, TWIN_STARBUCKS, MARCAS } from './suite.js';
 
 export const NOMBRE = 'ainimation';
-export const HERRAMIENTAS = ['quien_soy', 'sitio_estado', 'xperiencias_listar', 'xperiencia_detalle', 'xperiencia_canal_item', 'stock_animaciones', 'xperiencia_publicar', 'listar_xperiencias', 'plantillas', 'crear_proyecto', 'validar_admingo', 'compilar_admingo', 'publicar_xperiencia', 'menu_validar', 'enviar_a_admiratv', 'fijar_en_totem', 'marca_aplicar', 'cola_estado', 'cola_avanzar', 'cola_avisos'];
+export const HERRAMIENTAS = ['quien_soy', 'sitio_estado', 'xperiencias_listar', 'xperiencia_detalle', 'xperiencia_canal_item', 'stock_animaciones', 'xperiencia_publicar', 'listar_xperiencias', 'plantillas', 'crear_proyecto', 'validar_admingo', 'compilar_admingo', 'publicar_xperiencia', 'menu_validar', 'enviar_a_admiratv', 'fijar_en_totem', 'marca_aplicar', 'cola_estado', 'cola_avanzar', 'cola_avisos', 'admirito_voz'];
 const limpiar = (s) => String(s || '').replace(/\/+$/, '');
 const texto = (o) => ({ content: [{ type: 'text', text: typeof o === 'string' ? o : JSON.stringify(o, null, 2) }] });
 const fallo = (e) => ({ isError: true, content: [{ type: 'text', text: 'Error: ' + (e && e.message || e) }] });
@@ -312,6 +313,15 @@ export function crearServidor(env = {}, deps = {}, identidad = null) {
     annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: true },
   }, seguro(async ({ store = 'starbucks-paseo-de-gracia', pedido, a }) => texto(await cola('avanzar', store, { body: { numero: pedido, a } }))));
 
+  server.registerTool('admirito_voz', {
+    title: 'Voz de Admirito (ElevenLabs)',
+    description: 'URL de audio MP3 con la voz de Admirito (ElevenLabs, castellano) para un texto: GET https://mcp-ainimation.admira.store/voz?texto=...&voz=daniela. Caché de 30 días por frase; la clave nunca sale del servidor. Úsala en el iPad (/cola/ipad.html), el gemelo (ipad-cola.js, totem-kiosko.js) y el quiosco; si devuelve 503 el cliente usa la voz del navegador (es-ES).',
+    inputSchema: { texto: z.string().max(MAX_TEXTO).optional(), voz: z.string().max(40).optional() },
+    annotations: { readOnlyHint: true, openWorldHint: true },
+  }, seguro(async ({ texto: t = '', voz: v = '' }) => {
+    const limpio = limpiaTexto(t), id = vozId(v);
+    return texto({ voz_por_defecto: VOZ_ADMIRITO, voz: id, voces: VOCES, url: limpio ? `https://mcp-ainimation.admira.store/voz?voz=${id}&texto=${encodeURIComponent(limpio)}` : null, info: 'https://mcp-ainimation.admira.store/voz?info=1', respaldo: 'speechSynthesis es-ES del navegador' });
+  }));
   server.registerTool('cola_avisos', {
     title: 'Avisos de pedido listo',
     description: 'Pedidos «listos» de una tienda con el aviso que anuncian Admirito (iPad /cola/ipad.html y gemelo), la cola del móvil y la taza: «NOMBRE, tu pedido Starbucks está preparado» (sin nombre, con el número). Solo lectura; cada pantalla anuncia cada pedido una vez. Sin pedidos en recibido/preparando/listo, el iPad muestra a Admirito a pantalla completa; cualquier fase activa recupera las columnas. Empty received/preparing/ready queues show full-screen Admirito; any active phase restores queue columns. El quiosco exige el nombre antes de pagar.',
@@ -364,7 +374,8 @@ export async function manejar(request, env = {}, deps = {}) {
     const r = await stub.fetch(new Request('https://cola' + ruta + u.search, { method: request.method, headers: { 'content-type': 'application/json' }, body: request.method === 'POST' ? await request.text() : undefined }));
     return new Response(r.body, { status: r.status, headers: { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store', ...CORS } });
   }
-  return json({ ok: false, error: 'ruta desconocida', rutas: ['/', '/salud', '/mcp', '/cola/estado', '/cola/pedido', '/cola/pagar', '/cola/avanzar', '/cola/llamar', '/cola/reiniciar'] }, 404);
+  if (ruta === '/voz') return voz(request, env, deps);
+  return json({ ok: false, error: 'ruta desconocida', rutas: ['/', '/salud', '/mcp', '/voz', '/cola/estado', '/cola/pedido', '/cola/pagar', '/cola/avanzar', '/cola/llamar', '/cola/reiniciar'] }, 404);
 }
 
-export default { fetch: (request, env) => manejar(request, env) };
+export default { fetch: (request, env, ctx) => manejar(request, env, { ctx }) };

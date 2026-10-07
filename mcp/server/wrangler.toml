@@ -19,10 +19,16 @@ class_name = "ColaTienda"
 tag = "cola-v1"
 new_sqlite_classes = ["ColaTienda"]
 
+# Voz de Admirito (ElevenLabs): reutiliza el secret de la flota guardado en omnipublicity-api.
+# Alternativa: `npx wrangler secret put ELEVENLABS_API_KEY` en este worker (nunca en git).
+[[services]]
+binding = "OMNI"
+service = "omnipublicity-api"
+
 [observability]
 enabled = true
 
 [vars]
 SITIO = "https://www.ainimation.studio"
 STOCK_API = "https://api.admira.store"
-VERSION = "v.07.10.2026.r23.15:21"
+VERSION = "v.07.10.2026.r24.16:24"
