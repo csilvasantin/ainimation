@@ -1,18 +1,18 @@
 {
-  "version": "v.07.10.2026.r9.11:33",
-  "deployedAt": "2026-10-07T09:33:49Z",
+  "version": "v.07.10.2026.r10.11:35",
+  "deployedAt": "2026-10-07T09:35:39Z",
   "deployer": "GrokBot",
   "machine": "MacMini",
   "signature": "GrokBot · MacMini",
-  "git": "9632d0f606479e605303aaa4d9bbfa09cfe1f8f5",
-  "gitShort": "9632d0f",
-  "gitFull": "9632d0f606479e605303aaa4d9bbfa09cfe1f8f5",
+  "git": "712aed818857650f85e6770783c845a8a70d3cf3",
+  "gitShort": "712aed8",
+  "gitFull": "712aed818857650f85e6770783c845a8a70d3cf3",
   "dirty": false,
   "returnTag": "AInimation-v.04.09.2026.r1",
   "previousTag": "AInimation-v.03.09.2026.r2",
-  "previousVersion": "v.07.10.2026.r8.11:30",
-  "note": "Cola: el quiosco se entera al momento del pago hecho en el móvil",
+  "previousVersion": "v.07.10.2026.r9.11:33",
+  "note": "MCP: cola_estado y cola_avanzar ya responden",
   "novedades": [
-    "El quiosco pasa solo a la pantalla del número cuando pagas (simulado) desde el móvil"
+    "Las herramientas de la cola leen y avanzan los pedidos directamente, sin dar error 522"
   ]
 }
