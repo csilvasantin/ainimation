@@ -1,6 +1,6 @@
 {
-  "version": "v.07.10.2026.r13.12:15",
-  "deployedAt": "2026-10-07T10:15:36Z",
+  "version": "v.07.10.2026.r14.12:19",
+  "deployedAt": "2026-10-07T10:19:27Z",
   "deployer": "GrokBot",
   "machine": "MacMini",
   "signature": "GrokBot · MacMini",
@@ -10,13 +10,13 @@
   "dirty": false,
   "returnTag": "AInimation-v.04.09.2026.r1",
   "previousTag": "AInimation-v.03.09.2026.r2",
-  "previousVersion": "v.07.10.2026.r12.12:10",
-  "note": "El quiosco pide tu nombre y Admirito, la cola del móvil y la taza te llaman cuando el pedido está listo",
+  "previousVersion": "v.07.10.2026.r13.12:15",
+  "note": "Admirito en el iPad: el aviso ya no queda tapado por la barra de la nube",
   "novedades": [
+    "En el iPad de la barra, el bocadillo de Admirito con «NOMBRE, tu pedido Starbucks está preparado» sale arriba y ya no lo tapa la barra de chat de la nube",
     "El quiosco Starbucks pregunta «¿A qué nombre ponemos tu pedido?» en el carrito y lo guarda en el pedido de la cola",
     "Admirito, en el iPad de la barra, te llama por tu nombre: «Carlos, tu pedido Starbucks está preparado»",
     "La pantalla de la cola del móvil (la del QR) muestra el aviso con tu nombre, vibra y, si das permiso, manda una notificación",
-    "La taza de ainimation.studio/taza enseña «NOMBRE, tu pedido Starbucks está preparado» al pasar a listo",
-    "Sin nombre todo sigue funcionando con el número de pedido"
+    "La taza de ainimation.studio/taza enseña «NOMBRE, tu pedido Starbucks está preparado» al pasar a listo"
   ]
 }
