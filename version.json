@@ -1,6 +1,6 @@
 {
-  "version": "v.07.10.2026.r15.12:32",
-  "deployedAt": "2026-10-07T10:32:20Z",
+  "version": "v.07.10.2026.r16.13:02",
+  "deployedAt": "2026-10-07T11:02:55Z",
   "deployer": "GrokBot",
   "machine": "MacMini",
   "signature": "GrokBot · MacMini",
@@ -10,12 +10,10 @@
   "dirty": false,
   "returnTag": "AInimation-v.04.09.2026.r1",
   "previousTag": "AInimation-v.03.09.2026.r2",
-  "previousVersion": "v.07.10.2026.r14.12:19",
-  "note": "Ayuda y MCP del flujo de avisos: nombre, cola, iPad, móvil, taza y gemelo",
+  "previousVersion": "v.07.10.2026.r15.12:32",
+  "note": "El gestor de colas es la pantalla del iPad del mostrador del gemelo",
   "novedades": [
-    "La ayuda tiene una sección «Cola y avisos»: nombre en el quiosco, cola, iPad de Admirito (/cola/ipad.html y &voz=1), móvil, taza y gemelo",
-    "Nueva herramienta MCP cola_avisos: pedidos listos con el aviso «NOMBRE, tu pedido Starbucks está preparado» y las URL de cada pantalla",
-    "cola_estado devuelve el nombre de cada pedido y las URL del iPad y la taza",
-    "El MCP pasa a 20 herramientas"
+    "La ayuda (Cola y avisos) explica que /cola/ipad.html es la pantalla del iPad del mostrador: en el gemelo, starbucks-ipad-01 la enseña y al pulsarlo se abre en grande",
+    "cola_estado y cola_avisos del MCP devuelven ipad_mostrador con la URL y el dispositivo starbucks-ipad-01"
   ]
 }
