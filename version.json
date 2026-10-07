@@ -1,6 +1,6 @@
 {
-  "version": "v.07.10.2026.r14.12:19",
-  "deployedAt": "2026-10-07T10:19:27Z",
+  "version": "v.07.10.2026.r15.12:32",
+  "deployedAt": "2026-10-07T10:32:20Z",
   "deployer": "GrokBot",
   "machine": "MacMini",
   "signature": "GrokBot · MacMini",
@@ -10,13 +10,12 @@
   "dirty": false,
   "returnTag": "AInimation-v.04.09.2026.r1",
   "previousTag": "AInimation-v.03.09.2026.r2",
-  "previousVersion": "v.07.10.2026.r13.12:15",
-  "note": "Admirito en el iPad: el aviso ya no queda tapado por la barra de la nube",
+  "previousVersion": "v.07.10.2026.r14.12:19",
+  "note": "Ayuda y MCP del flujo de avisos: nombre, cola, iPad, móvil, taza y gemelo",
   "novedades": [
-    "En el iPad de la barra, el bocadillo de Admirito con «NOMBRE, tu pedido Starbucks está preparado» sale arriba y ya no lo tapa la barra de chat de la nube",
-    "El quiosco Starbucks pregunta «¿A qué nombre ponemos tu pedido?» en el carrito y lo guarda en el pedido de la cola",
-    "Admirito, en el iPad de la barra, te llama por tu nombre: «Carlos, tu pedido Starbucks está preparado»",
-    "La pantalla de la cola del móvil (la del QR) muestra el aviso con tu nombre, vibra y, si das permiso, manda una notificación",
-    "La taza de ainimation.studio/taza enseña «NOMBRE, tu pedido Starbucks está preparado» al pasar a listo"
+    "La ayuda tiene una sección «Cola y avisos»: nombre en el quiosco, cola, iPad de Admirito (/cola/ipad.html y &voz=1), móvil, taza y gemelo",
+    "Nueva herramienta MCP cola_avisos: pedidos listos con el aviso «NOMBRE, tu pedido Starbucks está preparado» y las URL de cada pantalla",
+    "cola_estado devuelve el nombre de cada pedido y las URL del iPad y la taza",
+    "El MCP pasa a 20 herramientas"
   ]
 }

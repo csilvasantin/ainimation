@@ -22,7 +22,7 @@ export { ColaTienda };
 import { Admingo, PLANTILLAS, proyectoVacio, compilar, validarEsquema, coherenciaMenu, urlKiosko, TWIN_BASE, TWIN_STARBUCKS, MARCAS } from './suite.js';
 
 export const NOMBRE = 'ainimation';
-export const HERRAMIENTAS = ['quien_soy', 'sitio_estado', 'xperiencias_listar', 'xperiencia_detalle', 'xperiencia_canal_item', 'stock_animaciones', 'xperiencia_publicar', 'listar_xperiencias', 'plantillas', 'crear_proyecto', 'validar_admingo', 'compilar_admingo', 'publicar_xperiencia', 'menu_validar', 'enviar_a_admiratv', 'fijar_en_totem', 'marca_aplicar', 'cola_estado', 'cola_avanzar'];
+export const HERRAMIENTAS = ['quien_soy', 'sitio_estado', 'xperiencias_listar', 'xperiencia_detalle', 'xperiencia_canal_item', 'stock_animaciones', 'xperiencia_publicar', 'listar_xperiencias', 'plantillas', 'crear_proyecto', 'validar_admingo', 'compilar_admingo', 'publicar_xperiencia', 'menu_validar', 'enviar_a_admiratv', 'fijar_en_totem', 'marca_aplicar', 'cola_estado', 'cola_avanzar', 'cola_avisos'];
 const limpiar = (s) => String(s || '').replace(/\/+$/, '');
 const texto = (o) => ({ content: [{ type: 'text', text: typeof o === 'string' ? o : JSON.stringify(o, null, 2) }] });
 const fallo = (e) => ({ isError: true, content: [{ type: 'text', text: 'Error: ' + (e && e.message || e) }] });
@@ -72,7 +72,7 @@ export function crearServidor(env = {}, deps = {}, identidad = null) {
       'Lecturas sin clave: sitio_estado, xperiencias_listar, xperiencia_detalle, xperiencia_canal_item, stock_animaciones. Escritura con clave de flota AdmiraNeXT (Authorization: Bearer): xperiencia_publicar. quien_soy te dice con qué identidad entras.',
       'Este servidor no guarda estado: lee el sitio (index.json es la única fuente de la galería) y escribe en el stock de Pixeria. Crear una Xperiencia nueva sigue siendo trabajo del repo (carpeta + entrada en index.json): el MCP te dice qué hay y publica lo que ya existe.',
       'Suite (desde 7-oct-2026): listar_xperiencias, plantillas, crear_proyecto (proyecto del Director desde plantilla), validar_admingo y compilar_admingo (el Lingo de AdmiraNeXT → reglas XPL), publicar_xperiencia (URL + ficheros; ZIP próximamente), menu_validar (carta de quiosco), enviar_a_admiratv (item de playlist type interactive), fijar_en_totem (comando /totem del gemelo) y marca_aplicar (marcablanca de admiranext). Son cálculos y lecturas: no escriben.',
-      'Gestor de colas (7-oct-2026): cola_estado (pedidos en preparación / listos de una tienda) y cola_avanzar (el barista de la demo). Pago siempre simulado; relé público en /cola/* de este mismo worker.',
+      'Gestor de colas (7-oct-2026): cola_estado (pedidos en preparación / listos de una tienda) y cola_avanzar (el barista de la demo) y cola_avisos (pedidos listos con el texto que dicen Admirito, el móvil y la taza: «NOMBRE, tu pedido Starbucks está preparado»). Los pedidos llevan «nombre» si el cliente lo dio en el quiosco. Pago siempre simulado; relé público en /cola/* de este mismo worker.',
       'Ritual de la flota: lo que hagas aquí se declara en yokup (mcp.admira.live · yokup_alta/yokup_paso) — este MCP no puntúa por sí mismo.',
     ].join(' '),
   });
@@ -298,12 +298,12 @@ export function crearServidor(env = {}, deps = {}, identidad = null) {
   const STO = z.string().regex(/^[a-z0-9-]{2,80}$/).default('starbucks-paseo-de-gracia');
   server.registerTool('cola_estado', {
     title: 'Estado de la cola de pedidos',
-    description: 'Pedidos de una tienda en «En preparación» y «¡Listo para recoger!» (gestor de colas del quiosco; pago siempre SIMULADO), con la URL de la pantalla pública. Con «pedido» (A001 o id) devuelve solo ese.',
+    description: 'Pedidos de una tienda en «En preparación» y «¡Listo para recoger!» (gestor de colas del quiosco; pago siempre SIMULADO), cada uno con su «nombre» si lo dio en el quiosco, y las URL de la pantalla pública, el iPad de Admirito y la taza. Con «pedido» (A001 o id) devuelve solo ese.',
     inputSchema: { store: STO, pedido: z.string().max(64).optional() },
     annotations: { readOnlyHint: true, openWorldHint: true },
   }, seguro(async ({ store = 'starbucks-paseo-de-gracia', pedido }) => {
     const r = pedido ? await cola('pedido', store, { query: '&pedido=' + encodeURIComponent(pedido) }) : await cola('estado', store);
-    return texto({ store, ...r, pantalla: `${sitio}/cola/?store=${store}`, barista: `${sitio}/cola/barista.html?store=${store}` });
+    return texto({ store, ...r, pantalla: `${sitio}/cola/?store=${store}`, barista: `${sitio}/cola/barista.html?store=${store}`, ipad: `${sitio}/cola/ipad.html?store=${store}`, taza: `${sitio}/taza/?store=${store}` });
   }));
   server.registerTool('cola_avanzar', {
     title: 'Avanzar un pedido en la cola',
@@ -311,6 +311,17 @@ export function crearServidor(env = {}, deps = {}, identidad = null) {
     inputSchema: { store: STO, pedido: z.string().min(1).max(64), a: z.enum(['preparando', 'listo', 'recogido']).optional() },
     annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: true },
   }, seguro(async ({ store = 'starbucks-paseo-de-gracia', pedido, a }) => texto(await cola('avanzar', store, { body: { numero: pedido, a } }))));
+
+  server.registerTool('cola_avisos', {
+    title: 'Avisos de pedido listo',
+    description: 'Pedidos «listos» de una tienda con el aviso que anuncian Admirito (iPad /cola/ipad.html y gemelo), la cola del móvil y la taza: «NOMBRE, tu pedido Starbucks está preparado» (sin nombre, con el número). Solo lectura; cada pantalla anuncia cada pedido una vez.',
+    inputSchema: { store: STO },
+    annotations: { readOnlyHint: true, openWorldHint: true },
+  }, seguro(async ({ store = 'starbucks-paseo-de-gracia' }) => {
+    const r = await cola('estado', store);
+    const avisos = (r.listo || []).map((p) => ({ numero: p.numero, nombre: p.nombre || null, aviso: p.nombre ? `${p.nombre}, tu pedido Starbucks está preparado` : `Pedido ${p.numero}, tu pedido Starbucks está preparado`, recoger: 'en barra' }));
+    return texto({ store, avisos, pantallas: { ipad: `${sitio}/cola/ipad.html?store=${store}`, ipad_sin_toque: `${sitio}/cola/ipad.html?store=${store}&voz=1`, movil: `${sitio}/cola/?store=${store}&pedido=<numero>`, taza: `${sitio}/taza/?store=${store}`, gemelo: 'https://www.xpaceos.com/admira-xp/ (Starbucks en escena)' }, simulado: true });
+  }));
 
   return server;
 }
