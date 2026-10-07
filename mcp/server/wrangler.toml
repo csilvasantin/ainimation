@@ -10,10 +10,19 @@ workers_dev = true
 pattern = "mcp-ainimation.admira.store"
 custom_domain = true
 
+# Gestor de colas del quiosco (7-oct-2026): un Durable Object por tienda.
+[[durable_objects.bindings]]
+name = "COLA"
+class_name = "ColaTienda"
+
+[[migrations]]
+tag = "cola-v1"
+new_sqlite_classes = ["ColaTienda"]
+
 [observability]
 enabled = true
 
 [vars]
 SITIO = "https://www.ainimation.studio"
 STOCK_API = "https://api.admira.store"
-VERSION = "v.07.10.2026.r7.10:54"
+VERSION = "v.07.10.2026.r8.11:30"

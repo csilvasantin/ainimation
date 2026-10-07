@@ -55,7 +55,7 @@
 
   <h2>Servidor MCP · <code>mcp-ainimation.admira.store</code></h2>
   <p>Desde el 8 de septiembre de 2026 este dominio tiene puerta de silicio de verdad: un servidor
-  MCP (Streamable HTTP) que expone las Xperiencias del estudio y, desde el 7 de octubre, el Director (plantillas, proyectos), Admingo, la carta del quiosco, admira.tv, el tótem del gemelo y la marca blanca: <b>17 herramientas</b>. Endpoint
+  MCP (Streamable HTTP) que expone las Xperiencias del estudio y, desde el 7 de octubre, el Director (plantillas, proyectos), Admingo, la carta del quiosco, admira.tv, el tótem del gemelo la marca blanca y el gestor de colas del quiosco: <b>19 herramientas</b>. Endpoint
   <code>https://mcp-ainimation.admira.store/mcp</code> · salud <code>/salud</code> · código en
   <a href="https://github.com/csilvasantin/ainimation/tree/main/mcp/server">mcp/server</a>.
   Las lecturas van sin clave; <code>xperiencia_publicar</code> exige la clave de flota AdmiraNeXT
@@ -79,6 +79,8 @@
         <tr><td><code>enviar_a_admiratv</code></td><td class="d">item de playlist type interactive + relevo a XpaceOS playlist_add; envío directo: próximamente</td><td><span class="estado vivo">vivo</span> <span class="estado pronto">parte próximamente</span></td></tr>
         <tr><td><code>fijar_en_totem</code></td><td class="d">comando del gemelo (/totem kiosko · /totem url …) y enlace al gemelo con el quiosco</td><td><span class="estado vivo">vivo</span></td></tr>
         <tr><td><code>marca_aplicar</code></td><td class="d">ficha de marcablanca de admiranext → URL con ?marca= y comando /marca del gemelo</td><td><span class="estado vivo">vivo</span></td></tr>
+        <tr><td><code>cola_estado</code></td><td class="d">gestor de colas: pedidos «En preparación» / «¡Listo para recoger!» de una tienda (o uno: A001) + URL de la pantalla /cola/</td><td><span class="estado vivo">vivo</span></td></tr>
+        <tr><td><code>cola_avanzar</code></td><td class="d">el barista de la demo: pasa un pedido a listo / recogido (pago siempre simulado)</td><td><span class="estado vivo">vivo</span></td></tr>
   </table>
   <p>La lista de Xperiencias sale de <a href="/xperiencias/index.json">/xperiencias/index.json</a>, la
   misma fuente que pinta la <a href="/xperiencias/">galería</a>. El servidor no guarda estado: lee el

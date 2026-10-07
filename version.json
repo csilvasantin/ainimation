@@ -1,20 +1,21 @@
 {
-  "version": "v.07.10.2026.r7.10:54",
-  "deployedAt": "2026-10-07T08:54:34Z",
+  "version": "v.07.10.2026.r8.11:30",
+  "deployedAt": "2026-10-07T09:30:37Z",
   "deployer": "GrokBot",
   "machine": "MacMini",
   "signature": "GrokBot · MacMini",
-  "git": "afea007763f1f96111596508da70d6dcd6d6184c",
-  "gitShort": "afea007",
-  "gitFull": "afea007763f1f96111596508da70d6dcd6d6184c",
+  "git": "1c88f09f61527a2a413f8a20d055b577edbf0f9c",
+  "gitShort": "1c88f09",
+  "gitFull": "1c88f09f61527a2a413f8a20d055b577edbf0f9c",
   "dirty": false,
   "returnTag": "AInimation-v.04.09.2026.r1",
   "previousTag": "AInimation-v.03.09.2026.r2",
-  "previousVersion": "v.07.10.2026.r6.10:17",
-  "note": "Formatos: el quiosco se adapta a cualquier player y el Director prueba la pieza en varios formatos",
+  "previousVersion": "v.07.10.2026.r7.10:54",
+  "note": "Gestor de colas: escaneas el QR del quiosco, pagas (simulado) en el móvil y ves tu número pasar a «¡Listo para recoger!»",
   "novedades": [
-    "El quiosco de pedido se reorganiza para cualquier pantalla: vertical 9:16, horizontal 16:9, cuadrada o tótems raros, sin bandas negras",
-    "Las piezas publicadas se encajan en el player (fit) o lo llenan recortando (fill) con ?ajuste=fill",
-    "Stage: tamaños de los players del gemelo (tótem pared, TPV, iPad, pantallas) y nueva 📐 Vista responsive con cuatro formatos a la vez"
+    "Nueva pantalla de la cola /cola/?store=… (En preparación / ¡Listo para recoger!), con tu número resaltado, en móvil o pantalla grande, ES/EN",
+    "El quiosco se entera del pago hecho en el móvil (otro dispositivo) y da el mismo número",
+    "Página del barista para avanzar pedidos (en la demo pasan solos a listo a los ~20 s)",
+    "MCP: cola_estado y cola_avanzar (19 herramientas)"
   ]
 }
