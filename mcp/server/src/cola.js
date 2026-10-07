@@ -37,7 +37,10 @@ export function limpiaLineas(lines) {
       }
     }
     const q = Math.round(+l.qty || 1);
-    const optionsText = limpiaTexto(l.optionsText || (Array.isArray(l.options) ? l.options.join(' · ') : Object.values(options).flat().join(' · ')), 160);
+    // optionsText legible lo manda el quiosco; si falta, la barra lo compone con las etiquetas de la carta
+    // a partir de los ids de `options` (tamano: venti, leche: avena…). Solo el formato antiguo (array de
+    // etiquetas) se convierte aquí.
+    const optionsText = limpiaTexto(l.optionsText || (Array.isArray(l.options) ? l.options.join(' · ') : ''), 160);
     return { id: String(l.id || '').replace(/[^A-Za-z0-9._-]/g, '').slice(0, 40) || null, name: limpiaTexto(l.name || l.nombre), qty: Math.max(1, Math.min(MAX_QTY, q || 1)), options, optionsText };
   });
   return { lineas, mas: Math.max(0, validas.length - MAX_LINEAS) };
