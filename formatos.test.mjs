@@ -20,7 +20,7 @@ test('el quiosco refluye: lado corto 1080, sin bandas, y reorganiza la atracció
   try {
     for (const [w, h, fmt, sw, sh] of [[540, 960, 'vertical', 1080, 1920], [1280, 720, 'horizontal', 1920, 1080], [800, 800, 'cuadrado', 1080, 1080], [400, 900, 'vertical', 1080, 2430]]) {
       const p = await b.newPage({ viewport: { width: w, height: h } });
-      await p.goto(`${base}/xperiencias/kiosko-pedido/?store=starbucks-paseo-de-gracia&formato=x&w=${w}&h=${h}`);
+      await p.goto(`${base}/xperiencias/kiosko-pedido/?store=starbucks-qa&formato=x&w=${w}&h=${h}`);
       await p.waitForFunction(() => window.__kioskReady);
       const f = await p.evaluate(() => window.__kioskFormato);
       assert.equal(f.formato, fmt); assert.equal(f.w, sw); assert.equal(f.h, sh);

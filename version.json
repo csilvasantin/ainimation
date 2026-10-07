@@ -1,6 +1,6 @@
 {
-  "version": "v.07.10.2026.r21.13:59",
-  "deployedAt": "2026-10-07T11:59:14Z",
+  "version": "v.07.10.2026.r22.14:07",
+  "deployedAt": "2026-10-07T12:07:38Z",
   "deployer": "GrokBot",
   "machine": "MacMini",
   "signature": "GrokBot · MacMini",
@@ -10,12 +10,11 @@
   "dirty": false,
   "returnTag": "AInimation-v.04.09.2026.r1",
   "previousTag": "AInimation-v.03.09.2026.r2",
-  "previousVersion": "v.07.10.2026.r20.13:52",
-  "note": "iPad: las gracias de Admirito no se salen de su zona",
+  "previousVersion": "v.07.10.2026.r21.13:59",
+  "note": "Sala de pruebas starbucks-qa para QA y demos automáticas",
   "novedades": [
-    "En el iPad, cuando Admirito gira o baila ya no tapa las columnas Preparado / En preparación / Recibido",
-    "Los pedidos pasan por tres fases: Recibido (1 min) → En preparación (1 min) → Preparado; a los 2 min se dan por recogidos",
-    "La cola del móvil y el iPad muestran las tres columnas; el barista tiene «Empezar a preparar» y «Marcar preparado»",
-    "Admirito te llama por tu nombre al pasar a Preparado"
+    "Las pruebas y demos automáticas (demo de la taza Ana/Luis/Eva, tests del quiosco) van ahora a la sala starbucks-qa",
+    "starbucks-paseo-de-gracia queda solo para la demo real de Carlos",
+    "La ayuda explica cómo ver la sala de pruebas (iPad, barista y taza con ?store=starbucks-qa)"
   ]
 }

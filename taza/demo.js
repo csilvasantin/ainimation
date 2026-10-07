@@ -1,8 +1,8 @@
 /* Demos exercise the source applications; physical confirmation remains explicit. */
 window.TazaDemo = function({api,project,status,say,expected}) {
   const kiosk='https://admira.tv/adcelerate/demo/?view=human&site=jardinets';
-  const queue='https://admira.tv/gestorColas/?store=starbucks-paseo-de-gracia';
-  const store='starbucks-paseo-de-gracia', relay='https://mcp-ainimation.admira.store';
+  const queue='https://admira.tv/gestorColas/?store=starbucks-qa';
+  const store='starbucks-qa', relay='https://mcp-ainimation.admira.store';
   let generation=0, active=null, target=null;
   const requests=new Map();
   addEventListener('message',e=>{const d=e.data;if(e.origin!=='https://admira.tv'||e.source!==target||d?.channel!=='taza-demo-v1')return;const p=requests.get(d.id);if(p){requests.delete(d.id);clearTimeout(p.timer);d.error?p.reject(Error(d.error)):p.resolve(d);}});

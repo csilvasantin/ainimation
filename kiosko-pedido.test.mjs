@@ -51,7 +51,7 @@ test('E2E: atracción → producto con opciones → carrito → QR → pago simu
   const srv = await serve(); const base = `http://127.0.0.1:${srv.address().port}/${dir}/`;
   try {
     const page = await browser.newPage({ viewport: { width: 540, height: 960 } });
-    await page.goto(base + '?store=starbucks-paseo-de-gracia');
+    await page.goto(base + '?store=starbucks-qa');
     await page.waitForFunction(() => window.__kioskReady);
     await page.click('#s-attract');
     await page.click('[data-item="caffe-latte"]');
