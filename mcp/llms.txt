@@ -32,7 +32,7 @@ No hay API HTTP propia todavía: lo que hay es el MCP. El sitio sigue siendo est
 | `marca_aplicar` | ficha de marcablanca de admiranext → URL con ?marca= y comando /marca del gemelo |
 | `cola_estado` | gestor de colas: pedidos en preparación / listos de una tienda (o uno: A001) + pantalla /cola/ |
 | `cola_avanzar` | barista de la demo: pasa un pedido a listo / recogido (pago simulado) |
-| `cola_avisos` | pedidos listos con el aviso «NOMBRE, tu pedido Starbucks está preparado» + URL del iPad (/cola/ipad.html), móvil y taza |
+| `cola_avisos` | pedidos listos con el aviso «NOMBRE, tu pedido Starbucks está preparado» + URL del iPad del mostrador (starbucks-ipad-01 → /cola/ipad.html), móvil y taza |
 
 Fuente única de la lista: `https://www.ainimation.studio/xperiencias/index.json`.
 Ejemplo (initialize → tools/list → xperiencias_listar):

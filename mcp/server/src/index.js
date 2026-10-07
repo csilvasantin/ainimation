@@ -303,7 +303,7 @@ export function crearServidor(env = {}, deps = {}, identidad = null) {
     annotations: { readOnlyHint: true, openWorldHint: true },
   }, seguro(async ({ store = 'starbucks-paseo-de-gracia', pedido }) => {
     const r = pedido ? await cola('pedido', store, { query: '&pedido=' + encodeURIComponent(pedido) }) : await cola('estado', store);
-    return texto({ store, ...r, pantalla: `${sitio}/cola/?store=${store}`, barista: `${sitio}/cola/barista.html?store=${store}`, ipad: `${sitio}/cola/ipad.html?store=${store}`, taza: `${sitio}/taza/?store=${store}` });
+    return texto({ store, ...r, pantalla: `${sitio}/cola/?store=${store}`, barista: `${sitio}/cola/barista.html?store=${store}`, ipad: `${sitio}/cola/ipad.html?store=${store}`, ipad_mostrador: { url: `${sitio}/cola/ipad.html?store=${store}`, dispositivo: 'starbucks-ipad-01', gemelo: 'https://www.xpaceos.com/admira-xp/ (iPad del mostrador; pulsarlo lo abre en grande; /ipad off vuelve a la playlist)' }, taza: `${sitio}/taza/?store=${store}` });
   }));
   server.registerTool('cola_avanzar', {
     title: 'Avanzar un pedido en la cola',
@@ -320,7 +320,7 @@ export function crearServidor(env = {}, deps = {}, identidad = null) {
   }, seguro(async ({ store = 'starbucks-paseo-de-gracia' }) => {
     const r = await cola('estado', store);
     const avisos = (r.listo || []).map((p) => ({ numero: p.numero, nombre: p.nombre || null, aviso: p.nombre ? `${p.nombre}, tu pedido Starbucks está preparado` : `Pedido ${p.numero}, tu pedido Starbucks está preparado`, recoger: 'en barra' }));
-    return texto({ store, avisos, pantallas: { ipad: `${sitio}/cola/ipad.html?store=${store}`, ipad_sin_toque: `${sitio}/cola/ipad.html?store=${store}&voz=1`, movil: `${sitio}/cola/?store=${store}&pedido=<numero>`, taza: `${sitio}/taza/?store=${store}`, gemelo: 'https://www.xpaceos.com/admira-xp/ (Starbucks en escena)' }, simulado: true });
+    return texto({ store, avisos, pantallas: { ipad: `${sitio}/cola/ipad.html?store=${store}`, ipad_sin_toque: `${sitio}/cola/ipad.html?store=${store}&voz=1`, movil: `${sitio}/cola/?store=${store}&pedido=<numero>`, taza: `${sitio}/taza/?store=${store}`, ipad_mostrador: { url: `${sitio}/cola/ipad.html?store=${store}`, dispositivo: 'starbucks-ipad-01', nota: 'el iPad del mostrador del gemelo enseña esta cola y al pulsarlo abre esta URL en grande' }, gemelo: 'https://www.xpaceos.com/admira-xp/ (Starbucks en escena)' }, simulado: true });
   }));
 
   return server;
