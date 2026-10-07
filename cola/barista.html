@@ -1,35 +1,141 @@
 <!doctype html>
 <html lang="es">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex">
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="robots" content="noindex">
+<meta name="apple-mobile-web-app-capable" content="yes">
 <link rel="icon" href="/favicon.ico" sizes="any">
-<title>Barista · cola de pedidos (demo)</title>
+<title>Barra · comandas (demo)</title>
+<!-- KDS de barra (Carlos, 7-oct-2026): cada comanda con número, nombre, hora, líneas y espera, por orden de
+     llegada, con botones grandes para iPad. Con la cola cerrada pide la clave de barra (x-cola-clave). -->
 <style>
-body{margin:0;font-family:Inter,-apple-system,'Segoe UI',Roboto,sans-serif;background:#1E3932;color:#fff;padding:16px}
-h1{margin:0 0 4px;font-size:22px}p{opacity:.8;margin:0 0 14px}
-.p{display:flex;align-items:center;gap:12px;background:#fff1;border-radius:12px;padding:10px 14px;margin:8px 0}
-.p b{font-size:30px;min-width:90px}.p span{flex:1;opacity:.85}
-button{font:inherit;font-weight:800;border:0;border-radius:10px;padding:10px 16px;background:#00A862;color:#fff;cursor:pointer}
-button.r{background:#d4e9e2;color:#1E3932}
-.warn{background:#FFE58A;color:#3A2E00;font-weight:700;border-radius:10px;padding:8px 12px;margin-bottom:12px}
+:root{--verde:#00704A;--osc:#1E3932;--amb:#FFB800;--rojo:#D62B1F;--fondo:#12251f;--card:#fff;--tx:#14211d}
+*{box-sizing:border-box}
+body{margin:0;font-family:Inter,-apple-system,'Segoe UI',Roboto,sans-serif;background:var(--fondo);color:#fff;padding:12px 16px 24px;-webkit-tap-highlight-color:transparent}
+header{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-bottom:10px}
+header h1{margin:0;font-size:24px;flex:1 1 auto;min-width:200px}header h1 small{font-size:14px;opacity:.65;font-weight:600;margin-left:8px}
+.cnt{display:flex;gap:8px;flex-wrap:wrap}.cnt span{background:#fff1;border-radius:999px;padding:6px 12px;font-weight:700;font-size:15px}
+.hb{font:inherit;font-weight:800;border:0;border-radius:12px;padding:10px 14px;min-height:46px;background:#fff1;color:#fff;cursor:pointer}
+.hb.on{background:var(--verde)}
+.warn{background:#FFE58A;color:#3A2E00;font-weight:700;border-radius:10px;padding:8px 12px;margin-bottom:10px;font-size:14px}
+.warn.abierta{background:#ffd2cc;color:#5a0d06}
+#clave{display:none;gap:8px;flex-wrap:wrap;align-items:center;background:#fff;color:var(--tx);border-radius:14px;padding:12px;margin-bottom:12px}
+#clave.on{display:flex}#clave input{flex:1 1 220px;font:inherit;font-size:18px;padding:12px;border-radius:10px;border:2px solid var(--verde)}
+#clave b{flex-basis:100%}
+#nueva{position:fixed;left:50%;top:14px;transform:translate(-50%,-160%);background:var(--amb);color:#2b1d00;font-weight:900;font-size:22px;padding:14px 22px;border-radius:16px;box-shadow:0 10px 30px #0006;transition:transform .3s;z-index:9;max-width:calc(100vw - 32px)}
+#nueva.on{transform:translate(-50%,0)}
+#l{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px;align-items:start}
+.c{background:var(--card);color:var(--tx);border-radius:18px;padding:12px 14px 14px;border-top:10px solid #8aa59b;box-shadow:0 4px 18px #0004}
+.c.preparando{border-top-color:var(--amb)}.c.listo{border-top-color:var(--verde)}
+.c.nueva{animation:latido 1s ease-in-out 6}
+@keyframes latido{50%{box-shadow:0 0 0 8px var(--amb)}}
+.ch{display:flex;align-items:baseline;gap:10px}
+.ch b{font-size:40px;font-weight:900;font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+.ch .nom{flex:1;font-size:20px;font-weight:800;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.chip{font-size:13px;font-weight:800;border-radius:999px;padding:4px 10px;background:#eef2f0;white-space:nowrap}
+.listo .chip{background:var(--verde);color:#fff}.preparando .chip{background:#fff1c7}
+.meta{display:flex;justify-content:space-between;font-size:15px;opacity:.85;margin:2px 0 8px;font-variant-numeric:tabular-nums}
+.meta .esp{font-weight:800}.meta .esp.amb{color:#9a6a00}.meta .esp.roja{color:var(--rojo)}
+ul{list-style:none;margin:0 0 10px;padding:0;border-top:1px solid #0001}
+li{padding:8px 0;border-bottom:1px solid #0001;display:flex;gap:10px}
+li .q{font-size:22px;font-weight:900;min-width:44px;color:var(--verde)}
+li .n{font-size:19px;font-weight:800;line-height:1.2}li .o{display:block;font-size:15px;font-weight:500;opacity:.8;margin-top:2px}
+.sin{opacity:.6;font-size:15px;padding:6px 0}
+.bt{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.bt button{font:inherit;font-size:18px;font-weight:900;border:0;border-radius:14px;min-height:64px;padding:8px 6px;cursor:pointer;touch-action:manipulation;color:#fff}
+.bt .preparando{background:#b07b00}.bt .listo{background:var(--verde)}.bt .recogido{background:var(--osc)}
+.bt button[aria-pressed=true]{outline:4px solid #0003;filter:saturate(.4) brightness(1.25);cursor:default}
+.bt button:disabled{opacity:.55}
+.bt button:active:not(:disabled){transform:scale(.97)}
+.vacio{grid-column:1/-1;text-align:center;opacity:.7;font-size:20px;padding:50px 0}
+a{color:#bfe6d6}
 </style>
 </head>
 <body>
-<div class="warn" id="w">DEMO · pedidos de ejemplo, pago SIMULADO. Las fases avanzan solas: recibido 30 s → en preparación 1 min → preparado; recogido a los 2 min.</div>
-<h1 id="h">Barista · avanzar pedidos</h1><p id="s"></p><p><a href="/cola/ipad.html" target="_blank" rel="noopener">☁️ Admirito en el iPad · avisos de pedido listo</a></p>
-<div id="l"></div>
+<div class="warn" id="w"></div>
+<header>
+  <h1 id="h">Barra · comandas</h1>
+  <div class="cnt" id="cnt"></div>
+  <button class="hb" id="bSon" type="button" aria-pressed="false">🔕</button>
+  <button class="hb" id="bClave" type="button">🔒</button>
+  <button class="hb" id="bLang" type="button">EN</button>
+</header>
+<form id="clave" autocomplete="off"><b id="claveT"></b><input id="claveI" type="password" autocapitalize="off" spellcheck="false" aria-labelledby="claveT"><button class="hb on" id="claveOk" type="submit"></button><button class="hb" id="claveX" type="button" style="background:#0002;color:var(--tx)"></button></form>
+<div id="nueva" role="status" aria-live="assertive"></div>
+<div id="l" aria-live="polite"></div>
+<p style="margin-top:18px;font-size:14px"><a href="/cola/ipad.html" target="_blank" rel="noopener" id="lIpad">☁️ Admirito en el iPad</a> · <span id="s"></span></p>
 <script>
 (function(){
-const P=new URLSearchParams(location.search),store=(P.get('store')||'starbucks-paseo-de-gracia').replace(/[^a-z0-9-]/g,'')||'starbucks-paseo-de-gracia',relay='https://mcp-ainimation.admira.store',en=(P.get('lang')||'').startsWith('en');
-const L=en?{rec:'Received',btnP:'Start preparing',prep:'Preparing',listo:'Ready',btnL:'Mark ready',btnR:'Collected',h:'Barista · advance orders',w:'DEMO · sample orders, SIMULATED payment. Phases advance by themselves: received 30 s → preparing 1 min → ready; collected after 2 min.',v:'No open orders'}:{rec:'Recibido',btnP:'Empezar a preparar',prep:'En preparación',listo:'Preparado',btnL:'Marcar preparado',btnR:'Recogido',h:'Barista · avanzar pedidos',w:'DEMO · pedidos de ejemplo, pago SIMULADO. Las fases avanzan solas: recibido 30 s → en preparación 1 min → preparado; recogido a los 2 min.',v:'No hay pedidos abiertos'};
-h.textContent=L.h;w.textContent=L.w;s.textContent=store;
-async function av(n,a){await fetch(relay+'/cola/avanzar?store='+store,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({numero:n,a})});tic();}
+const P=new URLSearchParams(location.search),$=id=>document.getElementById(id);
+const store=(P.get('store')||'starbucks-paseo-de-gracia').replace(/[^a-z0-9-]/g,'')||'starbucks-paseo-de-gracia';
+const relay='https://mcp-ainimation.admira.store';
+let lang=(P.get('lang')||'').startsWith('en')?'en':'es';
+// Clave de barra: ?clave= o #clave= una sola vez (se guarda en este iPad y se borra de la URL); al relé va en la cabecera x-cola-clave.
+const KK='cola:barra:'+store,leeK=()=>{try{return localStorage.getItem(KK)||'';}catch(_){return '';}},ponK=v=>{try{v?localStorage.setItem(KK,v):localStorage.removeItem(KK);}catch(_){}};
+{const h=new URLSearchParams(location.hash.slice(1)),c=P.get('clave')||h.get('clave');if(c){ponK(c.trim());P.delete('clave');history.replaceState(null,'',location.pathname+(P.toString()?'?'+P:''));}}
+const T={es:{h:'Barra · comandas',w:'DEMO · pedidos de ejemplo, pago SIMULADO. Por orden de llegada; las fases también avanzan solas (recibido 30 s → en preparación 1 min → listo; recogido a los 2 min).',abierta:'Cola ABIERTA: el relé aún no tiene clave de barra; cualquiera puede avanzar pedidos.',recibido:'Recibido',preparando:'En preparación',listo:'Listo',bPrep:'Preparando',bListo:'Listo',bEnt:'Entregado',vacio:'No hay comandas abiertas',sin:'Sin detalle de productos',mas:'+%n líneas más',esp:'espera',pend:'pendientes de pago',nueva:'🔔 Nueva comanda',claveT:'Clave de barra (admira.tv/gestorColas → «Ver clave»)',ok:'Guardar',olvidar:'Olvidar',falta:'🔒 Falta la clave de barra',conClave:'🔓 Barra',sinClave:'🔒 Clave',err:'Sin conexión con la cola',ipad:'☁️ Admirito en el iPad · avisos de pedido listo',sonOn:'🔔 Sonido',sonOff:'🔕 Sonido'},
+ en:{h:'Counter · orders',w:'DEMO · sample orders, SIMULATED payment. In arrival order; phases also advance by themselves (received 30 s → preparing 1 min → ready; collected after 2 min).',abierta:'Queue OPEN: the relay has no counter key yet; anyone can advance orders.',recibido:'Received',preparando:'Preparing',listo:'Ready',bPrep:'Preparing',bListo:'Ready',bEnt:'Handed over',vacio:'No open orders',sin:'No product detail',mas:'+%n more lines',esp:'waiting',pend:'awaiting payment',nueva:'🔔 New order',claveT:'Counter key (admira.tv/gestorColas → “Show key”)',ok:'Save',olvidar:'Forget',falta:'🔒 Counter key needed',conClave:'🔓 Counter',sinClave:'🔒 Key',err:'Queue offline',ipad:'☁️ Admirito on the iPad · ready announcements',sonOn:'🔔 Sound',sonOff:'🔕 Sound'}};
+const t=k=>T[lang][k];
+const esc=x=>String(x==null?'':x).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+let datos=null,vistos=null,nuevas=new Map(),skew=0,bloqueada=false,abierta=false,error='',ocupado=new Set();
+const K=window.__kds={renders:0,sonidos:0,nuevas:[],get datos(){return datos;}};
+// Etiquetas de la carta: si una línea no trae optionsText, se compone con los ids de options (tamano: venti…).
+let ETQ={};
+fetch('/xperiencias/kiosko-pedido/menu.starbucks.json',{cache:'force-cache'}).then(r=>r.json()).then(m=>{const e={};(m.items||[]).forEach(i=>(i.optionGroups||[]).forEach(g=>(g.choices||[]).forEach(c=>{(e[g.id]=e[g.id]||{})[c.id]=c.label;})));ETQ=e;ultimo='';pintar();}).catch(()=>{});
+const etq=(g,id)=>{const l=ETQ[g]&&ETQ[g][id];return l?(typeof l==='string'?l:l[lang]||l.es):String(id).replace(/-/g,' ');};
+const opciones=l=>l.optionsText||Object.entries(l.options||{}).flatMap(([g,v])=>(Array.isArray(v)?v:[v]).map(x=>etq(g,x))).join(' · ');
+// ── sonido: un «ding» con WebAudio (sin ficheros). El iPad exige un toque antes: el botón 🔔 lo desbloquea.
+let ac=null,sonido=(()=>{try{return localStorage.getItem('cola:kds:son')!=='off';}catch(_){return true;}})();
+function audio(){try{ac=ac||new (window.AudioContext||window.webkitAudioContext)();if(ac.state==='suspended')ac.resume();}catch(_){}}
+function ding(){K.sonidos++;if(!sonido||!ac)return;try{const t0=ac.currentTime;[880,1320].forEach((f,i)=>{const o=ac.createOscillator(),g=ac.createGain();o.frequency.value=f;o.connect(g);g.connect(ac.destination);g.gain.setValueAtTime(.0001,t0+i*.18);g.gain.exponentialRampToValueAtTime(.35,t0+i*.18+.02);g.gain.exponentialRampToValueAtTime(.0001,t0+i*.18+.5);o.start(t0+i*.18);o.stop(t0+i*.18+.55);});}catch(_){}}
+document.addEventListener('pointerdown',audio,{once:true});
+function textos(){document.documentElement.lang=lang;$('h').innerHTML=esc(t('h'))+'<small>'+esc(store)+'</small>';$('bLang').textContent=lang==='en'?'ES':'EN';$('lIpad').textContent=t('ipad');$('lIpad').href='/cola/ipad.html?store='+store+(lang==='en'?'&lang=en':'');
+  $('claveT').textContent=t('claveT');$('claveOk').textContent=t('ok');$('claveX').textContent=t('olvidar');$('bSon').textContent=sonido?t('sonOn'):t('sonOff');$('bSon').setAttribute('aria-pressed',String(sonido));$('bSon').classList.toggle('on',sonido);
+  $('bClave').textContent=leeK()?t('conClave'):t('sinClave');$('bClave').classList.toggle('on',!!leeK()&&!bloqueada);$('s').textContent=store;pintar();}
+const mmss=ms=>{const s=Math.max(0,Math.floor(ms/1000));return Math.floor(s/60)+':'+String(s%60).padStart(2,'0');};
+const hora=iso=>iso?new Date(iso).toLocaleTimeString(lang==='en'?'en-GB':'es-ES',{hour:'2-digit',minute:'2-digit'}):'';
+function linea(l){const o=opciones(l);return '<li><span class="q">'+esc(l.qty)+'×</span><span class="n">'+esc(l.name)+(o?'<span class="o">'+esc(o)+'</span>':'')+'</span></li>';}
+function tarjeta(p){const ls=p.lineas||[],e=p.estado,desde=p.pagado||p.creado,esp=Date.now()+skew-new Date(desde).getTime(),oc=ocupado.has(p.numero);
+  const b=(a,k)=>'<button type="button" class="'+a+'" data-n="'+esc(p.numero)+'" data-a="'+a+'" aria-pressed="'+(e===a)+'"'+(e===a||oc?' disabled':'')+'>'+esc(t(k))+'</button>';
+  return '<article class="c '+esc(e)+(nuevas.has(p.id)?' nueva':'')+'" data-id="'+esc(p.id)+'" data-numero="'+esc(p.numero)+'">'
+   +'<div class="ch"><b>'+esc(p.numero)+'</b><span class="nom">'+esc(p.nombre||'')+'</span><span class="chip">'+esc(t(e)||e)+'</span></div>'
+   +'<div class="meta"><span>🕑 '+esc(hora(desde))+'</span><span class="esp'+(esp>300000?' roja':esp>180000?' amb':'')+'" data-desde="'+esc(desde)+'">'+esc(t('esp'))+' '+mmss(esp)+'</span></div>'
+   +(ls.length?'<ul>'+ls.map(linea).join('')+(p.lineas_mas?'<li class="sin">'+esc(t('mas').replace('%n',p.lineas_mas))+'</li>':'')+'</ul>':'<p class="sin">'+esc(t('sin'))+'</p>')
+   +'<div class="bt">'+b('preparando','bPrep')+b('listo','bListo')+b('recogido','bEnt')+'</div></article>';}
 let ultimo='';
-async function tic(){const d=await (await fetch(relay+'/cola/estado?store='+store,{cache:'no-store'})).json();
-  const f=(p,e)=>'<div class="p"><b>'+p.numero+'</b><span>'+(e==='listo'?L.listo:L.prep)+'</span>'+(e==='listo'?'':'<button data-n="'+p.numero+'" data-a="listo">'+L.btnL+'</button>')+'<button class="r" data-n="'+p.numero+'" data-a="recogido">'+L.btnR+'</button></div>';
-  const html=(d.recibido||[]).map(p=>f(p,'recibido')).join('')+(d.preparando||[]).map(p=>f(p,'preparando')).join('')+(d.listo||[]).map(p=>f(p,'listo')).join('');const nuevo=html||'<p>'+L.v+'</p>';if(nuevo!==ultimo){ultimo=nuevo;l.innerHTML=nuevo;window.__baristaRenders=(window.__baristaRenders||0)+1;}}
-l.onclick=e=>{const b=e.target.closest('button');if(b)av(b.dataset.n,b.dataset.a);};
-tic();setInterval(tic,2500);
+function pintar(){const w=$('w');w.className='warn'+(abierta?' abierta':'');w.textContent=abierta?t('abierta'):t('w');
+  if(bloqueada){$('l').innerHTML='<p class="vacio">'+esc(t('falta'))+'</p>';$('clave').classList.add('on');$('cnt').innerHTML='';ultimo='';return;}
+  if(!datos){$('l').innerHTML='<p class="vacio">'+esc(error||'…')+'</p>';ultimo='';return;}
+  const l=datos.comandas||[],n=e=>l.filter(p=>p.estado===e).length;
+  $('cnt').innerHTML=['recibido','preparando','listo'].map(e=>'<span>'+esc(t(e))+' '+n(e)+'</span>').join('')+(datos.pendientes?'<span>'+esc(t('pend'))+' '+datos.pendientes+'</span>':'')+(error?'<span style="background:#D62B1F">'+esc(error)+'</span>':'');
+  const html=l.length?l.map(tarjeta).join(''):'<p class="vacio">'+esc(t('vacio'))+'</p>';
+  if(html!==ultimo){ultimo=html;$('l').innerHTML=html;K.renders++;window.__baristaRenders=K.renders;}}
+// Cada segundo solo cambia el contador de espera: se toca su texto, no se repinta la tarjeta.
+setInterval(()=>{document.querySelectorAll('.esp[data-desde]').forEach(s=>{const ms=Date.now()+skew-new Date(s.dataset.desde).getTime();s.textContent=t('esp')+' '+mmss(ms);s.className='esp'+(ms>300000?' roja':ms>180000?' amb':'');});},1000);
+function hdr(json){const h={};if(json)h['content-type']='application/json';const k=leeK();if(k)h['x-cola-clave']=k;return h;}
+function avisarNuevas(l){if(!vistos){vistos=new Set(l.map(p=>p.id));return;}
+  const ns=l.filter(p=>!vistos.has(p.id));l.forEach(p=>vistos.add(p.id));if(!ns.length)return;
+  const ahora=Date.now();ns.forEach(p=>{nuevas.set(p.id,ahora);K.nuevas.push(p.numero);});
+  const nv=$('nueva');nv.textContent=t('nueva')+' · '+ns.map(p=>p.numero+(p.nombre?' '+p.nombre:'')).join(', ');nv.classList.add('on');clearTimeout(avisarNuevas.t);avisarNuevas.t=setTimeout(()=>nv.classList.remove('on'),6000);
+  ding();try{navigator.vibrate&&navigator.vibrate([120,60,120]);}catch(_){}}
+async function tic(){try{const r=await fetch(relay+'/cola/comandas?store='+store,{cache:'no-store',headers:hdr(false)});
+    if(r.status===401){bloqueada=true;error='';datos=null;textos();return;}
+    const d=await r.json();if(!d.ok)throw new Error(d.error||r.status);
+    bloqueada=false;error='';if(d.ahora)skew=new Date(d.ahora).getTime()-Date.now();
+    for(const[id,at]of nuevas)if(Date.now()-at>8000)nuevas.delete(id);
+    avisarNuevas(d.comandas||[]);datos=d;
+    if(!tic.estado||Date.now()-tic.estado>30000){tic.estado=Date.now();fetch(relay+'/cola/estado?store='+store,{cache:'no-store'}).then(x=>x.json()).then(e=>{const a=!!(e&&e.acceso&&e.acceso.barra==='abierta');if(a!==abierta){abierta=a;pintar();}}).catch(()=>{});}
+    $('clave').classList.remove('on');$('bClave').classList.toggle('on',!!leeK());pintar();
+  }catch(e){error=t('err');pintar();}}
+async function av(n,a){if(ocupado.has(n))return;ocupado.add(n);pintar();
+  try{const r=await fetch(relay+'/cola/avanzar?store='+store,{method:'POST',headers:hdr(true),body:JSON.stringify({numero:n,a})});if(r.status===401){bloqueada=true;textos();}}
+  catch(_){}finally{ocupado.delete(n);await tic();}}
+$('l').addEventListener('click',e=>{const b=e.target.closest('button[data-a]');if(b&&!b.disabled)av(b.dataset.n,b.dataset.a);});
+$('bLang').onclick=()=>{lang=lang==='en'?'es':'en';textos();};
+$('bSon').onclick=()=>{sonido=!sonido;try{localStorage.setItem('cola:kds:son',sonido?'on':'off');}catch(_){}audio();if(sonido)ding();textos();};
+$('bClave').onclick=()=>{$('clave').classList.toggle('on');if($('clave').classList.contains('on'))$('claveI').focus();};
+$('clave').onsubmit=e=>{e.preventDefault();const v=$('claveI').value.trim();if(!v)return;ponK(v);$('claveI').value='';bloqueada=false;vistos=null;textos();tic();};
+$('claveX').onclick=()=>{ponK('');$('claveI').value='';textos();tic();};
+textos();tic();setInterval(tic,2500);
 })();
 </script>
 </body>
