@@ -83,6 +83,10 @@
         <tr><td><code>cola_avanzar</code></td><td class="d">el barista de la demo: pasa un pedido a listo / recogido (pago siempre simulado)</td><td><span class="estado vivo">vivo</span></td></tr>
         <tr><td><code>cola_avisos</code></td><td class="d">tres fases: recibido (30 s) → en preparación (1 min) → preparado; avisos de pedido listo: «NOMBRE, tu pedido Starbucks está preparado» por pedido, con las pantallas que lo anuncian (iPad del mostrador <code>starbucks-ipad-01</code> → <code>/cola/ipad.html</code>, móvil, taza, gemelo). <code>cola_estado</code> devuelve también <code>nombre</code> en cada pedido.</td></tr>
         <tr><td><code>admirito_voz</code></td><td class="d">voz de Admirito con ElevenLabs (castellano, voz «Santiago», chico joven): <code>GET /voz?texto=…</code> devuelve MP3 con caché por frase; la clave queda en el servidor; si no hay motor, voz del navegador es-ES</td></tr>
+        <tr><td><code>audiencia_estado</code></td><td class="d">quiosco segmentado: quién hay delante de cada tótem ahora (personas, género, banda de edad, individuo/grupo) y la carta mostrada; solo recuentos anónimos</td><td><span class="estado vivo">vivo</span></td></tr>
+        <tr><td><code>audiencia_reglas</code></td><td class="d">reglas de segmentación → variantes de carta (prioridad, por defecto); con <code>segmento</code> dice qué carta saldría</td><td><span class="estado vivo">vivo</span></td></tr>
+        <tr><td><code>audiencia_resumen</code></td><td class="d">KPIs de audiencia por tienda y fechas: personas, género, edad, grupos, por hora de Madrid, variantes, pedidos (tiendas reales con clave de flota)</td><td><span class="estado vivo">vivo</span></td></tr>
+        <tr><td><code>audiencia_simular</code></td><td class="d">visitas de demo para QA, solo en <code>starbucks-qa</code> (origen demo)</td><td><span class="estado vivo">vivo</span></td></tr>
   </table>
   <p>La lista de Xperiencias sale de <a href="/xperiencias/index.json">/xperiencias/index.json</a>, la
   misma fuente que pinta la <a href="/xperiencias/">galería</a>. El servidor no guarda estado: lee el

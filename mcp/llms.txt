@@ -34,6 +34,10 @@ No hay API HTTP propia todavía: lo que hay es el MCP. El sitio sigue siendo est
 | `cola_avanzar` | barista de la demo: pasa un pedido a listo / recogido (pago simulado); con la cola cerrada exige clave de flota o de barra |
 | `cola_avisos` | fases recibido → preparando → preparado (1 min cada una) · pedidos listos con el aviso «NOMBRE, tu pedido Starbucks está preparado» + URL del iPad del mostrador (starbucks-ipad-01 → /cola/ipad.html), móvil y taza |
 | `admirito_voz` | voz de Admirito con ElevenLabs (voz «Santiago», chico joven, castellano): `GET https://mcp-ainimation.admira.store/voz?texto=…&voz=santiago` → audio/mpeg, caché 30 días por frase, clave solo en el servidor; `?info=1` lista voces; si responde 503 usa speechSynthesis es-ES |
+| `audiencia_estado` | quiosco segmentado: quién hay delante de cada tótem (personas, género, banda de edad, individuo/grupo) y la carta mostrada; recuentos anónimos, nunca imágenes |
+| `audiencia_reglas` | reglas → variantes de carta (prioridad, por defecto); `segmento` opcional para probar qué carta saldría. HTTP: `GET /audiencia/reglas?tienda=` |
+| `audiencia_resumen` | KPIs por tienda y fechas (hora de Madrid); tiendas reales con clave de flota. Backoffice: admira.tv/audiencia |
+| `audiencia_simular` | visitas demo solo en `starbucks-qa`; nunca en starbucks-paseo-de-gracia. Contrato: docs/audiencia-v1.md |
 
 Fuente única de la lista: `https://www.ainimation.studio/xperiencias/index.json`.
 Ejemplo (initialize → tools/list → xperiencias_listar):

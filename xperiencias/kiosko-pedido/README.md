@@ -83,3 +83,10 @@ nunca a `"*"`; el origen se toma de `location.ancestorOrigins` (o del Referer).
 
 Ver `menu.schema.json` y [docs/menu-schema.md](../../docs/menu-schema.md). Ilustraciones de `img/` propias
 (SVG genéricos), sin imágenes oficiales de la marca.
+
+## Segmentado por cámara (`?seg=1`)
+
+`segmento.js` cuenta quién hay delante (personas, género, banda de edad, individuo/grupo) con face-api en el
+navegador y elige una variante de carta según las reglas de `mcp-ainimation.admira.store/audiencia/reglas`
+(editables en admira.tv/audiencia). Sin imágenes ni huellas: solo recuentos anónimos por visita, 90 días.
+QA sin cámara: `?simaud=joven_f;adulto_m+joven_f;0`. Ver [docs/audiencia-v1.md](../../docs/audiencia-v1.md).
