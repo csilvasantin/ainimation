@@ -147,6 +147,14 @@ const tr=o=>o?(o[lang]||o.es||""):"";const t=k=>T[lang][k]||k;
 const money=n=>new Intl.NumberFormat(lang==="en"?"en-IE":"es-ES",{style:"currency",currency:(M&&M.establishment.currency)||"EUR"}).format(n);
 function host(event,extra){const msg=Object.assign({source:"ainimation-xperiencia",piece:"kiosko-pedido",event:event,order:order},extra||{});
   try{if(window.parent!==window)window.parent.postMessage(msg,"*");}catch(e){} window.__kioskEvents=(window.__kioskEvents||[]).concat([msg]);}
+// «say»: el avatar del tótem del gemelo dice el número; sin acuse en 500 ms, voz del navegador (es-ES / en-GB)
+function say(text){const l=lang==="en"?"en-GB":"es-ES";window.__kioskSaid=(window.__kioskSaid||[]).concat([{text:text,lang:l}]);
+  function local(){try{const ss=window.speechSynthesis;if(!ss||!window.SpeechSynthesisUtterance)return;const u=new SpeechSynthesisUtterance(text);u.lang=l;const v=(ss.getVoices()||[]).find(x=>x.lang===l);if(v)u.voice=v;ss.cancel();ss.speak(u);}catch(e){}}
+  if(window.parent===window)return local();
+  const id="say-"+Date.now().toString(36)+Math.random().toString(36).slice(2,6);let ok=false;
+  const ack=e=>{const d=e.data;if(d&&d.type==="say-ack"&&d.id===id){ok=true;removeEventListener("message",ack);}};addEventListener("message",ack);
+  try{window.parent.postMessage({source:"ainimation-xperiencia",piece:"kiosko-pedido",type:"say",id:id,text:text,lang:l},"*");}catch(e){}
+  setTimeout(()=>{if(!ok){removeEventListener("message",ack);local();}},500);}
 function fit(){const s=Math.min(innerWidth/1080,innerHeight/1920);$("#stage").style.transform="translate(-50%,-50%) scale("+s+")";}
 addEventListener("resize",fit);fit();
 // ── marca blanca: tokens --mb-* del catálogo admiranext.com/marcablanca ──
@@ -208,6 +216,7 @@ function toPay(){makeOrder();go("pay");const url=checkoutUrl();order.checkoutUrl
 function finish(how){if(!order||order.number)return;order.number=nextNumber();order.status=how==="paid"?"paid-simulated":"pay-at-counter";order.paidAt=how==="paid"?new Date().toISOString():null;
   closeOverlay();$("#orderNum").textContent=order.number;$("#doneMsg").textContent=t(how==="paid"?"paid":"payAtCounter");go("done");
   if(how==="paid")host("payment",{status:"paid",simulated:true});host("order",{status:order.status});
+  say(lang==="en"?"Thank you! Your order number is "+order.number:"¡Gracias! Tu pedido es el "+order.number);
   setTimeout(()=>{if(screen==="done")go("attract");},(M.idle.resetSeconds||12)*1000);}
 function closeOverlay(){$("#overlay").classList.remove("on");$("#payFrame").src="about:blank";}
 // pago simulado: mismo navegador (BroadcastChannel / storage) o el overlay (postMessage)

@@ -1,11 +1,11 @@
 <!doctype html>
-<html lang="es">
+<html lang="es" data-l="es">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>AInimation Studio · Ayuda — qué es y cómo se usa</title>
-  <meta name="description" content="AInimation Studio explicado para personas: qué es, las tres puertas (Author, Generate, Control), dónde acaba lo que creas y a quién se avisa.">
-  <meta name="admiranext-version" content="v.07.10.2026.r5.09:53">
+  <title>AInimation Studio · Ayuda / Help — manual del Director y Ecosistema Admira</title>
+  <meta name="description" content="Manual bilingüe (ES/EN) del Director de AInimation Studio: Cast, Stage, Score, Inspector, Behaviour/XPL, Admingo, Mensaje, plantillas, Publicar Xperiencia, quiosco y pago simulado; y cómo conecta con Pixeria, admira.tv, XpaceOS, marcablanca, Yokup y admira.biz.">
+  <meta name="admiranext-version" content="v.07.10.2026.r6.10:17">
   <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
   <style>
     :root{--ink:#17120f;--muted:#6e6257;--paper:#f5eee2;--panel:#fffaf0;--line:rgba(23,18,15,.14);--line2:rgba(23,18,15,.28);--lime:#c8ff5f;--coral:#ff654f;--cyan:#31bed1;--violet:#7c5cff;--gold:#f0b84f;--mono:ui-monospace,SFMono-Regular,Menlo,monospace;--sans:-apple-system,BlinkMacSystemFont,"Inter","Segoe UI",Roboto,sans-serif}
@@ -30,69 +30,114 @@
     .nota{margin:16px 0;padding:14px 16px;border-left:3px solid var(--gold);background:var(--panel);color:var(--muted)}
     .nota b{color:var(--ink)}
     footer{margin-top:44px;padding-top:16px;border-top:1px solid var(--line);color:var(--muted);font:11px var(--mono)}
-  </style>
+  
+    html[data-l="es"] [lang="en"]:not(html),html[data-l="en"] [lang="es"]:not(html){display:none!important}
+    .top{display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+    .lg{display:flex;gap:4px}.lg button{font:11px var(--mono);letter-spacing:.08em;border:1px solid var(--line2);background:var(--panel);border-radius:999px;padding:5px 11px;cursor:pointer}
+    .lg button[aria-pressed="true"]{background:var(--ink);color:var(--paper)}
+    nav.toc{margin:20px 0;padding:12px 16px;border:1px solid var(--line);border-radius:14px;background:var(--panel);columns:2 220px;font-size:13.5px}
+    nav.toc a{display:block;padding:2px 0}
+    h3{font-size:16px;margin:22px 0 6px}
+    .estado{font:10px var(--mono);letter-spacing:.08em;text-transform:uppercase;padding:2px 7px;border-radius:999px;border:1px solid var(--line2)}
+    .vivo{background:#e7ffd0}.pronto{background:#fff1cf}
+    pre{font:12.5px/1.5 var(--mono);background:#17120f;color:#f5eee2;border-radius:10px;padding:12px 14px;overflow:auto}
+    kbd{font:11.5px var(--mono);border:1px solid var(--line2);border-bottom-width:2px;border-radius:5px;padding:0 5px;background:#fff}
+</style>
 </head>
 <body>
 <div class="wrap">
-  <p class="kicker">● AInimation Studio · ayuda</p>
-  <h1>Qué es AInimation Studio<br>y cómo se usa</h1>
-  <p class="lede">Es la <b>capa de autoría</b> de la suite AdmiraNeXT: trabajo de dirección de
-  animación, rehecho con IA. Aquí se crea lo que después se guarda, se emite y se mide en el
-  resto de la casa.</p>
-
+  <div class="top"><p class="kicker">● AInimation Studio · <span lang="es">ayuda</span><span lang="en">help</span></p>
+  <div class="lg" role="group" aria-label="Idioma / Language"><button type="button" data-l="es">ES</button><button type="button" data-l="en">EN</button></div></div>
+  <h1><span lang="es">Manual del Director<br>y del Ecosistema Admira</span><span lang="en">Director manual<br>and Admira Ecosystem</span></h1>
+  <p class="lede"><span lang="es">Todo lo que hace el editor de <a href="/studio.html">/studio.html</a>, paso a paso y sin programar, y cómo lo que creas llega a Pixeria, admira.tv, los tótems de XpaceOS y el resto de la casa.</span><span lang="en">Everything the <a href="/studio.html">/studio.html</a> editor does, step by step and without coding, and how what you make reaches Pixeria, admira.tv, XpaceOS totems and the rest of the house.</span></p>
   <div class="puertas">
-    <div class="puerta"><b style="color:var(--coral)">Para personas · esta página</b>
-      <span>Qué es, qué hace cada puerta y dónde acaba lo que creas.</span></div>
-    <div class="puerta"><b style="color:var(--violet)">Para máquinas</b>
-      <span>Contratos y estado real: <a href="/mcp/">ainimation.studio/mcp</a></span></div>
+    <div class="puerta"><b style="color:var(--coral)"><span lang="es">Para personas · esta página</span><span lang="en">For people · this page</span></b><span><span lang="es">Manual ES/EN.</span><span lang="en">ES/EN manual.</span> <a href="/help/admingo.html">Admingo</a></span></div>
+    <div class="puerta"><b style="color:var(--violet)"><span lang="es">Para máquinas</span><span lang="en">For machines</span></b><span><a href="/mcp/">ainimation.studio/mcp</a> · <a href="/mcp/manifest.json">manifest.json</a></span></div>
   </div>
-
-  <h2>Las tres puertas</h2>
-  <table>
-    <tr><th>Puerta</th><th>Qué hace</th></tr>
-    <tr><td><b>Author</b></td><td class="d">Escribir la intención: qué se cuenta y cómo se
-      cuenta, antes de que exista un solo fotograma.</td></tr>
-    <tr><td><b>Generate</b></td><td class="d">Convertir esa intención en material, con IA, sin
-      salir de la pieza que estás montando.</td></tr>
-    <tr><td><b>Control</b></td><td class="d">Quedarte al mando: lo que sale es
-      <b>editable</b>, no un resultado que hay que aceptar tal cual.</td></tr>
-  </table>
-  <p>La interfaz completa vive en <a href="/studio.html">/studio.html</a>. La portada es el
-  escaparate; el trabajo, ahí dentro.</p>
-
-  <h2>Dónde acaba lo que creas</h2>
-  <ul>
-    <li><b>Pixeria</b> guarda la pieza, etiquetada, para que el resto de la casa la use.</li>
-    <li><b>admira.tv</b> la emite, y deja constancia de cada pase.</li>
-    <li><b>clearchannel.tv</b> cruza esa emisión con la audiencia que la vio.</li>
-    <li><b>Yokup</b> es donde se declara el trabajo y donde puntúa.</li>
-  </ul>
-
-  <h2>Admingo: programar sin salir del Director</h2>
-  <p><a href="/help/admingo.html">Admingo</a> es el Lingo de AdmiraNeXT: scripts en español o en inglés (<code>al soltar</code> / <code>on mouseUp</code>, <code>ir a marca "CARRITO"</code>) para dar comportamiento a una pieza. Se escribe en <b>Ventana ▸ Script · Admingo</b> y viaja en la Xperiencia publicada.</p>
-
-  <h2>Para los agentes de la flota</h2>
-  <p>Un agente (Claude, Codex, OpenCode, los consejeros de GrokBot) no necesita abrir esta web:
-  habla con el <b>servidor MCP</b> de ainimation en <code>mcp-ainimation.admira.store</code>.
-  Con él puede <b>listar</b> las Xperiencias publicadas, <b>leer</b> el plan y las reglas de cada una,
-  pedir el <b>item de canal</b> para emitirla en admira.tv, ver lo que ya está en el stock de Pixeria y,
-  con su clave de flota, <b>publicar</b> una Xperiencia en Pixeria. Crear una Xperiencia nueva sigue
-  siendo trabajo del repositorio: carpeta en <code>/xperiencias/</code> más su entrada en
-  <code>index.json</code>. Contratos y ejemplos en <a href="/mcp/">ainimation.studio/mcp</a>.</p>
-
-  <div class="nota"><b>Esto es una web, no una aplicación instalada.</b> Se publica sola al
-  empujar los cambios: no hay botón de desplegar, y por eso un cambio pequeño llega enseguida.</div>
-
-  <h2>Si algo se rompe</h2>
-  <p>Avísalo en el grupo <b>AgoraMatrix</b> de Telegram, que es la única bandeja del equipo. Di
-  qué esperabas ver y en qué puerta estabas. El responsable del proyecto en el censo de Yokup es
-  <b>SmithMacMini</b>.</p>
-
+  <nav class="toc" aria-label="Índice"><a href="#que-es"><span lang="es">Qué es AInimation Studio</span><span lang="en">What AInimation Studio is</span></a><a href="#primeros-pasos"><span lang="es">Primeros pasos (5 minutos)</span><span lang="en">Getting started (5 minutes)</span></a><a href="#cast"><span lang="es">Cast (reparto)</span><span lang="en">Cast</span></a><a href="#stage"><span lang="es">Stage (escenario)</span><span lang="en">Stage</span></a><a href="#score"><span lang="es">Score (Timeline)</span><span lang="en">Score (Timeline)</span></a><a href="#inspector"><span lang="es">Inspector de propiedades</span><span lang="en">Property Inspector</span></a><a href="#behaviour"><span lang="es">Behaviour · reglas XPL</span><span lang="en">Behaviour · XPL rules</span></a><a href="#admingo"><span lang="es">Admingo (scripts)</span><span lang="en">Admingo (scripts)</span></a><a href="#mensaje"><span lang="es">Ventana Mensaje</span><span lang="en">Message window</span></a><a href="#plantillas"><span lang="es">Plantillas</span><span lang="en">Templates</span></a><a href="#publicar"><span lang="es">Publicar Xperiencia</span><span lang="en">Publish Xperience</span></a><a href="#quiosco"><span lang="es">Quiosco y menu.json</span><span lang="en">Kiosk and menu.json</span></a><a href="#pago"><span lang="es">Pago (simulado)</span><span lang="en">Payment (simulated)</span></a><a href="#ecosistema"><span lang="es">Ecosistema Admira</span><span lang="en">Admira Ecosystem</span></a><a href="#agentes"><span lang="es">Para los agentes (MCP)</span><span lang="en">For agents (MCP)</span></a><a href="#problemas"><span lang="es">Si algo se rompe</span><span lang="en">If something breaks</span></a></nav>
+  <section id="que-es"><h2><span lang="es">Qué es AInimation Studio</span><span lang="en">What AInimation Studio is</span></h2><div lang="es"><p>Es la <b>capa de autoría</b> de la suite AdmiraNeXT: un <b>Director</b> (como el Macromedia Director de siempre) rehecho para la era de la IA. Con él se montan <b>Xperiencias</b> —piezas interactivas para pantallas, tótems y quioscos— sin programar, y se publican para que el resto de la Galaxia Admira las guarde, las emita y las mida.</p>
+<table><tr><th>Puerta</th><th>Qué hace</th></tr>
+<tr><td><b>Author</b></td><td class="d">Escribir la intención (Brief): qué se cuenta y cómo, antes de que exista un fotograma.</td></tr>
+<tr><td><b>Generate</b></td><td class="d">Convertir esa intención en material con IA (Director IA), sin salir de la pieza.</td></tr>
+<tr><td><b>Control</b></td><td class="d">Quedarte al mando: Cast, Stage, Score, Inspector y Behaviours; todo es editable.</td></tr></table>
+<p>El editor vive en <a href="/studio.html">/studio.html</a>. Las piezas publicadas, en la <a href="/xperiencias/">galería de Xperiencias</a>.</p></div><div lang="en"><p>It is the <b>authoring layer</b> of the AdmiraNeXT suite: a <b>Director</b> (like classic Macromedia Director) rebuilt for the AI era. You build <b>Xperiences</b> —interactive pieces for screens, totems and kiosks— without coding, and publish them so the rest of the Admira Galaxy can store, broadcast and measure them.</p>
+<table><tr><th>Door</th><th>What it does</th></tr>
+<tr><td><b>Author</b></td><td class="d">Write the intent (Brief): what is told and how, before a single frame exists.</td></tr>
+<tr><td><b>Generate</b></td><td class="d">Turn that intent into material with AI (AI Director) without leaving the piece.</td></tr>
+<tr><td><b>Control</b></td><td class="d">Stay in charge: Cast, Stage, Score, Inspector and Behaviours; everything stays editable.</td></tr></table>
+<p>The editor lives at <a href="/studio.html">/studio.html</a>; published pieces in the <a href="/xperiencias/">Xperiences gallery</a>.</p></div></section><section id="primeros-pasos"><h2><span lang="es">Primeros pasos (5 minutos)</span><span lang="en">Getting started (5 minutes)</span></h2><div lang="es"><ol><li><b>Archivo ▸ Nuevo</b>: proyecto vacío, Stage 1920×1080 (16:9), sin marcas.</li>
+<li>Elige la resolución en el chip de tamaño del Stage: <b>1920×1080</b> (horizontal) o <b>1080×1920</b> (tótem vertical).</li>
+<li><b>Importar</b> imágenes, vídeo o audio al <b>Cast</b>; arrástralos al Stage para crear sprites.</li>
+<li>Selecciona un sprite: el <b>Inspector de propiedades</b> muestra posición, tamaño, fotogramas, color y texto.</li>
+<li>En el <b>Score</b> (Timeline) añade <b>marcas</b> (pantallas) y ajusta en qué fotogramas vive cada sprite.</li>
+<li>Da comportamiento con <b>Behaviour</b> (reglas CUANDO → ENTONCES) o con <a href="/help/admingo.html">Admingo</a>.</li>
+<li><b>Play</b> para probar; <b>Archivo ▸ Guardar</b> (navegador) o <b>Exportar proyecto (.json)</b>; <b>Publicar Xperiencia</b> descarga el ZIP listo.</li></ol>
+<p>¿Prisa? <b>Plantillas ▸ 🛒 Quiosco de pedidos</b> abre un quiosco Starbucks completo y editable (<a href="/studio.html?plantilla=quiosco">enlace directo</a>).</p></div><div lang="en"><ol><li><b>File ▸ New</b>: blank project, 1920×1080 (16:9) stage, no markers.</li>
+<li>Pick the resolution in the Stage size chip: <b>1920×1080</b> (landscape) or <b>1080×1920</b> (vertical totem).</li>
+<li><b>Import</b> images, video or audio into the <b>Cast</b>; drag them onto the Stage to create sprites.</li>
+<li>Select a sprite: the <b>Property Inspector</b> shows position, size, frames, colour and text.</li>
+<li>In the <b>Score</b> (Timeline) add <b>markers</b> (screens) and set which frames each sprite lives in.</li>
+<li>Add behaviour with <b>Behaviour</b> (WHEN → THEN rules) or with <a href="/help/admingo.html">Admingo</a>.</li>
+<li><b>Play</b> to test; <b>File ▸ Save</b> (browser) or <b>Export project (.json)</b>; <b>Publish Xperience</b> downloads the ready ZIP.</li></ol>
+<p>In a hurry? <b>Templates ▸ 🛒 Ordering kiosk</b> opens a full, editable Starbucks kiosk (<a href="/studio.html?plantilla=quiosco">direct link</a>).</p></div></section><section id="cast"><h2><span lang="es">Cast (reparto)</span><span lang="en">Cast</span></h2><div lang="es"><p>El Cast es la biblioteca del proyecto. Cada miembro es reutilizable en varios sprites:</p>
+<table><tr><th>Tipo</th><th>Cómo se crea</th></tr>
+<tr><td>Bitmap</td><td class="d">Importar PNG/JPG/WebP/SVG, o traer de Pixeria (ver Ecosistema).</td></tr>
+<tr><td>Texto</td><td class="d">Herramienta T en Tools o <b>Insertar ▸ T Etiqueta</b>; textos en ES y EN.</td></tr>
+<tr><td>Forma</td><td class="d">Rectángulo/óvalo en Tools; color, borde y radio en el Inspector.</td></tr>
+<tr><td>Vídeo / Audio</td><td class="d">Importar MP4/WebM o MP3/WAV; el audio se lanza con la acción «reproducir sonido».</td></tr>
+<tr><td>Botón</td><td class="d"><b>Insertar ▸ ▭ Botón</b>: texto ES/EN, color, interactivo (toque/clic).</td></tr>
+<tr><td>Carta / Quiosco</td><td class="d"><b>Carta ▸ Carta de ejemplo</b> o <b>Importar carta (.json)</b>: un miembro de datos (menu.json) que alimenta las vistas del quiosco.</td></tr></table></div><div lang="en"><p>The Cast is the project library. Each member can be reused by several sprites:</p>
+<table><tr><th>Type</th><th>How to create it</th></tr>
+<tr><td>Bitmap</td><td class="d">Import PNG/JPG/WebP/SVG, or bring it from Pixeria (see Ecosystem).</td></tr>
+<tr><td>Text</td><td class="d">T tool in Tools or <b>Insert ▸ T Label</b>; ES and EN texts.</td></tr>
+<tr><td>Shape</td><td class="d">Rectangle/oval in Tools; colour, border and radius in the Inspector.</td></tr>
+<tr><td>Video / Audio</td><td class="d">Import MP4/WebM or MP3/WAV; audio plays with the “play sound” action.</td></tr>
+<tr><td>Button</td><td class="d"><b>Insert ▸ ▭ Button</b>: ES/EN text, colour, interactive (tap/click).</td></tr>
+<tr><td>Menu / Kiosk</td><td class="d"><b>Menu ▸ Sample menu</b> or <b>Import menu (.json)</b>: a data member (menu.json) feeding the kiosk views.</td></tr></table></div></section><section id="stage"><h2><span lang="es">Stage (escenario)</span><span lang="en">Stage</span></h2><div lang="es"><p>WYSIWYG: lo que ves es lo que se publica. Selecciona con clic, mueve arrastrando, cambia el tamaño con la esquina, borra con <kbd>Supr</kbd>. Reglas en píxeles reales. Resoluciones: 1920×1080, 1080×1920 y más en el chip de tamaño (también desde <code>window.ainStageSize</code>). Al arrastrar en un fotograma con keyframes se actualiza el keyframe de ese fotograma.</p></div><div lang="en"><p>WYSIWYG: what you see is what gets published. Click to select, drag to move, resize from the corner, <kbd>Delete</kbd> removes. Rulers in real pixels. Resolutions: 1920×1080, 1080×1920 and more from the size chip. Dragging on a keyframed frame updates that frame's keyframe.</p></div></section><section id="score"><h2><span lang="es">Score (Timeline)</span><span lang="en">Score (Timeline)</span></h2><div lang="es"><p>La línea de tiempo con <b>canales</b> (un sprite por canal: imágenes, texto, formas, botones y vistas del quiosco), <b>fotogramas</b> y <b>marcas</b>. Cada marca es una «pantalla» a la que se salta con <i>ir a marca</i>. <b>Insertar ▸ 🚩 Nueva pantalla (marca)</b> crea marca + tramo. Un sprite solo se ve entre su fotograma de inicio y su final (exclusivo). Transporte: <b>Rebobinar</b>, <b>Play</b>, <b>Stop</b>.</p></div><div lang="en"><p>The timeline with <b>channels</b> (one sprite per channel: images, text, shapes, buttons and kiosk views), <b>frames</b> and <b>markers</b>. Each marker is a “screen” you jump to with <i>go to marker</i>. <b>Insert ▸ 🚩 New screen (marker)</b> creates marker + span. A sprite is only visible from its start frame up to (not including) its end frame. Transport: <b>Rewind</b>, <b>Play</b>, <b>Stop</b>.</p></div></section><section id="inspector"><h2><span lang="es">Inspector de propiedades</span><span lang="en">Property Inspector</span></h2><div lang="es"><p>Panel estilo Director para <b>todo tipo de sprite</b> (bitmap, texto, forma, vídeo, botón, quiosco): <b>Sprite</b> (nombre, que es como lo llaman los scripts), <b>Geometría</b> (x, y, ancho, alto, rotación, opacidad), <b>Tiempo</b> (inicio, duración), <b>Keyframes</b> (añadir/quitar en el fotograma actual, con interpolación), y lo propio del tipo (texto ES/EN, color, tamaño de letra, radio, interactivo, vista del quiosco). El botón <b>✎ Comportamiento · Admingo</b> abre el script de ese sprite.</p></div><div lang="en"><p>A Director-style panel for <b>every sprite type</b> (bitmap, text, shape, video, button, kiosk): <b>Sprite</b> (name, which is how scripts refer to it), <b>Geometry</b> (x, y, width, height, rotation, opacity), <b>Timing</b> (start, duration), <b>Keyframes</b> (add/remove at the current frame, interpolated), and type-specific fields (ES/EN text, colour, font size, radius, interactive, kiosk view). <b>✎ Behaviour · Admingo</b> opens that sprite's script.</p></div></section><section id="behaviour"><h2><span lang="es">Behaviour · reglas XPL</span><span lang="en">Behaviour · XPL rules</span></h2><div lang="es"><p>Comportamiento sin código: reglas <b>CUANDO → ENTONCES</b> en la ventana Behaviour (<b>+ Regla</b>). Hechos (CUANDO): clic/toque en un sprite, marca alcanzada, segundos sin tocar, variable, pedido pagado, artículos en el carrito… Acciones (ENTONCES): ir a marca, ir a fotograma, parar, fijar variable (<code>nombre=valor</code>), mostrar/ocultar, cambiar texto, reproducir sonido, añadir al carrito, vaciar carrito, abrir pago, pagar en barra. Se guardan en <code>rules.json</code>.</p></div><div lang="en"><p>No-code behaviour: <b>WHEN → THEN</b> rules in the Behaviour window (<b>+ Rule</b>). Facts (WHEN): click/tap on a sprite, marker reached, idle seconds, variable, order paid, cart count… Actions (THEN): go to marker, go to frame, stop, set variable (<code>name=value</code>), show/hide, set text, play sound, add to cart, clear cart, open checkout, pay at counter. Saved in <code>rules.json</code>.</p></div></section><section id="admingo"><h2><span lang="es">Admingo (scripts)</span><span lang="en">Admingo (scripts)</span></h2><div lang="es"><p>El «Lingo» de AdmiraNeXT, en español o inglés y mezclables: <code>al soltar</code> / <code>on mouseUp</code>, <code>ir a marca "CARRITO"</code> / <code>go to marker "CART"</code>, <code>decir "¡Gracias!"</code> / <code>say</code>. Se escribe en <b>Ventana ▸ Script · Admingo</b> (<kbd>Ctrl</kbd>+<kbd>0</kbd>) con resaltado, autocompletado (<kbd>Tab</kbd>), errores por línea y botón ES⇄EN. Ámbitos: película, fotograma/marca y sprite; los eventos van sprite → fotograma → película (<code>pasar</code>/<code>pass</code>). Sin <code>eval</code>: intérprete con sandbox; lo simple se compila a reglas XPL. Si una regla y un script atienden el mismo evento, gana el script. Manual completo: <a href="/help/admingo.html">/help/admingo.html</a>.</p></div><div lang="en"><p>AdmiraNeXT's “Lingo”, in Spanish or English, mixable: <code>on mouseUp</code> / <code>al soltar</code>, <code>go to marker "CART"</code>, <code>say "Thanks!"</code>. Write it in <b>Window ▸ Script · Admingo</b> (<kbd>Ctrl</kbd>+<kbd>0</kbd>) with highlighting, autocomplete (<kbd>Tab</kbd>), line-numbered errors and an ES⇄EN button. Scopes: movie, frame/marker and sprite; events flow sprite → frame → movie (<code>pass</code>). No <code>eval</code>: sandboxed interpreter; simple handlers compile to XPL rules. If a rule and a script handle the same event, the script wins. Full manual: <a href="/help/admingo.html">/help/admingo.html</a>.</p></div></section><section id="mensaje"><h2><span lang="es">Ventana Mensaje</span><span lang="en">Message window</span></h2><div lang="es"><p><b>Ventana ▸ Mensaje · Admingo</b> (<kbd>Ctrl</kbd>+<kbd>M</kbd>): consola en vivo durante Play. Escribe una línea (<code>put the cartCount</code>, <code>ir a marca "INICIO"</code>) y pulsa <kbd>Intro</kbd>; <kbd>↑</kbd>/<kbd>↓</kbd> recorren el historial. También muestra lo que los scripts escriben con <code>put</code> y los errores en ejecución.</p></div><div lang="en"><p><b>Window ▸ Message · Admingo</b> (<kbd>Ctrl</kbd>+<kbd>M</kbd>): a live console during Play. Type a line (<code>put the cartCount</code>, <code>go to marker "INICIO"</code>) and press <kbd>Enter</kbd>; <kbd>↑</kbd>/<kbd>↓</kbd> browse history. It also shows script <code>put</code> output and runtime errors.</p></div></section><section id="plantillas"><h2><span lang="es">Plantillas</span><span lang="en">Templates</span></h2><div lang="es"><p><b>Plantillas ▸ 🛒 Quiosco de pedidos</b>: tótem vertical 1080×1920 con atracción → categorías → producto con tamaño → carrito → pago QR simulado → número de pedido → vuelta al inicio tras 12 s sin tocar. Toda la lógica está en Admingo y se puede editar. También: <code>/studio.html?plantilla=quiosco</code>. <b>Exportar proyecto (.json)</b> guarda tu versión; <b>Archivo ▸ Abrir JSON</b> la recupera.</p></div><div lang="en"><p><b>Templates ▸ 🛒 Ordering kiosk</b>: a 1080×1920 vertical totem with attract → categories → item with size → cart → simulated QR payment → order number → back to start after 12 s idle. All logic is editable Admingo. Also: <code>/studio.html?plantilla=quiosco</code>. <b>Export project (.json)</b> saves your version; <b>File ▸ Open JSON</b> loads it back.</p></div></section><section id="publicar"><h2><span lang="es">Publicar Xperiencia</span><span lang="en">Publish Xperience</span></h2><div lang="es"><p><b>Publicar Xperiencia</b> descarga un ZIP autónomo: <code>index.html</code> (reproductor), <code>plan.json</code> (cast, score, marcas, stage), <code>rules.json</code> (XPL), y si hace falta <code>menu.json</code>, <code>scripts.admingo</code> + <code>admingo.js</code>, <code>kiosk-sprite.js</code> y <code>qrcode.min.js</code>. Funciona en cualquier hosting estático, en un player de admira.tv o en el tótem del gemelo. Idioma con <code>?lang=es|en</code>.</p></div><div lang="en"><p><b>Publish Xperience</b> downloads a self-contained ZIP: <code>index.html</code> (player), <code>plan.json</code> (cast, score, markers, stage), <code>rules.json</code> (XPL), and when needed <code>menu.json</code>, <code>scripts.admingo</code> + <code>admingo.js</code>, <code>kiosk-sprite.js</code> and <code>qrcode.min.js</code>. It runs on any static host, an admira.tv player or the twin's totem. Language via <code>?lang=es|en</code>.</p></div></section><section id="quiosco"><h2><span lang="es">Quiosco y menu.json</span><span lang="en">Kiosk and menu.json</span></h2><div lang="es"><p>La carta es un JSON con esquema público <a href="/xperiencias/kiosko-pedido/menu.schema.json">menu.schema.json</a>: <code>establishment</code> (id, nombre, tipo, moneda), <code>categories</code>, <code>items</code> (con grupos de opciones como tamaño o leche y su suplemento), <code>orderFlow</code>. Textos <code>{es,en}</code>. Ejemplo: <a href="/xperiencias/kiosko-pedido/menu.starbucks.json">menu.starbucks.json</a> (precios ficticios). Pieza viva: <a href="/starbucks">ainimation.studio/starbucks</a>. Los agentes la validan con la herramienta MCP <code>menu_validar</code>.</p></div><div lang="en"><p>The menu is JSON with a public schema, <a href="/xperiencias/kiosko-pedido/menu.schema.json">menu.schema.json</a>: <code>establishment</code> (id, name, type, currency), <code>categories</code>, <code>items</code> (with option groups such as size or milk and their surcharge), <code>orderFlow</code>. Texts are <code>{es,en}</code>. Sample: <a href="/xperiencias/kiosko-pedido/menu.starbucks.json">menu.starbucks.json</a> (fictional prices). Live piece: <a href="/starbucks">ainimation.studio/starbucks</a>. Agents validate it with the MCP tool <code>menu_validar</code>.</p></div></section><section id="pago"><h2><span lang="es">Pago (simulado)</span><span lang="en">Payment (simulated)</span></h2><div lang="es"><div class="nota"><b>Demo simulada:</b> no hay TPV real, ni dinero real, ni campos de tarjeta. Nunca.</div>
+<p>«Pagar» muestra un QR que abre <code>pago-simulado.html</code> en el móvil (o en una ventana). Al confirmar, el quiosco recibe el pago por <code>BroadcastChannel("kiosko-pedido")</code>, <code>localStorage "kiosko:pago"</code> o <code>postMessage</code> y muestra el número de pedido (A001, A002…). «Pagar en barra» genera el pedido sin pago. La ventana <b>Payment</b> del Studio sirve para revisar esta configuración (opcional).</p></div><div lang="en"><div class="nota"><b>Simulated demo:</b> no real POS, no real money and no card fields. Ever.</div>
+<p>“Pay” shows a QR that opens <code>pago-simulado.html</code> on the phone (or a window). On confirm, the kiosk receives the payment through <code>BroadcastChannel("kiosko-pedido")</code>, <code>localStorage "kiosko:pago"</code> or <code>postMessage</code> and shows the order number (A001, A002…). “Pay at counter” creates the order without payment. The Studio's <b>Payment</b> window reviews this setup (optional).</p></div></section><section id="ecosistema"><h2><span lang="es">Ecosistema Admira</span><span lang="en">Admira Ecosystem</span></h2><div lang="es"><p>ainimation.studio <b>crea</b>; el resto de la Galaxia guarda, opera, emite, coordina y mide. Cada pieza se conecta por identificadores compartidos y por MCP (<a href="https://www.xpaceos.com/mcp/galaxia.json">registro de la Galaxia</a>).</p>
+<table><tr><th>Sitio</th><th>Integración</th><th>Estado</th></tr>
+<tr><td><b>Pixeria / admira.studio</b></td><td class="d">Contenido de stock al Cast: busca en Pixeria (MCP <code>search_stock</code>) y trae la imagen/vídeo por su URL a <b>Importar</b>. Al revés, <code>xperiencia_publicar</code> lleva una Xperiencia al stock (clave de flota).</td><td><span class="estado vivo">vivo</span></td></tr>
+<tr><td><b>admira.tv</b></td><td class="d">Una Xperiencia se emite como item de playlist <code>{"type":"interactive","url":…}</code> (botón «Emit on admira.tv» de la galería o MCP <code>enviar_a_admiratv</code>). Envío directo desde el MCP: próximamente; hoy se añade con XpaceOS <code>playlist_add</code> o el CMS.</td><td><span class="estado vivo">item vivo</span> <span class="estado pronto">envío próximamente</span></td></tr>
+<tr><td><b>XpaceOS / admira.store</b></td><td class="d">En el gemelo, Experto: <code>/totem kiosko</code> pone el Quiosco de pedido en el tótem vertical; <code>/totem url https://…</code> cualquier Xperiencia; <code>/totem off</code> lo quita. MCP <code>fijar_en_totem</code> te da el comando y el enlace.</td><td><span class="estado vivo">vivo</span></td></tr>
+<tr><td><b>Marca · /marca</b></td><td class="d">Marca blanca del catálogo de admiranext (<a href="https://www.admiranext.com/marcablanca/clientes/index.json">marcablanca</a>): <code>?marca=starbucks</code> en la pieza y <code>/marca starbucks</code> en el gemelo. MCP <code>marca_aplicar</code>.</td><td><span class="estado vivo">vivo</span></td></tr>
+<tr><td><b>admira.app / Yokup</b></td><td class="d">Dispositivos (el tótem, la pantalla) e incidencias ITIL viven en admira.app/Yokup; el trabajo hecho aquí se declara en Yokup (yokup_alta / yokup_paso).</td><td><span class="estado vivo">vivo</span></td></tr>
+<tr><td><b>admira.biz / clearchannel.tv</b></td><td class="d">Circuitos de pantallas: la Xperiencia emitida en admira.tv se planifica por circuito y se cruza con audiencia.</td><td><span class="estado pronto">vía admira.tv</span></td></tr></table>
+<h3 id="contrato">Contrato postMessage (pedidos y voz)</h3>
+<p>Solo se aceptan mensajes del origen <code>https://www.ainimation.studio</code>.</p>
+<pre>// pieza → anfitrión (gemelo): pedido creado/pagado
+{source:"ainimation-xperiencia", event:"order", order:{id, number, status, lines, total, currency, simulated:true}}
+// pieza → anfitrión: que hable el avatar del tótem (Admingo «decir» / «say»)
+{source:"admingo", type:"say", id, text, lang:"es-ES"|"en-GB"}
+// anfitrión → pieza (≤ 500 ms): acuse; sin él, la pieza usa la voz del navegador
+{source:"xpaceos-totem", type:"say-ack", id, spoken, via}</pre></div><div lang="en"><p>ainimation.studio <b>creates</b>; the rest of the Galaxy stores, operates, broadcasts, coordinates and measures. Pieces connect through shared identifiers and MCP (<a href="https://www.xpaceos.com/mcp/galaxia.json">Galaxy registry</a>).</p>
+<table><tr><th>Site</th><th>Integration</th><th>Status</th></tr>
+<tr><td><b>Pixeria / admira.studio</b></td><td class="d">Stock content into the Cast: search Pixeria (MCP <code>search_stock</code>) and bring the image/video URL into <b>Import</b>. The other way, <code>xperiencia_publicar</code> pushes an Xperience to stock (fleet key).</td><td><span class="estado vivo">live</span></td></tr>
+<tr><td><b>admira.tv</b></td><td class="d">An Xperience airs as a playlist item <code>{"type":"interactive","url":…}</code> (gallery “Emit on admira.tv” or MCP <code>enviar_a_admiratv</code>). Direct push from the MCP: coming soon; today add it with XpaceOS <code>playlist_add</code> or the CMS.</td><td><span class="estado vivo">item live</span> <span class="estado pronto">push soon</span></td></tr>
+<tr><td><b>XpaceOS / admira.store</b></td><td class="d">In the twin, Expert: <code>/totem kiosko</code> pins the ordering kiosk on the vertical totem; <code>/totem url https://…</code> any Xperience; <code>/totem off</code> removes it. MCP <code>fijar_en_totem</code> gives command and link.</td><td><span class="estado vivo">live</span></td></tr>
+<tr><td><b>Brand · /marca</b></td><td class="d">White label from the admiranext catalogue (<a href="https://www.admiranext.com/marcablanca/clientes/index.json">marcablanca</a>): <code>?marca=starbucks</code> in the piece and <code>/marca starbucks</code> in the twin. MCP <code>marca_aplicar</code>.</td><td><span class="estado vivo">live</span></td></tr>
+<tr><td><b>admira.app / Yokup</b></td><td class="d">Devices (the totem, the screen) and ITIL incidents live in admira.app/Yokup; work done here is declared in Yokup (yokup_alta / yokup_paso).</td><td><span class="estado vivo">live</span></td></tr>
+<tr><td><b>admira.biz / clearchannel.tv</b></td><td class="d">Screen circuits: the Xperience aired on admira.tv is scheduled per circuit and crossed with audience.</td><td><span class="estado pronto">via admira.tv</span></td></tr></table>
+<h3>postMessage contract (orders and voice)</h3>
+<p>Only messages from origin <code>https://www.ainimation.studio</code> are accepted.</p>
+<pre>// piece → host (twin): order created/paid
+{source:"ainimation-xperiencia", event:"order", order:{id, number, status, lines, total, currency, simulated:true}}
+// piece → host: make the totem avatar speak (Admingo "say")
+{source:"admingo", type:"say", id, text, lang:"es-ES"|"en-GB"}
+// host → piece (≤ 500 ms): ack; without it the piece uses browser speech
+{source:"xpaceos-totem", type:"say-ack", id, spoken, via}</pre></div></section><section id="agentes"><h2><span lang="es">Para los agentes (MCP)</span><span lang="en">For agents (MCP)</span></h2><div lang="es"><p>Un agente no necesita abrir esta web: habla con <code>https://mcp-ainimation.admira.store/mcp</code> (Streamable HTTP). Herramientas, estado vivo/próximamente y ejemplos en <a href="/mcp/">ainimation.studio/mcp</a> (JSON: <a href="/mcp/manifest.json">manifest.json</a>).</p></div><div lang="en"><p>Agents don't need this page: they talk to <code>https://mcp-ainimation.admira.store/mcp</code> (Streamable HTTP). Tools, live/coming-soon status and examples at <a href="/mcp/">ainimation.studio/mcp</a> (JSON: <a href="/mcp/manifest.json">manifest.json</a>).</p></div></section><section id="problemas"><h2><span lang="es">Si algo se rompe</span><span lang="en">If something breaks</span></h2><div lang="es"><p>Avísalo en el grupo <b>AgoraMatrix</b> de Telegram: qué esperabas ver y en qué ventana estabas. Responsable en el censo de Yokup: SmithMacMini. Esto es una web estática: se publica al fusionar en <code>main</code>; el sello de abajo dice qué versión ves (pasa el ratón para ver las novedades).</p></div><div lang="en"><p>Report it in the <b>AgoraMatrix</b> Telegram group: what you expected and which window you were in. Owner in the Yokup census: SmithMacMini. This is a static site published on merge to <code>main</code>; the seal below tells you which version you see (hover for what's new).</p></div></section>
   <footer>
-    ainimation.studio/help · la puerta de carbono · para agentes,
-    <a href="/mcp/">ainimation.studio/mcp</a> · esta página existe por la regla 24 de la
-    <a href="https://www.admiranext.com/normativa">normativa</a> · <span data-studio-version>v.07.10.2026.r5.09:53</span>
+    ainimation.studio/help · <span lang="es">la puerta de carbono · para agentes,</span><span lang="en">the carbon door · for agents,</span>
+    <a href="/mcp/">ainimation.studio/mcp</a> · <span lang="es">regla 24 de la</span><span lang="en">rule 24 of the</span>
+    <a href="https://www.admiranext.com/normativa">normativa</a> · <span data-studio-version>v.07.10.2026.r6.10:17</span>
   </footer>
 </div>
+<script>
+(function(){var d=document.documentElement,q=new URLSearchParams(location.search).get('lang'),s=null;try{s=localStorage.getItem('ain-help-lang')}catch(e){}
+function set(l){l=l==='en'?'en':'es';d.dataset.l=l;d.lang=l;document.querySelectorAll('.lg button').forEach(function(b){b.setAttribute('aria-pressed',String(b.dataset.l===l))});try{localStorage.setItem('ain-help-lang',l)}catch(e){}}
+set(q||s||((navigator.language||'es').slice(0,2)==='en'?'en':'es'));
+document.querySelectorAll('.lg button').forEach(function(b){b.onclick=function(){set(b.dataset.l)}});})();
+</script>
+<script defer src="https://www.admiranext.com/assets/sello-novedades.js?v=20261006-sello-1"></script>
 </body>
 </html>

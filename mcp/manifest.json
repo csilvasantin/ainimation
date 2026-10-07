@@ -2,7 +2,7 @@
   "name": "ainimation-studio",
   "title": "AInimation Studio · ainimation.studio — Admira Director for the AI era",
   "description": "MCP hub for ainimation.studio, the authoring layer of the AdmiraNeXT suite: director-style animation work rebuilt with AI, through three doors — Author, Generate, Control. This page is the machine-readable side; there is no public API yet and this manifest says so instead of inventing one.",
-  "version": "v.07.10.2026.r5.09:53",
+  "version": "v.07.10.2026.r6.10:17",
   "site": "https://www.ainimation.studio",
   "hub": "https://www.ainimation.studio/mcp/",
   "llms_txt": "https://www.ainimation.studio/mcp/llms.txt",
@@ -12,46 +12,124 @@
     "telegram_group": "AgoraMatrix",
     "signature": "NeoMBP16 · MacBookPro16"
   },
-  "estado": "Puerta de silicio con servidor propio desde el 8-sep-2026 (Carlos, ventana 0124 · vía 3): las Xperiencias del estudio como herramientas MCP. El sitio sigue siendo una web estática (GitHub Pages, rama main); el servidor MCP es un worker aparte en admira.store que lee el sitio y escribe en Pixeria. Todavía no hay API HTTP propia: lo que hay es el MCP.",
+  "estado": "Puerta de silicio con servidor propio desde el 8-sep-2026 (Carlos, ventana 0124 · vía 3): las Xperiencias del estudio como herramientas MCP. El sitio sigue siendo una web estática (GitHub Pages, rama main); el servidor MCP es un worker aparte en admira.store que lee el sitio y escribe en Pixeria. Todavía no hay API HTTP propia: lo que hay es el MCP. Desde el 7-oct-2026 el MCP también expone el Director (plantillas, crear_proyecto), Admingo (validar/compilar), la carta del quiosco (menu_validar), admira.tv (enviar_a_admiratv), el tótem del gemelo (fijar_en_totem) y la marca blanca (marca_aplicar).",
   "http_api": null,
   "mcp_server": {
     "name": "ainimation-mcp",
     "endpoint": "https://mcp-ainimation.admira.store/mcp",
     "transport": "streamable-http",
     "salud": "https://mcp-ainimation.admira.store/salud",
-    "auth": "lecturas abiertas; xperiencia_publicar con clave de flota AdmiraNeXT (Authorization: Bearer), identidad derivada como en mcp.admira.store",
+    "auth": "lecturas y cálculos abiertos; xperiencia_publicar y publicar_xperiencia(pixeria:true) con clave de flota AdmiraNeXT (Authorization: Bearer), identidad derivada como en mcp.admira.store",
     "code": "https://github.com/csilvasantin/ainimation/tree/main/mcp/server",
     "tools": [
       {
         "name": "quien_soy",
-        "desc": "con qué identidad entras (clave de flota → persona y equipo) o anónimo de solo lectura"
+        "desc": "con qué identidad entras (clave de flota → persona y equipo) o anónimo de solo lectura",
+        "estado": "vivo"
       },
       {
         "name": "sitio_estado",
-        "desc": "sello vivo del sitio y si responden /help, /mcp y el índice de Xperiencias"
+        "desc": "sello vivo del sitio y si responden /help, /mcp y el índice de Xperiencias",
+        "estado": "vivo"
       },
       {
         "name": "xperiencias_listar",
-        "desc": "las Xperiencias publicadas, con duración, fps, marcadores y URL viva (fuente: /xperiencias/index.json)"
+        "desc": "las Xperiencias publicadas, con duración, fps, marcadores y URL viva (fuente: /xperiencias/index.json)",
+        "estado": "vivo"
       },
       {
         "name": "xperiencia_detalle",
-        "desc": "plan.json (cast, score, marcadores) y rules.json (reglas XPL) de una Xperiencia"
+        "desc": "plan.json (cast, score, marcadores) y rules.json (reglas XPL) de una Xperiencia",
+        "estado": "vivo"
       },
       {
         "name": "xperiencia_canal_item",
-        "desc": "el JSON de item de canal que admira.tv entiende para emitirla (el mismo que copia la galería)"
+        "desc": "el JSON de item de canal que admira.tv entiende para emitirla (el mismo que copia la galería)",
+        "estado": "vivo"
       },
       {
         "name": "stock_animaciones",
-        "desc": "lo que ainimation ya publicó en el stock de Pixeria"
+        "desc": "lo que ainimation ya publicó en el stock de Pixeria",
+        "estado": "vivo"
       },
       {
         "name": "xperiencia_publicar",
-        "desc": "ESCRITURA · clave de flota: lleva una Xperiencia al stock de Pixeria (api.admira.store/stock/publish)"
+        "desc": "ESCRITURA · clave de flota: lleva una Xperiencia al stock de Pixeria (api.admira.store/stock/publish)",
+        "estado": "vivo"
+      },
+      {
+        "name": "listar_xperiencias",
+        "estado": "vivo",
+        "desc": "nombre de suite de xperiencias_listar: Xperiencias publicadas con URL viva"
+      },
+      {
+        "name": "plantillas",
+        "estado": "vivo",
+        "desc": "plantillas del Director (Quiosco de pedidos 1080×1920, proyecto vacío) con el enlace que las abre"
+      },
+      {
+        "name": "crear_proyecto",
+        "estado": "vivo",
+        "desc": "proyecto del Director {format:'ainimation-project', plan} desde una plantilla, para Archivo → Abrir JSON"
+      },
+      {
+        "name": "validar_admingo",
+        "estado": "vivo",
+        "desc": "errores Admingo con línea y columna (ES/EN), mismo compilador que el Studio"
+      },
+      {
+        "name": "compilar_admingo",
+        "estado": "vivo",
+        "desc": "Admingo → reglas XPL (origin admingo) + manejadores para la VM con sandbox"
+      },
+      {
+        "name": "publicar_xperiencia",
+        "estado": "vivo",
+        "desc": "URL viva + ficheros (index.html, plan.json, rules.json, menu.json) + item admira.tv; pixeria:true lo lleva al stock (clave de flota). ZIP desde el MCP: próximamente (hoy, botón Publicar Xperiencia del Studio)"
+      },
+      {
+        "name": "menu_validar",
+        "estado": "vivo",
+        "desc": "valida una carta contra /xperiencias/kiosko-pedido/menu.schema.json y su coherencia"
+      },
+      {
+        "name": "enviar_a_admiratv",
+        "estado": "vivo",
+        "desc": "item de playlist type interactive + relevo a XpaceOS playlist_add; envío directo: próximamente"
+      },
+      {
+        "name": "fijar_en_totem",
+        "estado": "vivo",
+        "desc": "comando del gemelo (/totem kiosko · /totem url …) y enlace al gemelo con el quiosco"
+      },
+      {
+        "name": "marca_aplicar",
+        "estado": "vivo",
+        "desc": "ficha de marcablanca de admiranext → URL con ?marca= y comando /marca del gemelo"
       }
     ],
-    "fuente_unica": "https://www.ainimation.studio/xperiencias/index.json"
+    "fuente_unica": "https://www.ainimation.studio/xperiencias/index.json",
+    "tool_count": 17,
+    "proximamente": [
+      {
+        "que": "ZIP de publicar_xperiencia generado por el servidor",
+        "hoy": "Studio → Publicar Xperiencia descarga el ZIP"
+      },
+      {
+        "que": "enviar_a_admiratv con envío directo al canal",
+        "hoy": "el item + XpaceOS playlist_add (clave de flota) o el CMS de admira.tv"
+      },
+      {
+        "que": "API HTTP propia del sitio",
+        "hoy": "no existe; solo este MCP (http_api: null)"
+      }
+    ],
+    "como_corre": {
+      "codigo": "mcp/server (Cloudflare Worker, Node ≥ 22 para wrangler)",
+      "probar": "cd mcp/server && npm ci && npm test",
+      "desplegar": "cd mcp/server && npx wrangler deploy (ruta propia mcp-ainimation.admira.store)",
+      "compilador_admingo": "importa el mismo /assets/admingo.js del sitio"
+    }
   },
   "que_hay_hoy": [
     {
@@ -77,6 +155,14 @@
     {
       "ruta": "/help/",
       "desc": "La puerta para personas (regla 24)."
+    },
+    {
+      "ruta": "/plantillas/quiosco-de-pedidos.json",
+      "desc": "El proyecto de la plantilla «Quiosco de pedidos» (lo sirve crear_proyecto)."
+    },
+    {
+      "ruta": "/help/admingo.html",
+      "desc": "Manual de Admingo, el Lingo de AdmiraNeXT."
     }
   ],
   "donde_esta_el_dato": {
@@ -108,5 +194,56 @@
       "name": "admiranext.com",
       "hub": "https://www.admiranext.com/mcp/"
     }
-  ]
+  ],
+  "ecosistema": {
+    "registro_galaxia": "https://www.xpaceos.com/mcp/galaxia.json",
+    "directorio_suite": "https://www.admiranext.com/mcp/#directorio",
+    "crear_contenido": {
+      "sitio": "https://www.pixeria.com",
+      "mcp": "https://mcp-pixeria.admira.store/mcp",
+      "herramienta": "search_stock",
+      "en_ainimation": "URL del asset → Studio Importar al Cast"
+    },
+    "emitir": {
+      "sitio": "https://admira.tv",
+      "mcp": "https://mcp-tv.admira.store/mcp",
+      "item": {
+        "type": "interactive"
+      },
+      "herramienta_aqui": "enviar_a_admiratv"
+    },
+    "tótem_gemelo": {
+      "sitios": [
+        "https://www.xpaceos.com/admira-xp/",
+        "https://admira.store/admira-xp/"
+      ],
+      "comandos": [
+        "/totem kiosko",
+        "/totem url https://…",
+        "/totem off"
+      ],
+      "herramienta_aqui": "fijar_en_totem"
+    },
+    "marca": {
+      "catalogo": "https://www.admiranext.com/marcablanca/clientes/index.json",
+      "pieza": "?marca=<id>",
+      "gemelo": "/marca <id>",
+      "herramienta_aqui": "marca_aplicar"
+    },
+    "dispositivos_itil": {
+      "sitios": [
+        "https://admira.app",
+        "https://www.yokup.com"
+      ]
+    },
+    "circuitos": {
+      "sitio": "https://www.admira.biz",
+      "via": "admira.tv"
+    },
+    "postmessage": {
+      "origen": "https://www.ainimation.studio",
+      "pedido": "{source:'ainimation-xperiencia', event:'order', order}",
+      "voz": "{source:'admingo'|'ainimation-xperiencia', type:'say', id, text, lang} → {source:'xpaceos-totem', type:'say-ack', id, spoken, via} (≤500 ms; sin acuse, voz del navegador es-ES/en-GB)"
+    }
+  }
 }

@@ -28,6 +28,8 @@
     td.d{color:var(--muted)}
     .nota{margin:16px 0;padding:14px 16px;border-left:3px solid var(--gold);background:var(--panel);color:var(--muted)}
     .nota b{color:var(--ink)}
+    .estado{font:10px var(--mono);letter-spacing:.08em;text-transform:uppercase;padding:2px 7px;border-radius:999px;border:1px solid var(--line2);white-space:nowrap}.vivo{background:#e7ffd0}.pronto{background:#fff1cf}
+    pre{font:12.5px/1.5 var(--mono);background:#17120f;color:#f5eee2;border-radius:10px;padding:12px 14px;overflow:auto}
     footer{margin-top:44px;padding-top:16px;border-top:1px solid var(--line);color:var(--muted);font:11px var(--mono)}
   </style>
 </head>
@@ -53,26 +55,67 @@
 
   <h2>Servidor MCP · <code>mcp-ainimation.admira.store</code></h2>
   <p>Desde el 8 de septiembre de 2026 este dominio tiene puerta de silicio de verdad: un servidor
-  MCP (Streamable HTTP) que expone las Xperiencias del estudio. Endpoint
+  MCP (Streamable HTTP) que expone las Xperiencias del estudio y, desde el 7 de octubre, el Director (plantillas, proyectos), Admingo, la carta del quiosco, admira.tv, el tótem del gemelo y la marca blanca: <b>17 herramientas</b>. Endpoint
   <code>https://mcp-ainimation.admira.store/mcp</code> · salud <code>/salud</code> · código en
   <a href="https://github.com/csilvasantin/ainimation/tree/main/mcp/server">mcp/server</a>.
   Las lecturas van sin clave; <code>xperiencia_publicar</code> exige la clave de flota AdmiraNeXT
   (<code>Authorization: Bearer</code>, la misma que <a href="https://www.xpaceos.com/mcp/">mcp.admira.store</a>).</p>
   <table>
-    <tr><th>Herramienta</th><th>Qué hace</th></tr>
-        <tr><td><code>quien_soy</code></td><td class="d">con qué identidad entras (clave de flota → persona y equipo) o anónimo de solo lectura</td></tr>
-        <tr><td><code>sitio_estado</code></td><td class="d">sello vivo del sitio y si responden /help, /mcp y el índice de Xperiencias</td></tr>
-        <tr><td><code>xperiencias_listar</code></td><td class="d">las Xperiencias publicadas, con duración, fps, marcadores y URL viva (fuente: /xperiencias/index.json)</td></tr>
-        <tr><td><code>xperiencia_detalle</code></td><td class="d">plan.json (cast, score, marcadores) y rules.json (reglas XPL) de una Xperiencia</td></tr>
-        <tr><td><code>xperiencia_canal_item</code></td><td class="d">el JSON de item de canal que admira.tv entiende para emitirla (el mismo que copia la galería)</td></tr>
-        <tr><td><code>stock_animaciones</code></td><td class="d">lo que ainimation ya publicó en el stock de Pixeria</td></tr>
-        <tr><td><code>xperiencia_publicar</code> <span class="tag">clave</span></td><td class="d">ESCRITURA · clave de flota: lleva una Xperiencia al stock de Pixeria (api.admira.store/stock/publish)</td></tr>
+    <tr><th>Herramienta</th><th>Qué hace</th><th>Estado</th></tr>
+        <tr><td><code>quien_soy</code></td><td class="d">con qué identidad entras (clave de flota → persona y equipo) o anónimo de solo lectura</td><td><span class="estado vivo">vivo</span></td></tr>
+        <tr><td><code>sitio_estado</code></td><td class="d">sello vivo del sitio y si responden /help, /mcp y el índice de Xperiencias</td><td><span class="estado vivo">vivo</span></td></tr>
+        <tr><td><code>xperiencias_listar</code></td><td class="d">las Xperiencias publicadas, con duración, fps, marcadores y URL viva (fuente: /xperiencias/index.json)</td><td><span class="estado vivo">vivo</span></td></tr>
+        <tr><td><code>xperiencia_detalle</code></td><td class="d">plan.json (cast, score, marcadores) y rules.json (reglas XPL) de una Xperiencia</td><td><span class="estado vivo">vivo</span></td></tr>
+        <tr><td><code>xperiencia_canal_item</code></td><td class="d">el JSON de item de canal que admira.tv entiende para emitirla (el mismo que copia la galería)</td><td><span class="estado vivo">vivo</span></td></tr>
+        <tr><td><code>stock_animaciones</code></td><td class="d">lo que ainimation ya publicó en el stock de Pixeria</td><td><span class="estado vivo">vivo</span></td></tr>
+        <tr><td><code>xperiencia_publicar</code></td><td class="d">ESCRITURA · clave de flota: lleva una Xperiencia al stock de Pixeria (api.admira.store/stock/publish)</td><td><span class="tag">clave</span> <span class="estado vivo">vivo</span></td></tr>
+        <tr><td><code>listar_xperiencias</code></td><td class="d">nombre de suite de xperiencias_listar: Xperiencias publicadas con URL viva</td><td><span class="estado vivo">vivo</span></td></tr>
+        <tr><td><code>plantillas</code></td><td class="d">plantillas del Director (Quiosco de pedidos 1080×1920, proyecto vacío) con el enlace que las abre</td><td><span class="estado vivo">vivo</span></td></tr>
+        <tr><td><code>crear_proyecto</code></td><td class="d">proyecto del Director {format:&#x27;ainimation-project&#x27;, plan} desde una plantilla, para Archivo → Abrir JSON</td><td><span class="estado vivo">vivo</span></td></tr>
+        <tr><td><code>validar_admingo</code></td><td class="d">errores Admingo con línea y columna (ES/EN), mismo compilador que el Studio</td><td><span class="estado vivo">vivo</span></td></tr>
+        <tr><td><code>compilar_admingo</code></td><td class="d">Admingo → reglas XPL (origin admingo) + manejadores para la VM con sandbox</td><td><span class="estado vivo">vivo</span></td></tr>
+        <tr><td><code>publicar_xperiencia</code></td><td class="d">URL viva + ficheros (index.html, plan.json, rules.json, menu.json) + item admira.tv; pixeria:true lo lleva al stock (clave de flota). ZIP desde el MCP: próximamente (hoy, botón Publicar Xperiencia del Studio)</td><td><span class="estado vivo">vivo</span> <span class="estado pronto">parte próximamente</span></td></tr>
+        <tr><td><code>menu_validar</code></td><td class="d">valida una carta contra /xperiencias/kiosko-pedido/menu.schema.json y su coherencia</td><td><span class="estado vivo">vivo</span></td></tr>
+        <tr><td><code>enviar_a_admiratv</code></td><td class="d">item de playlist type interactive + relevo a XpaceOS playlist_add; envío directo: próximamente</td><td><span class="estado vivo">vivo</span> <span class="estado pronto">parte próximamente</span></td></tr>
+        <tr><td><code>fijar_en_totem</code></td><td class="d">comando del gemelo (/totem kiosko · /totem url …) y enlace al gemelo con el quiosco</td><td><span class="estado vivo">vivo</span></td></tr>
+        <tr><td><code>marca_aplicar</code></td><td class="d">ficha de marcablanca de admiranext → URL con ?marca= y comando /marca del gemelo</td><td><span class="estado vivo">vivo</span></td></tr>
   </table>
   <p>La lista de Xperiencias sale de <a href="/xperiencias/index.json">/xperiencias/index.json</a>, la
   misma fuente que pinta la <a href="/xperiencias/">galería</a>. El servidor no guarda estado: lee el
   sitio y escribe en el stock de Pixeria. Conectar desde Claude Code:
   <code>claude mcp add --transport http ainimation https://mcp-ainimation.admira.store/mcp</code>
   (con <code>--header "Authorization: Bearer …"</code> para publicar).</p>
+
+
+  <h2 id="proximamente">Próximamente (no existe todavía)</h2>
+  <ul>
+      <li><b>ZIP de publicar_xperiencia generado por el servidor</b> <span class="estado pronto">próximamente</span> — hoy: Studio → Publicar Xperiencia descarga el ZIP</li>
+      <li><b>enviar_a_admiratv con envío directo al canal</b> <span class="estado pronto">próximamente</span> — hoy: el item + XpaceOS playlist_add (clave de flota) o el CMS de admira.tv</li>
+      <li><b>API HTTP propia del sitio</b> <span class="estado pronto">próximamente</span> — hoy: no existe; solo este MCP (http_api: null)</li>
+  </ul>
+
+  <h2 id="como-corre">Cómo corre el servidor</h2>
+  <p>El sitio es estático (GitHub Pages). El MCP es un Cloudflare Worker aparte, en
+  <a href="https://github.com/csilvasantin/ainimation/tree/main/mcp/server">mcp/server</a>, que importa el mismo
+  <code>/assets/admingo.js</code> del Studio. Probar: <code>cd mcp/server &amp;&amp; npm ci &amp;&amp; npm test</code>.
+  Desplegar: <code>npx wrangler deploy</code> (Node ≥ 22; ruta propia <code>mcp-ainimation.admira.store</code>).</p>
+  <pre>curl -s -H 'Content-Type: application/json' -H 'Accept: application/json, text/event-stream' \
+  -d '{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"fijar_en_totem","arguments":{}}}' \
+  https://mcp-ainimation.admira.store/mcp</pre>
+
+  <h2 id="ecosistema">Ecosistema · con quién se habla</h2>
+  <table>
+    <tr><th>Elemento</th><th>Relevo</th></tr>
+    <tr><td>Pixeria / admira.studio</td><td class="d"><code>mcp-pixeria.admira.store · search_stock</code> → URL del asset → Studio Importar al Cast; <code>xperiencia_publicar</code> devuelve la pieza al stock.</td></tr>
+    <tr><td>admira.tv</td><td class="d"><code>enviar_a_admiratv</code> → item <code>type:"interactive"</code> → XpaceOS <code>playlist_add</code>; <code>mcp-tv.admira.store · on_air</code> lo comprueba.</td></tr>
+    <tr><td>XpaceOS / admira.store</td><td class="d"><code>fijar_en_totem</code> → <code>/totem kiosko</code> · <code>/totem url …</code> en Experto del gemelo.</td></tr>
+    <tr><td>Marca blanca</td><td class="d"><code>marca_aplicar</code> → <code>?marca=</code> en la pieza, <code>/marca</code> en el gemelo (catálogo de admiranext).</td></tr>
+    <tr><td>admira.app / Yokup</td><td class="d">dispositivos e ITIL; el trabajo se declara en yokup (<code>mcp.admira.live · yokup_paso</code>).</td></tr>
+    <tr><td>admira.biz / clearchannel.tv</td><td class="d">circuitos y audiencia, a través de admira.tv.</td></tr>
+  </table>
+  <p>Contrato postMessage (pedidos y voz del tótem) y manual para personas: <a href="/help/#ecosistema">/help · Ecosistema</a>.
+  Registro de la Galaxia: <a href="https://www.xpaceos.com/mcp/galaxia.json">xpaceos.com/mcp/galaxia.json</a> ·
+  directorio de la suite: <a href="https://www.admiranext.com/mcp/#directorio">admiranext.com/mcp</a>.</p>
 
   <h2>Qué hay hoy en este dominio</h2>
   <table>
@@ -81,6 +124,8 @@
         <tr><td><code>/studio.html</code></td><td class="d">El entorno de autoría — la interfaz completa (proyecto DirectorInteractivo).</td></tr>
         <tr><td><code>/xperiencias/</code></td><td class="d">La galería de Xperiencias (piezas interactivas) con preview en vivo y emisión a admira.tv.</td></tr>
         <tr><td><code>/xperiencias/index.json</code></td><td class="d">ÚNICA fuente de la galería y del MCP.</td></tr>
+        <tr><td><code>/help/</code></td><td class="d">Manual ES/EN del Director y del Ecosistema (personas).</td></tr>
+        <tr><td><code>/plantillas/quiosco-de-pedidos.json</code></td><td class="d">Proyecto de la plantilla «Quiosco de pedidos» (lo sirve crear_proyecto).</td></tr>
         <tr><td><code>/version.json</code></td><td class="d">El sello de la última publicación, con su firma agente · máquina.</td></tr>
   </table>
 
