@@ -1,9 +1,15 @@
-import test from 'node:test';
+import base from 'node:test';
 import assert from 'node:assert/strict';
-import { Client } from '@modelcontextprotocol/sdk/client/index.js';
-import { InMemoryTransport } from '@modelcontextprotocol/sdk/inMemory.js';
-import { crearServidor, manejar } from '../src/index.js';
-import { claveFlota } from '../src/identidad-flota.mjs';
+// Sin `npm ci` en mcp/server (p. ej. `node --test` desde la raíz del sitio) se SALTA en vez
+// de romper toda la batería: es un paquete aparte con sus propias dependencias.
+let Client, InMemoryTransport, crearServidor, manejar, claveFlota, SIN_SDK = false;
+try {
+  ({ Client } = await import('@modelcontextprotocol/sdk/client/index.js'));
+  ({ InMemoryTransport } = await import('@modelcontextprotocol/sdk/inMemory.js'));
+  ({ crearServidor, manejar } = await import('../src/index.js'));
+  ({ claveFlota } = await import('../src/identidad-flota.mjs'));
+} catch (e) { if (e?.code !== 'ERR_MODULE_NOT_FOUND') throw e; SIN_SDK = true; }
+const test = (name, ...rest) => (SIN_SDK ? base(name, { skip: 'faltan dependencias: npm ci en mcp/server' }, () => {}) : base(name, ...rest));
 
 const SITIO = 'https://sitio.test', STOCK = 'https://stock.test';
 const ENV = { SITIO, STOCK_API: STOCK, VERSION: 'v.08.09.2026.r1.12:00', MCP_FLOTA_SEED: 'semilla-de-prueba' };

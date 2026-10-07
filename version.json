@@ -1,22 +1,21 @@
 {
-  "version": "v.07.10.2026.r3.08:53",
-  "deployedAt": "2026-10-07T06:53:14Z",
+  "version": "v.07.10.2026.r4.09:07",
+  "deployedAt": "2026-10-07T07:07:41Z",
   "deployer": "GrokBot",
   "machine": "MacMini",
   "signature": "GrokBot · MacMini",
-  "git": "4fc0749811db11d7b121f4ed0c67fdeefb1dba17",
-  "gitShort": "4fc0749",
-  "gitFull": "4fc0749811db11d7b121f4ed0c67fdeefb1dba17",
+  "git": "d44c17d962bbaa3744c4577e39ed54bdfb418f2e",
+  "gitShort": "d44c17d",
+  "gitFull": "d44c17d962bbaa3744c4577e39ed54bdfb418f2e",
   "dirty": false,
   "returnTag": "AInimation-v.04.09.2026.r1",
   "previousTag": "AInimation-v.03.09.2026.r2",
-  "previousVersion": "v.07.10.2026.r2.08:25",
-  "note": "Studio tipo Director: Stage vertical 1080×1920 o 16:9, Inspector de propiedades y pantallas con marcas en el Score",
+  "previousVersion": "v.07.10.2026.r3.08:53",
+  "note": "Inspector de propiedades estilo Director para todos los sprites: texto, formas, líneas, botones, quiosco y miembros del Cast",
   "novedades": [
-    "Studio tipo Director: Stage vertical 1080×1920 o 16:9, Inspector de propiedades y pantallas con marcas en el Score",
-    "Nuevos miembros: Botón y Quiosco (carta, productos, opciones, carrito, QR, número) con Carta importable",
-    "Behaviour: añadir al carrito, vaciar, abrir pago simulado, cobrar en caja, variables y detener",
-    "Plantilla «Quiosco de pedidos» editable y Publicar Xperiencia con menu.json que corre sola",
-    "Arreglado: Abrir JSON ya abre el proyecto (con marcas y tamaño del Stage)"
+    "Inspector de propiedades estilo Director para todos los sprites: texto, formas, líneas, botones, quiosco y miembros del Cast",
+    "Keyframes en botones y vistas del quiosco: añadir/quitar en el fotograma y curva desde aquí",
+    "Texto, formas y líneas se ocultan fuera de su tramo en el Stage (el seleccionado queda como fantasma)",
+    "Textos ES/EN por sprite: la pieza publicada sigue ?lang=es / ?lang=en"
   ]
 }

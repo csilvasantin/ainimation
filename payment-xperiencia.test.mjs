@@ -9,7 +9,7 @@ const app=fs.readFileSync('assets/app.js','utf8');
 const payment=fs.readFileSync('assets/payment-authoring.js','utf8');
 
 test('Contact se sustituye por Payment en las dos superficies',()=>{
-  assert.match(live,/>Payment<\/a>/); assert.match(studio,/>Payment<\/a>/);
+  assert.match(live,/>Payment(?: \(opcional\))?<\/a>/); assert.match(studio,/>Payment<\/a>/);
   assert.doesNotMatch(live,/>Contact<\/a>/); assert.doesNotMatch(studio,/>Contact<\/a>/);
 });
 test('Payment solo acepta checkout HTTPS alojado y no contiene campos de tarjeta',()=>{

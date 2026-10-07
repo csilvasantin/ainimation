@@ -100,7 +100,7 @@
   function setStageSize(w, h) { const p = plan(); if (!p) return; p.stage = { w, h }; commit(p, false); applyStageSize(w, h); }
 
   /* --------------------------------------------- Stage: pintar sprites --- */
-  let selected = null;
+  let selected = null, dragging = null;
   function sync(force) {
     const stage = $(".stage-canvas"); const p = plan(); if (!stage || !p) return;
     const f = frameNow(); const live = Boolean(window.ainXPL?.engineRunning?.());
@@ -111,7 +111,11 @@
       if (!node) { node = document.createElement("div"); node.className = "stage-item dk-item"; node.dataset.stageItemId = item.id; node.innerHTML = '<div class="dk-body"></div><span class="dk-resize" aria-hidden="true"></span>'; stage.append(node); }
       const start = Number(item.startFrame || 1), end = start + Number(item.durationFrames || 24) - 1;
       const on = f >= start && f <= end; node.hidden = !on;
-      node.style.left = `${item.x}%`; node.style.top = `${item.y}%`; node.style.width = `${item.w}%`; node.style.height = `${item.h}%`;
+      // Keyframes: como cualquier sprite del Studio, si los hay mandan sobre x/y/w/h
+      const kf = Array.isArray(item.keyframes) && item.keyframes.length && window.interpolateStageKeyframe ? window.interpolateStageKeyframe(item, f) : null;
+      const g = kf || item;
+      if (!(dragging === item.id)) { node.style.left = `${g.x}%`; node.style.top = `${g.y}%`; node.style.width = `${g.w}%`; node.style.height = `${g.h}%`; }
+      node.style.opacity = String(kf ? kf.opacity : (item.opacity ?? 1)); node.style.transform = (kf ? kf.rotation : item.rotation) ? `rotate(${kf ? kf.rotation : item.rotation}deg)` : "";
       node.classList.toggle("is-selected", selected === item.id && !live);
       node.dataset.dkType = item.type;
       const body = node.firstChild;
@@ -120,7 +124,7 @@
         body.style.background = item.color || "transparent"; body.style.color = item.textColor || "#ffffff";
         body.style.fontSize = `${Number(item.fontSize || 4)}cqw`; body.style.borderRadius = `${Number(item.radius ?? 2)}cqw`;
         body.style.fontWeight = item.bold === false ? "500" : "800"; body.style.justifyContent = item.align === "left" ? "flex-start" : "center";
-        const txt = (window.ainXplTexts && window.ainXplTexts[item.spriteName]) || item.text || "";
+        const txt = (window.ainXplTexts && window.ainXplTexts[item.spriteName]) || (item.texts && item.texts[lang()]) || item.text || "";
         if (body.textContent !== txt) body.textContent = txt;
       } else if (on || force) {
         body.className = "dk-body"; body.style.cssText = "";
@@ -143,6 +147,9 @@
     selected = item.id; inspector(item);
     const stage = $(".stage-canvas").getBoundingClientRect();
     const resize = event.target.classList.contains("dk-resize");
+    const f0 = frameNow(); const kf0 = Array.isArray(item.keyframes) && item.keyframes.length ? window.interpolateStageKeyframe(item, f0) : null;
+    if (kf0) Object.assign(item, { x: kf0.x, y: kf0.y, w: kf0.w, h: kf0.h });
+    dragging = item.id;
     const sx = event.clientX, sy = event.clientY, ox = item.x, oy = item.y, ow = item.w, oh = item.h;
     const move = (e) => {
       const dx = ((e.clientX - sx) / stage.width) * 100, dy = ((e.clientY - sy) / stage.height) * 100;
@@ -152,10 +159,19 @@
     };
     const up = () => {
       document.removeEventListener("pointermove", move); document.removeEventListener("pointerup", up);
-      const q = plan(); q.stageItems = q.stageItems.map((i) => (i.id === item.id ? { ...i, x: round(item.x), y: round(item.y), w: round(item.w), h: round(item.h) } : i));
+      dragging = null;
+      const geo = { x: round(item.x), y: round(item.y), w: round(item.w), h: round(item.h) };
+      const q = plan(); q.stageItems = q.stageItems.map((i) => (i.id !== item.id ? i : kf0 ? { ...i, keyframes: window.upsertStageKeyframe(i, f0, geo) } : { ...i, ...geo }));
       commit(q); inspector(q.stageItems.find((i) => i.id === item.id));
     };
     document.addEventListener("pointermove", move); document.addEventListener("pointerup", up);
+  }, true);
+  document.addEventListener("pointerdown", (e) => {
+    const other = e.target.closest?.(".stage-item:not(.dk-item), .stage-imported-member, .score-sprite, .score-row");
+    if (!other || other.closest(".dk-item")) return;
+    const id = other.dataset?.stageItemId || other.querySelector?.("[data-stage-item-id]")?.dataset.stageItemId;
+    const p = plan(); const mineHit = id && (p?.stageItems || []).some((i) => i.id === id && isMine(i));
+    selected = mineHit ? id : null; inspOpen = true; setTimeout(() => refreshInspector(true), 30);
   }, true);
   const round = (n) => Math.round(Number(n) * 10) / 10;
   document.addEventListener("keydown", (e) => {
@@ -164,34 +180,119 @@
   });
   function removeItem(id) { const p = plan(); p.stageItems = (p.stageItems || []).filter((i) => i.id !== id); selected = null; commit(p); inspector(null); }
 
-  /* -------------------------------------------------------- Inspector --- */
-  let panel = null;
-  function inspector(item) {
+  /* ------------------------------------------- Property Inspector (Director) --- */
+  // Una sola ventana para TODOS los sprites (texto, forma, línea, botón, quiosco y miembros del
+  // Cast en el Stage): sigue la selección del Stage/Score, enseña los valores del fotograma
+  // actual (interpolados si hay keyframes) y al editar geometría con keyframes escribe el
+  // keyframe de ESE fotograma, como el Property Inspector de Director. El Brief sigue aparte.
+  let panel = null, inspOpen = false, lastKey = "";
+  const KIND = { text: ["T", "Texto", "Text"], line: ["／", "Línea", "Line"], oval: ["◯", "Óvalo", "Oval"], "oval-fill": ["●", "Óvalo relleno", "Filled oval"], rect: ["▢", "Rectángulo", "Rectangle"], "rect-fill": ["■", "Rectángulo relleno", "Filled rectangle"], button: ["▭", "Botón", "Button"], kiosk: ["🍽", "Quiosco", "Kiosk"] };
+  function currentTarget() {
+    if (selected) return { kind: "item", id: selected };
+    let t = null; try { t = typeof selectedStageTarget !== "undefined" ? selectedStageTarget : null; } catch { /* */ }
+    if (t?.stageItemId) return { kind: "item", id: t.stageItemId };
+    if (Number.isInteger(t?.castIndex)) return { kind: "cast", index: t.castIndex };
+    return null;
+  }
+  function resolve(p, t) {
+    if (!p || !t) return null;
+    if (t.kind === "item") return (p.stageItems || []).find((i) => i.id === t.id) || null;
+    const m = p.cast?.[t.index]; return m && m.onStage !== false ? m : m || null;
+  }
+  function mutate(t, fn) {
+    const p = plan(); if (!p) return;
+    if (t.kind === "item") p.stageItems = (p.stageItems || []).map((i) => (i.id === t.id ? fn({ ...i }) : i));
+    else p.cast = (p.cast || []).map((m, i) => (i === t.index ? fn({ ...m }) : m));
+    commit(p); lastKey = "";
+  }
+  const hasKeys = (o) => Array.isArray(o?.keyframes) && o.keyframes.length > 0;
+  const valuesAt = (o, f) => (hasKeys(o) && window.interpolateStageKeyframe ? window.interpolateStageKeyframe(o, f) : null);
+  function geom(o, t, f) {
+    const k = valuesAt(o, f);
+    if (o.type === "line") return null;
+    if (k) return { x: k.x, y: k.y, w: k.w, h: k.h, opacity: k.opacity, rotation: k.rotation, easing: k.easing };
+    if (t.kind === "cast") return { x: o.stageX ?? 0, y: o.stageY ?? 0, w: o.stageW ?? 12, h: o.stageH ?? 10, opacity: o.opacity ?? 1, rotation: o.rotation ?? 0 };
+    return { x: o.x ?? 0, y: o.y ?? 0, w: o.w ?? 12, h: o.h ?? 10, opacity: o.opacity ?? 1, rotation: o.rotation ?? 0 };
+  }
+  const r1 = (n) => Math.round(Number(n || 0) * 10) / 10;
+  function inspector(item) { if (item) { selected = item.id; inspOpen = true; } refreshInspector(true); }
+  function refreshInspector(force) {
     if (!panel) {
-      panel = document.createElement("aside"); panel.className = "dk-inspector"; panel.setAttribute("aria-label", "Propiedades del sprite");
+      panel = document.createElement("aside"); panel.className = "dk-inspector"; panel.setAttribute("aria-label", "Property Inspector"); panel.hidden = true;
       document.body.append(panel);
     }
-    if (!item) { panel.hidden = true; return; }
+    const t = currentTarget(); const p = plan(); const o = resolve(p, t);
+    if (o) inspOpen = true;
+    if (!inspOpen || window.ainXPL?.engineRunning?.()) { panel.hidden = true; return; }
     panel.hidden = false;
-    const f = (k, label, type = "text", extra = "") => `<label><span>${label}</span><input data-k="${k}" type="${type}" value="${String(item[k] ?? "").replace(/"/g, "&quot;")}" ${extra}></label>`;
-    panel.innerHTML = `<header><b>${L("Propiedades", "Properties")}</b><small>${item.type === "kiosk" ? "🍽 " + L("Quiosco", "Kiosk") : "▭ " + L("Botón", "Button")}</small><button type="button" data-close aria-label="Cerrar">✕</button></header>
-      ${f("spriteName", L("Nombre de sprite", "Sprite name"))}
-      ${item.type === "button" ? f("text", L("Texto", "Text")) : `<label><span>${L("Vista", "View")}</span><select data-k="view">${Object.entries(VIEWS).map(([v, n]) => `<option value="${v}" ${item.view === v ? "selected" : ""}>${L(n[0], n[1])}</option>`).join("")}</select></label>`}
-      <div class="dk-row">${f("x", "X %", "number", 'step="0.5"')}${f("y", "Y %", "number", 'step="0.5"')}</div>
-      <div class="dk-row">${f("w", L("Ancho %", "Width %"), "number", 'step="0.5"')}${f("h", L("Alto %", "Height %"), "number", 'step="0.5"')}</div>
-      <div class="dk-row">${f("startFrame", L("Fotograma", "Frame"), "number", 'min="1"')}${f("durationFrames", L("Duración", "Duration"), "number", 'min="1"')}</div>
-      ${item.type === "button" ? `<div class="dk-row">${f("color", L("Fondo", "Fill"), "text")}${f("textColor", L("Tinta", "Ink"), "text")}</div><div class="dk-row">${f("fontSize", L("Letra (cqw)", "Font (cqw)"), "number", 'step="0.5"')}${f("radius", L("Radio", "Radius"), "number", 'step="0.5"')}</div>` : ""}
-      ${item.type === "button" ? `<label class="dk-check"><input data-k="interactive" type="checkbox" ${item.interactive ? "checked" : ""}> ${L("Interactivo (recibe toques)", "Interactive (gets touches)")}</label>` : `<p class="dk-hint">${L("Los toques de avance emiten «clic» con el nombre del sprite: úsalo en Behaviour.", "Advancing touches emit a ‘click’ with the sprite name: use it in Behaviour.")}</p>`}
-      <button type="button" class="dk-del" data-del>${L("Eliminar sprite", "Delete sprite")}</button>`;
-    panel.querySelector("[data-close]").onclick = () => { selected = null; inspector(null); sync(true); };
-    panel.querySelector("[data-del]").onclick = () => removeItem(item.id);
+    const f = frameNow();
+    const key = JSON.stringify([t, f, o, lang()]);
+    if (!force && (key === lastKey || (panel.contains(document.activeElement) && /INPUT|SELECT/.test(document.activeElement.tagName)))) return;
+    lastKey = key;
+    const head = `<header class="dk-ins-head"><i></i><i></i><i></i><b>${L("Inspector de propiedades", "Property Inspector")}</b><button type="button" data-close aria-label="${L("Cerrar", "Close")}">✕</button></header>`;
+    if (!o) { panel.innerHTML = `${head}<p class="dk-hint">${L("Selecciona un sprite en el Stage o en el Score.", "Select a sprite on the Stage or in the Score.")}</p>`; wireClose(); return; }
+    const type = t.kind === "cast" ? (o.mediaType || "image") : (o.type || "rect");
+    const kind = t.kind === "cast" ? ["🎞", L("Miembro del Cast", "Cast member"), ""] : (KIND[type] || ["▢", type, type]);
+    const g = geom(o, t, f);
+    const fld = (k, label, val, typeAttr = "text", extra = "") => `<label><span>${label}</span><input data-k="${k}" type="${typeAttr}" value="${String(val ?? "").replace(/"/g, "&quot;")}" ${extra}></label>`;
+    const kfAtFrame = hasKeys(o) && o.keyframes.some((k) => Number(k.frame) === f);
+    const texts = o.texts || {};
+    const sec = (title, body) => `<section><h4>${title}</h4>${body}</section>`;
+    let typeBody = "";
+    if (type === "button" || type === "text") {
+      typeBody += `<div class="dk-row">${fld("texts.es", "Texto (ES)", texts.es ?? o.text)}${fld("texts.en", "Text (EN)", texts.en ?? o.text)}</div>`;
+    }
+    if (type === "button") typeBody += `<div class="dk-row">${fld("color", L("Fondo", "Fill"), o.color)}${fld("textColor", L("Tinta", "Ink"), o.textColor)}</div><div class="dk-row">${fld("fontSize", L("Letra (cqw)", "Font (cqw)"), o.fontSize, "number", 'step="0.5"')}${fld("radius", L("Radio", "Radius"), o.radius, "number", 'step="0.5"')}</div><label class="dk-check"><input data-k="interactive" type="checkbox" ${o.interactive ? "checked" : ""}> ${L("Interactivo (recibe toques)", "Interactive (gets touches)")}</label>`;
+    if (type === "text") typeBody += `<div class="dk-row">${fld("color", L("Color", "Colour"), o.color)}${fld("fontSize", L("Letra", "Font size"), o.fontSize)}</div><div class="dk-row"><label><span>${L("Peso", "Weight")}</span><select data-k="fontWeight">${["400", "600", "850"].map((w) => `<option ${String(o.fontWeight || "850") === w ? "selected" : ""}>${w}</option>`).join("")}</select></label><label><span>${L("Alinear", "Align")}</span><select data-k="textAlign">${["left", "center", "right"].map((a) => `<option ${(o.textAlign || "left") === a ? "selected" : ""}>${a}</option>`).join("")}</select></label></div>`;
+    if (/^(oval|rect)/.test(type) || type === "line") typeBody += `${fld("color", L("Color", "Colour"), o.color)}${type !== "line" ? `<label><span>${L("Tipo", "Kind")}</span><select data-k="type">${["rect", "rect-fill", "oval", "oval-fill"].map((s) => `<option value="${s}" ${type === s ? "selected" : ""}>${L(KIND[s][1], KIND[s][2])}</option>`).join("")}</select></label>` : `<div class="dk-row">${fld("x1", "X1 %", o.x1, "number")}${fld("y1", "Y1 %", o.y1, "number")}</div><div class="dk-row">${fld("x2", "X2 %", o.x2, "number")}${fld("y2", "Y2 %", o.y2, "number")}</div>`}`;
+    if (type === "kiosk") typeBody += `<label><span>${L("Vista", "View")}</span><select data-k="view">${Object.entries(VIEWS).map(([v, n]) => `<option value="${v}" ${o.view === v ? "selected" : ""}>${L(n[0], n[1])}</option>`).join("")}</select></label><p class="dk-hint">${L("Los toques de avance emiten «clic» con el nombre del sprite: úsalo en Behaviour.", "Advancing touches emit a ‘click’ with the sprite name: use it in Behaviour.")}</p>`;
+    if (t.kind === "cast") typeBody += `<p class="dk-hint">${L("Miembro", "Member")}: <b>${String(o.name || o.title || o.fileName || "").replace(/</g, "&lt;")}</b> · ${o.mediaType || "image"}</p>${/video|audio/.test(o.mediaType || "") ? `<label class="dk-check"><input data-k="muted" type="checkbox" ${o.muted ? "checked" : ""}> ${L("Silenciado", "Muted")}</label>` : ""}`;
+    panel.innerHTML = `${head}
+      <div class="dk-ins-kind"><span>${kind[0]}</span><b>${kind[1] && t.kind !== "cast" ? L(kind[1], kind[2]) : kind[1]}</b><small>${L("fotograma", "frame")} ${f}</small></div>
+      ${sec(L("Sprite", "Sprite"), fld("spriteName", L("Nombre de sprite", "Sprite name"), o.spriteName || ""))}
+      ${g ? sec(L("Geometría", "Geometry") + (hasKeys(o) ? ` <em>◆ ${L("en este fotograma", "at this frame")}</em>` : ""), `<div class="dk-row">${fld("x", "X %", r1(g.x), "number", 'step="0.5"')}${fld("y", "Y %", r1(g.y), "number", 'step="0.5"')}</div><div class="dk-row">${fld("w", L("Ancho %", "Width %"), r1(g.w), "number", 'step="0.5"')}${fld("h", L("Alto %", "Height %"), r1(g.h), "number", 'step="0.5"')}</div><div class="dk-row">${fld("opacity", L("Opacidad", "Opacity"), r1(g.opacity), "number", 'step="0.1" min="0" max="1"')}${fld("rotation", L("Giro °", "Rotation °"), r1(g.rotation), "number", 'step="1"')}</div>`) : ""}
+      ${sec(L("Tiempo", "Timing"), `<div class="dk-row">${fld("startFrame", L("Fotograma", "Frame"), o.startFrame || 1, "number", 'min="1"')}${fld("durationFrames", L("Duración", "Duration"), o.durationFrames || 24, "number", 'min="1"')}</div>
+        ${g ? `<div class="dk-kf"><button type="button" data-kf-add>◆ ${kfAtFrame ? L("Keyframe aquí ✓", "Keyframe here ✓") : L("Añadir keyframe", "Add keyframe")}</button>${kfAtFrame ? `<button type="button" data-kf-del>✕ ${L("Quitar", "Remove")}</button>` : ""}<small>${hasKeys(o) ? o.keyframes.length : 0} keyframes</small></div>${kfAtFrame ? `<label><span>${L("Curva desde aquí", "Ease from here")}</span><select data-k="easing">${["linear", "ease-in", "ease-out", "ease-in-out"].map((e) => `<option ${(g.easing || "linear") === e ? "selected" : ""}>${e}</option>`).join("")}</select></label>` : ""}` : ""}`)}
+      ${typeBody ? sec(L("Propiedades del tipo", "Type properties"), typeBody) : ""}
+      ${t.kind === "item" ? `<button type="button" class="dk-del" data-del>${L("Eliminar sprite", "Delete sprite")}</button>` : ""}`;
+    wireClose();
+    panel.querySelector("[data-del]")?.addEventListener("click", () => { if (t.kind === "item") { if (isMine(o)) removeItem(o.id); else window.removeStageItem?.(o.id); } });
+    const GEO = ["x", "y", "w", "h", "opacity", "rotation", "easing"];
+    panel.querySelector("[data-kf-add]")?.addEventListener("click", () => { const f = frameNow(); mutate(t, (m) => { const v = geom(m, t, f); m.keyframes = window.upsertStageKeyframe(m, f, v); return m; }); });
+    panel.querySelector("[data-kf-del]")?.addEventListener("click", () => mutate(t, (m) => { m.keyframes = (m.keyframes || []).filter((k) => Number(k.frame) !== f); if (!m.keyframes.length) delete m.keyframes; return m; }));
     panel.querySelectorAll("[data-k]").forEach((input) => input.addEventListener("change", () => {
       const k = input.dataset.k; let v = input.type === "checkbox" ? input.checked : input.value;
       if (input.type === "number") v = Number(v);
-      const p = plan(); p.stageItems = p.stageItems.map((i) => (i.id === item.id ? { ...i, [k]: v } : i));
-      commit(p); item = p.stageItems.find((i) => i.id === item.id);
+      const f = frameNow();
+      mutate(t, (m) => {
+        if (k.startsWith("texts.")) {
+          m.texts = { es: m.texts?.es ?? m.text ?? "", en: m.texts?.en ?? m.text ?? "", [k.slice(6)]: v };
+          m.text = m.texts[lang()] || m.texts.es || m.texts.en;
+          if (hasKeys(m)) m.keyframes = m.keyframes.map((kf) => ({ ...kf, text: m.text }));
+        } else if (GEO.includes(k) && hasKeys(m)) {
+          m.keyframes = window.upsertStageKeyframe(m, f, { [k]: v });
+        } else if (GEO.includes(k) && t.kind === "cast" && ["x", "y", "w", "h"].includes(k)) {
+          m[`stage${k.toUpperCase()}`] = v;
+        } else {
+          m[k] = v;
+          if (["color", "fontSize", "fontWeight", "textAlign"].includes(k) && hasKeys(m)) m.keyframes = m.keyframes.map((kf) => ({ ...kf, [k]: v }));
+        }
+        return m;
+      });
+      setTimeout(() => refreshInspector(true), 0);
     }));
   }
+  function wireClose() { panel.querySelector("[data-close]").onclick = () => { inspOpen = false; selected = null; panel.hidden = true; sync(true); }; }
+  setInterval(() => refreshInspector(false), 250);
+  // Arrastrar la ventana por su barra, como las demás del Studio
+  document.addEventListener("pointerdown", (e) => {
+    const h = e.target.closest?.(".dk-ins-head"); if (!h || e.target.closest("button")) return;
+    const r = panel.getBoundingClientRect(), sx = e.clientX - r.left, sy = e.clientY - r.top;
+    const mv = (ev) => { panel.style.left = `${ev.clientX - sx}px`; panel.style.top = `${ev.clientY - sy}px`; panel.style.right = "auto"; };
+    const up = () => { document.removeEventListener("pointermove", mv); document.removeEventListener("pointerup", up); };
+    document.addEventListener("pointermove", mv); document.addEventListener("pointerup", up); e.preventDefault();
+  });
+  window.ainInspector = { open: () => { inspOpen = true; refreshInspector(true); }, close: () => { inspOpen = false; refreshInspector(true); }, refresh: () => refreshInspector(true) };
 
   /* ---------------------------------------------------------- Insertar --- */
   function insert(type, extra = {}) {
@@ -241,20 +342,20 @@
   async function templateKiosk() {
     const menu = await loadSampleMenu();
     const S = (start) => ({ startFrame: start, durationFrames: 24 });
-    const btn = (id, start, text, x, y, w, h, extra = {}) => ({ id: uid(), type: "button", spriteName: id, text, x, y, w, h, ...S(start), color: "#00704A", textColor: "#ffffff", fontSize: 4.5, radius: 2, interactive: true, ...extra });
+    const btn = (id, start, text, x, y, w, h, extra = {}) => ({ id: uid(), type: "button", spriteName: id, text: Array.isArray(text) ? L(text[0], text[1]) : text, ...(Array.isArray(text) ? { texts: { es: text[0], en: text[1] } } : {}), x, y, w, h, ...S(start), color: "#00704A", textColor: "#ffffff", fontSize: 4.5, radius: 2, interactive: true, ...extra });
     const lbl = (id, start, text, y, size = 6, extra = {}) => btn(id, start, text, 5, y, 90, size * 2, { color: "transparent", textColor: "#1E3932", fontSize: size, interactive: false, ...extra });
     const k = (id, start, view, y = 12, h = 74) => ({ id: uid(), type: "kiosk", spriteName: id, view, x: 4, y, w: 92, h, ...S(start) });
     const bg = (start, color) => btn(`fondo${start}`, start, "", 0, 0, 100, 100, { color, interactive: false, radius: 0 });
     const items = [
-      bg(1, "#1E3932"), { ...bg(25, "#FFFFFF"), spriteName: "fondoCarta", durationFrames: 120 }, lbl("titulo", 1, L("Pide aquí, sin colas", "Order here, skip the queue"), 30, 9, { textColor: "#ffffff" }), lbl("subtitulo", 1, L("Toca la pantalla para empezar", "Touch the screen to start"), 50, 4.5, { textColor: "#cba258" }),
-      btn("btnEmpezar", 1, L("Toca para empezar", "Touch to start"), 20, 66, 60, 8, { fontSize: 5, radius: 6 }),
-      lbl("hCategorias", 25, L("¿Qué te apetece?", "What would you like?"), 3, 6), k("carta", 25, "categories"),
-      lbl("hProductos", 49, L("Elige tu bebida", "Choose your drink"), 3, 6), k("productos", 49, "items"), btn("btnAtras", 49, L("Atrás", "Back"), 4, 89, 40, 7, { color: "#EDEBE6", textColor: "#1E2A25" }),
+      bg(1, "#1E3932"), { ...bg(25, "#FFFFFF"), spriteName: "fondoCarta", durationFrames: 120 }, lbl("titulo", 1, ["Pide aquí, sin colas", "Order here, skip the queue"], 30, 9, { textColor: "#ffffff" }), lbl("subtitulo", 1, ["Toca la pantalla para empezar", "Touch the screen to start"], 50, 4.5, { textColor: "#cba258" }),
+      btn("btnEmpezar", 1, ["Toca para empezar", "Touch to start"], 20, 66, 60, 8, { fontSize: 5, radius: 6 }),
+      lbl("hCategorias", 25, ["¿Qué te apetece?", "What would you like?"], 3, 6), k("carta", 25, "categories"),
+      lbl("hProductos", 49, ["Elige tu bebida", "Choose your drink"], 3, 6), k("productos", 49, "items"), btn("btnAtras", 49, ["Atrás", "Back"], 4, 89, 40, 7, { color: "#EDEBE6", textColor: "#1E2A25" }),
       k("opciones", 73, "options", 4, 84),
-      lbl("hCarrito", 97, L("Tu pedido", "Your order"), 3, 6), k("carrito", 97, "cart", 12, 70), btn("btnMas", 97, L("Añadir más", "Add more"), 4, 88, 92, 7, { color: "#EDEBE6", textColor: "#1E2A25" }),
+      lbl("hCarrito", 97, ["Tu pedido", "Your order"], 3, 6), k("carrito", 97, "cart", 12, 70), btn("btnMas", 97, ["Añadir más", "Add more"], 4, 88, 92, 7, { color: "#EDEBE6", textColor: "#1E2A25" }),
       k("pago", 121, "qr", 6, 86),
       { ...bg(145, "#00704A") }, k("numero", 145, "number", 15, 60),
-      lbl("aviso", 1, L("DEMO · datos de ejemplo · pago simulado", "DEMO · example data · simulated payment"), 95, 2.4, { durationFrames: 168, textColor: "#3A2E00", color: "#FFE58A", radius: 0, y: 96.5, h: 3.5 }),
+      lbl("aviso", 1, ["DEMO · datos de ejemplo · pago simulado", "DEMO · example data · simulated payment"], 95, 2.4, { durationFrames: 168, textColor: "#3A2E00", color: "#FFE58A", radius: 0, y: 96.5, h: 3.5 }),
     ];
     const go = (m) => [{ id: "goToMarker", value: m }, { id: "stop" }];
     const r = (name, conds, actions) => ({ id: `xr-${name}`, name, enabled: true, when: { join: "and", conds }, do: actions });
@@ -309,10 +410,15 @@
       body.xpl-live .dk-item .dk-resize{display:none!important}
       .dk-menu{position:relative;display:inline-block}.dk-menu-list{display:none;position:absolute;top:100%;left:0;z-index:200;min-width:250px;flex-direction:column;background:#14110f;border:1px solid #3a3a3a;border-radius:8px;padding:6px;box-shadow:0 12px 30px rgba(0,0,0,.4)}
       .dk-menu.open .dk-menu-list{display:flex}.dk-menu-list button{all:unset;cursor:pointer;padding:7px 10px;border-radius:6px;color:#f3f1ea;font:13px Inter,system-ui,sans-serif}.dk-menu-list button:hover{background:#2a2622}.dk-menu-list i{height:1px;background:#3a3a3a;margin:4px 0}
-      .dk-inspector{position:fixed;right:14px;top:84px;z-index:300;width:270px;background:#14110f;color:#f3f1ea;border:1px solid #3a3a3a;border-radius:10px;padding:10px;font:12px Inter,system-ui,sans-serif;box-shadow:0 14px 34px rgba(0,0,0,.45)}
+      .dk-inspector{position:fixed;right:14px;top:84px;z-index:300;width:290px;max-height:calc(100vh - 110px);overflow:auto;background:#14110f;color:#f3f1ea;border:1px solid #3a3a3a;border-radius:10px;padding:0 10px 10px;font:12px Inter,system-ui,sans-serif;box-shadow:0 14px 34px rgba(0,0,0,.45)}
+      .dk-inspector .dk-ins-head{position:sticky;top:0;display:flex;gap:6px;align-items:center;margin:0 -10px 8px;padding:8px 10px;background:#1d1916;border-bottom:1px solid #3a3a3a;cursor:move;text-transform:uppercase;letter-spacing:.04em}.dk-ins-head i{width:9px;height:9px;border-radius:50%;background:#ff5f57}.dk-ins-head i+i{background:#febc2e}.dk-ins-head i+i+i{background:#28c840}.dk-ins-head b{flex:1;margin-left:6px}.dk-ins-head button{all:unset;cursor:pointer}
+      .dk-ins-kind{display:flex;gap:8px;align-items:center;margin-bottom:6px}.dk-ins-kind span{font-size:18px}.dk-ins-kind b{flex:1}.dk-ins-kind small{opacity:.65}
+      .dk-inspector section{border-top:1px solid #2c2724;padding-top:6px;margin-top:6px}.dk-inspector h4{margin:0 0 6px;font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:#c6f24e}.dk-inspector h4 em{color:#febc2e;font-style:normal;text-transform:none}
+      .dk-inspector .dk-row{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:6px}.dk-inspector .dk-row>label{min-width:0}.dk-inspector input:not([type=checkbox]),.dk-inspector select{width:100%;box-sizing:border-box}
+      .dk-kf{display:flex;gap:6px;align-items:center;margin:4px 0 6px}.dk-kf button{background:#221e1b;color:#f3f1ea;border:1px solid #3a3a3a;border-radius:6px;padding:4px 7px;cursor:pointer;font:inherit}.dk-kf small{opacity:.65;margin-left:auto}
       .dk-inspector header{display:flex;gap:8px;align-items:center;margin-bottom:8px}.dk-inspector header small{opacity:.7;flex:1}.dk-inspector header button{all:unset;cursor:pointer}
       .dk-inspector label{display:flex;flex-direction:column;gap:3px;margin-bottom:6px}.dk-inspector label span{opacity:.75}.dk-inspector input,.dk-inspector select{background:#221e1b;color:inherit;border:1px solid #3a3a3a;border-radius:6px;padding:5px 6px;font:inherit;min-width:0}
-      .dk-row{display:grid;grid-template-columns:1fr 1fr;gap:6px}.dk-check{flex-direction:row!important;align-items:center}.dk-hint{opacity:.7;margin:4px 0 8px}.dk-del{width:100%;background:#4a1f1a;color:#fff;border:0;border-radius:6px;padding:7px;cursor:pointer}
+      .dk-check{flex-direction:row!important;align-items:center}.dk-hint{opacity:.7;margin:4px 0 8px}.dk-del{width:100%;background:#4a1f1a;color:#fff;border:0;border-radius:6px;padding:7px;cursor:pointer}
       .dk-menu-badge{margin-left:6px;background:#00704A;color:#fff;border:0;border-radius:99px;padding:2px 9px;font:700 11px Inter,system-ui,sans-serif;cursor:pointer}
       .dk-size{cursor:pointer}.dk-size-menu{position:fixed;z-index:400;background:#14110f;border:1px solid #3a3a3a;border-radius:8px;padding:6px;display:flex;flex-direction:column}.dk-size-menu button{all:unset;cursor:pointer;padding:7px 10px;color:#f3f1ea;font:13px Inter,system-ui,sans-serif;border-radius:6px}.dk-size-menu button:hover{background:#2a2622}
       .dk-checkout{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9000;display:none;align-items:center;justify-content:center}.dk-checkout.on{display:flex}.dk-checkout div{position:relative;width:min(92vw,460px);height:min(86vh,720px)}.dk-checkout iframe{width:100%;height:100%;border:0;border-radius:16px;background:#fff}.dk-checkout button{position:absolute;top:-12px;right:-12px;width:34px;height:34px;border-radius:50%;border:0;background:#fff;cursor:pointer}`;
@@ -350,6 +456,8 @@
         setTimeout(() => document.addEventListener("pointerdown", function off(ev) { if (!m.contains(ev.target)) { m.remove(); document.removeEventListener("pointerdown", off); } }), 0); }); }
     const p = plan(); if (p?.stage) applyStageSize(p.stage.w, p.stage.h);
     badge();
+    const wl = document.querySelector(".window-menu-list");
+    if (wl && !wl.querySelector("[data-dk-open-inspector]")) { const b = document.createElement("button"); b.type = "button"; b.setAttribute("data-dk-open-inspector", ""); b.textContent = L("Inspector de propiedades", "Property Inspector"); b.onclick = () => window.ainInspector.open(); wl.prepend(b); }
     // ?plantilla=quiosco abre la plantilla directamente (enlace desde la galería)
     if (new URLSearchParams(location.search).get("plantilla") === "quiosco" && p?.template !== "quiosco-de-pedidos") templateKiosk();
   }
