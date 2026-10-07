@@ -159,6 +159,36 @@ html[data-formato="horizontal"] #confirm{align-items:center}html[data-formato="h
 #confirm .acts{display:flex;gap:24px}
 #cfOk{flex:1;padding:44px 30px;font-size:50px;border-radius:var(--r);font-weight:900;background:var(--mb-primario);color:var(--mb-primario-texto);box-shadow:0 8px 0 color-mix(in srgb,var(--mb-primario) 60%,#000)}
 #cfNo{flex:.55}
+/* ── /demo pedido (7-oct-2026): conversación Admirito ⇄ clienta, con subtítulos y toques visibles ── */
+#demoTalk{display:none;position:absolute;left:calc(var(--av-w) + 24px);right:24px;top:calc(var(--av-h) + 8px);z-index:38;pointer-events:none;flex-direction:column;gap:8px}
+#demoTalk.on{display:flex}
+#demoTalk .dbadge{align-self:flex-end;display:flex;align-items:center;gap:10px;background:#C0392B;color:#fff;border-radius:999px;padding:4px 16px;font-size:18px;font-weight:800;letter-spacing:1px;box-shadow:0 4px 14px rgba(0,0,0,.25)}
+#demoTalk .dbadge i{width:12px;height:12px;border-radius:50%;background:#fff;animation:recdot 1.2s infinite}
+#demoTalk .dbadge small{font-weight:600;opacity:.85;letter-spacing:0}
+@keyframes recdot{50%{opacity:.25}}
+#demoBubbles{display:flex;flex-direction:column;gap:12px}
+.db{max-width:92%;padding:10px 22px 14px;border-radius:26px;font-size:28px;line-height:1.22;box-shadow:0 8px 28px rgba(0,0,0,.3)}
+.db.new{animation:dbIn .2s ease-out}
+.db span{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.db b{display:flex;align-items:center;gap:10px;font-size:18px;letter-spacing:.6px;text-transform:uppercase;opacity:.9;margin-bottom:2px}
+.db.adm{align-self:flex-start;background:var(--mb-superficie);color:var(--mb-texto);border:4px solid var(--mb-primario);border-bottom-left-radius:8px}
+.db.adm b{color:var(--mb-primario)}
+.db.cli{align-self:flex-end;background:var(--mb-acento);color:var(--mb-acento-texto);border-bottom-right-radius:8px}
+.db .wv{display:none;gap:3px;align-items:flex-end;height:18px}.db.sp .wv{display:inline-flex}
+.db .wv i{width:4px;height:100%;background:currentColor;border-radius:2px;animation:wv .9s infinite ease-in-out}
+.db .wv i:nth-child(2){animation-delay:.15s}.db .wv i:nth-child(3){animation-delay:.3s}.db .wv i:nth-child(4){animation-delay:.45s}
+.db.th span{opacity:.8;font-style:italic}
+@keyframes wv{0%,100%{transform:scaleY(.3)}50%{transform:scaleY(1)}}
+@keyframes dbIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+/* en 16:9 la hoja «¿Lo confirmo?» baja durante la demo para dejar sitio al subtítulo */
+html.demo-on[data-formato="horizontal"] #confirm{align-items:flex-end}html.demo-on[data-formato="horizontal"] #confirm .sheet{border-radius:40px 40px 0 0}
+#demoNote{display:none;align-self:center;background:#C0392B;color:#fff;border-radius:18px;padding:14px 24px;font-size:26px;font-weight:800;box-shadow:0 8px 28px rgba(0,0,0,.3)}
+#demoNote.on{display:block}
+#demoTap{position:absolute;left:0;top:0;width:150px;height:150px;margin:-75px 0 0 -75px;border-radius:50%;border:6px solid #fff;background:rgba(255,255,255,.35);box-shadow:0 0 0 4px rgba(0,0,0,.25);z-index:60;pointer-events:none;opacity:0;transform:scale(.3)}
+#demoTap.on{animation:demotap .6s ease-out}
+@keyframes demotap{0%{opacity:.95;transform:scale(.3)}55%{opacity:.85;transform:scale(1)}100%{opacity:0;transform:scale(1.3)}}
+.demo-press{transform:scale(.96);filter:brightness(.9);transition:transform .12s,filter .12s}
+@media (prefers-reduced-motion:reduce){.db,#demoTalk .dbadge i,.db .wv i{animation:none}#demoTap.on{animation:none;opacity:.9;transform:none}}
 </style>
 </head>
 <body>
@@ -224,12 +254,15 @@ html[data-formato="horizontal"] #confirm{align-items:center}html[data-formato="h
     </div>
   </aside>
   <div id="confirm" role="dialog" aria-modal="true" aria-labelledby="cfTitle"><div class="sheet"><h2 id="cfTitle"></h2><p class="who" id="cfWho"></p><div id="cfLines"></div><div class="total"><span data-t="total"></span><span id="cfTotal"></span></div><div class="acts"><button type="button" class="btn alt" id="cfNo"></button><button type="button" id="cfOk"></button></div></div></div>
+  <div id="demoTalk" aria-live="polite"><div class="dbadge"><i></i><span id="demoBadge"></span><small id="demoHint"></small></div><div id="demoBubbles"></div><div id="demoNote" role="alert"></div></div>
+  <div id="demoTap" aria-hidden="true"></div>
   <div id="overlay"><iframe id="payFrame" title="Pago simulado"></iframe></div>
   <div id="idle"></div>
   <div class="demo" id="demo"></div>
 </div>
 <script src="qrcode.min.js"></script>
 <script src="pedido-avatar.js"></script>
+<script src="demo-pedido.js"></script>
 <script>
 (function(){
 "use strict";
@@ -317,7 +350,7 @@ function renderCart(){$("#lines").innerHTML=cart.length?cart.map((l,k)=>'<div cl
 function nextNumber(){const k="kiosko:n:"+M.establishment.id;let n=0;try{n=(+localStorage.getItem(k)||0)+1;if(n>999)n=1;localStorage.setItem(k,n);}catch(e){n=1+Math.floor(Math.random()*999);}return (M.orderFlow.prefix||"A")+String(n).padStart(3,"0");}
 function makeOrder(){const id="ped-"+Date.now().toString(36)+"-"+Math.random().toString(36).slice(2,6);
   order={id:id,number:null,simulated:true,store:storeId||M.establishment.id,establishment:M.establishment.name,brand:marca||M.establishment.brandId,currency:M.establishment.currency,lang:lang,
-   lines:cart.map(l=>({id:l.id,name:tr(l.name),qty:l.qty,unitPrice:l.unitPrice,options:l.options.map(o=>tr(o.label))})),total:sum(),customerName:custName(),status:"pending-payment",createdAt:new Date().toISOString(),_colaLines:KA?KA.queueLines(cart):[]};return order;}
+   lines:cart.map(l=>({id:l.id,name:tr(l.name),qty:l.qty,unitPrice:l.unitPrice,options:l.options.map(o=>tr(o.label))})),total:sum(),customerName:custName(),status:"pending-payment",createdAt:new Date().toISOString(),_colaLines:KA?KA.queueLines(cart):[]};if(demoOn())order.demo=true;return order;}
 // Gestor de colas (7-oct-2026): el pedido vive en un relé (Durable Object por tienda) para que el
 // móvil que escanea el QR —otro dispositivo— pague (SIMULADO) y siga su número en /cola/, y el quiosco
 // se entere del pago. Sin relé (offline) sigue el flujo local de antes.
@@ -335,7 +368,7 @@ function colaApi(op,body,extra){const q=relay()+"/cola/"+op+"?store="+encodeURIC
 function askName(){go("name");$("#nameErr").textContent="";const i=$("#custName");setTimeout(()=>{try{i.focus();}catch(_){}},50);}
 function confirmName(){const n=custName();if(n.replace(/[^\p{L}]/gu,"").length<2){$("#nameErr").textContent=t("nameErr");try{$("#custName").focus();}catch(_){}return;}$("#nameErr").textContent="";toPay();}
 function custName(){const i=document.getElementById("custName");return i?i.value.replace(/[^\p{L} '\-]/gu,"").replace(/\s+/g," ").trim().slice(0,24):"";}
-function colaCrear(o){return colaApi("pedido",{id:o.id,nombre:o.customerName||"",total:o.total,moneda:o.currency,prefijo:(M.orderFlow.prefix||"A"),lines:o._colaLines||[]}).then(r=>{if(order===o){o.queueNumber=r.numero;if(r.pago&&!o._pago){o._pago=String(r.pago).slice(0,64);if(screen==="pay"&&!o.number)paintQr();}window.__kioskCola={id:o.id,numero:r.numero,store:colaStore()};if(o.number&&o.number!==r.numero){o.number=r.numero;o.queueUrl=colaUrl(r.numero);try{$("#orderNum").textContent=r.numero;}catch(_){}}}return r;}).catch(()=>null);}
+function colaCrear(o){return colaApi("pedido",{id:o.id,nombre:(o.customerName||"")+(o.demo&&o.customerName?" - demo":""),total:o.total,moneda:o.currency,prefijo:(M.orderFlow.prefix||"A"),lines:o._colaLines||[]}).then(r=>{if(order===o){o.queueNumber=r.numero;if(r.pago&&!o._pago){o._pago=String(r.pago).slice(0,64);if(screen==="pay"&&!o.number)paintQr();}window.__kioskCola={id:o.id,numero:r.numero,store:colaStore()};if(o.number&&o.number!==r.numero){o.number=r.numero;o.queueUrl=colaUrl(r.numero);try{$("#orderNum").textContent=r.numero;}catch(_){}}}return r;}).catch(()=>null);}
 function colaVigilar(o){clearInterval(colaPoll);colaPoll=setInterval(()=>{if(order!==o||o.number||screen!=="pay"){clearInterval(colaPoll);return;}
   colaApi("pedido",null,"&id="+encodeURIComponent(o.id)).catch(()=>null).then(r=>{if(r&&r.estado&&r.estado!=="pendiente"&&order===o){o.queueNumber=r.numero;finish("paid");}});},2000);}
 function colaUrl(n){const u=new URL("../../cola/",document.baseURI);u.searchParams.set("store",colaStore());if(n)u.searchParams.set("pedido",n);u.searchParams.set("lang",lang);return u.href;}
@@ -351,7 +384,7 @@ function finishNow(how){if(!order||order.number)return;clearInterval(colaPoll);o
   closeOverlay();try{document.getElementById("custName").value="";}catch(_){}$("#orderNum").textContent=order.number;const dq=$("#doneQr"),df=$("#doneFollow");dq.innerHTML="";dq.classList.remove("on");df.hidden=true;
   if(how!=="paid"&&order.queueNumber){try{new QRCode(dq,{text:order.queueUrl,width:260,height:260,correctLevel:QRCode.CorrectLevel.M});dq.classList.add("on");dq.dataset.url=order.queueUrl;df.textContent=lang==="en"?"Scan to follow your order on your phone":"Escanea para seguir tu pedido en el móvil";df.hidden=false;}catch(_){}}$("#doneMsg").textContent=t(how==="paid"?"paid":"payAtCounter");go("done");
   if(how==="paid")host("payment",{status:"paid",simulated:true});host("order",{status:order.status});avPost({type:"da-context",order:null});
-  say(lang==="en"?"Thank you! Your order number is "+order.number:"¡Gracias! Tu pedido es el "+order.number);
+  if(!demoOn())say(lang==="en"?"Thank you! Your order number is "+order.number:"¡Gracias! Tu pedido es el "+order.number); /* en la demo cierra Admirito */
   setTimeout(()=>{if(screen==="done")go("attract");},((M.idle.resetSeconds||12)+(how!=="paid"&&order.queueNumber?13:0))*1000);}
 function closeOverlay(){$("#overlay").classList.remove("on");$("#payFrame").src="about:blank";}
 // pago simulado: mismo navegador (BroadcastChannel / storage) o el overlay (postMessage)
@@ -436,7 +469,9 @@ function avAnswer(d){const now=Date.now(),wasOpen=$("#confirm").classList.contai
   const a=d.action&&typeof d.action==="object"?d.action:null;avS.log.answers.push({answer:said,action:a&&a.type||null,at:now});if(!a)return;
   if(a.type==="order-draft"){applyDraft(a,"avatar");if(a.confirmed===true&&wasOpen&&avS.r&&avS.r.ready)avConfirm("voz");}
   else if(a.type==="order-confirm"&&wasOpen)avConfirm("voz");}
-function avAsk(q){q=String(q||"").replace(/\s+/g," ").trim().slice(0,300);if(!q||!avMounted)return;if(!avOn)avSetOn(true);avPost({type:"da-ask",question:q,lang:lang});$("#avQ").value="";avS.dirty=true;lastTouch=Date.now();}
+function avAsk(q){q=String(q||"").replace(/\s+/g," ").trim().slice(0,300);if(!q||!avMounted)return;
+  if(KD&&KD.parseCommand(q)){$("#avQ").value="";demoToggle();return;} // «/demo pedido» · «/demo order»: interruptor, no va a la cara
+  if(!avOn)avSetOn(true);avPost({type:"da-ask",question:q,lang:lang});$("#avQ").value="";avS.dirty=true;lastTouch=Date.now();}
 function avMic(){const SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(!SR||!avMounted)return;if(avRec){avStopMic();return;}
   let r;try{r=new SR();}catch(_){return;}r.lang=lang==="en"?"en-GB":"es-ES";r.interimResults=true;r.maxAlternatives=1;avRec=r;$("#avMic").classList.add("on");
   r.onresult=e=>{let txt="",fin=false;for(const x of e.results){txt+=x[0].transcript;if(x.isFinal)fin=true;}$("#avQ").value=txt;lastTouch=Date.now();if(fin){avStopMic();avAsk(txt);}};
@@ -455,11 +490,99 @@ function avTick(){if(!avMounted&&!avS.pending)return;const now=Date.now();
   if(avS.pending&&!avBusy()&&screen!=="pay"&&screen!=="done")avCommit(avS.pending.r);}
 addEventListener("message",e=>{const d=e.data;if(!d||typeof d!=="object")return;
   // la cara: solo nuestro iframe y desde digitalavatar.ai (o su proxy; localhost en pruebas)
-  if(avFrame&&e.source===avFrame.contentWindow&&KA&&KA.isAvatarOrigin(e.origin)){if(d.type==="da-answer")avAnswer(d);else if(d.type==="da-tap")avMic();return;}
+  if(avFrame&&e.source===avFrame.contentWindow&&KA&&KA.isAvatarOrigin(e.origin)){if(d.type==="da-answer"){avAnswer(d);if(demo)demo.onAnswer(d);}else if(d.type==="da-tap"){if(demoOn())demo.stop("toque");else avMic();}return;}
   // el anfitrión (tótem del gemelo): {source:'admira-avatar', type:'kiosk-fill', draft} | {…, type:'kiosk-add', line}
   if(d.source==="admira-avatar"&&window.parent!==window&&e.source===window.parent&&KA&&KA.isHostOrigin(e.origin)){if(d.type==="kiosk-fill")applyDraft(d.draft,"anfitrion");else if(d.type==="kiosk-add")kAdd(d.line,"anfitrion");}});
+// ── «/demo pedido» (Carlos, 7-oct-2026): una clienta simulada pide a Admirito de punta a punta ──
+// Lógica pura y guion en demo-pedido.js (KioskoDemo). Aquí: audio, bocadillos, toques y la ruta de siempre
+// (da-ask → da-answer → carrito → «¿Lo confirmo?» → Confirmar → Pagar en barra → número).
+// Audio: la cara se queda SIN voz propia durante la demo (da-audio off: el cerebro ni genera su audio) y el quiosco
+// pone las dos voces por un único AudioContext: una sola a la vez, niveladas por RMS y con compresor. El Intro (o el
+// clic en ➤) que lanza el comando es el gesto que desbloquea el audio en Safari y Chrome.
+const KD=window.KioskoDemo||null;
+let demo=null,demoSwallow=0,demoLang="es",demoMsgs=[],demoThink=false,demoNoteT=0,demoTypeT=0;
+function demoOn(){return !!(demo&&demo.active());}
+function demoClass(){document.documentElement.classList.toggle("demo-on",demoOn());}
+const DA=(function(){
+  let ctx=null,inp=null,gen=0,stopNow=null,ctl=typeof AbortController!=="undefined"?new AbortController():null;const bufs=new Map(),log=[];window.__demoAudio=log;
+  function unlock(){try{const AC=window.AudioContext||window.webkitAudioContext;if(AC&&!ctx){ctx=new AC();const c=ctx.createDynamicsCompressor();c.threshold.value=-20;c.knee.value=10;c.ratio.value=3;c.attack.value=.003;c.release.value=.25;const g=ctx.createGain();g.gain.value=.95;c.connect(g);g.connect(ctx.destination);inp=c;}
+      if(ctx){if(ctx.state!=="running"&&ctx.resume)ctx.resume().catch(()=>{});const b=ctx.createBuffer(1,1,22050),s=ctx.createBufferSource();s.buffer=b;s.connect(ctx.destination);s.start(0);}}catch(_){}
+    try{const ss=window.speechSynthesis;if(ss&&window.SpeechSynthesisUtterance){const u=new SpeechSynthesisUtterance(" ");u.volume=0;ss.speak(u);}}catch(_){}}
+  function decode(ab){return new Promise((res,rej)=>{try{const p=ctx.decodeAudioData(ab,res,rej);if(p&&p.then)p.then(res,rej);}catch(e){rej(e);}});}
+  // nivelado: ganancia para que cada frase quede a ~-20 dBFS RMS (las voces de ElevenLabs no salen igual de fuertes)
+  function gainOf(b){let s=0,n=0;for(let c=0;c<b.numberOfChannels;c++){const d=b.getChannelData(c);for(let i=0;i<d.length;i+=16){s+=d[i]*d[i];n++;}}const r=Math.sqrt(s/Math.max(1,n));return r>1e-4?Math.max(.35,Math.min(3,.1/r)):1;}
+  function load(who,lg,text){const url=KD.vozUrl(who,lg,text);if(!bufs.has(url))bufs.set(url,fetch(url,ctl?{signal:ctl.signal}:{}).then(r=>{if(!r.ok)throw new Error("voz "+r.status);return r.arrayBuffer();})
+      .then(ab=>{if(!ctx)throw new Error("sin audio");return decode(ab);}).then(b=>({buf:b,gain:gainOf(b)})).catch(()=>{bufs.delete(url);return null;}));return bufs.get(url);}
+  function play(it,onStart){return new Promise(res=>{try{const s=ctx.createBufferSource(),g=ctx.createGain();s.buffer=it.buf;g.gain.value=it.gain;s.connect(g);g.connect(inp);let done=false;
+      const end=()=>{if(done)return;done=true;clearTimeout(t);stopNow=null;res();},t=setTimeout(end,(it.buf.duration+1.5)*1000);s.onended=end;stopNow=()=>{try{s.stop();}catch(_){}end();};
+      if(ctx.state!=="running"&&ctx.resume)ctx.resume().catch(()=>{});s.start();if(onStart)onStart(it.buf.duration);}catch(e){res();}});}
+  // respaldo: voz del navegador (chica para la clienta, chico para Admirito) si el proxy /voz no responde
+  const FEM=/m[oó]nica|paulina|marisol|elvira|helena|laura|luc[ií]a|carmen|samantha|karen|serena|kate|susan|victoria|moira|tessa|fiona|zira|hazel|libby|sonia|jenny|aria|female|mujer/i,MAS=/jorge|diego|juan|pablo|[aá]lvaro|daniel|arthur|oliver|alex|fred|tom\b|david|george|ryan|guy|male|hombre/i;
+  function tts(who,lg,text,onStart){return new Promise(res=>{const ss=window.speechSynthesis;if(!ss||!window.SpeechSynthesisUtterance)return res();const l=lg==="en"?"en-GB":"es-ES",re=who==="customer"?FEM:MAS;
+      const vs=(ss.getVoices()||[]).filter(v=>String(v.lang).toLowerCase().startsWith(lg)),v=vs.find(x=>x.lang.replace("_","-")===l&&re.test(x.name))||vs.find(x=>re.test(x.name))||vs.find(x=>x.lang.replace("_","-")===l)||vs[0];
+      const u=new SpeechSynthesisUtterance(text);u.lang=l;if(v)u.voice=v;u.pitch=v&&re.test(v.name)?1:(who==="customer"?1.25:.9);let done=false;
+      const end=()=>{if(done)return;done=true;clearTimeout(t);stopNow=null;res();},t=setTimeout(end,(text.length/11+3)*1000);u.onend=end;u.onerror=end;stopNow=()=>{try{ss.cancel();}catch(_){}end();};
+      try{ss.cancel();ss.speak(u);}catch(_){end();}if(onStart)onStart(text.length/14);});}
+  async function speak(who,lg,text,onStart){const g=gen,parts=KD.chunks(text),e={who:who,lang:lg,voice:KD.voiceFor(who,lg).id,text:text,t0:performance.now(),t1:0,via:[]};log.push(e);
+    for(let i=0;i<parts.length;i++){const it=await load(who,lg,parts[i]);if(g!==gen)break;if(i===0)e.t0=performance.now();
+      if(it&&ctx){e.via.push("voz");await play(it,i===0?onStart:null);}else{e.via.push("navegador");await tts(who,lg,parts[i],i===0?onStart:null);}if(g!==gen)break;}
+    e.t1=performance.now();}
+  // precarga EN SERIE (una petición cada vez: no se pisan los límites de concurrencia de ElevenLabs); al hablar, directo
+  let pq=Promise.resolve();
+  function prefetch(who,lg,text){if(!ctx)return;const g=gen;KD.chunks(text).forEach(p=>{pq=pq.then(()=>g===gen?load(who,lg,p):null);});}
+  function stopAll(){gen++;if(stopNow)stopNow();try{window.speechSynthesis&&window.speechSynthesis.cancel();}catch(_){}if(ctl){ctl.abort();ctl=new AbortController();}}
+  return {unlock:unlock,speak:speak,prefetch:prefetch,stopAll:stopAll,get state(){return ctx?ctx.state:"none";}};
+})();
+function demoUntil(fn,ms){return new Promise(r=>{const t0=Date.now(),k=setInterval(()=>{let ok=false;try{ok=!!fn();}catch(_){}if(ok||Date.now()-t0>ms){clearInterval(k);r(ok);}},80);});}
+function demoRender(){const s=KD.script(demoLang),b=$("#demoBubbles");$("#demoBadge").textContent=s.badge;$("#demoHint").textContent=s.hint;
+  // una sola burbuja (la frase que suena ahora, o «Pensando…») para no tapar el carrito: Admirito a la izquierda, la clienta a la derecha
+  const list=demoThink?[]:demoMsgs.slice(-1).map(m=>({m:m}));
+  b.innerHTML=list.map(x=>'<div class="db '+(x.m.who==="customer"?"cli":"adm")+(x.m.sp?" sp":"")+(x.m.fresh?" new":"")+'"><b>'+(x.m.who==="customer"?avEsc(s.who+" · "+s.name):avEsc(s.admirito))+'<span class="wv"><i></i><i></i><i></i><i></i></span></b><span>'+avEsc(x.m.text)+'</span></div>').join("")
+    +(demoThink?'<div class="db adm th new"><b>'+avEsc(s.admirito)+'</b><span>'+avEsc(s.thinking)+'</span></div>':"");demoMsgs.forEach(m=>{m.fresh=false;});}
+function demoBubble(who,text,o){if(text==null){demoMsgs=[];demoThink=false;demoRender();return;}const sp=!!(o&&o.speaking),last=demoMsgs[demoMsgs.length-1];
+  if(last&&last.who===who&&last.text===text)last.sp=sp;else demoMsgs.push({who:who,text:text,sp:sp,fresh:true});demoMsgs=demoMsgs.slice(-3);demoRender();}
+// mientras la clienta habla, su frase aparece en la caja (como si dictara al micro) y luego viaja a la cara
+function demoType(text,dur){clearInterval(demoTypeT);const w=String(text).split(" "),t0=Date.now(),ms=Math.max(.6,dur||1)*1000;
+  demoTypeT=setInterval(()=>{const k=Math.min(w.length,Math.ceil(w.length*(Date.now()-t0)/ms));$("#avQ").value=w.slice(0,k).join(" ");if(k>=w.length)clearInterval(demoTypeT);},70);}
+function demoTap(el){return new Promise(r=>{if(!el)return r();const st=$("#stage"),sr=st.getBoundingClientRect(),k=sr.width/st.offsetWidth||1,er=el.getBoundingClientRect(),t=$("#demoTap");
+  t.style.left=((er.left+er.width/2-sr.left)/k)+"px";t.style.top=((er.top+er.height/2-sr.top)/k)+"px";t.classList.remove("on");void t.offsetWidth;t.classList.add("on");el.classList.add("demo-press");
+  setTimeout(()=>{el.classList.remove("demo-press");r();},560);});}
+function demoNote(msg){clearTimeout(demoNoteT);const n=$("#demoNote");n.textContent=msg;n.classList.add("on");$("#demoTalk").classList.add("on");
+  demoNoteT=setTimeout(()=>{n.classList.remove("on");if(!demoOn())$("#demoTalk").classList.remove("on");},6000);}
+function demoQuiet(){DA.stopAll();clearInterval(demoTypeT);try{$("#avQ").value="";$("#avMic").classList.remove("on");}catch(_){}}
+const demoDeps={
+  lang:()=>demoLang,menu:()=>M,onState:()=>demoClass(),
+  prepare:async()=>{if(!avMounted)throw Object.assign(new Error("face"),{kind:"face"});
+    // conversación nueva: si había un cliente a medias, vuelta a la atracción (cara nueva) antes de empezar
+    if(cart.length||order||screen!=="attract"||avS.dirty||!avOn)go("attract");if(!avOn)avSetOn(true);
+    avPost({type:"da-audio",on:false});avS.dirty=true; // sin voz en la cara: suena solo el quiosco (y el cerebro no gasta voz)
+    if(!(await demoUntil(()=>avLoaded,10000)))throw Object.assign(new Error("face"),{kind:"face"});},
+  speak:(who,text)=>{if(who==="customer")try{$("#avMic").classList.add("on");}catch(_){}
+    return DA.speak(who,demoLang,text,who==="customer"?d=>demoType(text,d):null).then(()=>{clearInterval(demoTypeT);try{$("#avMic").classList.remove("on");if(who==="customer")$("#avQ").value=text;}catch(_){}});},
+  prefetch:(who,text)=>DA.prefetch(who,demoLang,text),
+  bubble:demoBubble,thinking:on=>{demoThink=!!on;demoRender();},
+  ask:q=>avAsk(q),
+  validate:a=>KA?KA.validateDraft(M,a,{stores:[avStore(),storeId,M.establishment.id]}):null,
+  tapConfirm:async()=>{$("#avQ").value="";if(!(await demoUntil(()=>$("#confirm").classList.contains("on"),6000)))return false;await demoTap($("#cfOk"));if(!$("#confirm").classList.contains("on"))return false;
+    $("#cfOk").click();return demoUntil(()=>screen==="pay",4000);},
+  tapCounter:async()=>{$("#avQ").value="";if(!(await demoUntil(()=>screen==="pay",4000)))return null;await demoTap($("#payCounter"));if(screen!=="pay")return null;$("#payCounter").click();
+    return (await demoUntil(()=>screen==="done"&&order&&order.number,9000))?order.number:null;},
+  customerName:()=>custName()||(order&&order.customerName)||"",
+  notice:msg=>demoNote(msg),
+  cleanup:reason=>{demoQuiet();demoBubble(null);if(reason!=="fallo")$("#demoTalk").classList.remove("on");avPost({type:"da-audio",on:true});go("attract");},
+  finish:()=>{avPost({type:"da-audio",on:true});setTimeout(()=>{if(!demoOn()){demoBubble(null);$("#demoTalk").classList.remove("on");}},7000);}
+};
+function demoToggle(){if(!KD||!avMounted)return "off";if(!demo){demo=KD.createDemo(demoDeps);window.__kioskDemo=demo;}
+  if(demo.active()){demo.stop("comando");return "stopped";}
+  DA.unlock(); // dentro del gesto (Intro / clic): desbloquea AudioContext y speechSynthesis
+  demoLang=lang;demoMsgs=[];demoThink=false;clearTimeout(demoNoteT);$("#demoNote").classList.remove("on");$("#demoTalk").classList.add("on");demoRender();
+  return demo.toggle("comando");}
 // ── toques ──
-document.addEventListener("pointerdown",()=>{lastTouch=lastHuman=Date.now();$("#idle").classList.remove("on");},true);
+document.addEventListener("pointerdown",e=>{lastTouch=lastHuman=Date.now();$("#idle").classList.remove("on");
+  // tocar la pantalla para la demo (menos la caja del avatar: ahí se escribe «/demo pedido» para pararla)
+  if(e.isTrusted&&demoOn()&&!(e.target&&e.target.closest&&e.target.closest("#avAsk"))){demoSwallow=Date.now();demo.stop("toque");}},true);
+// ese toque solo para la demo (vuelve a la atracción): no se convierte además en un clic sobre lo que hubiera debajo
+addEventListener("click",e=>{if(demoSwallow&&Date.now()-demoSwallow<1500){demoSwallow=0;e.stopPropagation();e.preventDefault();}},true);
 // el nombre tecleado a mano manda sobre el que dicte el avatar (y el avatar se entera)
 $("#custName").addEventListener("input",()=>{nameByUser=true;avManual();});
 // escribir el nombre cuenta como actividad; Intro = continuar
@@ -484,7 +607,7 @@ document.addEventListener("click",e=>{const el=e.target.closest("button,[data-zo
   if(el.id==="qr"){$("#payFrame").src=el.dataset.url+"&embed=1";$("#overlay").classList.add("on");}
 });
 // ── regla XPL de calle: 12 s sin tocar → vuelta a la atracción (en Pago, 60 s: se paga con el móvil) ──
-setInterval(()=>{avTick();if(screen==="attract"||screen==="done")return;const lim=(screen==="pay"?60:screen==="name"?45:(M.idle.resetSeconds||12))*1000,warn=(M.idle.warnSeconds||4)*1000,idle=Date.now()-lastTouch;
+setInterval(()=>{avTick();if(demoOn())lastTouch=Date.now();if(screen==="attract"||screen==="done")return;const lim=(screen==="pay"?60:screen==="name"?45:(M.idle.resetSeconds||12))*1000,warn=(M.idle.warnSeconds||4)*1000,idle=Date.now()-lastTouch;
   if(idle>=lim){host("reset",{reason:"idle"});go("attract");}else if(idle>=lim-warn){const el=$("#idle");el.textContent=t("idle")+Math.ceil((lim-idle)/1000)+" s";el.classList.add("on");}},250);
 // atracción en bucle
 let h=0;setInterval(()=>{const im=$$("#hero img");if(!im.length)return;im.forEach(x=>x.classList.remove("on"));im[h++%im.length].classList.add("on");},2500);
@@ -494,7 +617,8 @@ let h=0;setInterval(()=>{const im=$$("#hero img");if(!im.length)return;im.forEac
   $$("[data-logo]").forEach(e=>e.textContent=(marca||M.establishment.brandId||"").toUpperCase());
   colaKeyFromUrl();texts();avMount();await brand();window.__kioskReady=true;host("ready",{store:storeId,marca:marca});})();
 window.kiosko={go:go,get state(){return{screen:screen,cart:cart,order:order,avatar:{on:avOn,level:avLevel,pending:!!avS.pending,ready:!!(avS.r&&avS.r.ready),confirm:$("#confirm").classList.contains("on")}};},
-  fill:d=>applyDraft(d,"api"),add:l=>kAdd(l,"api"),avatar:{on:()=>avSetOn(true),off:()=>avSetOn(false),ask:q=>avAsk(q)}};
+  fill:d=>applyDraft(d,"api"),add:l=>kAdd(l,"api"),avatar:{on:()=>avSetOn(true),off:()=>avSetOn(false),ask:q=>avAsk(q)},
+  demo:{toggle:()=>demoToggle(),stop:()=>!!(demo&&demo.stop("api")),get state(){return demo?{state:demo.state,turns:demo.turns,reason:demo.reason,number:demo.number,lang:demoLang}:{state:"idle"};}}};
 })();
 </script>
 </body>

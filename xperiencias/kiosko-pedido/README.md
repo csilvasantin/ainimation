@@ -69,6 +69,38 @@ extras:['shot']}, optionsText:'Grande · Avena · Normal · +Shot extra de espre
 en castellano). La clave del quiosco viaja como `x-cola-clave` solo en `pedido` y `pagar`; la cola devuelve `pago`
 (token por pedido), que va en el QR como `&t=` y `pago-simulado.html` lo manda como `x-cola-pago`.
 
+## Demo de pedido: `/demo pedido` (7-oct-2026)
+
+Para presentaciones: se escribe **`/demo pedido`** (o `/demo order`) en la caja del avatar y se pulsa Intro; la segunda
+vez la para. Una **clienta simulada** (Lucía / Lucy) pide a Admirito de punta a punta en el idioma activo (ES/EN):
+
+1. Admirito saluda y pregunta. La clienta pide un *caffè latte grande con leche de avena*, añade un *croissant* y da
+   su nombre (guion en `demo-pedido.js`, ids reales de la carta). Cada frase suya viaja a la cara como `da-ask`; **las
+   respuestas de Admirito son las del cerebro real** en modo pedido y el carrito se llena en vivo con el `order-draft`.
+2. Si el cerebro pregunta algo que el guion no cubre (`missing:['leche']`), la clienta lo rellena con lo que quería
+   (o el valor por defecto de la carta). Como mucho 6 frases al cerebro; si no se completa o el cerebro falla o calla
+   30 s, la demo se para con un aviso.
+3. Con `ready:true` sale «¿Lo confirmo?»: la clienta dice «Sí, confírmalo», la demo **toca** «Confirmar pedido» y
+   «Pagar en barra» (con un círculo de toque visible) y Admirito cierra con el nombre y el número. La comanda real va a
+   la cola de la tienda con el nombre `Lucía - demo` (el relé no tiene campo de vía al crear) y `order.demo = true`.
+4. **Bocadillos** con quién habla (Admirito / Clienta · Lucía) y el subtítulo; la frase de la clienta aparece en la caja
+   como si la dictara al micro.
+5. **Para:** `/demo pedido` otra vez, o **tocar la pantalla** (menos la caja del avatar, donde se escribe el comando) o
+   la cara. Corta el audio, limpia el carrito y vuelve a la atracción con una cara nueva.
+
+**Voces.** Durante la demo la cara se queda sin voz propia (`{type:'da-audio', on:false}`: el cerebro tampoco la genera)
+y el quiosco pone las dos por un único `AudioContext`, **una sola a la vez**, niveladas por RMS y con compresor, con
+pausas de 300–600 ms. Proxy `https://mcp-ainimation.admira.store/voz` (ElevenLabs, caché de 30 días por frase):
+
+| Quién | ES | EN |
+|---|---|---|
+| Admirito (su voz de siempre: la que el cerebro da a su identidad) | David Martin `Nh2zY9kknu6z4pZy6FhD` | Liam `TX3LPaxmHKxFdv7VOQHJ` |
+| Clienta | Daniela `ajOR9IDAaubDK5qtLUqQ` | Sarah `EXAVITQu4vr4xnSDxMaL` |
+
+Las frases fijas (saludo, guion, confirmación, pago) se precargan al arrancar y la siguiente de la clienta mientras habla
+Admirito. Si `/voz` no responde, voz del navegador (chica / chico). El Intro que lanza el comando es el gesto que
+desbloquea el audio. `window.kiosko.demo.toggle() | stop() | state` para el gemelo y las pruebas.
+
 ## Contrato con el anfitrión (gemelo, admira.tv, pantalla.html)
 
 ```js
