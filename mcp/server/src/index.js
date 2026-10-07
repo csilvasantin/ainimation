@@ -299,7 +299,7 @@ export function crearServidor(env = {}, deps = {}, identidad = null) {
   const STO = z.string().regex(/^[a-z0-9-]{2,80}$/).default('starbucks-paseo-de-gracia');
   server.registerTool('cola_estado', {
     title: 'Estado de la cola de pedidos',
-    description: 'Pedidos de una tienda en tres fases —«Recibido» (1 min), «En preparación» (1 min) y «Preparado» (listo; recogido solo a los 2 min)— cada uno con estado y fase (ES/EN), (gestor de colas del quiosco; pago siempre SIMULADO), cada uno con su «nombre» si lo dio en el quiosco, y las URL de la pantalla pública, el iPad de Admirito y la taza. Con «pedido» (A001 o id) devuelve solo ese.',
+    description: 'Pedidos de una tienda en tres fases —«Recibido» (30 s), «En preparación» (1 min) y «Preparado» (listo; recogido solo a los 2 min)— cada uno con estado y fase (ES/EN), (gestor de colas del quiosco; pago siempre SIMULADO), cada uno con su «nombre» si lo dio en el quiosco, y las URL de la pantalla pública, el iPad de Admirito y la taza. Con «pedido» (A001 o id) devuelve solo ese.',
     inputSchema: { store: STO, pedido: z.string().max(64).optional() },
     annotations: { readOnlyHint: true, openWorldHint: true },
   }, seguro(async ({ store = 'starbucks-paseo-de-gracia', pedido }) => {

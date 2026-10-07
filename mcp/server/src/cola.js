@@ -7,8 +7,9 @@
  * Estados: pendiente → recibido (al pagar, RECIBIDO_S) → preparando (PREP_S) → listo «preparado» (o el barista) → recogido
  * (auto a los RECOGER s de estar listo, o el barista). El tiempo se evalúa al leer: sin alarmas.
  */
-// Tres fases (Carlos, 7-oct-2026): recibido (1 min) → en preparación (1 min) → preparado/listo; recogido a los 2 min.
-export const RECIBIDO_S = 60, PREP_S = 60, RECOGER_S = 120, MAX = 300, VIDA_MS = 3 * 3600_000;
+// Tres fases (Carlos, 7-oct-2026): recibido (30 s) → en preparación (1 min) → preparado/listo; recogido a los 2 min.
+// Recibido bajó de 60 a 30 s esa misma tarde: es lo que dura la barra con el vaso en la pantalla de admira.tv.
+export const RECIBIDO_S = 30, PREP_S = 60, RECOGER_S = 120, MAX = 300, VIDA_MS = 3 * 3600_000;
 export const STORE = /^[a-z0-9-]{2,80}$/, ID = /^[A-Za-z0-9._-]{4,64}$/;
 /** Nombre de pila para llamar al cliente: solo letras, espacios, guion y apóstrofo; máx. 24. */
 export const limpiaNombre = (n) => String(n || '').normalize('NFC').replace(/[^\p{L} '\-]/gu, '').replace(/\s+/g, ' ').trim().slice(0, 24) || null;
