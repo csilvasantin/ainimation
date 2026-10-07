@@ -1,6 +1,6 @@
 {
-  "version": "v.07.10.2026.r17.13:16",
-  "deployedAt": "2026-10-07T11:14:54Z",
+  "version": "v.07.10.2026.r18.13:21",
+  "deployedAt": "2026-10-07T11:21:32Z",
   "deployer": "GrokBot",
   "machine": "MacMini",
   "signature": "GrokBot · MacMini",
@@ -10,11 +10,12 @@
   "dirty": false,
   "returnTag": "AInimation-v.04.09.2026.r1",
   "previousTag": "AInimation-v.03.09.2026.r2",
-  "previousVersion": "v.07.10.2026.r15.12:32",
-  "note": "El gestor de colas es la pantalla del iPad del mostrador del gemelo",
+  "previousVersion": "v.07.10.2026.r17.13:16",
+  "note": "El quiosco pide el nombre siempre antes de pagar y Admirito hace gracias en el iPad cuando no hay pedidos",
   "novedades": [
-    "El pago dentro del quiosco ya llega a la cola: el pedido sale en la pantalla y en el iPad",
-    "El número del quiosco es siempre el mismo que el de la cola",
-    "El relé acepta llamar y reiniciar desde admira.tv/gestorColas (con clave de servicio)"
+    "Al pulsar «Pagar» el quiosco abre una pantalla grande «¿A qué nombre ponemos tu pedido?»: sin nombre no se puede seguir",
+    "En el Studio (plantilla Quiosco) el carrito también pide el nombre antes de pagar",
+    "Sin pedidos pendientes, Admirito hace gracias en el iPad de la barra (saltos, giros, bailes) e invita a pedir en el quiosco con frases simpáticas",
+    "Cuando un pedido está listo, Admirito deja la demo y te llama por tu nombre"
   ]
 }

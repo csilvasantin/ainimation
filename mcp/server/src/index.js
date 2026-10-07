@@ -314,7 +314,7 @@ export function crearServidor(env = {}, deps = {}, identidad = null) {
 
   server.registerTool('cola_avisos', {
     title: 'Avisos de pedido listo',
-    description: 'Pedidos «listos» de una tienda con el aviso que anuncian Admirito (iPad /cola/ipad.html y gemelo), la cola del móvil y la taza: «NOMBRE, tu pedido Starbucks está preparado» (sin nombre, con el número). Solo lectura; cada pantalla anuncia cada pedido una vez.',
+    description: 'Pedidos «listos» de una tienda con el aviso que anuncian Admirito (iPad /cola/ipad.html y gemelo), la cola del móvil y la taza: «NOMBRE, tu pedido Starbucks está preparado» (sin nombre, con el número). Solo lectura; cada pantalla anuncia cada pedido una vez. Sin pedidos pendientes, el iPad muestra a Admirito en modo demo. El quiosco exige el nombre antes de pagar.',
     inputSchema: { store: STO },
     annotations: { readOnlyHint: true, openWorldHint: true },
   }, seguro(async ({ store = 'starbucks-paseo-de-gracia' }) => {
