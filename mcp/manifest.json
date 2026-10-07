@@ -2,7 +2,7 @@
   "name": "ainimation-studio",
   "title": "AInimation Studio · ainimation.studio — Admira Director for the AI era",
   "description": "MCP hub for ainimation.studio, the authoring layer of the AdmiraNeXT suite: director-style animation work rebuilt with AI, through three doors — Author, Generate, Control. This page is the machine-readable side; there is no public API yet and this manifest says so instead of inventing one.",
-  "version": "v.07.10.2026.r22.14:07",
+  "version": "v.07.10.2026.r23.15:21",
   "site": "https://www.ainimation.studio",
   "hub": "https://www.ainimation.studio/mcp/",
   "llms_txt": "https://www.ainimation.studio/mcp/llms.txt",
@@ -260,5 +260,10 @@
       "pedido": "{source:'ainimation-xperiencia', event:'order', order}",
       "voz": "{source:'admingo'|'ainimation-xperiencia', type:'say', id, text, lang} → {source:'xpaceos-totem', type:'say-ack', id, spoken, via} (≤500 ms; sin acuse, voz del navegador es-ES/en-GB)"
     }
+  },
+  "ipad_queue_idle": {
+    "es": "Sin pedidos en Recibido, En preparación ni Preparado, Admirito ocupa toda la pantalla del iPad. Al llegar un pedido reaparecen las tres fases; al recogerse el último vuelve al avatar completo. Una pérdida de conexión conserva el último estado conocido. /ipad cola activa la cola, /ipad abrir la amplía (también doble clic), /ipad off recupera la playlist. Los previos de Pixeria conservan prioridad. La vista de escena no activa voz propia; la voz ampliada requiere un toque. Las pruebas usan starbucks-qa, sin alterar la cola real de Carlos.",
+    "en": "With no Received, Preparing or Ready orders, Admirito fills the iPad screen. Any active order restores all three phases; collecting the last order restores the full avatar. A connection failure retains the last known state. /ipad cola enables the queue, /ipad abrir expands it (also double-click), /ipad off restores its playlist. Pixeria previews retain priority. Scene mode has no independent voice; expanded voice requires a user gesture. Tests use starbucks-qa without changing Carlos’s live queue.",
+    "guide": "https://www.admira.store/admira-xp/docs/ipad-queue-idle.md"
   }
 }

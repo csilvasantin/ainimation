@@ -37,11 +37,18 @@ footer{grid-column:1/-1;background:#FFE58A;color:#3A2E00;text-align:center;font-
 @keyframes gBaile{0%,100%{transform:none}25%{transform:translateX(-5%) rotate(-5deg)}75%{transform:translateX(5%) rotate(5deg)}}
 #bocadillo.demo{background:#F2F0EB}#bocadillo.demo b{color:#00704A}
 @media (orientation:portrait){body{grid-template-columns:1fr;grid-template-rows:auto 1.2fr 1fr auto}}
+/* Idle fills the iPad; queue columns return for any active order. */
+body.ipad-idle{display:block}
+body.ipad-idle #avatar{position:absolute;inset:0;width:100%;height:100%}
+body.ipad-idle aside,body.ipad-idle header{display:none}
+body.ipad-idle footer{position:absolute;z-index:3;left:0;right:0;bottom:0;font-size:clamp(10px,1.4vw,13px);padding:4px}
+body.ipad-idle #bocadillo{top:auto;bottom:7%;left:12%;right:12%;font-size:clamp(18px,2.4vw,30px);padding:12px 18px}
+body.ipad-idle #bocadillo:after{display:none}
 </style>
 </head>
-<body>
+<body class="ipad-idle">
 <header><b>☁️ Admirito<small id="tienda"></small></b><span id="estado">Conectando…</span></header>
-<div id="avatar"><iframe id="nube" title="Admirito" allow="autoplay" src="https://digitalavatar.ai/nube.html?kiosk=1&amp;avatar=admirito&amp;tier=good&amp;sector=retail&amp;audio=off"></iframe><div id="bocadillo" role="status" aria-live="assertive"></div></div>
+<div id="avatar"><iframe id="nube" title="Admirito" allow="autoplay" src="https://digitalavatar.ai/nube.html?embed=1&amp;kiosk=1&amp;avatar=admirito&amp;tier=good&amp;sector=retail&amp;audio=off"></iframe><div id="bocadillo" role="status" aria-live="assertive"></div></div>
 <aside>
   <h2>✅ ¡Preparado!</h2><div class="nums" id="listo"></div>
   <h2 style="color:#fff;opacity:.8">⏳ En preparación</h2><div class="nums prep" id="prep"></div>
@@ -108,7 +115,10 @@ async function tic(){
     const listos=d.listo||[];
     listos.forEach(p=>{if(!vistos.has(p.numero)){vistos.add(p.numero);if(true){cola.push(p);recientes.add(p.numero);setTimeout(()=>recientes.delete(p.numero),15000);}}});
     primera=false;
-    pendientes=listos.length;ultimoListo=listos[0]||null;$('listo').innerHTML=chips(listos,recientes);$('prep').innerHTML=chips(d.preparando||[]);$('rec').innerHTML=chips(d.recibido||[]);
+    pendientes=['recibido','preparando','listo'].reduce((n,k)=>n+(Array.isArray(d[k])?d[k].length:0),0);
+    document.body.classList.toggle('ipad-idle',pendientes===0);
+    if(pendientes>0&&$('bocadillo').classList.contains('demo')){$('bocadillo').classList.remove('on','demo');GRACIAS.forEach(c=>$('avatar').classList.remove(c));}
+    ultimoListo=listos[0]||null;$('listo').innerHTML=chips(listos,recientes);$('prep').innerHTML=chips(d.preparando||[]);$('rec').innerHTML=chips(d.recibido||[]);
     $('estado').textContent='En vivo · '+new Date().toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
     siguiente();
   }catch(_){$('estado').textContent='Sin conexión, reintentando…';}

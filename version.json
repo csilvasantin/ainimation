@@ -1,20 +1,20 @@
 {
-  "version": "v.07.10.2026.r22.14:07",
+  "version": "v.07.10.2026.r23.15:21",
   "deployedAt": "2026-10-07T12:07:38Z",
-  "deployer": "GrokBot",
+  "deployer": "OraculoMacMini",
   "machine": "MacMini",
-  "signature": "GrokBot · MacMini",
+  "signature": "OraculoMacMini · MacMini",
   "git": "66ffe72ac6eef009ad65c25540077062498843a2",
   "gitShort": "66ffe72",
   "gitFull": "66ffe72ac6eef009ad65c25540077062498843a2",
   "dirty": false,
   "returnTag": "AInimation-v.04.09.2026.r1",
   "previousTag": "AInimation-v.03.09.2026.r2",
-  "previousVersion": "v.07.10.2026.r21.13:59",
-  "note": "Sala de pruebas starbucks-qa para QA y demos automáticas",
+  "previousVersion": "v.07.10.2026.r22.14:07",
+  "note": "Admirito a pantalla completa en reposo",
   "novedades": [
-    "Las pruebas y demos automáticas (demo de la taza Ana/Luis/Eva, tests del quiosco) van ahora a la sala starbucks-qa",
-    "starbucks-paseo-de-gracia queda solo para la demo real de Carlos",
-    "La ayuda explica cómo ver la sala de pruebas (iPad, barista y taza con ?store=starbucks-qa)"
+    "Sin pedidos el iPad muestra Admirito completo",
+    "Cualquier fase activa recupera las columnas",
+    "Modo embed sin consola; ayuda ES/EN actualizada"
   ]
 }
