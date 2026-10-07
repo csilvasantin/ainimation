@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
 <title>Quiosco de pedido · AInimation Xperiencia</title>
-<meta name="description" content="Xperiencia de quiosco de pedido vertical 1080×1920 para tótems Retail OS: carta por establecimiento, opciones, carrito, pago QR simulado y número de pedido.">
+<meta name="description" content="Xperiencia de quiosco de pedido (se adapta a 9:16, 16:9, cuadrado y tótems) para players Retail OS: carta por establecimiento, opciones, carrito, pago QR simulado y número de pedido.">
 <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
 <style>
 :root{--mb-primario:#00704A;--mb-primario-texto:#fff;--mb-secundario:#1E3932;--mb-secundario-texto:#fff;--mb-acento:#CBA258;--mb-acento-texto:#1E1A12;--mb-fondo:#fff;--mb-fondo-alt:#F2F0EB;--mb-superficie:#fff;--mb-superficie-alt:#EDEBE6;--mb-borde:#D9D6CF;--mb-texto:#1E2A25;--mb-texto-suave:#55605B;--mb-ok:#2F7D4F;--mb-error:#C0392B;--mb-font:Inter,-apple-system,'Segoe UI',Roboto,sans-serif;--r:22px}
@@ -81,6 +81,21 @@ legend{font-size:36px;font-weight:800;margin-bottom:16px}
 #overlay iframe{width:860px;height:1400px;border:0;border-radius:30px;background:#fff}
 #idle{position:absolute;left:50%;top:40%;transform:translate(-50%,-50%);background:var(--mb-secundario);color:var(--mb-secundario-texto);padding:50px 70px;border-radius:30px;font-size:44px;font-weight:800;text-align:center;display:none;z-index:45}
 #idle.on{display:block}
+/* formatos: horizontal y cuadrado reorganizan, no encogen */
+.grid{grid-template-columns:repeat(auto-fill,minmax(440px,1fr))}
+html[data-formato="horizontal"] #s-attract.on,html[data-formato="cuadrado"] #s-attract.on{display:grid;grid-template-columns:auto 1fr;grid-template-areas:"hero logo" "hero h1" "hero p" "hero pulse";align-content:center;justify-items:center;column-gap:60px;padding:0 80px}
+html[data-formato] #s-attract .logo{grid-area:logo}html[data-formato] #s-attract .hero{grid-area:hero}html[data-formato] #s-attract h1{grid-area:h1}html[data-formato] #s-attract p{grid-area:p}html[data-formato] #s-attract .pulse{grid-area:pulse}
+html[data-formato="horizontal"] #s-attract .hero{width:600px;height:600px;flex:none;margin:0}
+html[data-formato="cuadrado"] #s-attract .hero{width:420px;height:420px;flex:none;margin:0}
+html[data-formato="horizontal"] #s-attract h1,html[data-formato="cuadrado"] #s-attract h1{font-size:76px;margin:0}
+html[data-formato="cuadrado"] #s-attract p{font-size:36px}
+html[data-formato="horizontal"] header.bar,html[data-formato="cuadrado"] header.bar{height:120px}
+html[data-formato="horizontal"] main,html[data-formato="cuadrado"] main{padding-bottom:200px}
+html[data-formato="horizontal"] .grid{grid-template-columns:repeat(auto-fill,minmax(330px,1fr))}
+html[data-formato="horizontal"] .card img,html[data-formato="cuadrado"] .card img{aspect-ratio:4/3;object-fit:contain}
+html[data-formato="horizontal"] .foot{left:auto;width:min(1100px,60%)}
+html[data-formato="horizontal"] #qr img,html[data-formato="horizontal"] #qr canvas,html[data-formato="cuadrado"] #qr img,html[data-formato="cuadrado"] #qr canvas{width:420px!important;height:420px!important}
+html[data-formato="horizontal"] .detail-top img,html[data-formato="cuadrado"] .detail-top img{width:240px;height:240px}
 </style>
 </head>
 <body>
@@ -155,7 +170,13 @@ function say(text){const l=lang==="en"?"en-GB":"es-ES";window.__kioskSaid=(windo
   const ack=e=>{const d=e.data;if(d&&d.type==="say-ack"&&d.id===id){ok=true;removeEventListener("message",ack);}};addEventListener("message",ack);
   try{window.parent.postMessage({source:"ainimation-xperiencia",piece:"kiosko-pedido",type:"say",id:id,text:text,lang:l},"*");}catch(e){}
   setTimeout(()=>{if(!ok){removeEventListener("message",ack);local();}},500);}
-function fit(){const s=Math.min(innerWidth/1080,innerHeight/1920);$("#stage").style.transform="translate(-50%,-50%) scale("+s+")";}
+// Formatos (7-oct-2026): el quiosco REFLUYE al player que lo aloja (9:16, 16:9, cuadrado, tótems raros).
+// El lado corto mide 1080 unidades de diseño; el largo crece con el player (sin bandas negras).
+// ?formato=vertical|horizontal|cuadrado&w=&h= (lo pasa el gemelo) solo se usa si el iframe aún no tiene tamaño.
+function fit(){const q=new URLSearchParams(location.search);let W=innerWidth,H=innerHeight;if(!(W>0&&H>0)){W=+q.get("w")||1080;H=+q.get("h")||1920;}
+  const s=Math.min(W,H)/1080,w=Math.round(W/s),h=Math.round(H/s),ar=W/H,fmt=ar<0.8?"vertical":ar>1.25?"horizontal":"cuadrado";
+  const st=$("#stage");st.style.width=w+"px";st.style.height=h+"px";st.style.transform="translate(-50%,-50%) scale("+s+")";
+  document.documentElement.dataset.formato=fmt;window.__kioskFormato={formato:fmt,w:w,h:h,pedido:q.get("formato")||"",px:[W,H]};}
 addEventListener("resize",fit);fit();
 // ── marca blanca: tokens --mb-* del catálogo admiranext.com/marcablanca ──
 const kebab=k=>k.replace(/[A-Z]/g,c=>"-"+c.toLowerCase());

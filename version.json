@@ -1,21 +1,20 @@
 {
-  "version": "v.07.10.2026.r6.10:17",
-  "deployedAt": "2026-10-07T08:17:51Z",
+  "version": "v.07.10.2026.r7.10:54",
+  "deployedAt": "2026-10-07T08:54:34Z",
   "deployer": "GrokBot",
   "machine": "MacMini",
   "signature": "GrokBot · MacMini",
-  "git": "fc3edbb2d13e5b6244f1cf2171aaacb5aa003657",
-  "gitShort": "fc3edbb",
-  "gitFull": "fc3edbb2d13e5b6244f1cf2171aaacb5aa003657",
+  "git": "afea007763f1f96111596508da70d6dcd6d6184c",
+  "gitShort": "afea007",
+  "gitFull": "afea007763f1f96111596508da70d6dcd6d6184c",
   "dirty": false,
   "returnTag": "AInimation-v.04.09.2026.r1",
   "previousTag": "AInimation-v.03.09.2026.r2",
-  "previousVersion": "v.07.10.2026.r5.09:53",
-  "note": "Ecosistema: /help manual ES/EN del Director y /mcp con herramientas de suite",
+  "previousVersion": "v.07.10.2026.r6.10:17",
+  "note": "Formatos: el quiosco se adapta a cualquier player y el Director prueba la pieza en varios formatos",
   "novedades": [
-    "Ayuda nueva en /help: manual completo del Director en español e inglés (Cast, Stage, Score, Inspector, Behaviour, Admingo, Mensaje, plantillas, publicar, quiosco y pago)",
-    "Sección Ecosistema: cómo llega lo que creas a Pixeria, admira.tv, los tótems de XpaceOS, la marca blanca, Yokup y admira.biz",
-    "El MCP suma 10 herramientas: plantillas, crear proyecto, validar y compilar Admingo, validar carta, item de admira.tv, fijar en el tótem y aplicar marca",
-    "El quiosco pide al avatar del tótem que diga el número de pedido; si nadie responde, habla el navegador"
+    "El quiosco de pedido se reorganiza para cualquier pantalla: vertical 9:16, horizontal 16:9, cuadrada o tótems raros, sin bandas negras",
+    "Las piezas publicadas se encajan en el player (fit) o lo llenan recortando (fill) con ?ajuste=fill",
+    "Stage: tamaños de los players del gemelo (tótem pared, TPV, iPad, pantallas) y nueva 📐 Vista responsive con cuatro formatos a la vez"
   ]
 }

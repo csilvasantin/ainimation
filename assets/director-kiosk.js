@@ -23,7 +23,34 @@
     { w: 1080, h: 1920, es: "Tótem vertical · 1080 × 1920", en: "Vertical totem · 1080 × 1920" },
     { w: 1280, h: 720, es: "16:9 · 1280 × 720", en: "16:9 · 1280 × 720" },
     { w: 1080, h: 1080, es: "Cuadrado · 1080 × 1080", en: "Square · 1080 × 1080" },
+    // Players virtuales del gemelo (XpaceOS / admira.store), 7-oct-2026
+    { w: 800, h: 1800, es: "Gemelo · tótem pared Starbucks (4:9) · 800 × 1800", en: "Twin · Starbucks wall totem (4:9) · 800 × 1800" },
+    { w: 1280, h: 800, es: "Gemelo · TPV / POS (16:10) · 1280 × 800", en: "Twin · POS screen (16:10) · 1280 × 800" },
+    { w: 1024, h: 768, es: "Gemelo · iPad horizontal (4:3) · 1024 × 768", en: "Twin · landscape iPad (4:3) · 1024 × 768" },
+    { w: 1920, h: 1080, es: "Gemelo · pantallas de pared (16:9) · 1920 × 1080", en: "Twin · wall screens (16:9) · 1920 × 1080" },
   ];
+  // Vista responsive: la pieza publicada en varios players a la vez, con ajuste fit / fill.
+  const FORMATS = [["9:16", 270, 480], ["16:9", 480, 270], ["1:1", 340, 340], ["Tótem 4:9", 200, 450]];
+  async function responsivePreview() {
+    if (!window.ainXperiencia?.previewHtml) return null;
+    document.querySelector(".dk-responsive")?.remove();
+    const d = document.createElement("div"); d.className = "dk-responsive"; d.setAttribute("role", "dialog"); d.setAttribute("aria-label", L("Vista responsive", "Responsive preview"));
+    d.innerHTML = `<header><b>📐 ${L("Vista responsive", "Responsive preview")}</b><label><input type="radio" name="dkfit" value="fit" checked> fit</label><label><input type="radio" name="dkfit" value="fill"> fill</label><button type="button" data-dk-close>✕</button></header><div class="dk-resp-grid"></div>`;
+    document.body.append(d);
+    d.querySelector("[data-dk-close]").onclick = () => d.remove();
+    const grid = d.querySelector(".dk-resp-grid");
+    async function paint(ajuste) {
+      grid.innerHTML = "";
+      for (const [name, w, h] of FORMATS) {
+        const html = await window.ainXperiencia.previewHtml(`ajuste=${ajuste}&formato=${w > h ? "horizontal" : w === h ? "cuadrado" : "vertical"}&w=${w}&h=${h}`);
+        const fig = document.createElement("figure"); fig.dataset.dkFormat = name;
+        const f = document.createElement("iframe"); f.style.width = w + "px"; f.style.height = h + "px"; f.srcdoc = html || ""; f.title = name;
+        const c = document.createElement("figcaption"); c.textContent = `${name} · ${w}×${h}`; fig.append(f, c); grid.append(fig);
+      }
+    }
+    d.querySelectorAll("input[name=dkfit]").forEach((r) => r.onchange = () => paint(r.value));
+    await paint("fit"); return d;
+  }
   const ADMINGO_MOVIE = `-- Quiosco de pedidos · script de película (Admingo)
 global pedido
 
@@ -466,6 +493,9 @@ fin`;
       .dk-check{flex-direction:row!important;align-items:center}.dk-hint{opacity:.7;margin:4px 0 8px}.dk-del{width:100%;background:#4a1f1a;color:#fff;border:0;border-radius:6px;padding:7px;cursor:pointer}
       .dk-menu-badge{margin-left:6px;background:#00704A;color:#fff;border:0;border-radius:99px;padding:2px 9px;font:700 11px Inter,system-ui,sans-serif;cursor:pointer}
       .dk-size{cursor:pointer}.dk-size-menu{position:fixed;z-index:400;background:#14110f;border:1px solid #3a3a3a;border-radius:8px;padding:6px;display:flex;flex-direction:column}.dk-size-menu button{all:unset;cursor:pointer;padding:7px 10px;color:#f3f1ea;font:13px Inter,system-ui,sans-serif;border-radius:6px}.dk-size-menu button:hover{background:#2a2622}
+      .dk-responsive{position:fixed;inset:40px;z-index:9500;background:#14110f;color:#f3f1ea;border:1px solid #3a3a3a;border-radius:10px;display:flex;flex-direction:column;font:13px Inter,system-ui,sans-serif}
+      .dk-responsive header{display:flex;gap:14px;align-items:center;padding:10px 14px;border-bottom:1px solid #3a3a3a}.dk-responsive header b{flex:1}.dk-responsive header button{all:unset;cursor:pointer;padding:2px 8px}
+      .dk-resp-grid{flex:1;overflow:auto;display:flex;flex-wrap:wrap;gap:22px;align-items:flex-start;padding:18px}.dk-resp-grid figure{margin:0}.dk-resp-grid iframe{display:block;border:1px solid #3a3a3a;background:#000}.dk-resp-grid figcaption{opacity:.7;margin-top:6px}
       .dk-checkout{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9000;display:none;align-items:center;justify-content:center}.dk-checkout.on{display:flex}.dk-checkout div{position:relative;width:min(92vw,460px);height:min(86vh,720px)}.dk-checkout iframe{width:100%;height:100%;border:0;border-radius:16px;background:#fff}.dk-checkout button{position:absolute;top:-12px;right:-12px;width:34px;height:34px;border-radius:50%;border:0;background:#fff;cursor:pointer}`;
     document.head.append(css);
     const bar = $(".director-menubar"); if (!bar) return;
@@ -497,6 +527,7 @@ fin`;
       host.addEventListener("pointerdown", (e) => e.stopPropagation()); // la barra de la ventana captura el puntero (arrastre)
       host.addEventListener("click", (e) => { e.stopPropagation(); document.querySelector(".dk-size-menu")?.remove(); const m = document.createElement("div"); m.className = "dk-size-menu";
         PRESETS.forEach((pr) => { const b = document.createElement("button"); b.type = "button"; b.textContent = L(pr.es, pr.en); b.dataset.dkSize = `${pr.w}x${pr.h}`; b.onclick = () => { setStageSize(pr.w, pr.h); m.remove(); }; m.append(b); });
+        { const b = document.createElement("button"); b.type = "button"; b.textContent = L("📐 Vista responsive (9:16 · 16:9 · 1:1 · tótem)", "📐 Responsive preview (9:16 · 16:9 · 1:1 · totem)"); b.dataset.dkResponsive = ""; b.onclick = () => { m.remove(); responsivePreview(); }; m.append(b); }
         const r = host.getBoundingClientRect(); m.style.left = `${Math.max(8, r.right - 260)}px`; m.style.top = `${r.bottom + 6}px`; document.body.append(m);
         setTimeout(() => document.addEventListener("pointerdown", function off(ev) { if (!m.contains(ev.target)) { m.remove(); document.removeEventListener("pointerdown", off); } }), 0); }); }
     const p = plan(); if (p?.stage) applyStageSize(p.stage.w, p.stage.h);
@@ -507,6 +538,6 @@ fin`;
     if (new URLSearchParams(location.search).get("plantilla") === "quiosco" && p?.template !== "quiosco-de-pedidos") templateKiosk();
   }
   function pick(accept, fn) { const i = Object.assign(document.createElement("input"), { type: "file", accept }); i.onchange = async () => { try { await fn(i.files[0]); } catch { window.alert(L("No se ha podido leer el archivo.", "Could not read the file.")); } }; i.click(); }
-  window.ainDirector = { newScreen, insert, templateKiosk, newKioskProject, exportProject, setStageSize, setMenu, loadSampleMenu, kiosk: () => kiosk(), inspector, sync };
+  window.ainDirector = { responsivePreview, PRESETS, newScreen, insert, templateKiosk, newKioskProject, exportProject, setStageSize, setMenu, loadSampleMenu, kiosk: () => kiosk(), inspector, sync };
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", () => setTimeout(boot, 0)); else setTimeout(boot, 0);
 })();
