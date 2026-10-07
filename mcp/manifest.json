@@ -2,7 +2,7 @@
   "name": "ainimation-studio",
   "title": "AInimation Studio · ainimation.studio — Admira Director for the AI era",
   "description": "MCP hub for ainimation.studio, the authoring layer of the AdmiraNeXT suite: director-style animation work rebuilt with AI, through three doors — Author, Generate, Control. This page is the machine-readable side; there is no public API yet and this manifest says so instead of inventing one.",
-  "version": "v.07.10.2026.r14.12:19",
+  "version": "v.07.10.2026.r15.12:32",
   "site": "https://www.ainimation.studio",
   "hub": "https://www.ainimation.studio/mcp/",
   "llms_txt": "https://www.ainimation.studio/mcp/llms.txt",
@@ -116,10 +116,15 @@
         "name": "cola_avanzar",
         "estado": "vivo",
         "desc": "barista de la demo: pasa un pedido a listo / recogido (pago simulado)"
+      },
+      {
+        "name": "cola_avisos",
+        "estado": "vivo",
+        "desc": "pedidos listos con el aviso «NOMBRE, tu pedido Starbucks está preparado» + URL del iPad de Admirito, móvil y taza"
       }
     ],
     "fuente_unica": "https://www.ainimation.studio/xperiencias/index.json",
-    "tool_count": 19,
+    "tool_count": 20,
     "proximamente": [
       {
         "que": "ZIP de publicar_xperiencia generado por el servidor",
