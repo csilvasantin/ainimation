@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+<title>Starbucks · Quiosco de pedido (demo) · AInimation</title>
+<meta name="robots" content="noindex">
+<style>html,body{margin:0;height:100%;background:#1E3932}</style>
+<script>
+/* /starbucks → el Quiosco de pedido (xperiencias/kiosko-pedido) con los valores de Starbucks.
+ * Una sola fuente: se carga el HTML de la Xperiencia y se escribe aquí con <base> a su carpeta,
+ * así la URL corta se queda en /starbucks/ y menú, imágenes, QR y pago siguen funcionando. */
+(function(){
+  var KIOSK="/xperiencias/kiosko-pedido/";
+  var q=new URLSearchParams(location.search);
+  if(!q.has("store")) q.set("store","starbucks-paseo-de-gracia");
+  if(!q.has("marca")) q.set("marca","starbucks");
+  history.replaceState(null,"","/starbucks/?"+q.toString());
+  fetch(KIOSK+"index.html",{cache:"no-cache"}).then(function(r){return r.text();}).then(function(html){
+    html=html.replace(/<head>/i,'<head><base href="'+KIOSK+'">');
+    document.open();document.write(html);document.close();
+  }).catch(function(){location.replace(KIOSK+"?"+q.toString());});
+})();
+</script>
+</head>
+<body></body>
+</html>

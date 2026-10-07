@@ -1,21 +1,19 @@
 {
-  "version": "v.07.10.2026.r1.08:02",
-  "deployedAt": "2026-10-07T06:02:12Z",
+  "version": "v.07.10.2026.r2.08:25",
+  "deployedAt": "2026-10-07T06:25:00Z",
   "deployer": "GrokBot",
   "machine": "MacMini",
   "signature": "GrokBot · MacMini",
-  "git": "180d439b7aff4ddd91f246fa9a81387f9812b3b1",
-  "gitShort": "180d439",
-  "gitFull": "180d439b7aff4ddd91f246fa9a81387f9812b3b1",
+  "git": "0d5e8b1aee711344d1fe934fab73c205ed55d400",
+  "gitShort": "0d5e8b1",
+  "gitFull": "0d5e8b1aee711344d1fe934fab73c205ed55d400",
   "dirty": false,
   "returnTag": "AInimation-v.04.09.2026.r1",
   "previousTag": "AInimation-v.03.09.2026.r2",
-  "previousVersion": "v.09.09.2026.r1.09:00",
-  "note": "Nueva Xperiencia «Quiosco de pedido»: autopedido vertical 1080×1920 para tótems (carta, opciones, carrito, pago QR simulado y número de pedido)",
+  "previousVersion": "v.07.10.2026.r1.08:02",
+  "note": "Nueva URL corta www.ainimation.studio/starbucks: abre el Quiosco de pedido de Starbucks (demo simulada)",
   "novedades": [
-    "Nueva Xperiencia «Quiosco de pedido»: autopedido vertical 1080×1920 para tótems (carta, opciones, carrito, pago QR simulado y número de pedido)",
-    "Carta genérica por establecimiento (menu.schema.json) con ejemplo Starbucks de precios ficticios",
-    "Habla con el gemelo por postMessage (order · payment) y vuelve sola a los 12 s sin tocar",
-    "El sello enseña sus novedades al pasar el ratón"
+    "Nueva URL corta www.ainimation.studio/starbucks: abre el Quiosco de pedido de Starbucks (demo simulada)",
+    "El QR de pago funciona igual desde la URL corta"
   ]
 }
