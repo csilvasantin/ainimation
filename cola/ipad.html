@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Admirito · iPad de la barra · ainimation</title>
+<meta name="description" content="Admirito en el iPad de la barra: avisa en voz alta y en pantalla cuando un pedido del quiosco está listo para recoger. Demo: pago siempre simulado.">
+<meta name="theme-color" content="#1E3932">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<link rel="icon" href="/favicon.ico" sizes="any"><link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<style>
+:root{--verde:#00704A;--osc:#1E3932;--crema:#F2F0EB;--listo:#00A862}
+*{box-sizing:border-box}html,body{margin:0;height:100%;overflow:hidden}
+body{font-family:Inter,-apple-system,'Segoe UI',Roboto,sans-serif;background:var(--osc);color:#fff;display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);grid-template-rows:auto 1fr auto;height:100dvh}
+header{grid-column:1/-1;display:flex;align-items:center;gap:12px;padding:10px 18px;background:#0f2620}
+header b{font-size:clamp(16px,2.2vw,28px);letter-spacing:.05em;text-transform:uppercase;flex:1}header small{opacity:.75;font-weight:500;text-transform:none;letter-spacing:0;margin-left:8px}
+#estado{font-size:13px;opacity:.75}
+#avatar{position:relative;min-height:0}
+#avatar iframe{position:absolute;inset:0;width:100%;height:100%;border:0;background:transparent}
+#bocadillo{position:absolute;left:5%;right:5%;bottom:6%;background:#fff;color:var(--osc);border-radius:26px;padding:18px 24px;font-size:clamp(20px,3.2vw,42px);font-weight:800;line-height:1.15;box-shadow:0 14px 40px #0006;transform:translateY(20px);opacity:0;transition:.35s}
+#bocadillo.on{opacity:1;transform:none}#bocadillo b{color:var(--listo)}
+#bocadillo:after{content:'';position:absolute;top:-16px;left:18%;border:16px solid transparent;border-top:0;border-bottom-color:#fff}
+aside{padding:16px 18px;display:flex;flex-direction:column;gap:12px;min-height:0}
+aside h2{margin:0;font-size:clamp(18px,2.4vw,32px);color:#9EE6C4}
+.nums{display:flex;flex-wrap:wrap;gap:10px;align-content:flex-start}
+.n{font-size:clamp(28px,5vw,70px);font-weight:900;padding:.1em .4em;border-radius:14px;background:#fff;color:var(--osc);font-variant-numeric:tabular-nums}
+.n.nuevo{background:var(--listo);color:#fff;animation:latido 1s ease-in-out 5}
+.prep .n{background:#ffffff22;color:#fff;font-size:clamp(20px,3vw,40px)}
+@keyframes latido{50%{transform:scale(1.08)}}
+.vacio{opacity:.6}
+footer{grid-column:1/-1;background:#FFE58A;color:#3A2E00;text-align:center;font-weight:700;font-size:13px;padding:7px}
+#activar{position:fixed;inset:0;background:#1E3932ee;display:grid;place-items:center;z-index:9;cursor:pointer;text-align:center;font-size:clamp(20px,3vw,34px);font-weight:800}
+#activar.off{display:none}#activar span{display:block;font-size:.55em;font-weight:500;opacity:.8;margin-top:10px}
+@media (orientation:portrait){body{grid-template-columns:1fr;grid-template-rows:auto 1.2fr 1fr auto}}
+</style>
+</head>
+<body>
+<header><b>☁️ Admirito<small id="tienda"></small></b><span id="estado">Conectando…</span></header>
+<div id="avatar"><iframe id="nube" title="Admirito" allow="autoplay" src="https://digitalavatar.ai/nube.html?kiosk=1&amp;avatar=admirito&amp;tier=good&amp;sector=retail&amp;audio=off"></iframe><div id="bocadillo" role="status" aria-live="assertive"></div></div>
+<aside>
+  <h2>✅ ¡Listo para recoger!</h2><div class="nums" id="listo"></div>
+  <h2 style="color:#fff;opacity:.8">⏳ En preparación</h2><div class="nums prep" id="prep"></div>
+</aside>
+<footer>DEMO · pedidos de ejemplo y pago SIMULADO: no se cobra nada</footer>
+<div id="activar" role="button" tabindex="0">🔊 Toca para que Admirito avise en voz alta<span>El iPad necesita un toque para permitir la voz</span></div>
+<script>
+(function(){
+const P=new URLSearchParams(location.search),$=id=>document.getElementById(id);
+const store=(P.get('store')||'starbucks-paseo-de-gracia').replace(/[^a-z0-9-]/g,'').slice(0,80)||'starbucks-paseo-de-gracia';
+const relay='https://mcp-ainimation.admira.store';
+const nombre=store.split('-').map(w=>w[0].toUpperCase()+w.slice(1)).join(' ');
+$('tienda').textContent='· '+nombre;
+const vistos=new Set(),cola=[];let primera=true,hablando=false,vozOk=P.get('voz')==='1';
+const said=window.__admiritoSaid=[];
+const act=$('activar');if(vozOk)act.classList.add('off');
+function activar(){vozOk=true;act.classList.add('off');try{const u=new SpeechSynthesisUtterance(' ');u.volume=0;speechSynthesis.speak(u);}catch(_){}}
+act.addEventListener('click',activar);act.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' ')activar();});
+// Admirito «dice»: bocadillo visible siempre + la nube (si entiende «say») + voz es-ES del navegador
+function decir(num){
+  const texto='Pedido '+num+', tu café está listo, recógelo en barra';
+  const b=$('bocadillo');b.innerHTML='Pedido <b>'+num+'</b>, tu café está listo. ¡Recógelo en barra! ☕';b.classList.add('on');
+  try{$('nube').contentWindow.postMessage({source:'ainimation-xperiencia',type:'say',text:texto,lang:'es-ES'},'https://digitalavatar.ai');}catch(_){}
+  let via='pantalla';
+  return new Promise(fin=>{
+    const cerrar=()=>{said.push({numero:num,text:texto,via,at:Date.now()});setTimeout(()=>{b.classList.remove('on');fin();},2500);};
+    try{
+      const ss=window.speechSynthesis;
+      if(!vozOk||!ss||typeof SpeechSynthesisUtterance!=='function')return cerrar();
+      const u=new SpeechSynthesisUtterance(texto);u.lang='es-ES';u.rate=.98;
+      const v=(ss.getVoices()||[]).find(x=>(x.lang||'').replace('_','-')==='es-ES');if(v)u.voice=v;
+      via='voz-es-ES';let hecho=false;const ok=()=>{if(!hecho){hecho=true;cerrar();}};
+      u.onend=ok;u.onerror=ok;setTimeout(ok,9000);ss.speak(u);
+    }catch(_){cerrar();}
+  });
+}
+async function siguiente(){if(hablando)return;hablando=true;while(cola.length){await decir(cola.shift());}hablando=false;}
+const chips=(a,nuevos)=>a.length?a.map(p=>'<span class="n'+(nuevos&&nuevos.has(p.numero)?' nuevo':'')+'">'+String(p.numero).replace(/[^A-Z0-9]/gi,'')+'</span>').join(''):'<span class="vacio">—</span>';
+const recientes=new Set();
+async function tic(){
+  try{
+    const d=await (await fetch(relay+'/cola/estado?store='+store,{cache:'no-store'})).json();
+    const listos=d.listo||[];
+    listos.forEach(p=>{if(!vistos.has(p.numero)){vistos.add(p.numero);if(!primera||P.get('anunciar')==='todos'){cola.push(p.numero);recientes.add(p.numero);setTimeout(()=>recientes.delete(p.numero),15000);}}});
+    primera=false;
+    $('listo').innerHTML=chips(listos,recientes);$('prep').innerHTML=chips(d.preparando||[]);
+    $('estado').textContent='En vivo · '+new Date().toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+    siguiente();
+  }catch(_){$('estado').textContent='Sin conexión, reintentando…';}
+}
+tic();setInterval(tic,2000);
+})();
+</script>
+</body>
+</html>

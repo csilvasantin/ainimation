@@ -1,6 +1,6 @@
 {
-  "version": "v.07.10.2026.r11.11:41",
-  "deployedAt": "2026-10-07T09:41:42Z",
+  "version": "v.07.10.2026.r12.12:10",
+  "deployedAt": "2026-10-07T10:10:27Z",
   "deployer": "GrokBot",
   "machine": "MacMini",
   "signature": "GrokBot · MacMini",
@@ -10,12 +10,12 @@
   "dirty": false,
   "returnTag": "AInimation-v.04.09.2026.r1",
   "previousTag": "AInimation-v.03.09.2026.r2",
-  "previousVersion": "v.07.10.2026.r10.11:35",
-  "note": "Pulido de la cola: pantalla de pago más clara y QR para seguir el pedido pagado en barra",
+  "previousVersion": "v.07.10.2026.r11.11:41",
+  "note": "Admirito en el iPad de la barra avisa cuando tu pedido está listo",
   "novedades": [
-    "En la pantalla de pago los botones «Atrás» y «Pagar en barra» ya no tapan la línea de ayuda, en vertical, horizontal, cuadrado y tótem",
-    "Tras «Pagar en barra» el quiosco enseña un QR para seguir tu pedido en la pantalla de la cola desde el móvil",
-    "La página del barista solo se repinta cuando cambian los pedidos",
-    "El sitio tiene /favicon.ico"
+    "Nueva pantalla para el iPad de la barra (/cola/ipad.html): Admirito, la nube, anuncia cada pedido listo en voz alta y con un bocadillo: «Pedido A015, tu café está listo, recógelo en barra»",
+    "Cada pedido se anuncia una sola vez, en el orden en que pasan a «listo»; si hay varios, Admirito los dice seguidos",
+    "El iPad pide un toque al abrirla para permitir la voz; sin voz el aviso sigue saliendo en pantalla",
+    "La página del barista enlaza la pantalla de Admirito"
   ]
 }
