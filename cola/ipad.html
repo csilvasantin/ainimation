@@ -80,15 +80,25 @@ function decir(p){
   return new Promise(fin=>{
     const cerrar=()=>{said.push({numero:num,nombre:nom||null,text:texto,via,at:Date.now()});setTimeout(()=>{b.classList.remove('on');fin();},2500);};
     try{
-      const ss=window.speechSynthesis;
-      if(!vozOk||!ss||typeof SpeechSynthesisUtterance!=='function')return cerrar();
-      const u=new SpeechSynthesisUtterance(texto);u.lang='es-ES';u.rate=.98;
-      const v=(ss.getVoices()||[]).find(x=>(x.lang||'').replace('_','-')==='es-ES');if(v)u.voice=v;
-      via='voz-es-ES';let hecho=false;const ok=()=>{if(!hecho){hecho=true;cerrar();}};
-      u.onend=ok;u.onerror=ok;setTimeout(ok,9000);ss.speak(u);
+      if(!vozOk)return cerrar();
+      hablarVoz(texto).then(v=>{via=v;cerrar();});
     }catch(_){cerrar();}
   });
 }
+// ── Voz de Admirito (Carlos, 7-oct-2026): ElevenLabs vía el proxy mcp-ainimation (/voz, caché por frase);
+//    si no hay audio en 6 s o falla, voz del navegador es-ES. ?voz_el=0 la desactiva; ?vozid= elige otra voz.
+const VOZ_URL='https://mcp-ainimation.admira.store/voz';
+const vozEl=P.get('voz_el')!=='0', vozId=P.get('vozid')||'';
+let audioEl=null;window.__admiritoVoz=[];
+function decirEL(texto){return new Promise(res=>{if(!vozEl)return res(false);let fin=false;const done=(ok,why)=>{if(fin)return;fin=true;window.__admiritoVoz.push({texto,via:ok?'elevenlabs':'respaldo',why:why||'',at:Date.now()});res(ok);};
+  try{if(audioEl){audioEl.pause();}audioEl=new Audio(VOZ_URL+'?texto='+encodeURIComponent(texto.replace(/[☁️☕🍪✨]/gu,'').trim())+(vozId?'&voz='+encodeURIComponent(vozId):''));
+    const t=setTimeout(()=>{try{audioEl.pause();}catch(_){}done(false,'timeout');},6000);
+    audioEl.onplaying=()=>clearTimeout(t);audioEl.onended=()=>done(true);audioEl.onerror=()=>{clearTimeout(t);done(false,'error');};
+    audioEl.play().catch(e=>{clearTimeout(t);done(false,'play:'+(e&&e.name));});}catch(_){done(false,'excepcion');}});}
+function decirNav(texto,pitch){return new Promise(res=>{try{const ss=window.speechSynthesis;if(!ss||typeof SpeechSynthesisUtterance!=='function')return res(false);
+  const u=new SpeechSynthesisUtterance(texto.replace(/[☁️☕🍪✨]/gu,''));u.lang='es-ES';u.rate=1;u.pitch=pitch||1.3;const v=(ss.getVoices()||[]).find(x=>(x.lang||'').replace('_','-')==='es-ES');if(v)u.voice=v;
+  let h=false;const ok=()=>{if(!h){h=true;res(true);}};u.onend=ok;u.onerror=ok;setTimeout(ok,9000);ss.speak(u);}catch(_){res(false);}});}
+async function hablarVoz(texto){if(await decirEL(texto))return 'elevenlabs';return (await decirNav(texto))?'voz-es-ES':'pantalla';}
 // ── Modo demo (Carlos, 7-oct-2026): sin pedidos pendientes, Admirito hace gracias e invita a pedir ──
 const FRASES=['¡Hola, hola! Soy Admirito, la nube más cafetera de Paseo de Gracia ☁️☕','¿Un café? Pídelo en el quiosco y te llamo por tu nombre','Hoy el Caffè Latte está de rechupete, ¡palabra de nube!','¡Qué buen día para un Frappuccino! Bueno… para una nube, todos','Toca el quiosco, elige, paga con el móvil… ¡y yo te aviso aquí!','¿Sabías que las nubes también hacemos cola? Pero aquí no, que va rapidísimo','Si llueve, que sea de cookies 🍪','Pide en el quiosco y escribe tu nombre: me encanta decirlo bien alto','¡Estoy aquí arriba! Bueno, en el iPad. Pero me siento en las nubes','Un cortado, un latte, un té… yo me apunto a todo, ¡venga, pide!'];
 const GRACIAS=['gracia-salto','gracia-giro','gracia-latido','gracia-baile'];
@@ -99,14 +109,14 @@ function demo(){
   GRACIAS.forEach(c=>av.classList.remove(c));void av.offsetWidth;av.classList.add(g);
   b.classList.add('demo');b.textContent=f;b.classList.add('on');demoN++;
   let via='pantalla';
-  if(vozOk&&!escena&&demoN%3===1){try{const ss=window.speechSynthesis;if(ss&&!ss.speaking){const u=new SpeechSynthesisUtterance(f.replace(/[☁️☕🍪]/gu,''));u.lang='es-ES';u.rate=1.02;u.pitch=1.15;const v=(ss.getVoices()||[]).find(x=>(x.lang||'').replace('_','-')==='es-ES');if(v)u.voice=v;ss.speak(u);via='voz-es-ES';}}catch(_){}}
+  if(vozOk&&!escena&&demoN%3===1&&!(audioEl&&!audioEl.paused)){via='voz';hablarVoz(f);}
   demoLog.push({frase:f,gracia:g,via,at:Date.now()});if(demoLog.length>50)demoLog.shift();
   setTimeout(()=>{if(b.classList.contains('demo'))b.classList.remove('on');},6000);
 }
 setInterval(demo,9000);setTimeout(demo,2500);
 function fijo(){if(hablando||cola.length||!ultimoListo)return;const b=$('bocadillo'),p=ultimoListo;b.classList.remove('demo');b.innerHTML=p.nombre?'<b>'+esc(p.nombre)+'</b>, tu pedido Starbucks está preparado ☕<br><small>Pedido '+esc(p.numero)+' · recógelo en barra</small>':'Pedido <b>'+esc(p.numero)+'</b>, tu café está listo. ¡Recógelo en barra! ☕';b.classList.add('on');}
 setInterval(fijo,1500);
-async function siguiente(){if(hablando)return;hablando=true;try{$('bocadillo').classList.remove('demo');window.speechSynthesis&&window.speechSynthesis.cancel();}catch(_){}while(cola.length){await decir(cola.shift());}hablando=false;}
+async function siguiente(){if(hablando)return;hablando=true;try{$('bocadillo').classList.remove('demo');window.speechSynthesis&&window.speechSynthesis.cancel();if(audioEl)audioEl.pause();}catch(_){}while(cola.length){await decir(cola.shift());}hablando=false;}
 const chips=(a,nuevos)=>a.length?a.map(p=>'<span class="n'+(nuevos&&nuevos.has(p.numero)?' nuevo':'')+'">'+String(p.numero).replace(/[^A-Z0-9]/gi,'')+(p.nombre?' <small style="font-size:.45em">'+esc(p.nombre)+'</small>':'')+'</span>').join(''):'<span class="vacio">—</span>';
 const recientes=new Set();
 async function tic(){

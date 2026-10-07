@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>AInimation Studio · Ayuda / Help — manual del Director y Ecosistema Admira</title>
   <meta name="description" content="Manual bilingüe (ES/EN) del Director de AInimation Studio: Cast, Stage, Score, Inspector, Behaviour/XPL, Admingo, Mensaje, plantillas, Publicar Xperiencia, quiosco y pago simulado; y cómo conecta con Pixeria, admira.tv, XpaceOS, marcablanca, Yokup y admira.biz.">
-  <meta name="admiranext-version" content="v.07.10.2026.r23.15:21">
+  <meta name="admiranext-version" content="v.07.10.2026.r24.16:24">
   <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
   <style>
     :root{--ink:#17120f;--muted:#6e6257;--paper:#f5eee2;--panel:#fffaf0;--line:rgba(23,18,15,.14);--line2:rgba(23,18,15,.28);--lime:#c8ff5f;--coral:#ff654f;--cyan:#31bed1;--violet:#7c5cff;--gold:#f0b84f;--mono:ui-monospace,SFMono-Regular,Menlo,monospace;--sans:-apple-system,BlinkMacSystemFont,"Inter","Segoe UI",Roboto,sans-serif}
@@ -103,7 +103,8 @@
 <p><b>4 · Móvil.</b> El QR lleva a <code>/cola/?store=…&amp;pedido=A015</code>: al estar listo enseña «NOMBRE, tu pedido Starbucks está preparado», vibra y, si diste permiso al primer toque, manda una notificación.</p>
 <p><b>5 · Taza.</b> <a href="/taza/">/taza/</a> muestra encima del PlayerTaza «NOMBRE, tu pedido Starbucks está preparado» durante 8 s por pedido.</p>
 <p><b>6 · Gemelo.</b> En el gemelo digital (<a href="https://www.xpaceos.com/admira-xp/">xpaceos</a> / <a href="https://www.admira.store/admira-xp/">admira.store</a>) con Starbucks en escena, el Admirito del tótem lee la cola y anuncia cada pedido listo con su voz (cara MetaHuman si está activa; si no, es-ES). <code>?cola=&lt;tienda&gt;</code> escucha otra tienda.</p>
-<p><b>Agentes (MCP).</b> <code>cola_estado</code> devuelve cada pedido con <code>nombre</code>; <code>cola_avisos</code> da los avisos listos y las URL de cada pantalla; <code>cola_avanzar</code> hace de barista. Ver <a href="/mcp">/mcp</a>.</p>
+<p><b>Voz de Admirito.</b> El iPad, el gemelo y el quiosco hablan con la voz de ElevenLabs (castellano, voz joven y dulce «Daniela») a través de <code>mcp-ainimation.admira.store/voz</code>, con caché de las frases frecuentes; la clave nunca llega al navegador. Si no responde en 6 s, se usa la voz es-ES del navegador. <code>?voz_el=0</code> la desactiva y <code>?vozid=raquel</code> prueba otra. ElevenLabs no permite voces infantiles reales, así que Admirito usa la voz adulta más joven y dulce.</p>
+<p><b>Agentes (MCP).</b> <code>admirito_voz</code> da la URL de audio de una frase; <code>cola_estado</code> devuelve cada pedido con <code>nombre</code>; <code>cola_avisos</code> da los avisos listos y las URL de cada pantalla; <code>cola_avanzar</code> hace de barista. Ver <a href="/mcp">/mcp</a>.</p>
 <p><b>Sala de pruebas.</b> Las pruebas, QA y demos automáticas (p. ej. la demo de la taza «Ana/Luis/Eva» y los tests del quiosco) usan la tienda <code>starbucks-qa</code>; <code>starbucks-paseo-de-gracia</code> queda solo para la demo real. Para ver la sala: <a href="/cola/ipad.html?store=starbucks-qa">/cola/ipad.html?store=starbucks-qa</a>, <a href="/cola/barista.html?store=starbucks-qa">barista</a>, <a href="/taza/?store=starbucks-qa">taza</a>.</p>
 <p lang="en">EN: The kiosk asks for a first name; when the order is ready Admirito (iPad /cola/ipad.html and the twin), the phone queue page and the mug all call it: “NAME, your Starbucks order is ready”. Demo only, SIMULATED payment.</p></section><section id="ecosistema"><h2><span lang="es">Ecosistema Admira</span><span lang="en">Admira Ecosystem</span></h2><div lang="es"><p>ainimation.studio <b>crea</b>; el resto de la Galaxia guarda, opera, emite, coordina y mide. Cada pieza se conecta por identificadores compartidos y por MCP (<a href="https://www.xpaceos.com/mcp/galaxia.json">registro de la Galaxia</a>).</p>
 <table><tr><th>Sitio</th><th>Integración</th><th>Estado</th></tr>
@@ -139,7 +140,7 @@
   <footer>
     ainimation.studio/help · <span lang="es">la puerta de carbono · para agentes,</span><span lang="en">the carbon door · for agents,</span>
     <a href="/mcp/">ainimation.studio/mcp</a> · <span lang="es">regla 24 de la</span><span lang="en">rule 24 of the</span>
-    <a href="https://www.admiranext.com/normativa">normativa</a> · <span data-studio-version>v.07.10.2026.r23.15:21</span>
+    <a href="https://www.admiranext.com/normativa">normativa</a> · <span data-studio-version>v.07.10.2026.r24.16:24</span>
   </footer>
 </div>
 <script>
