@@ -69,11 +69,12 @@ defecto. Semilla Starbucks: grupo, joven, senior, mujer, hombre, adulto.
 ## Reglas
 
 ```json
-{ "id": "r-joven", "prioridad": 70, "activa": true,
-  "si": { "edad": ["joven"], "grupo": ["individuo"], "genero": [], "franja": [] },
+{ "id": "r-joven", "nombre": "Joven → frío y dulce", "prioridad": 70, "activa": true,
+  "genero": "any", "edad": "joven", "grupo": "individuo", "franja": "any",
   "variante": "joven" }
 ```
 
-Gana la regla activa de mayor prioridad cuyas condiciones casan (lista vacía = cualquiera);
+Valores: `genero` any|m|f · `edad` any|nino|joven|adulto|senior · `grupo` any|individuo|grupo · `franja` any|manana|mediodia|tarde|noche.
+Gana la regla activa de mayor prioridad cuyas condiciones casan (`any` = cualquiera; a igualdad, la primera de la lista);
 si ninguna, `por_defecto`. Una variante tiene `titulo`/`subtitulo`/`oferta` ES/EN y
 `destacados` (ids de la carta) que el quiosco muestra en la pestaña «⭐ Para ti».

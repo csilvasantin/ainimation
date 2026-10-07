@@ -1,21 +1,19 @@
 {
-  "version": "v.08.10.2026.r29.00:16",
-  "deployedAt": "2026-10-07T22:16:32Z",
+  "version": "v.08.10.2026.r30.00:42",
+  "deployedAt": "2026-10-07T22:42:37Z",
   "deployer": "GrokBot",
   "machine": "MacMini",
   "signature": "GrokBot · MacMini",
-  "git": "bb5e18794e2a2d5b80718f3a074a0c890d14b313",
-  "gitShort": "bb5e187",
-  "gitFull": "bb5e18794e2a2d5b80718f3a074a0c890d14b313",
+  "git": "e37b7c6291aa0ee4120d5938e5b3158edffa6286",
+  "gitShort": "e37b7c6",
+  "gitFull": "e37b7c6291aa0ee4120d5938e5b3158edffa6286",
   "dirty": false,
-  "returnTag": "retorno/pre-audiencia-20261008",
-  "previousTag": "retorno/pre-voz-fix-20261007",
-  "previousVersion": "v.07.10.2026.r26.17:27",
-  "note": "Quiosco segmentado por cámara (audiencia)",
+  "returnTag": "retorno/pre-audiencia-doc-20261008",
+  "previousTag": "retorno/pre-audiencia-20261008",
+  "previousVersion": "v.08.10.2026.r29.00:16",
+  "note": "Contrato de reglas de audiencia corregido",
   "novedades": [
-    "Quiosco segmentado: con ?seg=1 la cámara cuenta personas, género, edad e individuo/grupo y elige la carta (grupo, joven, adulto, senior, mujer, hombre)",
-    "Audiencia anónima en D1: recuentos por visita con el pedido, sin imágenes ni huellas faciales, 90 días; aviso «Cámara en uso» siempre visible",
-    "Reglas y panel en admira.tv/audiencia; MCP audiencia_estado, audiencia_reglas, audiencia_resumen y audiencia_simular",
-    "Simulación QA sin cámara con ?simaud=, siempre en starbucks-qa"
+    "Guía de audiencia: el formato de las reglas es el real (género, edad, grupo y franja con un valor o «any»)",
+    "Verificado en producción con cámara: una cara → menú hombre; dos caras → carta para compartir"
   ]
 }
