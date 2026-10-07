@@ -1394,9 +1394,23 @@ function syncStageToFrame(frame = currentTimelineFrame(), shouldPlay = false) {
       if (content && document.activeElement !== content) content.textContent = renderItem.text || item.text || "Text";
       applyTextStyleToElement(stageItemEl, renderItem);
     }
-    stageItemEl.classList.toggle("is-out-of-frame", !isActive);
-    stageItemEl.setAttribute("aria-hidden", String(!isActive));
+    applyStageItemRange(stageItemEl, item, frame);
   });
+}
+
+// Tramo del sprite en el Stage (texto, forma, línea…): fuera de él no se ve, salvo el
+// seleccionado, que queda como fantasma para poder seguir editándolo (igual que el Cast).
+function stageItemIsActive(item, frame) {
+  const start = Number(item.startFrame || 1);
+  const duration = Math.max(1, Number(item.durationFrames || 24));
+  return frame >= start && frame <= start + duration - 1;
+}
+function applyStageItemRange(stageItemEl, item, frame = currentTimelineFrame()) {
+  const isActive = stageItemIsActive(item, frame);
+  const isGhost = !isActive && isSelectedStageItemTarget(item.id) && !document.body.classList.contains("ain-play");
+  stageItemEl.classList.toggle("is-out-of-frame", !isActive);
+  stageItemEl.classList.toggle("is-ghost", isGhost);
+  stageItemEl.setAttribute("aria-hidden", String(!isActive && !isGhost));
 }
 
 function timelineKeyframeFrames() {
@@ -3166,6 +3180,12 @@ function renderStageItems(stage, plan) {
       applyShapeStyle(shape, item);
       stage.append(shape);
     }
+  });
+  // Recién pintados también respetan su tramo (antes solo al mover el cabezal).
+  const frameNow = currentTimelineFrame();
+  stage.querySelectorAll(".stage-item[data-stage-item-id]:not(.dk-item)").forEach((el) => {
+    const item = (plan.stageItems || []).find((i) => i.id === el.dataset.stageItemId);
+    if (item) applyStageItemRange(el, item, frameNow);
   });
 }
 

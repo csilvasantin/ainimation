@@ -2428,7 +2428,9 @@ h2 {
 }
 
 .stage-imported-member.is-out-of-frame,
-.stage-text-item.is-out-of-frame {
+.stage-text-item.is-out-of-frame,
+.stage-shape-item.is-out-of-frame,
+.stage-line-item.is-out-of-frame {
   display: none;
 }
 
@@ -2436,7 +2438,9 @@ h2 {
    poder llevarlo a un fotograma más allá del final del clip. Se ve translúcido
    y punteado para que quede claro que ahí todavía no hay nada montado. */
 .stage-imported-member.is-out-of-frame.is-ghost,
-.stage-text-item.is-out-of-frame.is-ghost {
+.stage-text-item.is-out-of-frame.is-ghost,
+.stage-shape-item.is-out-of-frame.is-ghost,
+.stage-line-item.is-out-of-frame.is-ghost {
   display: block;
   filter: grayscale(0.4);
   opacity: calc(var(--stage-opacity, 1) * 0.32);

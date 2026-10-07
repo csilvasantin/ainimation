@@ -102,6 +102,8 @@
   const PLAYER_JS = String.raw`
 (function () {
   "use strict";
+  var XP_LANG = (new URLSearchParams(location.search).get("lang") || navigator.language || "es").slice(0, 2) === "en" ? "en" : "es";
+  document.documentElement.lang = XP_LANG;
   var plan  = JSON.parse(document.getElementById("xp-plan").textContent);
   var rules = JSON.parse(document.getElementById("xp-rules").textContent);
   var marks = plan.markers || [];
@@ -198,7 +200,7 @@
       node.style.borderRadius = oval ? "50%" : "0";
       if (type === "text") {
         node.style.background = "transparent"; node.style.border = "0";
-        node.textContent = texts[obj.spriteName] != null ? texts[obj.spriteName] : (k.text || obj.text || "");
+        node.textContent = texts[obj.spriteName] != null ? texts[obj.spriteName] : ((obj.texts && obj.texts[XP_LANG]) || k.text || obj.text || "");
         node.style.color = k.color || "#f8f7f2";
         node.style.font = (k.fontStyle || "normal") + " " + (k.fontWeight || "850") + " " + (k.fontSize || "3vw") + "/1.15 system-ui, sans-serif";
         node.style.textAlign = k.textAlign || "left";
@@ -318,6 +320,7 @@
    * ------------------------------------------------------------------------- */
   const EXT_JS = String.raw`
 (function () {
+  var XP_LANG = (new URLSearchParams(location.search).get("lang") || navigator.language || "es").slice(0, 2) === "en" ? "en" : "es";
   var K = null, plan = null, stage = null;
   function post(event, extra) {
     var msg = { source: "ainimation-xperiencia", piece: plan && plan.title, event: event, order: K && K.state.order };
@@ -338,7 +341,7 @@
       var css = document.createElement("style"); css.textContent = (window.AINKiosk ? window.AINKiosk.CSS : "") +
         ".xp-btn{display:flex;align-items:center;padding:0 .4em;line-height:1.1;text-align:center;font-family:Inter,system-ui,sans-serif;white-space:pre-wrap;overflow:hidden}.aink,.aink *{color:#1e2a25}.aink-cta,.aink-opt.on{color:#fff!important}.aink-cta.alt{color:#1e2a25!important}.xp-checkout{position:absolute;inset:0;z-index:60;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center}.xp-checkout[hidden]{display:none}.xp-checkout iframe{width:86%;height:80%;border:0;border-radius:16px;background:#fff}.xp-checkout button{position:absolute;top:8%;right:5%;width:2.4em;height:2.4em;border-radius:50%;border:0;background:#fff}";
       document.head.appendChild(css);
-      if (window.AINKiosk) K = window.AINKiosk.create({ menu: p.menu, base: (p.menu && p.menu.imageBase) || "", lang: (navigator.language || "es").slice(0, 2) === "en" ? "en" : "es", emit: post, openCheckout: openCheckout });
+      if (window.AINKiosk) K = window.AINKiosk.create({ menu: p.menu, base: (p.menu && p.menu.imageBase) || "", lang: XP_LANG, emit: post, openCheckout: openCheckout });
       var q = new URLSearchParams(location.search); if (K && q.get("lang")) K.setLang(q.get("lang"));
     },
     paint: function (node, obj, texts) {
@@ -349,7 +352,7 @@
         node.style.background = obj.color || "transparent"; node.style.color = obj.textColor || "#fff";
         node.style.fontSize = Number(obj.fontSize || 4) + "cqw"; node.style.borderRadius = Number(obj.radius == null ? 2 : obj.radius) + "cqw";
         node.style.fontWeight = obj.bold === false ? "500" : "800"; node.style.justifyContent = obj.align === "left" ? "flex-start" : "center";
-        var txt = texts[obj.spriteName] != null ? texts[obj.spriteName] : (obj.text || "");
+        var txt = texts[obj.spriteName] != null ? texts[obj.spriteName] : ((obj.texts && obj.texts[XP_LANG]) || obj.text || "");
         if (node.textContent !== txt) node.textContent = txt;
       } else if (K) { node.dataset.kiosk = obj.id; K.render(node, obj, true); }
     },

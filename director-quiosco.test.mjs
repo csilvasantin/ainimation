@@ -54,7 +54,7 @@ test('Director: quiosco montado con la interfaz → Play → guardar → publica
     const screen = async (name) => { promptAnswer = name; await menu('.dk-insert', '[data-dk-new-screen]'); await page.waitForTimeout(250); };
     const prop = async (k, v) => { const f = page.locator(`.dk-inspector [data-k="${k}"]`); await f.fill(String(v)); await f.press('Tab'); await page.waitForTimeout(120); };
     await screen('INICIO');
-    await menu('.dk-insert', '[data-dk-insert-button]'); await prop('text', 'Toca para empezar'); await prop('spriteName', 'btnEmpezar'); await prop('y', 60);
+    await menu('.dk-insert', '[data-dk-insert-button]'); await prop('texts.es', 'Toca para empezar'); await prop('texts.en', 'Toca para empezar'); await prop('spriteName', 'btnEmpezar'); await prop('y', 60);
     const views = [['CATEGORIAS', 'categories', 'carta'], ['PRODUCTOS', 'items', 'productos'], ['OPCIONES', 'options', 'opciones'], ['CARRITO', 'cart', 'carrito'], ['PAGO', 'qr', 'pago'], ['NUMERO', 'number', 'numero']];
     for (const [mark, view, sprite] of views) { await screen(mark); await menu('.dk-insert', `[data-dk-insert-${view}]`); await prop('spriteName', sprite); }
     await shot(page, '1-stage-sprites');
