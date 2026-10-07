@@ -96,6 +96,17 @@ html[data-formato="horizontal"] .card img,html[data-formato="cuadrado"] .card im
 html[data-formato="horizontal"] .foot{left:auto;width:min(1100px,60%)}
 html[data-formato="horizontal"] #qr img,html[data-formato="horizontal"] #qr canvas,html[data-formato="cuadrado"] #qr img,html[data-formato="cuadrado"] #qr canvas{width:420px!important;height:420px!important}
 html[data-formato="horizontal"] .detail-top img,html[data-formato="cuadrado"] .detail-top img{width:240px;height:240px}
+/* pago: la botonera va en el flujo (no flota) para no tapar la línea de ayuda; el QR se encoge con el alto disponible */
+#s-pay .foot{position:static;margin-bottom:56px;background:none;padding-top:12px}
+#s-pay main{padding-bottom:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;container-type:size;min-height:0}
+#s-pay main h2{margin:0 0 8px}#s-pay .paynote{margin:12px 40px}
+#s-pay #qr{padding:min(30px,2cqh)}
+#s-pay #qr img,#s-pay #qr canvas{width:min(560px,calc(100cqh - 360px),80cqw)!important;height:min(560px,calc(100cqh - 360px),80cqw)!important}
+#doneQr{display:none;margin:24px auto 0;background:#fff;padding:18px;border-radius:22px;width:max-content}#doneQr.on{display:block}
+#doneQr img,#doneQr canvas{width:260px!important;height:260px!important}
+#s-done .follow{font-size:30px!important;font-weight:700}
+html[data-formato="horizontal"] #doneQr img,html[data-formato="horizontal"] #doneQr canvas,html[data-formato="cuadrado"] #doneQr img,html[data-formato="cuadrado"] #doneQr canvas{width:180px!important;height:180px!important}
+html[data-formato="horizontal"] #s-done .num{font-size:200px;margin:10px 0}
 </style>
 </head>
 <body>
@@ -137,7 +148,7 @@ html[data-formato="horizontal"] .detail-top img,html[data-formato="cuadrado"] .d
   </section>
 
   <section class="screen" id="s-done" data-marker="NUMERO">
-    <h2 data-t="thanks"></h2><div class="num" id="orderNum"></div><p id="doneMsg"></p><p data-t="watch"></p>
+    <h2 data-t="thanks"></h2><div class="num" id="orderNum"></div><p id="doneMsg"></p><p data-t="watch"></p><div id="doneQr" aria-hidden="true"></div><p class="follow" id="doneFollow" hidden></p>
   </section>
 
   <div id="overlay"><iframe id="payFrame" title="Pago simulado"></iframe></div>
@@ -246,10 +257,11 @@ function toPay(){makeOrder();go("pay");colaCrear(order);colaVigilar(order);const
   const q=$("#qr");q.innerHTML="";q.dataset.url=url;try{new QRCode(q,{text:url,width:560,height:560,correctLevel:QRCode.CorrectLevel.M});}catch(e){q.textContent=url;}
   host("payment",{status:"started",checkoutUrl:url,simulated:true});}
 function finish(how){if(!order||order.number)return;clearInterval(colaPoll);order.number=order.queueNumber||nextNumber();order.queueUrl=colaUrl(order.number);if(how!=="paid"){const o=order;(o.queueNumber?Promise.resolve():colaCrear(o)).then(r=>{if(!o.queueNumber&&r)return;return colaApi("pagar",{id:o.id,via:"caja"});}).catch(()=>{});}order.status=how==="paid"?"paid-simulated":"pay-at-counter";order.paidAt=how==="paid"?new Date().toISOString():null;
-  closeOverlay();$("#orderNum").textContent=order.number;$("#doneMsg").textContent=t(how==="paid"?"paid":"payAtCounter");go("done");
+  closeOverlay();$("#orderNum").textContent=order.number;const dq=$("#doneQr"),df=$("#doneFollow");dq.innerHTML="";dq.classList.remove("on");df.hidden=true;
+  if(how!=="paid"&&order.queueNumber){try{new QRCode(dq,{text:order.queueUrl,width:260,height:260,correctLevel:QRCode.CorrectLevel.M});dq.classList.add("on");dq.dataset.url=order.queueUrl;df.textContent=lang==="en"?"Scan to follow your order on your phone":"Escanea para seguir tu pedido en el móvil";df.hidden=false;}catch(_){}}$("#doneMsg").textContent=t(how==="paid"?"paid":"payAtCounter");go("done");
   if(how==="paid")host("payment",{status:"paid",simulated:true});host("order",{status:order.status});
   say(lang==="en"?"Thank you! Your order number is "+order.number:"¡Gracias! Tu pedido es el "+order.number);
-  setTimeout(()=>{if(screen==="done")go("attract");},(M.idle.resetSeconds||12)*1000);}
+  setTimeout(()=>{if(screen==="done")go("attract");},((M.idle.resetSeconds||12)+(how!=="paid"&&order.queueNumber?13:0))*1000);}
 function closeOverlay(){$("#overlay").classList.remove("on");$("#payFrame").src="about:blank";}
 // pago simulado: mismo navegador (BroadcastChannel / storage) o el overlay (postMessage)
 function onPaid(d){if(d&&d.pedido&&order&&d.pedido===order.id&&d.estado==="pagado")finish("paid");}

@@ -1,18 +1,21 @@
 {
-  "version": "v.07.10.2026.r10.11:35",
-  "deployedAt": "2026-10-07T09:35:39Z",
+  "version": "v.07.10.2026.r11.11:41",
+  "deployedAt": "2026-10-07T09:41:42Z",
   "deployer": "GrokBot",
   "machine": "MacMini",
   "signature": "GrokBot · MacMini",
-  "git": "712aed818857650f85e6770783c845a8a70d3cf3",
-  "gitShort": "712aed8",
-  "gitFull": "712aed818857650f85e6770783c845a8a70d3cf3",
+  "git": "66ffe72ac6eef009ad65c25540077062498843a2",
+  "gitShort": "66ffe72",
+  "gitFull": "66ffe72ac6eef009ad65c25540077062498843a2",
   "dirty": false,
   "returnTag": "AInimation-v.04.09.2026.r1",
   "previousTag": "AInimation-v.03.09.2026.r2",
-  "previousVersion": "v.07.10.2026.r9.11:33",
-  "note": "MCP: cola_estado y cola_avanzar ya responden",
+  "previousVersion": "v.07.10.2026.r10.11:35",
+  "note": "Pulido de la cola: pantalla de pago más clara y QR para seguir el pedido pagado en barra",
   "novedades": [
-    "Las herramientas de la cola leen y avanzan los pedidos directamente, sin dar error 522"
+    "En la pantalla de pago los botones «Atrás» y «Pagar en barra» ya no tapan la línea de ayuda, en vertical, horizontal, cuadrado y tótem",
+    "Tras «Pagar en barra» el quiosco enseña un QR para seguir tu pedido en la pantalla de la cola desde el móvil",
+    "La página del barista solo se repinta cuando cambian los pedidos",
+    "El sitio tiene /favicon.ico"
   ]
 }
