@@ -14,6 +14,7 @@ rato buscando un contrato que no existe; cuando lo haya se declarará aquí.
 |---|---|
 | `/` | La portada: qué es Admira Director en la era de la IA y las tres puertas. |
 | `/studio.html` | El entorno de autoría — la interfaz completa (proyecto DirectorInteractivo). |
+| `/xperiencias/kiosko-pedido/?seg=1` | Quiosco segmentado por cámara (audiencia anónima; ver `docs/audiencia-v1.md`, API en mcp-ainimation.admira.store/audiencia/…). |
 | `/version.json` | El sello de la última publicación, con su firma agente · máquina. |
 
 ## Dónde vive el dato
