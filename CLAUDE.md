@@ -44,3 +44,7 @@ GitHub Pages sirve `main` (raíz). CNAME = `www.ainimation.studio`.
 - Preview local: `python3 -m http.server 9134` → http://127.0.0.1:9134/
 - HTTPS: el cert de Pages se aprovisiona solo tras fijar el custom domain; si
   `https_enforced` sigue en false, re-setear el cname vía API fuerza reintento.
+
+
+## Registro (7-oct-2026)
+La cola (`mcp/server/src/cola.js`) empuja cada pedido al registro de digitalavatar.ai/metricas. Campos opcionales del alta y reglas de `/demo pedido` (origen demo, demo_run, conv, t): `docs/registro-v1.md`.

@@ -353,7 +353,7 @@ export async function manejar(request, env = {}, deps = {}) {
   if (ruta === '/' || ruta === '/salud') {
     return json({ nombre: NOMBRE, version: env.VERSION || '', sitio, endpoint_mcp: `${u.origin}/mcp`, transport: 'streamable-http',
       que_es: 'MCP de ainimation.studio: Xperiencias, plantillas del Director, Admingo, carta, admira.tv, tótem del gemelo y marca blanca como herramientas.',
-      auth: 'lecturas abiertas; xperiencia_publicar con clave de flota AdmiraNeXT (Authorization: Bearer)', secretos: { MCP_FLOTA_SEED: !!env.MCP_FLOTA_SEED, COLA_KIOSKO_KEY: !!env.COLA_KIOSKO_KEY, COLA_BARRA_KEY: !!env.COLA_BARRA_KEY, COLAS_SEED: !!env.COLAS_SEED, COLA_ADMIN: !!env.COLA_ADMIN }, cola: avisoAbierta(env) || 'cerrada (quiosco y barra con clave)',
+      auth: 'lecturas abiertas; xperiencia_publicar con clave de flota AdmiraNeXT (Authorization: Bearer)', secretos: { MCP_FLOTA_SEED: !!env.MCP_FLOTA_SEED, COLA_KIOSKO_KEY: !!env.COLA_KIOSKO_KEY, COLA_BARRA_KEY: !!env.COLA_BARRA_KEY, COLAS_SEED: !!env.COLAS_SEED, COLA_ADMIN: !!env.COLA_ADMIN, REGISTRO_KEY: !!env.REGISTRO_KEY }, cola: avisoAbierta(env) || 'cerrada (quiosco y barra con clave)',
       herramientas: HERRAMIENTAS,
       documentacion: `${sitio}/mcp/`, llms: `${sitio}/mcp/llms.txt`, help_humanos: `${sitio}/help/` });
   }

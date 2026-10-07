@@ -165,3 +165,30 @@ test('MCP con la cola cerrada: cola_estado sin clave minimiza; con clave de barr
   const flota = crearServidor(env, {}, { agente: 'SubMorfeoMacMini' });
   assert.equal(JSON.parse((await call(flota, 'cola_avanzar', { store: 'sb-mcpc', pedido: 'A001', a: 'listo' })).content[0].text).estado, 'listo', 'la clave de flota cuenta como barra');
 });
+
+// ── Registro de avatares (GrokBot, 7-oct-2026, contrato «registro v1»): la cola empuja la foto de cada pedido ──
+import { metaRegistro, fotoRegistro } from '../src/cola.js';
+test('registro: campos opcionales del alta y foto con las horas de cada fase', async () => {
+  assert.equal(metaRegistro({}), null);
+  assert.deepEqual(metaRegistro({ conv: 'Conv-ABC123', origen: 'demo', demo_run: 'run1', canal: 'kiosko', avatar: 'neo', t: 123 }), { conv: 'conv-abc123', origen: 'demo', demo_run: 'run1', canal: 'kiosko', avatar: 'neo', t_sim: 123 });
+  assert.equal(metaRegistro({ origen: 'real', t: 123 }).t_sim, undefined, 'la hora simulada solo con origen demo');
+  const enviados = [];
+  const mem = new Map();
+  const obj = new ColaTienda({ storage: { get: async (k) => mem.get(k), put: async (k, v) => { mem.set(k, structuredClone(v)); } } }, { REGISTRO_KEY: 'k'.repeat(32), OMNI: { fetch: async (url, init) => { enviados.push({ url, h: init.headers, b: JSON.parse(init.body) }); return new Response('{"ok":true}'); } } });
+  const env = { COLA: { idFromName: (n) => n, get: () => ({ fetch: (r) => obj.fetch(r) }) } };
+  const post = (p, b) => manejar(new Request('https://w.test' + p, { method: 'POST', body: JSON.stringify(b) }), env);
+  await post('/cola/pedido?store=starbucks-qa', { id: 'ped-reg1', nombre: 'Carlos', conv: 'conv-aaa111', origen: 'demo', demo_run: 'run1', lines: [{ name: 'Caffè Latte', qty: 1 }] });
+  await post('/cola/pagar?store=starbucks-qa', { id: 'ped-reg1' });
+  assert.equal(enviados.length, 2);
+  assert.match(enviados[0].url, /\/registro\/pedido$/); assert.equal(enviados[0].h['x-registro-clave'].length, 32);
+  const f = enviados[1].b;
+  assert.equal(f.tienda, 'starbucks-qa'); assert.equal(f.conv, 'conv-aaa111'); assert.equal(f.origen, 'demo'); assert.equal(f.evento, 'pago'); assert.equal(f.nombre, 'Carlos');
+  assert.equal(f.t_preparando - f.t_recibido, RECIBIDO_S * 1000); assert.equal(f.t_listo - f.t_preparando, PREP_S * 1000); assert.equal(f.t_recogido - f.t_listo, RECOGER_S * 1000);
+  assert.equal(f.lineas[0].name, 'Caffè Latte');
+  // sin clave ni binding: la cola sigue igual y no se envía nada
+  const solo = new ColaTienda({ storage: { get: async () => undefined, put: async () => {} } });
+  const r = await solo.fetch(new Request('https://cola/cola/pedido?store=x1', { method: 'POST', headers: { 'x-cola-puede': 'kiosko' }, body: JSON.stringify({ id: 'ped-solo' }) }));
+  assert.equal((await r.json()).numero, 'A001');
+  const p = { id: 'p1', numero: 'A001', creadoAt: 1000, total: 0, moneda: 'EUR', prep: 60 };
+  assert.equal(fotoRegistro(p, 's').t_recibido, null, 'sin pagar no hay fases');
+});
