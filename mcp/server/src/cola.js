@@ -22,7 +22,7 @@ export function estadoDe(p, ahora = Date.now()) {
   if (p.auto !== false && ahora >= listo + RECOGER_S * 1000) return 'recogido';
   return 'listo';
 }
-export const vista = (p, ahora = Date.now()) => ({ id: p.id, numero: p.numero, estado: estadoDe(p, ahora), total: p.total, moneda: p.moneda, via: p.via || null, nombre: p.nombre || null, creado: new Date(p.creadoAt).toISOString(), pagado: p.pagadoAt ? new Date(p.pagadoAt).toISOString() : null, simulado: true });
+export const vista = (p, ahora = Date.now()) => ({ id: p.id, numero: p.numero, estado: estadoDe(p, ahora), total: p.total, moneda: p.moneda, via: p.via || null, nombre: p.nombre || null, llamadas: p.llamadas || 0, llamado: p.llamadoAt ? new Date(p.llamadoAt).toISOString() : null, creado: new Date(p.creadoAt).toISOString(), pagado: p.pagadoAt ? new Date(p.pagadoAt).toISOString() : null, simulado: true });
 
 /** Lógica pura sobre un mapa {id → pedido} y un contador; la usa el DO y los tests. */
 export function crearCola(datos = { pedidos: {}, n: 0 }) {
@@ -48,6 +48,10 @@ export function crearCola(datos = { pedidos: {}, n: 0 }) {
       if (destino === 'recogido') { p.pagadoAt ||= ahora; p.recogidoAt = ahora; }
       return vista(p, ahora);
     },
+    /** Volver a llamar a un pedido (lo pone «listo» si no lo estaba): las pantallas lo anuncian otra vez. */
+    llamar(k, ahora = Date.now()) { const p = buscar(k); if (!p) throw new Error('pedido no encontrado'); if (estadoDe(p, ahora) !== 'listo') this.avanzar(p.id, 'listo', ahora); p.llamadoAt = ahora; p.llamadas = (p.llamadas || 0) + 1; return vista(p, ahora); },
+    /** Vaciar la cola de la tienda y volver a numerar desde 001. */
+    reiniciar() { const n = Object.keys(d.pedidos).length; d.pedidos = {}; d.n = 0; return { borrados: n }; },
     uno(k, ahora = Date.now()) { const p = buscar(k); return p ? vista(p, ahora) : null; },
     estado(ahora = Date.now()) {
       const l = Object.values(d.pedidos).map((p) => vista(p, ahora));
@@ -71,6 +75,8 @@ export class ColaTienda {
       else if (op === 'pedido') { r = c.uno(k); if (!r) return Response.json({ ok: false, error: 'pedido no encontrado' }, { status: 404 }); }
       else if (op === 'pagar') { r = c.pagar(k, body.via); cambia = true; }
       else if (op === 'avanzar') { r = c.avanzar(k, body.a || body.estado); cambia = true; }
+      else if (op === 'llamar' && request.method === 'POST') { r = c.llamar(k); cambia = true; }
+      else if (op === 'reiniciar' && request.method === 'POST') { r = c.reiniciar(); cambia = true; }
       else if (op === 'estado') r = c.estado();
       else return Response.json({ ok: false, error: 'operación desconocida' }, { status: 404 });
     } catch (e) { return Response.json({ ok: false, error: String(e.message || e) }, { status: 400 }); }
