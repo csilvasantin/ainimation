@@ -235,10 +235,10 @@ function makeOrder(){const id="ped-"+Date.now().toString(36)+"-"+Math.random().t
 const relay=()=>((M&&M.orderFlow&&M.orderFlow.queue&&M.orderFlow.queue.relay)||"https://mcp-ainimation.admira.store").replace(/\/+$/,"");
 const colaStore=()=>(storeId||M.establishment.id||"tienda").toLowerCase().replace(/[^a-z0-9-]/g,"-").slice(0,80);
 let colaPoll=0;
-function colaApi(op,body){const q=relay()+"/cola/"+op+"?store="+encodeURIComponent(colaStore());return fetch(q,body?{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify(body)}:{cache:"no-store"}).then(r=>r.ok?r.json():Promise.reject(r.status));}
+function colaApi(op,body,extra){const q=relay()+"/cola/"+op+"?store="+encodeURIComponent(colaStore())+(extra||"");return fetch(q,body?{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify(body)}:{cache:"no-store"}).then(r=>r.ok?r.json():Promise.reject(r.status));}
 function colaCrear(o){return colaApi("pedido",{id:o.id,total:o.total,moneda:o.currency,prefijo:(M.orderFlow.prefix||"A")}).then(r=>{if(order===o){o.queueNumber=r.numero;window.__kioskCola={id:o.id,numero:r.numero,store:colaStore()};}return r;}).catch(()=>null);}
 function colaVigilar(o){clearInterval(colaPoll);colaPoll=setInterval(()=>{if(order!==o||o.number||screen!=="pay"){clearInterval(colaPoll);return;}
-  colaApi("pedido?id="+encodeURIComponent(o.id)).catch(()=>null).then(r=>{if(r&&r.estado&&r.estado!=="pendiente"&&order===o){o.queueNumber=r.numero;finish("paid");}});},2000);}
+  colaApi("pedido",null,"&id="+encodeURIComponent(o.id)).catch(()=>null).then(r=>{if(r&&r.estado&&r.estado!=="pendiente"&&order===o){o.queueNumber=r.numero;finish("paid");}});},2000);}
 function colaUrl(n){const u=new URL("../../cola/",document.baseURI);u.searchParams.set("store",colaStore());if(n)u.searchParams.set("pedido",n);u.searchParams.set("lang",lang);return u.href;}
 function checkoutUrl(){const base=new URL(M.orderFlow.payment.checkoutUrl||"pago-simulado.html",document.baseURI);
   base.searchParams.set("pedido",order.id);base.searchParams.set("store",colaStore());base.searchParams.set("total",order.total.toFixed(2));base.searchParams.set("moneda",order.currency);if(marca)base.searchParams.set("marca",marca);base.searchParams.set("lang",lang);return base.href;}

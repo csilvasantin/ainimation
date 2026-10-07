@@ -73,3 +73,11 @@ test('E2E: atracción → producto con opciones → carrito → QR → pago simu
     assert.ok(ev.includes('payment:paid') && ev.includes('order:paid-simulated'), ev.join());
   } finally { await browser.close(); srv.close(); }
 });
+
+// Gestor de colas (7-oct-2026): la vigilancia del pago pide /cola/pedido?store=…&id=… (no un segundo «?»).
+test('cola: el quiosco consulta el relé con una URL bien formada', async () => {
+  const fs = await import('node:fs');
+  const src = fs.readFileSync(new URL('./xperiencias/kiosko-pedido/index.html', import.meta.url), 'utf8');
+  assert.doesNotMatch(src, /colaApi\("[a-z]+\?/);
+  assert.match(src, /colaApi\("pedido",null,"&id="/);
+});
