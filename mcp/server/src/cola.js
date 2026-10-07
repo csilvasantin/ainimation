@@ -4,25 +4,29 @@
  * «En preparación» a «¡Listo para recoger!». Antes no existía ninguno en el ecosistema (solo el
  * dibujo «PEDIDO LISTO» del juego del gemelo). Un Durable Object por tienda (idFromName(store)).
  * Nunca hay dinero real: «pagar» solo marca el pedido como pagado-simulado.
- * Estados: pendiente → preparando (al pagar) → listo (auto a los PREP s, o el barista) → recogido
+ * Estados: pendiente → recibido (al pagar, RECIBIDO_S) → preparando (PREP_S) → listo «preparado» (o el barista) → recogido
  * (auto a los RECOGER s de estar listo, o el barista). El tiempo se evalúa al leer: sin alarmas.
  */
-export const PREP_S = 20, RECOGER_S = 120, MAX = 300, VIDA_MS = 3 * 3600_000;
+// Tres fases (Carlos, 7-oct-2026): recibido (1 min) → en preparación (1 min) → preparado/listo; recogido a los 2 min.
+export const RECIBIDO_S = 60, PREP_S = 60, RECOGER_S = 120, MAX = 300, VIDA_MS = 3 * 3600_000;
 export const STORE = /^[a-z0-9-]{2,80}$/, ID = /^[A-Za-z0-9._-]{4,64}$/;
 /** Nombre de pila para llamar al cliente: solo letras, espacios, guion y apóstrofo; máx. 24. */
 export const limpiaNombre = (n) => String(n || '').normalize('NFC').replace(/[^\p{L} '\-]/gu, '').replace(/\s+/g, ' ').trim().slice(0, 24) || null;
-const ORDEN = ['pendiente', 'preparando', 'listo', 'recogido'];
+const ORDEN = ['pendiente', 'recibido', 'preparando', 'listo', 'recogido'];
+export const FASES = { pendiente: ['Pendiente de pago', 'Awaiting payment'], recibido: ['Recibido', 'Received'], preparando: ['En preparación', 'Preparing'], listo: ['Preparado', 'Ready'], recogido: ['Recogido', 'Collected'] };
 
 /** Estado efectivo de un pedido en el instante `ahora` (ms). */
 export function estadoDe(p, ahora = Date.now()) {
   if (p.recogidoAt) return 'recogido';
   if (!p.pagadoAt) return 'pendiente';
-  const listo = p.listoAt || (p.auto !== false ? p.pagadoAt + (p.prep || PREP_S) * 1000 : 0);
+  const prep = p.prepAt || p.pagadoAt + RECIBIDO_S * 1000;
+  if (!p.listoAt && ahora < prep) return 'recibido';
+  const listo = p.listoAt || (p.auto !== false ? prep + (p.prep || PREP_S) * 1000 : 0);
   if (!listo || ahora < listo) return 'preparando';
   if (p.auto !== false && ahora >= listo + RECOGER_S * 1000) return 'recogido';
   return 'listo';
 }
-export const vista = (p, ahora = Date.now()) => ({ id: p.id, numero: p.numero, estado: estadoDe(p, ahora), total: p.total, moneda: p.moneda, via: p.via || null, nombre: p.nombre || null, llamadas: p.llamadas || 0, llamado: p.llamadoAt ? new Date(p.llamadoAt).toISOString() : null, creado: new Date(p.creadoAt).toISOString(), pagado: p.pagadoAt ? new Date(p.pagadoAt).toISOString() : null, simulado: true });
+export const vista = (p, ahora = Date.now()) => { const e = estadoDe(p, ahora); return { id: p.id, numero: p.numero, estado: e, fase: FASES[e][0], fase_en: FASES[e][1], total: p.total, moneda: p.moneda, via: p.via || null, nombre: p.nombre || null, llamadas: p.llamadas || 0, llamado: p.llamadoAt ? new Date(p.llamadoAt).toISOString() : null, creado: new Date(p.creadoAt).toISOString(), pagado: p.pagadoAt ? new Date(p.pagadoAt).toISOString() : null, simulado: true }; };
 
 /** Lógica pura sobre un mapa {id → pedido} y un contador; la usa el DO y los tests. */
 export function crearCola(datos = { pedidos: {}, n: 0 }) {
@@ -41,10 +45,11 @@ export function crearCola(datos = { pedidos: {}, n: 0 }) {
     pagar(k, via = 'qr', ahora = Date.now()) { const p = buscar(k); if (!p) throw new Error('pedido no encontrado'); if (!p.pagadoAt) { p.pagadoAt = ahora; p.via = via === 'caja' ? 'caja' : 'qr'; } return vista(p, ahora); },
     avanzar(k, a, ahora = Date.now()) {
       const p = buscar(k); if (!p) throw new Error('pedido no encontrado');
-      const e = estadoDe(p, ahora), destino = a || ORDEN[Math.min(3, ORDEN.indexOf(e) + 1)];
+      const e = estadoDe(p, ahora), destino = a || ORDEN[Math.min(4, ORDEN.indexOf(e) + 1)];
       if (!ORDEN.includes(destino)) throw new Error('estado inválido: ' + destino);
-      if (destino === 'preparando') { p.pagadoAt ||= ahora; p.auto = false; p.listoAt = 0; p.recogidoAt = 0; }
-      if (destino === 'listo') { p.pagadoAt ||= ahora; p.listoAt = ahora; p.auto = false; p.recogidoAt = 0; }
+      if (destino === 'recibido') { p.pagadoAt = ahora; p.prepAt = 0; p.listoAt = 0; p.recogidoAt = 0; delete p.auto; }
+      if (destino === 'preparando') { p.pagadoAt ||= ahora; p.prepAt = ahora; p.listoAt = 0; p.recogidoAt = 0; delete p.auto; }
+      if (destino === 'listo') { p.pagadoAt ||= ahora; p.prepAt ||= ahora; p.listoAt = ahora; p.recogidoAt = 0; delete p.auto; }
       if (destino === 'recogido') { p.pagadoAt ||= ahora; p.recogidoAt = ahora; }
       return vista(p, ahora);
     },
@@ -56,7 +61,7 @@ export function crearCola(datos = { pedidos: {}, n: 0 }) {
     estado(ahora = Date.now()) {
       const l = Object.values(d.pedidos).map((p) => vista(p, ahora));
       const de = (e) => l.filter((p) => p.estado === e).sort((a, b) => a.pagado < b.pagado ? -1 : 1);
-      return { preparando: de('preparando'), listo: de('listo').reverse(), recogidos: de('recogido').slice(-10).length, pendientes: de('pendiente').length, prep_s: PREP_S, recoger_s: RECOGER_S, ahora: new Date(ahora).toISOString(), simulado: true };
+      return { recibido: de('recibido'), preparando: de('preparando'), listo: de('listo').reverse(), fases: ['recibido', 'preparando', 'listo'], recogidos: de('recogido').slice(-10).length, pendientes: de('pendiente').length, recibido_s: RECIBIDO_S, prep_s: PREP_S, recoger_s: RECOGER_S, ahora: new Date(ahora).toISOString(), simulado: true };
     },
   };
 }
