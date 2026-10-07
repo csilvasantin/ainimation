@@ -1,6 +1,6 @@
 {
-  "version": "v.07.10.2026.r19.13:44",
-  "deployedAt": "2026-10-07T11:44:10Z",
+  "version": "v.07.10.2026.r20.13:52",
+  "deployedAt": "2026-10-07T11:52:29Z",
   "deployer": "GrokBot",
   "machine": "MacMini",
   "signature": "GrokBot · MacMini",
@@ -10,12 +10,12 @@
   "dirty": false,
   "returnTag": "AInimation-v.04.09.2026.r1",
   "previousTag": "AInimation-v.03.09.2026.r2",
-  "previousVersion": "v.07.10.2026.r18.13:21",
-  "note": "iPad: Admirito visible desde el primer momento y los pedidos listos al abrir también se avisan",
+  "previousVersion": "v.07.10.2026.r19.13:44",
+  "note": "Pedidos en tres fases: recibido, en preparación y preparado",
   "novedades": [
-    "El iPad ya no tapa la pantalla con «Toca para activar la voz»: ahora es un botón pequeño y Admirito se ve desde el primer momento haciendo gracias",
-    "Los pedidos que ya estaban listos al abrir el iPad también se avisan y se ven con número y nombre",
-    "Mientras haya un pedido listo, el bocadillo de Admirito lo sigue mostrando; sin listos vuelve el modo demo",
-    "Con &escena=1 el iPad se integra en el gemelo sin voz propia"
+    "Los pedidos pasan por tres fases: Recibido (1 min) → En preparación (1 min) → Preparado; a los 2 min se dan por recogidos",
+    "La cola del móvil y el iPad muestran las tres columnas; el barista tiene «Empezar a preparar» y «Marcar preparado»",
+    "Admirito te llama por tu nombre al pasar a Preparado",
+    "El MCP (cola_estado, cola_avisos, cola_avanzar) entiende las fases y las devuelve en español e inglés"
   ]
 }

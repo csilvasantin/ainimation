@@ -43,8 +43,9 @@ footer{grid-column:1/-1;background:#FFE58A;color:#3A2E00;text-align:center;font-
 <header><b>☁️ Admirito<small id="tienda"></small></b><span id="estado">Conectando…</span></header>
 <div id="avatar"><iframe id="nube" title="Admirito" allow="autoplay" src="https://digitalavatar.ai/nube.html?kiosk=1&amp;avatar=admirito&amp;tier=good&amp;sector=retail&amp;audio=off"></iframe><div id="bocadillo" role="status" aria-live="assertive"></div></div>
 <aside>
-  <h2>✅ ¡Listo para recoger!</h2><div class="nums" id="listo"></div>
+  <h2>✅ ¡Preparado!</h2><div class="nums" id="listo"></div>
   <h2 style="color:#fff;opacity:.8">⏳ En preparación</h2><div class="nums prep" id="prep"></div>
+  <h2 style="color:#fff;opacity:.6">🧾 Recibido</h2><div class="nums prep" id="rec"></div>
 </aside>
 <footer>DEMO · pedidos de ejemplo y pago SIMULADO: no se cobra nada</footer>
 <div id="activar" role="button" tabindex="0">🔊 Activar voz de Admirito<span>El iPad necesita un toque para permitir la voz</span></div>
@@ -107,7 +108,7 @@ async function tic(){
     const listos=d.listo||[];
     listos.forEach(p=>{if(!vistos.has(p.numero)){vistos.add(p.numero);if(true){cola.push(p);recientes.add(p.numero);setTimeout(()=>recientes.delete(p.numero),15000);}}});
     primera=false;
-    pendientes=listos.length;ultimoListo=listos[0]||null;$('listo').innerHTML=chips(listos,recientes);$('prep').innerHTML=chips(d.preparando||[]);
+    pendientes=listos.length;ultimoListo=listos[0]||null;$('listo').innerHTML=chips(listos,recientes);$('prep').innerHTML=chips(d.preparando||[]);$('rec').innerHTML=chips(d.recibido||[]);
     $('estado').textContent='En vivo · '+new Date().toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
     siguiente();
   }catch(_){$('estado').textContent='Sin conexión, reintentando…';}
