@@ -19,6 +19,7 @@ import { WebStandardStreamableHTTPServerTransport } from '@modelcontextprotocol/
 import * as z from 'zod/v4';
 import { identidadPorClave, claveDeRequest } from './identidad-flota.mjs';
 import { ColaTienda, STORE } from './cola.js';
+import { acceso, avisoAbierta, corsCola, origenPermitido } from './cola-acceso.js';
 export { ColaTienda };
 import { Admingo, PLANTILLAS, proyectoVacio, compilar, validarEsquema, coherenciaMenu, urlKiosko, TWIN_BASE, TWIN_STARBUCKS, MARCAS } from './suite.js';
 
@@ -73,7 +74,7 @@ export function crearServidor(env = {}, deps = {}, identidad = null) {
       'Lecturas sin clave: sitio_estado, xperiencias_listar, xperiencia_detalle, xperiencia_canal_item, stock_animaciones. Escritura con clave de flota AdmiraNeXT (Authorization: Bearer): xperiencia_publicar. quien_soy te dice con qué identidad entras.',
       'Este servidor no guarda estado: lee el sitio (index.json es la única fuente de la galería) y escribe en el stock de Pixeria. Crear una Xperiencia nueva sigue siendo trabajo del repo (carpeta + entrada en index.json): el MCP te dice qué hay y publica lo que ya existe.',
       'Suite (desde 7-oct-2026): listar_xperiencias, plantillas, crear_proyecto (proyecto del Director desde plantilla), validar_admingo y compilar_admingo (el Lingo de AdmiraNeXT → reglas XPL), publicar_xperiencia (URL + ficheros; ZIP próximamente), menu_validar (carta de quiosco), enviar_a_admiratv (item de playlist type interactive), fijar_en_totem (comando /totem del gemelo) y marca_aplicar (marcablanca de admiranext). Son cálculos y lecturas: no escriben.',
-      'Gestor de colas (7-oct-2026): cola_estado (pedidos en preparación / listos de una tienda) y cola_avanzar (el barista de la demo) y cola_avisos (pedidos listos con el texto que dicen Admirito, el móvil y la taza: «NOMBRE, tu pedido Starbucks está preparado»). Los pedidos llevan «nombre» si el cliente lo dio en el quiosco. Pago siempre simulado; relé público en /cola/* de este mismo worker.',
+      'Gestor de colas (7-oct-2026): cola_estado (pedidos en preparación / listos de una tienda; con clave de flota o de barra, las líneas de cada comanda) y cola_avanzar (el barista de la demo; con la cola cerrada exige clave de flota o de barra) y cola_avisos (pedidos listos con el texto que dicen Admirito, el móvil y la taza: «NOMBRE, tu pedido Starbucks está preparado»). Los pedidos llevan «nombre» si el cliente lo dio en el quiosco. Pago siempre simulado; relé público en /cola/* de este mismo worker.',
       'Ritual de la flota: lo que hagas aquí se declara en yokup (mcp.admira.live · yokup_alta/yokup_paso) — este MCP no puntúa por sí mismo.',
     ].join(' '),
   });
@@ -291,27 +292,32 @@ export function crearServidor(env = {}, deps = {}, identidad = null) {
   // ── Gestor de colas (7-oct-2026): el mismo relé que usan el quiosco, el móvil y la pantalla /cola/ ─
   const relevo = (env.COLA_API || 'https://mcp-ainimation.admira.store').replace(/\/+$/, '');
   // Dentro del worker se habla con el Durable Object directamente: pedirse a sí mismo por su dominio da 522.
-  const cola = async (op, store, { query = '', body } = {}) => {
-    if (!env.COLA) return llamar(`${relevo}/cola/${op}?store=${store}${query}`, body ? { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) } : {});
-    const r = await env.COLA.get(env.COLA.idFromName(store)).fetch(new Request(`https://cola/cola/${op}?store=${store}${query}`, body ? { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) } : {}));
+  // Cierre de la cola: la clave de flota (identidad) cuenta como barra; si no, la «clave» de barra del argumento.
+  const cola = async (op, store, { query = '', body, clave } = {}) => {
+    const init = (h) => body ? { method: 'POST', headers: { 'content-type': 'application/json', ...h }, body: JSON.stringify(body) } : { headers: h };
+    if (!env.COLA) return llamar(`${relevo}/cola/${op}?store=${store}${query}`, init(clave ? { 'x-cola-clave': clave } : {}));
+    const a = await acceso(new Request('https://cola/', { headers: clave ? { 'x-cola-clave': clave } : {} }), env, store);
+    const puede = new Set(a.puede); if (identidad) puede.add('barra');
+    const r = await env.COLA.get(env.COLA.idFromName(store)).fetch(new Request(`https://cola/cola/${op}?store=${store}${query}`, init({ 'x-cola-puede': [...puede].join(',') })));
     const d = await r.json(); if (!r.ok) throw new Error(d.error || r.status); return d;
   };
+  const CLAVE = z.string().max(80).optional().describe('Clave de barra (gc_… de admira.tv o COLA_BARRA_KEY) si no entras con clave de flota. Con la cola cerrada sin ella: estado sin líneas y sin avanzar.');
   const STO = z.string().regex(/^[a-z0-9-]{2,80}$/).default('starbucks-paseo-de-gracia');
   server.registerTool('cola_estado', {
     title: 'Estado de la cola de pedidos',
-    description: 'Pedidos de una tienda en tres fases —«Recibido» (30 s), «En preparación» (1 min) y «Preparado» (listo; recogido solo a los 2 min)— cada uno con estado y fase (ES/EN), (gestor de colas del quiosco; pago siempre SIMULADO), cada uno con su «nombre» si lo dio en el quiosco, y las URL de la pantalla pública, el iPad de Admirito y la taza. Con «pedido» (A001 o id) devuelve solo ese.',
-    inputSchema: { store: STO, pedido: z.string().max(64).optional() },
+    description: 'Pedidos de una tienda en tres fases —«Recibido» (30 s), «En preparación» (1 min) y «Preparado» (listo; recogido solo a los 2 min)— cada uno con estado y fase (ES/EN), (gestor de colas del quiosco; pago siempre SIMULADO), cada uno con su «nombre» si lo dio en el quiosco, y las URL de la pantalla pública, el iPad de Admirito y la taza. Con «pedido» (A001 o id) devuelve solo ese. Con clave de flota o de barra (o la cola abierta) cada pedido trae sus «lineas» [{name, qty, options, optionsText}] y el nombre completo; sin ella, solo número y nombre de pila.',
+    inputSchema: { store: STO, pedido: z.string().max(64).optional(), clave: CLAVE },
     annotations: { readOnlyHint: true, openWorldHint: true },
-  }, seguro(async ({ store = 'starbucks-paseo-de-gracia', pedido }) => {
-    const r = pedido ? await cola('pedido', store, { query: '&pedido=' + encodeURIComponent(pedido) }) : await cola('estado', store);
+  }, seguro(async ({ store = 'starbucks-paseo-de-gracia', pedido, clave }) => {
+    const r = pedido ? await cola('pedido', store, { query: '&pedido=' + encodeURIComponent(pedido), clave }) : await cola('estado', store, { clave });
     return texto({ store, ...r, pantalla: `${sitio}/cola/?store=${store}`, barista: `${sitio}/cola/barista.html?store=${store}`, ipad: `${sitio}/cola/ipad.html?store=${store}`, ipad_mostrador: { url: `${sitio}/cola/ipad.html?store=${store}`, dispositivo: 'starbucks-ipad-01', gemelo: 'https://www.xpaceos.com/admira-xp/ (iPad del mostrador; pulsarlo lo abre en grande; /ipad off vuelve a la playlist)' }, taza: `${sitio}/taza/?store=${store}` });
   }));
   server.registerTool('cola_avanzar', {
     title: 'Avanzar un pedido en la cola',
-    description: 'El «barista» de la demo: pasa un pedido (A001 o id) a la siguiente fase (recibido → preparando → listo «preparado» → recogido) o al que digas. Pedidos de demostración, sin dinero real.',
-    inputSchema: { store: STO, pedido: z.string().min(1).max(64), a: z.enum(['recibido', 'preparando', 'listo', 'recogido']).optional() },
+    description: 'El «barista» de la demo: pasa un pedido (A001 o id) a la siguiente fase (recibido → preparando → listo «preparado» → recogido) o al que digas. Pedidos de demostración, sin dinero real. Con la cola cerrada exige clave de flota o «clave» de barra.',
+    inputSchema: { store: STO, pedido: z.string().min(1).max(64), a: z.enum(['recibido', 'preparando', 'listo', 'recogido']).optional(), clave: CLAVE },
     annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: true },
-  }, seguro(async ({ store = 'starbucks-paseo-de-gracia', pedido, a }) => texto(await cola('avanzar', store, { body: { numero: pedido, a } }))));
+  }, seguro(async ({ store = 'starbucks-paseo-de-gracia', pedido, a, clave }) => texto(await cola('avanzar', store, { body: { numero: pedido, a }, clave }))));
 
   server.registerTool('admirito_voz', {
     title: 'Voz de Admirito (ElevenLabs)',
@@ -342,12 +348,12 @@ const json = (o, status = 200, extra = {}) => new Response(JSON.stringify(o, nul
 export async function manejar(request, env = {}, deps = {}) {
   const u = new URL(request.url);
   const ruta = u.pathname.replace(/\/+$/, '') || '/';
-  if (request.method === 'OPTIONS') return new Response(null, { status: 204, headers: CORS });
+  if (request.method === 'OPTIONS' && !ruta.startsWith('/cola/')) return new Response(null, { status: 204, headers: CORS });
   const sitio = limpiar(env.SITIO || 'https://www.ainimation.studio');
   if (ruta === '/' || ruta === '/salud') {
     return json({ nombre: NOMBRE, version: env.VERSION || '', sitio, endpoint_mcp: `${u.origin}/mcp`, transport: 'streamable-http',
       que_es: 'MCP de ainimation.studio: Xperiencias, plantillas del Director, Admingo, carta, admira.tv, tótem del gemelo y marca blanca como herramientas.',
-      auth: 'lecturas abiertas; xperiencia_publicar con clave de flota AdmiraNeXT (Authorization: Bearer)', secretos: { MCP_FLOTA_SEED: !!env.MCP_FLOTA_SEED },
+      auth: 'lecturas abiertas; xperiencia_publicar con clave de flota AdmiraNeXT (Authorization: Bearer)', secretos: { MCP_FLOTA_SEED: !!env.MCP_FLOTA_SEED, COLA_KIOSKO_KEY: !!env.COLA_KIOSKO_KEY, COLA_BARRA_KEY: !!env.COLA_BARRA_KEY, COLAS_SEED: !!env.COLAS_SEED, COLA_ADMIN: !!env.COLA_ADMIN }, cola: avisoAbierta(env) || 'cerrada (quiosco y barra con clave)',
       herramientas: HERRAMIENTAS,
       documentacion: `${sitio}/mcp/`, llms: `${sitio}/mcp/llms.txt`, help_humanos: `${sitio}/help/` });
   }
@@ -365,17 +371,32 @@ export async function manejar(request, env = {}, deps = {}) {
     } finally { Promise.resolve().then(() => server.close()).catch(() => {}); }
   }
   if (ruta.startsWith('/cola/')) {
+    const cors = corsCola(request, env);
+    const resp = (o, status) => new Response(JSON.stringify(o, null, 2), { status, headers: { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store', ...cors } });
+    if (request.method === 'OPTIONS') return new Response(null, { status: 204, headers: cors });
+    // Escritura desde un navegador de fuera de la casa: no (CORS no basta: un formulario no hace preflight).
+    if (request.method === 'POST' && request.headers.get('origin') && !origenPermitido(request.headers.get('origin'), env)) return resp({ ok: false, error: 'origen no permitido para escribir en la cola' }, 403);
     const store = u.searchParams.get('store') || '';
-    if (!STORE.test(store)) return json({ ok: false, error: 'store inválida (slug)' }, 400);
-    if (!env.COLA) return json({ ok: false, error: 'cola no configurada' }, 503);
-    // llamar / reiniciar (gestor de colas de admira.tv/gestorColas): solo con la clave de servicio compartida.
-    if (/\/(llamar|reiniciar)$/.test(ruta) && (!env.COLA_ADMIN || request.headers.get('x-cola-admin') !== env.COLA_ADMIN)) return json({ ok: false, error: 'requiere clave de servicio' }, 403);
+    if (!STORE.test(store)) return resp({ ok: false, error: 'store inválida (slug)' }, 400);
+    if (!env.COLA) return resp({ ok: false, error: 'cola no configurada' }, 503);
+    const a = await acceso(request, env, store);
+    const aviso = avisoAbierta(env);
+    if (aviso && !globalThis.__colaAvisada) { globalThis.__colaAvisada = true; console.warn(aviso); }
+    // llamar exige clave de verdad (barra o servicio) aunque la barra esté abierta; reiniciar, la de servicio.
+    if (/\/llamar$/.test(ruta) && !a.claveBarra) return resp({ ok: false, error: 'requiere clave de barra o de servicio' }, a.cerrada.barra || env.COLA_ADMIN ? 401 : 403);
+    if (/\/reiniciar$/.test(ruta) && !a.admin) return resp({ ok: false, error: 'requiere clave de servicio' }, env.COLA_ADMIN ? 401 : 403);
+    const headers = { 'content-type': 'application/json', 'x-cola-puede': a.puede.join(',') };
+    const pago = request.headers.get('x-cola-pago'); if (pago) headers['x-cola-pago'] = pago.slice(0, 64);
     const stub = env.COLA.get(env.COLA.idFromName(store));
-    const r = await stub.fetch(new Request('https://cola' + ruta + u.search, { method: request.method, headers: { 'content-type': 'application/json' }, body: request.method === 'POST' ? await request.text() : undefined }));
-    return new Response(r.body, { status: r.status, headers: { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store', ...CORS } });
+    const r = await stub.fetch(new Request('https://cola' + ruta + u.search, { method: request.method, headers, body: request.method === 'POST' ? await request.text() : undefined }));
+    if (/\/estado$/.test(ruta) && r.ok) {
+      const d = await r.json();
+      return resp({ ...d, acceso: { kiosko: a.cerrada.kiosko ? 'cerrado' : 'abierto', barra: a.cerrada.barra ? 'cerrada' : 'abierta', detalle: a.puede.includes('barra') }, ...(aviso ? { aviso } : {}) }, 200);
+    }
+    return new Response(r.body, { status: r.status, headers: { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store', ...cors } });
   }
   if (ruta === '/voz') return voz(request, env, deps);
-  return json({ ok: false, error: 'ruta desconocida', rutas: ['/', '/salud', '/mcp', '/voz', '/cola/estado', '/cola/pedido', '/cola/pagar', '/cola/avanzar', '/cola/llamar', '/cola/reiniciar'] }, 404);
+  return json({ ok: false, error: 'ruta desconocida', rutas: ['/', '/salud', '/mcp', '/voz', '/cola/estado', '/cola/pedido', '/cola/pagar', '/cola/avanzar', '/cola/comandas', '/cola/llamar', '/cola/reiniciar'] }, 404);
 }
 
 export default { fetch: (request, env, ctx) => manejar(request, env, { ctx }) };
