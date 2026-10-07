@@ -1,21 +1,18 @@
 {
-  "version": "v.07.10.2026.r8.11:30",
-  "deployedAt": "2026-10-07T09:30:37Z",
+  "version": "v.07.10.2026.r9.11:33",
+  "deployedAt": "2026-10-07T09:33:49Z",
   "deployer": "GrokBot",
   "machine": "MacMini",
   "signature": "GrokBot · MacMini",
-  "git": "1c88f09f61527a2a413f8a20d055b577edbf0f9c",
-  "gitShort": "1c88f09",
-  "gitFull": "1c88f09f61527a2a413f8a20d055b577edbf0f9c",
+  "git": "9632d0f606479e605303aaa4d9bbfa09cfe1f8f5",
+  "gitShort": "9632d0f",
+  "gitFull": "9632d0f606479e605303aaa4d9bbfa09cfe1f8f5",
   "dirty": false,
   "returnTag": "AInimation-v.04.09.2026.r1",
   "previousTag": "AInimation-v.03.09.2026.r2",
-  "previousVersion": "v.07.10.2026.r7.10:54",
-  "note": "Gestor de colas: escaneas el QR del quiosco, pagas (simulado) en el móvil y ves tu número pasar a «¡Listo para recoger!»",
+  "previousVersion": "v.07.10.2026.r8.11:30",
+  "note": "Cola: el quiosco se entera al momento del pago hecho en el móvil",
   "novedades": [
-    "Nueva pantalla de la cola /cola/?store=… (En preparación / ¡Listo para recoger!), con tu número resaltado, en móvil o pantalla grande, ES/EN",
-    "El quiosco se entera del pago hecho en el móvil (otro dispositivo) y da el mismo número",
-    "Página del barista para avanzar pedidos (en la demo pasan solos a listo a los ~20 s)",
-    "MCP: cola_estado y cola_avanzar (19 herramientas)"
+    "El quiosco pasa solo a la pantalla del número cuando pagas (simulado) desde el móvil"
   ]
 }
