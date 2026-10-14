@@ -189,6 +189,7 @@ html.demo-on[data-formato="horizontal"] #confirm{align-items:flex-end}html.demo-
 @keyframes demotap{0%{opacity:.95;transform:scale(.3)}55%{opacity:.85;transform:scale(1)}100%{opacity:0;transform:scale(1.3)}}
 .demo-press{transform:scale(.96);filter:brightness(.9);transition:transform .12s,filter .12s}
 @media (prefers-reduced-motion:reduce){.db,#demoTalk .dbadge i,.db .wv i{animation:none}#demoTap.on{animation:none;opacity:.9;transform:none}}
+#qr[hidden],#queueErr[hidden],#queueRetry[hidden]{display:none!important}
 </style>
 </head>
 <body>
@@ -235,6 +236,7 @@ html.demo-on[data-formato="horizontal"] #confirm{align-items:flex-end}html.demo-
     <header class="bar"><div class="logo" data-logo></div><button class="avToggle" type="button" data-av="on"></button><button class="lang" data-lang></button></header>
     <main><h2 data-t="scan"></h2><div class="big" id="payTotal"></div><br>
       <div id="qr" title="Toca para abrir el pago simulado aquí"></div>
+      <p id="queueErr" role="alert" hidden></p><button class="btn alt" id="queueRetry" type="button" hidden>Reintentar</button>
       <p class="paynote" data-t="payNote"></p><p class="paynote" data-t="tapQr"></p></main>
     <div class="foot"><button class="btn alt" data-go="cart" data-t="back"></button><button class="btn" id="payCounter" data-t="counter"></button></div>
   </section>
@@ -265,6 +267,7 @@ html.demo-on[data-formato="horizontal"] #confirm{align-items:flex-end}html.demo-
 <script src="pedido-avatar.js"></script>
 <script src="segmento.js?v=20261008r1"></script>
 <script src="demo-pedido.js"></script>
+<script src="queue-ack.js"></script>
 <script>
 (function(){
 "use strict";
@@ -357,7 +360,8 @@ function makeOrder(){const id="ped-"+Date.now().toString(36)+"-"+Math.random().t
    lines:cart.map(l=>({id:l.id,name:tr(l.name),qty:l.qty,unitPrice:l.unitPrice,options:l.options.map(o=>tr(o.label))})),total:sum(),customerName:custName(),status:"pending-payment",createdAt:new Date().toISOString(),_colaLines:KA?KA.queueLines(cart):[]};if(demoOn())order.demo=true;return order;}
 // Gestor de colas (7-oct-2026): el pedido vive en un relé (Durable Object por tienda) para que el
 // móvil que escanea el QR —otro dispositivo— pague (SIMULADO) y siga su número en /cola/, y el quiosco
-// se entere del pago. Sin relé (offline) sigue el flujo local de antes.
+// se entere del pago. Sin ACK del relé no se confirma número ni pago.
+const QACK=window.KioskoQueueAck;
 const relay=()=>((M&&M.orderFlow&&M.orderFlow.queue&&M.orderFlow.queue.relay)||"https://mcp-ainimation.admira.store").replace(/\/+$/,"");
 const colaStore=()=>(storeId||M.establishment.id||"tienda").toLowerCase().replace(/[^a-z0-9-]/g,"-").slice(0,80);
 let colaPoll=0;
@@ -368,23 +372,26 @@ let colaPoll=0;
 function colaKey(){try{return localStorage.getItem("cola:kiosko:"+colaStore())||"";}catch(e){return "";}}
 function colaKeyFromUrl(){try{const h=new URLSearchParams(location.hash.slice(1)),q=new URLSearchParams(location.search),v=(h.get("clave")||q.get("ck")||"").trim();if(!h.has("clave")&&!q.has("ck"))return;
   if(v)localStorage.setItem("cola:kiosko:"+colaStore(),v.slice(0,200));h.delete("clave");q.delete("ck");history.replaceState(history.state,"",location.pathname+(String(q)?"?"+q:"")+(String(h)?"#"+h:""));}catch(e){}}
-function colaApi(op,body,extra){const q=relay()+"/cola/"+op+"?store="+encodeURIComponent(colaStore())+(extra||""),k=body?colaKey():"";return fetch(q,body?{method:"POST",headers:Object.assign({"content-type":"application/json"},k?{"x-cola-clave":k}:{}),body:JSON.stringify(body)}:{cache:"no-store"}).then(r=>r.ok?r.json():Promise.reject(r.status));}
+function colaApi(op,body,extra){const q=relay()+"/cola/"+op+"?store="+encodeURIComponent(colaStore())+(extra||""),k=body?colaKey():"";return QACK.request(fetch,q,body?{method:"POST",headers:Object.assign({"content-type":"application/json"},k?{"x-cola-clave":k}:{}),body:JSON.stringify(body)}:{cache:"no-store"});}
+function queueProblem(){const e=$("#queueErr");e.hidden=false;e.textContent=lang==="en"?"The queue has not confirmed this order. Check kiosk provisioning or connection, then retry. No order number or payment is confirmed.":"La cola no ha confirmado este pedido. Comprueba el aprovisionamiento del quiosco o la conexión y reintenta. No se confirma número ni pago.";$("#queueRetry").hidden=false;$("#queueRetry").textContent=lang==="en"?"Retry":"Reintentar";}
+function clearQueueProblem(){$("#queueErr").hidden=true;$("#queueRetry").hidden=true;}
+async function startQueue(o){if(order!==o)return;clearQueueProblem();$("#qr").hidden=true;$("#payCounter").disabled=true;o._colaP=colaCrear(o);try{await o._colaP;if(order!==o)return;paintQr();colaVigilar(o);$("#payCounter").disabled=false;host("payment",{status:"started",checkoutUrl:o.checkoutUrl,simulated:true});}catch{if(order===o){o._colaP=null;queueProblem();}}}
+$("#queueRetry").onclick=()=>{const o=order;if(!o)return;if(o._finishHow)finish(o._finishHow);else startQueue(o);};
 function askName(){go("name");$("#nameErr").textContent="";const i=$("#custName");setTimeout(()=>{try{i.focus();}catch(_){}},50);}
 function confirmName(){const n=custName();if(n.replace(/[^\p{L}]/gu,"").length<2){$("#nameErr").textContent=t("nameErr");try{$("#custName").focus();}catch(_){}return;}$("#nameErr").textContent="";toPay();}
 function custName(){const i=document.getElementById("custName");return i?i.value.replace(/[^\p{L} '\-]/gu,"").replace(/\s+/g," ").trim().slice(0,24):"";}
-function colaCrear(o){return colaApi("pedido",{id:o.id,nombre:(o.customerName||"")+(o.demo&&o.customerName?" - demo":""),total:o.total,moneda:o.currency,prefijo:(M.orderFlow.prefix||"A"),lines:o._colaLines||[]}).then(r=>{if(order===o){o.queueNumber=r.numero;if(r.pago&&!o._pago){o._pago=String(r.pago).slice(0,64);if(screen==="pay"&&!o.number)paintQr();}window.__kioskCola={id:o.id,numero:r.numero,store:colaStore()};if(o.number&&o.number!==r.numero){o.number=r.numero;o.queueUrl=colaUrl(r.numero);try{$("#orderNum").textContent=r.numero;}catch(_){}}}return r;}).catch(()=>null);}
+function colaCrear(o){return colaApi("pedido",{id:o.id,nombre:(o.customerName||"")+(o.demo&&o.customerName?" - demo":""),total:o.total,moneda:o.currency,prefijo:(M.orderFlow.prefix||"A"),lines:o._colaLines||[]}).then(r=>{QACK.number(r,o.id);if(!r.pago)throw Error("missing payment token");if(order===o){o.queueNumber=r.numero;if(r.pago&&!o._pago){o._pago=String(r.pago).slice(0,64);if(screen==="pay"&&!o.number)paintQr();}window.__kioskCola={id:o.id,numero:r.numero,store:colaStore()};if(o.number&&o.number!==r.numero){o.number=r.numero;o.queueUrl=colaUrl(r.numero);try{$("#orderNum").textContent=r.numero;}catch(_){}}}return r;});}
 function colaVigilar(o){clearInterval(colaPoll);colaPoll=setInterval(()=>{if(order!==o||o.number||screen!=="pay"){clearInterval(colaPoll);return;}
   colaApi("pedido",null,"&id="+encodeURIComponent(o.id)).catch(()=>null).then(r=>{if(r&&r.estado&&r.estado!=="pendiente"&&order===o){o.queueNumber=r.numero;finish("paid");}});},2000);}
 function colaUrl(n){const u=new URL("../../cola/",document.baseURI);u.searchParams.set("store",colaStore());if(n)u.searchParams.set("pedido",n);u.searchParams.set("lang",lang);return u.href;}
 function checkoutUrl(){const base=new URL(M.orderFlow.payment.checkoutUrl||"pago-simulado.html",document.baseURI);
   base.searchParams.set("pedido",order.id);if(order._pago)base.searchParams.set("t",order._pago); /* token de pago del relé: el móvil del QR puede pagar */base.searchParams.set("store",colaStore());base.searchParams.set("total",order.total.toFixed(2));base.searchParams.set("moneda",order.currency);if(marca)base.searchParams.set("marca",marca);base.searchParams.set("lang",lang);return base.href;}
-function toPay(){makeOrder();segPedido(order);go("pay");order._colaP=colaCrear(order);colaVigilar(order);$("#payTotal").textContent=t("total")+": "+money(order.total);
-  const url=paintQr();host("payment",{status:"started",checkoutUrl:url,simulated:true});}
+function toPay(){makeOrder();segPedido(order);go("pay");$("#payTotal").textContent=t("total")+": "+money(order.total);startQueue(order);}
 // el QR se repinta cuando llega el token de pago (&t=) de la cola
-function paintQr(){const url=checkoutUrl();order.checkoutUrl=url;const q=$("#qr");q.innerHTML="";q.dataset.url=url;try{new QRCode(q,{text:url,width:560,height:560,correctLevel:QRCode.CorrectLevel.M});}catch(e){q.textContent=url;}return url;}
+function paintQr(){if(!order||!order.queueNumber||!order._pago)return "";$("#qr").hidden=false;const url=checkoutUrl();order.checkoutUrl=url;const q=$("#qr");q.innerHTML="";q.dataset.url=url;try{new QRCode(q,{text:url,width:560,height:560,correctLevel:QRCode.CorrectLevel.M});}catch(e){q.textContent=url;}return url;}
 // Si el número del relé aún no ha llegado, se espera hasta 4 s para que quiosco, cola e iPad muestren el MISMO número.
-function finish(how){const o=order;if(o&&!o.number&&!o.queueNumber&&o._colaP&&!o._espera){o._espera=1;Promise.race([o._colaP,new Promise(r=>setTimeout(r,4000))]).then(()=>{if(order===o)finishNow(how);});return;}finishNow(how);}
-function finishNow(how){if(!order||order.number)return;clearInterval(colaPoll);order.number=order.queueNumber||nextNumber();segPedido(order);order.queueUrl=colaUrl(order.number);{const o=order,via=how==="paid"?"qr":"caja";(o.queueNumber?Promise.resolve():colaCrear(o)).then(()=>colaApi("pagar",{id:o.id,via:via})).catch(()=>{});}order.status=how==="paid"?"paid-simulated":"pay-at-counter";order.paidAt=how==="paid"?new Date().toISOString():null;
+async function finish(how){const o=order;if(!o||o.number||o._finishing)return;o._finishing=true;o._finishHow=how;clearQueueProblem();$("#payCounter").disabled=true;try{let ack;if(how==="paid"){ack=await colaApi("pedido",null,"&id="+encodeURIComponent(o.id));}else{if(!o.queueNumber)await(o._colaP||colaCrear(o));if(order!==o)return;ack=await colaApi("pagar",{id:o.id,via:"caja",pago:o._pago});}QACK.paid(ack,o.id);if(order!==o)return;o.queueNumber=ack.numero;finishNow(how);}catch{if(order===o){closeOverlay();queueProblem();}}finally{o._finishing=false;if(order===o)$("#payCounter").disabled=!o.queueNumber;}}
+function finishNow(how){if(!order||order.number||!order.queueNumber)return;clearInterval(colaPoll);order.number=order.queueNumber;segPedido(order);order.queueUrl=colaUrl(order.number);order.status=how==="paid"?"paid-simulated":"pay-at-counter";order.paidAt=how==="paid"?new Date().toISOString():null;
   closeOverlay();try{document.getElementById("custName").value="";}catch(_){}$("#orderNum").textContent=order.number;const dq=$("#doneQr"),df=$("#doneFollow");dq.innerHTML="";dq.classList.remove("on");df.hidden=true;
   if(how!=="paid"&&order.queueNumber){try{new QRCode(dq,{text:order.queueUrl,width:260,height:260,correctLevel:QRCode.CorrectLevel.M});dq.classList.add("on");dq.dataset.url=order.queueUrl;df.textContent=lang==="en"?"Scan to follow your order on your phone":"Escanea para seguir tu pedido en el móvil";df.hidden=false;}catch(_){}}$("#doneMsg").textContent=t(how==="paid"?"paid":"payAtCounter");go("done");
   if(how==="paid")host("payment",{status:"paid",simulated:true});host("order",{status:order.status});avPost({type:"da-context",order:null});
@@ -395,7 +402,7 @@ function closeOverlay(){$("#overlay").classList.remove("on");$("#payFrame").src=
 function onPaid(d){if(d&&d.pedido&&order&&d.pedido===order.id&&d.estado==="pagado")finish("paid");}
 try{new BroadcastChannel("kiosko-pedido").onmessage=e=>onPaid(e.data);}catch(e){}
 addEventListener("storage",e=>{if(e.key==="kiosko:pago"&&e.newValue)try{onPaid(JSON.parse(e.newValue));}catch(_){}} );
-addEventListener("message",e=>{const d=e.data;if(d&&d.source==="kiosko-pago-simulado")onPaid(d);});
+addEventListener("message",e=>{const d=e.data;if(e.origin===location.origin&&e.source===$("#payFrame").contentWindow&&d&&d.source==="kiosko-pago-simulado")onPaid(d);});
 // ── Avatar en el quiosco (Carlos, 7-oct-2026) ──
 // La cara de digitalavatar.ai (good = Admirito, la nube; ?avatar=better|best; ?avatar=off = quiosco clásico)
 // conversa con el cliente y manda {type:'da-answer', action:{type:'order-draft', …pedido ACUMULADO}}. El quiosco
@@ -607,7 +614,7 @@ document.addEventListener("click",e=>{const el=e.target.closest("button,[data-zo
   if(el.id==="addBtn"){addLine();go("cart");return avManual();}
   if(el.id==="toPay"&&cart.length)return askName();
   if(el.id==="toName")return confirmName();
-  if(el.id==="payCounter"){if(!order)makeOrder();const o=order;return (o.queueNumber?Promise.resolve():Promise.race([colaCrear(o),new Promise(r=>setTimeout(r,1500))])).then(()=>finish("counter"));}
+  if(el.id==="payCounter")return finish("counter");
   if(el.id==="qr"){$("#payFrame").src=el.dataset.url+"&embed=1";$("#overlay").classList.add("on");}
 });
 // ── regla XPL de calle: 12 s sin tocar → vuelta a la atracción (en Pago, 60 s: se paga con el móvil) ──
