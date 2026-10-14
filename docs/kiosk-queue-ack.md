@@ -4,6 +4,8 @@
 
 Una sala del gestor no aprovisiona automáticamente el quiosco. Cada quiosco necesita su carta/marca, relé y clave `gk_…` autorizada para esa tienda mediante el procedimiento habitual. Nunca se usa una clave del staff `gc_…` ni de administrador en el navegador para sustituir esa autorización.
 
+La carta `menu.admiranext.json` prepara la sala `admiranext-demo` con la marca AdmiraNeXT, café y croissant de ejemplo, precios ficticios, ES/EN y pago simulado. La entrada candidata es `/xperiencias/kiosko-pedido/?marca=admiranext&store=admiranext-demo&avatar=off`. La carta no incorpora ninguna clave ni publica el quiosco; el alta sigue cerrada hasta su aprovisionamiento.
+
 El alta debe responder con el ID exacto, número y token específico del pedido antes de mostrar un QR. Si falla, se conserva el mismo pedido para reintentar durante esa visita; no se genera un número local ni se confirma el pago. No se promete recuperación del borrador tras cerrar o recargar la página.
 
 El móvil confirma exclusivamente el pago simulado de un pedido existente con su token. No crea otro pedido. Emite notificaciones sólo después del ACK del relé con ID exacto y estado pagado reconocido. El quiosco trata esas notificaciones como pistas: consulta el pedido y sólo finaliza si el servidor confirma que ya está pagado; no inicia un pago por recibir un mensaje. La acción explícita de caja conserva su operación y exige ACK.
@@ -13,6 +15,8 @@ Caso real detectado en admiranext-demo: el quiosco mostraba A001 aunque el relé
 ## English
 
 A queue-manager room does not automatically provision a kiosk. Each kiosk requires its configured menu/brand, relay and authorized per-store `gk_…` kiosk key through the normal process. Staff `gc_…` and administrator keys must never substitute kiosk provisioning in the browser.
+
+The `menu.admiranext.json` menu prepares the `admiranext-demo` room with AdmiraNeXT branding, sample coffee and croissant, fictitious prices, ES/EN and simulated payment. The candidate entry is `/xperiencias/kiosko-pedido/?marca=admiranext&store=admiranext-demo&avatar=off`. No key is embedded and no kiosk is published; creation stays protected until normal provisioning.
 
 The create acknowledgement must include the exact ID, queue number and order-specific payment token before the QR is shown. Failure preserves the same order for retry during that visit, without a local number or payment success. Draft recovery after closing/reloading is not claimed.
 

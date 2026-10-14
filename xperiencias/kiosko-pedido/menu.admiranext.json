@@ -1,0 +1,317 @@
+{
+  "$schema": "./menu.schema.json",
+  "schemaVersion": 1,
+  "example": true,
+  "disclaimer": {
+    "es": "DATOS DE EJEMPLO · precios ficticios · demo simulada, no se cobra nada",
+    "en": "EXAMPLE DATA · fictitious prices · simulated demo, nothing is charged"
+  },
+  "establishment": {
+    "id": "admiranext-demo",
+    "name": "AdmiraNeXT · Demo",
+    "type": "cafeteria",
+    "brandId": "admiranext",
+    "locale": [
+      "es",
+      "en"
+    ],
+    "currency": "EUR",
+    "taxIncluded": true
+  },
+  "attract": {
+    "title": {
+      "es": "AdmiraNeXT · Pide aquí",
+      "en": "AdmiraNeXT · Order here"
+    },
+    "subtitle": {
+      "es": "Toca la pantalla para empezar",
+      "en": "Touch the screen to start"
+    },
+    "images": [
+      "img/latte.svg",
+      "img/croissant.svg"
+    ]
+  },
+  "categories": [
+    {
+      "id": "calientes",
+      "name": {
+        "es": "Cafés calientes",
+        "en": "Hot coffees"
+      },
+      "image": "img/latte.svg"
+    },
+    {
+      "id": "comida",
+      "name": {
+        "es": "Para comer",
+        "en": "Food"
+      },
+      "image": "img/croissant.svg"
+    }
+  ],
+  "items": [
+    {
+      "id": "caffe-latte",
+      "category": "calientes",
+      "name": {
+        "es": "Caffè Latte",
+        "en": "Caffè Latte"
+      },
+      "description": {
+        "es": "Espresso con leche vaporizada.",
+        "en": "Espresso with steamed milk."
+      },
+      "image": "img/latte.svg",
+      "basePrice": 3.6,
+      "allergens": [
+        "leche"
+      ],
+      "tags": [
+        "popular"
+      ],
+      "optionGroups": [
+        {
+          "id": "tamano",
+          "label": {
+            "es": "Tamaño",
+            "en": "Size"
+          },
+          "type": "single",
+          "required": true,
+          "default": "grande",
+          "choices": [
+            {
+              "id": "alto",
+              "label": {
+                "es": "Pequeño",
+                "en": "Small"
+              },
+              "priceDelta": 0
+            },
+            {
+              "id": "grande",
+              "label": {
+                "es": "Mediano",
+                "en": "Medium"
+              },
+              "priceDelta": 0.4
+            },
+            {
+              "id": "venti",
+              "label": {
+                "es": "Grande",
+                "en": "Large"
+              },
+              "priceDelta": 0.8
+            }
+          ]
+        },
+        {
+          "id": "leche",
+          "label": {
+            "es": "Leche",
+            "en": "Milk"
+          },
+          "type": "single",
+          "required": true,
+          "default": "entera",
+          "choices": [
+            {
+              "id": "entera",
+              "label": {
+                "es": "Entera",
+                "en": "Whole"
+              },
+              "priceDelta": 0
+            },
+            {
+              "id": "desnatada",
+              "label": {
+                "es": "Desnatada",
+                "en": "Skimmed"
+              },
+              "priceDelta": 0
+            },
+            {
+              "id": "sin-lactosa",
+              "label": {
+                "es": "Sin lactosa",
+                "en": "Lactose-free"
+              },
+              "priceDelta": 0
+            },
+            {
+              "id": "avena",
+              "label": {
+                "es": "Avena",
+                "en": "Oat"
+              },
+              "priceDelta": 0.5,
+              "allergens": [
+                "gluten"
+              ]
+            },
+            {
+              "id": "soja",
+              "label": {
+                "es": "Soja",
+                "en": "Soy"
+              },
+              "priceDelta": 0.5,
+              "allergens": [
+                "soja"
+              ]
+            },
+            {
+              "id": "almendra",
+              "label": {
+                "es": "Almendra",
+                "en": "Almond"
+              },
+              "priceDelta": 0.5,
+              "allergens": [
+                "frutos-de-cascara"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "temperatura",
+          "label": {
+            "es": "Temperatura",
+            "en": "Temperature"
+          },
+          "type": "single",
+          "required": true,
+          "default": "normal",
+          "choices": [
+            {
+              "id": "normal",
+              "label": {
+                "es": "Normal",
+                "en": "Regular"
+              },
+              "priceDelta": 0
+            },
+            {
+              "id": "extra-caliente",
+              "label": {
+                "es": "Extra caliente",
+                "en": "Extra hot"
+              },
+              "priceDelta": 0
+            },
+            {
+              "id": "templado",
+              "label": {
+                "es": "Templado",
+                "en": "Warm"
+              },
+              "priceDelta": 0
+            }
+          ]
+        },
+        {
+          "id": "extras",
+          "label": {
+            "es": "Extras",
+            "en": "Extras"
+          },
+          "type": "multi",
+          "required": false,
+          "max": 4,
+          "choices": [
+            {
+              "id": "shot",
+              "label": {
+                "es": "Shot extra de espresso",
+                "en": "Extra espresso shot"
+              },
+              "priceDelta": 0.7
+            },
+            {
+              "id": "vainilla",
+              "label": {
+                "es": "Sirope de vainilla",
+                "en": "Vanilla syrup"
+              },
+              "priceDelta": 0.5
+            },
+            {
+              "id": "caramelo",
+              "label": {
+                "es": "Sirope de caramelo",
+                "en": "Caramel syrup"
+              },
+              "priceDelta": 0.5
+            },
+            {
+              "id": "nata",
+              "label": {
+                "es": "Nata montada",
+                "en": "Whipped cream"
+              },
+              "priceDelta": 0.5,
+              "allergens": [
+                "leche"
+              ]
+            },
+            {
+              "id": "descafeinado",
+              "label": {
+                "es": "Descafeinado",
+                "en": "Decaf"
+              },
+              "priceDelta": 0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "croissant",
+      "category": "comida",
+      "name": {
+        "es": "Croissant de mantequilla",
+        "en": "Butter croissant"
+      },
+      "description": {
+        "es": "Recién horneado.",
+        "en": "Freshly baked."
+      },
+      "image": "img/croissant.svg",
+      "basePrice": 2.2,
+      "allergens": [
+        "gluten",
+        "leche",
+        "huevo"
+      ],
+      "tags": [],
+      "optionGroups": []
+    }
+  ],
+  "upsells": [
+    "croissant"
+  ],
+  "orderFlow": {
+    "mode": "simulated",
+    "prefix": "A",
+    "payment": {
+      "qr": true,
+      "counter": true,
+      "checkoutUrl": "pago-simulado.html",
+      "note": {
+        "es": "Pago SIMULADO: no se cobra nada ni se piden datos de tarjeta",
+        "en": "SIMULATED payment: nothing is charged and no card data is asked"
+      }
+    },
+    "queue": {
+      "relay": "https://mcp-ainimation.admira.store"
+    }
+  },
+  "idle": {
+    "resetSeconds": 12,
+    "warnSeconds": 4
+  }
+}
