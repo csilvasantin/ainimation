@@ -1,19 +1,19 @@
 {
-  "version": "v.08.10.2026.r30.00:42",
-  "deployedAt": "2026-10-07T22:42:37Z",
-  "deployer": "GrokBot",
+  "version": "v.14.10.2026.r1.20:59",
+  "deployer": "OraculoMacMini",
   "machine": "MacMini",
-  "signature": "GrokBot · MacMini",
-  "git": "e37b7c6291aa0ee4120d5938e5b3158edffa6286",
-  "gitShort": "e37b7c6",
-  "gitFull": "e37b7c6291aa0ee4120d5938e5b3158edffa6286",
+  "signature": "OraculoMacMini · MacMini",
+  "git": "407aa344ad9a3bb6cd7139bd194263017d065e38",
+  "gitShort": "407aa34",
+  "gitFull": "407aa344ad9a3bb6cd7139bd194263017d065e38",
   "dirty": false,
-  "returnTag": "retorno/pre-audiencia-doc-20261008",
-  "previousTag": "retorno/pre-audiencia-20261008",
-  "previousVersion": "v.08.10.2026.r29.00:16",
-  "note": "Contrato de reglas de audiencia corregido",
+  "returnTag": "retorno/pre-kiosk-ack-20261014",
+  "previousVersion": "v.08.10.2026.r30.00:42",
+  "note": "Carta demo AdmiraNeXT ES/EN; alta y pago sólo tras confirmación del servidor",
   "novedades": [
-    "Guía de audiencia: el formato de las reglas es el real (género, edad, grupo y franja con un valor o «any»)",
-    "Verificado en producción con cámara: una cara → menú hombre; dos caras → carta para compartir"
-  ]
+    "El quiosco confirma alta y pago con el ID exacto del pedido; un fallo permite reintentar sin inventar número",
+    "Carta demo AdmiraNeXT en español e inglés con pago simulado"
+  ],
+  "sourceGit": "407aa344ad9a3bb6cd7139bd194263017d065e38",
+  "preparedAt": "2026-10-14T18:58:40.567086+00:00"
 }
