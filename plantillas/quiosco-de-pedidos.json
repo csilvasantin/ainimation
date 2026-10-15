@@ -3,19 +3,19 @@
  "version": 1,
  "savedAt": "2026-10-07T08:09:38.682Z",
  "plan": {
-  "title": "Ordering kiosk",
-  "format": "Short film",
-  "duration": "3 minutes",
-  "genre": "Sci-fi fable",
-  "tone": "Wonder with tension",
-  "protagonist": "a young signal archivist",
-  "world": "a coastal city where memories arrive as radio weather",
-  "logline": "When a forbidden transmission predicts tomorrow's emotions, an archivist must decide whether to preserve the city as it is or let everyone hear the truth.",
+  "title": "Quiosco de pedidos",
+  "format": "Quiosco vertical",
+  "duration": "90 segundos",
+  "genre": "Starbucks",
+  "tone": "Cálido y claro",
+  "protagonist": "Admirito",
+  "world": "Starbucks, mostrador de Alsea",
+  "logline": "El cliente pide en el tótem, paga simulado y Admirito dice su nombre en el iPad.",
   "createdAt": "2026-10-07T08:09:38.596Z",
-  "treatment": "The Last Signal is a 3 minutes short film in the shape of a sci-fi fable. It follows a young signal archivist inside a coastal city where memories arrive as radio weather. The emotional movement is wonder with tension: each scene should feel designed, musical, and ready for AI-assisted production.",
-  "theme": "What deserves to be preserved, and what must be transformed?",
+  "treatment": "Quiosco de pedidos para la demo de Alsea. Carta de ejemplo de Starbucks, pago simulado y gestor de colas con Admirito. Ensayo en la sala starbucks-qa; la sala starbucks-paseo-de-gracia queda para la demo real.",
+  "theme": "De la carta al número de pedido, sin cobrar nada.",
   "pipeline": {
-   "image": "Create cast-ready visual members: key art, character reference, world textures, color script, and layered stage plates for The Last Signal.",
+   "image": "Carta y fondos del quiosco de pedidos, listos para el tótem vertical.",
    "video": "Generate score-aware clips with controlled object behavior, consistent subject identity, and edit handles for transitions.",
    "music": "Compose score channels: loop beds, scene stingers, pressure ramps, and a final motif locked to frame ranges.",
    "voice": "Create voice cast, sparse narration, and timed reads attached to score rows rather than loose audio files."
@@ -338,107 +338,89 @@
   "scenes": [
    {
     "number": 1,
-    "act": "Act I",
-    "beat": "Cold Open",
-    "purpose": "A striking image introduces the world before anyone explains it.",
-    "behavior": "fadeInWorld",
+    "act": "Atracción",
+    "beat": "INICIO",
+    "purpose": "Invitar a pedir.",
+    "behavior": "atraccion",
     "startFrame": 1,
-    "length": 64,
-    "scene": "a young signal archivist moves through a coastal city where memories arrive as radio weather, where a striking image introduces the world before anyone explains it.",
-    "visualPrompt": "Sci-fi fable, Wonder with tension, stage-ready frame, a coastal city where memories arrive as radio weather, a young signal archivist, cast continuity, clear silhouette, editable layers",
-    "videoPrompt": "Cold Open: camera movement, object behavior, blocking, and edit handles for 3 minutes short film, Wonder with tension"
+    "length": 24,
+    "scene": "Pantalla de atracción: Pide aquí, sin colas.",
+    "visualPrompt": "Tótem Starbucks, fondo verde, botón Toca para empezar.",
+    "videoPrompt": ""
    },
    {
     "number": 2,
-    "act": "Act I",
-    "beat": "Inciting Signal",
-    "purpose": "The protagonist receives a message that changes the rules of the story.",
-    "behavior": "listenForSignal",
-    "startFrame": 49,
-    "length": 48,
-    "scene": "a young signal archivist moves through a coastal city where memories arrive as radio weather, where the protagonist receives a message that changes the rules of the story.",
-    "visualPrompt": "Sci-fi fable, Wonder with tension, stage-ready frame, a coastal city where memories arrive as radio weather, a young signal archivist, cast continuity, clear silhouette, editable layers",
-    "videoPrompt": "Inciting Signal: camera movement, object behavior, blocking, and edit handles for 3 minutes short film, Wonder with tension"
+    "act": "Carta",
+    "beat": "CATEGORIAS",
+    "purpose": "Elegir categoría.",
+    "behavior": "carta",
+    "startFrame": 25,
+    "length": 24,
+    "scene": "Categorías de la carta de ejemplo.",
+    "visualPrompt": "Cafés, bebidas frías, tés y para comer.",
+    "videoPrompt": ""
    },
    {
     "number": 3,
-    "act": "Act II",
-    "beat": "First Choice",
-    "purpose": "They make a decision that costs something visible.",
-    "behavior": "branchOnChoice",
-    "startFrame": 97,
-    "length": 72,
-    "scene": "a young signal archivist moves through a coastal city where memories arrive as radio weather, where they make a decision that costs something visible.",
-    "visualPrompt": "Sci-fi fable, Wonder with tension, stage-ready frame, a coastal city where memories arrive as radio weather, a young signal archivist, cast continuity, clear silhouette, editable layers",
-    "videoPrompt": "First Choice: camera movement, object behavior, blocking, and edit handles for 3 minutes short film, Wonder with tension"
+    "act": "Pedido",
+    "beat": "PRODUCTOS",
+    "purpose": "Elegir producto.",
+    "behavior": "productos",
+    "startFrame": 49,
+    "length": 24,
+    "scene": "Productos de la categoría.",
+    "visualPrompt": "Carta con precio de ejemplo.",
+    "videoPrompt": ""
    },
    {
     "number": 4,
-    "act": "Act II",
-    "beat": "Pressure Builds",
-    "purpose": "The world pushes back and the emotional stakes become public.",
-    "behavior": "raiseSystemPressure",
-    "startFrame": 145,
-    "length": 64,
-    "scene": "a young signal archivist moves through a coastal city where memories arrive as radio weather, where the world pushes back and the emotional stakes become public.",
-    "visualPrompt": "Sci-fi fable, Wonder with tension, stage-ready frame, a coastal city where memories arrive as radio weather, a young signal archivist, cast continuity, clear silhouette, editable layers",
-    "videoPrompt": "Pressure Builds: camera movement, object behavior, blocking, and edit handles for 3 minutes short film, Wonder with tension"
+    "act": "Pedido",
+    "beat": "OPCIONES",
+    "purpose": "Tamaño, leche y extras.",
+    "behavior": "opciones",
+    "startFrame": 73,
+    "length": 24,
+    "scene": "Opciones del producto.",
+    "visualPrompt": "Selectores de la bebida.",
+    "videoPrompt": ""
    },
    {
     "number": 5,
-    "act": "Act III",
-    "beat": "Mirror Moment",
-    "purpose": "A quiet scene reveals what the protagonist is afraid to admit.",
-    "behavior": "holdOnFace",
-    "startFrame": 193,
-    "length": 48,
-    "scene": "a young signal archivist moves through a coastal city where memories arrive as radio weather, where a quiet scene reveals what the protagonist is afraid to admit.",
-    "visualPrompt": "Sci-fi fable, Wonder with tension, stage-ready frame, a coastal city where memories arrive as radio weather, a young signal archivist, cast continuity, clear silhouette, editable layers",
-    "videoPrompt": "Mirror Moment: camera movement, object behavior, blocking, and edit handles for 3 minutes short film, Wonder with tension"
+    "act": "Pedido",
+    "beat": "CARRITO",
+    "purpose": "Revisar el pedido.",
+    "behavior": "carrito",
+    "startFrame": 97,
+    "length": 24,
+    "scene": "Carrito antes de pagar.",
+    "visualPrompt": "Resumen del pedido de ejemplo.",
+    "videoPrompt": ""
+   },
+   {
+    "number": 6,
+    "act": "Pago",
+    "beat": "PAGO",
+    "purpose": "Pago simulado.",
+    "behavior": "pago",
+    "startFrame": 121,
+    "length": 24,
+    "scene": "QR de pago simulado. No se cobra nada.",
+    "visualPrompt": "QR y aviso de demo.",
+    "videoPrompt": ""
+   },
+   {
+    "number": 7,
+    "act": "Número",
+    "beat": "NUMERO",
+    "purpose": "Admirito llama el nombre.",
+    "behavior": "numero",
+    "startFrame": 145,
+    "length": 24,
+    "scene": "Número de pedido. Admirito lo anuncia en el iPad.",
+    "visualPrompt": "Número grande sobre fondo verde.",
+    "videoPrompt": ""
    }
   ],
-  "productionManifest": {
-   "generatedAt": "2026-10-07T08:09:38.597Z",
-   "route": [
-    {
-     "lane": "Image",
-     "job": "Lock reusable cast references, world plates, style frames, and editable matte layers before video generation."
-    },
-    {
-     "lane": "Video",
-     "job": "Generate 5 controlled clips from score rows with handles, camera notes, and subject continuity checks."
-    },
-    {
-     "lane": "Sound",
-     "job": "Create ambience, motif, transition stingers, and sparse timed voice takes attached to frames."
-    },
-    {
-     "lane": "Edit",
-     "job": "Assemble a 240-frame working cut with JSON timing, prompt logs, markdown brief, and review notes."
-    }
-   ],
-   "continuityRules": [
-    "Keep a young signal archivist visually consistent across all cast references and generated clips.",
-    "Treat a coastal city where memories arrive as radio weather as a reusable stage with weather, light, prop, and camera states.",
-    "Every generated asset must map back to one score row and one behavior function.",
-    "Do not accept a clip unless it has edit handles and a clear first/last frame description."
-   ],
-   "deliverables": [
-    "Director board",
-    "Cast bible",
-    "Shot prompts",
-    "Timing map",
-    "Voice/music cue sheet",
-    "Production JSON",
-    "Review cut checklist"
-   ],
-   "risks": [
-    "Identity drift between shots",
-    "Unusable clips without handles",
-    "Audio not locked to score rows",
-    "Prompts that describe mood but not behavior"
-   ]
-  },
   "rules": [],
   "scripts": {
    "movie": "-- Quiosco de pedidos · script de película (Admingo)\nglobal pedido\n\nal empezar la película\n  vaciar carrito\n  ir a marca \"INICIO\"\nfin\n\n-- cada pantalla se queda quieta hasta que alguien toca, como en Director\nal salir del fotograma\n  quedarse\nfin\n\non idle\n  if the marker <> \"INICIO\" and the idleSeconds > 12 then\n    if the marker = \"PAGO\" and the idleSeconds < 60 then exit\n    vaciar carrito\n    ir a marca \"INICIO\"\n  end if\nend\n\nal pagar\n  fijar pedido a the orderNumber\n  reiniciar reposo\n  ir a marca \"NUMERO\"\n  decir \"¡Gracias! Tu pedido es el \" & pedido\nfin",
@@ -1941,6 +1923,22 @@
    }
   ],
   "durationSeconds": 90,
-  "template": "quiosco-de-pedidos"
+  "template": "quiosco-de-pedidos",
+  "continuityRules": [
+   "Carta de ejemplo: precios ficticios y pago simulado.",
+   "Ensayo solo en la sala starbucks-qa.",
+   "starbucks-paseo-de-gracia queda para la demo real de Carlos."
+  ],
+  "deliverables": [
+   "Quiosco vertical",
+   "Carta de ejemplo",
+   "Pago simulado",
+   "Gestor de colas",
+   "iPad de Admirito"
+  ],
+  "risks": [
+   "Ensayar en la sala real mezcla pedidos de prueba con la demo.",
+   "Sin la clave del quiosco en ese navegador, la cola no confirma el número."
+  ]
  }
 }
