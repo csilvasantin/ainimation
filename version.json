@@ -3,9 +3,9 @@
   "deployer": "MerovingioMacMini",
   "machine": "MacMini",
   "signature": "MerovingioMacMini · MacMini",
-  "git": "PENDING",
-  "gitShort": "PENDING",
-  "gitFull": "PENDING",
+  "git": "ed79a24fad24761e471f7e416c6560eed497fdbc",
+  "gitShort": "ed79a24",
+  "gitFull": "ed79a24fad24761e471f7e416c6560eed497fdbc",
   "dirty": false,
   "returnTag": "retorno/pre-alsea-demo-20261015",
   "previousVersion": "v.14.10.2026.r1.20:59",
@@ -14,6 +14,6 @@
     "La plantilla Quiosco de pedidos abre en español, con su título y su brief, y ya no deja The Last Signal en pantalla",
     "El sello del editor coincide con esta versión. El punto de retorno es retorno/pre-alsea-demo-20261015"
   ],
-  "sourceGit": "PENDING",
+  "sourceGit": "ed79a24fad24761e471f7e416c6560eed497fdbc",
   "preparedAt": "2026-10-15T18:44:00+00:00"
 }
