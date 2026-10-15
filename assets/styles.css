@@ -4021,6 +4021,20 @@ body.is-cast-pointer-dragging .director-cast-window {
   }
 }
 
+/* iPad en horizontal (1024): la barra no cabe y se cortaba «Control» y
+   «Window». Aquí se desplaza con el dedo, igual que por debajo de 860px. */
+@media (max-width: 1180px) and (min-width: 861px) {
+  .director-menubar {
+    gap: 10px;
+    overflow-x: auto;
+    scrollbar-width: thin;
+  }
+
+  .director-menubar .menu-button {
+    font-size: 0.74rem;
+  }
+}
+
 @media (max-width: 700px) {
   .studio-shell,
   .director-shell {

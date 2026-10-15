@@ -3426,6 +3426,24 @@ function renderFilmPlan(plan) {
     ["animation", "audio", "image", "video"].includes(member.mediaType)
   ));
   outputTitle.textContent = plan.title;
+  const movieName = document.querySelector("[data-movie-name]");
+  if (movieName) movieName.textContent = `Movie: ${plan.title || "Sin título"}.dir`;
+  // El formulario nace con «The Last Signal». Si el plan cambia (plantilla del
+  // quiosco), esos campos tienen que seguirlo o la demo enseña otro proyecto.
+  const syncFilmField = (id, value) => {
+    const el = document.getElementById(id);
+    if (!el || document.activeElement === el || value == null || value === "") return;
+    if (el.tagName === "SELECT" && ![...el.options].some((option) => option.value === value)) return;
+    el.value = value;
+  };
+  syncFilmField("film-title", plan.title || "");
+  syncFilmField("film-logline", plan.logline);
+  syncFilmField("film-protagonist", plan.protagonist);
+  syncFilmField("film-world", plan.world);
+  syncFilmField("film-format", plan.format);
+  syncFilmField("film-duration", plan.duration);
+  syncFilmField("film-genre", plan.genre);
+  syncFilmField("film-tone", plan.tone);
   sceneCount.textContent = `${stageWidthPixels} × ${stageHeightPixels}`;
   filmTreatment.innerHTML = `
     <p><strong>Authoring brief</strong><br>${plan.treatment}</p>

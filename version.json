@@ -1,19 +1,19 @@
 {
-  "version": "v.14.10.2026.r1.20:59",
-  "deployer": "OraculoMacMini",
+  "version": "v.15.10.2026.r1.20:44",
+  "deployer": "MerovingioMacMini",
   "machine": "MacMini",
-  "signature": "OraculoMacMini · MacMini",
-  "git": "407aa344ad9a3bb6cd7139bd194263017d065e38",
-  "gitShort": "407aa34",
-  "gitFull": "407aa344ad9a3bb6cd7139bd194263017d065e38",
+  "signature": "MerovingioMacMini · MacMini",
+  "git": "PENDING",
+  "gitShort": "PENDING",
+  "gitFull": "PENDING",
   "dirty": false,
-  "returnTag": "retorno/pre-kiosk-ack-20261014",
-  "previousVersion": "v.08.10.2026.r30.00:42",
-  "note": "Carta demo AdmiraNeXT ES/EN; alta y pago sólo tras confirmación del servidor",
+  "returnTag": "retorno/pre-alsea-demo-20261015",
+  "previousVersion": "v.14.10.2026.r1.20:59",
+  "note": "Editor del quiosco en español para la demo de Alsea: título, brief y sello. El ensayo es la sala starbucks-qa.",
   "novedades": [
-    "El quiosco confirma alta y pago con el ID exacto del pedido; un fallo permite reintentar sin inventar número",
-    "Carta demo AdmiraNeXT en español e inglés con pago simulado"
+    "La plantilla Quiosco de pedidos abre en español, con su título y su brief, y ya no deja The Last Signal en pantalla",
+    "El sello del editor coincide con esta versión. El punto de retorno es retorno/pre-alsea-demo-20261015"
   ],
-  "sourceGit": "407aa344ad9a3bb6cd7139bd194263017d065e38",
-  "preparedAt": "2026-10-14T18:58:40.567086+00:00"
+  "sourceGit": "PENDING",
+  "preparedAt": "2026-10-15T18:44:00+00:00"
 }
