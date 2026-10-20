@@ -31,3 +31,7 @@ No se puede eliminar la pantalla inicial ni una pantalla a la que todavía apunt
 Prueba local: `python3 -m http.server 46220 --bind 127.0.0.1`, abrir `http://127.0.0.1:46220/interactivos/`.
 
 Revisión en Chrome real del perfil csilvasantin@gmail.com: recorrido completo, edición y recuperación del nombre tras recargar, descarga JSON e importación confirmada, descarga HTML y navegación abriendo el archivo local, disposición del editor y previo a 320 y 390 px. Corregidos el texto de confirmación al importar y el robo de foco del previo durante la escritura. Capturas y archivos exportados conservados en la carpeta de evidencias local de esta conversación.
+
+## Corrección de Carlos · 20-oct-2026
+
+Carlos confirma que el interactivo del domingo fue realizado por los consejeros **coetáneos**. La consulta inicial a los consejeros leyenda y la respuesta de Jobs no identificaban ese trabajo; no deben interpretarse como prueba de que no existe. Se ha enviado la consulta correcta a Musk, Huang e Y (encargos 6862–6864), pendiente de recuperar la fuente y participantes exactos. La plantilla actual es una referencia táctil provisional, no una reconstrucción acreditada del trabajo del domingo.
