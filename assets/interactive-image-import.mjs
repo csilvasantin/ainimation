@@ -1,9 +1,9 @@
 import {validate} from './interactive-project.mjs';
-export const MAX_IMAGES=20;
+export const MAX_IMAGES=60;
 export const IMAGE_BUDGET=45000;
 export function sortedImages(files){return [...files].sort((a,b)=>a.name.localeCompare(b.name,'es',{numeric:true,sensitivity:'base'}));}
 export function projectFromImages(images,title='Cafetería · recreación'){
- if(!images.length||images.length>MAX_IMAGES)throw Error('Selecciona entre 1 y 20 imágenes.');
+ if(!images.length||images.length>MAX_IMAGES)throw Error('Selecciona entre 1 y 60 imágenes.');
  const scenes=images.map((image,i)=>({id:'imagen-'+(i+1),title:image.name.replace(/\.[^.]+$/,'').slice(0,100)||'Pantalla '+(i+1),body:'',image:image.data,imageAlt:image.name.slice(0,100),sourceName:image.name,...(image.sourceAssetId?{sourceAssetId:image.sourceAssetId}:{}),buttons:[...(i?[{label:'Anterior',target:'imagen-'+i}]:[]),{label:i===images.length-1?'Volver al inicio':'Siguiente',target:i===images.length-1?'imagen-1':'imagen-'+(i+2)}]}));
  const first=images[0],ratio=first.width/first.height;
  return validate({format:'ainimation-interactive',version:1,title:title.trim(),orientation:ratio>1.15?'landscape':ratio<.87?'portrait':'square',color:'#00ff41',resetSeconds:60,start:scenes[0].id,scenes,importedImages:true});

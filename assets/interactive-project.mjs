@@ -4,7 +4,8 @@ export function validate(p){
  if(!p||p.format!=='ainimation-interactive'||p.version!==1)throw Error('Este archivo no es un proyecto interactivo compatible (versión 1).');
  if(!text(p.title,80)||!['portrait','landscape','square'].includes(p.orientation)||!/^#[\da-f]{6}$/i.test(p.color))throw Error('Revisa el nombre, el formato y el color del proyecto.');
  if(!Number.isInteger(p.resetSeconds)||p.resetSeconds<10||p.resetSeconds>300)throw Error('El reinicio debe estar entre 10 y 300 segundos.');
- if(!Array.isArray(p.scenes)||!p.scenes.length||p.scenes.length>20)throw Error('El proyecto debe tener entre 1 y 20 pantallas.');
+ if(!Array.isArray(p.scenes)||!p.scenes.length||p.scenes.length>60)throw Error('El proyecto debe tener entre 1 y 60 pantallas.');
+ if(p.referenceAssets!==undefined&&(!Array.isArray(p.referenceAssets)||p.referenceAssets.length>60||p.referenceAssets.some(a=>!a||!/^[-a-f0-9]{36}$/.test(a.id)||!text(a.name,160)||!['video/mp4','video/webm','video/quicktime'].includes(a.mime)||!Number.isSafeInteger(a.size)||a.size<8||a.size>20000000||!/^([a-f0-9]{64})$/.test(a.sha256))))throw Error('Referencias de vídeo no compatibles.');
  const ids=new Set();
  for(const s of p.scenes){if(!text(s.id,80)||ids.has(s.id)||!text(s.title,100)||text(s.body??'',500)===null||!Array.isArray(s.buttons)||s.buttons.length>6)throw Error('Revisa las pantallas y sus textos (máximo 6 botones por pantalla).');if(s.image!==undefined&&(!/^data:image\/(png|jpeg|webp);base64,[A-Za-z0-9+/=]+$/.test(s.image)||s.image.length>820000))throw Error("Imagen no compatible o demasiado grande.");ids.add(s.id);}
  if(!ids.has(p.start))throw Error('La pantalla inicial no existe.');
