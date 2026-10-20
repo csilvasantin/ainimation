@@ -6,3 +6,6 @@ node_modules/
 node_modules/
 mcp/server/node_modules/
 mcp/server/.wrangler/
+
+cloud-library/preview-public/
+cloud-library/.wrangler/

@@ -44,3 +44,5 @@ $('enterPreview').onclick=()=>stage('workspace');
 $('backToEntry').onclick=()=>{$('loginDialog').close();stage('entry');};
 window.addEventListener('interactive-authenticated',()=>{$('loginDialog').close();stage('workspace');});
 try{stage(sessionStorage.getItem('ainimation:ui:stage')==='workspace'?'workspace':'entry');}catch{stage('entry');}
+
+window.addEventListener('interactive-signed-out',()=>stage('entry'));

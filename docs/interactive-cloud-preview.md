@@ -13,3 +13,13 @@ Imágenes: una por pantalla, PNG/JPEG/WebP de hasta 600 KB, incrustada en el pro
 Material del domingo: Jobs corrigió su negativa previa: el interactivo sí existió, pero sus archivos aún no están localizados. No se ha sustituido por otro material ni se afirma haber probado esas imágenes.
 
 Verificación: node --test tests/interactive*.test.mjs (18 pruebas).
+
+
+## Actualización: infraestructura de vista previa conectada
+
+Worker y assets: https://ainimation-interactive-library-preview.csilvasantin.workers.dev/interactivos/
+API: /api. D1 exclusiva ainimation-interactives-preview. El acceso está limitado en servidor a las dos cuentas verificadas de Carlos; la clave de propietario sigue siendo el sub firmado de Google. Se han comprobado remotamente: config 200, lectura sin token 401, token inválido 401 y origen no autorizado 403. Producción permanece sin cambios. 19 pruebas automatizadas correctas, incluida verificación criptográfica real de tokens de prueba y rechazo de caducados/audiencia ajena/cuenta ajena.
+
+Bloqueo actual: la consola de Google no incluye el origen HTTPS del previo ni localhost:46220/127.0.0.1:46220. Origen HTTPS preparado en formulario sin guardar; se solicitó confirmación al usuario antes de ampliar los orígenes autorizados. No se ha probado aún inicio de sesión real ni sincronización con la cuenta de Carlos. La prueba de teléfono físico también está pendiente.
+
+Para reconstruir solo los assets permitidos: node cloud-library/build-preview.mjs. Desplegar usando cloud-library/wrangler.preview.toml, nunca la configuración MCP de producción. No copiar carpetas completas del repositorio al hosting.

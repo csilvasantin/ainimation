@@ -12,6 +12,7 @@ export async function authenticate(request,env){
  const jwk=keys.keys.find(k=>k.kid===header.kid);if(!jwk)throw Error('unauthorized');
  const key=await crypto.subtle.importKey('jwk',jwk,{name:'RSASSA-PKCS1-v1_5',hash:'SHA-256'},false,['verify']);
  if(!await crypto.subtle.verify('RSASSA-PKCS1-v1_5',key,decode(parts[2]),new TextEncoder().encode(parts[0]+'.'+parts[1])))throw Error('unauthorized');
+ if(env.PREVIEW_EMAILS&&(!(claims.email_verified===true||claims.email_verified==='true')||!env.PREVIEW_EMAILS.split(',').includes(String(claims.email||'').toLowerCase())))throw Error('unauthorized');
  return claims.sub;
 }
 export async function route(request,env,identify=authenticate){
