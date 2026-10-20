@@ -1,0 +1,9 @@
+# Carga múltiple — vista previa
+
+Botón Biblioteca → + Subir imágenes. Selección conjunta de 1 a 20 archivos PNG/JPEG/WebP de hasta 20 MB cada uno. Se procesa secuencialmente y se generan copias WebP limitadas a 45 KB para que 18 pantallas, su biblioteca local y el respaldo de sincronización quepan en el almacenamiento del navegador. Los originales del usuario no se alteran; esta fase no es un archivo de originales y puede reducir resolución/calidad. Debe revisarse la legibilidad en los miniaturas y en el previo.
+
+Orden numérico natural de nombres, revisión con Subir/Bajar/Quitar y nombre editable. Crear proyecto nuevo añade una entrada independiente con una pantalla por imagen y navegación Anterior/Siguiente. No se infieren zonas táctiles ni el recorrido original de capturas aún no entregadas. Orientación derivada de la primera imagen. Descarga JSON de la selección disponible incluso si falla la cuota al crear. Los fallos no sobrescriben la biblioteca ni crean entradas parciales; la selección se conserva mientras la pestaña siga abierta y se avisa antes de recargar si aún no se ha creado el proyecto.
+
+Prueba real local en Chrome: selección de 18 PNG de muestra en un solo diálogo, preparación de los 18, creación de Prueba de carga · 18 imágenes, recarga → 7 proyectos conservados y 18 pantallas en el nuevo. Las imágenes de Carlos todavía no se han recibido: la prueba usa bandas de color claramente identificadas como prueba. No se han sincronizado esas imágenes de prueba a su cuenta en nube. 22 pruebas automatizadas correctas, incluidas conservación de anteriores, orden, destinos, validación y fallo de cuota sin escritura parcial.
+
+Solo preview del Worker; producción sin publicar. Para subir el material real: abrir el previo, entrar con Google, pulsar + Subir imágenes, seleccionar las 18 y revisar antes de Crear proyecto nuevo; luego Sincronizar biblioteca.
