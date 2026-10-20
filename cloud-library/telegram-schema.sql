@@ -1,0 +1,5 @@
+CREATE TABLE IF NOT EXISTS telegram_pairs(code TEXT PRIMARY KEY, owner TEXT NOT NULL, expires INTEGER NOT NULL, tg_user TEXT, chat TEXT, name TEXT, confirmed INTEGER NOT NULL DEFAULT 0);
+CREATE TABLE IF NOT EXISTS telegram_links(owner TEXT PRIMARY KEY, tg_user TEXT UNIQUE NOT NULL, chat TEXT NOT NULL);
+CREATE TABLE IF NOT EXISTS telegram_batches(id TEXT PRIMARY KEY, owner TEXT NOT NULL, tg_user TEXT NOT NULL, title TEXT NOT NULL, status TEXT NOT NULL DEFAULT 'open', created INTEGER NOT NULL);
+CREATE TABLE IF NOT EXISTS telegram_files(id TEXT PRIMARY KEY,batch TEXT NOT NULL,owner TEXT NOT NULL,name TEXT NOT NULL,mime TEXT NOT NULL,size INTEGER NOT NULL,sha256 TEXT NOT NULL,message INTEGER NOT NULL,UNIQUE(batch,message));
+CREATE UNIQUE INDEX IF NOT EXISTS telegram_open_batch ON telegram_batches(tg_user) WHERE status='open';

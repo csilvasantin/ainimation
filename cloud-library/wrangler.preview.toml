@@ -7,6 +7,7 @@ directory = "./preview-public"
 binding = "ASSETS"
 run_worker_first = true
 [vars]
+SITIO_PREVIEW = "https://ainimation-interactive-library-preview.csilvasantin.workers.dev"
 PREVIEW_EMAILS = "csilvasantin@gmail.com,csilva@admira.com"
 GOOGLE_CLIENT_ID = "861856772040-e1ri6kpu6maagtb6crdfbb923hsaalgb.apps.googleusercontent.com"
 ALLOWED_ORIGINS = "http://127.0.0.1:46220,http://localhost:46220,https://ainimation-interactive-library-preview.csilvasantin.workers.dev"
@@ -14,3 +15,7 @@ ALLOWED_ORIGINS = "http://127.0.0.1:46220,http://localhost:46220,https://ainimat
 binding = "LIBRARY_DB"
 database_name = "ainimation-interactives-preview"
 database_id = "f7f51410-7507-44f4-9b48-f3db1825ecd4"
+
+[[r2_buckets]]
+binding = "TELEGRAM_ORIGINALS"
+bucket_name = "ainimation-interactive-originals-preview"
