@@ -1,0 +1,45 @@
+import {validate} from './interactive-project.mjs';
+// Coordinates are percentages of each supplied photograph, not viewport pixels.
+// Only transitions evidenced by the photos/video are represented; checkout is a simulation.
+const z=(label,target,x,y,w,h)=>({label,target,x,y,w,h});
+export const cafeteriaScreens={
+1:['Elige una categoría',[z('Bebidas puristas',6,12,22,16,23),z('Bebidas de autor',2,28,22,16,23),z('Filtrados',8,44,22,15,23),z('Para comer',9,59,22,15,23),z('Otras bebidas',10,74,22,16,23),z('Shop',12,74,43,16,19)]],
+2:['Bebidas de autor · elige familia',[z('Calientes de autor',4,33,39,14,20),z('Frías de autor',3,48,39,14,20),z('Gelato frappé',5,62,39,13,20),z('Cerrar categorías',4,66,28,7,9)]],
+3:['Frías de autor',[z('Calientes de autor',4,44,27,13,8),z('Gelato frappé',5,70,27,14,8),z('Chai Iced Latte',13,69,37,14,29)]],
+4:['Calientes de autor',[z('Frías de autor',3,57,28,14,9),z('Gelato frappé',5,71,28,15,9),z('Urban Chocolate',16,80,39,16,30)]],
+5:['Gelato frappé y filtrados',[z('Calientes de autor',4,42,29,15,9),z('Frías de autor',3,57,29,14,9),z('Filtrados',8,21,18,10,10)]],
+6:['Puristas calientes',[z('Puristas fríos',7,60,26,17,10),z('Bebidas de autor',2,22,17,10,10)]],
+7:['Puristas fríos',[z('Puristas calientes',6,43,28,19,10),z('Chai Iced Latte',13,55,39,18,30)]],
+8:['Filtrados · referencia vertical',[z('Volver a categorías',1,7,5,15,12),z('Para comer',9,80,28,13,15)]],
+9:['Para comer',[z('Volver a categorías',1,9,81,8,12),z('Otras bebidas',10,41,21,12,11)]],
+10:['Otras bebidas',[z('Shop',12,55,20,11,11),z('Ver otra vista de bebidas',11,36,37,18,30)]],
+11:['Otras bebidas · segunda vista',[z('Volver a otras bebidas',10,7,5,15,12),z('Ir a Shop',12,79,34,13,15)]],
+12:['Shop y accesorios',[z('Volver a categorías',1,8,78,9,12),z('Bebidas de autor',2,18,18,10,12)]],
+13:['Chai Iced Latte · café',[z('Elegir café',14,28,38,12,24),z('Volver a puristas fríos',7,15,75,8,13),z('Agregar Chai Iced Latte',15,69,78,17,13)]],
+14:['Chai Iced Latte · leche y miel',[z('Elegir leche',15,38,39,15,34),z('Elegir miel',15,57,39,13,25),z('Agregar Chai Iced Latte',15,75,70,15,13),z('Volver a café',13,18,69,9,13)]],
+15:['Chai Iced Latte · agregar',[z('Agregar Chai al pedido de prueba',17,69,66,16,14),z('Cambiar opciones',14,38,36,17,30)]],
+16:['Urban Chocolate · personaliza',[z('Elegir leche',20,32,48,15,18),z('Elegir temperatura',20,53,48,15,17),z('Aumentar cantidad',21,45,66,7,10),z('Agregar Urban Chocolate',22,68,66,15,10),z('Volver a calientes',4,17,66,9,11)]],
+17:['Carta con una bebida añadida',[z('Urban Chocolate',18,76,46,15,17),z('Finalizar selección',23,76,63,15,12),z('Volver a categorías',1,17,63,9,12)]],
+18:['Elegir Urban Chocolate',[z('Urban Chocolate',16,77,46,13,18),z('Finalizar selección',23,76,65,15,12)]],
+20:['Urban Chocolate · temperatura',[z('Seleccionar temperatura',21,51,46,17,16),z('Elegir leche',16,31,45,15,24),z('Agregar Urban Chocolate',22,66,67,16,10)]],
+21:['Urban Chocolate · confirmar',[z('Agregar Urban Chocolate al pedido de prueba',22,76,64,15,11),z('Cambiar temperatura',20,58,43,15,17)]],
+22:['Urban Chocolate · pedido actualizado',[z('Ver bolsa y finalizar',23,62,62,13,15),z('Agregar bebida y continuar',23,76,65,14,12),z('Volver a calientes',17,17,65,9,11)]],
+23:['¿Consumir aquí o para llevar?',[z('Consumir aquí',25,28,45,20,15),z('Para llevar',24,48,45,21,15),z('Volver a la carta',17,17,67,10,12)]],
+24:['Para llevar · tu nombre',[z('Escribir nombre de prueba',27,33,51,30,10),z('De acuerdo',28,53,58,15,11),z('Cambiar a consumir aquí',25,17,67,9,12)]],
+25:['Consumir aquí · confirmar',[z('Consumir aquí',26,27,46,20,15),z('Para llevar',24,47,46,20,15)]],
+26:['Consumir aquí · tu nombre',[z('Escribir nombre de prueba',27,32,52,30,10),z('De acuerdo',28,46,59,18,11),z('Volver',23,16,69,10,12)]],
+27:['Nombre · abrir teclado',[z('Abrir teclado de nombre',28,34,53,30,10),z('De acuerdo',28,47,59,18,11),z('Volver',26,17,69,9,12)]],
+28:['Nombre · confirmar Carlos',[z('De acuerdo con el nombre de prueba',29,49,47,18,10),z('Volver al nombre',27,17,67,10,12)]],
+29:['Resumen del pedido · Carlos',[z('Pagar · simulación',31,52,44,20,17),z('Agregar más productos',17,30,57,17,9),z('Revisar productos',30,20,33,23,20),z('Forma de pago',33,56,26,17,10),z('Cambiar consumo',23,40,65,14,9)]],
+30:['Resumen · revisar productos',[z('Pagar · simulación',31,53,44,20,17),z('Agregar más productos',17,30,57,17,9),z('Volver al resumen',29,17,65,9,11)]],
+31:['Preparando pago de prueba',[z('Continuar a pago simulado',32,46,40,13,17),z('Volver al resumen',29,17,65,9,11)]],
+32:['Pago de prueba · confirmación',[z('Abrir terminal simulado',33,35,40,11,15),z('Volver al resumen',29,17,65,9,11)]],
+33:['Terminal de pago · simulación',[z('Simular acercar tarjeta',34,45,39,16,21),z('Cancelar simulación',29,29,64,13,11)]],
+34:['Acercar tarjeta · simulación',[z('Continuar con tarjeta de prueba',35,45,44,17,17),z('Volver al terminal',33,26,65,14,10)]],
+35:['Tarjeta de prueba preparada',[z('Acercar al lector · simulación',36,69,48,20,20),z('Volver',34,26,65,14,10)]],
+36:['Lector de tarjeta · simulación',[z('Confirmar lectura simulada',37,77,53,18,25),z('Volver',35,25,66,13,10)]],
+37:['Pago simulado completado',[z('Ver ticket de prueba',38,49,43,20,23),z('Volver al lector',36,78,53,18,25)]],
+38:['Ticket por correo · simulación',[z('No quiero recibo por correo',39,33,54,17,9),z('Escribir correo de prueba',39,30,39,40,12),z('Cerrar ticket',39,67,28,7,9)]],
+39:['Fin del recorrido',[z('Hacer un nuevo pedido',1,24,67,31,10),z('No quiero recibo',1,30,58,13,9),z('Enviar ticket · simulación',1,45,57,13,9),z('Cerrar ticket',1,55,38,7,8)]]
+};
+export function recreateCafeteria(input){const p=validate(input);if(p.scenes.length!==38||!p.referenceAssets?.some(a=>a.mime.startsWith('video/')))throw Error('Se necesitan las 38 imágenes y el vídeo de la cafetería.');const numbers=Object.keys(cafeteriaScreens).map(Number),ids=new Map(numbers.map((n,i)=>[n,p.scenes[i].id]));p.presentation='hotspots';p.resetSeconds=120;p.start=ids.get(1);p.scenes.forEach((scene,i)=>{const n=numbers[i],[title,zones]=cafeteriaScreens[n];scene.title=title;scene.body='';scene.buttons=[];scene.hotspots=zones.map(zone=>({...zone,target:ids.get(zone.target)}));if([3,4,5,6,7,9,10,12].includes(n)){const categories=[['Puristas',6],['Autor',2],['Filtrados',8],['Para comer',9],['Otras bebidas',10],['Shop',12]];categories.forEach(([label,target],j)=>scene.hotspots.push({...z(label,ids.get(target),10+j*10,17,9,12)}));if(!scene.hotspots.some(h=>h.label==='Volver a categorías'))scene.hotspots.push(z('Volver a categorías',ids.get(1),8,77,9,13));}});return validate(p);}
