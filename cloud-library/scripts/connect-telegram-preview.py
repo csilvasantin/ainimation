@@ -4,7 +4,7 @@ root=pathlib.Path(__file__).resolve().parents[2]
 vault='/Users/csilvasantin/Claude/admira-vault/vault-get.sh'
 def secret(name):return subprocess.check_output(['bash',vault,name],text=True,stderr=subprocess.DEVNULL).strip()
 name=sys.argv[1] if len(sys.argv)>1 else 'AINIMATION_TELEGRAM_BOT_TOKEN'
-token=secret(name)
+token=(subprocess.check_output(['security','find-generic-password','-s','AINimation Telegram preview','-a','ainimationStudioBot','-w'],text=True,stderr=subprocess.DEVNULL).strip() if name=='--keychain' else secret(name))
 def tg(method,data=None):
  req=urllib.request.Request('https://api.telegram.org/bot'+token+'/'+method,data=json.dumps(data or {}).encode(),headers={'Content-Type':'application/json'})
  with urllib.request.urlopen(req,timeout=30) as r: result=json.load(r)

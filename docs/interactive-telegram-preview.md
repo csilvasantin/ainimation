@@ -1,6 +1,6 @@
 # Telegram → AINimation: vista previa
 
-El bot de Admira no se modifica. BotFather ha rechazado crear otro bot en la cuenta actual por el límite de 20. Carlos ha elegido usar un bot libre y después ha indicado que creará uno llamado ainimation.studio. Falta confirmar su @usuario terminado en bot y disponer de su token en la bóveda como AINIMATION_TELEGRAM_BOT_TOKEN. No pegar secretos en el chat ni en git.
+Conectado @ainimationStudioBot el 20 de octubre de 2026. Token aportado por Carlos mediante formulario local de un uso y guardado en el Llavero de macOS (servicio AINimation Telegram preview, cuenta ainimationStudioBot). No pegar secretos en el chat ni en git. El bot de Admira no se modifica.
 
 Preparado: bucket R2 privado ainimation-interactive-originals-preview y tablas Telegram en la D1 exclusiva de preview. Interfaz Biblioteca → Telegram. Sin bot configurado, la vinculación permanece desactivada y se explica; el webhook rechaza cualquier petición sin secreto. Producción no se publica.
 
@@ -13,3 +13,5 @@ Prueba automatizada, no Telegram real: 18 documentos de muestra pasan por el rec
 Activación cuando exista bot libre: ejecutar cloud-library/scripts/connect-telegram-preview.py con el nombre del secreto en la bóveda. Verifica getMe y getWebhookInfo; si el bot tiene otro webhook aborta. Registra solo la URL de preview, no descarta updates pendientes y guarda secretos como secrets del Worker. Se debe revisar previamente el destino: dedicar un bot existente implica que sus futuros mensajes privados los procesará esta integración de prueba.
 
 Prueba real pendiente: vínculo por Carlos, 18 archivos sin comprimir en el bot, comprobación de hashes de originales, revisión en móvil y escritorio, crear entrada nueva y verificar que los proyectos anteriores coinciden antes/después. No finalizar ni publicar mientras falte esa prueba.
+
+Activación real verificada: getMe confirma ainimationStudioBot; getWebhookInfo confirma URL exclusiva de preview y cero actualizaciones pendientes. Secretos instalados en el Worker; comandos configurados. 25 pruebas siguen correctas. Pendiente vinculación Google/Telegram y envío real por Carlos. El script admite --keychain para leer el token del Llavero sin argumentos que contengan credenciales.

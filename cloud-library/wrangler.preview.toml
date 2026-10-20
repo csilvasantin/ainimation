@@ -7,6 +7,7 @@ directory = "./preview-public"
 binding = "ASSETS"
 run_worker_first = true
 [vars]
+TELEGRAM_BOT_USERNAME = "ainimationStudioBot"
 SITIO_PREVIEW = "https://ainimation-interactive-library-preview.csilvasantin.workers.dev"
 PREVIEW_EMAILS = "csilvasantin@gmail.com,csilva@admira.com"
 GOOGLE_CLIENT_ID = "861856772040-e1ri6kpu6maagtb6crdfbb923hsaalgb.apps.googleusercontent.com"
