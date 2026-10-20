@@ -11,3 +11,5 @@ Se validan toda la biblioteca y cada proyecto antes de escribir. Datos corruptos
 Pruebas: `node --test tests/interactive-*.test.mjs` (11). Cubren migración idempotente, independencia, creación/recuperación, duplicado/renombrado, cambios en otra pestaña, datos incompatibles, cuota y las pruebas del reproductor existente.
 
 No publicar sin revisión de Carlos. La vista previa tiene su propio origen; no lleva automáticamente los proyectos guardados en ainimation.studio. Se pueden trasladar con «Guardar archivo» y «Abrir proyecto».
+
+Validación manual en Chrome personal (csilvasantin@gmail.com): migración del borrador local existente, duplicado con nombre y contenido propios, recuperación del original sin cambios, renombrado desde una tarjeta, recarga de la copia activa y creación de un tercer proyecto. Capturas en escritorio y a 320 px. El intento de medir 390 px quedó interrumpido por un error de posicionamiento de la herramienta; no se da esa medida por verificada.
