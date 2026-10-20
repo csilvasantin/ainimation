@@ -4,6 +4,18 @@ try{language=localStorage.getItem('ainimation:ui:language')||'es';mode=localStor
 if(!['es','en'].includes(language))language='es';
 if(!['basic','advanced','expert'].includes(mode))mode='basic';
 const dictionary={
+'Entra. Elige tu idioma.':'Sign in. Choose your language.',
+'Crea tu interactivo.':'Create your interactive.',
+'Tu espacio para diseñar experiencias que responden.':'Your space to design responsive experiences.',
+'01 / ACCESO':'01 / SIGN IN','02 / IDIOMA':'02 / LANGUAGE',
+'Tu biblioteca, contigo.':'Your library, with you.',
+'Identifícate para recuperar tus proyectos desde tus dispositivos.':'Sign in to recover your projects across devices.',
+'Iniciar sesión con Google':'Sign in with Google',
+'Vista previa: Google aún no está conectado. Tus proyectos locales se conservan.':'Preview: Google is not connected yet. Your local projects are preserved.',
+'Entrar en vista previa local →':'Enter local preview →','A tu manera.':'Your way.',
+'Al entrar, este espacio deja sitio a Avanzado y Experto. Puedes volver a cambiar el idioma desde Cuenta.':'Once inside, this space becomes Advanced and Expert. You can change your language from Account.',
+'Acceso e idioma':'Sign in and language',
+
 'Idioma':'Language','Iniciar sesión':'Sign in','Básico':'Basic','Avanzado':'Advanced','Experto':'Expert','CREADOR / INTERACTIVOS':'CREATOR / INTERACTIVES',
 'Animación':'Animation','Interactivos':'Interactives','Xperiencias':'Experiences','VISTA PREVIA · v0.1':'PREVIEW · v0.1',
 'DE UNA IDEA A UNA EXPERIENCIA':'FROM IDEA TO EXPERIENCE','Crea algo que responda.':'Create something that responds.','Diseña pantallas, conecta sus botones y prueba el recorrido.':'Design screens, connect buttons and test the journey.',
@@ -15,9 +27,20 @@ const dictionary={
 'PNG, JPG o WebP, hasta 600 KB por imagen. Se incorpora al proyecto y a su exportación.':'PNG, JPG or WebP, up to 600 KB per image. Included in the project and its export.'
 };
 // Only shell text is translated; authored project text and input values are untouched.
-const nodes=[];const walker=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT);while(walker.nextNode()){const n=walker.currentNode;if(['SCRIPT','STYLE','OPTION'].includes(n.parentElement?.tagName))continue;const key=n.textContent.trim();if(dictionary[key])nodes.push({n,key});}
+const nodes=[];const walker=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT);while(walker.nextNode()){const n=walker.currentNode;if(['SCRIPT','STYLE','OPTION'].includes(n.parentElement?.tagName)||n.parentElement?.closest('#sceneName,#scenes,.library-card h3'))continue;const key=n.textContent.trim();if(dictionary[key])nodes.push({n,key});}
 function apply(){document.documentElement.lang=language;document.body.dataset.mode=mode;$('uiLanguage').value=language;for(const {n,key}of nodes)n.textContent=language==='en'?dictionary[key]:key;for(const b of document.querySelectorAll('[data-mode-choice]'))b.setAttribute('aria-pressed',String(b.dataset.modeChoice===mode));const hints={es:{basic:'Lo esencial: crea pantallas, añade imágenes y conecta botones.',advanced:'Avanzado: formato, color, pantalla inicial y reinicio automático.',expert:'Experto: todas las herramientas, exportación HTML y referencias.'},en:{basic:'The essentials: create screens, add images and connect buttons.',advanced:'Advanced: layout, color, start screen and automatic reset.',expert:'Expert: all tools, HTML export and references.'}};$('modeHint').textContent=hints[language][mode];try{localStorage.setItem('ainimation:ui:language',language);localStorage.setItem('ainimation:ui:mode',mode);}catch{}}
 $('uiLanguage').onchange=e=>{language=e.target.value;apply();};
-for(const b of document.querySelectorAll('[data-mode-choice]'))b.onclick=()=>{mode=b.dataset.modeChoice;apply();};
+for(const b of document.querySelectorAll('[data-mode-choice]'))b.onclick=()=>{mode=mode===b.dataset.modeChoice?'basic':b.dataset.modeChoice;apply();};
 $('loginButton').onclick=()=>{const login=$('googleLogin');$('loginTarget').append(login);if(login.childElementCount)$('loginExplanation').textContent=language==='en'?'Sign in with your Google account to sync your library.':'Inicia sesión con tu cuenta Google para sincronizar tu biblioteca.';$('loginDialog').showModal();};
 $('closeLogin').onclick=()=>$('loginDialog').close();apply();
+
+const sessionTools=document.querySelector('.session-tools'),languageLabel=$('uiLanguage').closest('label'),modeTools=document.querySelector('.mode-bar .tools');
+$('entryLanguage').append(languageLabel);
+const accountButton=document.createElement('button');accountButton.id='accountButton';accountButton.textContent='Cuenta / Idioma';accountButton.onclick=()=>{$('accountLanguage').append(languageLabel);$('loginDialog').showModal();};
+sessionTools.append(modeTools,accountButton);
+function stage(value){document.body.dataset.stage=value;if(value==='entry'){$('entryLanguage').append(languageLabel);mode='basic';apply();}try{sessionStorage.setItem('ainimation:ui:stage',value);}catch{}}
+$('entryLogin').onclick=()=>$('loginButton').click();
+$('enterPreview').onclick=()=>stage('workspace');
+$('backToEntry').onclick=()=>{$('loginDialog').close();stage('entry');};
+window.addEventListener('interactive-authenticated',()=>{$('loginDialog').close();stage('workspace');});
+try{stage(sessionStorage.getItem('ainimation:ui:stage')==='workspace'?'workspace':'entry');}catch{stage('entry');}
