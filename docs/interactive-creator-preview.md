@@ -29,3 +29,5 @@ No se puede eliminar la pantalla inicial ni una pantalla a la que todavía apunt
 `node --test tests/interactive-project.test.mjs`
 
 Prueba local: `python3 -m http.server 46220 --bind 127.0.0.1`, abrir `http://127.0.0.1:46220/interactivos/`.
+
+Revisión en Chrome real del perfil csilvasantin@gmail.com: recorrido completo, edición y recuperación del nombre tras recargar, descarga JSON e importación confirmada, descarga HTML y navegación abriendo el archivo local, disposición del editor y previo a 320 y 390 px. Corregidos el texto de confirmación al importar y el robo de foco del previo durante la escritura. Capturas y archivos exportados conservados en la carpeta de evidencias local de esta conversación.
