@@ -7,3 +7,5 @@
 #telegramDialog{max-width:650px;width:calc(100vw - 28px);max-height:90svh;overflow-y:auto}#telegramDialog>p{line-height:1.6;font-size:13px}#telegramLink{padding:12px;border:1px solid var(--accent);color:var(--accent)}#telegramBatches{display:grid;gap:12px;margin:18px 0}#telegramStatus{color:var(--accent)}
 
 .hotspot-coordinates{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}#hotspots fieldset{min-width:0;margin:12px 0;border:1px solid var(--line,#216738)}.expanded-player{width:96vw;max-width:1400px;height:94vh;padding:10px}.expanded-player iframe{display:block;width:100%;height:calc(100% - 60px);border:1px solid #39ff14;background:#102621}.expanded-player::backdrop{background:#000c}
+
+.native-cafeteria>#cafeCatalog~*{display:none}#cafeCatalog[hidden]{display:none}#catalogProducts details{margin:10px 0;border:1px solid #245232;padding:12px}#catalogProducts details label{margin-top:12px}#catalogProducts input[type=checkbox]{width:auto;min-height:0;margin-right:6px}
