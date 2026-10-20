@@ -1,0 +1,33 @@
+import {template,validate,readDraft,saveDraft,playerHtml} from './interactive-project.mjs';
+const $=id=>document.getElementById(id),status=$('status');
+let storage;try{storage=localStorage;}catch{}
+const draft=storage?readDraft(storage):{blocked:true};
+let project=draft.project||template(),selected=project.start,dirty=false;
+function announce(message,error=false){status.textContent=message;status.dataset.error=String(error);}
+const current=()=>project.scenes.find(s=>s.id===selected);
+function option(label,value){const n=document.createElement('option');n.textContent=label;n.value=value;return n;}
+function targets(select,value){select.replaceChildren(...project.scenes.map(s=>option(s.title,s.id)));select.value=value;}
+function updatePreview(){try{$('player').srcdoc=playerHtml(project);$('device').className='device '+project.orientation;}catch(e){announce(e.message,true);}}
+function persist(){dirty=true;try{validate(project);}catch(e){announce(e.message+' El último borrador válido se conserva.',true);return;}if(storage&&saveDraft(storage,project)){dirty=false;announce('Guardado en este navegador · '+new Date().toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit'}));}else announce('No se puede guardar en este navegador. Tu borrador anterior se conserva; usa «Guardar archivo».',true);}
+function list(){const ol=$('scenes');ol.replaceChildren();project.scenes.forEach((s,i)=>{const li=document.createElement('li'),b=document.createElement('button'),num=document.createElement('span'),name=document.createElement('span');num.className='number';num.textContent=String(i+1).padStart(2,'0');name.textContent=s.title;b.append(num,name);b.setAttribute('aria-current',String(s.id===selected));b.onclick=()=>{selected=s.id;render();};li.append(b);ol.append(li);});targets($('start'),project.start);$('remove').disabled=project.scenes.length===1||selected===project.start;$('add').disabled=project.scenes.length>=20;}
+function changed(){persist();list();updatePreview();}
+function renderButtons(){const parent=$('buttons');parent.replaceChildren();current().buttons.forEach((button,i)=>{const row=document.createElement('div');row.className='button-row';const l=document.createElement('label');l.textContent='Texto del botón '+(i+1);const input=document.createElement('input');input.maxLength=80;input.value=button.label;input.addEventListener('input',()=>{button.label=input.value;changed();});l.append(input);const dest=document.createElement('label');dest.textContent='Ir a pantalla';const select=document.createElement('select');targets(select,button.target);select.onchange=()=>{button.target=select.value;changed();};dest.append(select);const remove=document.createElement('button');remove.className='quiet';remove.textContent='Quitar botón';remove.onclick=()=>{current().buttons.splice(i,1);changed();renderButtons();};row.append(l,dest,remove);parent.append(row);});$('addButton').disabled=current().buttons.length>=6;}
+function render(){for(const k of ['title','orientation','color','resetSeconds'])$(k).value=project[k];if(!$('resetSeconds').value)$('resetSeconds').append(option(project.resetSeconds+' segundos',String(project.resetSeconds)));$('resetSeconds').value=String(project.resetSeconds);$('sceneName').textContent=current().title;$('sceneTitle').value=current().title;$('body').value=current().body;list();renderButtons();updatePreview();}
+for(const k of ['title','orientation','color','resetSeconds'])$(k).addEventListener(k==='title'?'input':'change',()=>{project[k]=k==='resetSeconds'?Number($(k).value):$(k).value;changed();});
+$('sceneTitle').oninput=()=>{current().title=$('sceneTitle').value;$('sceneName').textContent=current().title;changed();};$('sceneTitle').onchange=renderButtons;
+$('body').oninput=()=>{current().body=$('body').value;changed();};
+$('start').onchange=()=>{project.start=$('start').value;changed();};
+$('add').onclick=()=>{const id='pantalla-'+crypto.randomUUID();project.scenes.push({id,title:'Nueva pantalla',body:'Cuenta qué ocurre aquí.',buttons:[{label:'Volver al inicio',target:project.start}]});selected=id;changed();render();};
+$('remove').onclick=()=>{const inbound=project.scenes.filter(s=>s.id!==selected&&s.buttons.some(b=>b.target===selected));if(inbound.length){announce('Antes de eliminar, cambia los botones que llegan desde: '+inbound.map(s=>s.title).join(', ')+'.',true);return;}project.scenes=project.scenes.filter(s=>s.id!==selected);selected=project.start;changed();render();};
+$('addButton').onclick=()=>{current().buttons.push({label:'Nuevo botón',target:project.start});changed();renderButtons();};
+$('restart').onclick=updatePreview;
+function download(name,type,content){const url=URL.createObjectURL(new Blob([content],{type})),a=document.createElement('a');a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),30000);}
+function filename(){return(project.title.normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/gi,'-').replace(/^-|-$/g,'')||'interactivo').slice(0,60);}
+$('json').onclick=()=>{try{const data=validate(project);download(filename()+'.json','application/json',JSON.stringify(data,null,2));announce('Archivo del proyecto preparado para descargar.');}catch(e){announce(e.message,true);}};
+$('html').onclick=()=>{try{download(filename()+'.html','text/html',playerHtml(project));announce('Interactivo HTML preparado: sin conexión, pedidos ni pagos reales.');}catch(e){announce(e.message,true);}};
+$('import').onclick=()=>$('file').click();
+$('file').onchange=async()=>{const file=$('file').files[0];if(!file)return;try{if(file.size>200000)throw Error('El proyecto supera el límite de 200 KB.');const next=validate(JSON.parse(await file.text()));if(!await confirmReplace())return;project=next;selected=project.start;changed();render();}catch(e){announce('No se ha abierto el archivo: '+e.message+' Tu proyecto actual se conserva.',true);}finally{$('file').value='';}};
+function confirmReplace(){return new Promise(resolve=>{const dialog=$('confirm');dialog.returnValue='cancel';dialog.addEventListener('close',()=>resolve(dialog.returnValue==='replace'),{once:true});dialog.showModal();});}
+for(const [id,kind]of[['cafe','cafe'],['blank','blank']])$(id).onclick=async()=>{if(!await confirmReplace())return;project=template(kind);selected=project.start;changed();render();};
+window.addEventListener('beforeunload',e=>{if(dirty){e.preventDefault();e.returnValue='';}});
+render();announce(draft.blocked?'El borrador guardado no está disponible o no es compatible. Se conserva sin modificar; puedes abrir otro archivo o exportar esta propuesta.':draft.project?'Borrador recuperado · sigue donde lo dejaste.':'Plantilla de cafetería lista · cambia un texto para guardar tu borrador.',draft.blocked);
