@@ -23,3 +23,16 @@ API: /api. D1 exclusiva ainimation-interactives-preview. El acceso está limitad
 Bloqueo actual: la consola de Google no incluye el origen HTTPS del previo ni localhost:46220/127.0.0.1:46220. Origen HTTPS preparado en formulario sin guardar; se solicitó confirmación al usuario antes de ampliar los orígenes autorizados. No se ha probado aún inicio de sesión real ni sincronización con la cuenta de Carlos. La prueba de teléfono físico también está pendiente.
 
 Para reconstruir solo los assets permitidos: node cloud-library/build-preview.mjs. Desplegar usando cloud-library/wrangler.preview.toml, nunca la configuración MCP de producción. No copiar carpetas completas del repositorio al hosting.
+
+
+## Verificación real tras autorización de Carlos
+
+20-oct-2026: Google confirmó «Se guardó el cliente OAuth». Los tres orígenes aprobados aparecen al volver a abrir el cliente: HTTPS del Worker, http://localhost:46220 y http://127.0.0.1:46220. No se cambiaron los orígenes anteriores ni scopes.
+
+Login real con csilvasantin@gmail.com aceptado por el servidor en HTTPS y, inicialmente, en 127.0.0.1. Se sincronizaron tres proyectos locales y se recuperaron desde el otro origen, con almacenamiento local independiente. Se importó una copia del respaldo Cafetería · Carlos como entrada nueva y se sincronizó: comparación completa del JSON almacenado en D1 con el respaldo = idéntico. La prueba contiene seis entradas, incluidas plantillas y una copia de prueba adicional; ninguna se borró ni sobrescribió. Producción permanece intacta.
+
+HTTPS: recarga conserva las seis entradas y el activo Cafetería · Carlos. Se repitió el login real tras recargar y se sincronizó correctamente. En Chrome emulado a 390 px: salir devolvió acceso/idioma; login Google volvió a verificar la cuenta y sustituyó esos controles por Avanzado/Experto; sincronización correcta. Se capturó también a 320 px. No se dispone de control de un teléfono físico: esa validación sigue pendiente.
+
+Incidencia localizada: 127.0.0.1 devolvió origin_mismatch intermitente después de una recarga, aunque los orígenes están persistidos en Google. No se ha dado por resuelta ni se ha ampliado ningún permiso adicional. HTTPS sí superó el reintento de escritorio y el recorrido móvil emulado.
+
+La sincronización es manual mediante el botón; el token solo vive en memoria, por lo que recargar requiere verificar de nuevo la cuenta para sincronizar. Los proyectos locales permanecen recuperables. El estado de nube avisa cuando hay cambios locales pendientes de sincronizar.
