@@ -1,0 +1,11 @@
+name = "ainimation-interactive-library-preview"
+main = "worker.mjs"
+compatibility_date = "2026-10-01"
+[vars]
+# Google OAuth Web client, authorized JavaScript origins must match the preview.
+GOOGLE_CLIENT_ID = "CONFIGURE_GOOGLE_WEB_CLIENT_ID"
+ALLOWED_ORIGINS = "http://127.0.0.1:46220"
+[[d1_databases]]
+binding = "LIBRARY_DB"
+database_name = "ainimation-interactives-preview"
+database_id = "CONFIGURE_NEW_PREVIEW_DATABASE_ID"
