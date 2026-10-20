@@ -20,3 +20,11 @@ export async function prepareImage(file){
  throw Error(file.name+': no se pudo ajustar para la biblioteca. Prueba una imagen más pequeña.');
  }finally{bitmap.close();}
 }
+export function appendProjectImages(input,images,references=[]){
+ const next=validate(input),ids=new Set(next.scenes.map(s=>s.id));let last=next.scenes.at(-1);
+ for(const image of images){if(next.scenes.some(s=>(image.sourceAssetId&&s.sourceAssetId===image.sourceAssetId)||s.image===image.data))continue;let number=next.scenes.length+1,id;do{id='imagen-'+number++;}while(ids.has(id));const previous=last;
+ const scene={id,title:'Pantalla '+String(next.scenes.length+1).padStart(2,'0'),body:'',image:image.data,imageAlt:image.name.slice(0,100),sourceName:image.name,...(image.sourceAssetId?{sourceAssetId:image.sourceAssetId}:{}),buttons:[{label:'Anterior',target:previous.id},{label:'Volver al inicio',target:next.start}]};
+ const end=previous.buttons.find(b=>b.label==='Volver al inicio'&&b.target===next.start);if(end){end.label='Siguiente';end.target=id;}next.scenes.push(scene);ids.add(id);last=scene;
+ }
+ const assets=next.referenceAssets||[];for(const ref of references)if(!assets.some(a=>a.id===ref.id||a.sha256===ref.sha256))assets.push(structuredClone(ref));if(assets.length)next.referenceAssets=assets;return validate(next);
+}

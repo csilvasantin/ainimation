@@ -1,4 +1,4 @@
-import {telegramAccount,telegramWebhook} from './telegram.mjs';
+import {telegramAccount,telegramWebhook,telegramPlayback} from './telegram.mjs';
 import {validate} from '../assets/interactive-project.mjs';
 const reply=(body,status=200)=>new Response(JSON.stringify(body),{status,headers:{'content-type':'application/json','cache-control':'no-store'}});
 const decode=s=>Uint8Array.from(atob(s.replaceAll('-','+').replaceAll('_','/')),c=>c.charCodeAt(0));
@@ -19,6 +19,7 @@ export async function authenticate(request,env){
 export async function route(request,env,identify=authenticate){
  const path=new URL(request.url).pathname;
  if(path==='/telegram/webhook')return telegramWebhook(request,env);
+ if(path.startsWith('/telegram/play/'))return telegramPlayback(request,env);
  if(path==='/config'&&request.method==='GET')return reply({clientId:env.GOOGLE_CLIENT_ID||null});
  let owner;try{owner=await identify(request,env);}catch{return reply({error:'Inicia sesión para abrir tu biblioteca.'},401);}
  if(!env.LIBRARY_DB)return reply({error:'Almacenamiento pendiente de configurar.'},503);
