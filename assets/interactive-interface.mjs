@@ -4,6 +4,8 @@ try{language=localStorage.getItem('ainimation:ui:language')||'es';mode=localStor
 if(!['es','en'].includes(language))language='es';
 if(!['basic','advanced','expert'].includes(mode))mode='basic';
 const dictionary={
+'Recuperar biblioteca':'Recover library','Sincronizar este proyecto':'Sync this project',
+'Recuperar trae tus proyectos de la nube. Sincronizar este proyecto guarda solo el que estás editando.':'Recover brings your projects from the cloud. Sync this project saves only the one you are editing.',
 'Crear este interactivo':'Create this interactive',
 'Se abrirá una copia editable con las tres pantallas del vídeo. Tus proyectos actuales se conservan.':'Open an editable copy with the three screens from the video. Your existing projects are preserved.',
 'Ver demo':'Watch demo','Comandos de Experto':'Expert commands','Comando':'Command','Ejecutar':'Run',

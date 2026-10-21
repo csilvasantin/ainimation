@@ -17,15 +17,20 @@ export function mergeCloud(local,remote,bases={}){
 }
 const contentHash=async text=>[...new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(text)))].map(x=>x.toString(16).padStart(2,'0')).join('');
 async function compactBases(bases){const result={};for(const [id,base]of Object.entries(bases))result[id]={revision:base.revision,contentHash:base.contentHash||await contentHash(base.content)};return result;}
-export async function syncLibrary(storage,endpoint,token,request=fetch){
+export async function syncLibrary(storage,endpoint,token,request=fetch,{projectId,upload=true}={}){
  const loaded=readLibrary(storage);if(!loaded.ok)throw Error(loaded.error);
+ if(projectId&&!loaded.data.projects.some(p=>p.id===projectId))throw Error('El proyecto ya no está disponible. Recarga antes de sincronizar.');
  const before=storage.getItem(LIBRARY_KEY);
  const call=async(path,options={})=>{const r=await request(endpoint+path,{...options,headers:{authorization:'Bearer '+token,'content-type':'application/json'}});const data=await r.json();if(!r.ok)throw Error(data.error||'Sin conexión. Tu copia local se conserva.');return data;};
  const remote=await call('/projects');
  if(typeof remote.account!=='string'||!remote.account)throw Error('No se reconoce la cuenta.');
  const key='ainimation:cloud:bases:'+endpoint+':'+remote.account,saved=JSON.parse(storage.getItem(key)||'{}'),previousCompact=await compactBases(saved);
  for(const [id,base]of Object.entries(saved)){if(!base.contentHash)continue;const local=loaded.data.projects.find(p=>p.id===id),content=local?JSON.stringify(local.project):null;base.content=content&&await contentHash(content)===base.contentHash?content:null;}
- const merged=mergeCloud(loaded.data,remote.projects,saved),nextCompact=await compactBases(merged.bases);
+ const source=projectId?remote.projects.filter(p=>p.id===projectId):remote.projects;
+ const merged=mergeCloud(loaded.data,source,saved),nextCompact=await compactBases(merged.bases);
+ const selected=new Set([projectId]);
+ if(projectId)for(const entry of merged.library.projects)if(!loaded.data.projects.some(p=>p.id===entry.id))selected.add(entry.id);
+ const uploads=upload?merged.uploads.filter(item=>!projectId||selected.has(item.id)):[];
  // No asynchronous gap between the comparison and the local write.
  if(storage.getItem(LIBRARY_KEY)!==before)throw Error('Has editado durante la sincronización. Vuelve a sincronizar.');
  // Equivalent compact bases free space before the two full library copies are written.
@@ -33,6 +38,6 @@ export async function syncLibrary(storage,endpoint,token,request=fetch){
  storage.setItem('ainimation:cloud:backup:'+endpoint,before);
  storage.setItem(LIBRARY_KEY,JSON.stringify(merged.library));
  storage.setItem(key,JSON.stringify(nextCompact));
- for(const item of merged.uploads){const result=await call('/projects/'+encodeURIComponent(item.id),{method:'PUT',body:JSON.stringify(item)});merged.bases[item.id]={revision:result.revision,content:JSON.stringify(item.project)};storage.setItem(key,JSON.stringify(await compactBases(merged.bases)));}
+ for(const item of uploads){const result=await call('/projects/'+encodeURIComponent(item.id),{method:'PUT',body:JSON.stringify(item)});merged.bases[item.id]={revision:result.revision,content:JSON.stringify(item.project)};storage.setItem(key,JSON.stringify(await compactBases(merged.bases)));}
  return merged.library;
 }
