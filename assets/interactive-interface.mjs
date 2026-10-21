@@ -4,6 +4,8 @@ try{language=localStorage.getItem('ainimation:ui:language')||'es';mode=localStor
 if(!['es','en'].includes(language))language='es';
 if(!['basic','advanced','expert'].includes(mode))mode='basic';
 const dictionary={
+'Crear este interactivo':'Create this interactive',
+'Se abrirá una copia editable con las tres pantallas del vídeo. Tus proyectos actuales se conservan.':'Open an editable copy with the three screens from the video. Your existing projects are preserved.',
 'Ver demo':'Watch demo','Comandos de Experto':'Expert commands','Comando':'Command','Ejecutar':'Run',
 'Escribe /demo interactivo para abrir el vídeo de creación.':'Enter /demo interactivo to open the creation video.',
 'Demo · Creador de interactivos':'Demo · Interactive creator','Cerrar demo':'Close demo','Abrir vídeo ↗':'Open video ↗',
@@ -50,3 +52,4 @@ window.addEventListener('interactive-authenticated',()=>{$('loginDialog').close(
 try{stage(sessionStorage.getItem('ainimation:ui:stage')==='workspace'?'workspace':'entry');}catch{stage('entry');}
 
 window.addEventListener('interactive-signed-out',()=>stage('entry'));
+window.addEventListener('interactive-demo-created',()=>stage('workspace'));

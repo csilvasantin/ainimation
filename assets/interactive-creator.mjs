@@ -1,4 +1,5 @@
 import {cafeteriaCatalog} from './interactive-cafeteria.mjs';
+import {createDemoCopy} from './interactive-demo-project.mjs';
 import {sortedImages,prepareImage,projectFromImages,appendProjectImages,MAX_IMAGES} from './interactive-image-import.mjs';
 import {syncLibrary} from './interactive-cloud.mjs';
 import {template,validate,playerHtml} from './interactive-project.mjs';
@@ -84,3 +85,20 @@ async function reviewTelegramBatch(id){if(telegramBusy)return;telegramBusy=true;
 $('imagesAppend').onclick=()=>{try{if(preparingImages||!stagedImages.length||!appendTarget||appendTarget.id!==activeId||appendTarget.revision!==revision||dirty)throw Error('El proyecto cambió durante la revisión. Vuelve a abrir la subida antes de añadir archivos.');const next=appendProjectImages(project,stagedImages,stagedReferences);const result=updateProject(storage,activeId,next,revision);if(!activate(result))return;stagedImages=[];stagedReferences=[];appendTarget=null;$('imagesDialog').close();announce('Archivos combinados sin duplicados. Los otros proyectos se conservan.');if(cloudToken)$('cloudStatus').textContent='Proyecto ampliado en este navegador. Pulsa sincronizar para guardarlo en la nube.';}catch(e){$('imagesStatus').textContent=e.message;}};
 
 function renderReferenceMedia(){const panel=$('referenceMedia');if(!panel)return;panel.replaceChildren();for(const ref of project.referenceAssets||[]){const card=document.createElement('article'),name=document.createElement('h3'),button=document.createElement('button'),message=document.createElement('p');name.textContent='Vídeo de referencia · '+ref.name;button.textContent='Ver vídeo';button.onclick=async()=>{button.disabled=true;try{message.textContent='Preparando vídeo privado…';const access=await(await telegramCall('/preview/'+encodeURIComponent(ref.id),{method:'POST'})).json();const video=document.createElement('video');video.controls=true;video.preload='metadata';video.style.width='100%';video.src=cloudEndpoint+'/telegram/play/'+encodeURIComponent(ref.id)+'?ticket='+encodeURIComponent(access.ticket);video.onerror=()=>{message.textContent='No se pudo reproducir. Pulsa Ver vídeo para volver a intentarlo.';video.remove();button.hidden=false;button.disabled=false;};card.append(video);message.textContent='Referencia privada. No se incorpora a la exportación HTML.';button.hidden=true;}catch(e){message.textContent=e.message;button.disabled=false;}};card.append(name,button,message);panel.append(card);}}
+
+const createDemoButton=$('createDemoProject');
+createDemoButton.disabled=false;
+createDemoButton.onclick=()=>{
+  if(createDemoButton.disabled||!$('interactiveDemo').open)return;
+  createDemoButton.disabled=true;
+  const result=createDemoCopy(storage,{hasUnsavedWork:dirty||preparingImages||stagedImages.length>0});
+  if(!result.ok){$('demoCreateStatus').textContent=result.error;createDemoButton.disabled=false;return;}
+  activate(result);
+  $('demoCreateStatus').textContent='';
+  $('interactiveDemo').close();
+  window.dispatchEvent(new Event('interactive-demo-created'));
+  announce('Copia editable creada: '+project.title+'. Tus proyectos anteriores se conservan.');
+  if(cloudToken)$('cloudStatus').textContent='Copia guardada en este navegador. Pulsa sincronizar para recuperarla en tus dispositivos.';
+  const workspace=document.querySelector('.workspace');workspace.tabIndex=-1;workspace.focus({preventScroll:true});workspace.scrollIntoView({block:'start'});
+  createDemoButton.disabled=false;
+};
