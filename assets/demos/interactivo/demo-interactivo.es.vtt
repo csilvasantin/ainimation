@@ -1,0 +1,85 @@
+WEBVTT
+
+1
+00:00:00.350 --> 00:00:01.339
+Demo interactivo.
+
+2
+00:00:01.339 --> 00:00:05.119
+Vamos a crear una pequeña experiencia de cafetería en AINimation.
+
+3
+00:00:06.142 --> 00:00:07.324
+Pulsa Nuevo proyecto.
+
+4
+00:00:07.324 --> 00:00:11.602
+Empiezas una experiencia independiente y conservas los proyectos anteriores.
+
+5
+00:00:12.642 --> 00:00:13.536
+Ponle un nombre.
+
+6
+00:00:13.536 --> 00:00:15.941
+Escribe el título de bienvenida y su texto.
+
+7
+00:00:15.941 --> 00:00:19.239
+Después cambia el botón por una acción clara: Ver la carta.
+
+8
+00:00:22.142 --> 00:00:24.754
+Añade las pantallas de la carta y del producto.
+
+9
+00:00:24.754 --> 00:00:27.700
+Cada una tiene su propio título, contenido y botones.
+
+10
+00:00:30.142 --> 00:00:32.519
+En cada botón, elige la pantalla de destino.
+
+11
+00:00:32.519 --> 00:00:36.733
+Conecta Descubrir Espresso con su ficha y prepara también el camino de vuelta.
+
+12
+00:00:39.642 --> 00:00:41.693
+Ahora amplía el recorrido y pruébalo.
+
+13
+00:00:41.693 --> 00:00:43.300
+Bienvenida, carta y Espresso.
+
+14
+00:00:43.300 --> 00:00:46.349
+Volver a la carta y volver al inicio también funcionan.
+
+15
+00:00:50.642 --> 00:00:51.859
+Recarga la aplicación.
+
+16
+00:00:51.859 --> 00:00:56.341
+La biblioteca recupera el proyecto con sus tres pantallas y conserva el anterior.
+
+17
+00:00:56.341 --> 00:00:59.219
+Esta demostración usa una biblioteca local separada.
+
+18
+00:01:00.642 --> 00:01:02.232
+Guarda una copia editable.
+
+19
+00:01:02.232 --> 00:01:07.187
+En modo Experto, exporta un HTML para abrir y probar el interactivo sin conexión.
+
+20
+00:01:09.142 --> 00:01:10.888
+Ya tienes tu primer interactivo.
+
+21
+00:01:10.888 --> 00:01:13.235
+De una idea a una experiencia que responde.

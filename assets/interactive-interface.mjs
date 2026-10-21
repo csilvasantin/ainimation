@@ -4,6 +4,10 @@ try{language=localStorage.getItem('ainimation:ui:language')||'es';mode=localStor
 if(!['es','en'].includes(language))language='es';
 if(!['basic','advanced','expert'].includes(mode))mode='basic';
 const dictionary={
+'Ver demo':'Watch demo','Comandos de Experto':'Expert commands','Comando':'Command','Ejecutar':'Run',
+'Escribe /demo interactivo para abrir el vídeo de creación.':'Enter /demo interactivo to open the creation video.',
+'Demo · Creador de interactivos':'Demo · Interactive creator','Cerrar demo':'Close demo','Abrir vídeo ↗':'Open video ↗',
+'Una guía de 1:14 con voz en español: crea, conecta y prueba. Demostración local con capturas reales de Chrome.':'A 1:14 guide with Spanish narration: create, connect and test. Local demonstration with real Chrome captures.',
 'Entra. Elige tu idioma.':'Sign in. Choose your language.',
 'Crea tu interactivo.':'Create your interactive.',
 'Tu espacio para diseñar experiencias que responden.':'Your space to design responsive experiences.',
