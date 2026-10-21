@@ -25,3 +25,13 @@ Authenticated negative POSTs against the deployed API for `starbucks-wall-06`, `
 Empty inventory was checked in the production browser using the actual published module and a controlled in-memory destinations response containing only non-touch and unknown-capability screens. It visibly rendered «Este Xpacio no tiene pantallas táctiles disponibles.» and disabled both screen selection and submission. This was a controlled scenario, not a real venue inventory change. Temporary test UI and authentication callback changes were discarded by reloading; existing projects and real inventory were preserved.
 
 ES: Publicado y comprobado: selector táctil, rechazo al guardar en pared/TPV y aviso sin táctiles mediante caso controlado sobre el módulo público. Entrega y restauración verificadas en el iPad virtual. EN: Published and checked: touch-only selector, server rejection for wall/POS, and empty-touch warning through a controlled case against the public module. Delivery and restoration verified on the virtual iPad.
+
+## Touch totem addition · 21 October 2026
+
+The Starbucks touch totem is also available, with canonical existing surface ID `starbucks-avatar-wall`, portrait orientation and `touch: true`. It maps to the existing Matrix totem element, focuses its camera and preserves the underlying kiosk iframe. The iPad remains available; wall menu screens and POS remain excluded.
+
+Production check: real Google session in the public AINimation creator selected «Tótem táctil» and prepared receipt `0e70f03605474960b0a35bd860b85454f20733fe68dd45708e4f1b4d297b398d`. Its public metadata confirms the surface ID and touch capability. In production admira.store, Show on this screen mounted that snapshot on the totem; clicking «Ver la carta» reached «Elige tu café». Restore screen removed the interactive overlay and visually revealed the original Starbucks ordering kiosk. No kiosk URL, mode or playlist was replaced. Verified virtual twin playback only.
+
+Store deployment `ed928e4a.admira-store.pages.dev`; library Worker version `0e030823-7465-411d-ba17-b3797a0749f3`; MCP help version `7b59b5e6-91fd-41a8-adcd-e1159f833635`. Spanish and English help, tutorial, catalog and actual MCP topic include both touch destinations. Regression: 65 interactive tests pass; focused receiver/avatar checks pass, including preservation and restoration of the totem kiosk.
+
+ES: Tótem táctil incluido, asignación y navegación probadas en producción, restauración visual del quiosco anterior confirmada en el gemelo. EN: Touch totem included, production assignment and navigation tested, restoration of the previous kiosk visually confirmed in the twin.
