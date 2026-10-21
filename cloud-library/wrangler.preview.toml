@@ -2,6 +2,9 @@ name = "ainimation-interactive-library-preview"
 main = "preview-worker.mjs"
 compatibility_date = "2026-10-01"
 workers_dev = true
+# playerHtml serializes its own runtime; generated browser scripts must not depend
+# on esbuild's Worker-only __name helper.
+keep_names = false
 [assets]
 directory = "./preview-public"
 binding = "ASSETS"

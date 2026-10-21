@@ -17,7 +17,7 @@ export function mountInteractiveDelivery({button,getState,endpoint,doc=document,
  close.onclick=hide;dialog.addEventListener('cancel',e=>{e.preventDefault();hide();});
  button.onclick=async()=>{
   title.textContent=t('Enviar a Xpacio','Send to Xpace');close.textContent=t('Cerrar','Close');send.textContent=t('Preparar envío','Prepare delivery');link.textContent=t('Abrir en admira.store','Open in admira.store');link.hidden=true;status.textContent='';
-  try{state=getState();validate(state.project);if(!state.token)throw Error(t('Conecta tu cuenta Google antes de preparar el envío.','Connect your Google account before preparing a delivery.'));preview.srcdoc=playerHtml(state.project);description.textContent=state.project.title+' · '+t('Versión','Version')+' '+state.revision;dialog.showModal();send.disabled=true;
+  try{state=getState();validate(state.project);if(!state.token)throw Error(t('Conecta tu cuenta Google antes de preparar el envío.','Connect your Google account before preparing a delivery.'));preview.srcdoc=playerHtml(state.project);description.textContent=state.project.title+' · '+t('Versión guardada','Saved version');dialog.showModal();send.disabled=true;
    const r=await request(endpoint+'/destinations',{headers:{authorization:'Bearer '+state.token},signal:AbortSignal.timeout(30000)});const data=await r.json();if(!r.ok)throw Error(data.error);destinations=data.destinations;location.replaceChildren(option(t('Elige un Xpacio','Choose a Xpace'),''),...destinations.map(d=>option(d.name,d.id)));screens();send.disabled=false;
   }catch(error){if(!dialog.open)dialog.showModal();status.textContent=error.message;send.disabled=true;}
  };
