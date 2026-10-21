@@ -12,4 +12,4 @@ La vista ampliada, la incrustada y la exportación comparten la implementación.
 
 Pruebas automáticas: catálogo y tipos, importes, edición y eliminación, variantes, cantidades, estados de checkout, validación de nombre/correo, reinicio, exportación sin fotografías y sin red, y neutralización de cierre de script. El guardado compara la revisión del único proyecto de destino; se comprueba que los otros seis registros sigan idénticos.
 
-Solo Worker de vista previa. No publicado en ainimation.studio. La revisión visual en Chrome depende de desbloquear el Mac.
+Solo Worker de vista previa. No publicado en ainimation.studio. Revisión visual completada el 21 de octubre de 2026 en Chrome de Carlos: interfaz nativa en la aplicación y exportación autocontenida; 2 Chai con avena + Urban = 13,60 €, edición a 1 Chai entero + Urban = 8,50 €, cambio de cantidad = 12,30 €, eliminación de Urban = 4,70 €, reposición = 8,50 €. Se verificó nombre vacío bloqueado, nombre Carlos, resumen, pago de prueba, ticket opcional y pantalla final. Capturas de producto, cesta, resumen y final guardadas para revisión.
