@@ -17,7 +17,12 @@ export function mergeCloud(local,remote,bases={}){
 }
 const contentHash=async text=>[...new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(text)))].map(x=>x.toString(16).padStart(2,'0')).join('');
 async function compactBases(bases){const result={};for(const [id,base]of Object.entries(bases))result[id]={revision:base.revision,contentHash:base.contentHash||await contentHash(base.content)};return result;}
-export async function syncLibrary(storage,endpoint,token,request=fetch,{projectId,upload=true}={}){
+// Image-rich libraries need a backup outside localStorage's small quota.
+async function archiveBackups(entries){
+ const db=await new Promise((resolve,reject)=>{const open=indexedDB.open('ainimation-interactive-backups',1);open.onupgradeneeded=()=>open.result.createObjectStore('libraries');open.onsuccess=()=>resolve(open.result);open.onerror=()=>reject(open.error);});
+ try{await new Promise((resolve,reject)=>{const tx=db.transaction('libraries','readwrite');for(const [key,value]of entries)tx.objectStore('libraries').put(value,key);tx.oncomplete=resolve;tx.onabort=()=>reject(tx.error||Error('No se ha podido guardar la copia de seguridad.'));tx.onerror=()=>reject(tx.error);});}finally{db.close();}
+}
+export async function syncLibrary(storage,endpoint,token,request=fetch,{projectId,upload=true,archive=globalThis.indexedDB?archiveBackups:null}={}){
  const loaded=readLibrary(storage);if(!loaded.ok)throw Error(loaded.error);
  if(projectId&&!loaded.data.projects.some(p=>p.id===projectId))throw Error('El proyecto ya no está disponible. Recarga antes de sincronizar.');
  const before=storage.getItem(LIBRARY_KEY);
@@ -31,12 +36,15 @@ export async function syncLibrary(storage,endpoint,token,request=fetch,{projectI
  const selected=new Set([projectId]);
  if(projectId)for(const entry of merged.library.projects)if(!loaded.data.projects.some(p=>p.id===entry.id))selected.add(entry.id);
  const uploads=upload?merged.uploads.filter(item=>!projectId||selected.has(item.id)):[];
- // No asynchronous gap between the comparison and the local write.
+ const backupKey='ainimation:cloud:backup:'+endpoint,legacyBackup=storage.getItem(backupKey);
+ if(archive){const entries=[[backupKey,before]];if(legacyBackup!==null)entries.push([backupKey+':migrated',legacyBackup]);await archive(entries);}
+ // No asynchronous gap between this comparison and the local library write.
  if(storage.getItem(LIBRARY_KEY)!==before)throw Error('Has editado durante la sincronización. Vuelve a sincronizar.');
- // Equivalent compact bases free space before the two full library copies are written.
+ // Remove a legacy backup only after both snapshots are safely archived.
+ if(archive)storage.removeItem(backupKey);
  storage.setItem(key,JSON.stringify(previousCompact));
- storage.setItem('ainimation:cloud:backup:'+endpoint,before);
- storage.setItem(LIBRARY_KEY,JSON.stringify(merged.library));
+ if(!archive)storage.setItem(backupKey,before);
+ try{storage.setItem(LIBRARY_KEY,JSON.stringify(merged.library));}catch(error){if(error.name==='QuotaExceededError')throw Error('No queda espacio en este navegador. Tu biblioteca local y su copia de seguridad se conservan; guarda un archivo antes de liberar espacio.');throw error;}
  storage.setItem(key,JSON.stringify(nextCompact));
  for(const item of uploads){const result=await call('/projects/'+encodeURIComponent(item.id),{method:'PUT',body:JSON.stringify(item)});merged.bases[item.id]={revision:result.revision,content:JSON.stringify(item.project)};storage.setItem(key,JSON.stringify(await compactBases(merged.bases)));}
  return merged.library;
