@@ -5,6 +5,8 @@ import {sortedImages,prepareImage,projectFromImages,appendProjectImages,MAX_IMAG
 const cloudModule=new URL('./interactive-cloud.mjs',import.meta.url);
 cloudModule.search=new URL(import.meta.url).search;
 const {syncLibrary}=await import(cloudModule.href);
+const deliveryModule=new URL('./interactive-delivery.mjs',import.meta.url);deliveryModule.search=new URL(import.meta.url).search;
+const {mountInteractiveDelivery}=await import(deliveryModule.href);
 import {template,validate,playerHtml} from './interactive-project.mjs';
 import {loadLibrary,readLibrary,updateProject,createProject,openProject,duplicateProject,renameProject,LIBRARY_KEY} from './interactive-library.mjs';
 const $=id=>document.getElementById(id),status=$('status');
@@ -122,3 +124,9 @@ createDemoButton.onclick=()=>{
   const workspace=document.querySelector('.workspace');workspace.tabIndex=-1;workspace.focus({preventScroll:true});workspace.scrollIntoView({block:'start'});
   createDemoButton.disabled=false;
 };
+mountInteractiveDelivery({button:$('sendXpacio'),endpoint:cloudEndpoint,getState:()=>{
+ if(dirty||preparingImages||stagedImages.length)throw Error('Guarda o completa los cambios pendientes antes de enviar.');
+ const latest=readLibrary(storage),record=latest.data?.projects.find(r=>r.id===activeId);
+ if(!latest.ok||!record||record.revision!==revision)throw Error('El proyecto cambió en otra pestaña. Recupéralo antes de enviarlo.');
+ return{id:activeId,revision,project:structuredClone(project),token:cloudToken};
+}});

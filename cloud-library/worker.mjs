@@ -1,5 +1,6 @@
 import {telegramAccount,telegramWebhook,telegramPlayback} from './telegram.mjs';
 import {validate} from '../assets/interactive-project.mjs';
+import {DESTINATIONS,deliveryPath,publicDelivery,createDelivery} from './deliveries.mjs';
 const reply=(body,status=200)=>new Response(JSON.stringify(body),{status,headers:{'content-type':'application/json','cache-control':'no-store'}});
 const decode=s=>Uint8Array.from(atob(s.replaceAll('-','+').replaceAll('_','/')),c=>c.charCodeAt(0));
 export async function authenticate(request,env){
@@ -21,8 +22,11 @@ export async function route(request,env,identify=authenticate){
  if(path==='/telegram/webhook')return telegramWebhook(request,env);
  if(path.startsWith('/telegram/play/'))return telegramPlayback(request,env);
  if(path==='/config'&&request.method==='GET')return reply({clientId:env.GOOGLE_CLIENT_ID||null});
+ if(deliveryPath(path))return publicDelivery(request,env);
  let owner;try{owner=await identify(request,env);}catch{return reply({error:'Inicia sesión para abrir tu biblioteca.'},401);}
  if(!env.LIBRARY_DB)return reply({error:'Almacenamiento pendiente de configurar.'},503);
+ if(path==='/destinations'&&request.method==='GET')return reply({destinations:DESTINATIONS});
+ if(path==='/deliveries')return createDelivery(request,env,owner);
  if(path.startsWith('/telegram/'))return telegramAccount(request,env,owner);
  if(path==='/projects'&&request.method==='GET'){
  const {results}=await env.LIBRARY_DB.prepare('SELECT id, revision, project, updated_at FROM interactive_projects WHERE owner = ?').bind(owner).all();
@@ -41,7 +45,8 @@ export async function route(request,env,identify=authenticate){
 }
 export default{async fetch(request,env){
  const origin=request.headers.get('origin'),allowed=(env.ALLOWED_ORIGINS||'').split(',').map(s=>s.trim());
- if(origin&&!allowed.includes(origin))return reply({error:'Origen no permitido.'},403);
+ const publicOrigin=deliveryPath(new URL(request.url).pathname)&&['https://www.admira.store','https://admira.store','https://www.xpaceos.com','https://xpaceos.com','http://127.0.0.1:46223','http://localhost:46223'].includes(origin);
+ if(origin&&!allowed.includes(origin)&&!publicOrigin)return reply({error:'Origen no permitido.'},403);
  const response=request.method==='OPTIONS'?new Response(null,{status:204}):await route(request,env).catch(()=>reply({error:'No se ha podido sincronizar. Tu copia local se conserva.'},503));
  if(origin){response.headers.set('access-control-allow-origin',origin);response.headers.set('vary','Origin');response.headers.set('access-control-allow-methods','GET,PUT,POST,OPTIONS');response.headers.set('access-control-allow-headers','authorization,content-type');}
  return response;

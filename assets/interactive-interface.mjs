@@ -4,6 +4,7 @@ try{language=localStorage.getItem('ainimation:ui:language')||'es';mode=localStor
 if(!['es','en'].includes(language))language='es';
 if(!['basic','advanced','expert'].includes(mode))mode='basic';
 const dictionary={
+'Enviar a Xpacio':'Send to Xpace',
 'Recuperar biblioteca':'Recover library','Sincronizar este proyecto':'Sync this project',
 'Recuperar trae tus proyectos de la nube. Sincronizar este proyecto guarda solo el que estás editando.':'Recover brings your projects from the cloud. Sync this project saves only the one you are editing.',
 'Crear este interactivo':'Create this interactive',
