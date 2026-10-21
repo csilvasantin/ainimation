@@ -13,3 +13,11 @@ Las copias de seguridad se guardan en IndexedDB (`ainimation-interactive-backups
 Verificación automática: 57 pruebas, incluido un recorrido de copia de demo ordenador → nube → segundo almacenamiento → edición y sincronización en ambos sentidos. Solo el ID de la copia recibe escrituras; proyectos anteriores y proyectos locales pendientes conservan todos sus campos. También se comprueban el conflicto del proyecto elegido, el rechazo de IDs inexistentes sin llamadas ni escrituras, la recuperación con poco espacio y los fallos o ediciones durante el respaldo.
 
 Las peticiones de sincronización tienen un límite de 30 segundos. Si se agota, se conserva el trabajo local y se ofrece reintentar; una subida de respuesta incierta se resuelve con las revisiones y comparación de contenido al recuperar.
+
+## Comprobación real del 21 de octubre de 2026
+
+Chrome, cuenta Google de Carlos: la copia creada desde la demo se subió desde producción, se recuperó en el origen de vista previa con almacenamiento independiente y se editó allí con ancho de 390 px. La edición llegó a producción mediante «Recuperar biblioteca». Desde el escritorio se restauró el texto original, se sincronizó solo el proyecto y la segunda sesión recibió esa versión. Las revisiones remotas de la copia pasaron de 1 a 2 y a 3, sin crear duplicados.
+
+La recarga de la segunda sesión conservó los once proyectos locales y la copia editable. La reconexión con Google y recuperación también funcionaron a 320 px; los tres controles permanecieron dentro del ancho. La comparación de todos los campos de los nueve proyectos remotos anteriores y de los ocho registros locales previos de la segunda sesión no encontró cambios. El proyecto local pendiente de esa sesión no se subió. El contenido final de la demo coincide con el de antes de la prueba; solo avanzaron sus revisiones.
+
+Se corrigió durante esta revisión un agotamiento real de la cuota de localStorage al duplicar la biblioteca para respaldarla. La recuperación pasó después de migrar el respaldo a IndexedDB. Producción publicó el sello `1f67020`; los procesos de publicación y sellado terminaron correctamente. Los anchos móviles se comprobaron mediante emulación de Chrome en el Mac: no se ha controlado ni verificado directamente un teléfono físico.
