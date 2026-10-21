@@ -1,5 +1,5 @@
 import {validate,playerHtml} from '../assets/interactive-project.mjs';
-export const DESTINATIONS=[{id:'alsea-sbux-021',name:'Starbucks · Paseo de Gracia 103',kind:'virtual',screens:[...Array.from({length:6},(_,i)=>({id:'starbucks-wall-0'+(6-i),name:'Pantalla '+(i+1),orientation:'portrait'})),{id:'starbucks-tpv-01',name:'TPV',orientation:'portrait'},{id:'starbucks-ipad-01',name:'iPad horizontal',orientation:'landscape'}]}];
+export const DESTINATIONS=[{id:'alsea-sbux-021',name:'Starbucks · Paseo de Gracia 103',kind:'virtual',screens:[...Array.from({length:6},(_,i)=>({id:'starbucks-wall-0'+(6-i),name:'Pantalla '+(i+1),orientation:'portrait',touch:false})),{id:'starbucks-tpv-01',name:'TPV',orientation:'portrait',touch:false},{id:'starbucks-ipad-01',name:'iPad horizontal',orientation:'landscape',touch:true}]}];
 export const deliveryPath=path=>/^\/deliveries\/[a-f0-9]{64}(?:\/player)?$/.test(path);
 const json=(body,status=200)=>new Response(JSON.stringify(body),{status,headers:{'content-type':'application/json','cache-control':'no-store','referrer-policy':'no-referrer'}});
 const digest=async value=>[...new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(value)))].map(x=>x.toString(16).padStart(2,'0')).join('');
@@ -17,7 +17,7 @@ export async function createDelivery(request,env,owner){
  if(request.method!=='POST')return json({error:'Método no permitido.'},405);
  let data,project;try{const raw=await request.text();if(raw.length>24000000)return json({error:'Proyecto demasiado grande.'},413);data=JSON.parse(raw);project=validate(data.project);if(!/^[a-zA-Z0-9-]{1,80}$/.test(data.projectId)||!Number.isInteger(data.sourceRevision)||data.sourceRevision<1)throw Error();}catch{return json({error:'Proyecto no válido.'},400);}
  const destination=DESTINATIONS.find(d=>d.id===data.location),screen=destination?.screens.find(s=>s.id===data.screen);
- if(!screen)return json({error:'Selecciona una pantalla conectada de un Xpacio.'},400);
+ if(!screen||screen.touch!==true)return json({error:'Selecciona una pantalla táctil disponible de un Xpacio. / Select an available touch screen in a Xpace.'},400);
  const encoded=JSON.stringify(project),hash=await digest(encoded),now=new Date().toISOString(),id=(crypto.randomUUID()+crypto.randomUUID()).replaceAll('-','');
  await env.LIBRARY_DB.prepare('INSERT INTO interactive_deliveries (id,owner,project_id,project_revision,sha256,project,location,screen,created_at) VALUES (?,?,?,?,?,?,?,?,?) ON CONFLICT(owner,project_id,project_revision,sha256,location,screen) DO NOTHING').bind(id,owner,data.projectId,data.sourceRevision,hash,encoded,destination.id,screen.id,now).run();
  const row=await env.LIBRARY_DB.prepare('SELECT * FROM interactive_deliveries WHERE owner=? AND project_id=? AND project_revision=? AND sha256=? AND location=? AND screen=?').bind(owner,data.projectId,data.sourceRevision,hash,destination.id,screen.id).first();

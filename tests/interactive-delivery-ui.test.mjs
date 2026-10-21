@@ -1,0 +1,11 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {mountInteractiveDelivery} from '../assets/interactive-delivery.mjs';
+import {demoProject} from '../assets/interactive-demo-project.mjs';
+function fixture(screens){
+ const doc={documentElement:{lang:'es'},createElement(tag){return{tag,children:[],value:'',disabled:false,setAttribute(){},removeAttribute(){},append(...items){this.children.push(...items);},replaceChildren(...items){this.children=items;this.value=items[0]?.value||'';},addEventListener(){},showModal(){this.open=true;},close(){this.open=false;}};}};doc.body=doc.createElement('body');const button={};let posts=0;
+ const request=async(url)=>{if(url.endsWith('/deliveries')){posts++;return{ok:false,json:async()=>({error:'denied'})};}return{ok:true,json:async()=>({destinations:[{id:'store',name:'Store',screens}]})};};
+ const dialog=mountInteractiveDelivery({button,doc,request,endpoint:'https://test',getState:()=>({token:'token',project:demoProject(),id:'p',revision:1})});const form=dialog.children[2].children[0],location=form.children[0].children[1],screen=form.children[1].children[1],send=form.children[3],status=dialog.children[3];return{button,form,location,screen,send,status,posts:()=>posts};
+}
+test('selector oculta no táctiles y capacidad desconocida; bloquea el envío manipulado',async()=>{const f=fixture([{id:'touch',name:'iPad',touch:true},{id:'wall',name:'Wall',touch:false},{id:'unknown',name:'Unknown'}]);await f.button.onclick();f.location.value='store';f.location.onchange();assert.deepEqual(f.screen.children.map(s=>s.value),['','touch']);assert.equal(f.send.disabled,true);f.screen.value='touch';f.screen.onchange();assert.equal(f.send.disabled,false);f.screen.value='wall';await f.form.onsubmit({preventDefault(){}});assert.equal(f.posts(),0);assert.match(f.status.textContent,/táctil/);});
+test('Xpacio sin táctiles muestra aviso y deshabilita selector y envío',async()=>{const f=fixture([{id:'wall',name:'Wall',touch:false}]);await f.button.onclick();f.location.value='store';f.location.onchange();assert.equal(f.status.textContent,'Este Xpacio no tiene pantallas táctiles disponibles.');assert.equal(f.screen.disabled,true);assert.equal(f.send.disabled,true);});
