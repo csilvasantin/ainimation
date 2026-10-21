@@ -30,3 +30,8 @@ test('editar durante el archivo de seguridad no permite sobrescribir el trabajo 
  await assert.rejects(syncLibrary(s.storage,endpoint,'google',s.request,{upload:false,archive:async()=>{s.storage.setItem(LIBRARY_KEY,after);}}),/editado durante/);
  assert.equal(s.storage.getItem(LIBRARY_KEY),after);assert.equal(s.storage.getItem(backupKey),s.oldBackup);
 });
+test('una conexión agotada explica el reintento y conserva biblioteca y respaldo',async()=>{
+ const s=setup();
+ await assert.rejects(syncLibrary(s.storage,endpoint,'google',async(_url,options)=>{assert.ok(options.signal instanceof AbortSignal);throw new DOMException('timeout','TimeoutError');}),/tardado demasiado.*copia local se conserva/);
+ assert.equal(s.storage.getItem(LIBRARY_KEY),s.before);assert.equal(s.storage.getItem(backupKey),s.oldBackup);
+});

@@ -26,7 +26,7 @@ export async function syncLibrary(storage,endpoint,token,request=fetch,{projectI
  const loaded=readLibrary(storage);if(!loaded.ok)throw Error(loaded.error);
  if(projectId&&!loaded.data.projects.some(p=>p.id===projectId))throw Error('El proyecto ya no está disponible. Recarga antes de sincronizar.');
  const before=storage.getItem(LIBRARY_KEY);
- const call=async(path,options={})=>{const r=await request(endpoint+path,{...options,headers:{authorization:'Bearer '+token,'content-type':'application/json'}});const data=await r.json();if(!r.ok)throw Error(data.error||'Sin conexión. Tu copia local se conserva.');return data;};
+ const call=async(path,options={})=>{try{const r=await request(endpoint+path,{...options,signal:AbortSignal.timeout(30000),headers:{authorization:'Bearer '+token,'content-type':'application/json'}});const data=await r.json();if(!r.ok)throw Error(data.error||'Sin conexión. Tu copia local se conserva.');return data;}catch(error){if(error.name==='TimeoutError')throw Error('La conexión ha tardado demasiado. Tu copia local se conserva. Vuelve a sincronizar.');throw error;}};
  const remote=await call('/projects');
  if(typeof remote.account!=='string'||!remote.account)throw Error('No se reconoce la cuenta.');
  const key='ainimation:cloud:bases:'+endpoint+':'+remote.account,saved=JSON.parse(storage.getItem(key)||'{}'),previousCompact=await compactBases(saved);
