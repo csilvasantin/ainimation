@@ -97,6 +97,7 @@ createDemoButton.onclick=()=>{
   $('demoCreateStatus').textContent='';
   $('interactiveDemo').close();
   window.dispatchEvent(new Event('interactive-demo-created'));
+  const url=new URL(location.href);url.searchParams.delete('demo');history.replaceState(null,'',url);
   announce('Copia editable creada: '+project.title+'. Tus proyectos anteriores se conservan.');
   if(cloudToken)$('cloudStatus').textContent='Copia guardada en este navegador. Pulsa sincronizar para recuperarla en tus dispositivos.';
   const workspace=document.querySelector('.workspace');workspace.tabIndex=-1;workspace.focus({preventScroll:true});workspace.scrollIntoView({block:'start'});
