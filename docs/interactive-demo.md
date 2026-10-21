@@ -11,3 +11,5 @@ El reproductor utiliza controles nativos y `playsinline` para móvil. Cerrar, in
 Si hay cambios sin guardar, imágenes pendientes, falta de espacio o una biblioteca incompatible, no se crea ni se abre otra copia: el trabajo y el diálogo se conservan y se muestra la causa. La apertura pausa el vídeo y lleva el foco al editor sin abrir el teclado del móvil.
 
 Archivos: `assets/demos/interactivo/`. El constructor de vista previa incluye el módulo y sus tres recursos. Publicación desde `main` con el sello de caché habitual.
+
+Verificación de la copia editable: 50 pruebas automáticas; Chrome en escritorio y a 320/390 px. Creación desde acceso sin sesión y desde el editor, nombres independientes, edición conservada al recargar, recorrido completo y bloqueo con cambios pendientes. Al abrir una copia se retira el parámetro de demo del enlace para que una recarga vuelva al editor.
