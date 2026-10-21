@@ -38,6 +38,9 @@ try {
     htmlFiles.push("xperiencias/index.html");
   }
 } catch {}
+try {
+  if (readdirSync(join(root, "interactivos")).includes("index.html")) htmlFiles.push("interactivos/index.html");
+} catch {}
 let changed = 0;
 let stale = [];
 
@@ -45,8 +48,12 @@ for (const file of htmlFiles) {
   const path = join(root, file);
   const before = readFileSync(path, "utf8");
   // Solo los assets propios versionados; no tocamos enlaces externos.
-  const after = before.replace(
+  let after = before.replace(
     /(\bhref="\/?assets\/[^"?]+|\bsrc="\/?assets\/[^"?]+)\?v=[^"]*/g,
+    (_m, head) => `${head}?v=${version}`,
+  );
+  if (file === "interactivos/index.html") after = after.replace(
+    /(\b(?:href|src)="\.\.\/assets\/[^"?]+)(?:\?v=[^"]*)?/g,
     (_m, head) => `${head}?v=${version}`,
   );
   if (after === before) continue;
