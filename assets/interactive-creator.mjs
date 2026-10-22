@@ -1,4 +1,5 @@
-import {cafeteriaCatalog} from './interactive-cafeteria.mjs';
+import {mountCafeEditor} from './interactive-cafeteria-editor.mjs?v=director-cafe-3';
+import {cafeteriaCatalog} from './interactive-cafeteria.mjs?v=director-cafe-3';
 import {createDemoCopy} from './interactive-demo-project.mjs';
 import {sortedImages,prepareImage,projectFromImages,appendProjectImages,MAX_IMAGES} from './interactive-image-import.mjs';
 // Keep the new synchronization controls and their scope implementation together.
@@ -7,7 +8,7 @@ cloudModule.search=new URL(import.meta.url).search;
 const {syncLibrary}=await import(cloudModule.href);
 const deliveryModule=new URL('./interactive-delivery.mjs?v=five-touch-1',import.meta.url);deliveryModule.search=new URL(import.meta.url).search;
 const {mountInteractiveDelivery}=await import(deliveryModule.href);
-import {template,validate,playerHtml} from './interactive-project.mjs?v=director-1';
+import {template,validate,playerHtml} from './interactive-project.mjs?v=director-cafe-3';
 import {loadLibrary,readLibrary,updateProject,createProject,openProject,duplicateProject,renameProject,LIBRARY_KEY} from './interactive-library.mjs';
 const $=id=>document.getElementById(id),status=$('status');
 let storage;try{storage=localStorage;}catch{}
@@ -35,7 +36,7 @@ $('addHotspot').onclick=()=>{(current().hotspots??=[]).push({label:'Nueva zona',
 $('presentation').onchange=()=>{project.presentation=$('presentation').value;if(project.presentation==='cafeteria'&&!project.cafeteria)project.cafeteria=cafeteriaCatalog();changed();renderCafeCatalog();};
 $('expandPlayer').onclick=()=>{const html=playerHtml(project);$('expandedPlayer').showModal();requestAnimationFrame(()=>{$('largePlayer').srcdoc=html;});};
 $('closeExpandedPlayer').onclick=()=>{$('expandedPlayer').close();$('largePlayer').srcdoc='';};
-function renderCafeCatalog(){const native=project.presentation==='cafeteria',panel=$('cafeCatalog');panel.hidden=!native;panel.parentElement.classList.toggle('native-cafeteria',native);$('scenesHeading').textContent=native?'02 / REFERENCIAS':'02 / PANTALLAS';if(!native)return;const parent=$('catalogProducts');parent.replaceChildren();for(const product of project.cafeteria.products){const details=document.createElement('details'),summary=document.createElement('summary');summary.textContent=product.name+' · '+(product.price/100).toFixed(2)+' €';details.append(summary);for(const [key,name]of [['name','Nombre del producto'],['description','Descripción'],['price','Precio en euros']]){const label=document.createElement('label'),input=document.createElement('input');label.textContent=name;input.type=key==='price'?'number':'text';input.value=key==='price'?(product.price/100).toFixed(2):product[key];if(key==='price'){input.min='0';input.max='1000';input.step='0.01';}else input.maxLength=key==='name'?80:240;input.onchange=()=>{product[key]=key==='price'?Math.round(Number(input.value)*100):input.value;changed();summary.textContent=product.name+' · '+(product.price/100).toFixed(2)+' €';};label.append(input);details.append(label);}const available=document.createElement('label'),check=document.createElement('input');check.type='checkbox';check.checked=product.available;check.onchange=()=>{product.available=check.checked;changed();};available.append(check,document.createTextNode(' Disponible en el catálogo'));details.append(available);parent.append(details);}}
+function renderCafeCatalog(){const native=project.presentation==='cafeteria',panel=$('cafeCatalog');panel.hidden=!native;panel.parentElement.classList.toggle('native-cafeteria',native);$('scenesHeading').textContent=native?'02 / REFERENCIAS':'02 / PANTALLAS';if(native)mountCafeEditor($('catalogProducts'),project.cafeteria,changed,document.documentElement.lang);}
 function render(){for(const k of ['title','orientation','color','resetSeconds'])$(k).value=project[k];if(!$('resetSeconds').value)$('resetSeconds').append(option(project.resetSeconds+' segundos',String(project.resetSeconds)));$('resetSeconds').value=String(project.resetSeconds);$('sceneName').textContent=current().title;$('sceneTitle').value=current().title;$('body').value=current().body;$('presentation').value=project.presentation||'cards';renderCafeCatalog();list();renderButtons();renderHotspots();updatePreview();renderReferenceMedia();}
 for(const k of ['title','orientation','color','resetSeconds'])$(k).addEventListener(k==='title'?'input':'change',()=>{project[k]=k==='resetSeconds'?Number($(k).value):$(k).value;changed();});
 $('sceneTitle').oninput=()=>{current().title=$('sceneTitle').value;$('sceneName').textContent=current().title;changed();};$('sceneTitle').onchange=renderButtons;

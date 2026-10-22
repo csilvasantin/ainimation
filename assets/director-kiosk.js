@@ -78,7 +78,7 @@ al pagar
   ir a marca "NUMERO"
   decir "¡Gracias! Tu pedido es el " & pedido
 fin`;
-  const VIEWS = { categories: ["Categorías", "Categories"], items: ["Productos", "Products"], options: ["Opciones", "Options"], cart: ["Carrito", "Cart"], qr: ["Pago QR", "QR payment"], number: ["Número de pedido", "Order number"] };
+  const VIEWS = { cafeteria: ["Cafetería vinculada", "Linked cafeteria"], categories: ["Categorías", "Categories"], items: ["Productos", "Products"], options: ["Opciones", "Options"], cart: ["Carrito", "Cart"], qr: ["Pago QR", "QR payment"], number: ["Número de pedido", "Order number"] };
 
   /* --------------------------------------------------------------- plan --- */
   let rawCache = null, planCache = null;
@@ -183,7 +183,7 @@ fin`;
         if (body.textContent !== txt) body.textContent = txt;
       } else if (on || force) {
         body.className = "dk-body"; body.style.cssText = "";
-        if (on) kiosk().render(body, item, live);
+        if (on) { if(item.view === "cafeteria") window.ainInteractiveCafe?.render(body, p); else kiosk().render(body, item, live); }
       }
     });
   }
@@ -194,6 +194,7 @@ fin`;
   document.addEventListener("pointerdown", (event) => {
     const node = event.target.closest?.(".dk-item"); if (!node) return;
     const p = plan(); const item = (p?.stageItems || []).find((i) => i.id === node.dataset.stageItemId); if (!item) return;
+    if (item.view === "cafeteria") return;
     if (window.ainXPL?.engineRunning?.()) {
       if (item.type === "kiosk") { const name = kiosk().tap(event.target, item); sync(true); if (name && window.ainXPL?._bus) window.ainXPL._bus.click = name; }
       return;

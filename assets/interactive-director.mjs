@@ -1,19 +1,33 @@
+import {mountCafeEditor} from './interactive-cafeteria-editor.mjs?v=director-cafe-3';
 import {readLibrary} from './interactive-library.mjs';
-import {prepareDirector,fromDirector,saveDirectorInteractive,restoreDirectorWorkspace} from './interactive-director-bridge.mjs?v=director-1';
-import {playerHtml} from './interactive-project.mjs?v=director-1';
+import {prepareDirector,fromDirector,saveDirectorInteractive,restoreDirectorWorkspace} from './interactive-director-bridge.mjs?v=director-cafe-3';
+import {playerHtml} from './interactive-project.mjs?v=director-cafe-3';
 const q=new URLSearchParams(location.search),id=q.get('interactive');
 const t=(es,en)=>document.documentElement.lang==='en'?en:es;
 if(location.pathname.includes('/interactivos')){
  const button=document.getElementById('director');if(button)button.onclick=()=>{try{const lib=readLibrary(localStorage);if(!lib.ok)throw Error(lib.error);prepareDirector(localStorage,lib.data.activeId);location.href='/studio.html?interactive='+encodeURIComponent(lib.data.activeId)+'#workspace';}catch(error){document.getElementById('status').textContent=error.message;}};
 }else if(id){
+ window.ainInteractiveCafe={render(body,plan){
+  const signature=JSON.stringify([plan.cafeteria,plan.title,plan.resetSeconds]);if(body._cafeSignature===signature&&body.querySelector('iframe'))return;
+  body._cafeSignature=signature;const f=document.createElement('iframe');f.title=t('Cafetería en el Stage','Cafeteria on Stage');f.setAttribute('sandbox','allow-scripts');f.style.cssText='width:100%;height:100%;border:0;pointer-events:auto';
+  try{f.srcdoc=playerHtml(fromDirector(plan));body.replaceChildren(f);}catch(error){body.textContent=error.message;}
+ }};
  const start=()=>{const plan=window.currentPlan?.();if(plan?.interactiveSource?.id!==id)return;
  const bar=document.createElement('section');bar.className='interactive-director-bar';bar.setAttribute('aria-label',t('Edición del interactivo','Interactive editing'));bar.style.cssText='position:sticky;top:0;z-index:9999;background:#102621;color:#e5f5df;border:1px solid #b8ee77;padding:12px;display:flex;gap:12px;align-items:center;flex-wrap:wrap';
  const label=document.createElement('strong'),status=document.createElement('span');label.textContent=t('Interactivo · ','Interactive · ')+plan.title;status.setAttribute('role','status');
  const make=(es,en,fn)=>{const b=document.createElement('button');b.type='button';b.textContent=t(es,en);b.onclick=()=>{try{fn();}catch(error){console.error(error);status.textContent=error.message;}};return b;};
  const save=()=>{const current=window.currentPlan();current.markers=window.loadTimelineMarkers?.(current.totalFrames)||current.markers;const result=saveDirectorInteractive(localStorage,current);const movie=window.normalizeFilmPlan({...current,...result.plan});window.saveFilmPlan(movie);window.renderFilmPlan(movie);status.textContent=t('Interactivo guardado. Vuelve al Creador para sincronizar y preparar un nuevo envío.','Interactive saved. Return to Creator to sync and prepare a new delivery.');};
  const preview=()=>{const project=fromDirector(window.currentPlan()),d=document.createElement('dialog'),f=document.createElement('iframe'),b=make('Cerrar prueba','Close preview',()=>{f.src='about:blank';d.close();d.remove();});d.style.cssText='width:min(1000px,95vw);height:90svh;background:#102621;color:white';f.title=t('Prueba del interactivo editado','Edited interactive preview');f.setAttribute('sandbox','allow-scripts');f.srcdoc=playerHtml(project);f.style.cssText='width:100%;height:calc(100% - 60px);border:0';d.append(b,f);document.body.append(d);d.showModal();};
+ const editCafe=()=>{const current=window.currentPlan(),draft=structuredClone(current.cafeteria),d=document.createElement('dialog'),h=document.createElement('h2'),content=document.createElement('div'),notice=document.createElement('p'),resetLabel=document.createElement('label'),reset=document.createElement('input');
+ d.className='interactive-cafe-dialog';d.setAttribute('aria-label',t('Catálogo y cesta','Catalog and basket'));h.textContent=t('Catálogo y cesta','Catalog and basket');notice.setAttribute('role','status');const editor=mountCafeEditor(content,draft,()=>{},document.documentElement.lang);
+ resetLabel.textContent=t('Reiniciar tras segundos sin uso','Reset after idle seconds');reset.type='number';reset.min='10';reset.max='300';reset.value=current.resetSeconds;resetLabel.append(reset);
+ const apply=make('Aplicar cambios','Apply changes',()=>{try{const latest=window.currentPlan();if(latest.interactiveSource?.id!==id||latest.interactiveSource.revision!==current.interactiveSource.revision)throw Error(t('El proyecto cambió. Cierra y vuelve a abrir este editor.','The project changed. Close and reopen this editor.'));const next={...latest,cafeteria:editor.read(),resetSeconds:Number(reset.value)};fromDirector(next);window.saveFilmPlan(next);window.applyProjectExtras?.(next);d.close();d.remove();status.textContent=t('Catálogo y cesta actualizados en Director. Guarda o vuelve al Creador para conservarlos en el interactivo.','Catalog and basket updated in Director. Save or return to Creator to keep them in the interactive.');}catch(error){notice.textContent=error.message;}});
+ d.append(h,resetLabel,content,notice,apply,make('Cancelar','Cancel',()=>{d.close();d.remove();}));document.body.append(d);d.showModal();
+ };
+ const style=document.createElement('style');style.textContent='.interactive-cafe-dialog{width:min(760px,92vw);max-height:88svh;overflow:auto;background:#102621;color:#e5f5df;border:1px solid #b8ee77;padding:20px}.cafe-editor details{border:1px solid #567363;padding:12px;margin:10px 0}.cafe-editor summary{cursor:pointer;font-weight:700}.cafe-editor label,.interactive-cafe-dialog>label{display:grid;gap:6px;margin:12px 0}.cafe-editor input,.cafe-editor select,.interactive-cafe-dialog input{max-width:100%;min-height:36px;padding:6px}.cafe-editor input[type=checkbox]{width:24px}.interactive-cafe-dialog button{margin:8px;padding:12px}';document.head.append(style);
+ if(plan.interactiveSource.kind==='cafeteria'){bar.append(make('Catálogo y cesta','Catalog and basket',editCafe));const menu=document.querySelector('.dk-carta .dk-menu-list');if(menu){const b=make('Editar catálogo y cesta','Edit catalog and basket',()=>{document.querySelector('.dk-carta')?.classList.remove('open');editCafe();});menu.prepend(b);}}
  bar.append(label,make('Guardar interactivo','Save interactive',save),make('Probar recorrido','Test journey',preview),make('Volver al Creador','Return to Creator',()=>{save();restoreDirectorWorkspace(localStorage,window.currentPlan());location.href='/interactivos/?project='+encodeURIComponent(id);}),status);
- document.querySelector('.director-shell')?.prepend(bar);window.applyProjectExtras?.(plan);window.ainTransport?.setFrame(plan.markers[plan.interactiveSource.project.scenes.findIndex(s=>s.id===plan.interactiveSource.project.start)].frame);
+ document.querySelector('.director-shell')?.prepend(bar);window.applyProjectExtras?.(plan);window.ainTransport?.setFrame(plan.interactiveSource.kind==='cafeteria'?1:plan.markers[plan.interactiveSource.project.scenes.findIndex(s=>s.id===plan.interactiveSource.project.start)].frame);
  };
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start,{once:true});else start();
 }

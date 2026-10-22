@@ -1,10 +1,10 @@
-import {validate} from './interactive-project.mjs?v=director-1';
+import {validate} from './interactive-project.mjs?v=director-cafe-3';
 import {readLibrary,updateProject} from './interactive-library.mjs';
 const FILM='ainimation-film-plan',MARKERS='ainimation-timeline-markers';
 const box=(x,y,w,h,fontSize=4)=>({x,y,w,h,fontSize,color:'transparent',textColor:'#ffffff',radius:0});
 const spriteText=(item,binding)=>item.texts?.es!==undefined&&item.texts.es!==binding.original.text?item.texts.es:item.text;
 export function toDirector(record){
- const project=validate(record.project);if(project.presentation==='cafeteria')throw Error('El catálogo y la cesta se editan en el Creador; este enlace de Director ajusta pantallas y zonas táctiles.');
+ const project=validate(record.project);if(project.presentation==='cafeteria')return cafeToDirector(record,project);
  const bindings=[],items=[],cast=[],markers=project.scenes.map((s,i)=>({id:'interactive-scene-'+i,label:'S'+(i+1),frame:1+i*24})),rules=[];
  const sprite=(scene,index,key,value,style,interactive=false,target)=>{const id='interactive-'+index+'-'+key,item={id,type:'button',spriteName:id,text:value,startFrame:markers[index].frame,durationFrames:24,interactive,...style};items.push(item);bindings.push({scene:scene.id,key,id,original:structuredClone(item)});if(target)rules.push({id:'rule-'+id,name:value||key,enabled:true,when:{join:'and',conds:[{fact:'click',value:id}]},do:[{id:'goToMarker',value:markers[project.scenes.findIndex(s=>s.id===target)].label},{id:'stop'}]});};
  project.scenes.forEach((scene,i)=>{
@@ -19,6 +19,7 @@ export function toDirector(record){
 }
 export function fromDirector(plan){
  const source=plan?.interactiveSource;if(source?.version!==1)throw Error('No hay un interactivo vinculado.');
+ if(source.kind==='cafeteria')return cafeFromDirector(plan,source);
  const project=validate(source.project),sceneForMarker=new Map((plan.markers||[]).map(m=>[m.label,source.project.scenes[Number(m.id?.replace('interactive-scene-',''))]?.id]));
  const expected=toDirector({id:source.id,revision:source.revision,project});
  if(JSON.stringify(plan.scripts)!==JSON.stringify(expected.scripts)||(plan.cast||[]).length!==expected.cast.length||plan.rules?.length!==expected.rules.length)throw Error('Conserva los scripts, reglas adicionales y nuevos miembros en el proyecto Director. El retorno admite el diseño y los saltos de las pantallas vinculadas.');
@@ -45,3 +46,15 @@ export function prepareDirector(storage,id){
 }
 export function saveDirectorInteractive(storage,plan){const project=fromDirector(plan),result=updateProject(storage,plan.interactiveSource.id,project,plan.interactiveSource.revision);if(!result.ok)throw Error(result.error);const record=result.data.projects.find(r=>r.id===plan.interactiveSource.id);const fresh=toDirector(record);fresh.interactiveSource.recoveryKey=plan.interactiveSource.recoveryKey;return {project,plan:fresh};}
 export function restoreDirectorWorkspace(storage,plan){const key=plan?.interactiveSource?.recoveryKey,raw=key&&storage.getItem(key);if(!raw)throw Error('No se encontró la copia anterior de Director. Conserva este proyecto antes de salir.');const previous=JSON.parse(raw);for(const [name,value] of [[FILM,previous.film],[MARKERS,previous.markers]])if(value===null)storage.removeItem(name);else storage.setItem(name,value);}
+
+function cafeToDirector(record,project){
+ const item={id:'interactive-cafeteria',type:'kiosk',view:'cafeteria',spriteName:'cafeteria',x:0,y:0,w:100,h:100,startFrame:1,durationFrames:24};
+ return {title:project.title,format:project.orientation==='portrait'?'Vertical':project.orientation==='square'?'Square':'Landscape',duration:'90 segundos',genre:'Interactivo',tone:'Claro',protagonist:'Usuario',world:project.title,logline:'Catálogo y cesta de cafetería',treatment:'Edita categorías, productos, opciones y cesta. Prueba el recorrido y guarda para volver al Creador.',theme:'Catálogo y pedido de prueba',pipeline:{image:'Se conservan las referencias originales.',video:'Recorrido táctil con productos, opciones y cesta.',music:'Sin música añadida.',voice:'Sin voz añadida.'},cast:[],stageItems:[item],markers:[{id:'interactive-cafe',label:'CAFETERIA',frame:1}],rules:[],scenes:[{number:1,beat:'Catálogo y cesta',act:'Interactivo',scene:'Catálogo, opciones y cesta táctiles',behavior:'interactive',startFrame:1,length:24}],stage:project.orientation==='portrait'?{w:1080,h:1920}:project.orientation==='landscape'?{w:1920,h:1080}:{w:1080,h:1080},totalFrames:24,scripts:{movie:'al salir del fotograma\n quedarse\nfin',frames:{},sprites:{}},cafeteria:structuredClone(project.cafeteria),resetSeconds:project.resetSeconds,interactiveSource:{version:1,kind:'cafeteria',id:record.id,revision:record.revision,project}};
+}
+function ordered(value){return Array.isArray(value)?value.map(ordered):value&&typeof value==='object'?Object.fromEntries(Object.keys(value).sort().filter(k=>value[k]!==undefined).map(k=>[k,ordered(value[k])])):value;}
+function cafeFromDirector(plan,source){
+ const project=validate(source.project),expected=cafeToDirector({id:source.id,revision:source.revision},project);
+ for(const key of ['scripts','rules','cast','markers','stageItems','stage'])if(JSON.stringify(ordered(plan[key]))!==JSON.stringify(ordered(expected[key])))throw Error('Conserva el sprite de cafetería, sus marcas y sus scripts. Usa Catálogo y cesta para editar el interactivo; guarda las animaciones adicionales como película Director.');
+ if(plan.menu)throw Error('La carta genérica de quiosco es distinta de esta cafetería. Usa Catálogo y cesta para conservar sus opciones.');
+ project.title=plan.title;project.cafeteria=structuredClone(plan.cafeteria);project.resetSeconds=plan.resetSeconds;return validate(project);
+}

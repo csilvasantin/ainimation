@@ -1,4 +1,4 @@
-import {validateCafeteria,cafeteriaHtml} from './interactive-cafeteria.mjs';
+import {validateCafeteria,cafeteriaHtml} from './interactive-cafeteria.mjs?v=director-cafe-3';
 export const KEY='ainimation:interactive:draft:v1';
 const text=(v,max=300)=>typeof v==='string'&&v.trim().length<=max?v.trim():null;
 export function validate(p){
