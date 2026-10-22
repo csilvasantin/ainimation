@@ -79,13 +79,13 @@ export function mountDeliveryHistory({button,storage,doc=document,download,onReu
   clear.disabled=!query.value&&!project.value&&!outcome.value;
   status.textContent=shown.length+' '+t('de','of')+' '+batches.length+' '+t('lotes.','batches.')+(!shown.length?' '+t('No hay lotes que coincidan. Quita los filtros para ver todos.','No matching batches. Clear filters to see all batches.'):'');
   for(const [i,b] of shown.entries()){
-   const details=make('details'),summary=make('summary'),ul=make('ul');details.open=i===0;details.dataset.batchId=b.id;ul.className='delivery-results';
+   const details=make('details'),summary=make('summary'),ul=make('ul'),actions=make('div');details.open=i===0;details.dataset.batchId=b.id;ul.className='delivery-results';actions.className='history-batch-actions';actions.setAttribute('role','group');actions.setAttribute('aria-label',t('Acciones del lote','Batch actions'));
    const successful=b.results.filter(r=>r.status==='success').length;summary.textContent=b.projectTitle+' · '+t('Versión ','Version ')+b.revision+' · '+new Date(b.createdAt).toLocaleString(doc.documentElement.lang==='en'?'en-GB':'es-ES')+' · '+successful+'/'+b.results.length+' '+t('preparados','prepared')+' · '+outcomeText(deliveryBatchOutcome(b));details.append(summary);
    for(const r of b.results){const li=make('li'),name=make('strong',r.locationName+' · '+r.screenName),label=make('span',r.status==='success'?t('Versión preparada','Version prepared'):r.status==='error'?t('No preparado','Not prepared'):t('Sin confirmación · el lote se interrumpió','Unconfirmed · the batch was interrupted'));li.dataset.state=r.status;li.append(name,label);
     if(r.url){const a=make('a',t('Abrir en admira.store','Open in admira.store'));a.href=r.url;a.target='_blank';a.rel='noopener noreferrer';a.setAttribute('aria-label',t('Abrir ','Open ')+r.locationName+' · '+r.screenName);li.append(a);}ul.append(li);
    }const exportButton=make('button',t('Descargar CSV','Download CSV'));exportButton.type='button';exportButton.className='history-csv';exportButton.setAttribute('aria-label',t('Descargar CSV de ','Download CSV for ')+b.projectTitle+' · '+t('versión ','version ')+b.revision+' · '+b.createdAt);
    exportButton.onclick=()=>{try{const file=deliveryBatchCsv(b,doc.documentElement.lang);if(download)download(file);else{const url=URL.createObjectURL(new Blob([file.content],{type:file.type})),a=doc.createElement('a');a.href=url;a.download=file.filename;try{a.click();}finally{setTimeout(()=>URL.revokeObjectURL(url),30000);}}status.textContent=t('Informe CSV preparado: ','CSV report prepared: ')+b.results.length+' '+t('pantallas.','screens.');}catch{status.textContent=t('No se pudo preparar el CSV. El historial se conserva; vuelve a intentarlo.','The CSV could not be prepared. History is preserved; try again.');}};
-   details.append(exportButton);
+   actions.append(exportButton);
    const links=deliveryBatchLinks(b,doc.documentElement.lang),copy=make('button',t('Copiar enlaces','Copy links')),copyStatus=make('p'),fallback=make('label',t('Enlaces del lote para copiar','Batch links to copy')),copyText=make('textarea');
    copy.type='button';copy.className='history-copy';copy.disabled=!links.count;copy.setAttribute('aria-label',t('Copiar enlaces de ','Copy links for ')+b.projectTitle+' · '+t('versión ','version ')+b.revision+' · '+b.createdAt);copyStatus.className='history-copy-status';copyStatus.setAttribute('role','status');fallback.className='history-copy-fallback';fallback.hidden=true;copyText.readOnly=true;copyText.rows=8;fallback.append(copyText);
    if(!links.count)copyStatus.textContent=links.summary+'. '+t('No hay enlaces confirmados para copiar.','There are no confirmed links to copy.');
@@ -97,9 +97,9 @@ export function mountDeliveryHistory({button,storage,doc=document,download,onReu
     }catch{
      copyText.value=links.text;fallback.hidden=false;copyStatus.textContent=t('El navegador no ha permitido copiar. Selecciona el texto de abajo: ','The browser did not allow copying. Select the text below: ')+links.summary+'.';copyText.focus();copyText.select();
     }finally{copy.disabled=!links.count;}
-   };details.append(copy,copyStatus,fallback);
-   if(onReuse){const reuse=make('button',t('Usar estas pantallas','Use these screens'));reuse.type='button';reuse.className='history-reuse';reuse.setAttribute('aria-label',t('Usar pantallas de ','Use screens from ')+b.projectTitle+' · '+t('versión ','version ')+b.revision+' · '+b.createdAt);reuse.onclick=()=>{dialog.close();return onReuse(b.results.map(r=>({locationId:r.locationId,locationName:r.locationName,screenId:r.screenId,screenName:r.screenName})));};details.append(reuse);}
-   details.append(ul);list.append(details);
+   };actions.append(copy);
+   if(onReuse){const reuse=make('button',t('Usar estas pantallas','Use these screens'));reuse.type='button';reuse.className='history-reuse';reuse.setAttribute('aria-label',t('Usar pantallas de ','Use screens from ')+b.projectTitle+' · '+t('versión ','version ')+b.revision+' · '+b.createdAt);reuse.onclick=()=>{dialog.close();return onReuse(b.results.map(r=>({locationId:r.locationId,locationName:r.locationName,screenId:r.screenId,screenName:r.screenName})));};actions.append(reuse);}
+   details.append(actions,copyStatus,fallback,ul);list.append(details);
   }
  };
  query.oninput=render;project.onchange=render;outcome.onchange=render;clear.onclick=()=>{query.value='';project.value='';outcome.value='';render();};
