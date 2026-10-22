@@ -26,3 +26,21 @@ test('Google exige firma válida, caducidad y cuenta autorizada en la vista prev
 });
 
 test('sincronización con imágenes guarda bases compactas y conserva el cambio remoto sin duplicados',async()=>{const r=record();r.project.scenes[0].image='data:image/png;base64,'+'a'.repeat(400000);let cloud=structuredClone(r);const map=new Map([[LIBRARY_KEY,JSON.stringify(library(r))]]),storage={getItem:k=>map.get(k)??null,setItem:(k,v)=>{const total=[...map.entries()].reduce((n,[key,val])=>n+(key===k?0:val.length),0)+v.length;if(total>1000000)throw Error('quota');map.set(k,v);}};const request=async()=>Response.json({account:'owner',projects:[cloud]});await syncLibrary(storage,'https://example.test','token',request);const bases=JSON.parse(map.get('ainimation:cloud:bases:https://example.test:owner'));assert.equal(bases.one.contentHash.length,64);assert.equal(bases.one.content,undefined);cloud.project.title='Desde móvil';cloud.revision++;const result=await syncLibrary(storage,'https://example.test','token',request);assert.equal(result.projects.length,1);assert.equal(result.projects[0].project.title,'Desde móvil');});
+
+test('avisa del conflicto solo después de conservar ambas versiones, incluso si falla la subida',async()=>{
+ for(const upload of [false,true]){
+  const base=record(),local=structuredClone(base),remote=structuredClone(base);local.project.title='iPhone';remote.project.title='Ordenador';remote.revision=2;
+  const map=new Map([[LIBRARY_KEY,JSON.stringify(library(local))],['ainimation:cloud:bases:https://example.test:owner',JSON.stringify({one:{revision:1,content:JSON.stringify(base.project)}})]]);
+  const storage={getItem:k=>map.get(k)??null,setItem:(k,v)=>map.set(k,v)};let conflicts;
+  const result=syncLibrary(storage,'https://example.test','token',async(url,options)=>{if(options.method==='PUT')throw Error('offline al subir');return Response.json({account:'owner',projects:[remote]});},{upload,onConflicts:items=>{conflicts=items;const saved=JSON.parse(storage.getItem(LIBRARY_KEY));assert.equal(saved.projects.length,2);assert.equal(saved.projects.find(p=>p.id===items[0].copyId).project.title,'iPhone · copia de este equipo');}});
+  if(upload)await assert.rejects(result,/offline al subir/);else await result;
+  assert.equal(conflicts.length,1);assert.equal(conflicts[0].projectId,'one');
+ }
+});
+test('recuperar un cambio remoto sin edición local no avisa de conflicto',async()=>{
+ const base=record(),remote=structuredClone(base);remote.project.title='Ordenador';remote.revision=2;
+ const map=new Map([[LIBRARY_KEY,JSON.stringify(library(base))],['ainimation:cloud:bases:https://example.test:owner',JSON.stringify({one:{revision:1,content:JSON.stringify(base.project)}})]]);
+ const storage={getItem:k=>map.get(k)??null,setItem:(k,v)=>map.set(k,v)};
+ const out=await syncLibrary(storage,'https://example.test','token',async()=>Response.json({account:'owner',projects:[remote]}),{upload:false,onConflicts:()=>assert.fail('falso conflicto')});
+ assert.equal(out.projects.length,1);assert.equal(out.projects[0].project.title,'Ordenador');
+});

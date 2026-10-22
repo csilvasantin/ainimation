@@ -73,13 +73,15 @@ async function runCloudSync(mode){
  if(mode==='pull'&&(dirty||preparingImages||stagedImages.length)){$('cloudStatus').textContent='Guarda o completa los cambios pendientes antes de recuperar la biblioteca.';return;}
  if(mode!=='pull'&&dirty&&!persist())return;
  for(const id of ['cloudSync','cloudPull','cloudProjectSync'])$(id).disabled=true;
+ let conflictPreserved=false;
+ const conflictNotice='Conflicto detectado. Se han conservado ambas versiones: la de la nube y una «copia de este equipo» con tus cambios.';
  try{
-  const options=mode==='pull'?{upload:false}:mode==='project'?{projectId:activeId}:{};
+  const options={...(mode==='pull'?{upload:false}:mode==='project'?{projectId:activeId}:{}),onConflicts:()=>{conflictPreserved=true;}};
   const data=await syncLibrary(storage,cloudEndpoint,cloudToken,fetch,options);
-  if(dirty){$('cloudStatus').textContent='La operación terminó. Tus cambios pendientes siguen en el editor; guárdalos en un archivo antes de recuperar la biblioteca.';return;}
+  if(dirty){$('cloudStatus').textContent=(conflictPreserved?conflictNotice+' ':'')+'La operación terminó. Tus cambios pendientes siguen en el editor; guárdalos en un archivo antes de recuperar la biblioteca.';return;}
   activate({ok:true,data});
-  $('cloudStatus').textContent=mode==='pull'?'Biblioteca recuperada de tu cuenta Google. Los proyectos locales se conservan.':mode==='project'?'Proyecto sincronizado con tu cuenta Google.':'Biblioteca sincronizada. Inicia sesión con esta misma cuenta en el otro dispositivo.';
- }catch(e){$('cloudStatus').textContent=e.message;}
+  $('cloudStatus').textContent=conflictPreserved?conflictNotice:mode==='pull'?'Biblioteca recuperada de tu cuenta Google. Los proyectos locales se conservan.':mode==='project'?'Proyecto sincronizado con tu cuenta Google.':'Biblioteca sincronizada. Inicia sesión con esta misma cuenta en el otro dispositivo.';
+ }catch(e){$('cloudStatus').textContent=(conflictPreserved?conflictNotice+' ':'')+e.message;}
  finally{for(const id of ['cloudSync','cloudPull','cloudProjectSync'])$(id).disabled=!cloudToken;}
 }
 $('cloudSync').onclick=()=>runCloudSync('all');
