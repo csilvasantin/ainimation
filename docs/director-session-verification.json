@@ -1,0 +1,56 @@
+{
+  "checkedAt": "2026-10-22T18:19:02.629704+00:00",
+  "browser": "Internal browser",
+  "panelMoved": false,
+  "panelResized": false,
+  "sourceCommits": [
+    "75dfb24",
+    "56ab741"
+  ],
+  "pagesCommit": "54d05de",
+  "workerVersion": "dfba5795-6347-4cbc-8ced-367873065e6f",
+  "initialSignIn": 1,
+  "additionalSignInsAcrossDirectorReturns": 0,
+  "googleCredentialsStoredOrTransferredToDirector": false,
+  "roundtrips": [
+    {
+      "roundtrip": 1,
+      "sameCreatorURL": true,
+      "sameGoogleFrame": true,
+      "loginDialogOpened": false,
+      "syncEnabled": true,
+      "syncStatus": "Proyecto sincronizado con tu cuenta Google.",
+      "editedBasketText": "Elige algo de nuestra carta · sesión conservada.",
+      "delivery": {
+        "url": "https://www.admira.store/xpacios/pantalla/?loc=admira-prensa&screen=SinProyecto_PlazadeCibeles_Mostrador_1&ainimation=cf4fd426ad0d4c00a4d4a40158751c7c5065fcfeccc94fe5b34f736b391ba5e2&lang=es",
+        "sourceRevision": 7,
+        "sha256": "bf3c6b2be2eaf8dc4a0c1089d748498c5751f47681312e778cdec4ac6a1e74d4"
+      }
+    },
+    {
+      "roundtrip": 2,
+      "sameCreatorURL": true,
+      "sameGoogleFrame": true,
+      "loginDialogOpened": false,
+      "syncEnabled": true,
+      "syncStatus": "Proyecto sincronizado con tu cuenta Google.",
+      "editedBasketText": "Elige algo de nuestra carta.",
+      "delivery": {
+        "url": "https://www.admira.store/xpacios/pantalla/?loc=admira-prensa&screen=SinProyecto_PlazadeCibeles_Mostrador_1&ainimation=2cf547bd4d174472b0fd7c78ccf0c29ceb9eb5db6e0340deb58ce0d66b11d1bb&lang=es",
+        "sourceRevision": 8,
+        "sha256": "ffd868d1dd77c5f5efe03f1abd940daa709b40d7d1f6b130c7efc196da93c6b5"
+      }
+    }
+  ],
+  "finalBasketTextRestored": true,
+  "projectsPreserved": [
+    "Mi cafetería",
+    "Mi cafetería · copia",
+    "Prueba Director · catálogo y cesta"
+  ],
+  "tests": {
+    "interactive": 90,
+    "mcpHelp": 1
+  },
+  "scope": "The verified Creator document stays alive while Director edits inside the page. Normal token expiration and explicit sign-out still apply; reloading or closing Creator still requires sign-in."
+}
