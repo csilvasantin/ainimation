@@ -15,3 +15,11 @@ The bridge supports cards, hotspots and native cafeterias. For a cafeteria, choo
 Contract: `interactiveSource` retains the project ID, source revision, full validated source project and sprite bindings in the Director movie. Source library records use optimistic revision checks. The previous working movie and marker JSON are saved under a unique `ainimation:director:recovery:<uuid>` key before import; restoration uses the same key. No cloud credential or fleet command is added to Director.
 
 Cafeteria contract: `interactiveSource.kind="cafeteria"` retains the complete source. `plan.cafeteria` and `plan.resetSeconds` are validated on return. A single native kiosk sprite (`view="cafeteria"`) uses the exact export player. The optional `cafeteria.basket` settings are backwards compatible; absent settings preserve the existing bag flow and limits. Basket contents are customer session state, never saved as catalog configuration.
+
+## Sesión al volver de Director / Session on return from Director
+
+ES: Al abrir Director desde el Creador, la sesión verificada se mantiene abierta. Volver al Creador recupera el proyecto guardado y permite sincronizar y enviar sin otro acceso mientras la credencial siga vigente. Recargar o cerrar el Creador sí exige iniciar sesión. La credencial no se guarda ni se pasa a Director.
+
+EN: Opening Director from Creator keeps the verified session open. Return to Creator reloads the saved project and allows sync and delivery without another sign-in while the credential remains valid. Reloading or closing Creator still requires sign-in. The credential is neither stored nor passed to Director.
+
+Contrato / Contract: el Creador mantiene su documento y su credencial en memoria. Director se abre dentro de la página y devuelve sólo ID y revisión por un canal por apertura; se comprueban origen, ventana e identidad del proyecto. La revisión se valida contra la biblioteca antes de actualizar el editor. Los avisos de cambios de otras pestañas siguen activos. / Creator retains its document and memory-only credential. Director opens within the page and returns only project ID and revision through a per-opening channel, checked against origin, window and project. Library revision is checked before refreshing the editor. Other-tab conflict warnings remain active.

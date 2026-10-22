@@ -1,12 +1,9 @@
 import {mountCafeEditor} from './interactive-cafeteria-editor.mjs?v=director-cafe-3';
-import {readLibrary} from './interactive-library.mjs';
-import {prepareDirector,fromDirector,saveDirectorInteractive,restoreDirectorWorkspace} from './interactive-director-bridge.mjs?v=director-cafe-3';
+import {fromDirector,saveDirectorInteractive,restoreDirectorWorkspace} from './interactive-director-bridge.mjs?v=director-cafe-3';
 import {playerHtml} from './interactive-project.mjs?v=director-cafe-3';
 const q=new URLSearchParams(location.search),id=q.get('interactive');
 const t=(es,en)=>document.documentElement.lang==='en'?en:es;
-if(location.pathname.includes('/interactivos')){
- const button=document.getElementById('director');if(button)button.onclick=()=>{try{const lib=readLibrary(localStorage);if(!lib.ok)throw Error(lib.error);prepareDirector(localStorage,lib.data.activeId);location.href='/studio.html?interactive='+encodeURIComponent(lib.data.activeId)+'#workspace';}catch(error){document.getElementById('status').textContent=error.message;}};
-}else if(id){
+if(!location.pathname.includes('/interactivos')&&id){
  window.ainInteractiveCafe={render(body,plan){
   const signature=JSON.stringify([plan.cafeteria,plan.title,plan.resetSeconds]);if(body._cafeSignature===signature&&body.querySelector('iframe'))return;
   body._cafeSignature=signature;const f=document.createElement('iframe');f.title=t('Cafetería en el Stage','Cafeteria on Stage');f.setAttribute('sandbox','allow-scripts');f.style.cssText='width:100%;height:100%;border:0;pointer-events:auto';
@@ -26,8 +23,12 @@ if(location.pathname.includes('/interactivos')){
  };
  const style=document.createElement('style');style.textContent='.interactive-cafe-dialog{width:min(760px,92vw);max-height:88svh;overflow:auto;background:#102621;color:#e5f5df;border:1px solid #b8ee77;padding:20px}.cafe-editor details{border:1px solid #567363;padding:12px;margin:10px 0}.cafe-editor summary{cursor:pointer;font-weight:700}.cafe-editor label,.interactive-cafe-dialog>label{display:grid;gap:6px;margin:12px 0}.cafe-editor input,.cafe-editor select,.interactive-cafe-dialog input{max-width:100%;min-height:36px;padding:6px}.cafe-editor input[type=checkbox]{width:24px}.interactive-cafe-dialog button{margin:8px;padding:12px}';document.head.append(style);
  if(plan.interactiveSource.kind==='cafeteria'){bar.append(make('Catálogo y cesta','Catalog and basket',editCafe));const menu=document.querySelector('.dk-carta .dk-menu-list');if(menu){const b=make('Editar catálogo y cesta','Edit catalog and basket',()=>{document.querySelector('.dk-carta')?.classList.remove('open');editCafe();});menu.prepend(b);}}
- bar.append(label,make('Guardar interactivo','Save interactive',save),make('Probar recorrido','Test journey',preview),make('Volver al Creador','Return to Creator',()=>{save();restoreDirectorWorkspace(localStorage,window.currentPlan());location.href='/interactivos/?project='+encodeURIComponent(id);}),status);
+ let returning=false;
+ const embedded=q.get('host')==='creator'&&q.get('channel')&&window.parent!==window;
+ const finish=()=>{if(returning)return;returning=true;try{save();const saved=window.currentPlan();restoreDirectorWorkspace(localStorage,saved);if(embedded)window.parent.postMessage({type:'ainimation:director:return',id,channel:q.get('channel'),revision:saved.interactiveSource.revision},location.origin);else location.href='/interactivos/?project='+encodeURIComponent(id);}catch(error){returning=false;throw error;}};
+ bar.append(label,make('Guardar interactivo','Save interactive',save),make('Probar recorrido','Test journey',preview),make('Volver al Creador','Return to Creator',finish),status);
  document.querySelector('.director-shell')?.prepend(bar);window.applyProjectExtras?.(plan);window.ainTransport?.setFrame(plan.interactiveSource.kind==='cafeteria'?1:plan.markers[plan.interactiveSource.project.scenes.findIndex(s=>s.id===plan.interactiveSource.project.start)].frame);
+ if(embedded){window.addEventListener('message',event=>{if(event.origin===location.origin&&event.source===window.parent&&event.data?.type==='ainimation:director:request-return'&&event.data.id===id&&event.data.channel===q.get('channel'))try{finish();}catch(error){status.textContent=error.message;}});window.parent.postMessage({type:'ainimation:director:ready',id,channel:q.get('channel')},location.origin);}
  };
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start,{once:true});else start();
 }

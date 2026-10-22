@@ -8,6 +8,9 @@ cloudModule.search=new URL(import.meta.url).search;
 const {syncLibrary}=await import(cloudModule.href);
 const authModule=new URL('./interactive-auth.mjs',import.meta.url);authModule.search=new URL(import.meta.url).search;
 const {mountGoogleAuth}=await import(authModule.href);
+const directorWorkspaceModule=new URL('./interactive-director-workspace.mjs',import.meta.url);directorWorkspaceModule.search=new URL(import.meta.url).search;
+const {mountDirectorWorkspace}=await import(directorWorkspaceModule.href);
+import {prepareDirector,restoreDirectorWorkspace} from './interactive-director-bridge.mjs?v=director-cafe-3';
 const deliveryModule=new URL('./interactive-delivery.mjs?v=five-touch-1',import.meta.url);deliveryModule.search=new URL(import.meta.url).search;
 const {mountInteractiveDelivery}=await import(deliveryModule.href);
 import {template,validate,playerHtml} from './interactive-project.mjs?v=director-cafe-3';
@@ -16,7 +19,7 @@ const $=id=>document.getElementById(id),status=$('status');
 let storage;try{storage=localStorage;}catch{}
 const loaded=loadLibrary(storage);
 let library=loaded.ok?loaded.data:null,activeId=library?.activeId,activeRecord=library?.projects.find(x=>x.id===activeId),revision=activeRecord?.revision;
-let project=activeRecord?.project||template(),selected=project.start,dirty=false;
+let project=activeRecord?.project||template(),selected=project.start,dirty=false,directorWorkspace;
 function announce(message,error=false){status.textContent=message;status.dataset.error=String(error);}
 const current=()=>project.scenes.find(s=>s.id===selected);
 function option(label,value){const n=document.createElement('option');n.textContent=label;n.value=value;return n;}
@@ -29,7 +32,7 @@ let renaming;
 $('renameCancel').onclick=()=>$('renameDialog').close();
 $('renameForm').onsubmit=e=>{e.preventDefault();const result=renameProject(storage,renaming.id,$('renameTitle').value,renaming.revision);if(!result.ok){$('renameError').textContent=result.error;return;}library=result.data;if(renaming.id===activeId){const record=library.projects.find(x=>x.id===activeId);project=structuredClone(record.project);revision=record.revision;render();}renderLibrary();$('renameDialog').close();announce('Nombre guardado.');};
 $('newProject').onclick=()=>{if(!persist())return;if(activate(createProject(storage,template('blank'))))announce('Nuevo proyecto creado. El anterior sigue en tu biblioteca.');};
-window.addEventListener('storage',e=>{if(e.key!==LIBRARY_KEY)return;const latest=readLibrary(storage);if(latest.ok){library=latest.data;renderLibrary();}announce('La biblioteca ha cambiado en otra pestaña. Guarda un archivo si tienes cambios y recarga antes de seguir.',true);});
+window.addEventListener('storage',e=>{if(e.key!==LIBRARY_KEY||directorWorkspace?.ownsStorageEvent(e))return;const latest=readLibrary(storage);if(latest.ok){library=latest.data;renderLibrary();}announce('La biblioteca ha cambiado en otra pestaña. Guarda un archivo si tienes cambios y recarga antes de seguir.',true);});
 function list(){const ol=$('scenes');ol.replaceChildren();project.scenes.forEach((s,i)=>{const li=document.createElement('li'),b=document.createElement('button'),num=document.createElement('span'),name=document.createElement('span');num.className='number';num.textContent=String(i+1).padStart(2,'0');name.textContent=s.title;b.append(num,name);b.setAttribute('aria-current',String(s.id===selected));b.onclick=()=>{selected=s.id;render();};li.append(b);ol.append(li);});targets($('start'),project.start);$('remove').disabled=project.scenes.length===1||selected===project.start;$('add').disabled=project.scenes.length>=MAX_IMAGES;}
 function changed(){persist();list();updatePreview();}
 function renderButtons(){const parent=$('buttons');parent.replaceChildren();current().buttons.forEach((button,i)=>{const row=document.createElement('div');row.className='button-row';const l=document.createElement('label');l.textContent='Texto del botón '+(i+1);const input=document.createElement('input');input.maxLength=80;input.value=button.label;input.addEventListener('input',()=>{button.label=input.value;changed();});l.append(input);const dest=document.createElement('label');dest.textContent='Ir a pantalla';const select=document.createElement('select');targets(select,button.target);select.onchange=()=>{button.target=select.value;changed();};dest.append(select);const remove=document.createElement('button');remove.className='quiet';remove.textContent='Quitar botón';remove.onclick=()=>{current().buttons.splice(i,1);changed();renderButtons();};row.append(l,dest,remove);parent.append(row);});$('addButton').disabled=current().buttons.length>=6;}
@@ -135,4 +138,14 @@ mountInteractiveDelivery({button:$('sendXpacio'),endpoint:cloudEndpoint,getState
  return{id:activeId,revision,project:structuredClone(project),token:cloudToken};
 }});
 
-$('director')?.addEventListener('click',event=>{if(preparingImages||stagedImages.length||dirty&&!persist()){event.stopImmediatePropagation();announce('Completa y guarda los cambios antes de abrir Director.');}},{capture:true});
+if($('director'))directorWorkspace=mountDirectorWorkspace({button:$('director'),prepare:()=>{
+ if(preparingImages||stagedImages.length||dirty&&!persist())throw Error('Completa y guarda los cambios antes de abrir Director.');
+ const latest=readLibrary(storage),record=latest.data?.projects.find(r=>r.id===activeId);
+ if(!latest.ok||record?.revision!==revision)throw Error('El proyecto cambió en otra pestaña. Recupéralo antes de abrir Director.');
+ return prepareDirector(storage,activeId);
+},onCancel:plan=>restoreDirectorWorkspace(storage,plan),onReturn:({id,revision:returnedRevision})=>{
+ const latest=readLibrary(storage),record=latest.data?.projects.find(r=>r.id===id);
+ if(!latest.ok||dirty||id!==activeId||record?.revision!==returnedRevision)throw Error('El proyecto cambió durante el retorno. El trabajo de Director se conserva; recupera la biblioteca antes de seguir.');
+ activate(latest);announce('Cambios de Director recuperados. Tu sesión del Creador se conserva.');
+ if(cloudToken)$('cloudStatus').textContent='Cuenta verificada. Cambios de Director recuperados; ya puedes sincronizar y enviar.';
+},onError:error=>announce(error.message,true)});
