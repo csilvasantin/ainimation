@@ -1,0 +1,187 @@
+{
+  "checkedAt": "2026-10-22T17:23:21.377697+00:00",
+  "browser": "Codex internal browser",
+  "sidePanel": {
+    "moved": false,
+    "resized": false
+  },
+  "scope": "Five native interpreted Better 3D scenes; virtual receivers. Physical-player playback is not claimed.",
+  "project": {
+    "id": "8c63c927-e53c-419a-a5cf-091e0fcce3a5",
+    "title": "Prueba Director · catálogo y cesta",
+    "revision": 5,
+    "sha256": "e731f4445495ddf2590c8014ecb7fbe5ef6b7f58e52ebae105ef44f02d4e4e6b"
+  },
+  "auth": {
+    "status": "verified account; five production create-delivery requests accepted",
+    "observedPopupError": "Google 400 invalid_request in a separate sign-in popup; this popup error is not claimed fixed",
+    "inlineGoogleFlow": "Official Google confirmation offered in the same page; server signature, audience and allowed-account validation retained"
+  },
+  "deployments": {
+    "ainimation": "869f737",
+    "catalogAndBasket": "d69b1e1",
+    "libraryWorker": "a2c07739-17d3-48d8-8054-f8cec3dc4ddd"
+  },
+  "receivers": [
+    {
+      "location": "xtanco-bcn",
+      "screen": "JTIXtanco_PortaldelAngel_20_Mostrador_1",
+      "url": "https://www.admira.store/xpacios/pantalla/?loc=xtanco-bcn&screen=JTIXtanco_PortaldelAngel_20_Mostrador_1&ainimation=d0f441d1d3674ce28ce3be5ca6d856e7d15ffc9346c4425db31b8b609a837996&lang=es",
+      "assignmentVerified": true,
+      "catalogVerified": true,
+      "basketVerified": true,
+      "totalCents": 1780,
+      "maxQuantity": 3,
+      "mergeIdentical": false,
+      "restorationVerified": true,
+      "projectionVerified": true
+    },
+    {
+      "location": "xtanco",
+      "screen": "JTIXtanco_CalledeSantaRosa_4_Mostrador_1",
+      "url": "https://www.admira.store/xpacios/pantalla/?loc=xtanco&screen=JTIXtanco_CalledeSantaRosa_4_Mostrador_1&ainimation=8e12fa07e7314aa7a5bc9e5b8f329ed910a20114e0364c83a2b829fee0cb9a51&lang=es",
+      "assignmentVerified": true,
+      "catalogVerified": true,
+      "basketVerified": true,
+      "totalCents": 1780,
+      "maxQuantity": 3,
+      "mergeIdentical": false,
+      "restorationVerified": true,
+      "projectionVerified": true
+    },
+    {
+      "location": "xtanco-valencia",
+      "screen": "JTIXtanco_CarrerdeColon_22_Mostrador_1",
+      "url": "https://www.admira.store/xpacios/pantalla/?loc=xtanco-valencia&screen=JTIXtanco_CarrerdeColon_22_Mostrador_1&ainimation=81e38cfddf444d4c9d10c2aaefd9369827264f107b3a44bebedc8a0fa1629415&lang=es",
+      "assignmentVerified": true,
+      "catalogVerified": true,
+      "basketVerified": true,
+      "totalCents": 1780,
+      "maxQuantity": 3,
+      "mergeIdentical": false,
+      "restorationVerified": true,
+      "projectionVerified": true
+    },
+    {
+      "location": "admira-loterias",
+      "screen": "SinProyecto_GranVia_32_Mostrador_1",
+      "url": "https://www.admira.store/xpacios/pantalla/?loc=admira-loterias&screen=SinProyecto_GranVia_32_Mostrador_1&ainimation=4c86d397d0014d13ac57b9ea1052f113cf902a2aedfd41d8ab9641b03b347712&lang=es",
+      "assignmentVerified": true,
+      "catalogVerified": true,
+      "basketVerified": true,
+      "totalCents": 1780,
+      "maxQuantity": 3,
+      "mergeIdentical": false,
+      "restorationVerified": true,
+      "projectionVerified": true
+    },
+    {
+      "location": "admira-prensa",
+      "screen": "SinProyecto_PlazadeCibeles_Mostrador_1",
+      "url": "https://www.admira.store/xpacios/pantalla/?loc=admira-prensa&screen=SinProyecto_PlazadeCibeles_Mostrador_1&ainimation=9ab4d1cdc65a45bbac57991752d6ddedf3e33263235445a8b3aa5bdbc2d8503b&lang=es",
+      "assignmentVerified": true,
+      "catalogVerified": true,
+      "basketVerified": true,
+      "totalCents": 1780,
+      "maxQuantity": 3,
+      "mergeIdentical": false,
+      "restorationVerified": true,
+      "projectionVerified": true
+    }
+  ],
+  "publicMetadataChecks": [
+    {
+      "location": "xtanco-bcn",
+      "metadataStatus": 200,
+      "playerStatus": 200,
+      "title": "Prueba Director · catálogo y cesta",
+      "revision": 5,
+      "sha256": "e731f4445495ddf2590c8014ecb7fbe5ef6b7f58e52ebae105ef44f02d4e4e6b",
+      "screen": "JTIXtanco_PortaldelAngel_20_Mostrador_1",
+      "scene": {
+        "renderer": "better",
+        "item": "counter",
+        "aperture": "customer-panel"
+      },
+      "updatedProduct": true,
+      "updatedBasket": true
+    },
+    {
+      "location": "xtanco",
+      "metadataStatus": 200,
+      "playerStatus": 200,
+      "title": "Prueba Director · catálogo y cesta",
+      "revision": 5,
+      "sha256": "e731f4445495ddf2590c8014ecb7fbe5ef6b7f58e52ebae105ef44f02d4e4e6b",
+      "screen": "JTIXtanco_CalledeSantaRosa_4_Mostrador_1",
+      "scene": {
+        "renderer": "better",
+        "item": "counter",
+        "aperture": "customer-panel"
+      },
+      "updatedProduct": true,
+      "updatedBasket": true
+    },
+    {
+      "location": "xtanco-valencia",
+      "metadataStatus": 200,
+      "playerStatus": 200,
+      "title": "Prueba Director · catálogo y cesta",
+      "revision": 5,
+      "sha256": "e731f4445495ddf2590c8014ecb7fbe5ef6b7f58e52ebae105ef44f02d4e4e6b",
+      "screen": "JTIXtanco_CarrerdeColon_22_Mostrador_1",
+      "scene": {
+        "renderer": "better",
+        "item": "counter",
+        "aperture": "customer-panel"
+      },
+      "updatedProduct": true,
+      "updatedBasket": true
+    },
+    {
+      "location": "admira-loterias",
+      "metadataStatus": 200,
+      "playerStatus": 200,
+      "title": "Prueba Director · catálogo y cesta",
+      "revision": 5,
+      "sha256": "e731f4445495ddf2590c8014ecb7fbe5ef6b7f58e52ebae105ef44f02d4e4e6b",
+      "screen": "SinProyecto_GranVia_32_Mostrador_1",
+      "scene": {
+        "renderer": "better",
+        "item": "turnKiosk",
+        "aperture": "portrait-kiosk"
+      },
+      "updatedProduct": true,
+      "updatedBasket": true
+    },
+    {
+      "location": "admira-prensa",
+      "metadataStatus": 200,
+      "playerStatus": 200,
+      "title": "Prueba Director · catálogo y cesta",
+      "revision": 5,
+      "sha256": "e731f4445495ddf2590c8014ecb7fbe5ef6b7f58e52ebae105ef44f02d4e4e6b",
+      "screen": "SinProyecto_PlazadeCibeles_Mostrador_1",
+      "scene": {
+        "renderer": "better",
+        "item": "counter",
+        "aperture": "customer-panel"
+      },
+      "updatedProduct": true,
+      "updatedBasket": true
+    }
+  ],
+  "leftRestored": true,
+  "screenshots": [
+    "five-cafe-xtanco-bcn-assigned.png",
+    "five-cafe-xtanco-bcn-restored.png",
+    "five-cafe-xtanco-assigned.png",
+    "five-cafe-xtanco-restored.png",
+    "five-cafe-xtanco-valencia-assigned.png",
+    "five-cafe-xtanco-valencia-restored.png",
+    "five-cafe-admira-loterias-assigned.png",
+    "five-cafe-admira-loterias-restored.png",
+    "five-cafe-admira-prensa-assigned.png",
+    "five-cafe-admira-prensa-restored.png"
+  ]
+}
