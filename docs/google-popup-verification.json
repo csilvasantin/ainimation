@@ -1,0 +1,40 @@
+{
+  "checkedAt": "2026-10-22T17:48:50.574236+00:00",
+  "url": "https://www.ainimation.studio/interactivos/",
+  "browser": "ChatGPT in-app browser",
+  "panelMoved": false,
+  "panelResized": false,
+  "sourceCommit": "8505132f457ef9c2421e8e9f2a3e110ac00bffd8",
+  "pagesCommit": "1de1faa",
+  "libraryWorkerVersion": "4df0cea3-0b19-49f3-818f-bf058c9dca1a",
+  "freshPopupSignIns": 2,
+  "checks": [
+    {
+      "sequence": 1,
+      "startsAfter": "fresh unauthenticated page",
+      "googleInteractionMethod": "btn",
+      "googleButton": "account",
+      "status": "Cuenta verificada. Pulsa sincronizar para conservar y combinar tus proyectos.",
+      "syncEnabled": true,
+      "projectsPreserved": 3
+    },
+    {
+      "sequence": 2,
+      "startsAfter": "sign-out and page reload",
+      "googleInteractionMethod": "btn",
+      "googleButton": "account",
+      "status": "Cuenta verificada. Pulsa sincronizar para conservar y combinar tus proyectos.",
+      "syncEnabled": true,
+      "projectsPreserved": 3
+    }
+  ],
+  "serverVerification": "Production projects API accepted the Google credential before authenticated controls were enabled.",
+  "googleConfirmation": "The user completed Google account confirmation; the second successful result was independently observed in Creator.",
+  "finalState": "Verified session left open; three local projects preserved.",
+  "implementation": "Separate stable Google button containers, one GIS initialization per page and explicit strict-origin-when-cross-origin policy.",
+  "scope": "Successful popup sign-in regression checks; the earlier Google error detail was not captured.",
+  "tests": {
+    "interactive": 84,
+    "mcpHelp": 1
+  }
+}
