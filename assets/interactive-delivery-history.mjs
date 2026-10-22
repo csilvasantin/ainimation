@@ -33,13 +33,28 @@ export function saveDeliveryBatch(storage,input){
   const batches=[batch,...existing.data.filter(b=>b.id!==batch.id)].sort((a,b)=>b.updatedAt.localeCompare(a.updatedAt)).slice(0,MAX_BATCHES);storage.setItem(DELIVERY_HISTORY_KEY,JSON.stringify({version:1,batches}));return{ok:true,data:batches};
  }catch{return{ok:false,error:'history_not_saved'};}
 }
+const csvQuote=value=>{let text=String(value);if(/^[\s\p{Cc}\p{Cf}]*[=+\-@＝＋－＠]/u.test(text)||/^[\t\r\n]/.test(text))text="'"+text;return '"'+text.replaceAll('"','""')+'"';};
 // CSV is built from the same validated, metadata-only snapshot shown in History.
 export function deliveryBatchCsv(input,language='es'){
  const b=cleanBatch(input),en=language==='en';
- const quote=value=>{let text=String(value);if(/^[\s\p{Cc}\p{Cf}]*[=+\-@＝＋－＠]/u.test(text)||/^[\t\r\n]/.test(text))text="'"+text;return '"'+text.replaceAll('"','""')+'"';};
  const headers=en?['Date (UTC)','Project','Version','Xpace','Xpace ID','Screen','Screen ID','Result','Link']:['Fecha (UTC)','Proyecto','Versión','Xpacio','ID Xpacio','Pantalla','ID pantalla','Resultado','Enlace'];
  const rows=b.results.map(r=>[b.createdAt,b.projectTitle,b.revision,r.locationName,r.locationId,r.screenName,r.screenId,r.status==='success'?(en?'Prepared':'Preparado'):r.status==='error'?(en?'Not prepared':'No preparado'):(en?'Unconfirmed':'Sin confirmación'),r.status==='success'?r.url:'']);
- return{filename:'ainimation-'+(en?'deliveries':'envios')+'-'+b.createdAt.slice(0,10)+'-v'+b.revision+'-'+b.id+'.csv',type:'text/csv;charset=utf-8',content:'\ufeff'+[headers,...rows].map(row=>row.map(quote).join(',')).join('\r\n')+'\r\n'};
+ return{filename:'ainimation-'+(en?'deliveries':'envios')+'-'+b.createdAt.slice(0,10)+'-v'+b.revision+'-'+b.id+'.csv',type:'text/csv;charset=utf-8',content:'\ufeff'+[headers,...rows].map(row=>row.map(csvQuote).join(',')).join('\r\n')+'\r\n'};
+}
+export function deliveryVersionCheckCsv(input,report,language='es'){
+ const b=cleanBatch(input),en=language==='en';
+ if(!report||report.cancelled!==false||report.batchId!==b.id||report.projectId!==b.projectId||report.revision!==b.revision||!Array.isArray(report.results)||report.results.length!==b.results.length)throw Error('invalid_version_check');
+ const checkedAt=date(report.checkedAt),counts={available:0,unavailable:0,unknown:0,no_link:0};
+ const states=en?{available:'Available',unavailable:'Unavailable',unknown:'Could not be checked',no_link:'No confirmed link'}:{available:'Disponible',unavailable:'No disponible',unknown:'Sin poder comprobar',no_link:'Sin enlace confirmado'};
+ const reasons=en?{matched:'Receipt, project, version and destination match',not_found:'Confirmed absence (404/410)',mismatch:'Metadata does not match this batch',request_failed:'Request or response could not be verified',no_link:'Not checked: no confirmed link'}:{matched:'Coinciden recibo, proyecto, versión y destino',not_found:'Ausencia confirmada (404/410)',mismatch:'Los datos no coinciden con este lote',request_failed:'No se pudo verificar la petición o respuesta',no_link:'Sin comprobar: no hay enlace confirmado'};
+ const rows=b.results.map((r,i)=>{
+  const v=report.results[i],id=r.url?new URL(r.url).searchParams.get('ainimation'):undefined;
+  if(!v||v.locationId!==r.locationId||v.screenId!==r.screenId||v.receiptId!==id||!(r.status==='success'?(v.state==='available'&&v.reason==='matched')||(v.state==='unavailable'&&['not_found','mismatch'].includes(v.reason))||(v.state==='unknown'&&v.reason==='request_failed'):v.state==='no_link'&&v.reason==='no_link'))throw Error('invalid_version_check');
+  counts[v.state]++;return[checkedAt,b.projectTitle,b.revision,r.locationName,r.locationId,r.screenName,r.screenId,states[v.state],reasons[v.reason],r.url||''];
+ });
+ if(!report.counts||Object.keys(counts).some(key=>report.counts[key]!==counts[key]))throw Error('invalid_version_check');
+ const headers=en?['Checked at (UTC)','Project','Version','Xpace','Xpace ID','Screen','Screen ID','Version check','Reason','Confirmed link']:['Comprobado (UTC)','Proyecto','Versión','Xpacio','ID Xpacio','Pantalla','ID pantalla','Comprobación de versión','Motivo','Enlace confirmado'];
+ return{filename:'ainimation-'+(en?'version-check':'comprobacion')+'-'+checkedAt.replace(/[:.]/g,'-')+'-v'+b.revision+'-'+b.id+'.csv',type:'text/csv;charset=utf-8',content:'\ufeff'+[headers,...rows].map(row=>row.map(csvQuote).join(',')).join('\r\n')+'\r\n'};
 }
 export function deliveryBatchLinks(input,language='es'){
  const b=cleanBatch(input),en=language==='en',confirmed=b.results.filter(r=>r.status==='success'),missing=b.results.length-confirmed.length;
@@ -51,7 +66,7 @@ export function deliveryBatchLinks(input,language='es'){
 const VERSION_METADATA_URL='https://ainimation-interactive-library-preview.csilvasantin.workers.dev/api/deliveries/';
 // Read public metadata only. Never send credentials or follow a receipt redirect.
 export async function checkDeliveryBatchVersions(input,{request=fetch,signal,timeoutMs=10000,now=()=>new Date().toISOString()}={}){
- const b=cleanBatch(input),waiting=[],results=b.results.map((r,i)=>{if(r.status==='success')waiting.push(i);return{locationId:r.locationId,screenId:r.screenId,state:r.status==='success'?'unknown':'no_link',reason:r.status==='success'?'not_checked':'no_link'};});
+ const b=cleanBatch(input),waiting=[],results=b.results.map((r,i)=>{if(r.status==='success')waiting.push(i);return{locationId:r.locationId,screenId:r.screenId,...(r.url?{receiptId:new URL(r.url).searchParams.get('ainimation')}:{}),state:r.status==='success'?'unknown':'no_link',reason:r.status==='success'?'not_checked':'no_link'};});
  const limit=Math.max(1,Math.min(Number.isFinite(timeoutMs)?timeoutMs:10000,15000));let next=0;
  const inspect=async r=>{
   const id=new URL(r.url).searchParams.get('ainimation'),controller=new AbortController();let timer,cancel;
@@ -68,7 +83,7 @@ export async function checkDeliveryBatchVersions(input,{request=fetch,signal,tim
  const work=async()=>{while(next<waiting.length&&!signal?.aborted){const i=waiting[next++];results[i]={...results[i],...await inspect(b.results[i])};}};
  await Promise.all(Array.from({length:Math.min(3,waiting.length)},work));
  const counts={available:0,unavailable:0,unknown:0,no_link:0};for(const r of results)counts[r.state]++;
- return{batchId:b.id,checkedAt:date(now()),cancelled:signal?.aborted===true,counts,results};
+ return{batchId:b.id,projectId:b.projectId,revision:b.revision,checkedAt:date(now()),cancelled:signal?.aborted===true,counts,results};
 }
 // An interrupted batch is never called complete, even if some targets succeeded.
 export function deliveryBatchOutcome(batch){
@@ -87,6 +102,7 @@ export function filterDeliveryHistory(batches,{query='',projectId='',outcome=''}
 }
 export function mountDeliveryHistory({button,storage,doc=document,download,onReuse,writeClipboard,versionRequest=fetch,versionTimeoutMs=10000}){
  const t=(es,en)=>doc.documentElement.lang==='en'?en:es,make=(tag,value)=>{const n=doc.createElement(tag);if(value)n.textContent=value;return n;};
+ const downloadFile=file=>{if(download)return download(file);const url=URL.createObjectURL(new Blob([file.content],{type:file.type})),a=doc.createElement('a');a.href=url;a.download=file.filename;try{a.click();}finally{setTimeout(()=>URL.revokeObjectURL(url),30000);}};
  let viewVersion=0;const checks=new Set(),cancelChecks=()=>{viewVersion++;for(const controller of checks)controller.abort();checks.clear();};
  const dialog=make('dialog');dialog.className='delivery-history-dialog';dialog.setAttribute('aria-label',t('Historial de envíos','Delivery history'));
  const title=make('h2',t('Historial de envíos','Delivery history')),hint=make('p',t('Últimos 30 lotes guardados en este navegador. Los enlaces conservan su versión; abrirlos no asigna el interactivo automáticamente.','Last 30 batches saved in this browser. Links preserve their version; opening them does not automatically assign the interactive.')),status=make('p'),list=make('div'),close=make('button',t('Cerrar historial','Close history'));status.setAttribute('role','status');list.className='history-batches';close.type='button';close.onclick=()=>{cancelChecks();dialog.close();};dialog.addEventListener('cancel',event=>{event.preventDefault();cancelChecks();dialog.close();});dialog.addEventListener('close',cancelChecks);
@@ -108,7 +124,7 @@ export function mountDeliveryHistory({button,storage,doc=document,download,onReu
    for(const r of b.results){const li=make('li'),name=make('strong',r.locationName+' · '+r.screenName),label=make('span',r.status==='success'?t('Versión preparada','Version prepared'):r.status==='error'?t('No preparado','Not prepared'):t('Sin confirmación · el lote se interrumpió','Unconfirmed · the batch was interrupted'));li.dataset.state=r.status;li.append(name,label);
     if(r.url){const a=make('a',t('Abrir en admira.store','Open in admira.store'));a.href=r.url;a.target='_blank';a.rel='noopener noreferrer';a.setAttribute('aria-label',t('Abrir ','Open ')+r.locationName+' · '+r.screenName);li.append(a);}const version=make('span');version.className='history-version-state';version.hidden=true;versionRows.push(version);li.append(version);ul.append(li);
    }const exportButton=make('button',t('Descargar CSV','Download CSV'));exportButton.type='button';exportButton.className='history-csv';exportButton.setAttribute('aria-label',t('Descargar CSV de ','Download CSV for ')+b.projectTitle+' · '+t('versión ','version ')+b.revision+' · '+b.createdAt);
-   exportButton.onclick=()=>{try{const file=deliveryBatchCsv(b,doc.documentElement.lang);if(download)download(file);else{const url=URL.createObjectURL(new Blob([file.content],{type:file.type})),a=doc.createElement('a');a.href=url;a.download=file.filename;try{a.click();}finally{setTimeout(()=>URL.revokeObjectURL(url),30000);}}status.textContent=t('Informe CSV preparado: ','CSV report prepared: ')+b.results.length+' '+t('pantallas.','screens.');}catch{status.textContent=t('No se pudo preparar el CSV. El historial se conserva; vuelve a intentarlo.','The CSV could not be prepared. History is preserved; try again.');}};
+   exportButton.onclick=()=>{try{downloadFile(deliveryBatchCsv(b,doc.documentElement.lang));status.textContent=t('Informe CSV preparado: ','CSV report prepared: ')+b.results.length+' '+t('pantallas.','screens.');}catch{status.textContent=t('No se pudo preparar el CSV. El historial se conserva; vuelve a intentarlo.','The CSV could not be prepared. History is preserved; try again.');}};
    actions.append(exportButton);
    const links=deliveryBatchLinks(b,doc.documentElement.lang),copy=make('button',t('Copiar enlaces','Copy links')),copyStatus=make('p'),fallback=make('label',t('Enlaces del lote para copiar','Batch links to copy')),copyText=make('textarea');
    copy.type='button';copy.className='history-copy';copy.disabled=!links.count;copy.setAttribute('aria-label',t('Copiar enlaces de ','Copy links for ')+b.projectTitle+' · '+t('versión ','version ')+b.revision+' · '+b.createdAt);copyStatus.className='history-copy-status';copyStatus.setAttribute('role','status');fallback.className='history-copy-fallback';fallback.hidden=true;copyText.readOnly=true;copyText.rows=8;fallback.append(copyText);
@@ -125,16 +141,19 @@ export function mountDeliveryHistory({button,storage,doc=document,download,onReu
    if(onReuse){const reuse=make('button',t('Usar estas pantallas','Use these screens'));reuse.type='button';reuse.className='history-reuse';reuse.setAttribute('aria-label',t('Usar pantallas de ','Use screens from ')+b.projectTitle+' · '+t('versión ','version ')+b.revision+' · '+b.createdAt);reuse.onclick=()=>{cancelChecks();dialog.close();return onReuse(b.results.map(r=>({locationId:r.locationId,locationName:r.locationName,screenId:r.screenId,screenName:r.screenName})));};actions.append(reuse);}
    const check=make('button',t('Comprobar versiones','Check versions')),checkStatus=make('p');check.type='button';check.className='history-check';check.disabled=!successful;check.setAttribute('aria-label',t('Comprobar versiones de ','Check versions for ')+b.projectTitle+' · '+t('versión ','version ')+b.revision+' · '+b.createdAt);checkStatus.className='history-version-summary';checkStatus.setAttribute('role','status');
    const versionLabel=result=>result.state==='available'?t('Versión disponible','Version available'):result.state==='no_link'?t('Sin enlace confirmado · sin comprobar','No confirmed link · not checked'):result.reason==='mismatch'?t('Los datos no coinciden con este lote','Metadata does not match this batch'):result.state==='unavailable'?t('Versión no disponible','Version unavailable'):t('No se pudo comprobar la versión','Could not check the version');
+   let completedReport,completedTurn;const checkExport=make('button',t('Descargar comprobación CSV','Download check CSV'));checkExport.type='button';checkExport.className='history-version-csv';checkExport.hidden=true;checkExport.disabled=true;
+   checkExport.onclick=()=>{if(checkExport.disabled||!completedReport||completedTurn!==viewVersion||!dialog.open)return;try{downloadFile(deliveryVersionCheckCsv(b,completedReport,doc.documentElement.lang));status.textContent=t('Informe de comprobación preparado: ','Version check report prepared: ')+b.results.length+' '+t('pantallas.','screens.');}catch{status.textContent=t('No se pudo preparar el informe de comprobación. Vuelve a comprobar las versiones e inténtalo de nuevo.','The version check report could not be prepared. Check the versions again and retry.');}};
    check.onclick=async()=>{
-    if(check.disabled)return;const turn=viewVersion,controller=new AbortController();checks.add(controller);check.disabled=true;checkStatus.textContent=t('Comprobando versiones…','Checking versions…');
+    if(check.disabled)return;completedReport=undefined;checkExport.hidden=true;checkExport.disabled=true;delete checkStatus.dataset.checkedAt;const turn=viewVersion,controller=new AbortController();checks.add(controller);check.disabled=true;checkStatus.textContent=t('Comprobando versiones…','Checking versions…');
     versionRows.forEach((row,i)=>{row.hidden=false;row.dataset.versionState=b.results[i].status==='success'?'checking':'no_link';row.textContent=b.results[i].status==='success'?t('Comprobando versión…','Checking version…'):versionLabel({state:'no_link'});});
     try{
      const report=await checkDeliveryBatchVersions(b,{request:versionRequest,signal:controller.signal,timeoutMs:versionTimeoutMs});if(turn!==viewVersion||report.cancelled||!dialog.open)return;
      report.results.forEach((result,i)=>{versionRows[i].dataset.versionState=result.state;versionRows[i].textContent=versionLabel(result);});const c=report.counts;checkStatus.dataset.checkedAt=report.checkedAt;
      checkStatus.textContent=t('Comprobado ','Checked ')+new Date(report.checkedAt).toLocaleString(doc.documentElement.lang==='en'?'en-GB':'es-ES')+' · '+c.available+' '+t(c.available===1?'disponible':'disponibles','available')+' · '+c.unavailable+' '+t(c.unavailable===1?'no disponible':'no disponibles','unavailable')+' · '+c.unknown+' '+t('sin poder comprobar','could not be checked')+' · '+c.no_link+' '+t('sin enlace confirmado.','without a confirmed link.');
+     completedReport=report;completedTurn=turn;checkExport.hidden=false;checkExport.disabled=false;checkExport.setAttribute('aria-label',t('Descargar comprobación CSV de ','Download check CSV for ')+b.projectTitle+' · '+t('versión ','version ')+b.revision+' · '+report.checkedAt);
     }catch{if(turn===viewVersion&&dialog.open){checkStatus.textContent=t('No se pudo completar la comprobación. Vuelve a intentarlo.','The check could not be completed. Try again.');versionRows.forEach((row,i)=>{if(b.results[i].status==='success'){row.dataset.versionState='unknown';row.textContent=versionLabel({state:'unknown'});}});}}
     finally{checks.delete(controller);if(turn===viewVersion)check.disabled=!successful;}
-   };actions.append(check);details.append(actions,copyStatus,fallback,checkStatus,ul);list.append(details);
+   };actions.append(check);details.append(actions,copyStatus,fallback,checkStatus,checkExport,ul);list.append(details);
   }
  };
  query.oninput=render;project.onchange=render;outcome.onchange=render;clear.onclick=()=>{query.value='';project.value='';outcome.value='';render();};

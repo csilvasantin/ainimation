@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {checkDeliveryBatchVersions} from '../assets/interactive-delivery-history.mjs';
+import {checkDeliveryBatchVersions,deliveryVersionCheckCsv,deliveryBatchCsv} from '../assets/interactive-delivery-history.mjs';
 
 const receipt=i=>i.toString(16).padStart(64,'0');
 const row=(i,status='success')=>({locationId:'venue-'+i,locationName:'Local '+i,screenId:'touch-'+i,screenName:'Táctil '+i,status,url:'https://www.admira.store/xpacios/pantalla/?loc=venue-'+i+'&screen=touch-'+i+'&ainimation='+receipt(i)});
@@ -33,4 +33,27 @@ test('tiempo de espera limita tanto la petición como el cuerpo JSON y devuelve 
 test('cancelar aborta las consultas activas y no empieza los recibos que estaban en cola', {timeout:5000},async()=>{
  const controller=new AbortController(),signals=[];const running=checkDeliveryBatchVersions(batch(Array.from({length:10},(_,i)=>row(i+1))),{signal:controller.signal,request:(url,options)=>{signals.push(options.signal);return new Promise(()=>{});}});assert.equal(signals.length,3);controller.abort();const report=await running;assert.equal(report.cancelled,true);assert.equal(signals.length,3);assert.ok(signals.every(s=>s.aborted));assert.equal(report.counts.available,0);
  const before=signals.length;await checkDeliveryBatchVersions(batch(),{signal:controller.signal,request:()=>{signals.push(null);}});assert.equal(signals.length,before);
+});
+
+test('informe CSV exporta la consulta exacta con cuatro estados y motivos distintos, sin repetir peticiones ni incluir datos ajenos',async()=>{
+ const b=batch([row(1),row(2),row(3),row(4),row(5,'pending'),row(6,'error')]);b.projectTitle='Catálogo "táctil", café\nBarcelona';b.token='private-token';const before=JSON.stringify(b),original=deliveryBatchCsv(b);let calls=0;
+ const report=await checkDeliveryBatchVersions(b,{now:()=> '2026-10-23T01:02:03Z',request:async url=>{calls++;const id=parseInt(url.split('/').at(-1),16);return id===1?response(metadata(1)):id===2?response({},404):id===3?response({},503):response(metadata(1));}}),snapshot=JSON.stringify(report),file=deliveryVersionCheckCsv(b,report);
+ assert.equal(calls,4);assert.match(file.filename,/^ainimation-comprobacion-2026-10-23T01-02-03-000Z-v9-batch\.csv$/);assert.notEqual(file.filename,original.filename);assert.equal(file.type,'text/csv;charset=utf-8');assert.ok(file.content.startsWith('\ufeff"Comprobado (UTC)","Proyecto","Versión"'));assert.equal(file.content.match(/2026-10-23T01:02:03.000Z/g).length,6);assert.match(file.content,/"Catálogo ""táctil"", café\nBarcelona"/);
+ for(const value of ['"Disponible","Coinciden recibo, proyecto, versión y destino"','"No disponible","Ausencia confirmada (404/410)"','"Sin poder comprobar","No se pudo verificar la petición o respuesta"','"No disponible","Los datos no coinciden con este lote"','"Sin enlace confirmado","Sin comprobar: no hay enlace confirmado",""'])assert.ok(file.content.includes(value),value);
+ assert.equal(file.content.match(/https:\/\/www.admira.store/g).length,4);for(const forbidden of ['private-token','not-for-client','loc=venue-5','loc=venue-6'])assert.ok(!file.content.includes(forbidden));
+ const english=deliveryVersionCheckCsv(b,report,'en');assert.match(english.filename,/version-check/);assert.ok(english.content.startsWith('\ufeff"Checked at (UTC)"'));assert.match(english.content,/"Could not be checked"/);assert.equal(calls,4);assert.equal(JSON.stringify(b),before);assert.equal(JSON.stringify(report),snapshot);assert.deepEqual(deliveryBatchCsv(b),original);
+});
+
+test('informe de comprobación neutraliza fórmulas, acentos, comillas y controles sin cambiar sus metadatos',async()=>{
+ const b=batch([row(1)]),report=await checkDeliveryBatchVersions(b,{request:async()=>response(metadata(1))});
+ for(const value of ['=1+1','+SUM(1,2)','-1+2','@SUM(A1)','  =HYPERLINK("https://evil.test")','\t=1+1','\r\n+1','\u200b=1','＝1+1']){
+  for(const key of ['projectTitle','locationName','screenName']){const copy=structuredClone(b);if(key==='projectTitle')copy[key]=value;else copy.results[0][key]=value;const csv=deliveryVersionCheckCsv(copy,report);assert.ok(csv.content.includes('"\''+value.replaceAll('"','""')+'"'),key+':'+JSON.stringify(value));}
+ }
+});
+
+test('informe falla cerrado ante otra consulta, recibo, proyecto, revisión, destino, recuentos o resultados incompletos/cancelados',async()=>{
+ const b=batch(),report=await checkDeliveryBatchVersions(b,{request:async url=>response(metadata(parseInt(url.split('/').at(-1),16)))});
+ for(const change of [r=>r.batchId='other',r=>r.projectId='other',r=>r.revision=8,r=>r.checkedAt='bad',r=>r.cancelled=true,r=>delete r.cancelled,r=>r.results.pop(),r=>r.results.reverse(),r=>r.results[0].receiptId=receipt(2),r=>r.results[0].locationId='other',r=>r.results[0].screenId='other',r=>r.results[0].state='no_link',r=>r.results[0].reason='not_checked',r=>r.counts.available=4]){const copy=structuredClone(report);change(copy);assert.throws(()=>deliveryVersionCheckCsv(b,copy));}
+ const altered=structuredClone(b);altered.results[0].url=altered.results[0].url.replace(receipt(1),receipt(99));assert.throws(()=>deliveryVersionCheckCsv(altered,report));assert.throws(()=>deliveryVersionCheckCsv({...b,revision:10},report));assert.throws(()=>deliveryVersionCheckCsv(b,undefined));
+ const pending=batch([row(1,'pending')]),noLink=await checkDeliveryBatchVersions(pending);noLink.results[0].state='available';noLink.results[0].reason='matched';assert.throws(()=>deliveryVersionCheckCsv(pending,noLink));
 });
