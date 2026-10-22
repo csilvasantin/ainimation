@@ -1,0 +1,142 @@
+{
+  "feature": "Motivos de fallo de comprobación / Version-check failure reasons",
+  "verifiedAt": "2026-10-22T23:34:58.977505+00:00",
+  "creator": "https://www.ainimation.studio/interactivos/?project=8c63c927-e53c-419a-a5cf-091e0fcce3a5",
+  "batchId": "0420fbf3-c6c4-4806-a116-a4a9b440c73e",
+  "revision": 9,
+  "checkedAt": "2026-10-22T23:32:34.422Z",
+  "counts": {
+    "available": 5,
+    "unavailable": 0,
+    "unknown": 0,
+    "noConfirmedLink": 0
+  },
+  "scope": "Availability and exact metadata of prepared immutable versions only; not physical playback or 3D-scene operating state.",
+  "release": {
+    "ainimationCommit": "87b2c29926018a209e0ded76c21543f6092365eb",
+    "functionalCommit": "bb3db3f",
+    "assetToken": "bb3db3f",
+    "historyModuleSha256": "4263e01d906b117f9703ff7e0f86e1e0b8e3157c021820d2d9bd158af6e91719",
+    "libraryWorkerVersion": "16e00590-e3d5-4ba5-9116-560311d01e07",
+    "mcpCommit": "c310fa1",
+    "mcpWorkerVersion": "6506ec54-9f82-4d9b-9a96-0bce11ae3cba"
+  },
+  "production": {
+    "screens": [
+      {
+        "link": "https://www.admira.store/xpacios/pantalla/?loc=xtanco-bcn&screen=JTIXtanco_PortaldelAngel_20_Mostrador_1&ainimation=0d3223fb28f44efe9bc4ab23f68ba4390da298ef36af4bda86fba54ea59cfff4&lang=es",
+        "name": "Xtanco Barcelona · Mostrador panel",
+        "state": "success",
+        "versionState": "available"
+      },
+      {
+        "link": "https://www.admira.store/xpacios/pantalla/?loc=xtanco&screen=JTIXtanco_CalledeSantaRosa_4_Mostrador_1&ainimation=0e58c8dce1644c3488f84d1f4339bd4012abc9f2828c42c193fc8695d1d28d84&lang=es",
+        "name": "Xtanco · Mostrador panel",
+        "state": "success",
+        "versionState": "available"
+      },
+      {
+        "link": "https://www.admira.store/xpacios/pantalla/?loc=xtanco-valencia&screen=JTIXtanco_CarrerdeColon_22_Mostrador_1&ainimation=afd5917d36d94dc09894394e8a0612fc5f0acf6700e54ec49d328e71a93972e2&lang=es",
+        "name": "Xtanco Valencia · Mostrador panel",
+        "state": "success",
+        "versionState": "available"
+      },
+      {
+        "link": "https://www.admira.store/xpacios/pantalla/?loc=admira-loterias&screen=SinProyecto_GranVia_32_Mostrador_1&ainimation=d15a31e136d6477dbbd4046e6036fb5227afe72ae41542c3ace5d4a5d52af1cc&lang=es",
+        "name": "Admira Loterías · Boletos kiosk",
+        "state": "success",
+        "versionState": "available"
+      },
+      {
+        "link": "https://www.admira.store/xpacios/pantalla/?loc=admira-prensa&screen=SinProyecto_PlazadeCibeles_Mostrador_1&ainimation=f146668cd2ae4557bb7baf53f91aaea4d047e0a91eea4b55b83ce03063353096&lang=es",
+        "name": "Admira Prensa · Mostrador revista",
+        "state": "success",
+        "versionState": "available"
+      }
+    ],
+    "csvRows": 5,
+    "csvColumns": 10,
+    "csvTimestampProjectRevisionDestinationsStatesReasonsAndLinksExact": true,
+    "utf8BomAndAccentsVerified": true,
+    "originalDeliveryCsvByteIdentical": true,
+    "availableReportUnchangedExceptCheckTime": true,
+    "checkReportSha256": "0350801593fec998a3467ca31f0678301130cf6514a4721d91cca7be3b6a5641",
+    "historyBatchCount": 2,
+    "historyExactLinkCount": 10,
+    "projectCount": 3,
+    "noGoogleSignIn": true,
+    "newDeliveries": 0,
+    "assignments": 0,
+    "inventoryChanges": 0,
+    "panelMoved": false,
+    "panelResized": false,
+    "dialogBoundsUnchanged": true
+  },
+  "isolatedInternalBrowser": {
+    "simulatedResponsesOnly": true,
+    "states": [
+      "unknown",
+      "unknown",
+      "unknown",
+      "unknown"
+    ],
+    "preparedStatesUnchanged": [
+      "success",
+      "success",
+      "success",
+      "success"
+    ],
+    "labels": [
+      "No se pudo comprobar la versión · Fallo de conexión o consulta",
+      "No se pudo comprobar la versión · Respuesta HTTP 503",
+      "No se pudo comprobar la versión · Datos de respuesta ilegibles",
+      "No se pudo comprobar la versión · Tiempo de espera agotado"
+    ],
+    "csvReasonsMatchVisibleLabels": true,
+    "noRawErrorsExposed": true,
+    "labelsNoHorizontalOverflow": true,
+    "temporaryTabClosed": true,
+    "temporaryLocalServerStopped": true,
+    "noProductionErrorsCreated": true
+  },
+  "reasonContract": {
+    "timeout": "Includes request and JSON-body deadlines, including abort-triggered body rejection",
+    "http_error": "Only a valid unsuccessful integer HTTP status; 404/410 stay confirmed absence",
+    "unreadable_response": "Unreadable JSON/body or invalid response status",
+    "connection_failed": "Connection/request failure; blocked redirects may be indistinguishable",
+    "redirectionPolicy": "error",
+    "rawBodiesAndErrorsExposed": false,
+    "automaticRetriesAdded": false,
+    "requestsPerReceiptUnchanged": true,
+    "concurrencyLimit": 3,
+    "deadlineMs": 10000,
+    "csvReasonValidation": true,
+    "noPreparedStateChanges": true
+  },
+  "tests": {
+    "interactive": 141,
+    "mcpHelp": 1,
+    "bilingualPublicMcpHelp": true,
+    "isolatedCases": [
+      "request and body timeout",
+      "abortable body timeout remains timeout",
+      "HTTP 101/302/401/403/429/500/503/599",
+      "confirmed 404/410 absence",
+      "unreadable JSON and malformed status",
+      "connection and blocked redirect without unsupported cause attribution",
+      "forged HTTP codes and unknown reason rejection",
+      "controlled bilingual UI/CSV reasons",
+      "cancelled and late checks cannot export",
+      "existing formula safety and exact receipt/project/revision/destination checks"
+    ]
+  },
+  "localEvidence": [
+    "version-failure-production-ui.json",
+    "version-failure-production.png",
+    "version-failure-cinco-tactiles.csv",
+    "version-failure-isolated-ui.json",
+    "version-failure-isolated.png",
+    "version-failure-isolated.csv",
+    "version-failure-import-verification.json"
+  ]
+}
