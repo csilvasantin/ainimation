@@ -1,0 +1,142 @@
+{
+  "feature": "Comprobar versiones / Check versions",
+  "verifiedAt": "2026-10-22T22:39:35.041387+00:00",
+  "creator": "https://www.ainimation.studio/interactivos/?project=8c63c927-e53c-419a-a5cf-091e0fcce3a5",
+  "scope": "Public metadata of prepared immutable versions; not physical playback or 3D scene operating state.",
+  "release": {
+    "ainimationCommit": "6d864c4efcfe57995938b16574db70cff09c7c69",
+    "functionalCommit": "8daef85",
+    "assetToken": "8daef85",
+    "historyModuleSha256": "433058937179349f6cd8ecbae7e19e79bba7d8489c2435fd4bf5e47097dc14cc",
+    "libraryWorkerVersion": "0042c19e-08d8-4241-8a03-0bb97a731d9e",
+    "mcpCommit": "e03d488",
+    "mcpWorkerVersion": "ed403062-a098-429f-b1ba-71f64bab3625"
+  },
+  "batchId": "0420fbf3-c6c4-4806-a116-a4a9b440c73e",
+  "sourceRevision": 9,
+  "checkedAt": "2026-10-22T22:38:07.892Z",
+  "counts": {
+    "available": 5,
+    "unavailable": 0,
+    "unknown": 0,
+    "noConfirmedLink": 0
+  },
+  "screens": [
+    {
+      "locationId": "xtanco-bcn",
+      "screenId": "JTIXtanco_PortaldelAngel_20_Mostrador_1",
+      "url": "https://www.admira.store/xpacios/pantalla/?loc=xtanco-bcn&screen=JTIXtanco_PortaldelAngel_20_Mostrador_1&ainimation=0d3223fb28f44efe9bc4ab23f68ba4390da298ef36af4bda86fba54ea59cfff4&lang=es",
+      "preparedState": "success",
+      "versionState": "available"
+    },
+    {
+      "locationId": "xtanco",
+      "screenId": "JTIXtanco_CalledeSantaRosa_4_Mostrador_1",
+      "url": "https://www.admira.store/xpacios/pantalla/?loc=xtanco&screen=JTIXtanco_CalledeSantaRosa_4_Mostrador_1&ainimation=0e58c8dce1644c3488f84d1f4339bd4012abc9f2828c42c193fc8695d1d28d84&lang=es",
+      "preparedState": "success",
+      "versionState": "available"
+    },
+    {
+      "locationId": "xtanco-valencia",
+      "screenId": "JTIXtanco_CarrerdeColon_22_Mostrador_1",
+      "url": "https://www.admira.store/xpacios/pantalla/?loc=xtanco-valencia&screen=JTIXtanco_CarrerdeColon_22_Mostrador_1&ainimation=afd5917d36d94dc09894394e8a0612fc5f0acf6700e54ec49d328e71a93972e2&lang=es",
+      "preparedState": "success",
+      "versionState": "available"
+    },
+    {
+      "locationId": "admira-loterias",
+      "screenId": "SinProyecto_GranVia_32_Mostrador_1",
+      "url": "https://www.admira.store/xpacios/pantalla/?loc=admira-loterias&screen=SinProyecto_GranVia_32_Mostrador_1&ainimation=d15a31e136d6477dbbd4046e6036fb5227afe72ae41542c3ace5d4a5d52af1cc&lang=es",
+      "preparedState": "success",
+      "versionState": "available"
+    },
+    {
+      "locationId": "admira-prensa",
+      "screenId": "SinProyecto_PlazadeCibeles_Mostrador_1",
+      "url": "https://www.admira.store/xpacios/pantalla/?loc=admira-prensa&screen=SinProyecto_PlazadeCibeles_Mostrador_1&ainimation=f146668cd2ae4557bb7baf53f91aaea4d047e0a91eea4b55b83ce03063353096&lang=es",
+      "preparedState": "success",
+      "versionState": "available"
+    }
+  ],
+  "productionAssertions": {
+    "fiveAvailable": true,
+    "exactBatch9": true,
+    "exactCheckedLinks": true,
+    "bothBatchesUnchanged": true,
+    "threeProjectsUnchanged": true,
+    "noAutomaticResultsOnOpen": true,
+    "noCrossedOrStaleResult": true,
+    "noPersistedCheck": true,
+    "sameDialogBounds": true,
+    "csvUnchanged": true,
+    "noGoogleNeeded": true
+  },
+  "requestContract": {
+    "endpoint": "https://ainimation-interactive-library-preview.csilvasantin.workers.dev/api/deliveries/{validated-receipt-id}",
+    "method": "GET",
+    "credentials": "omit",
+    "redirect": "error",
+    "concurrency": 3,
+    "deadlineMsPerReceipt": 10000,
+    "exactMatches": [
+      "receipt ID",
+      "project ID",
+      "revision",
+      "Xpacio ID",
+      "screen ID",
+      "touch true"
+    ],
+    "noAutomaticQueries": true,
+    "filterCloseReuseCancelAndDiscardLateResults": true,
+    "resultsAreVolatile": true
+  },
+  "tests": {
+    "interactive": 133,
+    "mcpHelp": 1,
+    "isolatedCases": [
+      "confirmed absence 404/410",
+      "mismatched receipt/project/revision/Xpacio/screen/touch",
+      "server/network/redirect/unreadable responses",
+      "request and body timeouts",
+      "cancel active and queued requests",
+      "pending/error targets without confirmed links",
+      "no automatic open/filter checks",
+      "discard late results after filtering or closing",
+      "unchanged prepared state, history, CSV and copy callbacks"
+    ],
+    "bilingualPublicMcpHelpVerified": true
+  },
+  "preserved": {
+    "batchCount": 2,
+    "exactLinkCount": 10,
+    "projectCount": 3,
+    "revision9CsvByteIdentical": true,
+    "revision9CsvSha256": "34bdae288ab5fe70b4ce6fb8907dd87a33ac190ef8952a658c4ad12523ea4ac9",
+    "googleSignInPerformed": false,
+    "newDeliveriesPrepared": 0,
+    "screenAssignmentsPerformed": 0,
+    "inventoryChanges": 0
+  },
+  "browser": {
+    "type": "internal",
+    "panelMoved": false,
+    "panelResized": false,
+    "dialogBounds": {
+      "bottom": 708,
+      "height": 696,
+      "left": 182.5,
+      "right": 1082.5,
+      "top": 12,
+      "width": 900,
+      "x": 182.5,
+      "y": 12
+    },
+    "fourFullActionLabelsInOneRow": true
+  },
+  "evidenceFiles": [
+    "check-versions-production-ui.json",
+    "check-versions-production.png",
+    "check-versions-five-results.png",
+    "check-versions-v9-after.csv"
+  ]
+}
