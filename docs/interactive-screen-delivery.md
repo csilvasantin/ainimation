@@ -72,3 +72,10 @@ All five published receiver URLs were opened separately in the internal browser:
 ## Native 3D receiver integration · 22 October 2026
 
 The five stable `/xpacios/pantalla/` URLs now open the existing venue-scoped Better 3D renderer. Registry `scene.item/type/aperture` binds four landscape client panels to `counter`, and the lottery portrait screen to `turnKiosk`. Delivery metadata carries the server-side binding. World-space corners project the sandboxed HTML into the real 3D aperture and track orbit/zoom and furniture transforms; reverse faces, occlusion, invalid quads and absent supports fail closed. Restore removes the iframe and retains the same mesh, material and base screen content. This is an interpreted virtual layout, not a measured installation or physical player receipt. See the public Store contract for ES/EN usage and lifecycle.
+
+
+### Production acceptance · five native 3D surfaces · 22 October 2026
+
+Published Store `70f1d90` (`6ac091f7.admira-store.pages.dev`), AINimation `33ddfa3`, library Worker `4c1dfde4-aa78-4e0b-b51e-54830a0292bd` and MCP Worker `b368fd26-a169-44bc-aa33-82bbaf2af4fb`. Public scene/model/receiver sources match the tested files. All five were prepared from the authenticated production Creator, applied to their exact native 3D aperture, touched to navigate from “Ver la carta” to “¿Qué te apetece?”, and restored. The projected delivery iframe was absent after each restore; the same 3D support and its base display remained visible. The fixed snapshot links were reused idempotently; projects and playlists were retained.
+
+The Prensa camera orbit changed the projected transform while keeping the iframe visible; Focus in 3D reframed it and Restore remained functional. A Valencia receipt opened against Prensa was rejected and Show on this screen stayed disabled. The internal browser side panel was neither moved nor resized. Store regression: 128 pass; AINimation: 78 pass; actual MCP help: 1 pass. Full location/IoT/receipt/binding evidence: `five-touch-3d-verification.json`. Physical installation measurements and playback remain outside this virtual integration.

@@ -1,0 +1,124 @@
+{
+  "checkedAt": "2026-10-22T16:37:30.043Z",
+  "browser": "Codex internal browser",
+  "sidePanel": {
+    "moved": false,
+    "resized": false
+  },
+  "scope": "Native interpreted Better 3D venue scenes, exact catalog location and IoT screen identities. No physical-player playback claim.",
+  "deployments": {
+    "store": "https://6ac091f7.admira-store.pages.dev",
+    "storeCommit": "70f1d90",
+    "ainimation": "33ddfa3",
+    "libraryWorker": "4c1dfde4-aa78-4e0b-b51e-54830a0292bd",
+    "mcpWorker": "b368fd26-a169-44bc-aa33-82bbaf2af4fb"
+  },
+  "receivers": [
+    {
+      "location": "xtanco-bcn",
+      "screen": "JTIXtanco_PortaldelAngel_20_Mostrador_1",
+      "deliveryUrl": "https://www.admira.store/xpacios/pantalla/?loc=xtanco-bcn&screen=JTIXtanco_PortaldelAngel_20_Mostrador_1&ainimation=7bb6d789e1b7415abb6b04ce27128e07495941e9dd244cabb8312011cd74ee83&lang=es",
+      "assignmentVerified": true,
+      "touchNavigationVerified": true,
+      "restorationVerified": true,
+      "projected": true,
+      "renderer": "Better 3D",
+      "deliveryId": "7bb6d789e1b7415abb6b04ce27128e07495941e9dd244cabb8312011cd74ee83",
+      "sceneBinding": {
+        "renderer": "better",
+        "item": "counter",
+        "aperture": "customer-panel"
+      },
+      "metadataVerified": true,
+      "sha256": "2577e0144141bb9638e1db6667fd274109375c3a9882c7b8d9c18b4588ed848e"
+    },
+    {
+      "location": "xtanco",
+      "screen": "JTIXtanco_CalledeSantaRosa_4_Mostrador_1",
+      "deliveryUrl": "https://www.admira.store/xpacios/pantalla/?loc=xtanco&screen=JTIXtanco_CalledeSantaRosa_4_Mostrador_1&ainimation=f4abdff9e6ec4946988478baa9ce91f84c76ce23b785460b8992b4c1324a503c&lang=es",
+      "assignmentVerified": true,
+      "touchNavigationVerified": true,
+      "restorationVerified": true,
+      "projected": true,
+      "renderer": "Better 3D",
+      "deliveryId": "f4abdff9e6ec4946988478baa9ce91f84c76ce23b785460b8992b4c1324a503c",
+      "sceneBinding": {
+        "renderer": "better",
+        "item": "counter",
+        "aperture": "customer-panel"
+      },
+      "metadataVerified": true,
+      "sha256": "2577e0144141bb9638e1db6667fd274109375c3a9882c7b8d9c18b4588ed848e"
+    },
+    {
+      "location": "xtanco-valencia",
+      "screen": "JTIXtanco_CarrerdeColon_22_Mostrador_1",
+      "deliveryUrl": "https://www.admira.store/xpacios/pantalla/?loc=xtanco-valencia&screen=JTIXtanco_CarrerdeColon_22_Mostrador_1&ainimation=8df10992abc54021bfd2a31fa6cd7a6106cd9af71a7d4ea8a3cc0ae02780ce17&lang=es",
+      "assignmentVerified": true,
+      "touchNavigationVerified": true,
+      "restorationVerified": true,
+      "projected": true,
+      "renderer": "Better 3D",
+      "deliveryId": "8df10992abc54021bfd2a31fa6cd7a6106cd9af71a7d4ea8a3cc0ae02780ce17",
+      "sceneBinding": {
+        "renderer": "better",
+        "item": "counter",
+        "aperture": "customer-panel"
+      },
+      "metadataVerified": true,
+      "sha256": "2577e0144141bb9638e1db6667fd274109375c3a9882c7b8d9c18b4588ed848e"
+    },
+    {
+      "location": "admira-loterias",
+      "screen": "SinProyecto_GranVia_32_Mostrador_1",
+      "deliveryUrl": "https://www.admira.store/xpacios/pantalla/?loc=admira-loterias&screen=SinProyecto_GranVia_32_Mostrador_1&ainimation=f7d3b9fde5cd41009500bb24f8b8fd5726801b29a3e648ce8445d72313bde900&lang=es",
+      "assignmentVerified": true,
+      "touchNavigationVerified": true,
+      "restorationVerified": true,
+      "projected": true,
+      "renderer": "Better 3D",
+      "deliveryId": "f7d3b9fde5cd41009500bb24f8b8fd5726801b29a3e648ce8445d72313bde900",
+      "sceneBinding": {
+        "renderer": "better",
+        "item": "turnKiosk",
+        "aperture": "portrait-kiosk"
+      },
+      "metadataVerified": true,
+      "sha256": "2577e0144141bb9638e1db6667fd274109375c3a9882c7b8d9c18b4588ed848e"
+    },
+    {
+      "location": "admira-prensa",
+      "screen": "SinProyecto_PlazadeCibeles_Mostrador_1",
+      "deliveryUrl": "https://www.admira.store/xpacios/pantalla/?loc=admira-prensa&screen=SinProyecto_PlazadeCibeles_Mostrador_1&ainimation=6c5602c4f7e24a5f8e76651681d026fe52f00da99200471d963bbca67a130ea6&lang=es",
+      "assignmentVerified": true,
+      "touchNavigationVerified": true,
+      "restorationVerified": true,
+      "projected": true,
+      "renderer": "Better 3D",
+      "deliveryId": "6c5602c4f7e24a5f8e76651681d026fe52f00da99200471d963bbca67a130ea6",
+      "sceneBinding": {
+        "renderer": "better",
+        "item": "counter",
+        "aperture": "customer-panel"
+      },
+      "metadataVerified": true,
+      "sha256": "2577e0144141bb9638e1db6667fd274109375c3a9882c7b8d9c18b4588ed848e"
+    }
+  ],
+  "cameraOrbit": {
+    "location": "admira-prensa",
+    "projectionChanged": true,
+    "projectionRemainedVisible": true,
+    "refocusVerified": true
+  },
+  "crossVenueRejection": {
+    "deliveryLocation": "xtanco-valencia",
+    "receiverLocation": "admira-prensa",
+    "applyEnabled": false
+  },
+  "regression": {
+    "store": 128,
+    "ainimation": 78,
+    "mcp": 1
+  }
+}
