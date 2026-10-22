@@ -1,0 +1,57 @@
+{
+  "verifiedAt": "2026-10-22T21:35:24.419918+00:00",
+  "scope": "Copy confirmed links from the chosen batch; no new deliveries, assignments or sync.",
+  "browser": "Internal browser; panel neither moved nor resized.",
+  "chosenBatch": {
+    "id": "0420fbf3-c6c4-4806-a116-a4a9b440c73e",
+    "revision": 9,
+    "query": "versión 9",
+    "links": [
+      "https://www.admira.store/xpacios/pantalla/?loc=xtanco-bcn&screen=JTIXtanco_PortaldelAngel_20_Mostrador_1&ainimation=0d3223fb28f44efe9bc4ab23f68ba4390da298ef36af4bda86fba54ea59cfff4&lang=es",
+      "https://www.admira.store/xpacios/pantalla/?loc=xtanco&screen=JTIXtanco_CalledeSantaRosa_4_Mostrador_1&ainimation=0e58c8dce1644c3488f84d1f4339bd4012abc9f2828c42c193fc8695d1d28d84&lang=es",
+      "https://www.admira.store/xpacios/pantalla/?loc=xtanco-valencia&screen=JTIXtanco_CarrerdeColon_22_Mostrador_1&ainimation=afd5917d36d94dc09894394e8a0612fc5f0acf6700e54ec49d328e71a93972e2&lang=es",
+      "https://www.admira.store/xpacios/pantalla/?loc=admira-loterias&screen=SinProyecto_GranVia_32_Mostrador_1&ainimation=d15a31e136d6477dbbd4046e6036fb5227afe72ae41542c3ace5d4a5d52af1cc&lang=es",
+      "https://www.admira.store/xpacios/pantalla/?loc=admira-prensa&screen=SinProyecto_PlazadeCibeles_Mostrador_1&ainimation=f146668cd2ae4557bb7baf53f91aaea4d047e0a91eea4b55b83ce03063353096&lang=es"
+    ]
+  },
+  "clipboard": {
+    "method": "Native Copy links button, followed by native paste into a temporary localhost textarea. The temporary tab and server were closed.",
+    "exactTextMatch": true,
+    "confirmedLinks": 5,
+    "targetsWithoutLink": 0,
+    "characters": 1206,
+    "sha256": "f5f1a87e398980e16356d05d64029bf29b2e48760552a9c5d0d356dd0bd82f28",
+    "uiStatus": "5 enlaces copiados · 0 destinos sin enlace.",
+    "priorContentsNotSaved": true
+  },
+  "checks": {
+    "oneFilteredBatchOnly": true,
+    "copyStatusOnlyAfterButton": true,
+    "noAutomaticCopyOnOpenFilterOrReload": true,
+    "exactFiveVersion9Links": true,
+    "twoBatchIdsAndTenLinksRetained": true,
+    "threeProjectsRetained": true,
+    "noGoogleRequired": true,
+    "oldCsvByteIdentical": true,
+    "actualBilingualMcpHelp": true
+  },
+  "csvSha256": "2dd81a6d15ab5bd73bc79792e11424656d9e5a0d47bb48f66f36532b51042b0f",
+  "isolatedTests": {
+    "interactivePassed": 120,
+    "actualMcpHelpPassed": 1,
+    "clipboardDeniedShowsSelectableReadOnlyFallback": true,
+    "clipboardAbsentShowsFallback": true,
+    "failureNeverClaimsSuccess": true,
+    "partialBatchCountsMissingWithoutFabricatingUrls": true,
+    "emptyCopyDisabled": true,
+    "repeatedClicksBlockedWhilePending": true,
+    "exactBatchCsvReuseAndStorageRetained": true,
+    "invalidLinksRejected": true
+  },
+  "releases": {
+    "ainimation": "96eb21165ca1172d3fe7a54f021702c6d54cb374",
+    "assets": "94a846a",
+    "libraryWorker": "190738d1-fac4-4580-8981-aba5f30844cd",
+    "mcpWorker": "78571633-0523-434b-8491-5db0cce4f95a"
+  }
+}
