@@ -146,6 +146,6 @@ if($('director'))directorWorkspace=mountDirectorWorkspace({button:$('director'),
 },onCancel:plan=>restoreDirectorWorkspace(storage,plan),onReturn:({id,revision:returnedRevision})=>{
  const latest=readLibrary(storage),record=latest.data?.projects.find(r=>r.id===id);
  if(!latest.ok||dirty||id!==activeId||record?.revision!==returnedRevision)throw Error('El proyecto cambió durante el retorno. El trabajo de Director se conserva; recupera la biblioteca antes de seguir.');
- activate(latest);announce('Cambios de Director recuperados. Tu sesión del Creador se conserva.');
+ activate({ok:true,data:{...latest.data,activeId:id}});announce('Cambios de Director recuperados. Tu sesión del Creador se conserva.');
  if(cloudToken)$('cloudStatus').textContent='Cuenta verificada. Cambios de Director recuperados; ya puedes sincronizar y enviar.';
 },onError:error=>announce(error.message,true)});
