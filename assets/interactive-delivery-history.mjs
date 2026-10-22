@@ -41,7 +41,7 @@ export function deliveryBatchCsv(input,language='es'){
  const rows=b.results.map(r=>[b.createdAt,b.projectTitle,b.revision,r.locationName,r.locationId,r.screenName,r.screenId,r.status==='success'?(en?'Prepared':'Preparado'):r.status==='error'?(en?'Not prepared':'No preparado'):(en?'Unconfirmed':'Sin confirmación'),r.status==='success'?r.url:'']);
  return{filename:'ainimation-'+(en?'deliveries':'envios')+'-'+b.createdAt.slice(0,10)+'-v'+b.revision+'-'+b.id+'.csv',type:'text/csv;charset=utf-8',content:'\ufeff'+[headers,...rows].map(row=>row.map(quote).join(',')).join('\r\n')+'\r\n'};
 }
-export function mountDeliveryHistory({button,storage,doc=document,download}){
+export function mountDeliveryHistory({button,storage,doc=document,download,onReuse}){
  const t=(es,en)=>doc.documentElement.lang==='en'?en:es,make=(tag,value)=>{const n=doc.createElement(tag);if(value)n.textContent=value;return n;};
  const dialog=make('dialog');dialog.className='delivery-history-dialog';dialog.setAttribute('aria-label',t('Historial de envíos','Delivery history'));
  const title=make('h2',t('Historial de envíos','Delivery history')),hint=make('p',t('Últimos 30 lotes guardados en este navegador. Los enlaces conservan su versión; abrirlos no asigna el interactivo automáticamente.','Last 30 batches saved in this browser. Links preserve their version; opening them does not automatically assign the interactive.')),status=make('p'),list=make('div'),close=make('button',t('Cerrar historial','Close history'));status.setAttribute('role','status');close.type='button';close.onclick=()=>dialog.close();dialog.addEventListener('cancel',event=>{event.preventDefault();dialog.close();});dialog.append(title,hint,status,list,close);doc.body.append(dialog);
@@ -54,7 +54,9 @@ export function mountDeliveryHistory({button,storage,doc=document,download}){
     if(r.url){const a=make('a',t('Abrir en admira.store','Open in admira.store'));a.href=r.url;a.target='_blank';a.rel='noopener noreferrer';a.setAttribute('aria-label',t('Abrir ','Open ')+r.locationName+' · '+r.screenName);li.append(a);}ul.append(li);
    }const exportButton=make('button',t('Descargar CSV','Download CSV'));exportButton.type='button';exportButton.className='history-csv';exportButton.setAttribute('aria-label',t('Descargar CSV de ','Download CSV for ')+b.projectTitle+' · '+t('versión ','version ')+b.revision+' · '+b.createdAt);
    exportButton.onclick=()=>{try{const file=deliveryBatchCsv(b,doc.documentElement.lang);if(download)download(file);else{const url=URL.createObjectURL(new Blob([file.content],{type:file.type})),a=doc.createElement('a');a.href=url;a.download=file.filename;try{a.click();}finally{setTimeout(()=>URL.revokeObjectURL(url),30000);}}status.textContent=t('Informe CSV preparado: ','CSV report prepared: ')+b.results.length+' '+t('pantallas.','screens.');}catch{status.textContent=t('No se pudo preparar el CSV. El historial se conserva; vuelve a intentarlo.','The CSV could not be prepared. History is preserved; try again.');}};
-   details.append(exportButton,ul);list.append(details);
+   details.append(exportButton);
+   if(onReuse){const reuse=make('button',t('Usar estas pantallas','Use these screens'));reuse.type='button';reuse.className='history-reuse';reuse.setAttribute('aria-label',t('Usar pantallas de ','Use screens from ')+b.projectTitle+' · '+t('versión ','version ')+b.revision+' · '+b.createdAt);reuse.onclick=()=>{dialog.close();return onReuse(b.results.map(r=>({locationId:r.locationId,locationName:r.locationName,screenId:r.screenId,screenName:r.screenName})));};details.append(reuse);}
+   details.append(ul);list.append(details);
   }dialog.showModal();
  };
  return dialog;
