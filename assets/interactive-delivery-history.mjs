@@ -48,9 +48,10 @@ export function deliveryBatchOutcome(batch){
 }
 const searchable=value=>String(value).normalize('NFD').replace(/\p{M}/gu,'').toLowerCase().trim();
 export function filterDeliveryHistory(batches,{query='',projectId='',outcome=''}={}){
- const words=searchable(query).split(/\s+/).filter(Boolean);
+ const normalized=searchable(query),versionPattern=/(?:^|\s)(?:version|v)\s*(\d+)(?=\s|$)/g;
+ const versions=[...normalized.matchAll(versionPattern)].map(match=>Number(match[1])),words=normalized.replace(versionPattern,' ').split(/\s+/).filter(Boolean);
  return batches.filter(b=>{
-  if((projectId&&b.projectId!==projectId)||(outcome&&deliveryBatchOutcome(b)!==outcome))return false;
+  if((projectId&&b.projectId!==projectId)||(outcome&&deliveryBatchOutcome(b)!==outcome)||versions.some(version=>b.revision!==version))return false;
   const index=searchable([b.projectTitle,b.projectId,'version '+b.revision,'v'+b.revision,...b.results.flatMap(r=>[r.locationName,r.locationId,r.screenName,r.screenId])].join(' '));
   return words.every(word=>index.includes(word));
  });

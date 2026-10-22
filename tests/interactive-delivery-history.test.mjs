@@ -20,11 +20,12 @@ test('el resultado del lote nunca presenta pendientes o envíos interrumpidos co
  for(const status of ['pending','sending'])assert.equal(deliveryBatchOutcome(batch('b',[result('a'),result('b','error'),result('c',status)])),'unconfirmed');
 });
 test('búsqueda sin acentos ni distinción de mayúsculas combina proyecto, versión, Xpacio y pantalla sin modificar ni reordenar lotes',()=>{
- const a={...batch('a'),projectTitle:'Catálogo café',results:[{...result(),locationName:'Loterías',screenName:'Tótem táctil'}]},b={...batch('b'),revision:9,projectId:'otro-proyecto',projectTitle:'Otro catálogo'};
+ const a={...batch('a'),projectId:'project-1-9',projectTitle:'Catálogo café',results:[{...result(),locationName:'Loterías',screenName:'Tótem táctil'}]},b={...batch('b'),revision:9,projectId:'otro-proyecto-8',projectTitle:'Otro catálogo'};
  const all=[b,a],before=JSON.stringify(all);
  for(const query of ['CATALOGO CAFE','versión 8','v8','loterias','TOTEM TACTIL','cafe tactil v8'])assert.deepEqual(filterDeliveryHistory(all,{query}).map(b=>b.id),['a'],query);
  assert.deepEqual(filterDeliveryHistory(all,{query:'version 9'}).map(b=>b.id),['b']);
- assert.deepEqual(filterDeliveryHistory(all,{query:'venue touch',projectId:'project-1',outcome:'complete'}).map(b=>b.id),['a']);
+ assert.deepEqual(filterDeliveryHistory(all,{query:'venue touch',projectId:a.projectId,outcome:'complete'}).map(b=>b.id),['a']);
+ assert.deepEqual(filterDeliveryHistory([a,{...a,id:'v80',revision:80}],{query:'v8'}).map(b=>b.id),['a']);
  assert.equal(filterDeliveryHistory(all,{query:'no existe'}).length,0);assert.equal(JSON.stringify(all),before);
 });
 function historyView(s,language='es'){
