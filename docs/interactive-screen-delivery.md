@@ -58,3 +58,12 @@ Browser preference from Carlos: use the internal Codex browser for tests, withou
 Refine screen and hotspot interactives in the existing Director: Stage sprites, Cast images, Score markers and native XPL jump rules. Save updates the same project with revision protection; Return to Creator restores the previous movie. See [bilingual tutorial](interactive-director.md). Sync and create a new delivery after editing; existing snapshots are unchanged.
 
 The five discovered exact IoT IDs now have dedicated virtual receivers in `/xpacios/pantalla/`. These views restore their original “No content assigned” baseline. They do not yet bind those IDs to calibrated 3D scene meshes or physical hardware. The two Starbucks receivers retain their existing scene behavior. Source registry, contract and ES/EN usage: https://www.admira.store/admira-xp/docs/ainimation-screen-delivery.md.
+
+
+### Publication and internal browser verification · 22 October 2026
+
+AINimation main `d55d19b` (assets `57d909c`), library Worker `6c76659a-3372-42ac-81d4-23a9d3eef477`; Store main `d983304`, deployment `5dd27d04.admira-store.pages.dev`; actual MCP help Worker `aafc0129-f568-499e-abe1-fbeb88ccbef5`. Public asset hashes match the tested source; the public MCP topic describes seven receivers, their virtual scope and the Director workflow. Regression: 82 AINimation/Director checks, 6 receiver checks and the actual MCP help contract pass.
+
+In the internal browser on the production domain, duplicated “Mi cafetería”, opened the copy in Director, edited its first title to “Tu pausa empieza en Director” and changed X to 8%. Save succeeded, preview showed the new layout, “Ver la carta” navigated to the second screen, and Return to Creator retained the edited title and preview. The original project remains in the library. No new snapshot was sent during this test.
+
+All five published receiver URLs were opened separately in the internal browser: exact venue and IoT ID, confirmed virtual touch type, receiver connected, and baseline “Sin contenido asignado”. Production assignment and restoration of these five are **not yet verified**: Google sign-in in the internal browser did not complete after the page reload; the account must be verified before delivery writes. Unit tests cover exact-ID validation, assignment and baseline preservation for all five. This is not a substitute for the pending authenticated production checks.
