@@ -48,6 +48,28 @@ export function deliveryBatchLinks(input,language='es'){
  const text=[line(b.projectTitle)+' · '+(en?'Version ':'Versión ')+b.revision,summary,...confirmed.map(r=>line(r.locationName)+' · '+line(r.screenName)+'\n'+r.url)].join('\n\n');
  return{text,count,missing,summary};
 }
+const VERSION_METADATA_URL='https://ainimation-interactive-library-preview.csilvasantin.workers.dev/api/deliveries/';
+// Read public metadata only. Never send credentials or follow a receipt redirect.
+export async function checkDeliveryBatchVersions(input,{request=fetch,signal,timeoutMs=10000,now=()=>new Date().toISOString()}={}){
+ const b=cleanBatch(input),waiting=[],results=b.results.map((r,i)=>{if(r.status==='success')waiting.push(i);return{locationId:r.locationId,screenId:r.screenId,state:r.status==='success'?'unknown':'no_link',reason:r.status==='success'?'not_checked':'no_link'};});
+ const limit=Math.max(1,Math.min(Number.isFinite(timeoutMs)?timeoutMs:10000,15000));let next=0;
+ const inspect=async r=>{
+  const id=new URL(r.url).searchParams.get('ainimation'),controller=new AbortController();let timer,cancel;
+  const deadline=new Promise((_,reject)=>{cancel=()=>{controller.abort();reject(Error('cancelled'));};timer=setTimeout(()=>{controller.abort();reject(Error('timeout'));},limit);signal?.addEventListener('abort',cancel,{once:true});});
+  const read=async()=>{
+   const response=await request(VERSION_METADATA_URL+id,{method:'GET',credentials:'omit',redirect:'error',cache:'no-store',referrerPolicy:'no-referrer',signal:controller.signal});
+   if(response.status===404||response.status===410)return{state:'unavailable',reason:'not_found'};
+   if(!response.ok)return{state:'unknown',reason:'request_failed'};
+   const data=await response.json(),matches=data?.id===id&&data.projectId===b.projectId&&data.sourceRevision===b.revision&&data.destination?.id===r.locationId&&data.destination.screen?.id===r.screenId&&data.destination.screen.touch===true;
+   return matches?{state:'available',reason:'matched'}:{state:'unavailable',reason:'mismatch'};
+  };
+  try{return await Promise.race([read(),deadline]);}catch{return{state:'unknown',reason:'request_failed'};}finally{clearTimeout(timer);signal?.removeEventListener('abort',cancel);}
+ };
+ const work=async()=>{while(next<waiting.length&&!signal?.aborted){const i=waiting[next++];results[i]={...results[i],...await inspect(b.results[i])};}};
+ await Promise.all(Array.from({length:Math.min(3,waiting.length)},work));
+ const counts={available:0,unavailable:0,unknown:0,no_link:0};for(const r of results)counts[r.state]++;
+ return{batchId:b.id,checkedAt:date(now()),cancelled:signal?.aborted===true,counts,results};
+}
 // An interrupted batch is never called complete, even if some targets succeeded.
 export function deliveryBatchOutcome(batch){
  if(batch.results.some(r=>r.status==='pending'||r.status==='sending'))return'unconfirmed';
@@ -63,10 +85,11 @@ export function filterDeliveryHistory(batches,{query='',projectId='',outcome=''}
   return words.every(word=>index.includes(word));
  });
 }
-export function mountDeliveryHistory({button,storage,doc=document,download,onReuse,writeClipboard}){
+export function mountDeliveryHistory({button,storage,doc=document,download,onReuse,writeClipboard,versionRequest=fetch,versionTimeoutMs=10000}){
  const t=(es,en)=>doc.documentElement.lang==='en'?en:es,make=(tag,value)=>{const n=doc.createElement(tag);if(value)n.textContent=value;return n;};
+ let viewVersion=0;const checks=new Set(),cancelChecks=()=>{viewVersion++;for(const controller of checks)controller.abort();checks.clear();};
  const dialog=make('dialog');dialog.className='delivery-history-dialog';dialog.setAttribute('aria-label',t('Historial de envíos','Delivery history'));
- const title=make('h2',t('Historial de envíos','Delivery history')),hint=make('p',t('Últimos 30 lotes guardados en este navegador. Los enlaces conservan su versión; abrirlos no asigna el interactivo automáticamente.','Last 30 batches saved in this browser. Links preserve their version; opening them does not automatically assign the interactive.')),status=make('p'),list=make('div'),close=make('button',t('Cerrar historial','Close history'));status.setAttribute('role','status');list.className='history-batches';close.type='button';close.onclick=()=>dialog.close();dialog.addEventListener('cancel',event=>{event.preventDefault();dialog.close();});
+ const title=make('h2',t('Historial de envíos','Delivery history')),hint=make('p',t('Últimos 30 lotes guardados en este navegador. Los enlaces conservan su versión; abrirlos no asigna el interactivo automáticamente.','Last 30 batches saved in this browser. Links preserve their version; opening them does not automatically assign the interactive.')),status=make('p'),list=make('div'),close=make('button',t('Cerrar historial','Close history'));status.setAttribute('role','status');list.className='history-batches';close.type='button';close.onclick=()=>{cancelChecks();dialog.close();};dialog.addEventListener('cancel',event=>{event.preventDefault();cancelChecks();dialog.close();});dialog.addEventListener('close',cancelChecks);
  const filters=make('div'),searchLabel=make('label',t('Buscar lotes','Search batches')),query=make('input'),projectLabel=make('label',t('Proyecto del lote','Batch project')),project=make('select'),outcomeLabel=make('label',t('Resultado del lote','Batch result')),outcome=make('select'),clear=make('button',t('Quitar filtros','Clear filters'));
  filters.className='history-filters';searchLabel.className='history-search';query.className='history-query';query.type='search';query.placeholder=t('Proyecto, versión, Xpacio o pantalla','Project, version, Xpace or screen');query.maxLength=300;project.className='history-project';outcome.className='history-outcome';clear.className='history-clear';clear.type='button';
  const option=(value,label)=>{const n=make('option',label);n.value=value;return n;};
@@ -75,14 +98,15 @@ export function mountDeliveryHistory({button,storage,doc=document,download,onReu
  searchLabel.append(query);projectLabel.append(project);outcomeLabel.append(outcome);filters.append(searchLabel,projectLabel,outcomeLabel,clear);dialog.append(title,hint,filters,status,list,close);doc.body.append(dialog);
  let batches=[];
  const render=()=>{
+  cancelChecks();
   const shown=filterDeliveryHistory(batches,{query:query.value,projectId:project.value,outcome:outcome.value});list.replaceChildren();
   clear.disabled=!query.value&&!project.value&&!outcome.value;
   status.textContent=shown.length+' '+t('de','of')+' '+batches.length+' '+t('lotes.','batches.')+(!shown.length?' '+t('No hay lotes que coincidan. Quita los filtros para ver todos.','No matching batches. Clear filters to see all batches.'):'');
   for(const [i,b] of shown.entries()){
-   const details=make('details'),summary=make('summary'),ul=make('ul'),actions=make('div');details.open=i===0;details.dataset.batchId=b.id;ul.className='delivery-results';actions.className='history-batch-actions';actions.setAttribute('role','group');actions.setAttribute('aria-label',t('Acciones del lote','Batch actions'));
+   const details=make('details'),summary=make('summary'),ul=make('ul'),actions=make('div'),versionRows=[];details.open=i===0;details.dataset.batchId=b.id;ul.className='delivery-results';actions.className='history-batch-actions';actions.setAttribute('role','group');actions.setAttribute('aria-label',t('Acciones del lote','Batch actions'));
    const successful=b.results.filter(r=>r.status==='success').length;summary.textContent=b.projectTitle+' · '+t('Versión ','Version ')+b.revision+' · '+new Date(b.createdAt).toLocaleString(doc.documentElement.lang==='en'?'en-GB':'es-ES')+' · '+successful+'/'+b.results.length+' '+t('preparados','prepared')+' · '+outcomeText(deliveryBatchOutcome(b));details.append(summary);
    for(const r of b.results){const li=make('li'),name=make('strong',r.locationName+' · '+r.screenName),label=make('span',r.status==='success'?t('Versión preparada','Version prepared'):r.status==='error'?t('No preparado','Not prepared'):t('Sin confirmación · el lote se interrumpió','Unconfirmed · the batch was interrupted'));li.dataset.state=r.status;li.append(name,label);
-    if(r.url){const a=make('a',t('Abrir en admira.store','Open in admira.store'));a.href=r.url;a.target='_blank';a.rel='noopener noreferrer';a.setAttribute('aria-label',t('Abrir ','Open ')+r.locationName+' · '+r.screenName);li.append(a);}ul.append(li);
+    if(r.url){const a=make('a',t('Abrir en admira.store','Open in admira.store'));a.href=r.url;a.target='_blank';a.rel='noopener noreferrer';a.setAttribute('aria-label',t('Abrir ','Open ')+r.locationName+' · '+r.screenName);li.append(a);}const version=make('span');version.className='history-version-state';version.hidden=true;versionRows.push(version);li.append(version);ul.append(li);
    }const exportButton=make('button',t('Descargar CSV','Download CSV'));exportButton.type='button';exportButton.className='history-csv';exportButton.setAttribute('aria-label',t('Descargar CSV de ','Download CSV for ')+b.projectTitle+' · '+t('versión ','version ')+b.revision+' · '+b.createdAt);
    exportButton.onclick=()=>{try{const file=deliveryBatchCsv(b,doc.documentElement.lang);if(download)download(file);else{const url=URL.createObjectURL(new Blob([file.content],{type:file.type})),a=doc.createElement('a');a.href=url;a.download=file.filename;try{a.click();}finally{setTimeout(()=>URL.revokeObjectURL(url),30000);}}status.textContent=t('Informe CSV preparado: ','CSV report prepared: ')+b.results.length+' '+t('pantallas.','screens.');}catch{status.textContent=t('No se pudo preparar el CSV. El historial se conserva; vuelve a intentarlo.','The CSV could not be prepared. History is preserved; try again.');}};
    actions.append(exportButton);
@@ -98,8 +122,19 @@ export function mountDeliveryHistory({button,storage,doc=document,download,onReu
      copyText.value=links.text;fallback.hidden=false;copyStatus.textContent=t('El navegador no ha permitido copiar. Selecciona el texto de abajo: ','The browser did not allow copying. Select the text below: ')+links.summary+'.';copyText.focus();copyText.select();
     }finally{copy.disabled=!links.count;}
    };actions.append(copy);
-   if(onReuse){const reuse=make('button',t('Usar estas pantallas','Use these screens'));reuse.type='button';reuse.className='history-reuse';reuse.setAttribute('aria-label',t('Usar pantallas de ','Use screens from ')+b.projectTitle+' · '+t('versión ','version ')+b.revision+' · '+b.createdAt);reuse.onclick=()=>{dialog.close();return onReuse(b.results.map(r=>({locationId:r.locationId,locationName:r.locationName,screenId:r.screenId,screenName:r.screenName})));};actions.append(reuse);}
-   details.append(actions,copyStatus,fallback,ul);list.append(details);
+   if(onReuse){const reuse=make('button',t('Usar estas pantallas','Use these screens'));reuse.type='button';reuse.className='history-reuse';reuse.setAttribute('aria-label',t('Usar pantallas de ','Use screens from ')+b.projectTitle+' · '+t('versión ','version ')+b.revision+' · '+b.createdAt);reuse.onclick=()=>{cancelChecks();dialog.close();return onReuse(b.results.map(r=>({locationId:r.locationId,locationName:r.locationName,screenId:r.screenId,screenName:r.screenName})));};actions.append(reuse);}
+   const check=make('button',t('Comprobar versiones','Check versions')),checkStatus=make('p');check.type='button';check.className='history-check';check.disabled=!successful;check.setAttribute('aria-label',t('Comprobar versiones de ','Check versions for ')+b.projectTitle+' · '+t('versión ','version ')+b.revision+' · '+b.createdAt);checkStatus.className='history-version-summary';checkStatus.setAttribute('role','status');
+   const versionLabel=result=>result.state==='available'?t('Versión disponible','Version available'):result.state==='no_link'?t('Sin enlace confirmado · sin comprobar','No confirmed link · not checked'):result.reason==='mismatch'?t('Los datos no coinciden con este lote','Metadata does not match this batch'):result.state==='unavailable'?t('Versión no disponible','Version unavailable'):t('No se pudo comprobar la versión','Could not check the version');
+   check.onclick=async()=>{
+    if(check.disabled)return;const turn=viewVersion,controller=new AbortController();checks.add(controller);check.disabled=true;checkStatus.textContent=t('Comprobando versiones…','Checking versions…');
+    versionRows.forEach((row,i)=>{row.hidden=false;row.dataset.versionState=b.results[i].status==='success'?'checking':'no_link';row.textContent=b.results[i].status==='success'?t('Comprobando versión…','Checking version…'):versionLabel({state:'no_link'});});
+    try{
+     const report=await checkDeliveryBatchVersions(b,{request:versionRequest,signal:controller.signal,timeoutMs:versionTimeoutMs});if(turn!==viewVersion||report.cancelled||!dialog.open)return;
+     report.results.forEach((result,i)=>{versionRows[i].dataset.versionState=result.state;versionRows[i].textContent=versionLabel(result);});const c=report.counts;checkStatus.dataset.checkedAt=report.checkedAt;
+     checkStatus.textContent=t('Comprobado ','Checked ')+new Date(report.checkedAt).toLocaleString(doc.documentElement.lang==='en'?'en-GB':'es-ES')+' · '+c.available+' '+t(c.available===1?'disponible':'disponibles','available')+' · '+c.unavailable+' '+t(c.unavailable===1?'no disponible':'no disponibles','unavailable')+' · '+c.unknown+' '+t('sin poder comprobar','could not be checked')+' · '+c.no_link+' '+t('sin enlace confirmado.','without a confirmed link.');
+    }catch{if(turn===viewVersion&&dialog.open){checkStatus.textContent=t('No se pudo completar la comprobación. Vuelve a intentarlo.','The check could not be completed. Try again.');versionRows.forEach((row,i)=>{if(b.results[i].status==='success'){row.dataset.versionState='unknown';row.textContent=versionLabel({state:'unknown'});}});}}
+    finally{checks.delete(controller);if(turn===viewVersion)check.disabled=!successful;}
+   };actions.append(check);details.append(actions,copyStatus,fallback,checkStatus,ul);list.append(details);
   }
  };
  query.oninput=render;project.onchange=render;outcome.onchange=render;clear.onclick=()=>{query.value='';project.value='';outcome.value='';render();};
