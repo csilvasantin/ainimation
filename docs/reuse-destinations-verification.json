@@ -1,0 +1,246 @@
+{
+  "verifiedAt": "2026-10-22T20:38:08.553769+00:00",
+  "scope": "Reuse saved batch destinations for the current saved project. Five virtual 3D receivers; no physical playback claim.",
+  "browser": "Internal browser; panel neither moved nor resized.",
+  "sourceBatch": {
+    "id": "73f155c6-0e9f-486f-9ebb-a6d9f18749ef",
+    "sourceRevision": 8,
+    "createdAt": "2026-10-22T19:35:49.422Z"
+  },
+  "currentProject": {
+    "id": "8c63c927-e53c-419a-a5cf-091e0fcce3a5",
+    "title": "Prueba Director · catálogo y cesta",
+    "sourceRevision": 9,
+    "sha256": "ffd868d1dd77c5f5efe03f1abd940daa709b40d7d1f6b130c7efc196da93c6b5"
+  },
+  "selectedScreens": [
+    {
+      "checked": false,
+      "disabled": false,
+      "name": "Starbucks · Paseo de Gracia 103 · Tótem táctil"
+    },
+    {
+      "checked": false,
+      "disabled": false,
+      "name": "Starbucks · Paseo de Gracia 103 · iPad horizontal"
+    },
+    {
+      "checked": true,
+      "disabled": false,
+      "name": "Xtanco Barcelona · Mostrador panel"
+    },
+    {
+      "checked": true,
+      "disabled": false,
+      "name": "Xtanco · Mostrador panel"
+    },
+    {
+      "checked": true,
+      "disabled": false,
+      "name": "Xtanco Valencia · Mostrador panel"
+    },
+    {
+      "checked": true,
+      "disabled": false,
+      "name": "Admira Loterías · Boletos kiosk"
+    },
+    {
+      "checked": true,
+      "disabled": false,
+      "name": "Admira Prensa · Mostrador revista"
+    }
+  ],
+  "results": [
+    {
+      "name": "Xtanco Barcelona · Mostrador panel",
+      "status": "success",
+      "url": "https://www.admira.store/xpacios/pantalla/?loc=xtanco-bcn&screen=JTIXtanco_PortaldelAngel_20_Mostrador_1&ainimation=0d3223fb28f44efe9bc4ab23f68ba4390da298ef36af4bda86fba54ea59cfff4&lang=es",
+      "metadata": {
+        "id": "0d3223fb28f44efe9bc4ab23f68ba4390da298ef36af4bda86fba54ea59cfff4",
+        "title": "Prueba Director · catálogo y cesta",
+        "projectId": "8c63c927-e53c-419a-a5cf-091e0fcce3a5",
+        "sourceRevision": 9,
+        "sha256": "ffd868d1dd77c5f5efe03f1abd940daa709b40d7d1f6b130c7efc196da93c6b5",
+        "createdAt": "2026-10-22T20:36:48.084Z",
+        "destination": {
+          "id": "xtanco-bcn",
+          "name": "Xtanco Barcelona",
+          "kind": "virtual",
+          "screen": {
+            "id": "JTIXtanco_PortaldelAngel_20_Mostrador_1",
+            "name": "Mostrador panel",
+            "orientation": "landscape",
+            "touch": true,
+            "available": true,
+            "scene": {
+              "renderer": "better",
+              "item": "counter",
+              "aperture": "customer-panel"
+            }
+          }
+        },
+        "playerUrl": "https://ainimation-interactive-library-preview.csilvasantin.workers.dev/api/deliveries/0d3223fb28f44efe9bc4ab23f68ba4390da298ef36af4bda86fba54ea59cfff4/player",
+        "storeUrl": "https://www.admira.store/xpacios/pantalla/?loc=xtanco-bcn&screen=JTIXtanco_PortaldelAngel_20_Mostrador_1&ainimation=0d3223fb28f44efe9bc4ab23f68ba4390da298ef36af4bda86fba54ea59cfff4"
+      }
+    },
+    {
+      "name": "Xtanco · Mostrador panel",
+      "status": "success",
+      "url": "https://www.admira.store/xpacios/pantalla/?loc=xtanco&screen=JTIXtanco_CalledeSantaRosa_4_Mostrador_1&ainimation=0e58c8dce1644c3488f84d1f4339bd4012abc9f2828c42c193fc8695d1d28d84&lang=es",
+      "metadata": {
+        "id": "0e58c8dce1644c3488f84d1f4339bd4012abc9f2828c42c193fc8695d1d28d84",
+        "title": "Prueba Director · catálogo y cesta",
+        "projectId": "8c63c927-e53c-419a-a5cf-091e0fcce3a5",
+        "sourceRevision": 9,
+        "sha256": "ffd868d1dd77c5f5efe03f1abd940daa709b40d7d1f6b130c7efc196da93c6b5",
+        "createdAt": "2026-10-22T20:36:48.211Z",
+        "destination": {
+          "id": "xtanco",
+          "name": "Xtanco",
+          "kind": "virtual",
+          "screen": {
+            "id": "JTIXtanco_CalledeSantaRosa_4_Mostrador_1",
+            "name": "Mostrador panel",
+            "orientation": "landscape",
+            "touch": true,
+            "available": true,
+            "scene": {
+              "renderer": "better",
+              "item": "counter",
+              "aperture": "customer-panel"
+            }
+          }
+        },
+        "playerUrl": "https://ainimation-interactive-library-preview.csilvasantin.workers.dev/api/deliveries/0e58c8dce1644c3488f84d1f4339bd4012abc9f2828c42c193fc8695d1d28d84/player",
+        "storeUrl": "https://www.admira.store/xpacios/pantalla/?loc=xtanco&screen=JTIXtanco_CalledeSantaRosa_4_Mostrador_1&ainimation=0e58c8dce1644c3488f84d1f4339bd4012abc9f2828c42c193fc8695d1d28d84"
+      }
+    },
+    {
+      "name": "Xtanco Valencia · Mostrador panel",
+      "status": "success",
+      "url": "https://www.admira.store/xpacios/pantalla/?loc=xtanco-valencia&screen=JTIXtanco_CarrerdeColon_22_Mostrador_1&ainimation=afd5917d36d94dc09894394e8a0612fc5f0acf6700e54ec49d328e71a93972e2&lang=es",
+      "metadata": {
+        "id": "afd5917d36d94dc09894394e8a0612fc5f0acf6700e54ec49d328e71a93972e2",
+        "title": "Prueba Director · catálogo y cesta",
+        "projectId": "8c63c927-e53c-419a-a5cf-091e0fcce3a5",
+        "sourceRevision": 9,
+        "sha256": "ffd868d1dd77c5f5efe03f1abd940daa709b40d7d1f6b130c7efc196da93c6b5",
+        "createdAt": "2026-10-22T20:36:48.334Z",
+        "destination": {
+          "id": "xtanco-valencia",
+          "name": "Xtanco Valencia",
+          "kind": "virtual",
+          "screen": {
+            "id": "JTIXtanco_CarrerdeColon_22_Mostrador_1",
+            "name": "Mostrador panel",
+            "orientation": "landscape",
+            "touch": true,
+            "available": true,
+            "scene": {
+              "renderer": "better",
+              "item": "counter",
+              "aperture": "customer-panel"
+            }
+          }
+        },
+        "playerUrl": "https://ainimation-interactive-library-preview.csilvasantin.workers.dev/api/deliveries/afd5917d36d94dc09894394e8a0612fc5f0acf6700e54ec49d328e71a93972e2/player",
+        "storeUrl": "https://www.admira.store/xpacios/pantalla/?loc=xtanco-valencia&screen=JTIXtanco_CarrerdeColon_22_Mostrador_1&ainimation=afd5917d36d94dc09894394e8a0612fc5f0acf6700e54ec49d328e71a93972e2"
+      }
+    },
+    {
+      "name": "Admira Loterías · Boletos kiosk",
+      "status": "success",
+      "url": "https://www.admira.store/xpacios/pantalla/?loc=admira-loterias&screen=SinProyecto_GranVia_32_Mostrador_1&ainimation=d15a31e136d6477dbbd4046e6036fb5227afe72ae41542c3ace5d4a5d52af1cc&lang=es",
+      "metadata": {
+        "id": "d15a31e136d6477dbbd4046e6036fb5227afe72ae41542c3ace5d4a5d52af1cc",
+        "title": "Prueba Director · catálogo y cesta",
+        "projectId": "8c63c927-e53c-419a-a5cf-091e0fcce3a5",
+        "sourceRevision": 9,
+        "sha256": "ffd868d1dd77c5f5efe03f1abd940daa709b40d7d1f6b130c7efc196da93c6b5",
+        "createdAt": "2026-10-22T20:36:48.447Z",
+        "destination": {
+          "id": "admira-loterias",
+          "name": "Admira Loterías",
+          "kind": "virtual",
+          "screen": {
+            "id": "SinProyecto_GranVia_32_Mostrador_1",
+            "name": "Boletos kiosk",
+            "orientation": "portrait",
+            "touch": true,
+            "available": true,
+            "scene": {
+              "renderer": "better",
+              "item": "turnKiosk",
+              "aperture": "portrait-kiosk"
+            }
+          }
+        },
+        "playerUrl": "https://ainimation-interactive-library-preview.csilvasantin.workers.dev/api/deliveries/d15a31e136d6477dbbd4046e6036fb5227afe72ae41542c3ace5d4a5d52af1cc/player",
+        "storeUrl": "https://www.admira.store/xpacios/pantalla/?loc=admira-loterias&screen=SinProyecto_GranVia_32_Mostrador_1&ainimation=d15a31e136d6477dbbd4046e6036fb5227afe72ae41542c3ace5d4a5d52af1cc"
+      }
+    },
+    {
+      "name": "Admira Prensa · Mostrador revista",
+      "status": "success",
+      "url": "https://www.admira.store/xpacios/pantalla/?loc=admira-prensa&screen=SinProyecto_PlazadeCibeles_Mostrador_1&ainimation=f146668cd2ae4557bb7baf53f91aaea4d047e0a91eea4b55b83ce03063353096&lang=es",
+      "metadata": {
+        "id": "f146668cd2ae4557bb7baf53f91aaea4d047e0a91eea4b55b83ce03063353096",
+        "title": "Prueba Director · catálogo y cesta",
+        "projectId": "8c63c927-e53c-419a-a5cf-091e0fcce3a5",
+        "sourceRevision": 9,
+        "sha256": "ffd868d1dd77c5f5efe03f1abd940daa709b40d7d1f6b130c7efc196da93c6b5",
+        "createdAt": "2026-10-22T20:36:48.553Z",
+        "destination": {
+          "id": "admira-prensa",
+          "name": "Admira Prensa",
+          "kind": "virtual",
+          "screen": {
+            "id": "SinProyecto_PlazadeCibeles_Mostrador_1",
+            "name": "Mostrador revista",
+            "orientation": "landscape",
+            "touch": true,
+            "available": true,
+            "scene": {
+              "renderer": "better",
+              "item": "counter",
+              "aperture": "customer-panel"
+            }
+          }
+        },
+        "playerUrl": "https://ainimation-interactive-library-preview.csilvasantin.workers.dev/api/deliveries/f146668cd2ae4557bb7baf53f91aaea4d047e0a91eea4b55b83ce03063353096/player",
+        "storeUrl": "https://www.admira.store/xpacios/pantalla/?loc=admira-prensa&screen=SinProyecto_PlazadeCibeles_Mostrador_1&ainimation=f146668cd2ae4557bb7baf53f91aaea4d047e0a91eea4b55b83ce03063353096"
+      }
+    }
+  ],
+  "checks": {
+    "historyOpensWithoutGoogle": true,
+    "newDeliveryRequiresGoogle": true,
+    "freshDestinationQuery": true,
+    "exactFivePreselected": true,
+    "otherScreensUnselected": true,
+    "previewUsesCurrentRevision9InsteadOfOld8": true,
+    "noLinksBeforeExplicitPrepare": true,
+    "oneExplicitPrepareFiveAction": true,
+    "fivePreparedZeroErrors": true,
+    "previousBatchLinksUnchanged": true,
+    "previousCsvByteIdentical": true,
+    "oldAndNewBatchesRecoveredAfterReload": true,
+    "threeProjectsRetained": true,
+    "actualBilingualMcpHelp": true
+  },
+  "tests": {
+    "interactivePassed": 111,
+    "removedScreenBlocked": true,
+    "unconfirmedTouchBlocked": true,
+    "pendingReceiverBlocked": true,
+    "changedProjectAndRevisionGuarded": true,
+    "failedRefreshCannotReuseStaleSelection": true
+  },
+  "previousCsvSha256": "2dd81a6d15ab5bd73bc79792e11424656d9e5a0d47bb48f66f36532b51042b0f",
+  "releases": {
+    "ainimation": "c9520c3857dc1ac7864596c8dd864a7439638057",
+    "assets": "defc10e",
+    "libraryWorker": "8760e609-12c7-440e-8a6b-b3419ced0268",
+    "mcpWorker": "b9e89592-1cab-4837-bd5b-653da1ca7834"
+  }
+}
