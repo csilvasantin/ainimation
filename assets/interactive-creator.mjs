@@ -5,9 +5,9 @@ import {sortedImages,prepareImage,projectFromImages,appendProjectImages,MAX_IMAG
 const cloudModule=new URL('./interactive-cloud.mjs',import.meta.url);
 cloudModule.search=new URL(import.meta.url).search;
 const {syncLibrary}=await import(cloudModule.href);
-const deliveryModule=new URL('./interactive-delivery.mjs',import.meta.url);deliveryModule.search=new URL(import.meta.url).search;
+const deliveryModule=new URL('./interactive-delivery.mjs?v=five-touch-1',import.meta.url);deliveryModule.search=new URL(import.meta.url).search;
 const {mountInteractiveDelivery}=await import(deliveryModule.href);
-import {template,validate,playerHtml} from './interactive-project.mjs';
+import {template,validate,playerHtml} from './interactive-project.mjs?v=director-1';
 import {loadLibrary,readLibrary,updateProject,createProject,openProject,duplicateProject,renameProject,LIBRARY_KEY} from './interactive-library.mjs';
 const $=id=>document.getElementById(id),status=$('status');
 let storage;try{storage=localStorage;}catch{}
@@ -130,3 +130,5 @@ mountInteractiveDelivery({button:$('sendXpacio'),endpoint:cloudEndpoint,getState
  if(!latest.ok||!record||record.revision!==revision)throw Error('El proyecto cambió en otra pestaña. Recupéralo antes de enviarlo.');
  return{id:activeId,revision,project:structuredClone(project),token:cloudToken};
 }});
+
+$('director')?.addEventListener('click',event=>{if(preparingImages||stagedImages.length||dirty&&!persist()){event.stopImmediatePropagation();announce('Completa y guarda los cambios antes de abrir Director.');}},{capture:true});

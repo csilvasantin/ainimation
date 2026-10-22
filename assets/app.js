@@ -3194,6 +3194,10 @@ function hydrateFilmForm(plan) {
   for (const [key, value] of Object.entries(plan)) {
     const field = filmForm.elements[key];
     if (!field || typeof value !== "string") continue;
+    // Imported Director movies may carry their own format and vocabulary.
+    if (field.tagName === "SELECT" && !Array.from(field.options).some(option => option.value === value)) {
+      field.add(new Option(value, value));
+    }
     field.value = value;
   }
 }
