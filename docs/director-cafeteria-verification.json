@@ -1,0 +1,48 @@
+{
+  "verifiedAt": "2026-10-22T17:02:10.358319+00:00",
+  "release": {
+    "sourceCommit": "d69b1e1",
+    "pagesCommit": "ce6bfa1",
+    "libraryWorkerVersion": "d759a4e2-28f1-44ac-b4f5-66d4dc1198b1",
+    "helpMcpVersion": "5e48a9f2-9a9d-4254-aae7-d091e8140db9"
+  },
+  "browser": "Codex internal browser",
+  "panelMovedOrResized": false,
+  "project": {
+    "title": "Prueba Director · catálogo y cesta",
+    "localId": "8c63c927-e53c-419a-a5cf-091e0fcce3a5",
+    "storageScope": "browser library; cloud synchronization not part of this check"
+  },
+  "verified": [
+    "Creator duplicate preserves the two existing projects",
+    "Native Director bar and Carta menu open Catalog and basket",
+    "Stage displays one sandboxed native cafeteria player",
+    "Invalid product price is rejected without closing the editor",
+    "Urban product renamed Chocolate Director, price 425 cents, coffee customization",
+    "Sandwich availability enabled",
+    "Basket title Tu cesta · Director, empty message Elige tu café para empezar., checkout Revisar mi pedido",
+    "Maximum units per line 3 disables increment at 3",
+    "Identical choices remain separate when merging is disabled",
+    "Oat milk raises unit price to 445 cents; 3 plus 1 in two lines totals 1780 cents",
+    "Return to Creator and full reload preserve product, options and basket settings",
+    "Reopen Director retains idle reset 120 seconds and basket settings",
+    "Cancel discards unsaved editor change and subsequent return/reload retains saved basket",
+    "Public MCP help tools/call returns current ES/EN instructions; tool count remains 35",
+    "Public Admira Store delivery guide returns current ES/EN instructions"
+  ],
+  "tests": {
+    "interactive": 80,
+    "directorOnline": 4,
+    "mcpHelp": 1,
+    "failed": 0
+  },
+  "limits": [
+    "Payments remain simulated",
+    "Basket configuration persists; customer cart contents are temporary session state",
+    "Existing immutable screen deliveries are not replaced by editing the library"
+  ],
+  "screenshots": [
+    "director-cafe-production-cart.png",
+    "director-cafe-creator-restored.png"
+  ]
+}
