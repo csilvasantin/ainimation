@@ -1,5 +1,6 @@
 import {telegramAccount,telegramWebhook,telegramPlayback} from './telegram.mjs';
 import {validate} from '../assets/interactive-project.mjs';
+import {discoverDestinations} from './destination-discovery.mjs';
 import {DESTINATIONS,deliveryPath,publicDelivery,createDelivery} from './deliveries.mjs';
 const reply=(body,status=200)=>new Response(JSON.stringify(body),{status,headers:{'content-type':'application/json','cache-control':'no-store'}});
 const decode=s=>Uint8Array.from(atob(s.replaceAll('-','+').replaceAll('_','/')),c=>c.charCodeAt(0));
@@ -17,7 +18,7 @@ export async function authenticate(request,env){
  if(env.PREVIEW_EMAILS&&(!(claims.email_verified===true||claims.email_verified==='true')||!env.PREVIEW_EMAILS.split(',').includes(String(claims.email||'').toLowerCase())))throw Error('unauthorized');
  return claims.sub;
 }
-export async function route(request,env,identify=authenticate){
+export async function route(request,env,identify=authenticate,catalogFetcher=fetch){
  const path=new URL(request.url).pathname;
  if(path==='/telegram/webhook')return telegramWebhook(request,env);
  if(path.startsWith('/telegram/play/'))return telegramPlayback(request,env);
@@ -25,7 +26,7 @@ export async function route(request,env,identify=authenticate){
  if(deliveryPath(path))return publicDelivery(request,env);
  let owner;try{owner=await identify(request,env);}catch{return reply({error:'Inicia sesión para abrir tu biblioteca.'},401);}
  if(!env.LIBRARY_DB)return reply({error:'Almacenamiento pendiente de configurar.'},503);
- if(path==='/destinations'&&request.method==='GET')return reply({destinations:DESTINATIONS});
+ if(path==='/destinations'&&request.method==='GET'){try{return reply(await discoverDestinations(DESTINATIONS,catalogFetcher));}catch{return reply({destinations:DESTINATIONS,coverage:{error:'catalog_unavailable'}});}}
  if(path==='/deliveries')return createDelivery(request,env,owner);
  if(path.startsWith('/telegram/'))return telegramAccount(request,env,owner);
  if(path==='/projects'&&request.method==='GET'){

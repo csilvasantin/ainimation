@@ -1,0 +1,467 @@
+{
+  "checkedAt": "2026-10-22T15:21:50.960Z",
+  "source": "https://brain.digitalavatar.ai/locations",
+  "catalogUpdatedAt": 1792665470,
+  "coverage": {
+    "locations": 9130,
+    "surfaces": 24895,
+    "declaredTouch": 5,
+    "connectedTouch": 2,
+    "unconnectedTouch": 5,
+    "catalogUpdatedAt": 1792665470
+  },
+  "connected": [
+    {
+      "location": "alsea-sbux-021",
+      "name": "Starbucks · Paseo de Gracia 103",
+      "screen": "starbucks-avatar-wall",
+      "label": "Tótem táctil",
+      "kind": "virtual",
+      "assignable": true
+    },
+    {
+      "location": "alsea-sbux-021",
+      "name": "Starbucks · Paseo de Gracia 103",
+      "screen": "starbucks-ipad-01",
+      "label": "iPad horizontal",
+      "kind": "virtual",
+      "assignable": true
+    }
+  ],
+  "missing": [
+    {
+      "location": "xtanco-bcn",
+      "name": "Xtanco Barcelona",
+      "screen": "JTIXtanco_PortaldelAngel_20_Mostrador_1",
+      "label": "Mostrador panel",
+      "assignable": false,
+      "reason": "receiver_not_connected"
+    },
+    {
+      "location": "xtanco",
+      "name": "Xtanco",
+      "screen": "JTIXtanco_CalledeSantaRosa_4_Mostrador_1",
+      "label": "Mostrador panel",
+      "assignable": false,
+      "reason": "receiver_not_connected"
+    },
+    {
+      "location": "xtanco-valencia",
+      "name": "Xtanco Valencia",
+      "screen": "JTIXtanco_CarrerdeColon_22_Mostrador_1",
+      "label": "Mostrador panel",
+      "assignable": false,
+      "reason": "receiver_not_connected"
+    },
+    {
+      "location": "admira-loterias",
+      "name": "Admira Loterías",
+      "screen": "SinProyecto_GranVia_32_Mostrador_1",
+      "label": "Boletos kiosk",
+      "assignable": false,
+      "reason": "receiver_not_connected"
+    },
+    {
+      "location": "admira-prensa",
+      "name": "Admira Prensa",
+      "screen": "SinProyecto_PlazadeCibeles_Mostrador_1",
+      "label": "Mostrador revista",
+      "assignable": false,
+      "reason": "receiver_not_connected"
+    }
+  ],
+  "hardwareCandidates": [
+    {
+      "location": "super-santa-rosa",
+      "name": "Súper Santa Rosa",
+      "surface": "Carro con tablet",
+      "screen": null,
+      "status": "idle",
+      "assignable": false,
+      "reason": "hardware_touch_input_and_receiver_not_verified"
+    },
+    {
+      "location": "externo-negro14",
+      "name": "Externo Negro14",
+      "surface": "MUPI vertical",
+      "screen": "externo-negro14-mupi",
+      "status": "live",
+      "assignable": false,
+      "reason": "hardware_touch_input_and_receiver_not_verified"
+    },
+    {
+      "location": "tabletmediatek",
+      "name": "Tablet MediaTek (QR, sin cables)",
+      "surface": "MUPI horizontal",
+      "screen": "tabletmediatek-mupi",
+      "status": "live",
+      "assignable": false,
+      "reason": "hardware_touch_input_and_receiver_not_verified"
+    },
+    {
+      "location": "ipad-luna",
+      "name": "ipad-luna",
+      "surface": "MUPI vertical",
+      "screen": "ipad-luna-mupi",
+      "status": "live",
+      "assignable": false,
+      "reason": "hardware_touch_input_and_receiver_not_verified"
+    }
+  ],
+  "sceneCandidates": [
+    {
+      "scene": "xtanco",
+      "instance": "tablet",
+      "model": "native:tablet",
+      "number": 15,
+      "label": "Tablet Satisfacción",
+      "classification": "interactive_virtual_scene",
+      "assignable": false,
+      "reason": "no_destination_receiver_binding",
+      "source": "admira-xp/index.html#FACTORY_LAYOUTS"
+    },
+    {
+      "scene": "xtanco",
+      "instance": "turnKiosk",
+      "model": "native:turnKiosk",
+      "number": 18,
+      "label": "Gestor Turnos",
+      "classification": "queue_display_touch_unconfirmed",
+      "assignable": false,
+      "reason": "no_destination_receiver_binding",
+      "source": "admira-xp/index.html#FACTORY_LAYOUTS"
+    },
+    {
+      "scene": "xtanco",
+      "instance": "metahuman",
+      "model": "native:metahuman",
+      "number": 14,
+      "label": "Metahuman AI",
+      "classification": "interactive_virtual_scene",
+      "assignable": false,
+      "reason": "no_destination_receiver_binding",
+      "source": "admira-xp/index.html#FACTORY_LAYOUTS"
+    },
+    {
+      "scene": "supermercado",
+      "instance": "tablet",
+      "model": "native:tablet",
+      "number": 15,
+      "label": "Tablet Valoración",
+      "classification": "interactive_virtual_scene",
+      "assignable": false,
+      "reason": "no_destination_receiver_binding",
+      "source": "admira-xp/index.html#FACTORY_LAYOUTS"
+    },
+    {
+      "scene": "supermercado",
+      "instance": "turnKiosk",
+      "model": "native:turnKiosk",
+      "number": 18,
+      "label": "Gestor Turnos",
+      "classification": "queue_display_touch_unconfirmed",
+      "assignable": false,
+      "reason": "no_destination_receiver_binding",
+      "source": "admira-xp/index.html#FACTORY_LAYOUTS"
+    },
+    {
+      "scene": "cafeteria",
+      "instance": "tablet",
+      "model": "native:tablet",
+      "number": 15,
+      "label": "Tablet Valoración",
+      "classification": "interactive_virtual_scene",
+      "assignable": false,
+      "reason": "no_destination_receiver_binding",
+      "source": "admira-xp/index.html#FACTORY_LAYOUTS"
+    },
+    {
+      "scene": "cafeteria",
+      "instance": "turnKiosk",
+      "model": "native:turnKiosk",
+      "number": 18,
+      "label": "Pantalla pedidos",
+      "classification": "queue_display_touch_unconfirmed",
+      "assignable": false,
+      "reason": "no_destination_receiver_binding",
+      "source": "admira-xp/index.html#FACTORY_LAYOUTS"
+    },
+    {
+      "scene": "cafeteria",
+      "instance": "metahuman",
+      "model": "native:metahuman",
+      "number": 14,
+      "label": "Asistente IA",
+      "classification": "interactive_virtual_scene",
+      "assignable": false,
+      "reason": "no_destination_receiver_binding",
+      "source": "admira-xp/index.html#FACTORY_LAYOUTS"
+    }
+  ],
+  "inventory": {
+    "nativeModels": 30,
+    "stockModels": 25,
+    "registeredModels": 55,
+    "itilUnits": 28,
+    "sceneLayouts": [
+      "xtanco",
+      "supermercado",
+      "cafeteria",
+      "shoptalk",
+      "creator"
+    ],
+    "plans": [
+      {
+        "file": "data/xpacios/alsea-sbux-021.json",
+        "id": "alsea-sbux-021",
+        "screens": 6,
+        "declaredTouch": 0
+      },
+      {
+        "file": "data/xpacios/lab-gran-de-gracia-51.json",
+        "id": "lab-gran-de-gracia-51",
+        "screens": 7,
+        "declaredTouch": 0
+      },
+      {
+        "file": "xpacios/altadis-18/planos/alsea-mexico-10.json",
+        "id": null,
+        "screens": 0,
+        "declaredTouch": 0
+      },
+      {
+        "file": "xpacios/altadis-18/planos/altadis-18.json",
+        "id": null,
+        "screens": 0,
+        "declaredTouch": 0
+      },
+      {
+        "file": "xpacios/altadis-18/planos/altadis-cafe-01.json",
+        "id": "altadis-cafe-01",
+        "screens": 1,
+        "declaredTouch": 0
+      },
+      {
+        "file": "xpacios/altadis-18/planos/altadis-cafe-02.json",
+        "id": "altadis-cafe-02",
+        "screens": 1,
+        "declaredTouch": 0
+      },
+      {
+        "file": "xpacios/altadis-18/planos/altadis-cafe-03.json",
+        "id": "altadis-cafe-03",
+        "screens": 2,
+        "declaredTouch": 0
+      },
+      {
+        "file": "xpacios/altadis-18/planos/altadis-cafe-04.json",
+        "id": "altadis-cafe-04",
+        "screens": 1,
+        "declaredTouch": 0
+      },
+      {
+        "file": "xpacios/altadis-18/planos/altadis-cafe-05.json",
+        "id": "altadis-cafe-05",
+        "screens": 1,
+        "declaredTouch": 0
+      },
+      {
+        "file": "xpacios/altadis-18/planos/altadis-cafe-06.json",
+        "id": "altadis-cafe-06",
+        "screens": 4,
+        "declaredTouch": 0
+      },
+      {
+        "file": "xpacios/altadis-18/planos/altadis-cafe-07.json",
+        "id": "altadis-cafe-07",
+        "screens": 1,
+        "declaredTouch": 0
+      },
+      {
+        "file": "xpacios/altadis-18/planos/altadis-cafe-08.json",
+        "id": "altadis-cafe-08",
+        "screens": 1,
+        "declaredTouch": 0
+      },
+      {
+        "file": "xpacios/altadis-18/planos/altadis-cafe-09.json",
+        "id": "altadis-cafe-09",
+        "screens": 1,
+        "declaredTouch": 0
+      },
+      {
+        "file": "xpacios/altadis-18/planos/altadis-cafe-10.json",
+        "id": "altadis-cafe-10",
+        "screens": 1,
+        "declaredTouch": 0
+      },
+      {
+        "file": "xpacios/altadis-18/planos/altadis-cafe-11.json",
+        "id": "altadis-cafe-11",
+        "screens": 2,
+        "declaredTouch": 0
+      },
+      {
+        "file": "xpacios/altadis-18/planos/altadis-cafe-12.json",
+        "id": "altadis-cafe-12",
+        "screens": 2,
+        "declaredTouch": 0
+      },
+      {
+        "file": "xpacios/altadis-18/planos/altadis-cafe-13.json",
+        "id": "altadis-cafe-13",
+        "screens": 2,
+        "declaredTouch": 0
+      },
+      {
+        "file": "xpacios/altadis-18/planos/altadis-cafe-14.json",
+        "id": "altadis-cafe-14",
+        "screens": 3,
+        "declaredTouch": 0
+      },
+      {
+        "file": "xpacios/altadis-18/planos/altadis-cafe-15.json",
+        "id": "altadis-cafe-15",
+        "screens": 4,
+        "declaredTouch": 0
+      },
+      {
+        "file": "xpacios/altadis-18/planos/altadis-cafe-16.json",
+        "id": "altadis-cafe-16",
+        "screens": 4,
+        "declaredTouch": 0
+      },
+      {
+        "file": "xpacios/altadis-18/planos/altadis-cafe-17.json",
+        "id": "altadis-cafe-17",
+        "screens": 8,
+        "declaredTouch": 0
+      },
+      {
+        "file": "xpacios/altadis-18/planos/altadis-cafe-18.json",
+        "id": "altadis-cafe-18",
+        "screens": 1,
+        "declaredTouch": 0
+      },
+      {
+        "file": "xpacios/altadis-18/planos/altadis-espana-10.json",
+        "id": null,
+        "screens": 0,
+        "declaredTouch": 0
+      },
+      {
+        "file": "xpacios/altadis-18/planos/altadis-xtanco-01.json",
+        "id": "altadis-xtanco-01",
+        "screens": 1,
+        "declaredTouch": 0
+      },
+      {
+        "file": "xpacios/altadis-18/planos/altadis-xtanco-02.json",
+        "id": "altadis-xtanco-02",
+        "screens": 1,
+        "declaredTouch": 0
+      },
+      {
+        "file": "xpacios/altadis-18/planos/altadis-xtanco-03.json",
+        "id": "altadis-xtanco-03",
+        "screens": 2,
+        "declaredTouch": 0
+      },
+      {
+        "file": "xpacios/altadis-18/planos/altadis-xtanco-04.json",
+        "id": "altadis-xtanco-04",
+        "screens": 1,
+        "declaredTouch": 0
+      },
+      {
+        "file": "xpacios/altadis-18/planos/altadis-xtanco-05.json",
+        "id": "altadis-xtanco-05",
+        "screens": 1,
+        "declaredTouch": 0
+      },
+      {
+        "file": "xpacios/altadis-18/planos/altadis-xtanco-06.json",
+        "id": "altadis-xtanco-06",
+        "screens": 4,
+        "declaredTouch": 0
+      },
+      {
+        "file": "xpacios/altadis-18/planos/altadis-xtanco-07.json",
+        "id": "altadis-xtanco-07",
+        "screens": 1,
+        "declaredTouch": 0
+      },
+      {
+        "file": "xpacios/altadis-18/planos/altadis-xtanco-08.json",
+        "id": "altadis-xtanco-08",
+        "screens": 1,
+        "declaredTouch": 0
+      },
+      {
+        "file": "xpacios/altadis-18/planos/altadis-xtanco-09.json",
+        "id": "altadis-xtanco-09",
+        "screens": 1,
+        "declaredTouch": 0
+      },
+      {
+        "file": "xpacios/altadis-18/planos/altadis-xtanco-10.json",
+        "id": "altadis-xtanco-10",
+        "screens": 1,
+        "declaredTouch": 0
+      },
+      {
+        "file": "xpacios/altadis-18/planos/altadis-xtanco-11.json",
+        "id": "altadis-xtanco-11",
+        "screens": 2,
+        "declaredTouch": 0
+      },
+      {
+        "file": "xpacios/altadis-18/planos/altadis-xtanco-12.json",
+        "id": "altadis-xtanco-12",
+        "screens": 2,
+        "declaredTouch": 0
+      },
+      {
+        "file": "xpacios/altadis-18/planos/altadis-xtanco-13.json",
+        "id": "altadis-xtanco-13",
+        "screens": 2,
+        "declaredTouch": 0
+      },
+      {
+        "file": "xpacios/altadis-18/planos/altadis-xtanco-14.json",
+        "id": "altadis-xtanco-14",
+        "screens": 3,
+        "declaredTouch": 0
+      },
+      {
+        "file": "xpacios/altadis-18/planos/altadis-xtanco-15.json",
+        "id": "altadis-xtanco-15",
+        "screens": 4,
+        "declaredTouch": 0
+      },
+      {
+        "file": "xpacios/altadis-18/planos/altadis-xtanco-16.json",
+        "id": "altadis-xtanco-16",
+        "screens": 4,
+        "declaredTouch": 0
+      },
+      {
+        "file": "xpacios/altadis-18/planos/altadis-xtanco-17.json",
+        "id": "altadis-xtanco-17",
+        "screens": 8,
+        "declaredTouch": 0
+      },
+      {
+        "file": "xpacios/altadis-18/planos/altadis-xtanco-18.json",
+        "id": "altadis-xtanco-18",
+        "screens": 1,
+        "declaredTouch": 0
+      }
+    ]
+  },
+  "limits": [
+    "The public catalog has no structured touch capability flag. Explicit touch descriptions are evidence, not physical input or delivery receipts.",
+    "Demo scene furniture is not automatically a registered installation in every venue.",
+    "Absent screen/renderer bindings cannot be replaced by a different screen or a generic demo."
+  ]
+}
