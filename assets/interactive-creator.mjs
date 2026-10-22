@@ -131,7 +131,7 @@ createDemoButton.onclick=()=>{
   const workspace=document.querySelector('.workspace');workspace.tabIndex=-1;workspace.focus({preventScroll:true});workspace.scrollIntoView({block:'start'});
   createDemoButton.disabled=false;
 };
-mountInteractiveDelivery({button:$('sendXpacio'),endpoint:cloudEndpoint,getState:()=>{
+mountInteractiveDelivery({button:$('sendXpacio'),historyButton:$('deliveryHistory'),storage,endpoint:cloudEndpoint,getState:()=>{
  if(dirty||preparingImages||stagedImages.length)throw Error('Guarda o completa los cambios pendientes antes de enviar.');
  const latest=readLibrary(storage),record=latest.data?.projects.find(r=>r.id===activeId);
  if(!latest.ok||!record||record.revision!==revision)throw Error('El proyecto cambió en otra pestaña. Recupéralo antes de enviarlo.');

@@ -1,5 +1,7 @@
 import {validate,playerHtml} from './interactive-project.mjs';
-export function mountInteractiveDelivery({button,getState,endpoint,doc=document,request=fetch}){
+const historyModule=new URL('./interactive-delivery-history.mjs',import.meta.url);historyModule.search=new URL(import.meta.url).search;
+const {saveDeliveryBatch,mountDeliveryHistory}=await import(historyModule.href);
+export function mountInteractiveDelivery({button,historyButton,storage,getState,endpoint,doc=document,request=fetch}){
  const t=(es,en)=>doc.documentElement.lang==='en'?en:es;
  const make=(tag,text,cls)=>{const n=doc.createElement(tag);if(text)n.textContent=text;if(cls)n.className=cls;return n;};
  const dialog=make('dialog',null,'send-xpacio-dialog');dialog.setAttribute('aria-label',t('Enviar a Xpacios','Send to Xpaces'));
@@ -8,7 +10,15 @@ export function mountInteractiveDelivery({button,getState,endpoint,doc=document,
  send.type='submit';send.className='primary';close.type=all.type=clear.type='button';location.setAttribute('aria-label',t('Xpacio','Xpace'));list.setAttribute('aria-label',t('Pantallas táctiles','Touch screens'));
  const grid=make('div',null,'send-xpacio-grid'),field=make('label'),tools=make('div',null,'tools'),note=make('p',t('Gemelo digital. Cada enlace conserva esta versión; no cambia las playlists ni envía a hardware físico.','Digital twin. Each link preserves this version; it does not change playlists or send to physical hardware.'),'hint');
  field.append(make('span',t('Xpacio','Xpace')),location);tools.append(all,clear);form.append(field,tools,list,coverage,note,send);grid.append(form,preview);dialog.append(title,description,grid,status,results,close);doc.body.append(dialog);
- let state,rows=[],busy=false,loading=false,generation=0;const outcomes=new Map();
+ const historyNote=make('p',null,'hint');historyNote.setAttribute('role','status');dialog.append(historyNote);
+ if(historyButton)mountDeliveryHistory({button:historyButton,storage,doc});
+ let state,batch,rows=[],busy=false,loading=false,generation=0;const outcomes=new Map();
+ function remember(){
+  if(!historyButton&&!storage)return;
+  batch||={id:crypto.randomUUID(),projectId:state.id,projectTitle:state.project.title,revision:state.revision,createdAt:new Date().toISOString()};
+  const saved=saveDeliveryBatch(storage,{...batch,updatedAt:new Date().toISOString(),results:[...outcomes].map(([key,o])=>{const r=rows.find(r=>r.key===key);return{locationId:r.location.id,locationName:r.location.name,screenId:r.screen.id,screenName:r.screen.name,status:o.status,...(o.url?{url:o.url}:{})};})});
+  historyNote.textContent=saved.ok?t('Lote guardado en el historial de este navegador.','Batch saved in this browser’s history.'):t('No se pudo guardar el historial. Conserva los enlaces de este diálogo antes de salir; tus proyectos no han cambiado.','History could not be saved. Keep the links in this dialog before leaving; your projects are unchanged.');
+ }
  const eligible=r=>r.screen.touch===true&&r.screen.available!==false;
  const selected=()=>rows.filter(r=>eligible(r)&&r.check.checked);
  const pending=()=>selected().filter(r=>outcomes.get(r.key)?.status!=='success');
@@ -36,7 +46,7 @@ export function mountInteractiveDelivery({button,getState,endpoint,doc=document,
  function hide(){if(busy)return;generation++;loading=false;preview.removeAttribute('srcdoc');dialog.close();}
  close.onclick=hide;dialog.addEventListener('cancel',e=>{e.preventDefault();hide();});
  button.onclick=async()=>{
-  if(dialog.open||busy)return;const turn=++generation;rows=[];outcomes.clear();list.replaceChildren();results.replaceChildren();results.hidden=true;coverage.textContent='';location.replaceChildren(option(t('Todos los Xpacios','All Xpaces'),''));loading=true;controls();status.textContent=t('Buscando pantallas táctiles…','Finding touch screens…');
+  if(dialog.open||busy)return;const turn=++generation;batch=undefined;historyNote.textContent='';rows=[];outcomes.clear();list.replaceChildren();results.replaceChildren();results.hidden=true;coverage.textContent='';location.replaceChildren(option(t('Todos los Xpacios','All Xpaces'),''));loading=true;controls();status.textContent=t('Buscando pantallas táctiles…','Finding touch screens…');
   try{
    const current=getState();validate(current.project);if(!current.token)throw Error(t('Conecta tu cuenta Google antes de preparar el envío.','Connect your Google account before preparing a delivery.'));
    state={...current,project:structuredClone(current.project)};preview.srcdoc=playerHtml(state.project);description.textContent=state.project.title+' · '+t('Versión guardada','Saved version')+' '+state.revision;dialog.showModal();
@@ -53,7 +63,7 @@ export function mountInteractiveDelivery({button,getState,endpoint,doc=document,
   event.preventDefault();if(busy||loading)return;const targets=pending();if(!targets.length){status.textContent=t('Selecciona una pantalla táctil disponible.','Select an available touch screen.');controls();return;}
   // Recheck the saved revision once. All requests and retries keep the same opening snapshot.
   try{const current=getState();if(current.id!==state.id||current.revision!==state.revision||JSON.stringify(current.project)!==JSON.stringify(state.project))throw Error(t('El proyecto cambió. Cierra y vuelve a abrir Enviar a Xpacios para revisar la nueva versión.','The project changed. Close and reopen Send to Xpaces to review the new version.'));if(!current.token)throw Error(t('Conecta tu cuenta Google antes de preparar el envío.','Connect your Google account before preparing a delivery.'));state.token=current.token;}catch(error){status.textContent=error.message;return;}
-  busy=true;controls();for(const r of targets)outcomes.set(r.key,{status:'pending',message:t('Pendiente','Pending')});renderResults();
+  busy=true;controls();for(const r of targets)outcomes.set(r.key,{status:'pending',message:t('Pendiente','Pending')});renderResults();remember();
   for(const [i,r] of targets.entries()){
    status.textContent=t('Preparando ','Preparing ')+(i+1)+' / '+targets.length+'…';outcomes.set(r.key,{status:'sending',message:t('Preparando…','Preparing…')});renderResults();
    try{
@@ -61,7 +71,7 @@ export function mountInteractiveDelivery({button,getState,endpoint,doc=document,
     const u=new URL(data.storeUrl);if(u.origin!=='https://www.admira.store'||!['/admira-xp/','/xpacios/pantalla/'].includes(u.pathname)||u.searchParams.get('loc')!==r.location.id||data.destination?.id!==r.location.id||data.destination?.screen?.id!==r.screen.id||data.destination.screen.touch!==true||data.projectId!==state.id||data.sourceRevision!==state.revision||(u.pathname==='/xpacios/pantalla/'&&u.searchParams.get('screen')!==r.screen.id))throw Error(t('El resultado no corresponde a esta pantalla o versión.','The result does not match this screen or version.'));
     u.searchParams.set('lang',doc.documentElement.lang==='en'?'en':'es');outcomes.set(r.key,{status:'success',message:t('Versión preparada','Version prepared'),url:u.href});
    }catch(error){outcomes.set(r.key,{status:'error',message:error.name==='TimeoutError'?t('La conexión tardó demasiado. Reintenta este envío.','The connection timed out. Retry this delivery.'):error.message});}
-   renderResults();
+   renderResults();remember();
   }
   busy=false;controls();const done=[...outcomes.values()].filter(o=>o.status==='success').length,failed=[...outcomes.values()].filter(o=>o.status==='error').length;
   status.textContent=done+' '+t('preparados','prepared')+' · '+failed+' '+t('con error','failed')+'. '+(failed?t('Reintentar conserva los enlaces ya preparados.','Retry preserves the links already prepared.'):t('Abre cada enlace para asignar y restaurar en su escena 3D.','Open each link to assign and restore in its 3D scene.'));
