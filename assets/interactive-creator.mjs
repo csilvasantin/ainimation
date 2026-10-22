@@ -6,6 +6,8 @@ import {sortedImages,prepareImage,projectFromImages,appendProjectImages,MAX_IMAG
 const cloudModule=new URL('./interactive-cloud.mjs',import.meta.url);
 cloudModule.search=new URL(import.meta.url).search;
 const {syncLibrary}=await import(cloudModule.href);
+const conflictsModule=new URL('./interactive-conflicts.mjs',import.meta.url);conflictsModule.search=new URL(import.meta.url).search;
+const {mountConflictComparison}=await import(conflictsModule.href);
 const authModule=new URL('./interactive-auth.mjs',import.meta.url);authModule.search=new URL(import.meta.url).search;
 const {mountGoogleAuth}=await import(authModule.href);
 const directorWorkspaceModule=new URL('./interactive-director-workspace.mjs',import.meta.url);directorWorkspaceModule.search=new URL(import.meta.url).search;
@@ -67,6 +69,11 @@ $('removeImage').onclick=()=>{if(current().hotspots?.length){announce('Quita pri
 // Endpoint is a reviewed deployment setting, never a URL supplied by a query parameter.
 const cloudEndpoint=document.querySelector('meta[name="interactive-cloud-endpoint"]')?.content;
 let cloudToken;
+const conflictComparison=mountConflictComparison({status:$('cloudStatus'),storage,endpoint:cloudEndpoint,onOpen:id=>{
+ if(dirty||preparingImages||stagedImages.length)throw Error('Guarda o completa los cambios pendientes antes de abrir otra versión.');
+ if(!activate(openProject(storage,id)))throw Error('No se ha podido abrir la versión. Tus proyectos se conservan.');
+ announce('Versión abierta. La otra versión sigue en tu biblioteca.');
+}});
 
 async function runCloudSync(mode){
  if(!cloudToken)return;
@@ -76,7 +83,7 @@ async function runCloudSync(mode){
  let conflictPreserved=false;
  const conflictNotice='Conflicto detectado. Se han conservado ambas versiones: la de la nube y una «copia de este equipo» con tus cambios.';
  try{
-  const options={...(mode==='pull'?{upload:false}:mode==='project'?{projectId:activeId}:{}),onConflicts:()=>{conflictPreserved=true;}};
+  const options={...(mode==='pull'?{upload:false}:mode==='project'?{projectId:activeId}:{}),onConflicts:pairs=>{conflictPreserved=true;conflictComparison.remember(pairs);}};
   const data=await syncLibrary(storage,cloudEndpoint,cloudToken,fetch,options);
   if(dirty){$('cloudStatus').textContent=(conflictPreserved?conflictNotice+' ':'')+'La operación terminó. Tus cambios pendientes siguen en el editor; guárdalos en un archivo antes de recuperar la biblioteca.';return;}
   activate({ok:true,data});
