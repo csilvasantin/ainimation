@@ -1,0 +1,57 @@
+{
+  "verifiedAt": "2026-10-22T19:38:15.076345+00:00",
+  "timezone": "Europe/Madrid",
+  "scope": "Local delivery metadata in the production Creator; no physical publication.",
+  "browser": "Internal browser; panel neither moved nor resized.",
+  "checks": {
+    "fiveResultsSaved": true,
+    "sameFiveLinksAfterClosing": true,
+    "sameFiveLinksAfterDirector": true,
+    "sameFiveLinksAfterReloadWithoutSignIn": true,
+    "directorSessionPreserved": true,
+    "threeProjectsRetained": true
+  },
+  "batchSummary": [
+    "Prueba Director · catálogo y cesta · Versión 8 · 22/10/2026, 21:35:49 · 5/5 preparados"
+  ],
+  "results": [
+    {
+      "name": "Xtanco Barcelona · Mostrador panel",
+      "status": "success",
+      "url": "https://www.admira.store/xpacios/pantalla/?loc=xtanco-bcn&screen=JTIXtanco_PortaldelAngel_20_Mostrador_1&ainimation=080641d830c64eecb3a1ebb972a2ae6d37736ea5c5884198b4e0bf9b918681a6&lang=es"
+    },
+    {
+      "name": "Xtanco · Mostrador panel",
+      "status": "success",
+      "url": "https://www.admira.store/xpacios/pantalla/?loc=xtanco&screen=JTIXtanco_CalledeSantaRosa_4_Mostrador_1&ainimation=2dd215914a544e7b97d2814bf8a7fc9dd077ddf229ae447d95e26c6f66b0d26d&lang=es"
+    },
+    {
+      "name": "Xtanco Valencia · Mostrador panel",
+      "status": "success",
+      "url": "https://www.admira.store/xpacios/pantalla/?loc=xtanco-valencia&screen=JTIXtanco_CarrerdeColon_22_Mostrador_1&ainimation=e4751f2a80a64eb882eba99e3f86544a562bd9ee7df64eed996138b500b50c9a&lang=es"
+    },
+    {
+      "name": "Admira Loterías · Boletos kiosk",
+      "status": "success",
+      "url": "https://www.admira.store/xpacios/pantalla/?loc=admira-loterias&screen=SinProyecto_GranVia_32_Mostrador_1&ainimation=4c5fedec4dab4ea2bbd98514a6632c13a31bd67aff984eeba2cb7014195124d0&lang=es"
+    },
+    {
+      "name": "Admira Prensa · Mostrador revista",
+      "status": "success",
+      "url": "https://www.admira.store/xpacios/pantalla/?loc=admira-prensa&screen=SinProyecto_PlazadeCibeles_Mostrador_1&ainimation=2cf547bd4d174472b0fd7c78ccf0c29ceb9eb5db6e0340deb58ce0d66b11d1bb&lang=es"
+    }
+  ],
+  "validation": {
+    "interactiveTestsPassed": 103,
+    "metadataOnly": true,
+    "credentialsAndProjectContentsExcluded": true,
+    "interruptedBatchAndFailedStorageCasesCovered": true
+  },
+  "releases": {
+    "ainimation": "99692cd",
+    "assets": "0dc4627",
+    "libraryWorker": "3edfff93-a242-48ca-8d81-d8dfc1a17340",
+    "store": "9b0bb4ae.admira-store.pages.dev",
+    "mcpWorker": "1f09c069-2290-47c9-b479-707f22233068"
+  }
+}
