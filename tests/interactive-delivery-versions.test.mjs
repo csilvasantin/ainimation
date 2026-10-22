@@ -27,7 +27,7 @@ test('pendientes y errores sin enlace no generan consultas ni URLs, y un enlace 
 });
 
 test('tiempo de espera limita tanto la petición como el cuerpo JSON y devuelve sin poder comprobar', {timeout:5000},async()=>{
- for(const body of [false,true]){let observed;const r=await checkDeliveryBatchVersions(batch([row(1)]),{timeoutMs:5,request:async(url,options)=>{observed=options.signal;return body?{ok:true,status:200,json:()=>new Promise(()=>{})}:new Promise(()=>{});}});assert.equal(r.results[0].state,'unknown');assert.equal(r.counts.unavailable,0);assert.equal(observed.aborted,true);}
+ for(const body of [false,true,'abortable']){let observed;const r=await checkDeliveryBatchVersions(batch([row(1)]),{timeoutMs:5,request:async(url,options)=>{observed=options.signal;return body?{ok:true,status:200,json:()=>new Promise((_,reject)=>{if(body==='abortable')options.signal.addEventListener('abort',()=>reject(Error('raw abort must not leak')));})}:new Promise(()=>{});}});assert.equal(r.results[0].state,'unknown');assert.equal(r.results[0].reason,'timeout');assert.equal(r.counts.unavailable,0);assert.equal(observed.aborted,true);}
 });
 
 test('cancelar aborta las consultas activas y no empieza los recibos que estaban en cola', {timeout:5000},async()=>{
@@ -39,7 +39,7 @@ test('informe CSV exporta la consulta exacta con cuatro estados y motivos distin
  const b=batch([row(1),row(2),row(3),row(4),row(5,'pending'),row(6,'error')]);b.projectTitle='Catálogo "táctil", café\nBarcelona';b.token='private-token';const before=JSON.stringify(b),original=deliveryBatchCsv(b);let calls=0;
  const report=await checkDeliveryBatchVersions(b,{now:()=> '2026-10-23T01:02:03Z',request:async url=>{calls++;const id=parseInt(url.split('/').at(-1),16);return id===1?response(metadata(1)):id===2?response({},404):id===3?response({},503):response(metadata(1));}}),snapshot=JSON.stringify(report),file=deliveryVersionCheckCsv(b,report);
  assert.equal(calls,4);assert.match(file.filename,/^ainimation-comprobacion-2026-10-23T01-02-03-000Z-v9-batch\.csv$/);assert.notEqual(file.filename,original.filename);assert.equal(file.type,'text/csv;charset=utf-8');assert.ok(file.content.startsWith('\ufeff"Comprobado (UTC)","Proyecto","Versión"'));assert.equal(file.content.match(/2026-10-23T01:02:03.000Z/g).length,6);assert.match(file.content,/"Catálogo ""táctil"", café\nBarcelona"/);
- for(const value of ['"Disponible","Coinciden recibo, proyecto, versión y destino"','"No disponible","Ausencia confirmada (404/410)"','"Sin poder comprobar","No se pudo verificar la petición o respuesta"','"No disponible","Los datos no coinciden con este lote"','"Sin enlace confirmado","Sin comprobar: no hay enlace confirmado",""'])assert.ok(file.content.includes(value),value);
+ for(const value of ['"Disponible","Coinciden recibo, proyecto, versión y destino"','"No disponible","Ausencia confirmada (404/410)"','"Sin poder comprobar","Respuesta HTTP 503"','"No disponible","Los datos no coinciden con este lote"','"Sin enlace confirmado","Sin comprobar: no hay enlace confirmado",""'])assert.ok(file.content.includes(value),value);
  assert.equal(file.content.match(/https:\/\/www.admira.store/g).length,4);for(const forbidden of ['private-token','not-for-client','loc=venue-5','loc=venue-6'])assert.ok(!file.content.includes(forbidden));
  const english=deliveryVersionCheckCsv(b,report,'en');assert.match(english.filename,/version-check/);assert.ok(english.content.startsWith('\ufeff"Checked at (UTC)"'));assert.match(english.content,/"Could not be checked"/);assert.equal(calls,4);assert.equal(JSON.stringify(b),before);assert.equal(JSON.stringify(report),snapshot);assert.deepEqual(deliveryBatchCsv(b),original);
 });
@@ -56,4 +56,20 @@ test('informe falla cerrado ante otra consulta, recibo, proyecto, revisión, des
  for(const change of [r=>r.batchId='other',r=>r.projectId='other',r=>r.revision=8,r=>r.checkedAt='bad',r=>r.cancelled=true,r=>delete r.cancelled,r=>r.results.pop(),r=>r.results.reverse(),r=>r.results[0].receiptId=receipt(2),r=>r.results[0].locationId='other',r=>r.results[0].screenId='other',r=>r.results[0].state='no_link',r=>r.results[0].reason='not_checked',r=>r.counts.available=4]){const copy=structuredClone(report);change(copy);assert.throws(()=>deliveryVersionCheckCsv(b,copy));}
  const altered=structuredClone(b);altered.results[0].url=altered.results[0].url.replace(receipt(1),receipt(99));assert.throws(()=>deliveryVersionCheckCsv(altered,report));assert.throws(()=>deliveryVersionCheckCsv({...b,revision:10},report));assert.throws(()=>deliveryVersionCheckCsv(b,undefined));
  const pending=batch([row(1,'pending')]),noLink=await checkDeliveryBatchVersions(pending);noLink.results[0].state='available';noLink.results[0].reason='matched';assert.throws(()=>deliveryVersionCheckCsv(pending,noLink));
+});
+
+test('motivos controlados distinguen HTTP, conexión y JSON ilegible sin leer errores HTTP ni copiar cuerpos o excepciones',async()=>{
+ const b=batch([row(1)]);let bodies=0;
+ for(const status of [101,302,401,403,429,500,503,599]){const report=await checkDeliveryBatchVersions(b,{request:async()=>({ok:false,status,json:async()=>{bodies++;throw Error('private body');}})});assert.equal(report.results[0].state,'unknown');assert.equal(report.results[0].reason,'http_error');assert.equal(report.results[0].httpStatus,status);assert.ok(deliveryVersionCheckCsv(b,report).content.includes('Respuesta HTTP '+status));assert.ok(deliveryVersionCheckCsv(b,report,'en').content.includes('HTTP response '+status));}
+ assert.equal(bodies,0);
+ for(const request of [async()=>{throw Error('credential: private network error');},async()=>{throw new TypeError('redirect blocked: private target');}]){const report=await checkDeliveryBatchVersions(b,{request});assert.equal(report.results[0].reason,'connection_failed');assert.equal(report.results[0].httpStatus,undefined);assert.ok(!JSON.stringify(report).includes('private'));assert.ok(deliveryVersionCheckCsv(b,report).content.includes('Fallo de conexión o consulta'));}
+ for(const request of [async()=>({ok:true,status:200,json:async()=>{throw Error('private JSON payload');}}),async()=>({ok:false,status:0}),async()=>({ok:false,status:'503'}),async()=>({ok:false,status:700})]){const report=await checkDeliveryBatchVersions(b,{request});assert.equal(report.results[0].reason,'unreadable_response');assert.equal(report.results[0].httpStatus,undefined);assert.ok(!JSON.stringify(report).includes('private'));assert.ok(deliveryVersionCheckCsv(b,report).content.includes('Datos de respuesta ilegibles'));}
+});
+
+test('CSV rechaza códigos HTTP o motivos manipulados y no interpola atributos ajenos',async()=>{
+ const b=batch([row(1)]),report=await checkDeliveryBatchVersions(b,{request:async()=>response({},503)});
+ for(const status of [0,99,200,299,404,410,600,NaN,Infinity,'503','503 private\n=1',503.5]){const copy=structuredClone(report);copy.results[0].httpStatus=status;assert.throws(()=>deliveryVersionCheckCsv(b,copy));}
+ for(const reason of ['private-body','request_failed','not_checked','matched']){const copy=structuredClone(report);copy.results[0].reason=reason;assert.throws(()=>deliveryVersionCheckCsv(b,copy));}
+ const copy=structuredClone(report);copy.results[0].message='private-token';copy.results[0].body='private-content';const csv=deliveryVersionCheckCsv(b,copy).content;assert.ok(!csv.includes('private-'));
+ copy.results[0].reason='connection_failed';assert.throws(()=>deliveryVersionCheckCsv(b,copy));
 });

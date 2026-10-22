@@ -41,16 +41,21 @@ export function deliveryBatchCsv(input,language='es'){
  const rows=b.results.map(r=>[b.createdAt,b.projectTitle,b.revision,r.locationName,r.locationId,r.screenName,r.screenId,r.status==='success'?(en?'Prepared':'Preparado'):r.status==='error'?(en?'Not prepared':'No preparado'):(en?'Unconfirmed':'Sin confirmación'),r.status==='success'?r.url:'']);
  return{filename:'ainimation-'+(en?'deliveries':'envios')+'-'+b.createdAt.slice(0,10)+'-v'+b.revision+'-'+b.id+'.csv',type:'text/csv;charset=utf-8',content:'\ufeff'+[headers,...rows].map(row=>row.map(csvQuote).join(',')).join('\r\n')+'\r\n'};
 }
+const failedHttpStatus=status=>Number.isInteger(status)&&status>=100&&status<=599&&!(status>=200&&status<300)&&status!==404&&status!==410;
+function versionCheckReason(result,language='es'){
+ const en=language==='en',reasons=en?{matched:'Receipt, project, version and destination match',not_found:'Confirmed absence (404/410)',mismatch:'Metadata does not match this batch',timeout:'Time limit exceeded',unreadable_response:'Unreadable response data',connection_failed:'Connection or request failed',no_link:'Not checked: no confirmed link'}:{matched:'Coinciden recibo, proyecto, versión y destino',not_found:'Ausencia confirmada (404/410)',mismatch:'Los datos no coinciden con este lote',timeout:'Tiempo de espera agotado',unreadable_response:'Datos de respuesta ilegibles',connection_failed:'Fallo de conexión o consulta',no_link:'Sin comprobar: no hay enlace confirmado'};
+ if(result.reason==='http_error'&&failedHttpStatus(result.httpStatus))return(en?'HTTP response ':'Respuesta HTTP ')+result.httpStatus;
+ return reasons[result.reason]||(en?'Request could not be verified':'No se pudo verificar la consulta');
+}
 export function deliveryVersionCheckCsv(input,report,language='es'){
  const b=cleanBatch(input),en=language==='en';
  if(!report||report.cancelled!==false||report.batchId!==b.id||report.projectId!==b.projectId||report.revision!==b.revision||!Array.isArray(report.results)||report.results.length!==b.results.length)throw Error('invalid_version_check');
  const checkedAt=date(report.checkedAt),counts={available:0,unavailable:0,unknown:0,no_link:0};
  const states=en?{available:'Available',unavailable:'Unavailable',unknown:'Could not be checked',no_link:'No confirmed link'}:{available:'Disponible',unavailable:'No disponible',unknown:'Sin poder comprobar',no_link:'Sin enlace confirmado'};
- const reasons=en?{matched:'Receipt, project, version and destination match',not_found:'Confirmed absence (404/410)',mismatch:'Metadata does not match this batch',request_failed:'Request or response could not be verified',no_link:'Not checked: no confirmed link'}:{matched:'Coinciden recibo, proyecto, versión y destino',not_found:'Ausencia confirmada (404/410)',mismatch:'Los datos no coinciden con este lote',request_failed:'No se pudo verificar la petición o respuesta',no_link:'Sin comprobar: no hay enlace confirmado'};
  const rows=b.results.map((r,i)=>{
   const v=report.results[i],id=r.url?new URL(r.url).searchParams.get('ainimation'):undefined;
-  if(!v||v.locationId!==r.locationId||v.screenId!==r.screenId||v.receiptId!==id||!(r.status==='success'?(v.state==='available'&&v.reason==='matched')||(v.state==='unavailable'&&['not_found','mismatch'].includes(v.reason))||(v.state==='unknown'&&v.reason==='request_failed'):v.state==='no_link'&&v.reason==='no_link'))throw Error('invalid_version_check');
-  counts[v.state]++;return[checkedAt,b.projectTitle,b.revision,r.locationName,r.locationId,r.screenName,r.screenId,states[v.state],reasons[v.reason],r.url||''];
+  if(!v||v.locationId!==r.locationId||v.screenId!==r.screenId||v.receiptId!==id||(v.reason==='http_error'?!failedHttpStatus(v.httpStatus):v.httpStatus!==undefined)||!(r.status==='success'?(v.state==='available'&&v.reason==='matched')||(v.state==='unavailable'&&['not_found','mismatch'].includes(v.reason))||(v.state==='unknown'&&['timeout','http_error','unreadable_response','connection_failed'].includes(v.reason)):v.state==='no_link'&&v.reason==='no_link'))throw Error('invalid_version_check');
+  counts[v.state]++;return[checkedAt,b.projectTitle,b.revision,r.locationName,r.locationId,r.screenName,r.screenId,states[v.state],versionCheckReason(v,language),r.url||''];
  });
  if(!report.counts||Object.keys(counts).some(key=>report.counts[key]!==counts[key]))throw Error('invalid_version_check');
  const headers=en?['Checked at (UTC)','Project','Version','Xpace','Xpace ID','Screen','Screen ID','Version check','Reason','Confirmed link']:['Comprobado (UTC)','Proyecto','Versión','Xpacio','ID Xpacio','Pantalla','ID pantalla','Comprobación de versión','Motivo','Enlace confirmado'];
@@ -69,16 +74,17 @@ export async function checkDeliveryBatchVersions(input,{request=fetch,signal,tim
  const b=cleanBatch(input),waiting=[],results=b.results.map((r,i)=>{if(r.status==='success')waiting.push(i);return{locationId:r.locationId,screenId:r.screenId,...(r.url?{receiptId:new URL(r.url).searchParams.get('ainimation')}:{}),state:r.status==='success'?'unknown':'no_link',reason:r.status==='success'?'not_checked':'no_link'};});
  const limit=Math.max(1,Math.min(Number.isFinite(timeoutMs)?timeoutMs:10000,15000));let next=0;
  const inspect=async r=>{
-  const id=new URL(r.url).searchParams.get('ainimation'),controller=new AbortController();let timer,cancel;
-  const deadline=new Promise((_,reject)=>{cancel=()=>{controller.abort();reject(Error('cancelled'));};timer=setTimeout(()=>{controller.abort();reject(Error('timeout'));},limit);signal?.addEventListener('abort',cancel,{once:true});});
+  const id=new URL(r.url).searchParams.get('ainimation'),controller=new AbortController();let timer,cancel,timedOut=false;
+  const deadline=new Promise((_,reject)=>{cancel=()=>{controller.abort();reject(Error('cancelled'));};timer=setTimeout(()=>{timedOut=true;controller.abort();reject(Error('timeout'));},limit);signal?.addEventListener('abort',cancel,{once:true});});
   const read=async()=>{
    const response=await request(VERSION_METADATA_URL+id,{method:'GET',credentials:'omit',redirect:'error',cache:'no-store',referrerPolicy:'no-referrer',signal:controller.signal});
    if(response.status===404||response.status===410)return{state:'unavailable',reason:'not_found'};
-   if(!response.ok)return{state:'unknown',reason:'request_failed'};
-   const data=await response.json(),matches=data?.id===id&&data.projectId===b.projectId&&data.sourceRevision===b.revision&&data.destination?.id===r.locationId&&data.destination.screen?.id===r.screenId&&data.destination.screen.touch===true;
+   if(!response.ok)return failedHttpStatus(response.status)?{state:'unknown',reason:'http_error',httpStatus:response.status}:{state:'unknown',reason:'unreadable_response'};
+   let data;try{data=await response.json();}catch{return{state:'unknown',reason:'unreadable_response'};}
+   const matches=data?.id===id&&data.projectId===b.projectId&&data.sourceRevision===b.revision&&data.destination?.id===r.locationId&&data.destination.screen?.id===r.screenId&&data.destination.screen.touch===true;
    return matches?{state:'available',reason:'matched'}:{state:'unavailable',reason:'mismatch'};
   };
-  try{return await Promise.race([read(),deadline]);}catch{return{state:'unknown',reason:'request_failed'};}finally{clearTimeout(timer);signal?.removeEventListener('abort',cancel);}
+  try{const result=await Promise.race([read(),deadline]);return timedOut?{state:'unknown',reason:'timeout'}:result;}catch{return{state:'unknown',reason:timedOut?'timeout':'connection_failed'};}finally{clearTimeout(timer);signal?.removeEventListener('abort',cancel);}
  };
  const work=async()=>{while(next<waiting.length&&!signal?.aborted){const i=waiting[next++];results[i]={...results[i],...await inspect(b.results[i])};}};
  await Promise.all(Array.from({length:Math.min(3,waiting.length)},work));
@@ -140,7 +146,7 @@ export function mountDeliveryHistory({button,storage,doc=document,download,onReu
    };actions.append(copy);
    if(onReuse){const reuse=make('button',t('Usar estas pantallas','Use these screens'));reuse.type='button';reuse.className='history-reuse';reuse.setAttribute('aria-label',t('Usar pantallas de ','Use screens from ')+b.projectTitle+' · '+t('versión ','version ')+b.revision+' · '+b.createdAt);reuse.onclick=()=>{cancelChecks();dialog.close();return onReuse(b.results.map(r=>({locationId:r.locationId,locationName:r.locationName,screenId:r.screenId,screenName:r.screenName})));};actions.append(reuse);}
    const check=make('button',t('Comprobar versiones','Check versions')),checkStatus=make('p');check.type='button';check.className='history-check';check.disabled=!successful;check.setAttribute('aria-label',t('Comprobar versiones de ','Check versions for ')+b.projectTitle+' · '+t('versión ','version ')+b.revision+' · '+b.createdAt);checkStatus.className='history-version-summary';checkStatus.setAttribute('role','status');
-   const versionLabel=result=>result.state==='available'?t('Versión disponible','Version available'):result.state==='no_link'?t('Sin enlace confirmado · sin comprobar','No confirmed link · not checked'):result.reason==='mismatch'?t('Los datos no coinciden con este lote','Metadata does not match this batch'):result.state==='unavailable'?t('Versión no disponible','Version unavailable'):t('No se pudo comprobar la versión','Could not check the version');
+   const versionLabel=result=>result.state==='available'?t('Versión disponible','Version available'):result.state==='no_link'?t('Sin enlace confirmado · sin comprobar','No confirmed link · not checked'):result.reason==='mismatch'?t('Los datos no coinciden con este lote','Metadata does not match this batch'):result.state==='unavailable'?t('Versión no disponible','Version unavailable'):t('No se pudo comprobar la versión','Could not check the version')+' · '+versionCheckReason(result,doc.documentElement.lang);
    let completedReport,completedTurn;const checkExport=make('button',t('Descargar comprobación CSV','Download check CSV'));checkExport.type='button';checkExport.className='history-version-csv';checkExport.hidden=true;checkExport.disabled=true;
    checkExport.onclick=()=>{if(checkExport.disabled||!completedReport||completedTurn!==viewVersion||!dialog.open)return;try{downloadFile(deliveryVersionCheckCsv(b,completedReport,doc.documentElement.lang));status.textContent=t('Informe de comprobación preparado: ','Version check report prepared: ')+b.results.length+' '+t('pantallas.','screens.');}catch{status.textContent=t('No se pudo preparar el informe de comprobación. Vuelve a comprobar las versiones e inténtalo de nuevo.','The version check report could not be prepared. Check the versions again and retry.');}};
    check.onclick=async()=>{
