@@ -41,15 +41,38 @@ export function deliveryBatchCsv(input,language='es'){
  const rows=b.results.map(r=>[b.createdAt,b.projectTitle,b.revision,r.locationName,r.locationId,r.screenName,r.screenId,r.status==='success'?(en?'Prepared':'Preparado'):r.status==='error'?(en?'Not prepared':'No preparado'):(en?'Unconfirmed':'Sin confirmación'),r.status==='success'?r.url:'']);
  return{filename:'ainimation-'+(en?'deliveries':'envios')+'-'+b.createdAt.slice(0,10)+'-v'+b.revision+'-'+b.id+'.csv',type:'text/csv;charset=utf-8',content:'\ufeff'+[headers,...rows].map(row=>row.map(quote).join(',')).join('\r\n')+'\r\n'};
 }
+// An interrupted batch is never called complete, even if some targets succeeded.
+export function deliveryBatchOutcome(batch){
+ if(batch.results.some(r=>r.status==='pending'||r.status==='sending'))return'unconfirmed';
+ return batch.results.every(r=>r.status==='success')?'complete':'error';
+}
+const searchable=value=>String(value).normalize('NFD').replace(/\p{M}/gu,'').toLowerCase().trim();
+export function filterDeliveryHistory(batches,{query='',projectId='',outcome=''}={}){
+ const words=searchable(query).split(/\s+/).filter(Boolean);
+ return batches.filter(b=>{
+  if((projectId&&b.projectId!==projectId)||(outcome&&deliveryBatchOutcome(b)!==outcome))return false;
+  const index=searchable([b.projectTitle,b.projectId,'version '+b.revision,'v'+b.revision,...b.results.flatMap(r=>[r.locationName,r.locationId,r.screenName,r.screenId])].join(' '));
+  return words.every(word=>index.includes(word));
+ });
+}
 export function mountDeliveryHistory({button,storage,doc=document,download,onReuse}){
  const t=(es,en)=>doc.documentElement.lang==='en'?en:es,make=(tag,value)=>{const n=doc.createElement(tag);if(value)n.textContent=value;return n;};
  const dialog=make('dialog');dialog.className='delivery-history-dialog';dialog.setAttribute('aria-label',t('Historial de envíos','Delivery history'));
- const title=make('h2',t('Historial de envíos','Delivery history')),hint=make('p',t('Últimos 30 lotes guardados en este navegador. Los enlaces conservan su versión; abrirlos no asigna el interactivo automáticamente.','Last 30 batches saved in this browser. Links preserve their version; opening them does not automatically assign the interactive.')),status=make('p'),list=make('div'),close=make('button',t('Cerrar historial','Close history'));status.setAttribute('role','status');close.type='button';close.onclick=()=>dialog.close();dialog.addEventListener('cancel',event=>{event.preventDefault();dialog.close();});dialog.append(title,hint,status,list,close);doc.body.append(dialog);
- button.onclick=()=>{
-  const saved=readDeliveryHistory(storage);list.replaceChildren();status.textContent=!saved.ok?t('No se puede leer el historial. Se conserva sin modificar; tus proyectos y enlaces preparados siguen disponibles.','History cannot be read. It is preserved unchanged; your projects and prepared links remain available.'):!saved.data.length?t('Todavía no hay envíos guardados en este navegador. Prepara un envío para iniciar el historial.','No deliveries saved in this browser yet. Prepare a delivery to start the history.'):'';
-  if(saved.ok)for(const [i,b] of saved.data.entries()){
+ const title=make('h2',t('Historial de envíos','Delivery history')),hint=make('p',t('Últimos 30 lotes guardados en este navegador. Los enlaces conservan su versión; abrirlos no asigna el interactivo automáticamente.','Last 30 batches saved in this browser. Links preserve their version; opening them does not automatically assign the interactive.')),status=make('p'),list=make('div'),close=make('button',t('Cerrar historial','Close history'));status.setAttribute('role','status');list.className='history-batches';close.type='button';close.onclick=()=>dialog.close();dialog.addEventListener('cancel',event=>{event.preventDefault();dialog.close();});
+ const filters=make('div'),searchLabel=make('label',t('Buscar lotes','Search batches')),query=make('input'),projectLabel=make('label',t('Proyecto del lote','Batch project')),project=make('select'),outcomeLabel=make('label',t('Resultado del lote','Batch result')),outcome=make('select'),clear=make('button',t('Quitar filtros','Clear filters'));
+ filters.className='history-filters';searchLabel.className='history-search';query.className='history-query';query.type='search';query.placeholder=t('Proyecto, versión, Xpacio o pantalla','Project, version, Xpace or screen');query.maxLength=300;project.className='history-project';outcome.className='history-outcome';clear.className='history-clear';clear.type='button';
+ const option=(value,label)=>{const n=make('option',label);n.value=value;return n;};
+ const outcomeText=value=>value==='complete'?t('Completo','Complete'):value==='error'?t('Con errores','With errors'):t('Sin confirmación','Unconfirmed');
+ outcome.append(option('',t('Todos los resultados','All results')),...['complete','error','unconfirmed'].map(value=>option(value,outcomeText(value))));
+ searchLabel.append(query);projectLabel.append(project);outcomeLabel.append(outcome);filters.append(searchLabel,projectLabel,outcomeLabel,clear);dialog.append(title,hint,filters,status,list,close);doc.body.append(dialog);
+ let batches=[];
+ const render=()=>{
+  const shown=filterDeliveryHistory(batches,{query:query.value,projectId:project.value,outcome:outcome.value});list.replaceChildren();
+  clear.disabled=!query.value&&!project.value&&!outcome.value;
+  status.textContent=shown.length+' '+t('de','of')+' '+batches.length+' '+t('lotes.','batches.')+(!shown.length?' '+t('No hay lotes que coincidan. Quita los filtros para ver todos.','No matching batches. Clear filters to see all batches.'):'');
+  for(const [i,b] of shown.entries()){
    const details=make('details'),summary=make('summary'),ul=make('ul');details.open=i===0;details.dataset.batchId=b.id;ul.className='delivery-results';
-   const successful=b.results.filter(r=>r.status==='success').length;summary.textContent=b.projectTitle+' · '+t('Versión ','Version ')+b.revision+' · '+new Date(b.createdAt).toLocaleString(doc.documentElement.lang==='en'?'en-GB':'es-ES')+' · '+successful+'/'+b.results.length+' '+t('preparados','prepared');details.append(summary);
+   const successful=b.results.filter(r=>r.status==='success').length;summary.textContent=b.projectTitle+' · '+t('Versión ','Version ')+b.revision+' · '+new Date(b.createdAt).toLocaleString(doc.documentElement.lang==='en'?'en-GB':'es-ES')+' · '+successful+'/'+b.results.length+' '+t('preparados','prepared')+' · '+outcomeText(deliveryBatchOutcome(b));details.append(summary);
    for(const r of b.results){const li=make('li'),name=make('strong',r.locationName+' · '+r.screenName),label=make('span',r.status==='success'?t('Versión preparada','Version prepared'):r.status==='error'?t('No preparado','Not prepared'):t('Sin confirmación · el lote se interrumpió','Unconfirmed · the batch was interrupted'));li.dataset.state=r.status;li.append(name,label);
     if(r.url){const a=make('a',t('Abrir en admira.store','Open in admira.store'));a.href=r.url;a.target='_blank';a.rel='noopener noreferrer';a.setAttribute('aria-label',t('Abrir ','Open ')+r.locationName+' · '+r.screenName);li.append(a);}ul.append(li);
    }const exportButton=make('button',t('Descargar CSV','Download CSV'));exportButton.type='button';exportButton.className='history-csv';exportButton.setAttribute('aria-label',t('Descargar CSV de ','Download CSV for ')+b.projectTitle+' · '+t('versión ','version ')+b.revision+' · '+b.createdAt);
@@ -57,7 +80,16 @@ export function mountDeliveryHistory({button,storage,doc=document,download,onReu
    details.append(exportButton);
    if(onReuse){const reuse=make('button',t('Usar estas pantallas','Use these screens'));reuse.type='button';reuse.className='history-reuse';reuse.setAttribute('aria-label',t('Usar pantallas de ','Use screens from ')+b.projectTitle+' · '+t('versión ','version ')+b.revision+' · '+b.createdAt);reuse.onclick=()=>{dialog.close();return onReuse(b.results.map(r=>({locationId:r.locationId,locationName:r.locationName,screenId:r.screenId,screenName:r.screenName})));};details.append(reuse);}
    details.append(ul);list.append(details);
-  }dialog.showModal();
+  }
+ };
+ query.oninput=render;project.onchange=render;outcome.onchange=render;clear.onclick=()=>{query.value='';project.value='';outcome.value='';render();};
+ button.onclick=()=>{
+  const saved=readDeliveryHistory(storage);batches=saved.ok?saved.data:[];query.value='';outcome.value='';project.replaceChildren(option('',t('Todos los proyectos','All projects')));
+  const projects=new Map();for(const b of batches)if(!projects.has(b.projectId))projects.set(b.projectId,b.projectTitle);
+  const names=new Map();for(const name of projects.values())names.set(name,(names.get(name)||0)+1);
+  for(const [id,name] of projects)project.append(option(id,name+(names.get(name)>1?' · '+id:'')));project.value='';filters.hidden=!batches.length;list.replaceChildren();
+  if(batches.length)render();else status.textContent=!saved.ok?t('No se puede leer el historial. Se conserva sin modificar; tus proyectos y enlaces preparados siguen disponibles.','History cannot be read. It is preserved unchanged; your projects and prepared links remain available.'):t('Todavía no hay envíos guardados en este navegador. Prepara un envío para iniciar el historial.','No deliveries saved in this browser yet. Prepare a delivery to start the history.');
+  dialog.showModal();
  };
  return dialog;
 }
