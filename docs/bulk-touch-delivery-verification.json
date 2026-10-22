@@ -1,0 +1,103 @@
+{
+  "verifiedAt": "2026-10-22T19:10:35.275888+00:00",
+  "timezone": "Europe/Madrid",
+  "scope": "Five virtual native Better 3D receivers; not physical hardware delivery.",
+  "browser": "Internal browser; panel neither moved nor resized.",
+  "projectId": "8c63c927-e53c-419a-a5cf-091e0fcce3a5",
+  "projectTitle": "Prueba Director · catálogo y cesta",
+  "sourceRevision": 8,
+  "sameContentSha256": "ffd868d1dd77c5f5efe03f1abd940daa709b40d7d1f6b130c7efc196da93c6b5",
+  "batchAction": "One Prepare 5 deliveries click in the production Creator",
+  "batchResult": {
+    "prepared": 5,
+    "failed": 0,
+    "perScreenLinks": true
+  },
+  "cafeteriaCheck": {
+    "product": "Chocolate Director · completo",
+    "basePriceCents": 460,
+    "option": "Avena",
+    "unitPriceCents": 480,
+    "basketTitle": "Tu cesta · recorrido completo"
+  },
+  "checks": [
+    {
+      "name": "Xtanco Barcelona · Mostrador panel",
+      "url": "https://www.admira.store/xpacios/pantalla/?loc=xtanco-bcn&screen=JTIXtanco_PortaldelAngel_20_Mostrador_1&ainimation=080641d830c64eecb3a1ebb972a2ae6d37736ea5c5884198b4e0bf9b918681a6&lang=es",
+      "assigned": [
+        {
+          "display": "block",
+          "transform": "matrix3d(0.367569, 0.0643376, 0, 1.72272e-19, -0.0318262, 0.398047, 0, -1.61286e-18, 0, 0, 1, 0, 280.411, 146.141, 0, 1)",
+          "url": "https://ainimation-interactive-library-preview.csilvasantin.workers.dev/api/deliveries/080641d830c64eecb3a1ebb972a2ae6d37736ea5c5884198b4e0bf9b918681a6/player"
+        }
+      ],
+      "catalogAndBasket": true,
+      "restored": true
+    },
+    {
+      "name": "Xtanco · Mostrador panel",
+      "url": "https://www.admira.store/xpacios/pantalla/?loc=xtanco&screen=JTIXtanco_CalledeSantaRosa_4_Mostrador_1&ainimation=2dd215914a544e7b97d2814bf8a7fc9dd077ddf229ae447d95e26c6f66b0d26d&lang=es",
+      "assigned": [
+        {
+          "display": "block",
+          "transform": "matrix3d(0.367569, 0.0643376, 0, 1.72272e-19, -0.0318262, 0.398047, 0, -1.61286e-18, 0, 0, 1, 0, 280.411, 146.141, 0, 1)",
+          "url": "https://ainimation-interactive-library-preview.csilvasantin.workers.dev/api/deliveries/2dd215914a544e7b97d2814bf8a7fc9dd077ddf229ae447d95e26c6f66b0d26d/player"
+        }
+      ],
+      "catalogAndBasket": true,
+      "restored": true
+    },
+    {
+      "name": "Xtanco Valencia · Mostrador panel",
+      "url": "https://www.admira.store/xpacios/pantalla/?loc=xtanco-valencia&screen=JTIXtanco_CarrerdeColon_22_Mostrador_1&ainimation=e4751f2a80a64eb882eba99e3f86544a562bd9ee7df64eed996138b500b50c9a&lang=es",
+      "assigned": [
+        {
+          "display": "block",
+          "transform": "matrix3d(0.367569, 0.0643376, 0, 1.72272e-19, -0.0318262, 0.398047, 0, -1.61286e-18, 0, 0, 1, 0, 280.411, 146.141, 0, 1)",
+          "url": "https://ainimation-interactive-library-preview.csilvasantin.workers.dev/api/deliveries/e4751f2a80a64eb882eba99e3f86544a562bd9ee7df64eed996138b500b50c9a/player"
+        }
+      ],
+      "catalogAndBasket": true,
+      "restored": true
+    },
+    {
+      "name": "Admira Loterías · Boletos kiosk",
+      "url": "https://www.admira.store/xpacios/pantalla/?loc=admira-loterias&screen=SinProyecto_GranVia_32_Mostrador_1&ainimation=4c5fedec4dab4ea2bbd98514a6632c13a31bd67aff984eeba2cb7014195124d0&lang=es",
+      "assigned": [
+        {
+          "display": "block",
+          "transform": "matrix3d(0.266737, 0.0466884, 0, 1.13138e-18, -0.0103373, 0.283645, 0, -2.02482e-18, 0, 0, 1, 0, 397.441, 134.277, 0, 1)",
+          "url": "https://ainimation-interactive-library-preview.csilvasantin.workers.dev/api/deliveries/4c5fedec4dab4ea2bbd98514a6632c13a31bd67aff984eeba2cb7014195124d0/player"
+        }
+      ],
+      "catalogAndBasket": true,
+      "restored": true
+    },
+    {
+      "name": "Admira Prensa · Mostrador revista",
+      "url": "https://www.admira.store/xpacios/pantalla/?loc=admira-prensa&screen=SinProyecto_PlazadeCibeles_Mostrador_1&ainimation=2cf547bd4d174472b0fd7c78ccf0c29ceb9eb5db6e0340deb58ce0d66b11d1bb&lang=es",
+      "assigned": [
+        {
+          "display": "block",
+          "transform": "matrix3d(0.367569, 0.0643376, 0, 1.72272e-19, -0.0318262, 0.398047, 0, -1.61286e-18, 0, 0, 1, 0, 280.411, 146.141, 0, 1)",
+          "url": "https://ainimation-interactive-library-preview.csilvasantin.workers.dev/api/deliveries/2cf547bd4d174472b0fd7c78ccf0c29ceb9eb5db6e0340deb58ce0d66b11d1bb/player"
+        }
+      ],
+      "catalogAndBasket": true,
+      "restored": true
+    }
+  ],
+  "validation": {
+    "ainimationTestsPassed": 95,
+    "storeReceiverTestsPassed": 10,
+    "actualMcpHelpTestsPassed": 1,
+    "controlledPartialFailure": "Four successes retained; only failed fifth retried. Local isolated fixture, not production failure injection."
+  },
+  "releases": {
+    "ainimation": "f3d313d",
+    "assets": "1e3bc54",
+    "libraryWorker": "cc8b1b35-71cc-4ee9-b8d3-8c9cb7729370",
+    "store": "b9b0d292.admira-store.pages.dev",
+    "mcpWorker": "1fbf2ba5-df3f-4ebc-9d62-d058668bcfbb"
+  }
+}
