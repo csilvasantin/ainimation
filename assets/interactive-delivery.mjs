@@ -1,31 +1,70 @@
 import {validate,playerHtml} from './interactive-project.mjs';
 export function mountInteractiveDelivery({button,getState,endpoint,doc=document,request=fetch}){
  const t=(es,en)=>doc.documentElement.lang==='en'?en:es;
- const dialog=doc.createElement('dialog');dialog.className='send-xpacio-dialog';dialog.setAttribute('aria-label',t('Enviar a Xpacio','Send to Xpace'));
- const title=doc.createElement('h2'),description=doc.createElement('p'),form=doc.createElement('form'),preview=doc.createElement('iframe'),status=doc.createElement('p'),location=doc.createElement('select'),screen=doc.createElement('select'),send=doc.createElement('button'),close=doc.createElement('button'),link=doc.createElement('a');
- preview.title=t('Versión que se enviará','Version to send');preview.setAttribute('sandbox','allow-scripts');status.setAttribute('role','status');location.required=screen.required=true;send.type='submit';send.className='primary';close.type='button';link.target='_blank';link.rel='noopener noreferrer';link.hidden=true;link.className='button-link primary';
- const grid=doc.createElement('div');grid.className='send-xpacio-grid';
- function field(label,control){const n=doc.createElement('label'),text=doc.createElement('span');text.textContent=label;n.append(text,control);return n;}
- const locationField=field(t('Xpacio','Xpace'),location),screenField=field(t('Pantalla','Screen'),screen),note=doc.createElement('p');note.className='hint';
- note.textContent=t('Gemelo digital. El enlace permite ver esta versión; no cambia las playlists ni envía a hardware físico.','Digital twin. The link lets its holder view this version; it does not change playlists or send to physical hardware.');
- form.append(locationField,screenField,note,send);grid.append(form,preview);dialog.append(title,description,grid,status,link,close);doc.body.append(dialog);
- let state,destinations=[],busy=false;const coverage=doc.createElement('p');coverage.className='hint';form.append(coverage);
- const option=(label,value)=>{const o=doc.createElement('option');o.textContent=label;o.value=value;return o;};
- const available=()=> (destinations.find(d=>d.id===location.value)?.screens||[]).filter(s=>s.touch===true&&s.available!==false);
- function screens(){const list=available(),pending=(destinations.find(d=>d.id===location.value)?.screens||[]).filter(s=>s.touch===true&&s.available===false);coverage.textContent=pending.length?t('Táctiles detectadas pendientes de conectar: ','Detected touch screens awaiting connection: ')+pending.map(s=>s.name).join(', ')+'. '+t('No se puede asignar hasta conectar su receptor.','Assignment requires a connected receiver.'):'';screen.replaceChildren(option(t('Elige una pantalla táctil','Choose a touch screen'),''),...list.map(s=>option(s.name,s.id)),...pending.map(s=>{const o=option(s.name+' · '+t('receptor pendiente','receiver pending'),s.id);o.disabled=true;return o;}));screen.disabled=!list.length&&!pending.length;send.disabled=busy||!list.length||!screen.value;status.textContent=location.value&&!list.length?t('Este Xpacio no tiene pantallas táctiles disponibles.','This Xpace has no touch screens available.'):'';}
- screen.onchange=()=>{send.disabled=busy||!available().some(s=>s.id===screen.value);};
- location.onchange=screens;
- function hide(){if(busy)return;preview.removeAttribute('srcdoc');dialog.close();}
+ const make=(tag,text,cls)=>{const n=doc.createElement(tag);if(text)n.textContent=text;if(cls)n.className=cls;return n;};
+ const dialog=make('dialog',null,'send-xpacio-dialog');dialog.setAttribute('aria-label',t('Enviar a Xpacios','Send to Xpaces'));
+ const title=make('h2',t('Enviar a Xpacios','Send to Xpaces')),description=make('p'),form=make('form'),preview=make('iframe'),status=make('p'),location=make('select'),send=make('button'),close=make('button',t('Cerrar','Close')),list=make('div',null,'delivery-targets'),results=make('ul',null,'delivery-results'),all=make('button',t('Seleccionar visibles','Select visible')),clear=make('button',t('Quitar selección','Clear selection')),coverage=make('p',null,'hint');
+ preview.title=t('Versión que se enviará','Version to send');preview.setAttribute('sandbox','allow-scripts');status.setAttribute('role','status');results.setAttribute('aria-label',t('Resultado por pantalla','Results by screen'));results.hidden=true;
+ send.type='submit';send.className='primary';close.type=all.type=clear.type='button';location.setAttribute('aria-label',t('Xpacio','Xpace'));list.setAttribute('aria-label',t('Pantallas táctiles','Touch screens'));
+ const grid=make('div',null,'send-xpacio-grid'),field=make('label'),tools=make('div',null,'tools'),note=make('p',t('Gemelo digital. Cada enlace conserva esta versión; no cambia las playlists ni envía a hardware físico.','Digital twin. Each link preserves this version; it does not change playlists or send to physical hardware.'),'hint');
+ field.append(make('span',t('Xpacio','Xpace')),location);tools.append(all,clear);form.append(field,tools,list,coverage,note,send);grid.append(form,preview);dialog.append(title,description,grid,status,results,close);doc.body.append(dialog);
+ let state,rows=[],busy=false,loading=false,generation=0;const outcomes=new Map();
+ const eligible=r=>r.screen.touch===true&&r.screen.available!==false;
+ const selected=()=>rows.filter(r=>eligible(r)&&r.check.checked);
+ const pending=()=>selected().filter(r=>outcomes.get(r.key)?.status!=='success');
+ const option=(label,value)=>{const n=make('option',label);n.value=value;return n;};
+ function controls(){
+  for(const r of rows)r.check.disabled=busy||loading||!eligible(r);
+  location.disabled=all.disabled=clear.disabled=busy||loading;close.disabled=busy;send.disabled=busy||loading||!pending().length;
+  const n=pending().length;send.textContent=(outcomes.size?t('Preparar / reintentar','Prepare / retry'):t('Preparar','Prepare'))+' '+n+' '+t(n===1?'envío':'envíos',n===1?'delivery':'deliveries');
+ }
+ function filter(){
+  const visible=rows.filter(r=>!location.value||r.location.id===location.value);
+  for(const r of rows)r.row.hidden=!visible.includes(r);
+  const missing=visible.filter(r=>!eligible(r));coverage.textContent=missing.length?t('Táctiles detectadas pendientes de conectar: ','Detected touch screens awaiting connection: ')+missing.map(r=>r.location.name+' · '+r.screen.name).join(', ')+'. '+t('No se puede asignar hasta conectar su receptor.','Assignment requires a connected receiver.'):'';
+  status.textContent=!visible.some(eligible)?t('Este Xpacio no tiene pantallas táctiles disponibles.','This Xpace has no touch screens available.'):'';controls();
+ }
+ location.onchange=filter;
+ all.onclick=()=>{for(const r of rows)if(!r.row.hidden&&eligible(r))r.check.checked=true;controls();};
+ clear.onclick=()=>{for(const r of rows)r.check.checked=false;controls();};
+ function renderResults(){
+  results.hidden=!outcomes.size;results.replaceChildren();
+  for(const [key,o] of outcomes){const r=rows.find(r=>r.key===key),item=make('li'),name=make('strong',r.location.name+' · '+r.screen.name),detail=make('span',o.message);item.dataset.state=o.status;item.append(name,detail);
+   if(o.url){const a=make('a',t('Abrir en admira.store','Open in admira.store'));a.href=o.url;a.target='_blank';a.rel='noopener noreferrer';a.setAttribute('aria-label',t('Abrir ','Open ')+r.location.name+' · '+r.screen.name);item.append(a);}results.append(item);
+  }
+ }
+ function hide(){if(busy)return;generation++;loading=false;preview.removeAttribute('srcdoc');dialog.close();}
  close.onclick=hide;dialog.addEventListener('cancel',e=>{e.preventDefault();hide();});
  button.onclick=async()=>{
-  title.textContent=t('Enviar a Xpacio','Send to Xpace');close.textContent=t('Cerrar','Close');send.textContent=t('Preparar envío','Prepare delivery');link.textContent=t('Abrir en admira.store','Open in admira.store');link.hidden=true;status.textContent='';
-  try{state=getState();validate(state.project);if(!state.token)throw Error(t('Conecta tu cuenta Google antes de preparar el envío.','Connect your Google account before preparing a delivery.'));preview.srcdoc=playerHtml(state.project);description.textContent=state.project.title+' · '+t('Versión guardada','Saved version');dialog.showModal();send.disabled=true;
-   const r=await request(endpoint+'/destinations',{headers:{authorization:'Bearer '+state.token},signal:AbortSignal.timeout(30000)});const data=await r.json();if(!r.ok)throw Error(data.error);destinations=data.destinations;if(data.coverage?.error)description.textContent+=' · '+t('No se pudo revisar el inventario completo. Se muestran los destinos ya conectados.','The full inventory could not be checked. Showing connected destinations.');location.replaceChildren(option(t('Elige un Xpacio','Choose a Xpace'),''),...destinations.map(d=>option(d.name,d.id)));screens();
-  }catch(error){if(!dialog.open)dialog.showModal();status.textContent=error.message;send.disabled=true;}
+  if(dialog.open||busy)return;const turn=++generation;rows=[];outcomes.clear();list.replaceChildren();results.replaceChildren();results.hidden=true;coverage.textContent='';location.replaceChildren(option(t('Todos los Xpacios','All Xpaces'),''));loading=true;controls();status.textContent=t('Buscando pantallas táctiles…','Finding touch screens…');
+  try{
+   const current=getState();validate(current.project);if(!current.token)throw Error(t('Conecta tu cuenta Google antes de preparar el envío.','Connect your Google account before preparing a delivery.'));
+   state={...current,project:structuredClone(current.project)};preview.srcdoc=playerHtml(state.project);description.textContent=state.project.title+' · '+t('Versión guardada','Saved version')+' '+state.revision;dialog.showModal();
+   const response=await request(endpoint+'/destinations',{headers:{authorization:'Bearer '+state.token},signal:AbortSignal.timeout(30000)}),data=await response.json();if(turn!==generation)return;if(!response.ok)throw Error(data.error);
+   if(data.coverage?.error)description.textContent+=' · '+t('No se pudo revisar el inventario completo. Se muestran los destinos ya conectados.','The full inventory could not be checked. Showing connected destinations.');
+   const destinations=data.destinations;location.replaceChildren(option(t('Todos los Xpacios','All Xpaces'),''),...destinations.map(d=>option(d.name,d.id)));
+   for(const d of destinations)for(const s of d.screens.filter(s=>s.touch===true)){
+    const row=make('label',null,'delivery-target'),check=make('input'),text=make('span',d.name+' · '+s.name+(s.available===false?' · '+t('receptor pendiente','receiver pending'):''));check.type='checkbox';check.onchange=controls;row.append(check,text);list.append(row);rows.push({key:JSON.stringify([d.id,s.id]),location:d,screen:s,row,check});
+   }
+   loading=false;filter();
+  }catch(error){if(turn!==generation)return;loading=false;if(!dialog.open)dialog.showModal();status.textContent=error.message;controls();}
  };
- form.onsubmit=async event=>{event.preventDefault();if(busy)return;if(!available().some(s=>s.id===screen.value)){status.textContent=t('Selecciona una pantalla táctil disponible.','Select an available touch screen.');send.disabled=true;return;}busy=true;send.disabled=close.disabled=true;status.textContent=t('Preparando la versión…','Preparing this version…');
-  try{const r=await request(endpoint+'/deliveries',{method:'POST',headers:{authorization:'Bearer '+state.token,'content-type':'application/json'},signal:AbortSignal.timeout(30000),body:JSON.stringify({projectId:state.id,sourceRevision:state.revision,project:state.project,location:location.value,screen:screen.value})});const data=await r.json();if(!r.ok)throw Error(data.error||t('No se pudo preparar.','Could not prepare delivery.'));const u=new URL(data.storeUrl);if(u.origin!=='https://www.admira.store'||!['/admira-xp/','/xpacios/pantalla/'].includes(u.pathname))throw Error('Destino no válido');u.searchParams.set('lang',doc.documentElement.lang==='en'?'en':'es');link.href=u.href;link.hidden=false;status.textContent=t('Versión preparada. Ábrela en admira.store para revisarla y mostrarla en la pantalla elegida.','Version prepared. Open it in admira.store to review it and display it on the chosen screen.');
-  }catch(error){status.textContent=error.name==='TimeoutError'?t('La conexión tardó demasiado. Puedes reintentar; tus proyectos se conservan.','The connection timed out. Retry safely; your projects are preserved.'):error.message;}finally{busy=false;close.disabled=false;send.disabled=!available().some(s=>s.id===screen.value);}
+ form.onsubmit=async event=>{
+  event.preventDefault();if(busy||loading)return;const targets=pending();if(!targets.length){status.textContent=t('Selecciona una pantalla táctil disponible.','Select an available touch screen.');controls();return;}
+  // Recheck the saved revision once. All requests and retries keep the same opening snapshot.
+  try{const current=getState();if(current.id!==state.id||current.revision!==state.revision||JSON.stringify(current.project)!==JSON.stringify(state.project))throw Error(t('El proyecto cambió. Cierra y vuelve a abrir Enviar a Xpacios para revisar la nueva versión.','The project changed. Close and reopen Send to Xpaces to review the new version.'));if(!current.token)throw Error(t('Conecta tu cuenta Google antes de preparar el envío.','Connect your Google account before preparing a delivery.'));state.token=current.token;}catch(error){status.textContent=error.message;return;}
+  busy=true;controls();for(const r of targets)outcomes.set(r.key,{status:'pending',message:t('Pendiente','Pending')});renderResults();
+  for(const [i,r] of targets.entries()){
+   status.textContent=t('Preparando ','Preparing ')+(i+1)+' / '+targets.length+'…';outcomes.set(r.key,{status:'sending',message:t('Preparando…','Preparing…')});renderResults();
+   try{
+    const response=await request(endpoint+'/deliveries',{method:'POST',headers:{authorization:'Bearer '+state.token,'content-type':'application/json'},signal:AbortSignal.timeout(30000),body:JSON.stringify({projectId:state.id,sourceRevision:state.revision,project:state.project,location:r.location.id,screen:r.screen.id})}),data=await response.json();if(!response.ok)throw Error(data.error||t('No se pudo preparar.','Could not prepare delivery.'));
+    const u=new URL(data.storeUrl);if(u.origin!=='https://www.admira.store'||!['/admira-xp/','/xpacios/pantalla/'].includes(u.pathname)||u.searchParams.get('loc')!==r.location.id||data.destination?.id!==r.location.id||data.destination?.screen?.id!==r.screen.id||data.destination.screen.touch!==true||data.projectId!==state.id||data.sourceRevision!==state.revision||(u.pathname==='/xpacios/pantalla/'&&u.searchParams.get('screen')!==r.screen.id))throw Error(t('El resultado no corresponde a esta pantalla o versión.','The result does not match this screen or version.'));
+    u.searchParams.set('lang',doc.documentElement.lang==='en'?'en':'es');outcomes.set(r.key,{status:'success',message:t('Versión preparada','Version prepared'),url:u.href});
+   }catch(error){outcomes.set(r.key,{status:'error',message:error.name==='TimeoutError'?t('La conexión tardó demasiado. Reintenta este envío.','The connection timed out. Retry this delivery.'):error.message});}
+   renderResults();
+  }
+  busy=false;controls();const done=[...outcomes.values()].filter(o=>o.status==='success').length,failed=[...outcomes.values()].filter(o=>o.status==='error').length;
+  status.textContent=done+' '+t('preparados','prepared')+' · '+failed+' '+t('con error','failed')+'. '+(failed?t('Reintentar conserva los enlaces ya preparados.','Retry preserves the links already prepared.'):t('Abre cada enlace para asignar y restaurar en su escena 3D.','Open each link to assign and restore in its 3D scene.'));
  };
  return dialog;
 }
