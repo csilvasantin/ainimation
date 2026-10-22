@@ -83,3 +83,7 @@ The Prensa camera orbit changed the projected transform while keeping the iframe
 Director: las cafeterías nativas también admiten Catálogo y cesta. Aplicar → Probar recorrido → Volver al Creador conserva productos, precios, opciones y ajustes de cesta en el mismo proyecto. Sincronizar y preparar un nuevo envío publica una nueva versión; los enlaces anteriores permanecen fijos. Guía: [Director](interactive-director.md).
 
 Director: native cafeterias also support Catalog and basket. Apply → Test journey → Return to Creator preserves products, prices, options and basket settings in the same project. Sync and prepare a new delivery to publish a new version; earlier links remain immutable. Guide: [Director](interactive-director.md).
+
+Acceso: si el navegador interno no completa la ventana emergente de Google, «Continuar con Google aquí» solicita la confirmación oficial de Google en la misma página. La API sigue exigiendo un ID token firmado y una cuenta autorizada; un aviso de acceso incompleto no permite preparar envíos.
+
+Sign-in: if an embedded browser cannot complete the Google popup, “Continue with Google here” requests Google’s official confirmation in the same page. The API still requires a signed ID token and an allowed account; an incomplete sign-in message does not authorize a delivery.
