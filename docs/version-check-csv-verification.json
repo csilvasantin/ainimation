@@ -1,0 +1,126 @@
+{
+  "feature": "Descargar comprobación CSV / Download check CSV",
+  "verifiedAt": "2026-10-22T23:05:26.018030+00:00",
+  "creator": "https://www.ainimation.studio/interactivos/?project=8c63c927-e53c-419a-a5cf-091e0fcce3a5",
+  "batchId": "0420fbf3-c6c4-4806-a116-a4a9b440c73e",
+  "revision": 9,
+  "checkedAt": "2026-10-22T23:02:50.018Z",
+  "counts": {
+    "available": 5,
+    "unavailable": 0,
+    "unknown": 0,
+    "noConfirmedLink": 0
+  },
+  "scope": "Completed public-metadata check of prepared immutable versions; no physical playback or 3D scene operating-state claim.",
+  "release": {
+    "ainimationCommit": "8f43ddaf4fd531c8fdb43821e91734a43a2876ae",
+    "functionalCommit": "ca802c5",
+    "assetToken": "ca802c5",
+    "historyModuleSha256": "94f3b457ad45ffcfdff15968a02e9058469937fe3d8de088da92c8496f490089",
+    "libraryWorkerVersion": "62980722-67f8-42e7-8fa4-4bb71ee3934a",
+    "mcpCommit": "2762725",
+    "mcpWorkerVersion": "0d3b5a85-7a9c-45f0-8857-60c4fe6a6df0"
+  },
+  "report": {
+    "rows": 5,
+    "columns": 10,
+    "utf8Bom": true,
+    "headers": [
+      "Comprobado (UTC)",
+      "Proyecto",
+      "Versión",
+      "Xpacio",
+      "ID Xpacio",
+      "Pantalla",
+      "ID pantalla",
+      "Comprobación de versión",
+      "Motivo",
+      "Enlace confirmado"
+    ],
+    "sha256": "09b9556501486190782c7328a67636d8c14bd332c5cc52efc9873ce0965181c6",
+    "timestampMatchesVisibleCheck": true,
+    "exactProjectRevisionDestinationsStatesReasonsAndLinks": true,
+    "separateFromOriginalDeliveryCsv": true,
+    "originalDeliveryCsvByteIdentical": true,
+    "originalDeliveryCsvSha256": "34bdae288ab5fe70b4ce6fb8907dd87a33ac190ef8952a658c4ad12523ea4ac9",
+    "spreadsheetImportVerified": "Workbook.fromCSV; UTF-8 BOM verified then removed for importer; parsed dates compared as ISO UTC",
+    "screens": [
+      {
+        "link": "https://www.admira.store/xpacios/pantalla/?loc=xtanco-bcn&screen=JTIXtanco_PortaldelAngel_20_Mostrador_1&ainimation=0d3223fb28f44efe9bc4ab23f68ba4390da298ef36af4bda86fba54ea59cfff4&lang=es",
+        "name": "Xtanco Barcelona · Mostrador panel",
+        "state": "success",
+        "versionState": "available"
+      },
+      {
+        "link": "https://www.admira.store/xpacios/pantalla/?loc=xtanco&screen=JTIXtanco_CalledeSantaRosa_4_Mostrador_1&ainimation=0e58c8dce1644c3488f84d1f4339bd4012abc9f2828c42c193fc8695d1d28d84&lang=es",
+        "name": "Xtanco · Mostrador panel",
+        "state": "success",
+        "versionState": "available"
+      },
+      {
+        "link": "https://www.admira.store/xpacios/pantalla/?loc=xtanco-valencia&screen=JTIXtanco_CarrerdeColon_22_Mostrador_1&ainimation=afd5917d36d94dc09894394e8a0612fc5f0acf6700e54ec49d328e71a93972e2&lang=es",
+        "name": "Xtanco Valencia · Mostrador panel",
+        "state": "success",
+        "versionState": "available"
+      },
+      {
+        "link": "https://www.admira.store/xpacios/pantalla/?loc=admira-loterias&screen=SinProyecto_GranVia_32_Mostrador_1&ainimation=d15a31e136d6477dbbd4046e6036fb5227afe72ae41542c3ace5d4a5d52af1cc&lang=es",
+        "name": "Admira Loterías · Boletos kiosk",
+        "state": "success",
+        "versionState": "available"
+      },
+      {
+        "link": "https://www.admira.store/xpacios/pantalla/?loc=admira-prensa&screen=SinProyecto_PlazadeCibeles_Mostrador_1&ainimation=f146668cd2ae4557bb7baf53f91aaea4d047e0a91eea4b55b83ce03063353096&lang=es",
+        "name": "Admira Prensa · Mostrador revista",
+        "state": "success",
+        "versionState": "available"
+      }
+    ]
+  },
+  "ui": {
+    "hiddenAndDisabledBeforeCheck": true,
+    "visibleAfterComplete": true,
+    "downloadNotice": "Informe de comprobación preparado: 5 pantallas.",
+    "discardedAfterChangingBatch": true,
+    "discardedAfterReload": true,
+    "panelMoved": false,
+    "panelResized": false,
+    "dialogBoundsUnchanged": true
+  },
+  "preserved": {
+    "batchCount": 2,
+    "exactLinkCount": 10,
+    "projectCount": 3,
+    "googleSignInPerformed": false,
+    "newDeliveriesPrepared": 0,
+    "screenAssignmentsPerformed": 0,
+    "inventoryChanges": 0,
+    "historyWritesByExport": 0,
+    "requestsByExport": 0,
+    "reportPersistedInHistory": false
+  },
+  "tests": {
+    "interactive": 138,
+    "mcpHelp": 1,
+    "publicMcpHelpBilingual": true,
+    "isolatedCases": [
+      "four result states and distinct reasons",
+      "confirmed absence versus failed requests",
+      "no URLs for unconfirmed deliveries",
+      "formula-like labels with whitespace, controls and Unicode forms",
+      "Spanish accents, quotes and newlines",
+      "crossed batch, project, revision, destination or receipt",
+      "invalid counts, incomplete results and cancelled queries",
+      "hidden export until complete, invalidated on recheck/filter/close",
+      "no requests or history writes while exporting",
+      "unchanged original CSV"
+    ]
+  },
+  "localEvidence": [
+    "version-check-csv-production-ui.json",
+    "version-check-csv-import-verification.json",
+    "version-check-csv-production.png",
+    "ainimation-comprobacion-cinco-tactiles.csv",
+    "version-check-csv-original-after.csv"
+  ]
+}
