@@ -1,0 +1,103 @@
+{
+  "verifiedAt": "2026-10-22T22:04:02.604747+00:00",
+  "scope": "Compact batch action layout only; no new deliveries, assignments or synchronization.",
+  "browser": "Internal browser; panel neither moved nor resized.",
+  "layout": {
+    "sameDialogBounds": {
+      "bottom": 708,
+      "height": 696,
+      "right": 1082.5,
+      "width": 900,
+      "x": 182.5,
+      "y": 12
+    },
+    "firstResultYBefore": 641.578125,
+    "firstResultYAfter": 513.578125,
+    "verticalSpaceGainedPx": 128,
+    "actions": [
+      {
+        "clientWidth": 120,
+        "label": "Descargar CSV de Prueba Director · catálogo y cesta · versión 9 · 2026-10-22T20:36:48.005Z",
+        "rect": {
+          "bottom": 501.578125,
+          "height": 44,
+          "right": 333.421875,
+          "width": 121.921875,
+          "x": 211.5,
+          "y": 457.578125
+        },
+        "scrollWidth": 120,
+        "text": "Descargar CSV"
+      },
+      {
+        "clientWidth": 127,
+        "label": "Copiar enlaces de Prueba Director · catálogo y cesta · versión 9 · 2026-10-22T20:36:48.005Z",
+        "rect": {
+          "bottom": 501.578125,
+          "height": 44,
+          "right": 470.578125,
+          "width": 129.15625,
+          "x": 341.421875,
+          "y": 457.578125
+        },
+        "scrollWidth": 127,
+        "text": "Copiar enlaces"
+      },
+      {
+        "clientWidth": 171,
+        "label": "Usar pantallas de Prueba Director · catálogo y cesta · versión 9 · 2026-10-22T20:36:48.005Z",
+        "rect": {
+          "bottom": 501.578125,
+          "height": 44,
+          "right": 651.078125,
+          "width": 172.5,
+          "x": 478.578125,
+          "y": 457.578125
+        },
+        "scrollWidth": 171,
+        "text": "Usar estas pantallas"
+      }
+    ],
+    "copyNoticeBelowActions": true
+  },
+  "chosenBatch": {
+    "id": "0420fbf3-c6c4-4806-a116-a4a9b440c73e",
+    "links": [
+      "https://www.admira.store/xpacios/pantalla/?loc=xtanco-bcn&screen=JTIXtanco_PortaldelAngel_20_Mostrador_1&ainimation=0d3223fb28f44efe9bc4ab23f68ba4390da298ef36af4bda86fba54ea59cfff4&lang=es",
+      "https://www.admira.store/xpacios/pantalla/?loc=xtanco&screen=JTIXtanco_CalledeSantaRosa_4_Mostrador_1&ainimation=0e58c8dce1644c3488f84d1f4339bd4012abc9f2828c42c193fc8695d1d28d84&lang=es",
+      "https://www.admira.store/xpacios/pantalla/?loc=xtanco-valencia&screen=JTIXtanco_CarrerdeColon_22_Mostrador_1&ainimation=afd5917d36d94dc09894394e8a0612fc5f0acf6700e54ec49d328e71a93972e2&lang=es",
+      "https://www.admira.store/xpacios/pantalla/?loc=admira-loterias&screen=SinProyecto_GranVia_32_Mostrador_1&ainimation=d15a31e136d6477dbbd4046e6036fb5227afe72ae41542c3ace5d4a5d52af1cc&lang=es",
+      "https://www.admira.store/xpacios/pantalla/?loc=admira-prensa&screen=SinProyecto_PlazadeCibeles_Mostrador_1&ainimation=f146668cd2ae4557bb7baf53f91aaea4d047e0a91eea4b55b83ce03063353096&lang=es"
+    ],
+    "summary": "Prueba Director · catálogo y cesta · Versión 9 · 22/10/2026, 22:36:48 · 5/5 preparados · Completo"
+  },
+  "checks": {
+    "threeFullLabelsInOneRowAtCurrentSize": true,
+    "noClippingOrOverlap": true,
+    "keyboardCsvThenCopyThenReuse": true,
+    "nativePasteMatchesExactFiveLinks": true,
+    "version9CsvByteIdenticalBeforeAndAfter": true,
+    "twoBatchesAndTenLinksRetained": true,
+    "threeProjectsRetained": true,
+    "noGoogleRequiredForHistoryCopyOrCsv": true,
+    "noAutomaticCopyAfterReload": true
+  },
+  "csv": {
+    "sha256": "34bdae288ab5fe70b4ce6fb8907dd87a33ac190ef8952a658c4ad12523ea4ac9",
+    "bytes": 1929,
+    "dataRows": 5,
+    "columns": 9
+  },
+  "isolatedTests": {
+    "interactivePassed": 125,
+    "clipboardDeniedAndAbsentFallbackPass": true,
+    "partialBatchCountsRetained": true,
+    "csvAndCopyBelongToChosenBatch": true,
+    "reuseRefreshesTargetsAndKeepsSessionRevisionAndConfirmationChecks": true
+  },
+  "releases": {
+    "ainimation": "554aefc60e4cd7306dc009fdf47d6bfbab259385",
+    "assets": "b58c6c6",
+    "libraryWorker": "94966dd5-45a1-425d-8b99-444911e3f534"
+  }
+}
