@@ -1,0 +1,98 @@
+{
+  "feature": "ainimation-comparison-swap",
+  "verifiedAt": "2026-10-23T07:03:56.183558+00:00",
+  "production": {
+    "url": "https://www.ainimation.studio/interactivos/",
+    "originalRevisions": [
+      8,
+      9
+    ],
+    "swappedRevisions": [
+      9,
+      8
+    ],
+    "restoredRevisions": [
+      8,
+      9
+    ],
+    "manualComparisonRequired": true,
+    "shared": 5,
+    "onlyFirst": 0,
+    "onlySecond": 0,
+    "originalRowsRestoredExactly": true,
+    "queryReset": true,
+    "orderReset": true,
+    "exclusiveReset": true,
+    "keyboardSwapVerified": true,
+    "comparisonCsvByteIdentical": true,
+    "originalDeliveryCsvByteIdentical": true,
+    "completeBackupMetadataIdentical": true,
+    "batches": 2,
+    "confirmedLinks": 10,
+    "libraryBefore": 25,
+    "libraryAfter": 25,
+    "libraryNamesAndOrderIdentical": true,
+    "panelBoundsIdentical": true,
+    "panelBounds": {
+      "bottom": 708,
+      "height": 696,
+      "left": 182.5,
+      "right": 1082.5,
+      "top": 12,
+      "width": 900,
+      "x": 182.5,
+      "y": 12
+    },
+    "newDeliveries": 0,
+    "versionQueries": 0,
+    "assignments": 0,
+    "restores": 0,
+    "initialGithubLoadErrorRecovered": true,
+    "originalTabRecoveredAndTemporaryTabClosed": true
+  },
+  "isolated": {
+    "languages": [
+      "es",
+      "en"
+    ],
+    "manualSwapWithoutComparison": true,
+    "bothLabelsAndIdsExact": true,
+    "mixedStatesRetained": true,
+    "exclusiveTargetsChangeSides": true,
+    "invalidSelectionsDisabled": true,
+    "historyChangeOrReadDenialBlocksCompare": true,
+    "lateDownloadCallbacksDiscarded": true,
+    "searchOrderAndExclusiveViewReset": true,
+    "keyboardVerified": true,
+    "writesBeforeAndAfter": 2,
+    "requests": 0,
+    "automaticDownloads": 0,
+    "temporaryTabAndServerClosed": true
+  },
+  "tests": {
+    "interactive": 202,
+    "passed": 202,
+    "mcpHelp": 1,
+    "priorExportHashesUnchanged": 10,
+    "pureDataAndExportFunctionsUnchanged": true
+  },
+  "release": {
+    "ainimationAssets": "0974fa7",
+    "ainimationStamp": "f1ba826",
+    "ainimationWorker": "3f7009db-af1d-40f6-9e4b-cf2b9bbcecaa",
+    "store": "dcc62a0",
+    "storeDeployment": "https://2105a19a.admira-store.pages.dev",
+    "mcp": "0563a45",
+    "mcpWorker": "54ce7196-adfd-4499-b6ff-99ad0d188460"
+  },
+  "help": {
+    "storeSurfacesUpdated": 8,
+    "publicStoreSurfacesVerified": 6,
+    "protectedRoutesNotBypassed": 2,
+    "mcpBilingualVerified": true
+  },
+  "files": {
+    "comparisonCsvSha256": "a1ec788484362ee9ad87e7ff5dd5d059494a3ce3778031b60acd8a236bc7b586",
+    "originalDeliveryCsvSha256": "34bdae288ab5fe70b4ce6fb8907dd87a33ac190ef8952a658c4ad12523ea4ac9"
+  }
+}
