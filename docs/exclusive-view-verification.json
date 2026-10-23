@@ -1,0 +1,67 @@
+{
+  "verifiedAt": "2026-10-23T05:20:06.768756+00:00",
+  "feature": "exclusive-screen-comparison-view",
+  "release": {
+    "functionalCommit": "5487e96",
+    "stampCommit": "519c5fbfdf90d2dd3d889d59816f426e6ecf977d",
+    "ainimationWorkerVersion": "ac95d7ca-ff86-4969-8223-d70d9055d0ab",
+    "mcpWorkerVersion": "7c54d0fc-6cce-4c20-8c21-52164109aa0e",
+    "historyModuleSha256": "dd838f123db6b05e40832436e9943b2c884faca94372d536151d8a6bbb288f0e"
+  },
+  "production": {
+    "firstRevision": 8,
+    "secondRevision": 9,
+    "sharedTargets": 5,
+    "exclusiveTargets": 0,
+    "exclusiveMessage": "0 de 5 pantallas. No hay pantallas exclusivas en esta pareja.",
+    "returnAllMessage": "5 de 5 pantallas.",
+    "tenTargetIdsLabelsAndStatesExact": true,
+    "fullPairIdentityAndCountsRetained": true,
+    "keyboardToggleVerified": true,
+    "comparisonCsvCompleteAndByteIdentical": true,
+    "comparisonCsvRows": 5,
+    "comparisonCsvColumns": 21,
+    "comparisonCsvLinks": 10,
+    "fullCopyBatchMetadataIdentical": true,
+    "originalCsvByteIdentical": true,
+    "retainedBatches": 2,
+    "retainedLinks": 10,
+    "retainedProjects": 3,
+    "resetAndReopenDiscardView": true,
+    "languagePreferenceChanged": false,
+    "googleOrVersionQueriesDeliveriesAssignmentsRestores": false,
+    "panelBounds": {
+      "bottom": 708,
+      "height": 696,
+      "left": 182.5,
+      "right": 1082.5,
+      "top": 12,
+      "width": 900,
+      "x": 182.5,
+      "y": 12
+    },
+    "panelMovedOrResized": false
+  },
+  "isolated": {
+    "esAndEn": true,
+    "twoExclusiveOfThreeIdentities": true,
+    "sameNamesDifferentIdsAndRenamedSharedIdentity": true,
+    "mixedStatesRetained": true,
+    "comparisonCsvBeforeAndAfterFilterByteIdentical": true,
+    "zeroAddedQueriesWritesCopiesDeliveries": true,
+    "invalidationsPairScopeAndLateCallbacksVerified": true,
+    "temporaryTabAndServerClosed": true
+  },
+  "checks": {
+    "interactiveTestsPassed": 188,
+    "bilingualMcpHelpTestPassed": 1,
+    "pureExportFunctionsByteIdentical": true,
+    "previousTenExportAndClipboardHashesMatch": true
+  },
+  "artifacts": {
+    "screenshot": "exclusive-view-production.png",
+    "ui": "exclusive-view-production-ui.json",
+    "comparisonCsvSha256": "a1ec788484362ee9ad87e7ff5dd5d059494a3ce3778031b60acd8a236bc7b586",
+    "originalCsvSha256": "34bdae288ab5fe70b4ce6fb8907dd87a33ac190ef8952a658c4ad12523ea4ac9"
+  }
+}
