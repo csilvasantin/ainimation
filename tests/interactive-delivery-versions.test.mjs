@@ -73,3 +73,25 @@ test('CSV rechaza códigos HTTP o motivos manipulados y no interpola atributos a
  const copy=structuredClone(report);copy.results[0].message='private-token';copy.results[0].body='private-content';const csv=deliveryVersionCheckCsv(b,copy).content;assert.ok(!csv.includes('private-'));
  copy.results[0].reason='connection_failed';assert.throws(()=>deliveryVersionCheckCsv(b,copy));
 });
+
+test('progreso cuenta sólo recibos confirmados y consultas terminadas, esperando al cuerpo y sin confundir resultado con disponibilidad',async()=>{
+ const b=batch([row(1),row(2),row(3),row(4,'pending'),row(5,'error')]),pending=[],events=[];let rejectBody;
+ const body=new Promise((_,reject)=>rejectBody=reject),running=checkDeliveryBatchVersions(b,{onProgress:event=>events.push(event),request:(url,options)=>new Promise(resolve=>pending.push({resolve,url,options}))});
+ assert.deepEqual(events,[{batchId:'batch',completed:0,total:3,withoutLink:2}]);assert.equal(pending.length,3);
+ pending[0].resolve(response(metadata(1)));await new Promise(setImmediate);assert.equal(events.at(-1).completed,1);
+ pending[1].resolve(response({},404));await new Promise(setImmediate);assert.equal(events.at(-1).completed,2);
+ pending[2].resolve({ok:true,status:200,json:()=>body});await new Promise(setImmediate);assert.equal(events.length,3);rejectBody(Error('private body'));const report=await running;
+ assert.deepEqual(events.map(e=>e.completed),[0,1,2,3]);assert.ok(events.every(e=>e.total===3&&e.withoutLink===2&&Object.keys(e).sort().join(',')==='batchId,completed,total,withoutLink'));assert.deepEqual(report.counts,{available:1,unavailable:1,unknown:1,no_link:2});assert.equal(pending.length,3);assert.ok(!JSON.stringify(events).includes('private'));
+});
+
+test('plazos y errores también terminan consultas; observadores fallidos o modificados no cambian el informe',async()=>{
+ for(const request of [()=>new Promise(()=>{}),async()=>({ok:true,status:200,json:()=>new Promise(()=>{})}),async()=>{throw Error('private network');}]){const events=[],report=await checkDeliveryBatchVersions(batch([row(1)]),{request,timeoutMs:5,onProgress:p=>events.push(p.completed)});assert.deepEqual(events,[0,1]);assert.equal(report.counts.unknown,1);}
+ let calls=0;const report=await checkDeliveryBatchVersions(batch([row(1)]),{request:async()=>response(metadata(1)),onProgress:p=>{calls++;p.completed=1000;p.total=0;throw Error('private observer');}});assert.equal(calls,2);assert.equal(report.counts.available,1);assert.ok(!JSON.stringify(report).includes('observer'));
+ const events=[];await checkDeliveryBatchVersions(batch([row(1,'pending')]),{onProgress:p=>events.push(p),request:()=>{throw Error('must not request');}});assert.deepEqual(events,[{batchId:'batch',completed:0,total:0,withoutLink:1}]);
+});
+
+test('cancelar detiene los callbacks y la cola aunque lleguen respuestas después',async()=>{
+ const controller=new AbortController(),pending=[],events=[];const running=checkDeliveryBatchVersions(batch(),{signal:controller.signal,onProgress:p=>{events.push(p.completed);if(p.completed===1)controller.abort();},request:(url,options)=>new Promise(resolve=>pending.push({resolve,signal:options.signal}))});
+ assert.equal(pending.length,3);pending[0].resolve(response(metadata(1)));const report=await running;assert.equal(report.cancelled,true);assert.deepEqual(events,[0,1]);assert.equal(pending.length,3);assert.ok(pending.slice(1).every(p=>p.signal.aborted));for(const p of pending)p.resolve(response({},404));await new Promise(setImmediate);assert.deepEqual(events,[0,1]);
+ const noEvents=[];await checkDeliveryBatchVersions(batch(),{signal:controller.signal,onProgress:p=>noEvents.push(p)});assert.deepEqual(noEvents,[]);
+});
