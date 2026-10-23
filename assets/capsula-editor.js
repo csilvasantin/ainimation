@@ -28,7 +28,7 @@
   const stockId = params.get('admiraStockId') || '';
   const fields = [['titulo', 'Titular', 160], ['tipologia', 'Tipología', 60], ['gancho', 'Gancho', 160], ['giro', 'Giro', 160], ['remate', 'Remate', 160]];
   const beats = ['gancho', 'giro', 'remate'];
-  const clone = (value) => JSON.parse(JSON.stringify(value));
+  const clone = (value) => value == null ? value : JSON.parse(JSON.stringify(value));
   const esc = (value) => String(value ?? '').replace(/[&<>"']/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const http = (value) => { try { const u = new URL(value, location.href); return /https?:/.test(u.protocol) ? u.href : ''; } catch { return ''; } };
   const label = (value) => value.charAt(0).toUpperCase() + value.slice(1);
