@@ -1,0 +1,80 @@
+{
+  "verifiedAt": "2026-10-23T01:07:07.123400+00:00",
+  "feature": "completed-version-check-issues-view",
+  "release": {
+    "functionalCommit": "d64e859",
+    "stampCommit": "8c3ceed",
+    "ainimationWorkerVersion": "9518f3df-68f9-4e1f-bbd9-0e9c7db794a3",
+    "mcpCommit": "29ca7c4",
+    "mcpWorkerVersion": "f0fb4936-547e-47b0-8cf5-d1e352df60f3",
+    "historyModuleSha256": "9ecf5667a988356db1093bde9f1242cbb012dc0170fc7f178e33ae23c4c63a0f"
+  },
+  "production": {
+    "batchId": "0420fbf3-c6c4-4806-a116-a4a9b440c73e",
+    "revision": 9,
+    "checkedAt": "2026-10-23T01:05:32.925Z",
+    "available": 5,
+    "incidentsVisible": 0,
+    "allRestored": 5,
+    "fullCsvRows": 5,
+    "csvIncludesAllScreensWhileFiltered": true,
+    "originalCsvByteIdentical": true,
+    "unchangedApartFromCheckTimestamp": true,
+    "retainedBatches": 2,
+    "retainedLinks": 10,
+    "retainedProjects": [
+      "Mi cafetería",
+      "Mi cafetería · copia",
+      "Prueba Director · catálogo y cesta"
+    ],
+    "links": [
+      "https://www.admira.store/xpacios/pantalla/?loc=xtanco-bcn&screen=JTIXtanco_PortaldelAngel_20_Mostrador_1&ainimation=0d3223fb28f44efe9bc4ab23f68ba4390da298ef36af4bda86fba54ea59cfff4&lang=es",
+      "https://www.admira.store/xpacios/pantalla/?loc=xtanco&screen=JTIXtanco_CalledeSantaRosa_4_Mostrador_1&ainimation=0e58c8dce1644c3488f84d1f4339bd4012abc9f2828c42c193fc8695d1d28d84&lang=es",
+      "https://www.admira.store/xpacios/pantalla/?loc=xtanco-valencia&screen=JTIXtanco_CarrerdeColon_22_Mostrador_1&ainimation=afd5917d36d94dc09894394e8a0612fc5f0acf6700e54ec49d328e71a93972e2&lang=es",
+      "https://www.admira.store/xpacios/pantalla/?loc=admira-loterias&screen=SinProyecto_GranVia_32_Mostrador_1&ainimation=d15a31e136d6477dbbd4046e6036fb5227afe72ae41542c3ace5d4a5d52af1cc&lang=es",
+      "https://www.admira.store/xpacios/pantalla/?loc=admira-prensa&screen=SinProyecto_PlazadeCibeles_Mostrador_1&ainimation=f146668cd2ae4557bb7baf53f91aaea4d047e0a91eea4b55b83ce03063353096&lang=es"
+    ],
+    "panelBounds": {
+      "bottom": 708,
+      "height": 696,
+      "left": 182.5,
+      "right": 1082.5,
+      "top": 12,
+      "width": 900,
+      "x": 182.5,
+      "y": 12
+    },
+    "panelMovedOrResized": false,
+    "googleRequired": false,
+    "newDeliveriesOrAssignments": false,
+    "oldViewDiscardedOnGlobalFilterAndReload": true
+  },
+  "isolated": {
+    "states": [
+      "available",
+      "unavailable",
+      "unknown",
+      "no_link"
+    ],
+    "incidentsShown": 3,
+    "allRestored": 4,
+    "requestsBeforeAndAfterToggle": 3,
+    "fullCsvRows": 4,
+    "temporaryTabAndServerClosed": true
+  },
+  "checks": {
+    "interactiveTestsPassed": 151,
+    "bilingualMcpHelpTestsPassed": 1,
+    "mixedStatesAndNoLink": true,
+    "batchIndependence": true,
+    "cancelRestartFilterCloseAndLateCallbacks": true,
+    "spreadsheetImport": "five exact rows and ten columns with UTC date, accents and links verified",
+    "bilingualPublicHelpVerified": true
+  },
+  "artifacts": {
+    "productionCsvSha256": "6498198352ad8ad7888b1efe801127be6af0a88db18c1e53342862a0c1b04c55",
+    "originalCsvSha256": "34bdae288ab5fe70b4ce6fb8907dd87a33ac190ef8952a658c4ad12523ea4ac9",
+    "screenshot": "incidents-production.png",
+    "isolatedScreenshot": "incidents-isolated.png"
+  }
+}
