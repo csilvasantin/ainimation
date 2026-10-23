@@ -1,4 +1,5 @@
-import {deviceLabel} from './interactive-provenance.mjs';
+const provenanceModule=new URL('./interactive-provenance.mjs',import.meta.url);provenanceModule.search=new URL(import.meta.url).search;
+const {deviceLabel}=await import(provenanceModule.href);
 import {validate, readDraft, template} from './interactive-project.mjs';
 export const LIBRARY_KEY='ainimation:interactive:library:v1';
 const MAX_PROJECTS=100;

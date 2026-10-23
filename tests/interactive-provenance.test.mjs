@@ -31,3 +31,11 @@ test('API conserva origen, protege revisión, acepta clientes antiguos y no camb
  const list=await(await route(new Request('https://test/projects'),env,async()=> 'owner')).json();assert.equal(list.projects.find(p=>p.id==='test').sourceDevice,'Mac · sesión ABC123');assert.equal(list.projects.find(p=>p.id==='old').sourceDevice,null);
  assert.equal((await req('test',{project,baseRevision:1,sourceDevice:{bad:true}})).status,400);assert.deepEqual(db.prepare("SELECT * FROM interactive_projects WHERE id='old'").get(),before);
 });
+
+test('nombre reconocible persiste sin modificar proyectos ni etiquetas históricas',async()=>{
+ const {setDeviceName,deviceName}=await import('../assets/interactive-provenance.mjs');const storage=store();storage.setItem('ainimation:interactive:library:v1','original');
+ setDeviceName(storage,'  Mac del estudio  ');assert.equal(deviceName(storage),'Mac del estudio');assert.equal(deviceLabel(storage),'Mac del estudio');assert.equal(storage.getItem('ainimation:interactive:library:v1'),'original');
+ const previous={updatedAt:'2026-10-23',sourceDevice:'Mac · sesión ABC123'};assert.equal(versionIdentity(previous).device,'Mac · sesión ABC123');
+ assert.throws(()=>setDeviceName(storage,'a'.repeat(61)));assert.throws(()=>setDeviceName(storage,'Mac\nEstudio'));assert.equal(deviceName(storage),'Mac del estudio');
+ setDeviceName(storage,'');assert.match(deviceLabel(storage),/sesión/);const other=store();setDeviceName(other,'Mac de pruebas');assert.equal(deviceLabel(other),'Mac de pruebas');assert.notEqual(deviceLabel(storage),deviceLabel(other));
+});
