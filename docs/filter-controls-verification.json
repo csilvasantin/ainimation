@@ -1,0 +1,114 @@
+{
+  "feature": "general-project-and-outcome-selectors-control-own-batch-list",
+  "verifiedAt": "2026-10-23T20:13:18.947839+00:00",
+  "production": "https://www.ainimation.studio/interactivos/",
+  "release": {
+    "functional": "5feb509",
+    "assets": "394f38a",
+    "stamp": "1da13de0574fceec9d68a5d958786bad11e2dbb2",
+    "worker": "674e1f75-6873-4486-a96f-4080e9e38a11",
+    "preservedPublishedCapsuleCommit": "317f046",
+    "capsulePreviewModuleAndStylePublicByteExact": true,
+    "storeHelp": "f28132cb54389aeae3e41862d150cdb04606f6f7",
+    "storeWorkflow": 40017061073,
+    "storeDeployment": "https://b6acec05.admira-store.pages.dev",
+    "canonicalLocalDesignCss": true,
+    "mcp": "64e3044",
+    "mcpWorker": "4a821b09-5e31-4df4-a6e5-8341b429a3fe"
+  },
+  "semantics": {
+    "bothGeneralSelectorsControlExactlyTheirExistingBatchList": true,
+    "sameTargetAsGeneralSearchAndClear": true,
+    "noNewIdOrContainer": true,
+    "distinctFromComparisonTarget": true,
+    "uniqueGenericIdPerHistory": true,
+    "noPrivateDataInId": true,
+    "stableAcrossCombinedFiltersEmptyListsAndReopen": true,
+    "labelsNamesOptionsTextsValuesOrderNativeTypeStatesAndKeyboardUnchanged": true,
+    "noAriaLabelRolesTabindexAnnouncementsOrNewAreas": true,
+    "domAccessibilityTreeAndNativeKeyboardInspected": true,
+    "specificScreenReaderNotTested": true
+  },
+  "realBatches": {
+    "revisions": [
+      8,
+      9
+    ],
+    "nativeProjectAndCompleteSelectionShowsTwo": true,
+    "v9WithProjectAndCompleteShowsOne": true,
+    "clearRestoresBothAndInitialValues": true,
+    "outcomeFilterWithNoMatchesKeepsOwnList": true,
+    "generalProjectChangeInvalidatesComparisonAsBefore": true,
+    "reopenResetsWithoutChangingOwnTargets": true,
+    "localPrensaVisible": 1,
+    "localPrensaFullCommon": 5,
+    "differentStateViewVisible": 0,
+    "fullCommonOnlyFirstOnlySecond": [
+      5,
+      0,
+      0
+    ],
+    "fullSavedStateDifferences": [
+      0,
+      5
+    ],
+    "summaryCharacters": 709,
+    "txtComparisonCsvAndOriginalCsvByteIdentical": true,
+    "historyBackupBatchesIdentical": true,
+    "noRealClipboardAccessOrVersionQueries": true
+  },
+  "preserved": {
+    "batches": 2,
+    "confirmedLinks": 10,
+    "projectCount": 25,
+    "completeInitialLibraryNamesAndOrderUnchanged": true,
+    "allExistingModuleCodeByteIdenticalExceptTwoAttributes": true,
+    "generalHistoryDatesStatesAndIdsUnchanged": true,
+    "panelBoundsUnchanged": true,
+    "dialogBounds": {
+      "bottom": 708,
+      "height": 696,
+      "left": 182.5,
+      "right": 1082.5,
+      "top": 12,
+      "width": 900,
+      "x": 182.5,
+      "y": 12
+    },
+    "language": "es",
+    "allOtherComparisonAccessibilityLinksAndBehaviorUnchanged": true,
+    "otherPublishedWorkMergedIntactWithoutDevelopingIt": true,
+    "primaryWorkspaceUntouched": true
+  },
+  "tests": {
+    "existingInteractive": 230,
+    "targetedMcpHelp": 1,
+    "broaderMcpKnownPreExistingFailures": 15,
+    "broaderUnrelatedHelpSuiteNotRepeated": true,
+    "publicBilingualHelpSurfaces": 6,
+    "liveMcpBilingualHelp": true,
+    "isolatedLanguages": [
+      "es",
+      "en"
+    ],
+    "twoHistoriesIndependentOwnListsAndFilters": true,
+    "queryProjectOutcomeCombinedFiltersAndClearVerified": true,
+    "nativeTabOrder": [
+      "history-project",
+      "history-outcome",
+      "history-clear"
+    ],
+    "filterClearHasNoNewReadsWritesQueriesCopiesOrDownloads": true,
+    "emptySearchOrFilterRetainsOwnList": true,
+    "initialNoBatchesBothLanguagesRetainsOwnListAndHiddenFilters": true,
+    "reopenKeepsOwnListId": true,
+    "temporaryTabAndServerClosed": true,
+    "bundledRuntimeExecutesIndependently": true
+  },
+  "scope": "Only aria-controls on the two existing general Batch project and Batch result native selects, using the existing general batch-list ID already shared by Search batches and Clear filters. No new ID/container, logic, options, focus changes, controls, reads, writes, queries, clipboard operations, automatic downloads, deliveries, assignments, restores or synchronization. Existing filter invalidation and states preserved. Other published capsule preview and local design styles retained.",
+  "sha256": {
+    "txt": "7b165b8ebee2f39f30a2ca2eaf2796834526495b39c08e085f15cbe15fb4fdf1",
+    "comparisonCsv": "a1ec788484362ee9ad87e7ff5dd5d059494a3ce3778031b60acd8a236bc7b586",
+    "originalCsv": "34bdae288ab5fe70b4ce6fb8907dd87a33ac190ef8952a658c4ad12523ea4ac9"
+  }
+}
