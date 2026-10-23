@@ -1,0 +1,31 @@
+AINIMATION — Relevo entre ordenadores — 23 octubre 2026
+
+Repositorio de producto: https://github.com/csilvasantin/ainimation
+Producción: https://www.ainimation.studio/interactivos/
+
+ESTADO COMPROBADO AL CERRAR ESTE RELEVO
+PR46: aviso explícito de conflicto y conservación de ambas versiones.
+PR47: Comparar versiones conservadas; recorridos y diferencias; abrir cualquiera sin borrar la otra; persistencia al recargar.
+PR48: fecha/hora de Madrid y dispositivo/sesión de origen. Campo opcional source_device en API/base de datos. Versiones antiguas: Dispositivo no registrado.
+PR49: nombres reconocibles por navegador, con Guardar nombre y Usar nombre automático. Los nuevos cambios usan ese nombre; no se reescribe el origen histórico. Merge d0c167c57155649c03a34abbcded23b8da21ad23; versión de recursos edde7c3. 196 pruebas pasaron en esa revisión.
+Todos estos PR están fusionados y publicados. main ha recibido cambios de otros trabajos después; al continuar, revisar main actual y no restaurar la versión de este relevo sobre trabajo posterior.
+
+PRUEBA AUTORIZADA
+Proyecto: PRUEBA movil-PC 20261022 58291
+ID: 3ad4fa71-c66b-4613-94d0-d12d10b5ae6d
+Solo editar este proyecto o nuevas copias generadas por sus conflictos. No editar, renombrar, borrar ni sincronizar en bloque proyectos anteriores. No borrar tampoco las copias de pruebas ya conservadas.
+Último conflicto verificado: original NOMBRE SECUNDARIA 58291, origen Mac · prueba secundaria, 08:14:55 Madrid; copia f81e47a4-ef64-4920-af8a-0ff45b54beb7 con NOMBRE PRINCIPAL 58291, origen Mac · prueba principal, 08:14:54 Madrid.
+Verificado: comparar, abrir ambas, persistencia de nombres y comparación tras recargar. Auditoría de nube: 22 registros antes, 23 después; ningún registro previo distinto al proyecto de prueba cambió.
+
+RESTRICCIONES VIGENTES
+Trabajar en segundo plano sin tomar el foco del teclado o ratón del usuario. Utilizar el navegador interno, no Safari ni Chrome de escritorio. No mover ni redimensionar ventanas o paneles.
+Las últimas comprobaciones se hicieron con dos orígenes y almacenamiento local de aplicación independiente dentro del navegador interno: producción y https://ainimation-interactive-library-preview.csilvasantin.workers.dev/interactivos/ . Ambos usan la misma nube y cuenta; no son perfiles de navegador separados ni equivalen a una prueba física del iPhone. La protección entre pestañas del mismo origen permanece activa.
+La comprobación del iPhone físico en producción para las funciones recientes sigue pendiente. No darla por hecha.
+
+LO QUE NO VIAJA CON GIT
+El acceso Google, bibliotecas locales, relaciones de conflictos y nombres de dispositivos pertenecen al navegador de cada ordenador/origen. No copiar tokens, cookies ni credenciales. En el nuevo equipo iniciar sesión por el flujo normal y usar Recuperar biblioteca antes de editar; no Sincronizar biblioteca.
+El nombre se configura en Nombre de este dispositivo dentro de la biblioteca. Cambiarlo afecta solo a cambios futuros de ese navegador.
+Las relaciones que habilitan Comparar versiones conservadas se guardan localmente. Las copias sí se recuperan de la nube, pero no se ha comprobado que el botón de comparación reaparezca en un navegador nuevo sin provocar allí otro conflicto. No inventar relaciones por títulos duplicados ni cambiar IDs para forzarlo.
+
+CONTINUACIÓN PROPUESTA
+Primero revisar el repositorio main y el estado del nuevo navegador. Autenticarse por la UI normal, recuperar y localizar exactamente la copia de prueba, sin editar otros proyectos. Comprobar qué versiones y controles se recuperan en ese nuevo equipo. Si falta el vínculo de comparación, informar del resultado antes de ampliar el modelo de sincronización. La petición actual es relevar el trabajo, no añadir otra función ni crear otra publicación.
