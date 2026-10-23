@@ -1,0 +1,83 @@
+{
+  "feature": "comparison-search-results-accessible-link",
+  "verifiedAt": "2026-10-23T16:27:21.878126+00:00",
+  "production": "https://www.ainimation.studio/interactivos/",
+  "release": {
+    "assets": "bae7080",
+    "stamp": "60c80ff",
+    "worker": "fea80bc1-6f32-4c50-8f16-14869a299b2f",
+    "storeHelp": "bdb48e821fcd527c053916a03812ecd85e24d096",
+    "storeWorkflow": 39986532569,
+    "storeDeployment": "https://f465da62.admira-store.pages.dev",
+    "canonicalLocalDesignCss": true,
+    "mcp": "ec0e3be",
+    "mcpWorker": "a9ea0c93-789d-4560-bfa6-c9ff57cbfa63"
+  },
+  "realBatches": {
+    "revisions": [
+      8,
+      9
+    ],
+    "searchControlsResolvesToExactlyOneOwnResultsContainer": true,
+    "idValidAndNotDerivedFromUserOrBatchData": true,
+    "initialQueryDisabledSearchAndResultsHidden": true,
+    "targetStableAcrossPairSwapGeneralFiltersAndHistoryReopen": true,
+    "invalidationRemovesRowsAndDisablesSearch": true,
+    "commonHeadingAll": "Pantallas comunes · 5 de 5 pantallas",
+    "commonHeadingPrensa": "Pantallas comunes · 1 de 5 pantallas",
+    "nativeTabMovesFromSearchToClearAndEnterClearsAndReturnsToSearch": true,
+    "clearSearchRestoresFiveOfFive": true,
+    "exclusiveAndDifferentViewsKeepExistingEmptyMessagesAndHiddenGroups": true,
+    "summaryCharacters": 709,
+    "txtComparisonCsvAndOriginalCsvByteIdentical": true,
+    "historyBackupBatchesIdentical": true,
+    "noRealClipboardAccessOrVersionQueries": true
+  },
+  "preserved": {
+    "batches": 2,
+    "confirmedLinks": 10,
+    "projectCount": 25,
+    "completeInitialLibraryNamesAndOrderUnchanged": true,
+    "pureValidatorsAndExportGeneratorsByteIdentical": true,
+    "existingSearchViewSortRowsGroupEligibilityCountsStatesAndTextsUnchanged": true,
+    "generalHistoryDatesAndExportsUnchanged": true,
+    "panelBoundsUnchanged": true,
+    "dialogBounds": {
+      "bottom": 708,
+      "height": 696,
+      "left": 182.5,
+      "right": 1082.5,
+      "top": 12,
+      "width": 900,
+      "x": 182.5,
+      "y": 12
+    },
+    "language": "es",
+    "summaryControlsExpandedLabelAndSingleReadonlyAreaUnchanged": true,
+    "noNewControlsAreasHeadingsRolesTabindexFocusChangesOrAnnouncements": true
+  },
+  "tests": {
+    "existingInteractive": 230,
+    "targetedMcpHelp": 1,
+    "broaderMcpKnownPreExistingFailures": 15,
+    "broaderUnrelatedHelpSuiteNotRepeated": true,
+    "publicBilingualHelpSurfaces": 6,
+    "liveMcpBilingualHelp": true,
+    "isolatedLanguages": [
+      "es",
+      "en"
+    ],
+    "twoMountedHistoriesHaveDistinctValidIdsAndOwnControlsTargets": true,
+    "nativeEnglishSearchTabEnterAndSpanishProductionKeyboard": true,
+    "domAndAccessibilityTreeInspected": true,
+    "specificScreenReaderTestPerformed": false,
+    "searchAndInvalidationRemainIndependentBetweenHistories": true,
+    "rapidToggleAndInvalidationDoNotReviveOtherResults": true,
+    "stableTargetsAcrossInvalidationAndReopenWithoutRevivingRows": true,
+    "mixedPendingSendingSuccessErrorAndRenamedOrEqualLabelsPreserved": true,
+    "presentationStorageAndSideEffects": "reads 4, writes 2 seeds, queries 0, copies 0, downloads 0; unchanged by searching and clearing",
+    "noHorizontalOverflow": true,
+    "temporaryTabAndServerClosed": true
+  },
+  "scope": "Only a unique, collision-checked per-history ID on the existing comparison results container and aria-controls on the existing comparison search field. Label, appearance, focus, selection, keyboard order, disabled/hidden states, text, matching logic, counts and all operations remain unchanged. No new roles, controls, areas, tabindex, announcements, reads, writes, queries, comparisons, clipboard access, automatic downloads, deliveries, assignments, restores or synchronization. Panel neither moved nor resized."
+}
