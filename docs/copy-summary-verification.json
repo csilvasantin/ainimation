@@ -1,0 +1,66 @@
+{
+  "feature": "copy-full-comparison-summary",
+  "verifiedAt": "2026-10-23T10:27:14.358482+00:00",
+  "production": "https://www.ainimation.studio/interactivos/",
+  "release": {
+    "assets": "89328d4",
+    "stamp": "9c6e2cd",
+    "worker": "e3043dda-913c-4698-9677-f53e22814233",
+    "storeHelp": "7a585444032ea61795d72d9fb5a722ae7a7223e0",
+    "storeWorkflow": 39938522698,
+    "storeDeployment": "https://b680b3ef.admira-store.pages.dev",
+    "canonicalLocalDesignCss": true,
+    "mcp": "15a86f5",
+    "mcpWorker": "c604d2fc-8e8d-430e-adbe-5e8c3f2e9520"
+  },
+  "realBatches": {
+    "revisions": [
+      8,
+      9
+    ],
+    "copiedFromEmptyFilteredView": true,
+    "counts": {
+      "shared": 5,
+      "onlyFirst": 0,
+      "onlySecond": 0,
+      "differentStates": 0
+    },
+    "identitiesVersionsAndUtcDatesExact": true,
+    "nativeCopyAndLocalPasteExact": true,
+    "copiedCharacters": 709,
+    "confirmedLinksIncluded": 0,
+    "copyHiddenBeforeComparing": true,
+    "copyNotice": "Resumen de comparación copiado. Incluye ambos lotes y los recuentos completos."
+  },
+  "clipboardVerification": "Native input gestures clicked Copy and pasted into a local test field. The browser clipboard and native paste matched the exact expected summary. Previous native clipboard content was not retained.",
+  "preserved": {
+    "batches": 2,
+    "confirmedLinks": 10,
+    "projectCount": 25,
+    "completeLibraryNamesAndOrderUnchanged": true,
+    "comparisonCsvByteIdentical": true,
+    "originalDeliveryCsvByteIdentical": true,
+    "historyBackupBatchesIdentical": true,
+    "allPreviousPureDataAndExportFunctionsByteIdentical": true,
+    "panelBoundsUnchanged": true,
+    "language": "es"
+  },
+  "tests": {
+    "interactive": 218,
+    "mcpHelp": 1,
+    "isolatedLanguages": [
+      "es",
+      "en"
+    ],
+    "isolatedFallbackExact": true,
+    "isolatedCopiedCharacters": 542,
+    "narrowContainerPixels": 340,
+    "safeReadOnlySelectableText": true,
+    "mixedStatesAndNoSharedTargets": true,
+    "historyChangedOrDeniedBeforeAndDuringCopy": true,
+    "lateSuccessAndFailureDiscardedAfterInvalidation": true,
+    "noAutomaticCopyOrQueriesOrWrites": true,
+    "temporaryTabAndServerClosed": true
+  },
+  "scope": "Complete saved comparison metadata and counts only. No delivery URLs, project contents, credentials, new version checks, deliveries, assignments, 3D restorations or synchronization. Does not verify physical playback."
+}
