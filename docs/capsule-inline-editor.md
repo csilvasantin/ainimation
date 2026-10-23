@@ -10,6 +10,12 @@ EN: “Render” retains the existing revision and authorization checks. When bo
 
 ## Shared editor contract
 
+ES: **Mover cajas** permite arrastrar titular, frases, marca, cifra/unidad y texto del cierre sin editar caracteres. Las flechas mueven un píxel; Mayús+flecha mueve diez. Escape cancela un arrastre. Cada orientación conserva sus propios desplazamientos proporcionales, con Deshacer/Rehacer, guardado automático, comparación y recuperación al volver al vídeo. **Restablecer posiciones** afecta sólo al formato visible. Desactiva Mover cajas para volver a escribir. Las animaciones se editan en Ainimation Studio.
+
+EN: **Move text boxes** enables dragging headings, sentences, branding, figure/unit and closing copy without editing characters. Arrow keys move one pixel, Shift+arrow ten. Escape cancels a drag. Each orientation retains proportional offsets with Undo/Redo, autosave, comparison and return-to-video recovery. **Reset positions** affects only the visible format. Turn Move text boxes off to type again. Animation editing belongs in Ainimation Studio.
+
+Render limitation: layout is local draft data (`textPositions`). The current queue renderer has not been updated to consume it; SSH to GrokBotBox timed out. Submitting nonempty positions is deliberately blocked unless the project API explicitly advertises `textPositionRendering`, preventing a generated video silently dropping the layout. Text-only rendering remains available after resetting positions. No real capsule was regenerated for verification.
+
 ES: El aviso de conflicto compara **Mi copia** con **Otra pestaña**, campo por campo, antes de elegir. Incluye textos, tema, cifra, unidad y cartelas; se actualiza al editar o recibir cambios de la otra pestaña. No modifica ninguna copia por mostrarla. Las copias iguales lo indican aunque sus historiales difieran. Si la otra copia pertenece a otra revisión o no se puede leer, se explica y se desactiva recuperarla; la copia propia sigue conservada. Los textos se muestran como texto literal.
 
 EN: The conflict notice compares **My copy** with **Other tab**, field by field, before choosing. It includes text, topic, figure, unit and cards, updating after local or other-tab edits. Viewing changes modifies neither copy. Identical copies are identified even when histories differ. An unreadable copy or another source revision is explained and cannot be adopted; your own copy remains retained. Content is displayed as literal text.
