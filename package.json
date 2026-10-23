@@ -6,7 +6,8 @@
   "scripts": {
     "verify:stage": "node scripts/verify-stage-ruler.js",
     "stamp": "node scripts/stamp-version.mjs",
-    "verify:stamp": "node scripts/stamp-version.mjs --check"
+    "verify:stamp": "node scripts/stamp-version.mjs --check",
+    "verify:capsula": "node --test test/capsula-editor.browser.test.mjs"
   },
   "repository": {
     "type": "git",
