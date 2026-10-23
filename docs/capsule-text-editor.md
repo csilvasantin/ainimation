@@ -19,3 +19,10 @@ MCP: this is an HTTP/browser workflow; no new MCP tool is claimed. Agents can in
 ES: La cápsula Depredador v8 dispone de pista para edición. Al ser histórica, su vídeo central se recupera de la versión horizontal publicada y se retiran las barras de progreso; el original no se modifica. Para nuevas cápsulas está preparado `tools/capsulas-sabiasque/editor_preview.py`: exporta el b-roll limpio y lo sube con la credencial de Stock existente en una cabecera. Debe instalarse con `capsula_cola.py` en el renderizador y tener `ADMIRANEXT_INGEST_TOKEN` o `NOTIFY_KEY`; la instalación remota en GrokBotBox no se ha verificado en esta entrega (SSH no accesible). No se anuncia cobertura automática de todas las cápsulas.
 
 EN: The Predator v8 capsule has an editing track. For this historical asset, its central video is recovered from the published landscape version and progress bars are removed; the original is untouched. New-capsule support is prepared in `tools/capsulas-sabiasque/editor_preview.py`: export clean b-roll and upload using the existing Stock credential in a request header. Install it with `capsula_cola.py` on the renderer and provide `ADMIRANEXT_INGEST_TOKEN` or `NOTIFY_KEY`; remote GrokBotBox installation was not verified in this delivery (SSH unavailable). Automatic coverage of all capsules is not claimed.
+
+
+## Edición integrada / Inline editing
+
+ES: «Editar con Ainimation» en el detalle de Stock abre la edición en la misma pantalla, a la izquierda del enlace externo existente. [Guía y contrato](capsule-inline-editor.md).
+
+EN: “Edit with Ainimation” in Stock detail opens editing in the same screen, immediately before the existing external link. [Guide and contract](capsule-inline-editor.md).
