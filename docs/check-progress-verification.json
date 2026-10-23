@@ -1,0 +1,152 @@
+{
+  "feature": "Avance de comprobación / Check progress",
+  "verifiedAt": "2026-10-23T00:35:55.036329+00:00",
+  "creator": "https://www.ainimation.studio/interactivos/?project=8c63c927-e53c-419a-a5cf-091e0fcce3a5",
+  "batchId": "0420fbf3-c6c4-4806-a116-a4a9b440c73e",
+  "revision": 9,
+  "checkedAt": "2026-10-23T00:34:22.158Z",
+  "counts": {
+    "available": 5,
+    "unavailable": 0,
+    "unknown": 0,
+    "noConfirmedLink": 0
+  },
+  "scope": "Completed public receipt queries, not a success rate, prepared-delivery progress, physical playback or 3D-scene operating state.",
+  "release": {
+    "ainimationCommit": "7434d55d7ac35b54af5ad529c96df9c18fb562a1",
+    "functionalCommit": "0b4dd49",
+    "assetToken": "0b4dd49",
+    "historyModuleSha256": "176d5ce1749e5aea107db854adbd7fa2a5cf391ed9d6bc803bf91e27968cf539",
+    "libraryWorkerVersion": "f6021190-b162-4486-a5ac-310930cceea9",
+    "mcpCommit": "bddea66",
+    "mcpWorkerVersion": "b4794ea8-b4af-478f-99b2-c26ad7341bff"
+  },
+  "production": {
+    "screens": [
+      {
+        "link": "https://www.admira.store/xpacios/pantalla/?loc=xtanco-bcn&screen=JTIXtanco_PortaldelAngel_20_Mostrador_1&ainimation=0d3223fb28f44efe9bc4ab23f68ba4390da298ef36af4bda86fba54ea59cfff4&lang=es",
+        "name": "Xtanco Barcelona · Mostrador panel",
+        "state": "success",
+        "versionState": "available"
+      },
+      {
+        "link": "https://www.admira.store/xpacios/pantalla/?loc=xtanco&screen=JTIXtanco_CalledeSantaRosa_4_Mostrador_1&ainimation=0e58c8dce1644c3488f84d1f4339bd4012abc9f2828c42c193fc8695d1d28d84&lang=es",
+        "name": "Xtanco · Mostrador panel",
+        "state": "success",
+        "versionState": "available"
+      },
+      {
+        "link": "https://www.admira.store/xpacios/pantalla/?loc=xtanco-valencia&screen=JTIXtanco_CarrerdeColon_22_Mostrador_1&ainimation=afd5917d36d94dc09894394e8a0612fc5f0acf6700e54ec49d328e71a93972e2&lang=es",
+        "name": "Xtanco Valencia · Mostrador panel",
+        "state": "success",
+        "versionState": "available"
+      },
+      {
+        "link": "https://www.admira.store/xpacios/pantalla/?loc=admira-loterias&screen=SinProyecto_GranVia_32_Mostrador_1&ainimation=d15a31e136d6477dbbd4046e6036fb5227afe72ae41542c3ace5d4a5d52af1cc&lang=es",
+        "name": "Admira Loterías · Boletos kiosk",
+        "state": "success",
+        "versionState": "available"
+      },
+      {
+        "link": "https://www.admira.store/xpacios/pantalla/?loc=admira-prensa&screen=SinProyecto_PlazadeCibeles_Mostrador_1&ainimation=f146668cd2ae4557bb7baf53f91aaea4d047e0a91eea4b55b83ce03063353096&lang=es",
+        "name": "Admira Prensa · Mostrador revista",
+        "state": "success",
+        "versionState": "available"
+      }
+    ],
+    "csvRows": 5,
+    "csvColumns": 10,
+    "exactCheckTimeProjectRevisionDestinationsStatesReasonsAndLinks": true,
+    "reportUnchangedExceptCheckTime": true,
+    "originalDeliveryCsvByteIdentical": true,
+    "reportSha256": "53e178a9db1793ceb41d419615bc74472603c85dbeb0f0a8b24a679be7a3cf36",
+    "progressReplacedByCompleteSummary": true,
+    "reportOnlyAfterCompletion": true,
+    "batchCount": 2,
+    "exactLinkCount": 10,
+    "projectCount": 3,
+    "noGoogleSignIn": true,
+    "newDeliveries": 0,
+    "assignments": 0,
+    "inventoryChanges": 0,
+    "panelMoved": false,
+    "panelResized": false,
+    "dialogBoundsUnchanged": true
+  },
+  "isolatedInternalBrowser": {
+    "simulatedResponsesOnly": true,
+    "assertions": {
+      "confirmedDenominator": true,
+      "intermediateCount": true,
+      "missingLinkSeparate": true,
+      "accessibleStatus": true,
+      "noHorizontalOverflow": true,
+      "noPartialCsv": true,
+      "notAvailabilityCount": true,
+      "cancelRemovesProgress": true,
+      "cancelKeepsDialogAndFilter": true,
+      "newRunCompleted": true,
+      "noLateProgress": true,
+      "queueAndNoLinkRequestsExcluded": true,
+      "reportOnlyComplete": true,
+      "preparedStatesUnchanged": true,
+      "samePanelBounds": true
+    },
+    "intermediateText": "Comprobando versiones · 1 de 5 consultas terminadas · 1 destino sin enlace.",
+    "intermediateCompleted": 1,
+    "confirmedTotal": 5,
+    "targetsWithoutLink": 1,
+    "preparedStatesUnchanged": true,
+    "noPartialCsv": true,
+    "cancelledMessage": "Comprobación cancelada. Puedes comprobar otra vez.",
+    "newCompletedSummary": "Comprobado 23/10/2026, 2:32:42 · 5 disponibles · 0 no disponibles · 0 sin poder comprobar · 1 sin enlace confirmado.",
+    "oldLateResponses": 3,
+    "requestsAcrossCancelledAndNewCheck": 9,
+    "temporaryTabClosed": true,
+    "temporaryServerStopped": true,
+    "noProductionErrorsInduced": true
+  },
+  "progressContract": {
+    "fields": [
+      "batchId",
+      "completed",
+      "total",
+      "withoutLink"
+    ],
+    "confirmedReceiptsOnly": true,
+    "countsAfterBodyOrDeadline": true,
+    "errorsAndAbsencesCountAsFinishedNotAvailable": true,
+    "callbackExceptionsDoNotChangeReport": true,
+    "noCallbacksAfterAbort": true,
+    "guardedByBatchRunViewAbortAndDialog": true,
+    "noProgressPersistence": true,
+    "noAdditionalRequestsOrRetries": true,
+    "noEstimatedTimeOrSuccessPercent": true,
+    "concurrencyPerCheck": 3,
+    "requestAndBodyDeadlineMs": 10000,
+    "fixedPublicGetWithoutCredentials": true
+  },
+  "tests": {
+    "interactive": 148,
+    "mcpHelp": 1,
+    "bilingualPublicMcpHelp": true,
+    "isolatedCases": [
+      "intermediate counts and excluded missing links",
+      "JSON body still pending after headers",
+      "absence, unreadable response, network error and timeouts count as finished",
+      "observer errors and payload mutation do not affect reports",
+      "aborted queue and late callbacks",
+      "cancelled/new run isolation",
+      "bilingual UI progress and no partial export",
+      "existing URL, CSV, clipboard, session and delivery validation"
+    ]
+  },
+  "localEvidence": [
+    "check-progress-production-ui.json",
+    "check-progress-production.png",
+    "check-progress-cinco-tactiles.csv",
+    "check-progress-isolated-ui.json",
+    "check-progress-isolated.png",
+    "check-progress-import-verification.json"
+  ]
+}
