@@ -1,0 +1,65 @@
+{
+  "verifiedAt": "2026-10-23T04:51:06.616599+00:00",
+  "feature": "download-validated-batch-comparison-csv",
+  "release": {
+    "functionalCommit": "3417668",
+    "stampCommit": "9576e7b489a836dd0960c75cd7f933341cf400fb",
+    "ainimationWorkerVersion": "e424d696-8d87-421b-892b-58e726dab2b2",
+    "historyModuleSha256": "47f69ac7ab6589c102ed9ce555158c6609c10d8fef4c0e209b505ae954e7bb79",
+    "mcpWorkerVersion": "d775f9b7-e2d3-4d49-86c8-a58fa6e8bcfa"
+  },
+  "production": {
+    "rows": 5,
+    "columns": 21,
+    "shared": 5,
+    "onlyFirst": 0,
+    "onlySecond": 0,
+    "firstBatchId": "73f155c6-0e9f-486f-9ebb-a6d9f18749ef",
+    "secondBatchId": "0420fbf3-c6c4-4806-a116-a4a9b440c73e",
+    "firstRevision": 8,
+    "secondRevision": 9,
+    "tenLinksIdsProjectsVersionsAndUtcDeliveryDatesExact": true,
+    "utf8BomAndSpreadsheetReaderVerified": true,
+    "keyboardComparisonAndDownloadVerified": true,
+    "downloadHiddenBeforeComparisonAndAfterReset": true,
+    "fullCopyBatchMetadataIdentical": true,
+    "originalCsvByteIdentical": true,
+    "retainedBatches": 2,
+    "retainedLinks": 10,
+    "retainedProjects": 3,
+    "languagePreferenceChanged": false,
+    "panelBounds": {
+      "bottom": 708,
+      "height": 696,
+      "left": 182.5,
+      "right": 1082.5,
+      "top": 12,
+      "width": 900,
+      "x": 182.5,
+      "y": 12
+    },
+    "panelMovedOrResized": false,
+    "googleOrNewVersionQueriesDeliveriesAssignmentsRestores": false
+  },
+  "isolated": {
+    "mixedStatesExclusiveTargetsRenamedAndEqualNamesVerified": true,
+    "missingTargetFieldsEmpty": true,
+    "changedUnreadableOrDeniedHistoryBlocksDownload": true,
+    "formulasQuotesAccentsAndNewlinesVerified": true,
+    "invalidOrAlteredComparisonRejected": true,
+    "downloadFailuresRetryAndLateCallbacksVerified": true,
+    "noNewWritesOrQueries": true,
+    "temporaryTabAndServerClosed": true
+  },
+  "checks": {
+    "interactiveTestsPassed": 184,
+    "previousTenExportAndClipboardHashesMatch": true,
+    "bilingualMcpHelpTestPassed": 1
+  },
+  "artifacts": {
+    "csv": "ainimation-comparacion-v8-v9.csv",
+    "csvSha256": "a1ec788484362ee9ad87e7ff5dd5d059494a3ce3778031b60acd8a236bc7b586",
+    "originalCsvSha256": "34bdae288ab5fe70b4ce6fb8907dd87a33ac190ef8952a658c4ad12523ea4ac9",
+    "screenshot": "comparison-csv-production.png"
+  }
+}
