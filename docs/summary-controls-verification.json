@@ -1,0 +1,90 @@
+{
+  "feature": "comparison-summary-control-relationship",
+  "verifiedAt": "2026-10-23T13:28:42.296842+00:00",
+  "production": "https://www.ainimation.studio/interactivos/",
+  "release": {
+    "assets": "fb783c6",
+    "stamp": "8ca5a82",
+    "worker": "848dfaf4-7b94-4d8e-8934-8bf60e51ce1a",
+    "storeHelp": "3c8915c6390ce8ae68f0d0974427595fc98c54da",
+    "storeWorkflow": 39960750810,
+    "storeDeployment": "https://c5702dd1.admira-store.pages.dev",
+    "canonicalLocalDesignCss": true,
+    "mcp": "6a03d98",
+    "mcpWorker": "632515e3-a35a-4621-93a5-5d23084f660c"
+  },
+  "realBatches": {
+    "revisions": [
+      8,
+      9
+    ],
+    "ariaControlsResolvesExactlyToSingleReadOnlySummaryField": true,
+    "summaryFieldId": "ainimation-history-summary-1",
+    "targetCount": 1,
+    "existingAccessibleLabelPreserved": true,
+    "expandedComparedOpenClosed": [
+      "false",
+      "true",
+      "false"
+    ],
+    "filteredPreviewExact": true,
+    "invalidationClearsTextAndExpandedState": true,
+    "nativeKeyboardOrder": [
+      "Descargar comparación CSV",
+      "Descargar resumen TXT",
+      "Ver resumen de comparación",
+      "Copiar resumen de comparación"
+    ],
+    "twoActionRowsAndVisualAppearanceUnchanged": true,
+    "noNewFocusSelectionOrAnnouncementBehavior": true,
+    "summaryCharacters": 709,
+    "txtAndComparisonCsvFromFilteredViewByteIdentical": true,
+    "noRealClipboardAccessOrVersionQueries": true
+  },
+  "preserved": {
+    "batches": 2,
+    "confirmedLinks": 10,
+    "projectCount": 25,
+    "completeInitialLibraryNamesAndOrderUnchanged": true,
+    "originalDeliveryCsvByteIdentical": true,
+    "historyBackupBatchesIdentical": true,
+    "allPreviousCodeByteIdenticalExceptIdAllocationAndAssociation": true,
+    "panelBoundsUnchanged": true,
+    "dialogBounds": {
+      "bottom": 708,
+      "height": 696,
+      "left": 182.5,
+      "right": 1082.5,
+      "top": 12,
+      "width": 900,
+      "x": 182.5,
+      "y": 12
+    },
+    "language": "es"
+  },
+  "tests": {
+    "existingInteractive": 228,
+    "targetedMcpHelp": 1,
+    "broaderMcpKnownPreExistingFailures": 15,
+    "broaderUnrelatedHelpSuiteNotRepeated": true,
+    "publicBilingualHelpSurfaces": 6,
+    "liveMcpBilingualHelp": true,
+    "isolatedLanguages": [
+      "es",
+      "en"
+    ],
+    "twoHistoriesInOneDocument": true,
+    "preExistingIdCollisionSkipped": true,
+    "uniqueIdsAndOneTargetPerHistory": true,
+    "simulatedClipboardDenialUsesOwnSingleField": true,
+    "openingSecondHistoryRetainsFirstTextAndExpandedState": true,
+    "invalidatingFirstDoesNotChangeSecond": true,
+    "reopeningPreservesCorrectPerInstanceAssociation": true,
+    "nativeKeyboardOrderVerifiedBothLanguages": true,
+    "domAndAccessibilityTreeInspected": true,
+    "specificScreenReaderTested": false,
+    "noAdditionalQueriesWritesOrRealClipboardAccess": true,
+    "temporaryTabAndServerClosed": true
+  },
+  "scope": "Only unique per-instance summary IDs and aria-controls were added. The existing accessible label, aria-expanded lifecycle, appearance, focus/selection, keyboard order, actions, data and exports remain unchanged. Checked with DOM, the browser accessibility tree and native keyboard; no claim of a specific screen-reader test. No backend/version queries, project/history writes, deliveries, assignments, restores or synchronization; panel neither moved nor resized."
+}
