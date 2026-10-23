@@ -10,6 +10,10 @@ EN: “Render” retains the existing revision and authorization checks. When bo
 
 ## Shared editor contract
 
+ES: El aviso de conflicto compara **Mi copia** con **Otra pestaña**, campo por campo, antes de elegir. Incluye textos, tema, cifra, unidad y cartelas; se actualiza al editar o recibir cambios de la otra pestaña. No modifica ninguna copia por mostrarla. Las copias iguales lo indican aunque sus historiales difieran. Si la otra copia pertenece a otra revisión o no se puede leer, se explica y se desactiva recuperarla; la copia propia sigue conservada. Los textos se muestran como texto literal.
+
+EN: The conflict notice compares **My copy** with **Other tab**, field by field, before choosing. It includes text, topic, figure, unit and cards, updating after local or other-tab edits. Viewing changes modifies neither copy. Identical copies are identified even when histories differ. An unreadable copy or another source revision is explained and cannot be adopted; your own copy remains retained. Content is displayed as literal text.
+
 ES: Si el borrador cambia en otra pestaña del mismo origen, se pausa la escritura compartida y la generación hasta elegir **Continuar con la otra copia** o **Conservar mi copia**. La edición local y su historial se guardan aparte en la sesión de esa pestaña, sin clave; se recuperan al volver al vídeo o recargar esa misma pestaña. Esa copia de recuperación dura lo que dure la sesión de la pestaña. No se mezclan textos automáticamente. La comprobación antes de guardar también detecta cambios cuando el evento del navegador todavía no ha llegado.
 
 EN: When another tab changes the draft on the same origin, shared writes and rendering pause until you choose **Continue with the other copy** or **Keep my copy**. Local edits and history are backed up separately in that tab's session without passwords; returning to video or reloading that tab recovers them. Recovery lasts for that tab session. Copy is never merged automatically. A pre-save check also detects changes before the browser event arrives.
