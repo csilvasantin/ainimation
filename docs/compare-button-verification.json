@@ -1,0 +1,109 @@
+{
+  "feature": "manual-compare-button-controls-own-existing-results",
+  "verifiedAt": "2026-10-23T21:43:31.680938+00:00",
+  "production": "https://www.ainimation.studio/interactivos/",
+  "release": {
+    "functional": "02dff9c",
+    "stamp": "371f9ecddc84c21f53dc02b51259879cc6b6b44d",
+    "worker": "da7849a0-d973-46d3-b3b5-aee36797feaf",
+    "preservedPublishedCapsuleCommit": "e16eeb4",
+    "capsuleEditorModulePublicByteExact": true,
+    "storeHelp": "86d282487b68e6af0c034f74d87bf2198740d8e5",
+    "storeWorkflow": 40028498483,
+    "storeDeployment": "https://810245f6.admira-store.pages.dev",
+    "canonicalLocalDesignCss": true,
+    "mcp": "d5721d8",
+    "mcpWorker": "3c171dfc-5929-4e80-bf5e-03ade9898efc"
+  },
+  "semantics": {
+    "compareControlsExactlyItsExistingResults": true,
+    "sameTargetAsOtherComparisonControls": true,
+    "noNewIdOrContainer": true,
+    "distinctFromGeneralHistoryTarget": true,
+    "uniqueGenericIdPerHistory": true,
+    "noPrivateDataInId": true,
+    "stableDuringSelectionInvalidationAndReopen": true,
+    "nameTextNativeButtonTypeDisabledStatesFocusAndKeyboardUnchanged": true,
+    "noAriaLabelExpandedRolesTabindexAnnouncementsOrNewAreas": true,
+    "domAccessibilityTreeAndNativeKeyboardInspected": true,
+    "specificScreenReaderNotTested": true
+  },
+  "realBatches": {
+    "revisions": [
+      8,
+      9
+    ],
+    "initialButtonDisabledAndNoResult": true,
+    "incompleteAndSameIdsRemainDisabled": true,
+    "twoDistinctValidIdsEnableWithoutAutomaticResult": true,
+    "nativeTabToCompareAndEnterRunsManualComparison": true,
+    "fullCommonOnlyFirstOnlySecond": [
+      5,
+      0,
+      0
+    ],
+    "fullSavedStateDifferences": [
+      0,
+      5
+    ],
+    "PrensaVisibleOutOfFive": 1,
+    "differentSavedStateViewEmptyMessagePreserved": true,
+    "selectionInvalidationKeepsOwnTargetDisabledAndResultEmpty": true,
+    "reopenResetsWithoutChangingOwnTarget": true,
+    "summaryCharacters": 709,
+    "txtComparisonCsvAndOriginalCsvByteIdentical": true,
+    "historyBackupBatchesIdentical": true,
+    "noRealClipboardAccessOrVersionQueries": true
+  },
+  "preserved": {
+    "batches": 2,
+    "confirmedLinks": 10,
+    "projectCount": 25,
+    "completeInitialLibraryNamesAndOrderUnchanged": true,
+    "allExistingModuleCodeByteIdenticalExceptOneAttribute": true,
+    "generalHistoryDatesStatesAndIdsUnchanged": true,
+    "panelBoundsUnchanged": true,
+    "dialogBounds": {
+      "bottom": 708,
+      "height": 696,
+      "left": 182.5,
+      "right": 1082.5,
+      "top": 12,
+      "width": 900,
+      "x": 182.5,
+      "y": 12
+    },
+    "language": "es",
+    "allOtherAccessibilityLinksAndBehaviorUnchanged": true,
+    "otherPublishedWorkPreservedWithoutDevelopingIt": true,
+    "primaryWorkspaceUntouched": true
+  },
+  "tests": {
+    "existingInteractive": 230,
+    "targetedMcpHelp": 1,
+    "broaderMcpKnownPreExistingFailures": 15,
+    "broaderUnrelatedHelpSuiteNotRepeated": true,
+    "publicBilingualHelpSurfaces": 6,
+    "liveMcpBilingualHelp": true,
+    "isolatedLanguages": [
+      "es",
+      "en"
+    ],
+    "twoHistoriesIndependentOwnResultsAndCompareActions": true,
+    "incompleteSameAndValidIdsVerified": true,
+    "nativeManualCompareInBothLanguages": true,
+    "changedAndDeniedHistorySimulatedLocallyBlockCompareAndShowNoStaleResults": true,
+    "selectionDoesNotBypassReadBlock": true,
+    "controlledErrorsDoNotExposeRawTestError": true,
+    "invalidationOneHistoryDoesNotCrossOtherInstance": true,
+    "reopenKeepsOwnResultsId": true,
+    "temporaryTabAndServerClosed": true,
+    "bundledRuntimeExecutesIndependently": true
+  },
+  "scope": "Only aria-controls on the existing manual Compare button using its existing results-container ID. Existing readiness gating, manual calculation, stored-history revalidation, blocking, focus, labels and disabled states remain unchanged. No new ID/container, controls, reads, writes, queries, clipboard operations, automatic comparisons/downloads, deliveries, assignments, restores or synchronization. Other published work and canonical local design styles retained.",
+  "sha256": {
+    "txt": "7b165b8ebee2f39f30a2ca2eaf2796834526495b39c08e085f15cbe15fb4fdf1",
+    "comparisonCsv": "a1ec788484362ee9ad87e7ff5dd5d059494a3ce3778031b60acd8a236bc7b586",
+    "originalCsv": "34bdae288ab5fe70b4ce6fb8907dd87a33ac190ef8952a658c4ad12523ea4ac9"
+  }
+}
