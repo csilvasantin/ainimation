@@ -1,0 +1,110 @@
+{
+  "feature": "swap-button-controls-own-existing-comparison-results",
+  "verifiedAt": "2026-10-23T22:12:25.371076+00:00",
+  "production": "https://www.ainimation.studio/interactivos/",
+  "release": {
+    "functional": "a9aef81",
+    "stamp": "f171333e8e1843a97db0b8a065b9ef415d73dbd0",
+    "worker": "b44a9207-5b1e-4593-9267-4b33d3bc665c",
+    "preservedPublishedCapsuleCommit": "2178f19",
+    "capsuleEditorModulePublicByteExact": true,
+    "storeHelp": "f5c35016a8ec85c94c854240e851a9b9f8d008ac",
+    "storeWorkflow": 40031809413,
+    "storeDeployment": "https://808b0142.admira-store.pages.dev",
+    "canonicalLocalDesignCss": true,
+    "mcp": "37a7c4a07ccfcb31490cb041d415583a7a95dde5",
+    "mcpWorker": "893b0ce6-8f67-48f2-b296-020ddb961e3f"
+  },
+  "semantics": {
+    "swapControlsExactlyItsExistingResults": true,
+    "sameTargetAsCompareAndPresentationControls": true,
+    "distinctFromGeneralHistoryList": true,
+    "noNewIdOrContainer": true,
+    "uniqueGenericIdPerHistory": true,
+    "noPrivateDataInId": true,
+    "stableAcrossSelectionInvalidationAndReopen": true,
+    "nameTextNativeTypeDisabledFocusKeyboardAndSwapNoticeUnchanged": true,
+    "noAriaLabelExpandedRolesTabindexFocusAnnouncementsOrNewAreas": true,
+    "domAccessibilityTreeAndNativeKeyboardInspected": true,
+    "specificScreenReaderNotTested": true
+  },
+  "realBatches": {
+    "revisions": [
+      8,
+      9
+    ],
+    "emptyIncompleteSameIdsDisabled": true,
+    "distinctValidIdsEnableWithoutAutomaticComparison": true,
+    "nativeKeyboardSwapReversesExactIdsAndLabels": true,
+    "swapRetiresResultExportsPreviewAndOldNotices": true,
+    "manualCompareRequiredAfterSwap": true,
+    "reversePairComparedManuallyThenReturnedToOriginalOrderAndComparedManually": true,
+    "fullCommonOnlyFirstOnlySecond": [
+      5,
+      0,
+      0
+    ],
+    "fullSavedStateDifferences": [
+      0,
+      5
+    ],
+    "PrensaVisibleOutOfFive": 1,
+    "summaryCharacters": 709,
+    "summaryUtf8Bytes": 723,
+    "txtComparisonCsvAndOriginalCsvByteIdentical": true,
+    "historyBackupBatchesIdentical": true,
+    "noRealClipboardAccessOrVersionQueries": true
+  },
+  "preserved": {
+    "batches": 2,
+    "confirmedLinks": 10,
+    "projectCount": 25,
+    "completeInitialLibraryNamesAndOrderUnchanged": true,
+    "allExistingModuleCodeByteIdenticalExceptOneAttribute": true,
+    "generalHistoryDatesStatesIdsUnchanged": true,
+    "dialogBounds": {
+      "bottom": 708,
+      "height": 696,
+      "left": 182.5,
+      "right": 1082.5,
+      "top": 12,
+      "width": 900,
+      "x": 182.5,
+      "y": 12
+    },
+    "panelBoundsUnchanged": true,
+    "language": "es",
+    "allOtherAccessibilityLinksAndBehaviorUnchanged": true,
+    "otherPublishedWorkPreservedWithoutDevelopingIt": true,
+    "primaryWorkspaceUntouched": true
+  },
+  "isolated": {
+    "languages": [
+      "es",
+      "en"
+    ],
+    "twoHistoriesOwnUniqueLinksAndIndependentSwaps": true,
+    "incompleteSameAndDistinctIds": true,
+    "sameRevisionsWithDifferentIds": true,
+    "nativeKeyboardSwapBothLanguages": true,
+    "readsWritesQueriesCopiesDownloadsUnchangedDuringSwap": true,
+    "noAutomaticComparisonOnSwap": true,
+    "invalidationsAndReopenKeepOwnLinkWithoutOldResult": true,
+    "temporaryTabAndServerClosed": true
+  },
+  "validation": {
+    "existingInteractiveTests": 230,
+    "targetedMcpHelpTests": 1,
+    "publicBilingualHelpSurfaces": 6,
+    "liveMcpBilingualHelp": true,
+    "broaderUnrelatedHelpSuiteNotRepeated": true,
+    "knownPreExistingUnrelatedHelpFailures": 15,
+    "bundledRuntimeExecutesIndependently": true
+  },
+  "scope": "Only aria-controls on the existing Swap batches button, using its existing per-history comparison-results ID. All action, validation, selection, data, focus and keyboard behavior retained. No added reads, queries, writes, clipboard operations, automatic comparisons/downloads, deliveries, assignments, restores or synchronization.",
+  "sha256": {
+    "txt": "7b165b8ebee2f39f30a2ca2eaf2796834526495b39c08e085f15cbe15fb4fdf1",
+    "comparisonCsv": "a1ec788484362ee9ad87e7ff5dd5d059494a3ce3778031b60acd8a236bc7b586",
+    "originalCsv": "34bdae288ab5fe70b4ce6fb8907dd87a33ac190ef8952a658c4ad12523ea4ac9"
+  }
+}
