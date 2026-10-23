@@ -4900,6 +4900,8 @@ function stockMemberFromImportParams(params, existingCount, timelineMemberCount)
 
 function importAdmiraStockAssetFromQuery() {
   const params = new URLSearchParams(window.location.search);
+  // Editable capsules load their source through the capsule editor, not as flattened video.
+  if (params.get("mode") === "capsula") return false;
   if (!params.has("admiraStockUrl")) return false;
   const plan = currentPlan();
   const existing = plan.cast || makeCast(plan);
