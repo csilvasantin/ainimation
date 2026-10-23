@@ -1,0 +1,100 @@
+{
+  "feature": "comparison-ready-distinct-pair",
+  "verifiedAt": "2026-10-23T15:03:19.225303+00:00",
+  "production": "https://www.ainimation.studio/interactivos/",
+  "release": {
+    "assets": "4cb6b22",
+    "stamp": "9f7817c",
+    "worker": "084f2ea1-f06c-4ec6-8e90-a255608244f3",
+    "storeHelp": "5d7786a15c07726207f7763d0d917ca0375f50e6",
+    "storeWorkflow": 39973903415,
+    "storeDeployment": "https://538ed700.admira-store.pages.dev",
+    "canonicalLocalDesignCss": true,
+    "mcp": "35d09bc",
+    "mcpWorker": "42591f8c-1dfb-4028-aa19-a07c72c286c8"
+  },
+  "realBatches": {
+    "revisions": [
+      8,
+      9
+    ],
+    "compareDisabledInitially": true,
+    "compareDisabledWithFirstOnlySecondOnlyOrSameId": true,
+    "existingNoticeExplainsMissingSideOrRepeatedId": true,
+    "compareEnabledWithExactDistinctIds": true,
+    "readyNoticeBeforeManualCompare": true,
+    "selectedCounts": [
+      5,
+      5
+    ],
+    "swapKeepsExactIdsCountsAndNoticeWithoutComparing": true,
+    "nativeKeyboardOrder": [
+      "first batch",
+      "second batch",
+      "Compare",
+      "Swap batches"
+    ],
+    "manualReturnRunsComparison": true,
+    "shared": 5,
+    "onlyFirst": 0,
+    "onlySecond": 0,
+    "differentSavedStates": 0,
+    "prensaMatches": 1,
+    "emptyDifferentStateViewMatches": 0,
+    "summaryCharacters": 709,
+    "txtComparisonCsvAndOriginalCsvByteIdentical": true,
+    "historyBackupBatchesIdentical": true,
+    "pairChangesFiltersCloseAndReloadRetireResultsAndDisableCompare": true,
+    "noRealClipboardAccessOrVersionQueries": true
+  },
+  "preserved": {
+    "batches": 2,
+    "confirmedLinks": 10,
+    "projectCount": 25,
+    "completeInitialLibraryNamesAndOrderUnchanged": true,
+    "pureValidatorsAndExportGeneratorsByteIdentical": true,
+    "projectRevisionUtcMillisecondsAndIdsExact": true,
+    "generalHistoryDatesSearchStatesAndExportsUnchanged": true,
+    "panelBoundsUnchanged": true,
+    "dialogBounds": {
+      "bottom": 708,
+      "height": 696,
+      "left": 182.5,
+      "right": 1082.5,
+      "top": 12,
+      "width": 900,
+      "x": 182.5,
+      "y": 12
+    },
+    "language": "es",
+    "summaryAccessibilityAndExpandedLifecycleUnchanged": true,
+    "actionRowsAndOtherControlsUnchanged": true
+  },
+  "tests": {
+    "interactiveTotal": 230,
+    "previousTestsAdaptedToRealSelectionChangeEvents": 228,
+    "newMeaningfulReadinessAndStaleHistoryGuardTests": 2,
+    "targetedMcpHelp": 1,
+    "broaderMcpKnownPreExistingFailures": 15,
+    "broaderUnrelatedHelpSuiteNotRepeated": true,
+    "publicBilingualHelpSurfaces": 6,
+    "liveMcpBilingualHelp": true,
+    "isolatedLanguages": [
+      "es",
+      "en"
+    ],
+    "initialIncompleteSameAndInvalidIdsDisabled": true,
+    "equalTitlesDoNotDetermineReadiness": true,
+    "mixedPendingSendingSuccessErrorStatesRetained": true,
+    "changedHistoryBeforeCompareBlocks": true,
+    "deniedHistoryBeforePreviewBlocks": true,
+    "reselectionCannotBypassKnownInvalidReading": true,
+    "freshReopenRecoversAfterValidReading": true,
+    "zeroOrOneBatchKeepExistingExplanation": true,
+    "nativeSelectionCompareSwapKeyboardBothLanguages": true,
+    "noClippedTextOrHorizontalOverflow": true,
+    "fixtureEffects": "Only isolated seed/mutation writes; no queries, clipboard operations or downloads.",
+    "temporaryTabAndServerClosed": true
+  },
+  "scope": "Existing Compare button availability and existing bilingual notice now follow the exact validated selected IDs. Known invalid history stays blocked until a fresh History read. Comparison and export revalidation and late-callback guards remain. No new controls, confirmations, automatic comparisons, queries, Google, preference/project/history writes, clipboard access, deliveries, assignments, restores or synchronization. Panel neither moved nor resized."
+}
