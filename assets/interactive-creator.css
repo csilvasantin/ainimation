@@ -40,3 +40,5 @@
 .conflict-differences section{border-top:1px solid var(--line);padding:12px 0}.conflict-differences pre{white-space:pre-wrap;overflow-wrap:anywhere;font:inherit;margin:8px 0}.conflict-differences h4{overflow-wrap:anywhere}
 .conflict-compare-status:empty{display:none}
 @media(max-width:640px){.conflict-compare-previews,.conflict-difference-values{grid-template-columns:minmax(0,1fr)}.conflict-compare-dialog{padding:16px}.conflict-compare-previews iframe{height:360px}}
+
+.conflict-version-identity{font-size:.85rem;line-height:1.5;overflow-wrap:anywhere;color:#b7c9c0}

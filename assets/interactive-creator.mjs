@@ -16,7 +16,8 @@ import {prepareDirector,restoreDirectorWorkspace} from './interactive-director-b
 const deliveryModule=new URL('./interactive-delivery.mjs?v=five-touch-1',import.meta.url);deliveryModule.search=new URL(import.meta.url).search;
 const {mountInteractiveDelivery}=await import(deliveryModule.href);
 import {template,validate,playerHtml} from './interactive-project.mjs?v=director-cafe-3';
-import {loadLibrary,readLibrary,updateProject,createProject,openProject,duplicateProject,renameProject,LIBRARY_KEY} from './interactive-library.mjs';
+const libraryModule=new URL('./interactive-library.mjs',import.meta.url);libraryModule.search=new URL(import.meta.url).search;
+const {loadLibrary,readLibrary,updateProject,createProject,openProject,duplicateProject,renameProject,LIBRARY_KEY}=await import(libraryModule.href);
 const $=id=>document.getElementById(id),status=$('status');
 let storage;try{storage=localStorage;}catch{}
 const loaded=loadLibrary(storage);
