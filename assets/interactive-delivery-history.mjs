@@ -26,6 +26,11 @@ export function readDeliveryHistory(storage){
   const batches=data.batches.map(cleanBatch);if(new Set(batches.map(b=>b.id)).size!==batches.length)throw Error('invalid_history');return{ok:true,data:batches.sort((a,b)=>b.updatedAt.localeCompare(a.updatedAt))};
  }catch{return{ok:false,error:'history_unavailable'};}
 }
+export function deliveryHistoryBackup(storage,exportedAt=new Date().toISOString()){
+ const saved=readDeliveryHistory(storage);if(!saved.ok)throw Error('history_unavailable');if(!saved.data.length)throw Error('empty_history');
+ const snapshot={format:'ainimation-delivery-history',version:1,exportedAt:date(exportedAt),batches:saved.data};
+ return{filename:'ainimation-historial-'+snapshot.exportedAt.replace(/[:.]/g,'-')+'.json',type:'application/json;charset=utf-8',content:JSON.stringify(snapshot,null,2)+'\n',batches:snapshot.batches.length,destinations:snapshot.batches.reduce((count,b)=>count+b.results.length,0)};
+}
 export function saveDeliveryBatch(storage,input){
  try{
   const batch=cleanBatch(input),existing=readDeliveryHistory(storage);if(!existing.ok)throw Error('history_unavailable');const before=existing.data.find(b=>b.id===batch.id);
@@ -124,12 +129,14 @@ export function mountDeliveryHistory({button,storage,doc=document,download,onReu
  let viewVersion=0;const checks=new Set(),viewCleanups=new Set(),cancelChecks=()=>{viewVersion++;for(const controller of checks)controller.abort();checks.clear();for(const cleanup of viewCleanups)cleanup();viewCleanups.clear();};
  const dialog=make('dialog');dialog.className='delivery-history-dialog';dialog.setAttribute('aria-label',t('Historial de envíos','Delivery history'));
  const title=make('h2',t('Historial de envíos','Delivery history')),hint=make('p',t('Últimos 30 lotes guardados en este navegador. Los enlaces conservan su versión; abrirlos no asigna el interactivo automáticamente.','Last 30 batches saved in this browser. Links preserve their version; opening them does not automatically assign the interactive.')),status=make('p'),list=make('div'),close=make('button',t('Cerrar historial','Close history'));status.setAttribute('role','status');list.className='history-batches';close.type='button';close.onclick=()=>{cancelChecks();dialog.close();};dialog.addEventListener('cancel',event=>{event.preventDefault();cancelChecks();dialog.close();});dialog.addEventListener('close',cancelChecks);
+ const backupActions=make('div'),backup=make('button',t('Descargar copia del historial completo','Download complete history copy')),backupHint=make('p'),backupStatus=make('p');let backupAttempt=0;status.className='history-filter-status';backupActions.className='history-backup-actions';backup.className='history-backup';backup.type='button';backup.disabled=true;backupHint.className='history-backup-scope';backupStatus.className='history-backup-status';backupStatus.setAttribute('role','status');backupActions.append(backup,backupHint);
+ backup.onclick=async()=>{if(backup.disabled||!dialog.open)return;const attempt=++backupAttempt,current=()=>attempt===backupAttempt&&dialog.open;backup.disabled=true;backupStatus.textContent='';let file;try{file=deliveryHistoryBackup(storage);}catch(error){if(current()){backupStatus.textContent=error.message==='empty_history'?t('No hay lotes guardados para descargar.','There are no saved batches to download.'):t('No se puede leer el historial. La copia no se ha creado y los datos se conservan sin modificar.','History cannot be read. No copy was created and the data is preserved unchanged.');backup.disabled=false;}return;}try{await downloadFile(file);if(current())backupStatus.textContent=t('Copia del historial completo preparada: ','Complete history copy prepared: ')+file.batches+' '+t('lotes','batches')+' · '+file.destinations+' '+t('destinos.','targets.');}catch{if(current())backupStatus.textContent=t('No se pudo preparar la descarga. El historial se conserva; vuelve a intentarlo.','The download could not be prepared. History is preserved; try again.');}finally{if(current())backup.disabled=false;}};
  const filters=make('div'),searchLabel=make('label',t('Buscar lotes','Search batches')),query=make('input'),projectLabel=make('label',t('Proyecto del lote','Batch project')),project=make('select'),outcomeLabel=make('label',t('Resultado del lote','Batch result')),outcome=make('select'),clear=make('button',t('Quitar filtros','Clear filters'));
  filters.className='history-filters';searchLabel.className='history-search';query.className='history-query';query.type='search';query.placeholder=t('Proyecto, versión, Xpacio o pantalla','Project, version, Xpace or screen');query.maxLength=300;project.className='history-project';outcome.className='history-outcome';clear.className='history-clear';clear.type='button';
  const option=(value,label)=>{const n=make('option',label);n.value=value;return n;};
  const outcomeText=value=>value==='complete'?t('Completo','Complete'):value==='error'?t('Con errores','With errors'):t('Sin confirmación','Unconfirmed');
  outcome.append(option('',t('Todos los resultados','All results')),...['complete','error','unconfirmed'].map(value=>option(value,outcomeText(value))));
- searchLabel.append(query);projectLabel.append(project);outcomeLabel.append(outcome);filters.append(searchLabel,projectLabel,outcomeLabel,clear);dialog.append(title,hint,filters,status,list,close);doc.body.append(dialog);
+ searchLabel.append(query);projectLabel.append(project);outcomeLabel.append(outcome);filters.append(searchLabel,projectLabel,outcomeLabel,clear);dialog.append(title,hint,backupActions,backupStatus,filters,status,list,close);doc.body.append(dialog);
  let batches=[];
  const render=()=>{
   cancelChecks();
@@ -204,7 +211,8 @@ export function mountDeliveryHistory({button,storage,doc=document,download,onReu
  };
  query.oninput=render;project.onchange=render;outcome.onchange=render;clear.onclick=()=>{query.value='';project.value='';outcome.value='';render();};
  button.onclick=()=>{
-  const saved=readDeliveryHistory(storage);batches=saved.ok?saved.data:[];query.value='';outcome.value='';project.replaceChildren(option('',t('Todos los proyectos','All projects')));
+  backupAttempt++;
+  const saved=readDeliveryHistory(storage);batches=saved.ok?saved.data:[];backup.disabled=!saved.ok||!batches.length;backupStatus.textContent='';backupHint.textContent=batches.length?t('Todo el historial, con cualquier filtro: ','All history, with any filter: ')+batches.length+' '+t('lotes','batches')+' · '+batches.reduce((count,b)=>count+b.results.length,0)+' '+t('destinos.','targets.'):t('La copia incluye todos los lotes guardados; requiere un historial legible con al menos un lote.','The copy includes all saved batches; a readable history with at least one batch is required.');query.value='';outcome.value='';project.replaceChildren(option('',t('Todos los proyectos','All projects')));
   const projects=new Map();for(const b of batches)if(!projects.has(b.projectId))projects.set(b.projectId,b.projectTitle);
   const names=new Map();for(const name of projects.values())names.set(name,(names.get(name)||0)+1);
   for(const [id,name] of projects)project.append(option(id,name+(names.get(name)>1?' · '+id:'')));project.value='';filters.hidden=!batches.length;list.replaceChildren();
