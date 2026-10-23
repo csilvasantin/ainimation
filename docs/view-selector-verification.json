@@ -1,0 +1,109 @@
+{
+  "feature": "ainimation-comparison-view-selector",
+  "verifiedAt": "2026-10-23T08:51:01.513290+00:00",
+  "production": {
+    "url": "https://www.ainimation.studio/interactivos/",
+    "batchRevisions": [
+      8,
+      9
+    ],
+    "options": [
+      {
+        "text": "Todas las pantallas",
+        "value": "all"
+      },
+      {
+        "text": "Pantallas exclusivas",
+        "value": "exclusive"
+      },
+      {
+        "text": "Estados guardados distintos",
+        "value": "different"
+      }
+    ],
+    "counts": [
+      5,
+      0,
+      0
+    ],
+    "restoredScreens": 5,
+    "oldViewButtons": 0,
+    "keyboardAllOptionsVerified": true,
+    "searchPrensa": "1 de 5 pantallas.",
+    "clearRetainsView": true,
+    "clearRetainsOrder": true,
+    "summaryAndStatesRetained": true,
+    "comparisonCsvByteIdentical": true,
+    "originalDeliveryCsvByteIdentical": true,
+    "completeBackupMetadataIdentical": true,
+    "libraryBefore": 25,
+    "libraryAfter": 25,
+    "libraryNamesAndOrderIdentical": true,
+    "batches": 2,
+    "confirmedLinks": 10,
+    "languageRetained": true,
+    "resetAfterReload": true,
+    "panelBoundsIdentical": true,
+    "panelBounds": {
+      "bottom": 708,
+      "height": 696,
+      "left": 182.5,
+      "right": 1082.5,
+      "top": 12,
+      "width": 900,
+      "x": 182.5,
+      "y": 12
+    },
+    "newDeliveries": 0,
+    "versionQueries": 0,
+    "assignments": 0,
+    "restores": 0
+  },
+  "isolated": {
+    "languages": [
+      "es",
+      "en"
+    ],
+    "viewCounts": [
+      3,
+      2,
+      1
+    ],
+    "nativeKeyboardSelectorVerified": true,
+    "noDuplicateButtons": true,
+    "searchOrderAndClearRetained": true,
+    "statesAndRenamedIdentitiesPreserved": true,
+    "noSharedStatesEmptyMessageVerified": true,
+    "fullCsvBytesUnchanged": true,
+    "writesBeforeAndAfter": 2,
+    "requests": 0,
+    "automaticDownloads": 0,
+    "temporaryTabAndServerClosed": true
+  },
+  "tests": {
+    "interactive": 210,
+    "passed": 210,
+    "mcpHelp": 1,
+    "priorExportHashesUnchanged": 10,
+    "pureDataAndExportFunctionsUnchanged": true
+  },
+  "release": {
+    "ainimationAssets": "e918d10",
+    "ainimationStamp": "410ef25",
+    "ainimationWorker": "e8f082b3-196c-4287-82a2-45fd3a844c08",
+    "storeHelp": "7e7c53b",
+    "storeCanonicalWorkflow": 39927207122,
+    "mcp": "a9c145d",
+    "mcpWorker": "eded7468-b61d-4ed4-b4f0-16049796d50b"
+  },
+  "help": {
+    "storeSurfacesUpdated": 8,
+    "publicStoreSurfacesVerified": 6,
+    "protectedRoutesNotBypassed": 2,
+    "mcpBilingualVerified": true
+  },
+  "files": {
+    "comparisonCsvSha256": "a1ec788484362ee9ad87e7ff5dd5d059494a3ce3778031b60acd8a236bc7b586",
+    "originalDeliveryCsvSha256": "34bdae288ab5fe70b4ce6fb8907dd87a33ac190ef8952a658c4ad12523ea4ac9"
+  }
+}
