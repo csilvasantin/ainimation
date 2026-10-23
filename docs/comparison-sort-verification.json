@@ -1,0 +1,105 @@
+{
+  "feature": "ainimation-comparison-sort",
+  "verifiedAt": "2026-10-23T06:20:46.505435+00:00",
+  "production": {
+    "url": "https://www.ainimation.studio/interactivos/",
+    "batchRevisions": [
+      8,
+      9
+    ],
+    "shared": 5,
+    "onlyFirst": 0,
+    "onlySecond": 0,
+    "originalRestoredExactly": true,
+    "sortedLocationIds": [
+      "admira-loterias",
+      "admira-prensa",
+      "xtanco",
+      "xtanco-bcn",
+      "xtanco-valencia"
+    ],
+    "searchPrensa": "1 de 5 pantallas.",
+    "clearPreservesOrder": true,
+    "exclusive": "0 de 5 pantallas. No hay pantallas exclusivas en esta pareja.",
+    "comparisonCsvIdenticalToOriginal": true,
+    "deliveryCsvIdenticalToOriginal": true,
+    "completeBackupMetadataIdentical": true,
+    "batches": 2,
+    "confirmedLinks": 10,
+    "librarySnapshotProjects": 25,
+    "libraryAfterReloadProjects": 25,
+    "librarySnapshotNamesAndOrderIdentical": true,
+    "panelBoundsUnchanged": true,
+    "panelBounds": {
+      "bottom": 708,
+      "height": 696,
+      "left": 182.5,
+      "right": 1082.5,
+      "top": 12,
+      "width": 900,
+      "x": 182.5,
+      "y": 12
+    },
+    "newDeliveries": 0,
+    "realVersionChecks": 0,
+    "assignments": 0,
+    "restores": 0
+  },
+  "isolated": {
+    "languages": [
+      "es",
+      "en"
+    ],
+    "sharedSortedIds": [
+      "shared",
+      "same-a",
+      "same-z"
+    ],
+    "onlyFirstSortedIds": [
+      "left-a",
+      "left-z"
+    ],
+    "onlySecondSortedIds": [
+      "right-a",
+      "right-z"
+    ],
+    "storageWritesBeforeAndAfter": 2,
+    "requests": 0,
+    "accentAndCaseCollation": true,
+    "exactIdTies": true,
+    "renamedLabelsAndStatesRetained": true,
+    "searchExclusiveAndOrderCombined": true,
+    "csvBytesUnchanged": true,
+    "originalOrderRestored": true,
+    "invalidationsAndLateCallbacksCovered": true,
+    "temporaryTabAndServerClosed": true
+  },
+  "tests": {
+    "interactive": 199,
+    "passed": 199,
+    "mcpHelp": 1,
+    "priorExportHashesUnchanged": 10,
+    "pureDataAndExportFunctionsUnchanged": true
+  },
+  "release": {
+    "ainimationAssets": "81860b0",
+    "ainimationStamp": "fb20d9a",
+    "ainimationWorker": "4bcd45dd-e99f-4e4c-96ec-08d8170686ca",
+    "retainedPublishedBase": "d0c167c",
+    "store": "57bec08",
+    "storeDeployment": "https://a5133461.admira-store.pages.dev",
+    "mcp": "1f8c217",
+    "mcpWorker": "ca55f9e8-a801-4c7e-b4c7-8d2509042c46"
+  },
+  "help": {
+    "storeSurfacesUpdated": 8,
+    "publicStoreSurfacesVerified": 6,
+    "protectedRoutesNotBypassed": 2,
+    "mcpBilingualVerified": true
+  },
+  "files": {
+    "comparisonCsvSha256": "a1ec788484362ee9ad87e7ff5dd5d059494a3ce3778031b60acd8a236bc7b586",
+    "originalDeliveryCsvSha256": "34bdae288ab5fe70b4ce6fb8907dd87a33ac190ef8952a658c4ad12523ea4ac9",
+    "historyMetadataSha256": "86b390d1add7c2fffd606d99f7dbc7592285b8aecee4c8ba328d97b2e38a0401"
+  }
+}
