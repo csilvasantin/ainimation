@@ -1,0 +1,88 @@
+{
+  "feature": "ainimation-comparison-different-states-view",
+  "verifiedAt": "2026-10-23T08:20:34.269362+00:00",
+  "production": {
+    "url": "https://www.ainimation.studio/interactivos/",
+    "batchRevisions": [
+      8,
+      9
+    ],
+    "unionScreens": 5,
+    "differentView": "0 de 5 pantallas. No hay pantallas comunes con estado guardado distinto en esta pareja.",
+    "allRestored": "5 de 5 pantallas.",
+    "restoredIdentities": 5,
+    "keyboardReturnToAllVerified": true,
+    "searchRetained": true,
+    "orderRetained": true,
+    "mutualExclusion": true,
+    "fullStateSummaryRetained": true,
+    "comparisonCsvByteIdentical": true,
+    "originalDeliveryCsvByteIdentical": true,
+    "completeBackupMetadataIdentical": true,
+    "libraryBefore": 25,
+    "libraryAfter": 25,
+    "libraryNamesAndOrderIdentical": true,
+    "batches": 2,
+    "confirmedLinks": 10,
+    "languageRetained": true,
+    "panelBoundsIdentical": true,
+    "panelBounds": {
+      "bottom": 708,
+      "height": 696,
+      "left": 182.5,
+      "right": 1082.5,
+      "top": 12,
+      "width": 900,
+      "x": 182.5,
+      "y": 12
+    },
+    "newDeliveries": 0,
+    "versionQueries": 0,
+    "assignments": 0,
+    "restores": 0
+  },
+  "isolated": {
+    "languages": [
+      "es",
+      "en"
+    ],
+    "differentViewShownOfUnion": "1/3",
+    "mutualExclusionVerified": true,
+    "searchAndOrderRetained": true,
+    "exclusiveAndRenamedEqualStatesExcluded": true,
+    "pendingAndSendingDistinct": true,
+    "noSharedTargetsEmptyMessageVerified": true,
+    "allStateAndResetTestsRetained": true,
+    "fullCsvBytesUnchanged": true,
+    "writesBeforeAndAfter": 2,
+    "requests": 0,
+    "automaticDownloads": 0,
+    "temporaryTabAndServerClosed": true
+  },
+  "tests": {
+    "interactive": 208,
+    "passed": 208,
+    "mcpHelp": 1,
+    "priorExportHashesUnchanged": 10,
+    "pureDataAndExportFunctionsUnchanged": true
+  },
+  "release": {
+    "ainimationAssets": "bad2aa0",
+    "ainimationStamp": "4af89c1",
+    "ainimationWorker": "24ebfcf3-2a46-43f0-83f1-33fad450fd86",
+    "storeHelp": "f3770f5",
+    "storeCanonicalWorkflow": 39923584281,
+    "mcp": "01f191e",
+    "mcpWorker": "60a19ca8-a8bd-4244-9565-02aea072e509"
+  },
+  "help": {
+    "storeSurfacesUpdated": 8,
+    "publicStoreSurfacesVerified": 6,
+    "protectedRoutesNotBypassed": 2,
+    "mcpBilingualVerified": true
+  },
+  "files": {
+    "comparisonCsvSha256": "a1ec788484362ee9ad87e7ff5dd5d059494a3ce3778031b60acd8a236bc7b586",
+    "originalDeliveryCsvSha256": "34bdae288ab5fe70b4ce6fb8907dd87a33ac190ef8952a658c4ad12523ea4ac9"
+  }
+}
