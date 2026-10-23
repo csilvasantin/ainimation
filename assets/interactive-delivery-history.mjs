@@ -144,10 +144,21 @@ export function filterDeliveryHistory(batches,{query='',projectId='',outcome=''}
   return words.every(word=>index.includes(word));
  });
 }
+const comparisonReports=new WeakMap();
+const comparisonState=(result,en=false)=>result?({success:en?'Prepared':'Preparado',error:en?'Not prepared':'No preparado',pending:en?'Awaiting confirmation':'Pendiente de confirmación',sending:en?'Delivery unconfirmed':'Envío sin confirmar'})[result.status]:'';
 export function compareDeliveryBatchTargets(first,second){
  const a=cleanBatch(first),b=cleanBatch(second);if(a.id===b.id)throw Error('distinct_batches_required');
  const key=r=>JSON.stringify([r.locationId,r.screenId]),left=new Map(a.results.map(r=>[key(r),r])),right=new Map(b.results.map(r=>[key(r),r]));
- return{first:a,second:b,common:a.results.filter(r=>right.has(key(r))).map(r=>({first:r,second:right.get(key(r))})),onlyFirst:a.results.filter(r=>!right.has(key(r))),onlySecond:b.results.filter(r=>!left.has(key(r)))};
+ const report={first:a,second:b,common:a.results.filter(r=>right.has(key(r))).map(r=>({first:r,second:right.get(key(r))})),onlyFirst:a.results.filter(r=>!right.has(key(r))),onlySecond:b.results.filter(r=>!left.has(key(r)))};comparisonReports.set(report,JSON.stringify(report));return report;
+}
+export function deliveryComparisonCsv(report,language='es'){
+ const snapshot=comparisonReports.get(report);if(!snapshot||JSON.stringify(report)!==snapshot)throw Error('invalid_comparison');
+ const {first:a,second:b,common,onlyFirst,onlySecond}=JSON.parse(snapshot),en=language==='en';
+ const headers=en?['Group','Xpace ID','Screen ID','First batch ID','First project ID','First project','First version','First delivery date (UTC)','First Xpace','First screen','First saved state','First confirmed link','Second batch ID','Second project ID','Second project','Second version','Second delivery date (UTC)','Second Xpace','Second screen','Second saved state','Second confirmed link']:['Grupo','ID Xpacio','ID pantalla','ID primer lote','ID primer proyecto','Primer proyecto','Primera versión','Fecha primer envío (UTC)','Primer Xpacio','Primera pantalla','Primer estado guardado','Primer enlace confirmado','ID segundo lote','ID segundo proyecto','Segundo proyecto','Segunda versión','Fecha segundo envío (UTC)','Segundo Xpacio','Segunda pantalla','Segundo estado guardado','Segundo enlace confirmado'];
+ const side=(batch,r)=>[batch.id,batch.projectId,batch.projectTitle,batch.revision,batch.createdAt,r?.locationName||'',r?.screenName||'',comparisonState(r,en),r?.url||''];
+ const row=(group,left,right)=>{const r=left||right;return[group,r.locationId,r.screenId,...side(a,left),...side(b,right)];};
+ const rows=[...common.map(r=>row(en?'Shared':'En común',r.first,r.second)),...onlyFirst.map(r=>row(en?'Only in first batch':'Sólo en el primer lote',r)),...onlySecond.map(r=>row(en?'Only in second batch':'Sólo en el segundo lote',undefined,r))];
+ return{filename:'ainimation-'+(en?'comparison':'comparacion')+'-'+a.id+'-'+b.id+'.csv',type:'text/csv;charset=utf-8',content:'\ufeff'+[headers,...rows].map(r=>r.map(csvQuote).join(',')).join('\r\n')+'\r\n',destinations:rows.length};
 }
 export function mountDeliveryHistory({button,storage,doc=document,download,onReuse,writeClipboard,versionRequest=fetch,versionTimeoutMs=10000}){
  const t=(es,en)=>doc.documentElement.lang==='en'?en:es,make=(tag,value)=>{const n=doc.createElement(tag);if(value)n.textContent=value;return n;};
@@ -181,20 +192,21 @@ export function mountDeliveryHistory({button,storage,doc=document,download,onReu
  const option=(value,label)=>{const n=make('option',label);n.value=value;return n;};
  const outcomeText=value=>value==='complete'?t('Completo','Complete'):value==='error'?t('Con errores','With errors'):t('Sin confirmación','Unconfirmed');
  outcome.append(option('',t('Todos los resultados','All results')),...['complete','error','unconfirmed'].map(value=>option(value,outcomeText(value))));
- const comparison=make('details'),compareControls=make('div'),firstLabel=make('label',t('Primer lote','First batch')),secondLabel=make('label',t('Segundo lote','Second batch')),firstSelect=make('select'),secondSelect=make('select'),compareButton=make('button',t('Comparar','Compare')),compareStatus=make('p'),compareResults=make('div');
- comparison.className='history-compare';comparison.open=false;compareControls.className='history-compare-controls';firstSelect.className='history-compare-first';secondSelect.className='history-compare-second';compareButton.className='history-compare-button';compareButton.type='button';compareStatus.className='history-compare-status';compareStatus.setAttribute('role','status');compareResults.className='history-compare-results';compareResults.hidden=true;firstLabel.append(firstSelect);secondLabel.append(secondSelect);compareControls.append(firstLabel,secondLabel,compareButton);comparison.append(make('summary',t('Comparar pantallas de dos lotes','Compare screens in two batches')),make('p',t('Elige dos lotes de todo el historial. Compara sus destinos guardados; no revisa contenido, disponibilidad actual ni reproducción física.','Choose two batches from all history. Compares saved targets; it does not review content, current availability or physical playback.')),compareControls,compareStatus,compareResults);
+ const comparison=make('details'),compareControls=make('div'),firstLabel=make('label',t('Primer lote','First batch')),secondLabel=make('label',t('Segundo lote','Second batch')),firstSelect=make('select'),secondSelect=make('select'),compareButton=make('button',t('Comparar','Compare')),compareStatus=make('p'),compareResults=make('div'),compareDownload=make('button',t('Descargar comparación CSV','Download comparison CSV'));let completedComparison,comparisonDownloadAttempt=0;
+ comparison.className='history-compare';comparison.open=false;compareControls.className='history-compare-controls';firstSelect.className='history-compare-first';secondSelect.className='history-compare-second';compareButton.className='history-compare-button';compareButton.type='button';compareStatus.className='history-compare-status';compareStatus.setAttribute('role','status');compareResults.className='history-compare-results';compareResults.hidden=true;firstLabel.append(firstSelect);secondLabel.append(secondSelect);compareControls.append(firstLabel,secondLabel,compareButton);comparison.append(make('summary',t('Comparar pantallas de dos lotes','Compare screens in two batches')),make('p',t('Elige dos lotes de todo el historial. Compara sus destinos guardados; no revisa contenido, disponibilidad actual ni reproducción física.','Choose two batches from all history. Compares saved targets; it does not review content, current availability or physical playback.')),compareControls,compareStatus,compareDownload,compareResults);
  searchLabel.append(query);projectLabel.append(project);outcomeLabel.append(outcome);filters.append(searchLabel,projectLabel,outcomeLabel,clear);dialog.append(title,hint,guide,comparison,backupActions,backupStatus,restoreStatus,restoreReview,filters,status,list,close);doc.body.append(dialog);
+ compareDownload.type='button';compareDownload.className='history-compare-download';compareDownload.hidden=true;compareDownload.disabled=true;
  let batches=[],comparisonSnapshot='';
- const clearComparisonResult=()=>{compareResults.replaceChildren();compareResults.hidden=true;delete compareResults.dataset.firstBatchId;delete compareResults.dataset.secondBatchId;compareStatus.textContent=batches.length<2?t('Se necesitan al menos dos lotes legibles para comparar.','At least two readable batches are needed to compare.'):t('Selecciona dos lotes distintos y pulsa Comparar.','Select two different batches and press Compare.');};
+ const clearComparisonResult=()=>{completedComparison=undefined;comparisonDownloadAttempt++;compareDownload.hidden=true;compareDownload.disabled=true;compareResults.replaceChildren();compareResults.hidden=true;delete compareResults.dataset.firstBatchId;delete compareResults.dataset.secondBatchId;compareStatus.textContent=batches.length<2?t('Se necesitan al menos dos lotes legibles para comparar.','At least two readable batches are needed to compare.'):t('Selecciona dos lotes distintos y pulsa Comparar.','Select two different batches and press Compare.');};
  resetComparison=()=>{firstSelect.value='';secondSelect.value='';comparison.open=false;clearComparisonResult();};
  const firstSelection=make('p'),secondSelection=make('p');firstLabel.append(firstSelection);secondLabel.append(secondSelection);
  const clearPair=resetComparison;resetComparison=()=>{clearPair();firstSelection.textContent='';secondSelection.textContent='';};
  firstSelect.onchange=secondSelect.onchange=()=>{clearComparisonResult();firstSelection.textContent=batches.find(b=>b.id===firstSelect.value)?batchLabel(batches.find(b=>b.id===firstSelect.value)):'';secondSelection.textContent=batches.find(b=>b.id===secondSelect.value)?batchLabel(batches.find(b=>b.id===secondSelect.value)):'';};
  const batchLabel=b=>b.projectTitle+' · '+t('Versión ','Version ')+b.revision+' · '+b.createdAt+' · '+b.id;
- const targetStatus=r=>({success:t('Preparado','Prepared'),error:t('No preparado','Not prepared'),pending:t('Pendiente de confirmación','Awaiting confirmation'),sending:t('Envío sin confirmar','Delivery unconfirmed')})[r.status];
+ const targetStatus=r=>comparisonState(r,doc.documentElement.lang==='en');
  const comparisonTarget=(r,side)=>{const item=make('p',side+': '+r.locationName+' · '+r.screenName+' · '+targetStatus(r));item.dataset.locationId=r.locationId;item.dataset.screenId=r.screenId;item.dataset.state=r.status;item.append(make('span',t('IDs: ','IDs: ')+r.locationId+' / '+r.screenId));return item;};
  compareButton.onclick=()=>{
-  if(compareButton.disabled||!dialog.open)return;clearComparisonResult();const saved=readDeliveryHistory(storage);
+  if(compareButton.disabled||!dialog.open)return;clearComparisonResult();let saved;try{const snapshot=restoreHistorySnapshot(storage);saved={ok:true,data:snapshot.batches,raw:snapshot.raw};}catch{saved={ok:false};}
   if(!saved.ok||JSON.stringify(saved.data)!==comparisonSnapshot){resetComparison();compareStatus.textContent=t('El historial ha cambiado o no se puede leer. Cierra y vuelve a abrir el historial para revisar otra vez.','History changed or cannot be read. Close and reopen History to review it again.');return;}
   const a=saved.data.find(b=>b.id===firstSelect.value),b=saved.data.find(b=>b.id===secondSelect.value);
   if(!a||!b||a.id===b.id){compareStatus.textContent=t('Elige dos lotes distintos guardados en el historial.','Choose two different batches saved in History.');return;}
@@ -205,6 +217,16 @@ export function mountDeliveryHistory({button,storage,doc=document,download,onReu
    for(const row of rows){const li=make('li');if(kind==='common')li.append(comparisonTarget(row.first,t('Primer lote','First batch')),comparisonTarget(row.second,t('Segundo lote','Second batch')));else li.append(comparisonTarget(row,kind==='only-first'?t('Primer lote','First batch'):t('Segundo lote','Second batch')));items.append(li);}section.append(items);compareResults.append(section);
   }
   compareStatus.textContent=t('En común: ','Shared: ')+result.common.length+' · '+t('Sólo en el primer lote: ','Only in the first batch: ')+result.onlyFirst.length+' · '+t('Sólo en el segundo lote: ','Only in the second batch: ')+result.onlySecond.length+'.';
+  completedComparison={result,raw:saved.raw};compareDownload.hidden=false;compareDownload.disabled=false;
+ };
+ compareDownload.onclick=async()=>{
+  if(compareDownload.disabled||!completedComparison||!dialog.open)return;const entry=completedComparison,attempt=++comparisonDownloadAttempt,current=()=>entry===completedComparison&&attempt===comparisonDownloadAttempt&&dialog.open;
+  let fresh;try{fresh=restoreHistorySnapshot(storage);}catch{/* An unreadable history must invalidate this result. */}
+  if(!fresh||fresh.raw!==entry.raw||firstSelect.value!==entry.result.first.id||secondSelect.value!==entry.result.second.id){resetComparison();compareStatus.textContent=t('El historial o la selección han cambiado o no se pueden leer. Abre el historial y compara otra vez antes de descargar.','History or selection changed or cannot be read. Reopen History and compare again before downloading.');return;}
+  compareDownload.disabled=true;
+  try{const file=deliveryComparisonCsv(entry.result,doc.documentElement.lang);await downloadFile(file);if(current())compareStatus.textContent=t('Comparación CSV preparada: ','Comparison CSV prepared: ')+file.destinations+' '+word(file.destinations,'pantalla.','pantallas.','screen.','screens.');}
+  catch{if(current())compareStatus.textContent=t('No se pudo preparar el CSV de comparación. Puedes volver a intentarlo; el historial se conserva.','The comparison CSV could not be prepared. You can try again; history is preserved.');}
+  finally{if(current())compareDownload.disabled=false;}
  };
  const render=()=>{
   cancelChecks();
