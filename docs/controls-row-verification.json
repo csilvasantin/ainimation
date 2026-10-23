@@ -1,0 +1,66 @@
+{
+  "feature": "comparison-order-view-responsive-row",
+  "verifiedAt": "2026-10-23T09:19:27.849844+00:00",
+  "production": "https://www.ainimation.studio/interactivos/",
+  "release": {
+    "assets": "8355d3b",
+    "stamp": "f34ad6a1d773dea0e0ba2f008252f6724f7bf936",
+    "worker": "51d742ba-8f92-4f69-8e98-9c3f3fdddb32",
+    "storeHelp": "b30e78acf9e5e641eceee3ee38f143cf8b4868cc",
+    "storeWorkflow": 39930675787,
+    "storeDeployment": "https://cb91806e.admira-store.pages.dev",
+    "canonicalLocalDesignCss": true,
+    "mcp": "ea5f794",
+    "mcpWorker": "1b0b2f4c-5643-4aac-9ffa-f45b93b188f8"
+  },
+  "layout": {
+    "savedVerticalPixels": 48.0,
+    "orderThenView": true,
+    "sameRowAtCurrentWidth": true,
+    "countsBelowSelectors": true,
+    "narrowContainerPixels": 340,
+    "wrappedWithoutOverflow": [
+      "es",
+      "en"
+    ],
+    "dialogBoundsUnchanged": true
+  },
+  "realBatches": {
+    "revisions": [
+      8,
+      9
+    ],
+    "counts": {
+      "all": "5 de 5 pantallas.",
+      "exclusive": "0 de 5 pantallas. No hay pantallas exclusivas en esta pareja.",
+      "different": "0 de 5 pantallas. No hay pantallas comunes con estado guardado distinto en esta pareja.",
+      "prensa": "1 de 5 pantallas.",
+      "restored": "5 de 5 pantallas."
+    },
+    "exactIdentitiesAndSavedStates": true
+  },
+  "preserved": {
+    "batches": 2,
+    "confirmedLinks": 10,
+    "projectCount": 25,
+    "completeProjectNamesAndOrderUnchanged": true,
+    "originalDeliveryCsvByteIdentical": true,
+    "comparisonCsvByteIdentical": true,
+    "historyBackupBatchesIdentical": true,
+    "pureDataAndExportFunctionsByteIdentical": true,
+    "language": "es"
+  },
+  "tests": {
+    "interactive": 210,
+    "mcpHelp": 1,
+    "isolatedMixedCounts": [
+      3,
+      2,
+      1
+    ],
+    "isolatedNoExtraRequestsOrWrites": true,
+    "hiddenAndResetOnSwap": true,
+    "temporaryTabAndServerClosed": true
+  },
+  "scope": "Presentation only; no new version checks, deliveries, assignments, restorations or synchronization. Virtual metadata tests do not certify physical playback."
+}
