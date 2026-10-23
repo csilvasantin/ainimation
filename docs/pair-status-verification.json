@@ -1,0 +1,109 @@
+{
+  "feature": "compare-and-swap-describedby-own-current-notice",
+  "verifiedAt": "2026-10-23T22:42:23.802858+00:00",
+  "production": "https://www.ainimation.studio/interactivos/",
+  "release": {
+    "functional": "ac5de65",
+    "stamp": "25b4fbb76410a267e5165555337767911e24f3da",
+    "worker": "e2367c72-dea4-4705-90c8-82fcf1eaabf3",
+    "preservedPublishedCapsuleCommit": "c5b3412",
+    "capsuleEditorModuleCssAndPreviewPublicByteExact": true,
+    "storeHelp": "ff64f16c3578d5220ef2ce1272178230662a4861",
+    "storeWorkflow": 40035065643,
+    "storeDeployment": "https://74028de2.admira-store.pages.dev",
+    "canonicalLocalDesignCss": true,
+    "mcp": "05679b707255814d1f1df4ec7bfac72a3dd34ee9",
+    "mcpWorker": "db54cac2-f402-410c-808e-f7b44c74094c"
+  },
+  "semantics": {
+    "bothButtonsDescribeExactlyOneExistingOwnStatusParagraph": true,
+    "validGenericIdUniquePerHistory": true,
+    "noPrivateDataInId": true,
+    "noNewParagraphOrContainer": true,
+    "separateControlsLinksStillResolveToOwnResults": true,
+    "statusRolePreservedWithoutNewAriaLive": true,
+    "namesTextsNativeTypesDisabledStatesFocusAndKeyboardUnchanged": true,
+    "noAlternativeLabelsExpandedRolesTabindexFocusAnnouncementsOrNewAreas": true,
+    "stableAcrossSelectionInvalidationAndReopen": true,
+    "domAccessibilityTreeAndNativeKeyboardInspected": true,
+    "specificScreenReaderNotTested": true
+  },
+  "realBatches": {
+    "revisions": [
+      8,
+      9
+    ],
+    "emptyIncompleteSameReadyNoticesExact": true,
+    "emptyIncompleteSameDisabled": true,
+    "readyDoesNotCompareAutomatically": true,
+    "nativeManualCompareAndSwap": true,
+    "swapReversesExactIdsAndRetiresResultsUntilManualCompare": true,
+    "returnedToOriginal89AndComparedManually": true,
+    "completeCommonOnlyFirstOnlySecond": [
+      5,
+      0,
+      0
+    ],
+    "completeSavedStateDifferences": [
+      0,
+      5
+    ],
+    "PrensaVisibleOutOfFive": 1,
+    "summaryCharacters": 709,
+    "summaryUtf8Bytes": 723,
+    "comparisonCsvPreparedNoticeExactAndStillOwn": true,
+    "txtComparisonCsvOriginalCsvByteIdentical": true,
+    "historyBackupBatchesIdentical": true,
+    "noRealClipboardAccessOrVersionQueries": true
+  },
+  "isolated": {
+    "languages": [
+      "es",
+      "en"
+    ],
+    "twoHistoriesHaveDifferentStatusIdsAndOnlyOwnReferences": true,
+    "selectionNoticeAndResultIndependent": true,
+    "selectionAndSwapAddNoReadsWritesQueriesCopiesDownloads": true,
+    "emptyIncompleteSameReadyComparedAndSwappedNoticesExact": true,
+    "changedAndDeniedHistorySimulatedBothLanguages": true,
+    "blockedButtonsDescribeOwnControlledMessageWithoutStaleResults": true,
+    "invalidationReopenStableOwnNotice": true,
+    "temporaryTabAndServerClosed": true
+  },
+  "preserved": {
+    "projectCount": 25,
+    "completeInitialLibraryNamesAndOrderUnchanged": true,
+    "batches": 2,
+    "confirmedLinks": 10,
+    "dialogBounds": {
+      "bottom": 708,
+      "height": 696,
+      "left": 182.5,
+      "right": 1082.5,
+      "top": 12,
+      "width": 900,
+      "x": 182.5,
+      "y": 12
+    },
+    "panelBoundsUnchanged": true,
+    "language": "es",
+    "allPreviousModuleCodeByteExactExceptIdSequenceAndDescriptionAssignments": true,
+    "otherPublishedWorkRetainedWithoutDevelopingIt": true,
+    "primaryWorkspaceUntouched": true
+  },
+  "validation": {
+    "existingInteractiveTests": 230,
+    "targetedMcpHelpTests": 1,
+    "publicBilingualHelpSurfaces": 6,
+    "liveMcpBilingualHelp": true,
+    "broaderUnrelatedHelpSuiteNotRepeated": true,
+    "knownPreExistingUnrelatedHelpFailures": 15,
+    "bundledRuntimeExecutesIndependently": true
+  },
+  "scope": "Only a generic unique ID on the existing comparison-status paragraph and aria-describedby on existing Compare and Swap batches buttons. Texts, logic, actions, validations, disabled states, keyboard, focus and existing status role unchanged. No new controls, announcements, operations, reads, queries, writes, clipboard activity, automatic comparisons/downloads, deliveries, assignments, restores or synchronization.",
+  "sha256": {
+    "txt": "7b165b8ebee2f39f30a2ca2eaf2796834526495b39c08e085f15cbe15fb4fdf1",
+    "comparisonCsv": "a1ec788484362ee9ad87e7ff5dd5d059494a3ce3778031b60acd8a236bc7b586",
+    "originalCsv": "34bdae288ab5fe70b4ce6fb8907dd87a33ac190ef8952a658c4ad12523ea4ac9"
+  }
+}
