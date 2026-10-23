@@ -10,6 +10,10 @@ EN: “Render” retains the existing revision and authorization checks. When bo
 
 ## Shared editor contract
 
+ES: **Deshacer** usa ⌘/Ctrl+Z. **Rehacer** usa ⌘/Ctrl+Mayús+Z (también Ctrl+Y). Funcionan en los campos y sobre la composición; no interceptan la clave del Stock ni la composición de caracteres. El historial incluye textos, tema, cifra y cartelas, además de «Recuperar original». Conserva hasta 100 estados de edición en el navegador y se recupera con el borrador al volver al vídeo. Un cambio nuevo descarta la rama de Rehacer. El historial pertenece a la revisión de origen; nunca contiene la clave ni se envía al renderizador.
+
+EN: **Undo** uses ⌘/Ctrl+Z. **Redo** uses ⌘/Ctrl+Shift+Z (also Ctrl+Y). They work in fields and on the composition, excluding the Stock password and character composition. History covers text, topic, figure, cards and Restore original. Up to 100 editing states are retained locally and recovered with the draft after returning to video. A new edit discards the redo branch. History belongs to the source revision; it never contains the password or reaches the renderer.
+
 The Stock adapter imports `https://www.ainimation.studio/assets/capsule-editor.mjs?v=capsule-inline-1` using CORS and checks `CAPSULE_EDITOR_EMBED_VERSION === 1`. A failed module load restores the original viewer and can be retried. It does not copy the engine, transfer credentials between origins, or create a new publication API.
 
 `mountCapsuleEditor({host, params, signal, returnUrl, onClose})` mounts inline when `host` is provided; otherwise it retains the Director modal. `params` carries the validated capsule reference, selected asset ID/URL and orientation. It returns `{element, destroy, pause, saveDraft}`. Destruction saves only changed local copy, clears in-memory password fields, stops polling/media and disconnects the preview observer. `signal` prevents an abandoned load from mounting on a later detail. Ordinary library imports do not bootstrap a modal. Director uses `capsule-editor-entry.mjs`; cached legacy direct-script entries remain supported.
