@@ -10,6 +10,10 @@ EN: “Render” retains the existing revision and authorization checks. When bo
 
 ## Shared editor contract
 
+ES: El borrador y su historial se guardan automáticamente después de cada cambio, Deshacer y Rehacer. Se recuperan tras recargar la página, siempre que siga siendo la misma revisión. El aviso de guardado pertenece al navegador actual y no publica la cápsula. Si el almacenamiento falla, se muestra un aviso y se mantiene la edición en memoria; «Guardar borrador» permite reintentarlo. La clave nunca forma parte del guardado.
+
+EN: Draft and history are saved automatically after every edit, Undo and Redo, and recovered after page reload for the same source revision. The saved notice applies to this browser and does not publish the capsule. If storage fails, a warning appears and edits remain in memory; Save draft retries. Passwords are never stored.
+
 ES: **Deshacer** usa ⌘/Ctrl+Z. **Rehacer** usa ⌘/Ctrl+Mayús+Z (también Ctrl+Y). Funcionan en los campos y sobre la composición; no interceptan la clave del Stock ni la composición de caracteres. El historial incluye textos, tema, cifra y cartelas, además de «Recuperar original». Conserva hasta 100 estados de edición en el navegador y se recupera con el borrador al volver al vídeo. Un cambio nuevo descarta la rama de Rehacer. El historial pertenece a la revisión de origen; nunca contiene la clave ni se envía al renderizador.
 
 EN: **Undo** uses ⌘/Ctrl+Z. **Redo** uses ⌘/Ctrl+Shift+Z (also Ctrl+Y). They work in fields and on the composition, excluding the Stock password and character composition. History covers text, topic, figure, cards and Restore original. Up to 100 editing states are retained locally and recovered with the draft after returning to video. A new edit discards the redo branch. History belongs to the source revision; it never contains the password or reaches the renderer.
