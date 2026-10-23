@@ -1,0 +1,89 @@
+{
+  "feature": "download-comparison-summary-txt",
+  "verifiedAt": "2026-10-23T11:56:00.151581+00:00",
+  "production": "https://www.ainimation.studio/interactivos/",
+  "release": {
+    "assets": "4601480",
+    "stamp": "7beb476",
+    "worker": "eab3be06-c505-41e7-82ec-15b019e1e883",
+    "storeHelp": "1251a5396008f0a5a81b91e9c47e04f321d67f6a",
+    "storeWorkflow": 39949034220,
+    "storeDeployment": "https://34cf70cf.admira-store.pages.dev",
+    "canonicalLocalDesignCss": true,
+    "mcp": "c90fc6e",
+    "mcpWorker": "852d5aab-6c19-4b44-8f58-f447b9262f53"
+  },
+  "realBatches": {
+    "revisions": [
+      8,
+      9
+    ],
+    "summaryCharacters": 709,
+    "utf8Bytes": 723,
+    "summaryByteIdenticalToCopiedReference": true,
+    "noBomOrAddedNewline": true,
+    "downloadedFromEmptySearchedSortedView": true,
+    "fullCounts": {
+      "shared": 5,
+      "onlyFirst": 0,
+      "onlySecond": 0,
+      "differentSavedStates": 0
+    },
+    "bothBatchIdsRevisionsAndUtcDatesExact": true,
+    "manualDownloadOnly": true,
+    "safeFilenameFromValidatedIds": true,
+    "previewTextAndAdaptiveHeightUnchanged": true,
+    "realClipboardUntouched": true,
+    "actionHiddenAndDisabledBeforeComparingAfterReload": true,
+    "noVersionChecksDeliveriesAssignmentsOrRestores": true
+  },
+  "preserved": {
+    "batches": 2,
+    "confirmedLinks": 10,
+    "projectCount": 25,
+    "completeInitialLibraryNamesAndOrderUnchanged": true,
+    "comparisonCsvByteIdentical": true,
+    "originalDeliveryCsvByteIdentical": true,
+    "historyBackupBatchesIdentical": true,
+    "allExistingPureFunctionsByteIdentical": true,
+    "panelBoundsUnchanged": true,
+    "dialogBounds": {
+      "bottom": 708,
+      "height": 696,
+      "left": 182.5,
+      "right": 1082.5,
+      "top": 12,
+      "width": 900,
+      "x": 182.5,
+      "y": 12
+    },
+    "language": "es"
+  },
+  "tests": {
+    "interactive": 228,
+    "targetedMcpHelp": 1,
+    "broaderMcpSuite": {
+      "tests": 122,
+      "passed": 107,
+      "preExistingFailures": 15,
+      "failedTestNamesIdenticalOnUnmodifiedHead": true,
+      "note": "Existing failures in other help contracts/version assertions are unchanged by this documentation-only edit."
+    },
+    "publicBilingualHelpSurfaces": 6,
+    "liveMcpBilingualHelp": true,
+    "isolatedLanguages": [
+      "es",
+      "en"
+    ],
+    "narrowContainerPixels": 340,
+    "unicodeAndNoSharedTargets": true,
+    "fullTextExactFromEmptyView": true,
+    "changedCorruptOrDeniedHistoryBlocksDownload": true,
+    "controlledFailureAndRetry": true,
+    "nativeKeyboardFailureNotice": true,
+    "lateCallbacksAndHistoryChangesDuringDownloadDiscarded": true,
+    "noExtraQueriesWritesOrClipboardCalls": true,
+    "temporaryTabAndServerClosed": true
+  },
+  "scope": "Manual TXT download of the existing complete validated comparison summary only. Revalidates local history before downloading; invalidates stale/illegible history and guards late callbacks by comparison and attempt identity. No clipboard access, backend/version queries, history/project writes, delivery preparation, assignment, 3D restore or synchronization."
+}
