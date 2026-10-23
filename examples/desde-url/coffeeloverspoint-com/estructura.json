@@ -1,0 +1,227 @@
+{
+ "title": "Carta Madrid - Coffee Lovers Point",
+ "description": "Carta Tenemos una amplia variedad de cafés, bebidas, helados, dulce y salado para que puedas desayunar y merendar. No encontrarás una cafetería heladería mejor. Café y Té Tostadas Refrescos Dulce Salado Menús Cervezas Cafés y Tés Cafés Espresso 1,70€ Cortado 2,00€ Café con leche 2,40€ Café con leche XL 3,00€ Americano 2,20€ Americano XL 2,60€ […]",
+ "sections": [
+  {
+   "heading": "Te damos la bienvenida a nuestra cafetería",
+   "items": [
+    "Inicio",
+    "Sobre nosotros",
+    "Contacto"
+   ]
+  },
+  {
+   "heading": "Carta",
+   "items": []
+  },
+  {
+   "heading": "Cafés y Tés",
+   "items": []
+  },
+  {
+   "heading": "Cafés",
+   "items": [
+    "Espresso 1,70€",
+    "Cortado 2,00€",
+    "Café con leche 2,40€",
+    "Café con leche XL 3,00€",
+    "Americano 2,20€",
+    "Americano XL 2,60€",
+    "Bombón 3,00€",
+    "Colacao 2,90€",
+    "Vaso de leche 2,00€",
+    "Doble carga café 0,50€",
+    "Extra de Baileys 0,80€",
+    "Extra de leche 0,50€"
+   ]
+  },
+  {
+   "heading": "Cafés especiales",
+   "items": [
+    "Capuccino 4,00€",
+    "Vienes 4,30€",
+    "Mochaccino 4,50€ (sirope de chocolate-café leche- cacao)",
+    "Affogato 4,90€ (café + helado vainilla)",
+    "Belmonte con Baileys 3,50€",
+    "Belmonte 3,50€",
+    "Carajillo 3,50€"
+   ]
+  },
+  {
+   "heading": "Tés",
+   "items": [
+    "Ceylan Op 2,50€ (Té negro)",
+    "Fruits Rouges 2,50€ (Té negro con frutos rojos deshidratados)",
+    "Jazmin 2,50€ (Té verde aromatizado)",
+    "Rooibos 2,50€",
+    "Manzanilla 2,50€",
+    "Verbena Menta 2,50€",
+    "Sobre adicional 0,70€"
+   ]
+  },
+  {
+   "heading": "Cafés y Tés helados",
+   "items": [
+    "Café con hielo 4,50€ café + hielo",
+    "Latte helado 4,50€ café + leche + hielo",
+    "Frappe Cream 4,80€ café + leche + nata",
+    "Bombón helado 4,80€ (condensada + café + leche + nata)",
+    "Black Tea - Mango 3,80€",
+    "Black Tea - Red Fruits 3,80€",
+    "Black Tea - Lemon 3,80€"
+   ]
+  },
+  {
+   "heading": "Tostadas",
+   "items": [
+    "Tostada de tomate 2,50€ Tostada de York 2,90€ Tostada Fit 2,90€ Tostada de Serrano 3,50€"
+   ]
+  },
+  {
+   "heading": "Refrescos",
+   "items": [
+    "Coca Cola, Zero, Light 2,90€",
+    "Fanta 2,90€",
+    "Nestea 2,90€",
+    "Zumo 2,30€ Melocótón - Piña - Tomate",
+    "Agua 2,00€",
+    "Agua con gás 2,90€",
+    "Zumo de naranja 3,50€",
+    "Zumo de naranja pequeño 2,00€"
+   ]
+  },
+  {
+   "heading": "Cervezas y Vinos",
+   "items": [
+    "Caña - Clara 2,50€ Doble Caña 3,50€ Jarra 4,50€ Mahou 1/5 3,50€ Mahou 1/3 3,90€ Mahou 00 3,50€ Vino Blanco 3,30€ Vino Tinto 3,30€"
+   ]
+  },
+  {
+   "heading": "Dulce",
+   "items": []
+  },
+  {
+   "heading": "Tortitas americanas",
+   "items": [
+    "Tortitas Americana 1 2,50€ Tortitas Americana 2 4,00€"
+   ]
+  },
+  {
+   "heading": "Croissants",
+   "items": [
+    "Croisant 2,00€"
+   ]
+  },
+  {
+   "heading": "Gofres",
+   "items": [
+    "Gofre solo 3,00€ Gofre con topping 3,50€ Gofre con helado 5,00€"
+   ]
+  },
+  {
+   "heading": "Donuts",
+   "items": [
+    "Donut colores 2,60€ Big Donut 2,90€ Berlinas 2,90€"
+   ]
+  },
+  {
+   "heading": "Tartas",
+   "items": [
+    "Tarta de chocolate 3,50€",
+    "Tarta de zanahoria 3,50€",
+    "Tarta de manzana 4,90€",
+    "Cheese Cake 4,90€",
+    "Red Velvet 4,90€",
+    "Corto - San Marcos 3,80€",
+    "Corto - Oreo 3,80€"
+   ]
+  },
+  {
+   "heading": "Muffins",
+   "items": [
+    "Muffin caramelo 3,50€ Muffin chocolate 3,50€ Muffin yogurt 3,50€ Magdalenas SIN GLUTEN 3,50€ (Pack 2 unidades)"
+   ]
+  },
+  {
+   "heading": "Cookies",
+   "items": [
+    "Cookies doble chocolate 2,90€ Cookie triple chocolate 2,90€"
+   ]
+  },
+  {
+   "heading": "Salado",
+   "items": []
+  },
+  {
+   "heading": "Sandwich",
+   "items": [
+    "Bagel 4,50€ Focaccia serrano y queso 4,90€ Triángulo cereales 4,30€ Bocata cereal atún 4,00€ Croissant york y queso 3,90€"
+   ]
+  },
+  {
+   "heading": "Pan pizza",
+   "items": [
+    "Pan pizza york 4,90€ Pan pizza atún 4,90€"
+   ]
+  },
+  {
+   "heading": "Menús",
+   "items": []
+  },
+  {
+   "heading": "Menú desayuno",
+   "items": [
+    "Tostada de tomate 2,50€",
+    "Tostada de York 2,90€",
+    "Tostada Fit 2,90€",
+    "Tostada de Serrano 3,50€",
+    "Café + Tostada Tomate 3,50€",
+    "Café + Tostada York 3,90€",
+    "Café + Tostada de Serrano 4,50€",
+    "Café + Tostada Fit 3,90€",
+    "Café + Croisant 3,90€",
+    "Queso extra 0,30€ Agrégalo extra a tu desayuno",
+    "Zumo de naranja 1,00€ Agrégalo extra a tu desayuno"
+   ]
+  },
+  {
+   "heading": "Menú merienda",
+   "items": [
+    "Café + Big Donut o Berlina 4,50€ Café + Tarta 5,50€ De chocolate o de zanahoria"
+   ]
+  },
+  {
+   "heading": "Visítanos y vive la experiencia",
+   "items": []
+  },
+  {
+   "heading": "¿Quieres trabajar con nosotros? Envíanos tu CV",
+   "items": [
+    "640 199 796",
+    "635 501 958 Gerencia",
+    "info@coffeeloverspoint.com",
+    "Avda. Rosa Mazon Valero 7, Torrevieja, (Alicante)",
+    "Calle Adolfo Bioy Casares 2, Vallecas, 28051 Madrid",
+    "Lunes - Domingo: 9AM - 10PM"
+   ]
+  },
+  {
+   "heading": "Redes Sociales",
+   "items": [
+    "Facebook",
+    "Instagram",
+    "Accesibilidad – Cookies – Aviso Legal – Privacidad",
+    "Palabra Clave – Agencia de Marketing en Torrevieja"
+   ]
+  }
+ ],
+ "links": [
+  "Inicio",
+  "Sobre nosotros",
+  "Contacto",
+  "Gestionar consentimiento"
+ ],
+ "url": "https://coffeeloverspoint.com/cartamadrid/",
+ "host": "coffeeloverspoint.com",
+ "capturedAt": "2026-10-23T07:56:57.814Z"
+}
