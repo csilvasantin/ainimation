@@ -1,0 +1,101 @@
+{
+  "verifiedAt": "2026-10-23T02:54:36.798830+00:00",
+  "feature": "review-and-restore-history-copy",
+  "release": {
+    "functionalCommit": "8a89d65",
+    "stampCommit": "8f3490d",
+    "ainimationWorkerVersion": "627fcbbf-2765-4dca-bad5-1ffc97e62b78",
+    "mcpCommit": "291e51b",
+    "mcpWorkerVersion": "9a8f36c7-6c45-4083-9aea-ab33265e905d",
+    "historyModuleSha256": "6ca026d80164e460df0cf2ec6341ab306c0eb8e593724bd9ceaff42cded26d10"
+  },
+  "production": {
+    "reviewedBatches": 2,
+    "alreadyIdentical": 2,
+    "newBatches": 0,
+    "exactLinks": 10,
+    "emptyRestoreHiddenAndDisabled": true,
+    "cancelAndReloadDiscardReview": true,
+    "batchMetadataIdenticalAfterReviewAndReload": true,
+    "originalCsvByteIdentical": true,
+    "retainedProjects": [
+      "Mi cafetería",
+      "Mi cafetería · copia",
+      "Prueba Director · catálogo y cesta"
+    ],
+    "batches": [
+      {
+        "existing": "true",
+        "id": "0420fbf3-c6c4-4806-a116-a4a9b440c73e",
+        "links": [
+          "https://www.admira.store/xpacios/pantalla/?loc=xtanco-bcn&screen=JTIXtanco_PortaldelAngel_20_Mostrador_1&ainimation=0d3223fb28f44efe9bc4ab23f68ba4390da298ef36af4bda86fba54ea59cfff4&lang=es",
+          "https://www.admira.store/xpacios/pantalla/?loc=xtanco&screen=JTIXtanco_CalledeSantaRosa_4_Mostrador_1&ainimation=0e58c8dce1644c3488f84d1f4339bd4012abc9f2828c42c193fc8695d1d28d84&lang=es",
+          "https://www.admira.store/xpacios/pantalla/?loc=xtanco-valencia&screen=JTIXtanco_CarrerdeColon_22_Mostrador_1&ainimation=afd5917d36d94dc09894394e8a0612fc5f0acf6700e54ec49d328e71a93972e2&lang=es",
+          "https://www.admira.store/xpacios/pantalla/?loc=admira-loterias&screen=SinProyecto_GranVia_32_Mostrador_1&ainimation=d15a31e136d6477dbbd4046e6036fb5227afe72ae41542c3ace5d4a5d52af1cc&lang=es",
+          "https://www.admira.store/xpacios/pantalla/?loc=admira-prensa&screen=SinProyecto_PlazadeCibeles_Mostrador_1&ainimation=f146668cd2ae4557bb7baf53f91aaea4d047e0a91eea4b55b83ce03063353096&lang=es"
+        ],
+        "summary": "Prueba Director · catálogo y cesta · Versión 9 · Ya existe idéntico · 5 destinos"
+      },
+      {
+        "existing": "true",
+        "id": "73f155c6-0e9f-486f-9ebb-a6d9f18749ef",
+        "links": [
+          "https://www.admira.store/xpacios/pantalla/?loc=xtanco-bcn&screen=JTIXtanco_PortaldelAngel_20_Mostrador_1&ainimation=080641d830c64eecb3a1ebb972a2ae6d37736ea5c5884198b4e0bf9b918681a6&lang=es",
+          "https://www.admira.store/xpacios/pantalla/?loc=xtanco&screen=JTIXtanco_CalledeSantaRosa_4_Mostrador_1&ainimation=2dd215914a544e7b97d2814bf8a7fc9dd077ddf229ae447d95e26c6f66b0d26d&lang=es",
+          "https://www.admira.store/xpacios/pantalla/?loc=xtanco-valencia&screen=JTIXtanco_CarrerdeColon_22_Mostrador_1&ainimation=e4751f2a80a64eb882eba99e3f86544a562bd9ee7df64eed996138b500b50c9a&lang=es",
+          "https://www.admira.store/xpacios/pantalla/?loc=admira-loterias&screen=SinProyecto_GranVia_32_Mostrador_1&ainimation=4c5fedec4dab4ea2bbd98514a6632c13a31bd67aff984eeba2cb7014195124d0&lang=es",
+          "https://www.admira.store/xpacios/pantalla/?loc=admira-prensa&screen=SinProyecto_PlazadeCibeles_Mostrador_1&ainimation=2cf547bd4d174472b0fd7c78ccf0c29ceb9eb5db6e0340deb58ce0d66b11d1bb&lang=es"
+        ],
+        "summary": "Prueba Director · catálogo y cesta · Versión 8 · Ya existe idéntico · 5 destinos"
+      }
+    ],
+    "panelBounds": {
+      "bottom": 708,
+      "height": 696,
+      "left": 182.5,
+      "right": 1082.5,
+      "top": 12,
+      "width": 900,
+      "x": 182.5,
+      "y": 12
+    },
+    "panelMovedOrResized": false,
+    "googleRequired": false,
+    "newVersionQueriesDeliveriesOrAssignments": false,
+    "historyRestoreWritePerformed": false
+  },
+  "isolated": {
+    "previewNew": 1,
+    "previewIdentical": 1,
+    "writesBeforeConfirm": 1,
+    "writesAfterCancel": 1,
+    "writesAfterConfirm": 2,
+    "newBatchesRestored": 1,
+    "previousBatchPreserved": true,
+    "pendingTargetHasNoInventedLink": true,
+    "secondReviewIdentical": 2,
+    "secondReviewNew": 0,
+    "secondReviewWrites": 2,
+    "temporaryTabAndServerClosed": true
+  },
+  "checks": {
+    "interactiveTestsPassed": 169,
+    "bilingualMcpHelpTestsPassed": 1,
+    "formatSizeDatesIdsUrlsCapacityAndDuplicatesValidated": true,
+    "conflictsAndLocalHistoryChangesBlocked": true,
+    "corruptDeniedAndQuotaFailurePreserveData": true,
+    "privateFieldsNeverPersisted": true,
+    "previewAndCancelDoNotWrite": true,
+    "confirmationRequiredForNewBatches": true,
+    "immutableOneUsePlan": true,
+    "lateFileReadsDiscarded": true,
+    "projectsNeverWritten": true,
+    "bilingualPublicHelpVerified": true
+  },
+  "artifacts": {
+    "jsonAfterReviewSha256": "415368106ebcbbaca6cf29c1faf49f07de003ce4af99da8f68dbe0ac614efe2a",
+    "originalCsvSha256": "34bdae288ab5fe70b4ce6fb8907dd87a33ac190ef8952a658c4ad12523ea4ac9",
+    "screenshot": "history-restore-production.png",
+    "isolatedScreenshot": "history-restore-isolated.png"
+  }
+}
