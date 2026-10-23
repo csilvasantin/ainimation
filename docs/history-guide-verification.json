@@ -1,0 +1,70 @@
+{
+  "verifiedAt": "2026-10-23T03:19:48.444658+00:00",
+  "feature": "optional-bilingual-inline-history-guide",
+  "release": {
+    "functionalCommit": "f0c1623",
+    "stampCommit": "502261c",
+    "ainimationWorkerVersion": "1d3fc783-a7bd-4635-ae0c-3eb3a6db1c51",
+    "mcpCommit": "9884bab",
+    "mcpWorkerVersion": "2aa7f22a-74a4-405d-8318-a1c7b8d72746",
+    "historyModuleSha256": "b039906598eed5b16cbe7a180f0b7772325f87001cfeb175968461ac32b93551"
+  },
+  "production": {
+    "initiallyCollapsed": true,
+    "keyboardOpenAndClose": true,
+    "pointerOpen": true,
+    "fiveReadableSteps": 5,
+    "noHorizontalOverflow": true,
+    "filterPreserved": "versión 9",
+    "collapsedAfterReload": true,
+    "fullCopyBatchMetadataIdentical": true,
+    "originalCsvByteIdentical": true,
+    "retainedBatches": 2,
+    "retainedLinks": 10,
+    "retainedProjects": [
+      "Mi cafetería",
+      "Mi cafetería · copia",
+      "Prueba Director · catálogo y cesta"
+    ],
+    "panelBounds": {
+      "bottom": 708,
+      "height": 696,
+      "left": 182.5,
+      "right": 1082.5,
+      "top": 12,
+      "width": 900,
+      "x": 182.5,
+      "y": 12
+    },
+    "panelMovedOrResized": false,
+    "googleRequired": false,
+    "newVersionQueriesDeliveriesRestoresOrAssignments": false
+  },
+  "isolated": {
+    "language": "en",
+    "initiallyCollapsed": true,
+    "keyboardOpenAndClose": true,
+    "fiveReadableSteps": 5,
+    "noHorizontalOverflow": true,
+    "testWritesUnchanged": 1,
+    "versionQueries": 0,
+    "linksUnchanged": true,
+    "CarlosLanguagePreferenceChanged": false,
+    "temporaryTabAndServerClosed": true
+  },
+  "checks": {
+    "interactiveTestsPassed": 170,
+    "bilingualMcpHelpTestsPassed": 1,
+    "noOperationControlsOrUrlsAdded": true,
+    "noSideEffectsOnOpenAndClose": true,
+    "reopenResetsGuide": true,
+    "scopeAnd3dDistinctionExplained": true,
+    "bilingualPublicHelpVerified": true
+  },
+  "artifacts": {
+    "fullCopySha256": "b54fd76d2141d6d01ac98e1e6d883dbff91c55108eae5ab7693c607668ae86a5",
+    "originalCsvSha256": "34bdae288ab5fe70b4ce6fb8907dd87a33ac190ef8952a658c4ad12523ea4ac9",
+    "screenshot": "history-guide-production.png",
+    "isolatedScreenshot": "history-guide-english.png"
+  }
+}
