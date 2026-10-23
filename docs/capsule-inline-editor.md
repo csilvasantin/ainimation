@@ -10,6 +10,10 @@ EN: “Render” retains the existing revision and authorization checks. When bo
 
 ## Shared editor contract
 
+ES: Si el borrador cambia en otra pestaña del mismo origen, se pausa la escritura compartida y la generación hasta elegir **Continuar con la otra copia** o **Conservar mi copia**. La edición local y su historial se guardan aparte en la sesión de esa pestaña, sin clave; se recuperan al volver al vídeo o recargar esa misma pestaña. Esa copia de recuperación dura lo que dure la sesión de la pestaña. No se mezclan textos automáticamente. La comprobación antes de guardar también detecta cambios cuando el evento del navegador todavía no ha llegado.
+
+EN: When another tab changes the draft on the same origin, shared writes and rendering pause until you choose **Continue with the other copy** or **Keep my copy**. Local edits and history are backed up separately in that tab's session without passwords; returning to video or reloading that tab recovers them. Recovery lasts for that tab session. Copy is never merged automatically. A pre-save check also detects changes before the browser event arrives.
+
 ES: El borrador y su historial se guardan automáticamente después de cada cambio, Deshacer y Rehacer. Se recuperan tras recargar la página, siempre que siga siendo la misma revisión. El aviso de guardado pertenece al navegador actual y no publica la cápsula. Si el almacenamiento falla, se muestra un aviso y se mantiene la edición en memoria; «Guardar borrador» permite reintentarlo. La clave nunca forma parte del guardado.
 
 EN: Draft and history are saved automatically after every edit, Undo and Redo, and recovered after page reload for the same source revision. The saved notice applies to this browser and does not publish the capsule. If storage fails, a warning appears and edits remain in memory; Save draft retries. Passwords are never stored.
