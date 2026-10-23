@@ -1,0 +1,80 @@
+{
+  "verifiedAt": "2026-10-23T03:51:35.530508+00:00",
+  "feature": "singular-and-plural-visible-history-counts",
+  "release": {
+    "functionalCommit": "2ab15d5",
+    "stampCommit": "85cb592",
+    "ainimationWorkerVersion": "34f7624a-20ca-4a93-bd57-812cf50d3b10",
+    "historyModuleSha256": "97ae81162dd2cddcc609b8e2b1740b45a9600efab3807a3b8b6a9767f8d278b0",
+    "existingMcpWorkerUnchanged": "2aa7f22a-74a4-405d-8318-a1c7b8d72746"
+  },
+  "production": {
+    "fullScope": "Todo el historial, con cualquier filtro: 2 lotes · 10 destinos.",
+    "filter": "versión 9",
+    "filteredCount": "1 de 2 lotes.",
+    "downloadNotice": "Copia del historial completo preparada: 2 lotes · 10 destinos.",
+    "fullCopyBatchMetadataIdentical": true,
+    "originalCsvByteIdentical": true,
+    "retainedBatches": 2,
+    "retainedLinks": 10,
+    "retainedProjects": [
+      "Mi cafetería",
+      "Mi cafetería · copia",
+      "Prueba Director · catálogo y cesta"
+    ],
+    "guideRemainsCollapsed": true,
+    "panelBounds": {
+      "bottom": 708,
+      "height": 696,
+      "left": 182.5,
+      "right": 1082.5,
+      "top": 12,
+      "width": 900,
+      "x": 182.5,
+      "y": 12
+    },
+    "panelMovedOrResized": false,
+    "googleRequired": false,
+    "newVersionQueriesRestoresDeliveriesOrAssignments": false
+  },
+  "isolated": {
+    "es": {
+      "backupStatus": "Copia del historial completo preparada: 1 lote · 1 destino.",
+      "counter": "TEST · writes 1 · queries 0 · downloads 2",
+      "scope": "Todo el historial, con cualquier filtro: 1 lote · 1 destino.",
+      "status": "Informe CSV preparado: 1 pantalla.",
+      "summary": "PRUEBA AISLADA · Café · Versión 1 · 23/10/2026, 3:00:00 · 1/1 preparado · Completo",
+      "review": "1 lote · 1 destino · 0 nuevos · 1 ya existente idéntico. Copia del 2026-10-23T02:00:00.000Z Todos los lotes ya están guardados; no hay nada que restaurar."
+    },
+    "en": {
+      "backupStatus": "Complete history copy prepared: 1 batch · 1 target.",
+      "counter": "TEST · writes 1 · queries 0 · downloads 2",
+      "overflow": false,
+      "scope": "All history, with any filter: 1 batch · 1 target.",
+      "status": "CSV report prepared: 1 screen.",
+      "summary": "PRUEBA AISLADA · Café · Version 1 · 23/10/2026, 03:00:00 · 1/1 prepared · Complete",
+      "review": "1 batch · 1 target · 0 new · 1 already identical. Copy from 2026-10-23T02:00:00.000Z All batches are already saved; there is nothing to restore."
+    },
+    "zeroOneAndMultipleCasesCovered": true,
+    "progressAndIssueViewsCovered": true,
+    "sourcePureFormattersUnchanged": true,
+    "tenPreChangeExportAndClipboardHashesMatch": true,
+    "CarlosLanguagePreferenceChanged": false,
+    "temporaryTabAndServerClosed": true
+  },
+  "checks": {
+    "interactiveTestsPassed": 172,
+    "existingBilingualMcpHelpTestPassed": 1,
+    "onlyVisibleTextChanged": true,
+    "quantitiesAndCalculationsPreserved": true,
+    "csvJsonAndCopiedTextUnchanged": true,
+    "noControlsOrOperationsAdded": true,
+    "validationsAndSessionPreserved": true
+  },
+  "artifacts": {
+    "fullCopySha256": "edccf3e9c9bdd7814461d23272970288306185053120bfb6ff65aaae41107939",
+    "originalCsvSha256": "34bdae288ab5fe70b4ce6fb8907dd87a33ac190ef8952a658c4ad12523ea4ac9",
+    "screenshot": "history-counts-production.png",
+    "isolatedScreenshot": "history-counts-english.png"
+  }
+}
