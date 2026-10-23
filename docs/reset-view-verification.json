@@ -1,0 +1,74 @@
+{
+  "feature": "reset-comparison-view",
+  "verifiedAt": "2026-10-23T09:49:32.555107+00:00",
+  "production": "https://www.ainimation.studio/interactivos/",
+  "release": {
+    "assets": "b79303e",
+    "stamp": "d4c9d83022003dcdb5ae44770a8b8d788edc5169",
+    "worker": "89c77d88-b974-4375-b38e-01ba1d4b3983",
+    "storeHelp": "065165d1ba195ed6df5340a3dfaf7ee4a51a4728",
+    "storeWorkflow": 39934392681,
+    "storeDeployment": "https://85a34df0.admira-store.pages.dev",
+    "canonicalLocalDesignCss": true,
+    "mcp": "ae6d8ce",
+    "mcpWorker": "1ebb163e-ee82-4cbc-956d-05b3d5ac8473"
+  },
+  "realBatches": {
+    "revisions": [
+      8,
+      9
+    ],
+    "beforeCompareHidden": true,
+    "initialDisabled": true,
+    "prensaMatches": "1 de 5 pantallas.",
+    "changedMatches": "0 de 5 pantallas. No hay pantallas comunes con estado guardado distinto en esta pareja.",
+    "restoredMatches": "5 de 5 pantallas.",
+    "restoredOrder": "original",
+    "restoredQuery": "",
+    "restoredView": "all",
+    "restoredDisabled": true,
+    "samePairRowsStatesAndSummary": true,
+    "keyboardEnterVerified": true
+  },
+  "preserved": {
+    "batches": 2,
+    "confirmedLinks": 10,
+    "projectCount": 25,
+    "completeProjectNamesAndOrderUnchanged": true,
+    "comparisonCsvByteIdentical": true,
+    "originalDeliveryCsvByteIdentical": true,
+    "historyBackupBatchesIdentical": true,
+    "pureDataAndExportFunctionsByteIdentical": true,
+    "panelBoundsUnchanged": true,
+    "language": "es"
+  },
+  "tests": {
+    "interactive": 212,
+    "mcpHelp": 1,
+    "resetCombinations": [
+      "original/name",
+      "empty/nonmatching search",
+      "all/exclusive/different"
+    ],
+    "isolatedLanguages": [
+      "es",
+      "en"
+    ],
+    "narrowContainerPixels": 340,
+    "generalHistoryFiltersPreserved": true,
+    "noExtraStorageReadsOnReset": true,
+    "noNewQueriesOrWrites": true,
+    "isolatedCsvByteIdenticalAfterReset": true,
+    "invalidations": [
+      "pair",
+      "swap",
+      "general filter",
+      "close",
+      "refresh",
+      "new comparison",
+      "changed history"
+    ],
+    "temporaryTabAndServerClosed": true
+  },
+  "scope": "Manual presentation reset only. No new version checks, deliveries, assignments, 3D restorations or synchronization; physical playback is not certified."
+}
