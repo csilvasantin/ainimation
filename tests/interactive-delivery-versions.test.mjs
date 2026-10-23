@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {checkDeliveryBatchVersions,deliveryVersionCheckCsv,deliveryBatchCsv} from '../assets/interactive-delivery-history.mjs';
+import {checkDeliveryBatchVersions,deliveryVersionCheckCsv,deliveryBatchCsv,deliveryVersionCheckIncidents} from '../assets/interactive-delivery-history.mjs';
 
 const receipt=i=>i.toString(16).padStart(64,'0');
 const row=(i,status='success')=>({locationId:'venue-'+i,locationName:'Local '+i,screenId:'touch-'+i,screenName:'Táctil '+i,status,url:'https://www.admira.store/xpacios/pantalla/?loc=venue-'+i+'&screen=touch-'+i+'&ainimation='+receipt(i)});
@@ -94,4 +94,12 @@ test('cancelar detiene los callbacks y la cola aunque lleguen respuestas despué
  const controller=new AbortController(),pending=[],events=[];const running=checkDeliveryBatchVersions(batch(),{signal:controller.signal,onProgress:p=>{events.push(p.completed);if(p.completed===1)controller.abort();},request:(url,options)=>new Promise(resolve=>pending.push({resolve,signal:options.signal}))});
  assert.equal(pending.length,3);pending[0].resolve(response(metadata(1)));const report=await running;assert.equal(report.cancelled,true);assert.deepEqual(events,[0,1]);assert.equal(pending.length,3);assert.ok(pending.slice(1).every(p=>p.signal.aborted));for(const p of pending)p.resolve(response({},404));await new Promise(setImmediate);assert.deepEqual(events,[0,1]);
  const noEvents=[];await checkDeliveryBatchVersions(batch(),{signal:controller.signal,onProgress:p=>noEvents.push(p)});assert.deepEqual(noEvents,[]);
+});
+
+test('resumen bilingüe contiene sólo incidencias validadas de la consulta exacta, sin URLs inventadas ni texto remoto',async()=>{
+ const b=batch([row(1),{...row(2),locationName:'Café\nBarcelona',screenName:'Tótem\u202e táctil'},row(3),row(4,'pending')]);b.projectTitle='Catálogo\nDirector';const before=JSON.stringify(b),report=await checkDeliveryBatchVersions(b,{now:()=> '2026-10-23T01:02:03Z',request:async url=>{const i=parseInt(url.split('/').at(-1),16);return i===1?response(metadata(1)):response({private:'remote body'},i===2?404:503);}}),snapshot=JSON.stringify(report),csv=deliveryVersionCheckCsv(b,report);
+ for(const lang of ['es','en']){const summary=deliveryVersionCheckIncidents(b,report,lang);assert.equal(summary.count,3);assert.equal(summary.checkedAt,'2026-10-23T01:02:03.000Z');assert.match(summary.text,/Catálogo Director · (Versión|Version) 9/);assert.match(summary.text,/Café Barcelona · Tótem táctil/);assert.match(summary.text,/2026-10-23T01:02:03.000Z/);assert.equal(summary.text.match(/https:\/\//g).length,2);assert.ok(!summary.text.includes('loc=venue-1'));assert.ok(!summary.text.includes('loc=venue-4'));assert.ok(!summary.text.includes('remote body'));assert.ok(summary.text.includes(lang==='es'?'Ausencia confirmada (404/410)':'Confirmed absence (404/410)'));assert.ok(summary.text.includes(lang==='es'?'Sin poder comprobar · Respuesta HTTP 503':'Could not be checked · HTTP response 503'));assert.ok(summary.text.includes(lang==='es'?'Sin enlace confirmado · Sin comprobar: no hay enlace confirmado':'No confirmed link · Not checked: no confirmed link'));}
+ assert.equal(JSON.stringify(b),before);assert.equal(JSON.stringify(report),snapshot);assert.deepEqual(deliveryVersionCheckCsv(b,report),csv);
+ for(const alter of [r=>r.batchId='other',r=>r.cancelled=true,r=>r.results.pop(),r=>r.results[1].screenId='other',r=>r.results[1].receiptId=receipt(1),r=>r.results[2].reason='private raw error',r=>r.counts.unknown=0]){const r=structuredClone(report);alter(r);assert.throws(()=>deliveryVersionCheckIncidents(b,r));}
+ const success=await checkDeliveryBatchVersions(batch([row(1)]),{request:async()=>response(metadata(1))});assert.equal(deliveryVersionCheckIncidents(batch([row(1)]),success).count,0);assert.equal(deliveryVersionCheckIncidents(batch([row(1)]),success).text,'');
 });

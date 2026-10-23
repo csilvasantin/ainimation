@@ -47,7 +47,7 @@ function versionCheckReason(result,language='es'){
  if(result.reason==='http_error'&&failedHttpStatus(result.httpStatus))return(en?'HTTP response ':'Respuesta HTTP ')+result.httpStatus;
  return reasons[result.reason]||(en?'Request could not be verified':'No se pudo verificar la consulta');
 }
-export function deliveryVersionCheckCsv(input,report,language='es'){
+function versionCheckRows(input,report,language='es'){
  const b=cleanBatch(input),en=language==='en';
  if(!report||report.cancelled!==false||report.batchId!==b.id||report.projectId!==b.projectId||report.revision!==b.revision||!Array.isArray(report.results)||report.results.length!==b.results.length)throw Error('invalid_version_check');
  const checkedAt=date(report.checkedAt),counts={available:0,unavailable:0,unknown:0,no_link:0};
@@ -58,12 +58,22 @@ export function deliveryVersionCheckCsv(input,report,language='es'){
   counts[v.state]++;return[checkedAt,b.projectTitle,b.revision,r.locationName,r.locationId,r.screenName,r.screenId,states[v.state],versionCheckReason(v,language),r.url||''];
  });
  if(!report.counts||Object.keys(counts).some(key=>report.counts[key]!==counts[key]))throw Error('invalid_version_check');
+ return{b,checkedAt,rows};
+}
+export function deliveryVersionCheckCsv(input,report,language='es'){
+ const {b,checkedAt,rows}=versionCheckRows(input,report,language),en=language==='en';
  const headers=en?['Checked at (UTC)','Project','Version','Xpace','Xpace ID','Screen','Screen ID','Version check','Reason','Confirmed link']:['Comprobado (UTC)','Proyecto','Versión','Xpacio','ID Xpacio','Pantalla','ID pantalla','Comprobación de versión','Motivo','Enlace confirmado'];
  return{filename:'ainimation-'+(en?'version-check':'comprobacion')+'-'+checkedAt.replace(/[:.]/g,'-')+'-v'+b.revision+'-'+b.id+'.csv',type:'text/csv;charset=utf-8',content:'\ufeff'+[headers,...rows].map(row=>row.map(csvQuote).join(',')).join('\r\n')+'\r\n'};
 }
+const singleLine=value=>value.replace(/[\p{Cc}\p{Cf}]+/gu,' ').replace(/\s+/g,' ').trim();
+export function deliveryVersionCheckIncidents(input,report,language='es'){
+ const {b,checkedAt,rows}=versionCheckRows(input,report,language),en=language==='en',issues=rows.filter((_,i)=>report.results[i].state!=='available'),count=issues.length;
+ const text=count?[singleLine(b.projectTitle)+' · '+(en?'Version ':'Versión ')+b.revision,(en?'Checked at (UTC): ':'Comprobado (UTC): ')+checkedAt,count+' '+(en?(count===1?'issue':'issues'):(count===1?'incidencia':'incidencias')),...issues.map(r=>singleLine(r[3])+' · '+singleLine(r[5])+'\n'+r[7]+' · '+r[8]+(r[9]?'\n'+r[9]:'')),en?'Prepared version check; does not confirm physical playback or 3D scene status.':'Comprobación de versiones preparadas; no acredita reproducción física ni estado de escenas 3D.'].join('\n\n'):'';
+ return{text,count,checkedAt};
+}
 export function deliveryBatchLinks(input,language='es'){
  const b=cleanBatch(input),en=language==='en',confirmed=b.results.filter(r=>r.status==='success'),missing=b.results.length-confirmed.length;
- const line=value=>value.replace(/[\p{Cc}\p{Cf}]+/gu,' ').replace(/\s+/g,' ').trim();
+ const line=singleLine;
  const count=confirmed.length,summary=count+' '+(en?(count===1?'confirmed link':'confirmed links'):(count===1?'enlace confirmado':'enlaces confirmados'))+' · '+missing+' '+(en?(missing===1?'target without a link':'targets without a link'):(missing===1?'destino sin enlace':'destinos sin enlace'));
  const text=[line(b.projectTitle)+' · '+(en?'Version ':'Versión ')+b.revision,summary,...confirmed.map(r=>line(r.locationName)+' · '+line(r.screenName)+'\n'+r.url)].join('\n\n');
  return{text,count,missing,summary};
@@ -111,7 +121,7 @@ export function filterDeliveryHistory(batches,{query='',projectId='',outcome=''}
 export function mountDeliveryHistory({button,storage,doc=document,download,onReuse,writeClipboard,versionRequest=fetch,versionTimeoutMs=10000}){
  const t=(es,en)=>doc.documentElement.lang==='en'?en:es,make=(tag,value)=>{const n=doc.createElement(tag);if(value)n.textContent=value;return n;};
  const downloadFile=file=>{if(download)return download(file);const url=URL.createObjectURL(new Blob([file.content],{type:file.type})),a=doc.createElement('a');a.href=url;a.download=file.filename;try{a.click();}finally{setTimeout(()=>URL.revokeObjectURL(url),30000);}};
- let viewVersion=0;const checks=new Set(),cancelChecks=()=>{viewVersion++;for(const controller of checks)controller.abort();checks.clear();};
+ let viewVersion=0;const checks=new Set(),viewCleanups=new Set(),cancelChecks=()=>{viewVersion++;for(const controller of checks)controller.abort();checks.clear();for(const cleanup of viewCleanups)cleanup();viewCleanups.clear();};
  const dialog=make('dialog');dialog.className='delivery-history-dialog';dialog.setAttribute('aria-label',t('Historial de envíos','Delivery history'));
  const title=make('h2',t('Historial de envíos','Delivery history')),hint=make('p',t('Últimos 30 lotes guardados en este navegador. Los enlaces conservan su versión; abrirlos no asigna el interactivo automáticamente.','Last 30 batches saved in this browser. Links preserve their version; opening them does not automatically assign the interactive.')),status=make('p'),list=make('div'),close=make('button',t('Cerrar historial','Close history'));status.setAttribute('role','status');list.className='history-batches';close.type='button';close.onclick=()=>{cancelChecks();dialog.close();};dialog.addEventListener('cancel',event=>{event.preventDefault();cancelChecks();dialog.close();});dialog.addEventListener('close',cancelChecks);
  const filters=make('div'),searchLabel=make('label',t('Buscar lotes','Search batches')),query=make('input'),projectLabel=make('label',t('Proyecto del lote','Batch project')),project=make('select'),outcomeLabel=make('label',t('Resultado del lote','Batch result')),outcome=make('select'),clear=make('button',t('Quitar filtros','Clear filters'));
@@ -153,9 +163,21 @@ export function mountDeliveryHistory({button,storage,doc=document,download,onReu
    let completedReport,completedTurn,activeCheck;const checkExport=make('button',t('Descargar comprobación CSV','Download check CSV'));checkExport.type='button';checkExport.className='history-version-csv';checkExport.hidden=true;checkExport.disabled=true;
    const resultView=make('div'),incidents=make('button'),matches=make('p'),reportScope=make('p',t('El CSV de comprobación incluye todas las pantallas, también al ver sólo incidencias.','The check CSV includes all screens, including when viewing issues only.'));let issuesOnly=false;
    resultView.className='history-version-view';resultView.hidden=true;incidents.type='button';incidents.className='history-version-incidents';incidents.disabled=true;matches.className='history-version-matches';matches.setAttribute('role','status');reportScope.className='history-version-scope';reportScope.hidden=true;resultView.append(incidents,matches);
-   const resetResultView=()=>{issuesOnly=false;resultView.hidden=true;incidents.disabled=true;incidents.setAttribute('aria-pressed','false');matches.textContent='';reportScope.hidden=true;targetRows.forEach(row=>{row.hidden=false;});};
+   const copyIssues=make('button',t('Copiar resumen de incidencias','Copy issue summary')),issuesStatus=make('p'),issuesFallback=make('label',t('Resumen de incidencias para copiar','Issue summary to copy')),issuesText=make('textarea');let copyAttempt=0;
+   copyIssues.type='button';copyIssues.className='history-incidents-copy';copyIssues.hidden=true;copyIssues.disabled=true;issuesStatus.className='history-incidents-status';issuesStatus.setAttribute('role','status');issuesFallback.className='history-incidents-fallback';issuesFallback.hidden=true;issuesText.readOnly=true;issuesText.rows=8;issuesFallback.append(issuesText);resultView.append(copyIssues);
+   const resetIssueCopy=()=>{copyAttempt++;copyIssues.hidden=true;copyIssues.disabled=true;issuesStatus.textContent='';issuesFallback.hidden=true;issuesText.value='';};viewCleanups.add(resetIssueCopy);
+   const resetResultView=()=>{resetIssueCopy();issuesOnly=false;resultView.hidden=true;incidents.disabled=true;incidents.setAttribute('aria-pressed','false');matches.textContent='';reportScope.hidden=true;targetRows.forEach(row=>{row.hidden=false;});};
    const updateResultView=()=>{let count=0;targetRows.forEach((row,i)=>{row.hidden=issuesOnly&&completedReport.results[i].state==='available';if(!row.hidden)count++;});incidents.textContent=issuesOnly?t('Ver todas las pantallas','View all screens'):t('Ver sólo incidencias','View issues only');incidents.setAttribute('aria-pressed',String(issuesOnly));matches.textContent=count+' '+t('de','of')+' '+targetRows.length+' '+t('pantallas.','screens.')+(issuesOnly&&!count?' '+t('No hay incidencias en esta comprobación.','There are no issues in this check.'):'');};
    incidents.onclick=()=>{if(incidents.disabled||!completedReport||completedTurn!==viewVersion||activeCheck||!dialog.open)return;issuesOnly=!issuesOnly;updateResultView();};resetResultView();
+   copyIssues.onclick=async()=>{
+    if(copyIssues.disabled||!completedReport||completedTurn!==viewVersion||activeCheck||!dialog.open)return;
+    const report=completedReport,turn=completedTurn,attempt=++copyAttempt,current=()=>completedReport===report&&completedTurn===turn&&viewVersion===turn&&attempt===copyAttempt&&!activeCheck&&dialog.open;let summary;
+    try{summary=deliveryVersionCheckIncidents(b,report,doc.documentElement.lang);}catch{issuesStatus.textContent=t('No se pudo preparar el resumen. Vuelve a comprobar las versiones.','The summary could not be prepared. Check the versions again.');return;}
+    if(!summary.count)return;copyIssues.disabled=true;issuesFallback.hidden=true;issuesText.value='';issuesStatus.textContent=t('Copiando incidencias…','Copying issues…');
+    try{if(writeClipboard)await writeClipboard(summary.text);else{const clipboard=doc.defaultView?.navigator?.clipboard;if(!clipboard?.writeText)throw Error('clipboard_unavailable');await clipboard.writeText(summary.text);}if(!current())return;issuesStatus.textContent=summary.count+' '+t(summary.count===1?'incidencia copiada.':'incidencias copiadas.',summary.count===1?'issue copied.':'issues copied.');}
+    catch{if(!current())return;issuesText.value=summary.text;issuesFallback.hidden=false;issuesStatus.textContent=t('El navegador no ha permitido copiar. Selecciona el resumen de abajo: ','The browser did not allow copying. Select the summary below: ')+summary.count+' '+t(summary.count===1?'incidencia.':'incidencias.',summary.count===1?'issue.':'issues.');issuesText.focus();issuesText.select();}
+    finally{if(current())copyIssues.disabled=false;}
+   };
    const cancelCheck=make('button',t('Cancelar comprobación','Cancel check'));cancelCheck.type='button';cancelCheck.className='history-check-cancel';cancelCheck.hidden=true;cancelCheck.disabled=true;cancelCheck.setAttribute('aria-label',t('Cancelar comprobación de ','Cancel check for ')+b.projectTitle+' · '+t('versión ','version ')+b.revision+' · '+b.createdAt);
    cancelCheck.onclick=()=>{
     if(cancelCheck.disabled||!activeCheck||activeCheck.turn!==viewVersion||!dialog.open)return;const {controller}=activeCheck;activeCheck=undefined;controller.abort();checks.delete(controller);completedReport=undefined;checkExport.hidden=true;checkExport.disabled=true;delete checkStatus.dataset.checkedAt;
@@ -174,9 +196,10 @@ export function mountDeliveryHistory({button,storage,doc=document,download,onReu
      checkStatus.textContent=t('Comprobado ','Checked ')+new Date(report.checkedAt).toLocaleString(doc.documentElement.lang==='en'?'en-GB':'es-ES')+' · '+c.available+' '+t(c.available===1?'disponible':'disponibles','available')+' · '+c.unavailable+' '+t(c.unavailable===1?'no disponible':'no disponibles','unavailable')+' · '+c.unknown+' '+t('sin poder comprobar','could not be checked')+' · '+c.no_link+' '+t('sin enlace confirmado.','without a confirmed link.');
      completedReport=report;completedTurn=turn;checkExport.hidden=false;checkExport.disabled=false;checkExport.setAttribute('aria-label',t('Descargar comprobación CSV de ','Download check CSV for ')+b.projectTitle+' · '+t('versión ','version ')+b.revision+' · '+report.checkedAt);
      resultView.hidden=false;incidents.disabled=false;reportScope.hidden=false;updateResultView();
+     const issueCount=c.unavailable+c.unknown+c.no_link;copyIssues.hidden=!issueCount;copyIssues.disabled=!issueCount;copyIssues.setAttribute('aria-label',t('Copiar resumen de incidencias de ','Copy issue summary for ')+b.projectTitle+' · '+t('versión ','version ')+b.revision+' · '+report.checkedAt);
     }catch{if(activeCheck===run&&turn===viewVersion&&dialog.open){clearProgress();checkStatus.textContent=t('No se pudo completar la comprobación. Vuelve a intentarlo.','The check could not be completed. Try again.');versionRows.forEach((row,i)=>{if(b.results[i].status==='success'){row.dataset.versionState='unknown';row.textContent=versionLabel({state:'unknown'});}});}}
     finally{checks.delete(controller);if(activeCheck===run&&turn===viewVersion){activeCheck=undefined;check.disabled=!successful;cancelCheck.hidden=true;cancelCheck.disabled=true;}}
-   };actions.append(check,cancelCheck);details.append(actions,copyStatus,fallback,checkStatus,resultView,checkExport,reportScope,ul);list.append(details);
+   };actions.append(check,cancelCheck);details.append(actions,copyStatus,fallback,checkStatus,resultView,issuesStatus,issuesFallback,checkExport,reportScope,ul);list.append(details);
   }
  };
  query.oninput=render;project.onchange=render;outcome.onchange=render;clear.onclick=()=>{query.value='';project.value='';outcome.value='';render();};
