@@ -14,6 +14,15 @@ test('edit, save, restore, auth failure, conflict and render status in ES and EN
  await page.goto(url);await page.locator('textarea[name=giro]').waitFor();assert.equal(await page.locator('textarea[name=giro]').inputValue(),original.guion.giro);
  await page.locator('.capsule-live-stage:not([hidden])').waitFor();
  assert.equal(await page.locator('[data-undo]').isDisabled(),true);
+ await page.locator('textarea[name=idea]').fill('Guardado sin pulsar botón');
+ assert.match(await page.locator('[data-save-status]').innerText(),/guardados|saved/);
+ await page.reload();await page.locator('textarea[name=idea]').waitFor();assert.equal(await page.locator('textarea[name=idea]').inputValue(),'Guardado sin pulsar botón');
+ await page.locator('[data-undo]').click();assert.equal(await page.locator('textarea[name=idea]').inputValue(),original.guion.idea);await page.reload();await page.locator('textarea[name=idea]').waitFor();await page.locator('[data-redo]').click();assert.equal(await page.locator('textarea[name=idea]').inputValue(),'Guardado sin pulsar botón');
+ await page.evaluate(()=>{window.originalSetItem=Storage.prototype.setItem;Storage.prototype.setItem=function(){throw new DOMException('Quota exceeded','QuotaExceededError');};});
+ await page.locator('textarea[name=idea]').fill('Cambio retenido en memoria');assert.equal(await page.locator('[data-save-status]').getAttribute('role'),'alert');assert.equal(await page.locator('textarea[name=idea]').inputValue(),'Cambio retenido en memoria');
+ await page.evaluate(()=>Storage.prototype.setItem=window.originalSetItem);await page.locator('[data-save]').click();assert.equal(await page.locator('[data-save-status]').getAttribute('role'),'status');
+ await page.locator('input[name=secret]').fill('password-must-stay-in-memory');await page.locator('textarea[name=idea]').fill('Recuperado');assert.equal(await page.evaluate(()=>JSON.stringify(localStorage).includes('password-must-stay-in-memory')),false);await page.locator('input[name=secret]').fill('');await page.locator('[data-reset]').click();
+
  await page.locator('[data-phase]').selectOption('giro');await page.locator('[data-live-line]').fill('Primer cambio');await page.locator('textarea[name=subtitulo]').fill('Segundo cambio');
  await page.locator('textarea[name=subtitulo]').press('Meta+z');assert.equal(await page.locator('textarea[name=subtitulo]').inputValue(),original.guion.subtitulo);
  await page.locator('[data-live-line]').press('Control+z');assert.equal(await page.locator('[data-live-line]').innerText(),original.guion.giro);
