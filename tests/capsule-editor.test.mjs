@@ -1,0 +1,21 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {chromium} from 'playwright';import {createServer} from 'node:http';import {readFile} from 'node:fs/promises';
+import {capsuleRef} from '../assets/capsule-editor.mjs';
+test('capsule references accept only saved project identifiers',()=>{assert.equal(capsuleRef(new URLSearchParams('admiraCapsuleRef=javascript:bad')),null);assert.equal(capsuleRef(new URLSearchParams('admiraCapsuleRef=capsula-url:aa519cf8a50173ad')),'capsula-url:aa519cf8a50173ad');});
+test('edit, save, restore, auth failure, conflict and render status in ES and EN',async()=>{
+ const source=await readFile(new URL('../assets/capsule-editor.mjs',import.meta.url));
+ const server=createServer((req,res)=>{if(req.url==='/editor.mjs'){res.setHeader('Content-Type','text/javascript');res.end(source);}else res.end('<html lang="'+(req.url.includes('lang=en')?'en':'es')+'"><body><script type="module" src="/editor.mjs"></script></body></html>');});await new Promise(r=>server.listen(0,'127.0.0.1',r));
+ const browser=await chromium.launch({headless:true});try{for(const lang of ['es','en']){
+ const page=await browser.newPage({viewport:{width:1100,height:850}});const errors=[];page.on('pageerror',e=>errors.push(String(e)));let sent,status=401;
+ const original={ok:true,ref:'capsula-url:aa519cf8a50173ad',revision:'r1',capsuleVersion:8,guion:{objeto:'Depredador',subtitulo:'Una improvisación que se volvió icónica',gancho:'Recuerdas la película',giro:'No estaba en el guion',remate:'Fue una improvisación de Bill Duke',fuente:'Fuente: FILMAZIQ',idea:'Creatividad',tema:'creatividad',cifra:{hasta:null,unidad:''}},cartelas:{preroll:false,postroll:false}};
+ await page.route('https://api.admira.store/**',async route=>{if(route.request().method()==='POST'){sent=route.request().postDataJSON();assert.equal(route.request().headers()['x-notify-key'],'test-key');await route.fulfill({status,json:status===202?{ok:true,queued:true}:{error:status===401?'unauthorized':'revision-conflict'}});}else await route.fulfill({json:route.request().url().includes('/estado')?{status:'publicada',existing:{horizontal:{id:'new-h'},vertical:{id:'new-v'}}}:original});});
+ const url=`http://127.0.0.1:${server.address().port}/?lang=${lang}&admiraCapsuleRef=capsula-url:aa519cf8a50173ad&admiraStockId=old`;
+ await page.goto(url);await page.locator('textarea[name=giro]').waitFor();assert.equal(await page.locator('textarea[name=giro]').inputValue(),original.guion.giro);
+ await page.locator('textarea[name=giro]').fill('<Texto nuevo> & Carlos');await page.locator('[data-save]').click();await page.reload();await page.locator('textarea[name=giro]').waitFor();assert.equal(await page.locator('textarea[name=giro]').inputValue(),'<Texto nuevo> & Carlos');
+ await page.locator('[data-reset]').click();assert.equal(await page.locator('textarea[name=giro]').inputValue(),original.guion.giro);
+ await page.locator('textarea[name=giro]').fill('Cambio verificado');await page.locator('input[name=secret]').fill('test-key');await page.locator('button[type=submit]').click();await page.waitForFunction(()=>/incorrect/i.test(document.querySelector('[data-status]').textContent));assert.equal(sent.guion.giro,'Cambio verificado');assert.equal(sent.secret,undefined);
+ status=409;await page.locator('button[type=submit]').click();await page.waitForFunction(()=>/sesión|session/.test(document.querySelector('[data-status]').textContent));
+ status=202;await page.locator('button[type=submit]').click();await page.waitForFunction(()=>/publicada|published/.test(document.querySelector('[data-status]').textContent));assert.equal(await page.locator('input[name=secret]').inputValue(),'');assert.match(await page.locator('[data-stock]').getAttribute('href'),/new-h/);assert.equal(await page.locator('button[type=submit]').isDisabled(),true);
+ assert.equal(await page.evaluate(()=>document.querySelector('dialog').scrollWidth<=document.querySelector('dialog').clientWidth),true);
+ await page.screenshot({path:`/tmp/trinity-capsule-editor-${lang}.png`});assert.deepEqual(errors,[]);await page.close();
+ }}finally{await browser.close();await new Promise(r=>server.close(r));}
+});
