@@ -1,0 +1,95 @@
+{
+  "verifiedAt": "2026-10-23T02:04:57.267884+00:00",
+  "feature": "download-complete-delivery-history",
+  "release": {
+    "functionalCommit": "a275851",
+    "stampCommit": "819ca68",
+    "ainimationWorkerVersion": "8bc3aa12-e8bd-4e1d-b55c-6bbff36cd626",
+    "mcpCommit": "846807d",
+    "mcpWorkerVersion": "85b5452d-4583-4a95-a43a-ef3517adfc18",
+    "historyModuleSha256": "2a28d4a94ae33442004d23f48e333fc4278f25532d6178827670b9ae9f85c5ed"
+  },
+  "production": {
+    "filter": "versión 9",
+    "visibleBatches": 1,
+    "exportedBatches": 2,
+    "exportedTargets": 10,
+    "format": "ainimation-delivery-history",
+    "version": 1,
+    "exportedAt": "2026-10-23T02:03:45.030Z",
+    "reexportedAt": "2026-10-23T02:04:06.032Z",
+    "exactOriginalDatesAndLinks": true,
+    "identicalBatchMetadataAcrossReload": true,
+    "utf8Spanish": true,
+    "metadataOnlyAllowedKeys": true,
+    "noCredentialsPrivateIdentityOrProjectContents": true,
+    "noTemporaryVersionChecks": true,
+    "originalCsvByteIdentical": true,
+    "retainedBatches": 2,
+    "retainedLinks": 10,
+    "retainedProjects": [
+      "Mi cafetería",
+      "Mi cafetería · copia",
+      "Prueba Director · catálogo y cesta"
+    ],
+    "batches": [
+      {
+        "createdAt": "2026-10-22T20:36:48.005Z",
+        "id": "0420fbf3-c6c4-4806-a116-a4a9b440c73e",
+        "links": [
+          "https://www.admira.store/xpacios/pantalla/?loc=xtanco-bcn&screen=JTIXtanco_PortaldelAngel_20_Mostrador_1&ainimation=0d3223fb28f44efe9bc4ab23f68ba4390da298ef36af4bda86fba54ea59cfff4&lang=es",
+          "https://www.admira.store/xpacios/pantalla/?loc=xtanco&screen=JTIXtanco_CalledeSantaRosa_4_Mostrador_1&ainimation=0e58c8dce1644c3488f84d1f4339bd4012abc9f2828c42c193fc8695d1d28d84&lang=es",
+          "https://www.admira.store/xpacios/pantalla/?loc=xtanco-valencia&screen=JTIXtanco_CarrerdeColon_22_Mostrador_1&ainimation=afd5917d36d94dc09894394e8a0612fc5f0acf6700e54ec49d328e71a93972e2&lang=es",
+          "https://www.admira.store/xpacios/pantalla/?loc=admira-loterias&screen=SinProyecto_GranVia_32_Mostrador_1&ainimation=d15a31e136d6477dbbd4046e6036fb5227afe72ae41542c3ace5d4a5d52af1cc&lang=es",
+          "https://www.admira.store/xpacios/pantalla/?loc=admira-prensa&screen=SinProyecto_PlazadeCibeles_Mostrador_1&ainimation=f146668cd2ae4557bb7baf53f91aaea4d047e0a91eea4b55b83ce03063353096&lang=es"
+        ],
+        "revision": 9
+      },
+      {
+        "createdAt": "2026-10-22T19:35:49.422Z",
+        "id": "73f155c6-0e9f-486f-9ebb-a6d9f18749ef",
+        "links": [
+          "https://www.admira.store/xpacios/pantalla/?loc=xtanco-bcn&screen=JTIXtanco_PortaldelAngel_20_Mostrador_1&ainimation=080641d830c64eecb3a1ebb972a2ae6d37736ea5c5884198b4e0bf9b918681a6&lang=es",
+          "https://www.admira.store/xpacios/pantalla/?loc=xtanco&screen=JTIXtanco_CalledeSantaRosa_4_Mostrador_1&ainimation=2dd215914a544e7b97d2814bf8a7fc9dd077ddf229ae447d95e26c6f66b0d26d&lang=es",
+          "https://www.admira.store/xpacios/pantalla/?loc=xtanco-valencia&screen=JTIXtanco_CarrerdeColon_22_Mostrador_1&ainimation=e4751f2a80a64eb882eba99e3f86544a562bd9ee7df64eed996138b500b50c9a&lang=es",
+          "https://www.admira.store/xpacios/pantalla/?loc=admira-loterias&screen=SinProyecto_GranVia_32_Mostrador_1&ainimation=4c5fedec4dab4ea2bbd98514a6632c13a31bd67aff984eeba2cb7014195124d0&lang=es",
+          "https://www.admira.store/xpacios/pantalla/?loc=admira-prensa&screen=SinProyecto_PlazadeCibeles_Mostrador_1&ainimation=2cf547bd4d174472b0fd7c78ccf0c29ceb9eb5db6e0340deb58ce0d66b11d1bb&lang=es"
+        ],
+        "revision": 8
+      }
+    ],
+    "panelBounds": {
+      "bottom": 708,
+      "height": 696,
+      "left": 182.5,
+      "right": 1082.5,
+      "top": 12,
+      "width": 900,
+      "x": 182.5,
+      "y": 12
+    },
+    "panelMovedOrResized": false,
+    "googleRequired": false,
+    "newVersionQueriesDeliveriesOrAssignments": false
+  },
+  "checks": {
+    "interactiveTestsPassed": 161,
+    "bilingualMcpHelpTestsPassed": 1,
+    "mixedStatesKeepMissingLinksAbsent": true,
+    "unknownFieldsDiscarded": true,
+    "emptyCorruptDeniedDuplicateAndForeignUrlStorageFailClosed": true,
+    "clickTimeReadValidated": true,
+    "filterDoesNotLimitCopy": true,
+    "syncAndAsyncDownloadFailuresHandled": true,
+    "lateDownloadCallbacksAfterReopenDiscarded": true,
+    "storageAndProjectsNeverWritten": true,
+    "bilingualPublicHelpVerified": true,
+    "temporaryTabsOrServersCreated": false
+  },
+  "artifacts": {
+    "firstJsonSha256": "36fb2c074c08214ae3d76ff49147fd261a6d6844f558d3a7d561d8e4675c9f28",
+    "secondJsonSha256": "8f91962d8970ea09b33b9403d7633381de46dac306891142c719337cb89058a7",
+    "originalCsvSha256": "34bdae288ab5fe70b4ce6fb8907dd87a33ac190ef8952a658c4ad12523ea4ac9",
+    "screenshot": "history-backup-production.png"
+  }
+}
