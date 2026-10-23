@@ -1,0 +1,72 @@
+{
+  "verifiedAt": "2026-10-23T05:51:28.433782+00:00",
+  "feature": "search-within-batch-comparison",
+  "release": {
+    "functionalCommit": "56d3300",
+    "stampCommit": "0d39c4ff852740d554d5638e15fb3f6718282545",
+    "existingPublishedBaseRetained": "6f57e2b",
+    "ainimationWorkerVersion": "ce7294db-eebd-4c2c-8920-c58eb349c59e",
+    "mcpWorkerVersion": "b505653d-e0cb-4cbe-82e8-68f460de5b77",
+    "historyModuleSha256": "7c0824872d4327fc5fc3e1f33c6356d1e82e652441c298ec235e277d01c636fd",
+    "existingDatabaseSchemaCompatibilityReadOnlyVerified": true
+  },
+  "production": {
+    "query": "Prensa",
+    "shownIdentities": 1,
+    "totalIdentities": 5,
+    "bothSidesExact": true,
+    "noMatchesMessage": "0 de 5 pantallas. No hay pantallas que coincidan con la búsqueda.",
+    "noExclusivesMessage": "0 de 5 pantallas. No hay pantallas exclusivas en esta pareja.",
+    "clearPreservesPairGeneralFiltersAndExclusiveView": true,
+    "returnAllMessage": "5 de 5 pantallas.",
+    "searchHiddenBeforeComparisonAndAfterInvalidation": true,
+    "maxQueryLength": 300,
+    "comparisonCsvCompleteAndByteIdentical": true,
+    "comparisonCsvRows": 5,
+    "comparisonCsvColumns": 21,
+    "comparisonCsvLinks": 10,
+    "fullCopyBatchMetadataIdentical": true,
+    "originalCsvByteIdentical": true,
+    "retainedBatches": 2,
+    "retainedLinks": 10,
+    "projectBaselineCount": 24,
+    "retainedProjects": 24,
+    "originalThreeReferenceProjectsRetained": true,
+    "projectCountContext": "The library already contained 24 projects before this test; all were preserved.",
+    "languagePreferenceChanged": false,
+    "googleOrVersionQueriesDeliveriesAssignmentsRestores": false,
+    "panelBounds": {
+      "bottom": 708,
+      "height": 696,
+      "left": 182.5,
+      "right": 1082.5,
+      "top": 12,
+      "width": 900,
+      "x": 182.5,
+      "y": 12
+    },
+    "panelMovedOrResized": false
+  },
+  "isolated": {
+    "caseAndAccentInsensitiveBothSidesAndIds": true,
+    "distinctEmptyMessagesAndCombinationWithExclusives": true,
+    "clearSearchPreservesPairAndView": true,
+    "csvBeforeAndAfterSearchByteIdentical": true,
+    "esAndEn": true,
+    "boundedQuerySafeTextAndResetsVerified": true,
+    "zeroAddedQueriesWritesCopiesDeliveries": true,
+    "temporaryTabAndServerClosed": true
+  },
+  "checks": {
+    "interactiveTestsPassed": 195,
+    "bilingualMcpHelpTestPassed": 1,
+    "pureExportFunctionsByteIdentical": true,
+    "previousTenExportAndClipboardHashesMatch": true
+  },
+  "artifacts": {
+    "screenshot": "comparison-search-production.png",
+    "ui": "comparison-search-production-ui.json",
+    "comparisonCsvSha256": "a1ec788484362ee9ad87e7ff5dd5d059494a3ce3778031b60acd8a236bc7b586",
+    "originalCsvSha256": "34bdae288ab5fe70b4ce6fb8907dd87a33ac190ef8952a658c4ad12523ea4ac9"
+  }
+}
