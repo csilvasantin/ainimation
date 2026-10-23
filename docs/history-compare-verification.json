@@ -1,0 +1,64 @@
+{
+  "verifiedAt": "2026-10-23T04:21:58.378819+00:00",
+  "feature": "compare-saved-batch-screen-destinations",
+  "release": {
+    "functionalCommit": "c4ff2bd",
+    "stampCommit": "dc07ad7d3fdbaa9216ed0e22966ee7d983cfbc5f",
+    "ainimationWorkerVersion": "7e70b965-25dc-4d84-b144-3008b077d3fb",
+    "mcpWorkerVersion": "94836e97-4f9e-456c-a839-9e436fb6475a",
+    "historyModuleSha256": "c5e4ede9ddb6c22e919b23eb08e30d65ab352bd2e5b84aaf646e1f84c2239328"
+  },
+  "production": {
+    "firstBatchId": "73f155c6-0e9f-486f-9ebb-a6d9f18749ef",
+    "firstRevision": 8,
+    "secondBatchId": "0420fbf3-c6c4-4806-a116-a4a9b440c73e",
+    "secondRevision": 9,
+    "sharedTargets": 5,
+    "onlyFirst": 0,
+    "onlySecond": 0,
+    "identitiesAndOriginalStatesExact": true,
+    "manualKeyboardComparisonVerified": true,
+    "filterClearsResultAndPair": true,
+    "reloadClearsComparison": true,
+    "fullCopyBatchMetadataIdentical": true,
+    "originalCsvByteIdentical": true,
+    "retainedBatches": 2,
+    "retainedLinks": 10,
+    "retainedProjects": 3,
+    "languagePreferenceChanged": false,
+    "panelBounds": {
+      "bottom": 708,
+      "height": 696,
+      "left": 182.5,
+      "right": 1082.5,
+      "top": 12,
+      "width": 900,
+      "x": 182.5,
+      "y": 12
+    },
+    "panelMovedOrResized": false,
+    "googleRequired": false,
+    "newVersionQueriesRestoresDeliveriesOrAssignments": false
+  },
+  "isolated": {
+    "esAndEnVerified": true,
+    "renamedIdentityRemainsShared": true,
+    "sameNamesDifferentIdsRemainExclusive": true,
+    "mixedStatesAndDifferentProjectsVerified": true,
+    "zeroOneBatchInvalidPairUnreadableChangedHistoryBlocked": true,
+    "pairFiltersCloseRefreshInvalidateResult": true,
+    "textRenderedSafely": true,
+    "newQueriesWritesDownloadsCopiesOrDeliveries": false,
+    "temporaryTabAndServerClosed": true
+  },
+  "checks": {
+    "interactiveTestsPassed": 178,
+    "bilingualMcpHelpTestPassed": 1,
+    "tenPreviousExportAndClipboardHashesMatch": true
+  },
+  "artifacts": {
+    "screenshot": "history-compare-production.png",
+    "ui": "history-compare-production-ui.json",
+    "originalCsvSha256": "34bdae288ab5fe70b4ce6fb8907dd87a33ac190ef8952a658c4ad12523ea4ac9"
+  }
+}
