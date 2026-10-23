@@ -70,6 +70,9 @@ $('removeImage').onclick=()=>{if(current().hotspots?.length){announce('Quita pri
 // Endpoint is a reviewed deployment setting, never a URL supplied by a query parameter.
 const cloudEndpoint=document.querySelector('meta[name="interactive-cloud-endpoint"]')?.content;
 let cloudToken;
+const provenanceModule=new URL('./interactive-provenance.mjs',import.meta.url);provenanceModule.search=new URL(import.meta.url).search;
+const {mountDeviceNaming}=await import(provenanceModule.href);
+mountDeviceNaming({status:$('cloudStatus'),storage});
 const conflictComparison=mountConflictComparison({status:$('cloudStatus'),storage,endpoint:cloudEndpoint,onOpen:id=>{
  if(dirty||preparingImages||stagedImages.length)throw Error('Guarda o completa los cambios pendientes antes de abrir otra versión.');
  if(!activate(openProject(storage,id)))throw Error('No se ha podido abrir la versión. Tus proyectos se conservan.');
