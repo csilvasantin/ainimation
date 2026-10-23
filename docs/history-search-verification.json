@@ -1,0 +1,107 @@
+{
+  "feature": "general-history-search-controls-own-batch-list",
+  "verifiedAt": "2026-10-23T19:03:11.969824+00:00",
+  "production": "https://www.ainimation.studio/interactivos/",
+  "release": {
+    "assets": "d54e1e8",
+    "stamp": "08a96bd2593ab938c8a65679c7ef85d61878f304",
+    "worker": "3545552f-43b7-4afd-8f23-80ce86cccc41",
+    "storeHelp": "0174892be6d51e9fbbed40d980c000c9861cfa14",
+    "storeWorkflow": 40007334864,
+    "storeDeployment": "https://cc7768bd.admira-store.pages.dev",
+    "canonicalLocalDesignCss": true,
+    "mcp": "2529df310c30f6524dbd1b5cb44a3f52571c208a",
+    "mcpWorker": "0f7acaeb-f60b-4c39-a9b0-cb1038e88e12"
+  },
+  "semantics": {
+    "generalSearchControlsExactlyItsExistingBatchList": true,
+    "uniqueGenericIdPerInstance": true,
+    "noPrivateDataInId": true,
+    "distinctFromComparisonSearchTarget": true,
+    "stableAcrossSearchFiltersAndReopen": true,
+    "existingLabelPlaceholderSearchTypeAndMaximum300Unchanged": true,
+    "noAriaLabelRolesTabindexAnnouncementsOrNewAreas": true,
+    "domAccessibilityTreeAndNativeKeyboardInspected": true,
+    "specificScreenReaderNotTested": true
+  },
+  "realBatches": {
+    "revisions": [
+      8,
+      9
+    ],
+    "bareNineShows": 2,
+    "bareNineReason": "Existing substring search includes project IDs; both batches have the same project ID containing 9. Search logic was preserved.",
+    "explicitVersionQuery": "v9",
+    "explicitVersionShows": 1,
+    "clearFiltersRestores": 2,
+    "nativeTabOrder": [
+      "history-project",
+      "history-outcome",
+      "history-clear"
+    ],
+    "nativeEnterClearVerified": true,
+    "generalFilterInvalidatesPreviousComparisonAsBefore": true,
+    "localPrensaVisible": 1,
+    "localPrensaFullCommon": 5,
+    "differentStateViewVisible": 0,
+    "fullCommonOnlyFirstOnlySecond": [
+      5,
+      0,
+      0
+    ],
+    "fullSavedStateDifferences": [
+      0,
+      5
+    ],
+    "summaryCharacters": 709,
+    "txtComparisonCsvAndOriginalCsvByteIdentical": true,
+    "historyBackupBatchesIdentical": true,
+    "noRealClipboardAccessOrVersionQueries": true
+  },
+  "preserved": {
+    "batches": 2,
+    "confirmedLinks": 10,
+    "projectCount": 25,
+    "completeInitialLibraryNamesAndOrderUnchanged": true,
+    "pureValidatorsSearchAndExportGeneratorsByteIdentical": true,
+    "generalHistoryDatesStatesAndIdsUnchanged": true,
+    "panelBoundsUnchanged": true,
+    "dialogBounds": {
+      "bottom": 708,
+      "height": 696,
+      "left": 182.5,
+      "right": 1082.5,
+      "top": 12,
+      "width": 900,
+      "x": 182.5,
+      "y": 12
+    },
+    "language": "es",
+    "allOtherComparisonAccessibilityLinksAndBehaviorUnchanged": true
+  },
+  "tests": {
+    "existingInteractive": 230,
+    "targetedMcpHelp": 1,
+    "broaderMcpKnownPreExistingFailures": 15,
+    "broaderUnrelatedHelpSuiteNotRepeated": true,
+    "publicBilingualHelpSurfaces": 6,
+    "liveMcpBilingualHelp": true,
+    "isolatedLanguages": [
+      "es",
+      "en"
+    ],
+    "twoHistoriesIndependentOwnListsAndComparisonTargets": true,
+    "queryProjectOutcomeAndClearKeyboardOrderUnchanged": true,
+    "filterClearHasNoNewReadsWritesQueriesCopiesOrDownloads": true,
+    "emptySearchRetainsOwnEmptyList": true,
+    "initialNoBatchesBothLanguagesRetainsOwnListAndHiddenFilters": true,
+    "reopenClearsSelectionWithoutChangingOwnListId": true,
+    "temporaryTabAndServerClosed": true
+  },
+  "scope": "Only aria-controls on the existing general history search input plus a generic unique ID on its existing batch-list container. No search/filter/action/data or visual changes, new controls, reads, writes, queries, clipboard operations, automatic downloads, deliveries, assignments, restores or synchronization. Existing bare-number substring behavior retained; explicit v9 selects one real batch.",
+  "sha256": {
+    "txt": "7b165b8ebee2f39f30a2ca2eaf2796834526495b39c08e085f15cbe15fb4fdf1",
+    "comparisonCsv": "a1ec788484362ee9ad87e7ff5dd5d059494a3ce3778031b60acd8a236bc7b586",
+    "originalCsv": "34bdae288ab5fe70b4ce6fb8907dd87a33ac190ef8952a658c4ad12523ea4ac9"
+  }
+}
