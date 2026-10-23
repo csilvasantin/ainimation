@@ -38,7 +38,8 @@
     },
     "panelMovedOrResized": false,
     "googleRequired": false,
-    "newVersionQueriesDeliveriesRestoresOrAssignments": false
+    "newVersionQueriesDeliveriesRestoresOrAssignments": false,
+    "pointerClose": true
   },
   "isolated": {
     "language": "en",
