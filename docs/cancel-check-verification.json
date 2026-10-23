@@ -1,0 +1,145 @@
+{
+  "feature": "Cancelar comprobación / Cancel check",
+  "verifiedAt": "2026-10-23T00:05:36.193027+00:00",
+  "creator": "https://www.ainimation.studio/interactivos/?project=8c63c927-e53c-419a-a5cf-091e0fcce3a5",
+  "batchId": "0420fbf3-c6c4-4806-a116-a4a9b440c73e",
+  "revision": 9,
+  "checkedAt": "2026-10-23T00:03:45.572Z",
+  "counts": {
+    "available": 5,
+    "unavailable": 0,
+    "unknown": 0,
+    "noConfirmedLink": 0
+  },
+  "scope": "Availability and exact metadata of prepared immutable versions only; not physical playback or 3D-scene operating state.",
+  "release": {
+    "ainimationCommit": "101e83419bc962d2732e62826fb4af83b3852c15",
+    "functionalCommit": "b4ae41f",
+    "assetToken": "b4ae41f",
+    "historyModuleSha256": "5d9f5bf0e35f777a5114d14cfbffdf2488cc1c67c4abc2af850ff0409a72b3f9",
+    "libraryWorkerVersion": "ede73af8-a998-4c55-aa8d-008c2dcd3008",
+    "mcpCommit": "876c7fd",
+    "mcpWorkerVersion": "a52e1b72-1fd4-4a3b-a2d0-cbc6dee9a889"
+  },
+  "production": {
+    "screens": [
+      {
+        "link": "https://www.admira.store/xpacios/pantalla/?loc=xtanco-bcn&screen=JTIXtanco_PortaldelAngel_20_Mostrador_1&ainimation=0d3223fb28f44efe9bc4ab23f68ba4390da298ef36af4bda86fba54ea59cfff4&lang=es",
+        "name": "Xtanco Barcelona · Mostrador panel",
+        "state": "success",
+        "versionState": "available"
+      },
+      {
+        "link": "https://www.admira.store/xpacios/pantalla/?loc=xtanco&screen=JTIXtanco_CalledeSantaRosa_4_Mostrador_1&ainimation=0e58c8dce1644c3488f84d1f4339bd4012abc9f2828c42c193fc8695d1d28d84&lang=es",
+        "name": "Xtanco · Mostrador panel",
+        "state": "success",
+        "versionState": "available"
+      },
+      {
+        "link": "https://www.admira.store/xpacios/pantalla/?loc=xtanco-valencia&screen=JTIXtanco_CarrerdeColon_22_Mostrador_1&ainimation=afd5917d36d94dc09894394e8a0612fc5f0acf6700e54ec49d328e71a93972e2&lang=es",
+        "name": "Xtanco Valencia · Mostrador panel",
+        "state": "success",
+        "versionState": "available"
+      },
+      {
+        "link": "https://www.admira.store/xpacios/pantalla/?loc=admira-loterias&screen=SinProyecto_GranVia_32_Mostrador_1&ainimation=d15a31e136d6477dbbd4046e6036fb5227afe72ae41542c3ace5d4a5d52af1cc&lang=es",
+        "name": "Admira Loterías · Boletos kiosk",
+        "state": "success",
+        "versionState": "available"
+      },
+      {
+        "link": "https://www.admira.store/xpacios/pantalla/?loc=admira-prensa&screen=SinProyecto_PlazadeCibeles_Mostrador_1&ainimation=f146668cd2ae4557bb7baf53f91aaea4d047e0a91eea4b55b83ce03063353096&lang=es",
+        "name": "Admira Prensa · Mostrador revista",
+        "state": "success",
+        "versionState": "available"
+      }
+    ],
+    "csvRows": 5,
+    "csvColumns": 10,
+    "csvTimestampProjectRevisionDestinationsStatesReasonsAndLinksExact": true,
+    "availableReportUnchangedExceptCheckTime": true,
+    "originalDeliveryCsvByteIdentical": true,
+    "reportSha256": "60239a155f12ecb21cd12436147d154bab827b8726e1c17e07b54d5dc2a5cf8c",
+    "cancelHiddenBeforeAndAfterCheck": true,
+    "historyBatchCount": 2,
+    "historyExactLinkCount": 10,
+    "projectCount": 3,
+    "noGoogleSignIn": true,
+    "newDeliveries": 0,
+    "assignments": 0,
+    "inventoryChanges": 0,
+    "panelMoved": false,
+    "panelResized": false,
+    "dialogBoundsUnchanged": true
+  },
+  "isolatedInternalBrowser": {
+    "simulatedResponsesOnly": true,
+    "assertions": {
+      "hiddenBefore": true,
+      "visibleWhileWaiting": true,
+      "onlyThreeStarted": true,
+      "cancelledWithoutClosing": true,
+      "filtersUnchanged": true,
+      "preparedStatesUnchanged": true,
+      "partialResultsDiscarded": true,
+      "cancelledReportUnavailable": true,
+      "focusReturnedToCheck": true,
+      "newRunUnaffectedByLateResults": true,
+      "cancelOnlyPending": true,
+      "newReportAvailable": true,
+      "queueStopped": true,
+      "samePanelBounds": true
+    },
+    "pendingRequestCount": 3,
+    "abortedRequestCount": 3,
+    "lateResponseCount": 3,
+    "requestsAfterCancelAndOneNewCheck": 8,
+    "cancelledMessage": "Comprobación cancelada. Puedes comprobar otra vez.",
+    "newRunCounts": "5 available, 0 unavailable, 0 unknown, 0 without a confirmed link",
+    "temporaryTabClosed": true,
+    "temporaryLocalServerStopped": true,
+    "cancelFullLabelVisibleInWrappingActions": true,
+    "noProductionErrorsInduced": true
+  },
+  "cancellationContract": {
+    "controlOnlyWhilePending": true,
+    "scope": "Chosen batch only",
+    "activeAndQueuedRequestsStopped": true,
+    "partialAndLateResultsDiscarded": true,
+    "previousReportNotRestored": true,
+    "cancelledReportUnavailable": true,
+    "newRunHasSeparateIdentity": true,
+    "otherBatchesUnaffected": true,
+    "filtersAndDialogRemainOpen": true,
+    "keyboardFocusReturnsToCheck": true,
+    "noHistoryOrPreparedStateWrites": true,
+    "noAutomaticRetry": true,
+    "fixedPublicGetWithCredentialsOmitted": true,
+    "concurrencyPerCheck": 3,
+    "requestAndBodyDeadlineMs": 10000
+  },
+  "tests": {
+    "interactive": 144,
+    "mcpHelp": 1,
+    "bilingualPublicMcpHelp": true,
+    "isolatedCases": [
+      "three active requests and remaining queue",
+      "partial completed response discarded",
+      "cancel followed immediately by another check",
+      "old results and finalizers cannot alter new run",
+      "cancelled and previous reports unavailable",
+      "another batch continues independently",
+      "filter/close still abort pending checks",
+      "existing reason, URL, CSV, clipboard and validation checks"
+    ]
+  },
+  "localEvidence": [
+    "cancel-check-production-ui.json",
+    "cancel-check-production.png",
+    "cancel-check-cinco-tactiles.csv",
+    "cancel-check-isolated-ui.json",
+    "cancel-check-waiting-isolated.png",
+    "cancel-check-cancelled-isolated.png",
+    "cancel-check-import-verification.json"
+  ]
+}
