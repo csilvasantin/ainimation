@@ -1,3 +1,4 @@
+import {versionIdentity} from './interactive-provenance.mjs';
 import {readLibrary} from './interactive-library.mjs';
 import {playerHtml} from './interactive-project.mjs';
 
@@ -44,10 +45,10 @@ export function mountConflictComparison({status,storage,endpoint,onOpen}){
    const pair=available()[Number(picker.value)],versions=conflictVersions(latest(),pair);
    if(!versions)throw Error('Una de las versiones ya no está disponible. No se ha modificado ningún proyecto.');
    for(const [name,record]of [['Versión de la nube',versions.cloud],['Copia de este equipo',versions.local]]){
-    const section=doc.createElement('section'),heading=doc.createElement('h3'),title=doc.createElement('p'),frame=doc.createElement('iframe'),open=doc.createElement('button');
-    heading.textContent=name;title.textContent=record.project.title;frame.title='Recorrido · '+name;frame.setAttribute('sandbox','allow-scripts');frame.srcdoc=playerHtml(record.project);
+    const section=doc.createElement('section'),heading=doc.createElement('h3'),title=doc.createElement('p'),identity=doc.createElement('p'),frame=doc.createElement('iframe'),open=doc.createElement('button');
+    heading.textContent=name;title.textContent=record.project.title;const info=versionIdentity(record);identity.className='conflict-version-identity';identity.textContent='Guardada: '+info.date+' · Origen: '+info.device;frame.title='Recorrido · '+name;frame.setAttribute('sandbox','allow-scripts');frame.srcdoc=playerHtml(record.project);
     open.type='button';open.textContent='Abrir '+name.toLowerCase();open.onclick=()=>{try{const current=conflictVersions(latest(),pair);if(!current)throw Error('Una de las versiones ya no está disponible.');onOpen(record.id);dialog.close();}catch(e){message.textContent=e.message;}};
-    section.append(heading,title,frame,open);previews.append(section);
+    section.append(heading,title,identity,frame,open);previews.append(section);
    }
    const changes=compareProjects(versions.cloud.project,versions.local.project),heading=doc.createElement('h3');heading.textContent=changes.length?'Diferencias entre las versiones':'Las dos versiones tienen el mismo contenido';differences.append(heading);
    for(const change of changes){const row=doc.createElement('section'),name=doc.createElement('h4'),grid=doc.createElement('div');name.textContent=label(change.path);grid.className='conflict-difference-values';for(const [side,v]of [['Nube',change.left],['Este equipo',change.right]]){const cell=doc.createElement('div'),caption=doc.createElement('strong'),text=doc.createElement('pre');caption.textContent=side;text.textContent=value(v);cell.append(caption,text);grid.append(cell);}row.append(name,grid);differences.append(row);}

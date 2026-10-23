@@ -30,17 +30,17 @@ export async function route(request,env,identify=authenticate,catalogFetcher=fet
  if(path==='/deliveries')return createDelivery(request,env,owner);
  if(path.startsWith('/telegram/'))return telegramAccount(request,env,owner);
  if(path==='/projects'&&request.method==='GET'){
- const {results}=await env.LIBRARY_DB.prepare('SELECT id, revision, project, updated_at FROM interactive_projects WHERE owner = ?').bind(owner).all();
- return reply({account:owner,projects:results.map(r=>({id:r.id,revision:r.revision,updatedAt:r.updated_at,project:JSON.parse(r.project)}))});
+ const {results}=await env.LIBRARY_DB.prepare('SELECT id, revision, project, updated_at, source_device FROM interactive_projects WHERE owner = ?').bind(owner).all();
+ return reply({account:owner,projects:results.map(r=>({id:r.id,revision:r.revision,updatedAt:r.updated_at,sourceDevice:r.source_device||null,project:JSON.parse(r.project)}))});
  }
  const id=path.match(/^\/projects\/([a-zA-Z0-9-]{1,80})$/)?.[1];
  if(!id||request.method!=='PUT')return reply({error:'No encontrado.'},404);
  if(Number(request.headers.get('content-length'))>24000000)return reply({error:'Proyecto demasiado grande.'},413);
- let data,project;try{const raw=await request.text();if(raw.length>24000000)return reply({error:'Proyecto demasiado grande.'},413);data=JSON.parse(raw);project=validate(data.project);if(!Number.isInteger(data.baseRevision)||data.baseRevision<0)throw Error();}catch{return reply({error:'Proyecto no válido.'},400);}
+ let data,project;try{const raw=await request.text();if(raw.length>24000000)return reply({error:'Proyecto demasiado grande.'},413);data=JSON.parse(raw);project=validate(data.project);if(data.sourceDevice!=null&&(typeof data.sourceDevice!=='string'||data.sourceDevice.length>100||/[\u0000-\u001f\u007f]/.test(data.sourceDevice)))throw Error();if(!Number.isInteger(data.baseRevision)||data.baseRevision<0)throw Error();}catch{return reply({error:'Proyecto no válido.'},400);}
  const json=JSON.stringify(project),now=new Date().toISOString();
  const result=data.baseRevision===0
- ?await env.LIBRARY_DB.prepare('INSERT INTO interactive_projects (owner,id,revision,project,updated_at) VALUES (?,?,1,?,?) ON CONFLICT(owner,id) DO NOTHING').bind(owner,id,json,now).run()
- :await env.LIBRARY_DB.prepare('UPDATE interactive_projects SET project=?, revision=revision+1, updated_at=? WHERE owner=? AND id=? AND revision=?').bind(json,now,owner,id,data.baseRevision).run();
+ ?await env.LIBRARY_DB.prepare('INSERT INTO interactive_projects (owner,id,revision,project,updated_at,source_device) VALUES (?,?,1,?,?,?) ON CONFLICT(owner,id) DO NOTHING').bind(owner,id,json,now,data.sourceDevice||null).run()
+ :await env.LIBRARY_DB.prepare('UPDATE interactive_projects SET project=?, revision=revision+1, updated_at=?, source_device=? WHERE owner=? AND id=? AND revision=?').bind(json,now,data.sourceDevice||null,owner,id,data.baseRevision).run();
  if(result.meta.changes!==1)return reply({error:'El proyecto cambió en otro dispositivo. Se conserva tu copia local.'},409);
  return reply({id,revision:data.baseRevision+1,updatedAt:now});
 }
