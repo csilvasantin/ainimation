@@ -46,6 +46,17 @@ test('filtrar proyectos de igual nombre por ID y resultados mixtos conserva enla
  f.query.value='version 8';f.query.oninput();assert.equal(f.list.children.length,0);assert.match(f.status.textContent,/0 de 3.*No hay lotes/);assert.equal(f.clear.disabled,false);
  f.clear.onclick();assert.equal(f.list.children.length,3);assert.equal(f.clear.disabled,true);assert.deepEqual([...s.map],before);
 });
+test('el aviso de lotes visibles cuenta entradas guardadas de todos los estados por lote sin deduplicar ni leer al filtrar',()=>{
+ for(const lang of ['es','en']){
+  const s=store();saveDeliveryBatch(s,batch('a',[result('shared')]));saveDeliveryBatch(s,{...batch('b',[result('shared','pending'),result('sending','sending'),result('failed','error'),result('ok')]),revision:9,projectId:'other'});
+  let reads=0,writes=0,requests=0,copies=0;const get=s.getItem,set=s.setItem;s.getItem=k=>{reads++;return get(k);};s.setItem=(k,v)=>{writes++;set(k,v);};const before=[...s.map],f=historyView(s,lang,async()=>copies++,{versionRequest:async()=>requests++});f.button.onclick();const initialReads=reads;
+  assert.equal(f.status.textContent,lang==='es'?'2 de 2 lotes. 5 destinos guardados en los lotes visibles.':'2 of 2 batches. 5 saved targets in visible batches.');
+  f.project.value='project-1';f.project.onchange();assert.match(f.status.textContent,lang==='es'?/1 destino guardado en los lotes visibles\./:/1 saved target in visible batches\./);assert.deepEqual(f.list.children.map(d=>d.dataset.batchId),['a']);
+  f.project.value='other';f.project.onchange();assert.match(f.status.textContent,lang==='es'?/4 destinos guardados/:/4 saved targets/);f.outcome.value='complete';f.outcome.onchange();assert.match(f.status.textContent,lang==='es'?/0 destinos guardados.*No hay lotes que coincidan\./:/0 saved targets.*No matching batches\./);assert.equal(f.list.children.length,0);
+  f.clear.onclick();f.query.value='v9';f.query.oninput();assert.deepEqual(f.list.children.map(d=>d.dataset.batchId),['b']);assert.match(f.status.textContent,lang==='es'?/4 destinos guardados/:/4 saved targets/);action(f.list.children[0],'history-csv').onclick();assert.equal(f.status.textContent,lang==='es'?'Informe CSV preparado: 4 pantallas.':'CSV report prepared: 4 screens.');
+  f.clear.onclick();assert.match(f.status.textContent,lang==='es'?/5 destinos guardados/:/5 saved targets/);assert.equal(reads,initialReads);assert.equal(writes,0);assert.equal(requests,0);assert.equal(copies,0);assert.equal(f.downloads.length,1);assert.deepEqual([...s.map],before);
+ }
+});
 test('búsqueda y filtros se reinician al abrir; historial vacío o corrupto conserva datos y avisa sin filtros falsos',()=>{
  const s=store();saveDeliveryBatch(s,batch());const f=historyView(s,'en');f.button.onclick();f.query.value='none';f.query.oninput();assert.match(f.status.textContent,/0 of 1 batch.*No matching/);f.button.onclick();assert.equal(f.query.value,'');assert.equal(f.list.children.length,1);assert.match(f.list.children[0].children[0].textContent,/Complete/);
  for(const raw of [null,'{broken']){const s=store();if(raw)s.map.set(DELIVERY_HISTORY_KEY,raw);const before=[...s.map],f=historyView(s);f.button.onclick();assert.equal(f.filters.hidden,true);assert.equal(f.list.children.length,0);assert.match(f.status.textContent,raw?/No se puede leer/:/Todavía no hay/);assert.deepEqual([...s.map],before);}

@@ -304,7 +304,8 @@ export function mountDeliveryHistory({button,storage,doc=document,download,onReu
   cancelChecks();
   const shown=filterDeliveryHistory(batches,{query:query.value,projectId:project.value,outcome:outcome.value});list.replaceChildren();
   clear.disabled=!query.value&&!project.value&&!outcome.value;
-  status.textContent=shown.length+' '+t('de','of')+' '+batches.length+' '+word(batches.length,'lote.','lotes.','batch.','batches.')+(!shown.length?' '+t('No hay lotes que coincidan. Quita los filtros para ver todos.','No matching batches. Clear filters to see all batches.'):'');
+  const visibleTargets=shown.reduce((count,b)=>count+b.results.length,0);
+  status.textContent=shown.length+' '+t('de','of')+' '+batches.length+' '+word(batches.length,'lote.','lotes.','batch.','batches.')+' '+visibleTargets+' '+word(visibleTargets,'destino guardado','destinos guardados','saved target','saved targets')+' '+t('en los lotes visibles.','in visible batches.')+(!shown.length?' '+t('No hay lotes que coincidan. Quita los filtros para ver todos.','No matching batches. Clear filters to see all batches.'):'');
   for(const [i,b] of shown.entries()){
    const details=make('details'),summary=make('summary'),ul=make('ul'),actions=make('div'),versionRows=[],targetRows=[];details.open=i===0;details.dataset.batchId=b.id;ul.className='delivery-results';actions.className='history-batch-actions';actions.setAttribute('role','group');actions.setAttribute('aria-label',t('Acciones del lote','Batch actions'));
    const successful=b.results.filter(r=>r.status==='success').length;summary.textContent=b.projectTitle+' · '+t('Versión ','Version ')+b.revision+' · '+new Date(b.createdAt).toLocaleString(doc.documentElement.lang==='en'?'en-GB':'es-ES')+' · '+successful+'/'+b.results.length+' '+word(b.results.length,'preparado','preparados','prepared','prepared')+' · '+outcomeText(deliveryBatchOutcome(b));details.append(summary);
