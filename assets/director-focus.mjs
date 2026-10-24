@@ -5,7 +5,7 @@ function toggleInterface(){
  const focused=document.body.classList.toggle('director-focus');
  document.dispatchEvent(new CustomEvent('director:interface',{detail:{visible:!focused}}));
  button?.setAttribute('aria-pressed',String(!focused));
- button?.setAttribute('aria-label',focused?'Mostrar interfaz / Show interface · H':'Ocultar interfaz / Hide interface · H');
+ button?.setAttribute('aria-label',document.documentElement.lang==='en'?(focused?'Show interface · H':'Hide interface · H'):(focused?'Mostrar interfaz · H':'Ocultar interfaz · H'));
 }
 document.addEventListener('click',event=>{if(event.target.closest?.('[data-director-interface-toggle]')){event.stopPropagation();toggleInterface();}},true);
 document.addEventListener('keydown',event=>{
