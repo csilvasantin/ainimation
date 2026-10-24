@@ -6834,7 +6834,7 @@ body.studio-page.director-focus:not(.ain-play) .director-workbench .resize-handl
 body.studio-page.director-focus:not(.ain-play) .stage-window{flex:1;min-height:0}
 body.studio-page.director-focus:not(.ain-play) .score-grid{flex:1;min-height:0;overflow:auto}
 [data-director-interface-toggle]{margin-left:auto;min-width:32px;min-height:28px;font:inherit;cursor:pointer}
-@media(max-width:600px){body.studio-page.director-focus .director-score-window .window-titlebar{flex-wrap:wrap;height:auto;flex-shrink:0}body.studio-page.director-focus .director-score-window .window-titlebar .score-tools{order:2;flex:1 0 100%;box-sizing:border-box;min-width:0;max-width:100%;width:100%!important;overflow-x:auto}body.studio-page.director-focus .director-score-window .window-titlebar > strong{flex:1}}
+@media(max-width:600px){body.studio-page .director-score-window .window-titlebar{flex-wrap:wrap;height:auto;flex-shrink:0}body.studio-page .director-score-window .window-titlebar .score-tools{order:2;flex:1 0 100%;box-sizing:border-box;min-width:0;max-width:100%;width:100%!important;overflow-x:auto}body.studio-page .director-score-window .window-titlebar > strong{flex:1}}
 
 /* Authoring workspace: application chrome only, also after H reveals the panels. */
 body.studio-page > .site-header,body.studio-page > .site-footer,
