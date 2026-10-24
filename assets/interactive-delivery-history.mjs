@@ -171,7 +171,7 @@ export function deliveryComparisonSummaryTxt(report,language='es'){
  const summary=deliveryComparisonSummary(report,language);
  return{filename:'ainimation-'+(language==='en'?'comparison-summary':'resumen-comparacion')+'-'+report.first.id+'-'+report.second.id+'.txt',type:'text/plain;charset=utf-8',content:summary.text};
 }
-let comparisonSummarySequence=0,comparisonResultsSequence=0,comparisonScopeSequence=0,comparisonStatusSequence=0,historyListSequence=0,historyStatusSequence=0,backupScopeSequence=0;
+let comparisonSummarySequence=0,comparisonResultsSequence=0,comparisonScopeSequence=0,comparisonStatusSequence=0,historyListSequence=0,historyStatusSequence=0,backupScopeSequence=0,batchCsvScopeSequence=0;
 export function mountDeliveryHistory({button,storage,doc=document,download,onReuse,writeClipboard,versionRequest=fetch,versionTimeoutMs=10000}){
  const t=(es,en)=>doc.documentElement.lang==='en'?en:es,make=(tag,value)=>{const n=doc.createElement(tag);if(value)n.textContent=value;return n;};
  const word=(n,esOne,esMany,enOne,enMany)=>t(n===1?esOne:esMany,n===1?enOne:enMany);
@@ -317,6 +317,7 @@ export function mountDeliveryHistory({button,storage,doc=document,download,onReu
    exportButton.onclick=()=>{try{downloadFile(deliveryBatchCsv(b,doc.documentElement.lang));status.textContent=t('Informe CSV preparado: ','CSV report prepared: ')+b.results.length+' '+word(b.results.length,'pantalla.','pantallas.','screen.','screens.');}catch{status.textContent=t('No se pudo preparar el CSV. El historial se conserva; vuelve a intentarlo.','The CSV could not be prepared. History is preserved; try again.');}};
    actions.append(exportButton);
    const csvScope=make('p',t('CSV de este lote: ','This batch CSV: ')+b.results.length+' '+word(b.results.length,'destino guardado','destinos guardados','saved target','saved targets')+t(', en su orden original. Buscar o filtrar el historial no cambia el archivo.',', in the original order. Searching or filtering history does not change the file.'));csvScope.className='history-batch-csv-scope';
+   do{csvScope.id='ainimation-history-batch-csv-scope-'+(++batchCsvScopeSequence);}while(doc.getElementById?.(csvScope.id));exportButton.setAttribute('aria-describedby',csvScope.id);
    const links=deliveryBatchLinks(b,doc.documentElement.lang),copy=make('button',t('Copiar enlaces','Copy links')),copyStatus=make('p'),fallback=make('label',t('Enlaces del lote para copiar','Batch links to copy')),copyText=make('textarea');
    copy.type='button';copy.className='history-copy';copy.disabled=!links.count;copy.setAttribute('aria-label',t('Copiar enlaces de ','Copy links for ')+b.projectTitle+' · '+t('versión ','version ')+b.revision+' · '+b.createdAt);copyStatus.className='history-copy-status';copyStatus.setAttribute('role','status');fallback.className='history-copy-fallback';fallback.hidden=true;copyText.readOnly=true;copyText.rows=8;fallback.append(copyText);
    if(!links.count)copyStatus.textContent=links.summary+'. '+t('No hay enlaces confirmados para copiar.','There are no confirmed links to copy.');
