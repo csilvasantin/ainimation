@@ -8,7 +8,7 @@ export async function mountCapsuleEditor({doc=document,win=window,fetcher=fetch,
  const inline=!!host;let destroyed=false,submitted=false,payload,textPositions={};
  const en=doc.documentElement.lang.startsWith('en'),t=(es,eng)=>en?eng:es;
  const dialog=doc.createElement(inline?'section':'dialog');dialog.className='capsule-editor'+(inline?' capsule-editor-inline':'');dialog.setAttribute('aria-labelledby','capsule-editor-title');
- const assetQuery=new URLSearchParams(new URL(import.meta.url).search);assetQuery.set('positions','1');assetQuery.set('quadratic','1');
+ const assetQuery=new URLSearchParams(new URL(import.meta.url).search);assetQuery.set('positions','1');assetQuery.set('quadratic','2');
  const cssHref=new URL('./capsule-editor.css?'+assetQuery,import.meta.url).href;if(!Array.from(doc.querySelectorAll('link[data-ainimation-editor]')).some(link=>link.href===cssHref)){const stylesheet=doc.createElement('link');stylesheet.rel='stylesheet';stylesheet.href=cssHref;stylesheet.dataset.ainimationEditor='';doc.head.append(stylesheet);}
  const {mountLivePreview,scriptChanges,sanitizeTextPositions}=await import('./capsule-preview.mjs?'+assetQuery);
  const {mountCapsuleShell}=await import('./capsule-shell.mjs?'+assetQuery);
