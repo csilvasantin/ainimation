@@ -4028,6 +4028,8 @@ function drawStageDomFrame(ctx, stage, width, height) {
   stageGradient(ctx, width, height);
 
   stage.querySelectorAll(".stage-imported-member:not(.is-out-of-frame)").forEach((figure) => {
+    // Audio is mixed separately; its authoring glyph is not part of the video.
+    if (figure.querySelector("audio")) return;
     const rect = figure.getBoundingClientRect();
     const x = ((rect.left - stageRect.left) / stageRect.width) * width;
     const y = ((rect.top - stageRect.top) / stageRect.height) * height;
@@ -4898,8 +4900,38 @@ function stockMemberFromImportParams(params, existingCount, timelineMemberCount)
   };
 }
 
+function showAdmiraCreationNotice(plan) {
+  document.querySelector('.admira-create-notice')?.remove();
+  if (!plan.admiraSources?.length) return;
+  document.body.classList.remove('director-focus');
+  if (plan.stage) window.ainStageSize?.set(plan.stage.w,plan.stage.h);
+  document.querySelector('[data-director-interface-toggle]')?.setAttribute('aria-pressed','true');
+  const notice=document.createElement('aside');notice.className='admira-create-notice';notice.setAttribute('role','status');notice.style.cssText='padding:10px;font:12px system-ui;border-bottom:1px solid #52667a';
+  const message=document.createElement('p');message.textContent=`${plan.admiraSources.length} recursos de Admira para crear ${plan.admiraOutput==='interactive'?'un interactivo':'un vídeo'}. Ajusta el montaje en Cast y Timeline.`;
+  const restore=document.createElement('button');restore.type='button';restore.textContent='Recuperar proyecto anterior';restore.disabled=!localStorage.getItem('ainimation:before-admira-create');
+  restore.onclick=()=>{try{const previous=normalizeFilmPlan(JSON.parse(localStorage.getItem('ainimation:before-admira-create')));if(!previous)throw Error('No se encuentra el proyecto anterior.');localStorage.setItem('ainimation:before-admira-create',JSON.stringify(currentPlan()));saveFilmPlan(previous);window.ainStageSize?.set(previous.stage?.w||1920,previous.stage?.h||1080);hydrateFilmForm(previous);renderFilmPlan(previous);if(stockExportButton)stockExportButton.textContent=previous.admiraEdit?.id?'Guardar nueva versión en Admira':'Guardar en Admira';notice.remove();}catch(error){window.alert(error.message);}};
+  notice.append(message,restore);document.getElementById('castBin')?.insertAdjacentElement('beforebegin',notice);
+}
+
 async function importAdmiraStockAssetFromQuery() {
   const params = new URLSearchParams(window.location.search);
+  if (new URLSearchParams(location.hash.slice(1)).has('admiraBatch')) {
+    const {batchFromHash,batchPlan}=await import('./admira-resource-batch.mjs?v=batch-1');
+    const batch=batchFromHash(location.hash);
+    const next=normalizeFilmPlan(batchPlan(batch,stockMemberFromImportParams));
+    if (!next) throw Error('No se ha podido preparar la creación de Admira.');
+    // Persist the previous project before activating the new selection.
+    localStorage.setItem('ainimation:before-admira-create',JSON.stringify(currentPlan()));
+    saveFilmPlan(next);
+    if (JSON.stringify(currentPlan().admiraSources)!==JSON.stringify(next.admiraSources)) throw Error('No hay espacio para guardar el proyecto. Conserva esta pestaña y libera espacio.');
+    window.ainStageSize?.set(next.stage.w,next.stage.h);
+    hydrateFilmForm(next);renderFilmPlan(next);
+    if (stockExportButton) stockExportButton.textContent=batch.output==='interactive'?'Guardar interactivo en Admira':'Guardar vídeo en Admira';
+    const clean=new URL(location.href);clean.hash='';history.replaceState({},'',clean.href);
+    showAdmiraCreationNotice(next);
+    document.querySelector('[data-open-window="cast"]')?.click();
+    return true;
+  }
   if (!params.has("admiraStockUrl")) return false;
   const bridge = await import('./admira-roundtrip.mjs?v=roundtrip-1');
   const context = bridge.editContext(params);
@@ -6547,13 +6579,14 @@ function importCastAsset(name, kind) {
 
 if (filmForm) {
   const initialPlan = currentPlan();
+  showAdmiraCreationNotice(initialPlan);
   hydrateFilmForm(initialPlan);
   renderStageRulers();
   initStageRulerToggle();
   renderFilmPlan(initialPlan);
   initStageTools();
   window.requestAnimationFrame(() => window.requestAnimationFrame(renderStageRulers));
-  if (initialPlan.admiraEdit && stockExportButton) stockExportButton.textContent = 'Guardar nueva versión en Admira';
+  if (initialPlan.admiraEdit && stockExportButton) stockExportButton.textContent = initialPlan.admiraEdit.id ? 'Guardar nueva versión en Admira' : initialPlan.admiraOutput === 'interactive' ? 'Guardar interactivo en Admira' : 'Guardar vídeo en Admira';
   importAdmiraStockAssetFromQuery().catch(error => { if (stockExportButton) stockExportButton.disabled = true; window.alert(error.message); });
 
   fileNewButton?.addEventListener("click", () => {

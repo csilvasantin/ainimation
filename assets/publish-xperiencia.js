@@ -180,6 +180,9 @@
   }
 
   /* --- pintado --- */
+  var mediaUnlocked = false;
+  document.addEventListener("pointerdown", function () { mediaUnlocked = true; }, {once:true});
+  document.addEventListener("keydown", function () { mediaUnlocked = true; }, {once:true});
   var nodes = {};
   var hidden = {};
   var texts  = {};
@@ -191,14 +194,16 @@
     var live  = frame >= start && frame < end && !hidden[obj.spriteName];
     var k = at(obj, frame);
     var node = ensure(id, function () {
-      var n = document.createElement(kind === "cast" ? (obj.mediaType === "video" ? "video" : "img") : "div");
+      var n = document.createElement(kind === "cast" ? (obj.mediaType === "video" ? "video" : obj.mediaType === "audio" ? "audio" : "img") : "div");
       if (kind === "cast") { n.src = obj.src; if (obj.mediaType === "video") { n.muted = true; n.loop = true; n.playsInline = true; } }
+      if (obj.mediaType === "audio") { n.controls = true; n.setAttribute("aria-label", obj.name || "Audio"); }
       n.className = "xp-item";
       if (obj.interactive) { n.dataset.sprite = obj.spriteName; n.classList.add("xp-hot"); }
       return n;
     });
     node.style.display = live ? "block" : "none";
-    if (!live) return;
+    if (!live) { if (node.pause) node.pause(); return; }
+    if (kind === "cast" && node.play && (obj.mediaType === "video" || mediaUnlocked)) { if (node.paused && !node.ended) node.play().catch(function () {}); }
     node.style.left = k.x + "%"; node.style.top = k.y + "%";
     node.style.width = k.w + "%"; node.style.height = k.h + "%";
     if (kind === "item" && EXT && EXT.paint && (obj.type === "button" || obj.type === "kiosk")) { EXT.paint(node, obj, texts); return; }

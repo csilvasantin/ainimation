@@ -29,3 +29,17 @@ Stop before enabling the next component if its dependency check fails. Productio
 For rollback, restore the previous catalogue and generated Studio deployment first, then the previous editor. Keep the newer Stock service available while any deployed editor still sends editable projects. Sources are additive: do not delete source objects or rewrite asset metadata during rollback. Reverting the UI does not remove versions already saved by users.
 
 Deleting a version must forget a rendered-content hash only when that version owns its mapping. Stock tests cover preservation of another piece's hash mapping and deletion of the version's editable source.
+
+## Create from multiple catalogue resources
+
+The catalogue's selection bar opens **Create in AInimation** with the selected items in selection order. The user chooses a title, landscape/portrait/square format, and video or interactive output. Both open Director; interactive output retains Director's buttons and behaviours and exports HTML. This flow does not import these materials into the separate structured interactive creator.
+
+The shared `assets/admira-resource-batch.mjs` contract accepts 1–20 HTTPS image, video and audio references in a bounded `admiraBatch` URL fragment. HTML projects and other unsupported types fail the whole selection with an explanation. No binary data or credentials are copied into the URL. The editor validates the whole batch before changing its workspace, preserves the previous project in `ainimation:before-admira-create`, and offers a recovery button in Cast, including after reload. Reload does not reimport the original selection over edits.
+
+Visuals form a sequence (four seconds when duration is unknown); soundtracks start at frame one. The user can adjust timing and add interactions in Director. Audio controls in the HTML runtime require a user gesture to start sound under browser autoplay rules. Audio's editing glyph is excluded from the rendered video.
+
+The new plan retains every input in `admiraSources`. It has catalogue return context but no immediate-parent ID: a composition of several inputs is a new work, not a revision of one arbitrarily chosen resource. The existing save/return integration preserves the editable source, sends the correct WebM/HTML MIME, and highlights the newly saved work.
+
+Release: publish AInimation before enabling the catalogue action. Publish Pixeria next, then apply only this release's catalogue delta and its two new modules through Studio's scoped generator. Do not run a full Studio mirror sync, which would remove independent Studio features. No Worker change is required.
+
+Validation: 241 editor unit tests pass. Chrome headless exercises ES/EN selection of image/video/audio, both outputs, selection order, format, workspace recovery, reload, HTML with all three media, and intercepted save/return with all input IDs. The video recording is stubbed in that integration test; rendering real video and production saves remain release checks. No production data is written by the preparation tests.
