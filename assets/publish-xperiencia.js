@@ -447,7 +447,7 @@
   function collect(planOverride) {
     const plan = planOverride || window.currentPlan?.();
     if (!plan) return null;
-    const totalFrames = Math.max(24,Number(plan.totalFrames)||0,...(plan.cast||[]).map(x=>Number(x.startFrame||1)+Number(x.durationFrames||0)-1),...(plan.stageItems||[]).map(x=>Number(x.startFrame||1)+Number(x.durationFrames||0)-1), Number(window.ainTransport?.totalFrames)||240);
+    const totalFrames = Math.max(24,Number(plan.totalFrames)||0,...(plan.cast||[]).map(x=>Number(x.startFrame||1)+Number(x.durationFrames||0)-1),...(plan.stageItems||[]).map(x=>Number(x.startFrame||1)+Number(x.durationFrames||0)-1), (plan.admiraPackage?24:Number(window.ainTransport?.totalFrames)||240));
     const dropped = [];
     const cast = (plan.cast || []).filter((member) => {
       if (!member?.src) return false;
@@ -465,7 +465,7 @@
       dropped,
       piece: {
         title: plan.title || "Xperiencia",
-        fps: 24,
+        fps: Number(plan.packageFps)||24,
         totalFrames,
         // Cuánto le pertenece la pantalla, no cuánto dura el timeline.
         durationSeconds: limitaSegundos(plan.durationSeconds),
