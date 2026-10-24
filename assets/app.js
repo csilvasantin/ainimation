@@ -6654,7 +6654,7 @@ helpModal?.addEventListener("click", (event) => {
 
 document.addEventListener("keydown", (event) => {
   const activeTarget = event.target;
-  const isEditingText = activeTarget?.closest?.("input, textarea, [contenteditable='true']");
+  const isEditingText = activeTarget?.closest?.("input, textarea, select, [contenteditable='true']");
   // Ctrl/Cmd+Z y Ctrl/Cmd+Y sobre la pieza. Dentro de un campo de texto NO se
   // tocan: ahí el deshacer del navegador es el que el usuario espera.
   if ((event.metaKey || event.ctrlKey) && !isEditingText) {
