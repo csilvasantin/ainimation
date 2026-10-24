@@ -162,3 +162,35 @@ if($('director'))directorWorkspace=mountDirectorWorkspace({button:$('director'),
  activate({ok:true,data:{...latest.data,activeId:id}});announce('Cambios de Director recuperados. Tu sesión del Creador se conserva.');
  if(cloudToken)$('cloudStatus').textContent='Cuenta verificada. Cambios de Director recuperados; ya puedes sincronizar y enviar.';
 },onError:error=>announce(error.message,true)});
+
+// Catalogue edits keep their own identity in the project, across reloads and cloud saves.
+const stockBridge=await import('./admira-roundtrip.mjs?v=roundtrip-1');
+const saveToAdmira=document.createElement('button');saveToAdmira.type='button';saveToAdmira.className='primary';saveToAdmira.textContent='Guardar nueva versión en Admira';
+$('html').parentElement.append(saveToAdmira);
+saveToAdmira.onclick=async()=>{
+ if(!persist())return;
+ saveToAdmira.disabled=true;
+ try{
+  const snapshot=validate(project),editorProject=await stockBridge.portableProject(snapshot,'interactive');
+  const html=playerHtml(snapshot),base64=await new Promise((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(reader.result.split(',')[1]);reader.onerror=reject;reader.readAsDataURL(new Blob([html],{type:'text/html'}));});
+  announce('Guardando nueva versión en el catálogo de Admira…');
+  const response=await fetch('https://api.admira.store/stock/publish',{method:'POST',headers:{'Content-Type':'application/json'},signal:AbortSignal.timeout(120000),body:JSON.stringify({type:'animation',motor:'ainimation',mime:'text/html',title:snapshot.title,base64,editorProject,...(snapshot.admiraEdit?.id?{externalRef:snapshot.admiraEdit.id}:{})})});
+  const result=await response.json();if(!response.ok)throw Error(result.error||'No se ha podido guardar en Admira.');
+  const href=stockBridge.catalogueVersion(snapshot.admiraEdit,result);
+  if(JSON.stringify(project)!==JSON.stringify(snapshot)){announce('Versión publicada. Hay cambios posteriores sin publicar; tu proyecto sigue abierto.');const a=document.createElement('a');a.href=href;a.textContent='Ver la versión guardada en Admira';status.append(' ',a);return;}
+  window.location.assign(href);
+ }catch(error){announce(error.message+' Tu proyecto sigue en la biblioteca; puedes reintentar.',true);}
+ finally{saveToAdmira.disabled=false;}
+};
+const stockParams=new URLSearchParams(location.search);
+if(stockParams.get('admiraEditable')==='interactive'){
+ try{
+  const context=stockBridge.editContext(stockParams),source=await stockBridge.readEditorProject(context?.id);
+  if(source.kind!=='interactive')throw Error('Este proyecto necesita Director.');
+  const next=validate(source.plan);next.admiraEdit=context;
+  if(!persist())throw Error('Guarda el proyecto actual antes de abrir la versión de Admira.');
+  if(!activate(createProject(storage,next)))throw Error('No se ha podido abrir la versión de Admira.');
+  history.replaceState({},'',location.pathname+'?project='+encodeURIComponent(activeId));
+  announce('Versión de Admira abierta. Guarda para crear una nueva versión vinculada al original.');
+ }catch(error){announce(error.message,true);saveToAdmira.disabled=true;}
+}

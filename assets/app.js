@@ -4898,10 +4898,37 @@ function stockMemberFromImportParams(params, existingCount, timelineMemberCount)
   };
 }
 
-function importAdmiraStockAssetFromQuery() {
+async function importAdmiraStockAssetFromQuery() {
   const params = new URLSearchParams(window.location.search);
   if (!params.has("admiraStockUrl")) return false;
-  const plan = currentPlan();
+  const bridge = await import('./admira-roundtrip.mjs?v=roundtrip-1');
+  const context = bridge.editContext(params);
+  if (params.get('admiraEditable') === 'director') {
+    const source = await bridge.readEditorProject(context?.id);
+    if (source.kind !== 'director') throw Error('Este proyecto necesita el editor de interactivos.');
+    // Keep the previous workspace recoverable before switching to a catalogue version.
+    localStorage.setItem('ainimation:before-admira-edit', JSON.stringify(currentPlan()));
+    const restored = normalizeFilmPlan(source.plan);
+    restored.admiraEdit = context;
+    if (params.get('admiraStockMime') === 'text/html') restored.admiraOutput = 'interactive';
+    saveFilmPlan(restored);hydrateFilmForm(restored);renderFilmPlan(restored);
+    if (stockExportButton) stockExportButton.textContent = 'Guardar nueva versión en Admira';
+    const clean = new URL(location.href);
+    for (const key of [...clean.searchParams.keys()]) if (key.startsWith('admiraStock') || key === 'admiraReturnUrl' || key === 'admiraEditable') clean.searchParams.delete(key);
+    history.replaceState({}, '', clean.href);
+    return true;
+  }
+  if (params.get('admiraStockMime') === 'text/html' || params.get('admiraStockType') === 'interactive') {
+    throw Error('Esta pieza antigua no conserva su proyecto editable. Importa el proyecto original en AInimation antes de crear una nueva versión.');
+  }
+
+  const plan = context ? buildFilmPlan(false) : currentPlan();
+  if (context) {
+    localStorage.setItem('ainimation:before-admira-edit', JSON.stringify(currentPlan()));
+    plan.cast = [];plan.stageItems = [];plan.title = params.get('admiraStockTitle') || 'Versión de Admira';
+    plan.admiraEdit = context;saveFilmPlan(plan);hydrateFilmForm(plan);
+    if (stockExportButton) stockExportButton.textContent = 'Guardar nueva versión en Admira';
+  }
   const existing = plan.cast || makeCast(plan);
   const sourceUrl = params.get("admiraStockUrl") || "";
   if (existing.some((member) => member.sourceUrl === sourceUrl || member.src === sourceUrl)) {
@@ -4911,6 +4938,11 @@ function importAdmiraStockAssetFromQuery() {
   const timelineMemberCount = existing.filter((member) => member.imported && member.src).length;
   const member = stockMemberFromImportParams(params, existing.length, timelineMemberCount);
   if (!member) return false;
+  if (context) {
+    member.onStage = true;member.startFrame = 1;
+    member.durationFrames = Math.max(1, Math.round((member.sourceDuration || 4) * 24));
+    Object.assign(member,{stageX:0,stageY:0,stageW:100,stageH:100});
+  }
   composeStockMembersIntoPlan([member]);
   updateMemberMetadataFromMedia(existing.length, member.src, member.mediaType);
   try {
@@ -5477,6 +5509,8 @@ async function postStageAnimationToStock(endpoint, blob, metadata) {
     comment: [fpsTxt, framesTxt].filter(Boolean).join(" · ") || null,
     mime: blob.type || "video/webm",
     base64,
+    ...(metadata.editorProject ? {editorProject:metadata.editorProject} : {}),
+    ...(metadata.context?.id ? {externalRef:metadata.context.id} : {}),
   };
   const response = await fetchWithTimeout(endpoint, {
     method: "POST",
@@ -5501,7 +5535,12 @@ async function exportStageToAdmiraStock() {
     const plan = currentPlan();
     fallbackPlan = plan;
     const fps = Number(document.querySelector("[data-score-fps]")?.dataset.value || 24);
-    const blob = await getStageAnimationCapture();
+    const bridge = await import('./admira-roundtrip.mjs?v=roundtrip-1');
+    const editorProject = await bridge.portableProject(plan);
+    const isInteractive = plan.admiraOutput === 'interactive';
+    const built = isInteractive ? await window.ainXperiencia?.build(editorProject.plan) : null;
+    if (isInteractive && !built?.exportedHtml) throw Error('No se ha podido preparar el interactivo.');
+    const blob = isInteractive ? new Blob([built.exportedHtml], {type:'text/html'}) : await getStageAnimationCapture();
     fallbackBlob = blob;
     // El peso decide si esto va a tardar dos segundos o dos minutos, y es lo
     // único que el usuario puede cambiar (acortar la pieza). Se enseña mientras
@@ -5518,13 +5557,22 @@ async function exportStageToAdmiraStock() {
       fps,
       exportedAt: new Date().toISOString(),
       project: plan,
+      context: plan.admiraEdit,
+      editorProject,
     };
     let lastError = null;
     for (const endpoint of admiraStockExportEndpoints) {
       try {
-        await postStageAnimationToStock(endpoint, blob, metadata);
+        const result = await postStageAnimationToStock(endpoint, blob, metadata);
+        const returnUrl = bridge.catalogueVersion(plan.admiraEdit, result);
         playUiTick("import");
-        stockExportButton.textContent = "Exportado";
+        stockExportButton.textContent = "Guardado en Admira";
+        // Stay in the same tab: only leave after source and catalogue index are confirmed.
+        if (JSON.stringify(currentPlan()) !== JSON.stringify(plan)) {
+          const link = document.createElement('a');link.href = returnUrl;link.textContent = 'Ver versión guardada en Admira';
+          stockExportButton.insertAdjacentElement('afterend', link);
+          window.alert('Versión guardada. Hay cambios posteriores en el editor; guárdalos como otra versión antes de salir.');
+        } else window.location.assign(returnUrl);
         window.setTimeout(() => { stockExportButton.textContent = originalText; }, 1400);
         return;
       } catch (error) {
@@ -5536,7 +5584,7 @@ async function exportStageToAdmiraStock() {
     console.warn("Admira Stock export failed", error);
     stockExportButton.textContent = "Stock no disponible";
     if (fallbackBlob && fallbackPlan) {
-      downloadBlob(fallbackBlob, `${planSlug(fallbackPlan)}-stock-animation.webm`);
+      downloadBlob(fallbackBlob, `${planSlug(fallbackPlan)}-stock.${fallbackBlob.type === "text/html" ? "html" : "webm"}`);
     }
     // Se dice la causa concreta cuando se conoce (el corte de *.workers.dev es
     // la habitual desde España). Un "no se ha podido" a secas deja al usuario
@@ -5544,7 +5592,7 @@ async function exportStageToAdmiraStock() {
     window.alert([
       "No se ha podido exportar la animación al Stock de Admira.",
       String(error?.message || "").slice(0, 180),
-      "El WebM local se ha guardado igualmente como respaldo.",
+      fallbackBlob ? "La exportación local se ha guardado como respaldo. Tu proyecto sigue abierto." : "Tu proyecto sigue abierto. Corrige el error y vuelve a guardar.",
     ].filter(Boolean).join("\n\n"));
     window.setTimeout(() => { stockExportButton.textContent = originalText; }, 1800);
   } finally {
@@ -6505,7 +6553,8 @@ if (filmForm) {
   renderFilmPlan(initialPlan);
   initStageTools();
   window.requestAnimationFrame(() => window.requestAnimationFrame(renderStageRulers));
-  importAdmiraStockAssetFromQuery();
+  if (initialPlan.admiraEdit && stockExportButton) stockExportButton.textContent = 'Guardar nueva versión en Admira';
+  importAdmiraStockAssetFromQuery().catch(error => { if (stockExportButton) stockExportButton.disabled = true; window.alert(error.message); });
 
   fileNewButton?.addEventListener("click", () => {
     // Antes esto pisaba la pieza en marcha sin decir nada y no había manera de
