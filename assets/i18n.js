@@ -158,19 +158,24 @@
     "Show interface · H":"Mostrar interfaz · H", "Hide interface · H":"Ocultar interfaz · H"
   };
   Object.assign(directorLabels,{"Insert": "Insertar", "🚩 New screen (marker)…": "🚩 Nueva pantalla (marca)…", "▭ Button": "▭ Botón", "T Label": "T Etiqueta", "Label": "Etiqueta", "Menu": "Carta", "🍽 Sample menu (Starbucks · fictitious)": "🍽 Carta de ejemplo (Starbucks · ficticia)", "Import menu (.json)…": "Importar carta (.json)…", "Remove menu": "Quitar la carta", "Templates": "Plantillas", "🛒 Ordering kiosk (Starbucks, vertical totem)": "🛒 Quiosco de pedidos (Starbucks, tótem vertical)", "⬇ Export project (.json)": "⬇ Exportar proyecto (.json)", "🍽 Kiosk · Linked cafeteria": "🍽 Quiosco · Cafetería vinculada", "🍽 Kiosk · Categories": "🍽 Quiosco · Categorías", "🍽 Kiosk · Products": "🍽 Quiosco · Productos", "🍽 Kiosk · Options": "🍽 Quiosco · Opciones", "🍽 Kiosk · Cart": "🍽 Quiosco · Carrito", "🍽 Kiosk · QR payment": "🍽 Quiosco · Pago QR", "🍽 Kiosk · Order number": "🍽 Quiosco · Número de pedido"});
+  Object.assign(directorLabels,{"Clear": "Limpiar", "Mark": "Marca", "Canal · Member": "Canal · Miembro", "Channel · Member": "Canal · Miembro", "Toggle stage rulers": "Mostrar u ocultar reglas del Stage", "Horizontal pixels": "Píxeles horizontales", "Vertical pixels": "Píxeles verticales", "Stage preview": "Vista previa del Stage", "Generated stage composition": "Composición generada en el Stage", "Full HD stage canvas": "Lienzo Full HD del Stage", "Move cast members": "Mover miembros del Cast", "Inspect stage object": "Inspeccionar objeto del Stage", "Write text": "Escribir texto", "Draw line": "Dibujar línea", "Filled rectangle": "Rectángulo relleno", "Rectangle outline": "Contorno de rectángulo", "Filled oval": "Óvalo relleno", "Oval outline": "Contorno de óvalo", "Stage drawing tools": "Herramientas de dibujo del Stage", "Stage background color": "Color de fondo del Stage", "Choose stage background color": "Elegir color de fondo del Stage", "Timeline transport": "Transporte del Score", "Timeline range controls": "Controles de rango del Score", "Timeline frame controls": "Controles de fotogramas del Score", "Timeline playback speed": "Velocidad de reproducción del Score", "Frames per second controls": "Controles de fotogramas por segundo", "Increase FPS": "Aumentar FPS", "Decrease FPS": "Reducir FPS", "Go to start": "Ir al inicio", "Go to end": "Ir al final", "Go to start (Home)": "Ir al inicio (Home)", "Go to end (End)": "Ir al final (End)", "Play / stop (Space)": "Reproducir / detener (Space)", "Play timeline": "Reproducir Score", "Stop timeline": "Detener Score", "Previous mark": "Marca anterior", "Next mark": "Marca siguiente", "Previous mark (Shift+←) · one frame with ←": "Marca anterior (Shift+←) · un fotograma con ←", "Next mark (Shift+→) · one frame with →": "Marca siguiente (Shift+→) · un fotograma con →", "Timeline zoom": "Zoom del Score", "Make timeline larger": "Ampliar Score", "Make timeline smaller": "Reducir Score", "Create timeline mark at current frame": "Crear marca del Score en el fotograma actual", "Save mark at current frame": "Guardar marca en el fotograma actual", "Timeline marks": "Marcas del Score", "Timeline playhead": "Cabezal del Score", "Edit timeline row label": "Editar etiqueta de fila del Score", "Mute all timeline audio": "Silenciar todo el audio del Score", "Unmute all timeline audio": "Activar todo el audio del Score", "Mute audio": "Silenciar audio", "Unmute audio": "Activar audio", "The Score is empty.": "El Score está vacío.", "Start from an example": "Empezar con un ejemplo"});
+  var directorAliases={};
+  Object.keys(directorLabels).forEach(function(key){if(key!=='Timeline'&&/timeline/i.test(key)){var canonical=key.replace(/timeline/gi,'Score');directorLabels[canonical]=directorLabels[key];directorAliases[key]=canonical;delete directorLabels[key];}});
   var directorReverse = {};
   Object.keys(directorLabels).forEach(function(en){if(en!=="Timeline")directorReverse[directorLabels[en]]=en;});
   function directorText(raw,lang){
-    var key=norm(raw),aliases={'▶ Play (proyector)':'▶ Play (projector)','Mostrar interfaz / Show interface · H':'Show interface · H','Ocultar interfaz / Hide interface · H':'Hide interface · H'},en=aliases[key]||directorReverse[key]||key;
+    var key=norm(raw),aliases={'▶ Play (proyector)':'▶ Play (projector)','Mostrar interfaz / Show interface · H':'Show interface · H','Ocultar interfaz / Hide interface · H':'Hide interface · H'},en=aliases[key]||directorAliases[key]||directorReverse[key]||key;
+    var dynamic=[[/^(\d+) frames per second$/, /^(\d+) fotogramas por segundo$/, '$1 frames per second', '$1 fotogramas por segundo'],[/^(?:Timeline|Score) zoom (\d+) percent$/, /^Zoom del Score (\d+) por ciento$/, 'Score zoom $1 percent','Zoom del Score $1 por ciento'],[/^Keyframe at frame (\d+)$/, /^Fotograma clave en fotograma (\d+)$/, 'Keyframe at frame $1','Fotograma clave en fotograma $1'],[/^Keyframe (\d+)$/, /^Fotograma clave (\d+)$/, 'Keyframe $1','Fotograma clave $1'],[/^Canal (\d+)$/, /^Channel (\d+)$/, 'Channel $1','Canal $1']];
+    for(var i=0;i<dynamic.length;i++){var d=dynamic[i],match=key.match(d[0])||key.match(d[1]);if(match)return raw.replace(key,(lang==='es'?d[3]:d[2]).replace('$1',match[1]));}
     if(!Object.prototype.hasOwnProperty.call(directorLabels,en))return raw;
     return raw.replace(key,lang==='es'?directorLabels[en]:en);
   }
   function applyDirector(lang){
-    document.querySelectorAll('.director-menubar,.window-titlebar,.window-taskbar').forEach(function(root){
+    document.querySelectorAll('.director-menubar,.window-titlebar,.window-taskbar,.score-member-title > span,.score-empty-state').forEach(function(root){
       var walk=document.createTreeWalker(root,NodeFilter.SHOW_TEXT),node;
       while((node=walk.nextNode())){if(node.parentElement.closest('input,textarea,[contenteditable]'))continue;var next=directorText(node.nodeValue,lang);if(next!==node.nodeValue)node.nodeValue=next;}
     });
-    document.querySelectorAll('.director-window,.director-menubar [aria-label],.director-menubar [title],.window-titlebar [aria-label],.window-titlebar [title]').forEach(function(el){
+    document.querySelectorAll('.director-window,.director-menubar [aria-label],.director-menubar [title],.window-titlebar [aria-label],.window-titlebar [title],.director-score-window [aria-label],.director-score-window [title],.stage-window[aria-label],.stage-window > [aria-label],.tool-palette [title],.tool-palette [aria-label]').forEach(function(el){
       ['aria-label','title','data-window-title'].forEach(function(attr){var raw=el.getAttribute(attr);if(!raw)return;var next=directorText(raw,lang);
         var action=raw.match(/^(Close|Minimize|Maximize|Cerrar|Minimizar|Maximizar) (.+)$/);
         if(action)next=directorText(action[1],lang)+' '+directorText(action[2]==='Timeline'?'Score':action[2],lang);
@@ -178,7 +183,7 @@
       });
     });
     var h=document.querySelector('[data-director-interface-toggle]');
-    if(h)h.setAttribute('aria-label',directorText(document.body.classList.contains('director-focus')?'Show interface · H':'Hide interface · H',lang));
+    if(h){var help=directorText(document.body.classList.contains('director-focus')?'Show interface · H':'Hide interface · H',lang);if(h.getAttribute('aria-label')!==help)h.setAttribute('aria-label',help);}
   }
 
   var norm = function (s) { return s.replace(/\s+/g, " ").trim(); };
@@ -227,8 +232,8 @@
     apply(detectLang());
     if(document.body.classList.contains('studio-page')){
       var queued=false;
-      var observer=new MutationObserver(function(records){if(!records.some(function(record){var el=record.target.nodeType===3?record.target.parentElement:record.target;return el.closest?.('.director-menubar,.window-titlebar,.window-taskbar')||Array.from(record.addedNodes||[]).some(function(n){return n.nodeType===1&&(n.matches('.window-titlebar,.window-taskbar')||n.querySelector('.window-titlebar,.window-taskbar'));});}))return;if(queued)return;queued=true;queueMicrotask(function(){queued=false;applyDirector(document.documentElement.lang);});});
-      document.querySelectorAll('.director-menubar,.director-workbench').forEach(function(root){observer.observe(root,{childList:true,subtree:true,characterData:true});});
+      var observer=new MutationObserver(function(records){if(!records.some(function(record){var el=record.target.nodeType===3?record.target.parentElement:record.target;return el.closest?.('.director-menubar,.window-titlebar,.window-taskbar,.score-member-title,.score-empty-state')||(record.type==='attributes'&&el.closest?.('.director-score-window,.director-stage-window,.tool-palette'))||Array.from(record.addedNodes||[]).some(function(n){return n.nodeType===1&&(n.matches('.window-titlebar,.window-taskbar,.score-tools')||n.querySelector('.window-titlebar,.window-taskbar,.score-tools'));});}))return;if(queued)return;queued=true;queueMicrotask(function(){queued=false;applyDirector(document.documentElement.lang);});});
+      document.querySelectorAll('.director-menubar,.director-workbench').forEach(function(root){observer.observe(root,{childList:true,subtree:true,characterData:true,attributes:true,attributeFilter:['aria-label','title']});});
     }
     var btn = document.getElementById("langToggle");
     if (btn) btn.addEventListener("click", function () {
