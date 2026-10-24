@@ -3920,6 +3920,7 @@ function stageAnimationSignature(plan = currentPlan()) {
       fontSize: item.fontSize || "",
     }));
   return JSON.stringify({
+    stage: {w:stageWidthPixels,h:stageHeightPixels},
     fps: timelineFps(),
     totalFrames: totalTimelineFrames(plan),
     cast,
@@ -5557,28 +5558,38 @@ async function postStageAnimationToStock(endpoint, blob, metadata) {
 }
 
 async function exportStageToAdmiraStock() {
-  if (!stockExportButton) return;
+  if (!stockExportButton || stockExportButton.disabled) return;
+  closeArchivoMenu();
   const originalText = stockExportButton.textContent;
   stockExportButton.disabled = true;
-  stockExportButton.textContent = "Exportando...";
+  stockExportButton.textContent = "Revisando…";
   let fallbackBlob = null;
   let fallbackPlan = null;
+  let review = null;
   try {
     const plan = currentPlan();
+    plan.markers = window.loadTimelineMarkers?.(totalTimelineFrames(plan)) || plan.markers || [];
     fallbackPlan = plan;
     const fps = Number(document.querySelector("[data-score-fps]")?.dataset.value || 24);
     const bridge = await import('./admira-roundtrip.mjs?v=roundtrip-1');
     const editorProject = await bridge.portableProject(plan);
     const isInteractive = plan.admiraOutput === 'interactive';
-    const built = isInteractive ? await window.ainXperiencia?.build(editorProject.plan) : null;
-    if (isInteractive && !built?.exportedHtml) throw Error('No se ha podido preparar el interactivo.');
-    const blob = isInteractive ? new Blob([built.exportedHtml], {type:'text/html'}) : await getStageAnimationCapture();
+    const preflight = await import('./admira-preflight.mjs?v=preflight-1');
+    const inspection=preflight.inspectDirector(editorProject.plan,{compileScripts:window.Admingo?.compileScripts});
+    const currentSnapshot=()=>{const value=currentPlan();value.markers=window.loadTimelineMarkers?.(totalTimelineFrames(value))||value.markers||[];return value;};
+    review=await preflight.openPublicationReview({snapshot:plan,getCurrent:currentSnapshot,inspection,kind:isInteractive?'interactive':'video',makePreview:async()=>{
+      if(isInteractive){const built=await window.ainXperiencia?.build(editorProject.plan);if(!built?.exportedHtml)throw Error('No se ha podido preparar el interactivo.');return{html:built.exportedHtml,blob:new Blob([built.exportedHtml],{type:'text/html'})};}
+      return{blob:await getStageAnimationCapture()};
+    }});
+    if(!review)return;
+    const blob=review.artifact.blob;
     fallbackBlob = blob;
     // El peso decide si esto va a tardar dos segundos o dos minutos, y es lo
     // único que el usuario puede cambiar (acortar la pieza). Se enseña mientras
     // sube, en vez de dejar un «Exportando…» mudo.
     const megas = blob.size / (1024 * 1024);
     stockExportButton.textContent = `Subiendo ${megas.toFixed(1)} MB…`;
+    review.setStatus(`Publicando en Admira · ${megas.toFixed(1)} MB…`);
     const metadata = {
       title: `${plan.title || "AiDirector Stage"} animation`,
       source: "ainimation.studio AiDirector",
@@ -5597,10 +5608,11 @@ async function exportStageToAdmiraStock() {
       try {
         const result = await postStageAnimationToStock(endpoint, blob, metadata);
         const returnUrl = bridge.catalogueVersion(plan.admiraEdit, result);
+        review.close();
         playUiTick("import");
         stockExportButton.textContent = "Guardado en Admira";
         // Stay in the same tab: only leave after source and catalogue index are confirmed.
-        if (JSON.stringify(currentPlan()) !== JSON.stringify(plan)) {
+        if (JSON.stringify(currentSnapshot()) !== JSON.stringify(plan)) {
           const link = document.createElement('a');link.href = returnUrl;link.textContent = 'Ver versión guardada en Admira';
           stockExportButton.insertAdjacentElement('afterend', link);
           window.alert('Versión guardada. Hay cambios posteriores en el editor; guárdalos como otra versión antes de salir.');
@@ -5613,6 +5625,7 @@ async function exportStageToAdmiraStock() {
     }
     throw lastError || new Error("Stock did not accept the animation export.");
   } catch (error) {
+    review?.fail(String(error?.message||error));
     console.warn("Admira Stock export failed", error);
     stockExportButton.textContent = "Stock no disponible";
     if (fallbackBlob && fallbackPlan) {
@@ -5630,6 +5643,7 @@ async function exportStageToAdmiraStock() {
   } finally {
     closeArchivoMenu();
     stockExportButton.disabled = false;
+    if (stockExportButton.textContent === "Revisando…") stockExportButton.textContent = originalText;
   }
 }
 
@@ -6587,6 +6601,7 @@ if (filmForm) {
   initStageTools();
   window.requestAnimationFrame(() => window.requestAnimationFrame(renderStageRulers));
   if (initialPlan.admiraEdit && stockExportButton) stockExportButton.textContent = initialPlan.admiraEdit.id ? 'Guardar nueva versión en Admira' : initialPlan.admiraOutput === 'interactive' ? 'Guardar interactivo en Admira' : 'Guardar vídeo en Admira';
+  const reviewButton=document.createElement('button');reviewButton.type='button';reviewButton.textContent='Previsualizar y comprobar para Admira';reviewButton.dataset.admiraReview='';reviewButton.onclick=exportStageToAdmiraStock;stockExportButton?.insertAdjacentElement('beforebegin',reviewButton);
   importAdmiraStockAssetFromQuery().catch(error => { if (stockExportButton) stockExportButton.disabled = true; window.alert(error.message); });
 
   fileNewButton?.addEventListener("click", () => {
