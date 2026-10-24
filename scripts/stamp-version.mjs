@@ -41,6 +41,7 @@ try {
 try {
   if (readdirSync(join(root, "interactivos")).includes("index.html")) htmlFiles.push("interactivos/index.html");
 } catch {}
+try { if (readdirSync(join(root, 'borradores')).includes('index.html')) htmlFiles.push('borradores/index.html'); } catch {}
 let changed = 0;
 let stale = [];
 
@@ -52,7 +53,7 @@ for (const file of htmlFiles) {
     /(\bhref="\/?assets\/[^"?]+|\bsrc="\/?assets\/[^"?]+)\?v=[^"]*/g,
     (_m, head) => `${head}?v=${version}`,
   );
-  if (file === "interactivos/index.html") after = after.replace(
+  if (['interactivos/index.html','borradores/index.html'].includes(file)) after = after.replace(
     /(\b(?:href|src)="\.\.\/assets\/[^"?]+)(?:\?v=[^"]*)?/g,
     (_m, head) => `${head}?v=${version}`,
   );

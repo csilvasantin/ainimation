@@ -1,6 +1,12 @@
-import {mkdir,copyFile,readFile,writeFile} from 'node:fs/promises';
+import {mkdir,copyFile,readFile,writeFile,readdir} from 'node:fs/promises';
 const root=new URL('./preview-public/',import.meta.url);await mkdir(new URL('assets/',root),{recursive:true});await mkdir(new URL('interactivos/',root),{recursive:true});
 for(const name of ['interactive-creator.css','interactive-creator.mjs','interactive-auth.mjs','interactive-cloud.mjs','interactive-conflicts.mjs','interactive-provenance.mjs','interactive-delivery.mjs','interactive-delivery-history.mjs','interactive-director.mjs','interactive-director-workspace.mjs','interactive-director-bridge.mjs','interactive-image-import.mjs','interactive-interface.mjs','interactive-library.mjs','interactive-project.mjs','interactive-cafeteria.mjs','interactive-cafeteria-editor.mjs','interactive-demo.mjs','interactive-demo-project.mjs','favicon.svg'])await copyFile(new URL('../assets/'+name,import.meta.url),new URL('assets/'+name,root));
 await mkdir(new URL('assets/demos/interactivo/',root),{recursive:true});
 for(const name of ['demo-interactivo.mp4','demo-interactivo.jpg','demo-interactivo.es.vtt'])await copyFile(new URL('../assets/demos/interactivo/'+name,import.meta.url),new URL('assets/demos/interactivo/'+name,root));
 let html=await readFile(new URL('../interactivos/index.html',import.meta.url),'utf8');html=html.replace('<button id="director" type="button">Afinar en Director</button>','').replace('href="../index.html"','href="/interactivos/"').replace('<a href="../studio.html">Animación</a>','').replace('<a href="../xperiencias/">Xperiencias</a>','');await writeFile(new URL('interactivos/index.html',root),html);await writeFile(new URL('index.html',root),'<meta http-equiv="refresh" content="0;url=/interactivos/">');
+
+await mkdir(new URL('borradores/',root),{recursive:true});await copyFile(new URL('../borradores/index.html',import.meta.url),new URL('borradores/index.html',root));for(const name of ['admira-drafts.mjs','admira-draft-hub.mjs','admira-draft-model.mjs','admira-drafts.css','admira-roundtrip.mjs','admira-format-package.mjs','admira-preflight.mjs','admira-resource-updates.mjs','admira-resource-batch.mjs'])await copyFile(new URL('../assets/'+name,import.meta.url),new URL('assets/'+name,root));
+
+// Linked Director drafts resume on this origin, so their editor and runtimes must travel with the preview.
+await copyFile(new URL('../studio.html',import.meta.url),new URL('studio.html',root));
+for(const entry of await readdir(new URL('../assets/',import.meta.url),{withFileTypes:true}))if(entry.isFile())await copyFile(new URL('../assets/'+entry.name,import.meta.url),new URL('assets/'+entry.name,root));

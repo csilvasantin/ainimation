@@ -24,6 +24,7 @@ export async function readEditorProject(id,request=fetch){
 }
 export async function portableProject(plan,kind='director',request=fetch){
   const copy=structuredClone(plan);
+  if(copy.admiraDraft)delete copy.admiraDraft.recoveryKey;
   async function walk(value){
     for(const key of Object.keys(value)){
       const v=value[key];

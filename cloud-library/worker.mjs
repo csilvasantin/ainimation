@@ -1,3 +1,4 @@
+import {editorDrafts,confirmDraftPublication} from './editor-drafts.mjs';
 import {telegramAccount,telegramWebhook,telegramPlayback} from './telegram.mjs';
 import {validate} from '../assets/interactive-project.mjs';
 import {discoverDestinations} from './destination-discovery.mjs';
@@ -24,8 +25,10 @@ export async function route(request,env,identify=authenticate,catalogFetcher=fet
  if(path.startsWith('/telegram/play/'))return telegramPlayback(request,env);
  if(path==='/config'&&request.method==='GET')return reply({clientId:env.GOOGLE_CLIENT_ID||null});
  if(deliveryPath(path))return publicDelivery(request,env);
+ if(/^\/drafts\/[^/]+\/published$/.test(path))return confirmDraftPublication(request,env,catalogFetcher);
  let owner;try{owner=await identify(request,env);}catch{return reply({error:'Inicia sesión para abrir tu biblioteca.'},401);}
  if(!env.LIBRARY_DB)return reply({error:'Almacenamiento pendiente de configurar.'},503);
+ if(path==='/drafts'||path.startsWith('/drafts/'))return editorDrafts(request,env,owner);
  if(path==='/destinations'&&request.method==='GET'){try{return reply(await discoverDestinations(DESTINATIONS,catalogFetcher));}catch{return reply({destinations:DESTINATIONS,coverage:{error:'catalog_unavailable'}});}}
  if(path==='/deliveries')return createDelivery(request,env,owner);
  if(path.startsWith('/telegram/'))return telegramAccount(request,env,owner);

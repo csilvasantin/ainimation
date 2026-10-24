@@ -68,7 +68,7 @@ export async function sendVariant(record,variant,request=fetch) {
   const base64=await new Promise((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(String(reader.result).split(',')[1]);reader.onerror=reject;reader.readAsDataURL(variant.artifact.blob);});
   const body={type:'animation',motor:'ainimation',title:record.title+' · '+variant.label,prompt:'ainimation.studio · '+record.tag,comment:'Paquete '+record.id+' · '+variant.label+' · '+variant.w+' × '+variant.h,tags:['ainimation',record.tag,variant.id,variant.output],mime:variant.artifact.blob.type,base64,editorProject:variant.editorProject,...(record.source.admiraEdit?.id?{externalRef:record.source.admiraEdit.id}:{})};
   const response=await request('https://api.admira.store/stock/publish',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(body),signal:AbortSignal.timeout(180000)});
-  const result=await response.json();if(!response.ok||!result.ok){const error=Error(result.error||'Admira no ha confirmado '+variant.label+'.');error.confirmedRejected=response.status>=400&&response.status<500;throw error;}return result;
+  const result=await response.json();if(!response.ok||!result.ok){const error=Error(result.error||'Admira no ha confirmado '+variant.label+'.');error.confirmedRejected=response.status>=400&&response.status<500;throw error;}if(variant.editorProject.plan.admiraDraft){try{const drafts=await import('./admira-drafts.mjs');await drafts.noteDraftPublication(variant.editorProject.plan,result);}catch{}}return result;
 }
 export async function reconcileVariant(record,variant,request=fetch){
   const items=await fetchResourceIndex(request);
