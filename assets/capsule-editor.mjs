@@ -31,6 +31,7 @@ export async function mountCapsuleEditor({doc=document,win=window,fetcher=fetch,
  signal?.addEventListener('abort',destroy,{once:true});
  status.textContent=t('Recuperando guion original…','Loading original script…');
  async function read(url){const r=await fetcher(url,{cache:'no-store',...(signal?{signal}:{})}),d=await r.json();if(!r.ok)throw Error(d.error||String(r.status));return d;}
+ async function loadOriginal(){
  try{
   project=await read(endpoint);if(destroyed||signal?.aborted)return controller;if(!project.guion)throw Error('capsule-project-not-found');
   for(const [name,es,eng,max] of FIELDS){const label=doc.createElement('label');label.textContent=t(es,eng);const input=doc.createElement('textarea');input.name=name;input.maxLength=max;input.rows=name==='idea'?3:2;input.required=['objeto','gancho','giro','remate','fuente'].includes(name);label.append(input);$('[data-fields]').append(label);}
@@ -82,7 +83,11 @@ export async function mountCapsuleEditor({doc=document,win=window,fetcher=fetch,
    try{const r=await fetcher(endpoint,{method:'POST',headers:{'Content-Type':'application/json','X-Notify-Key':secret},body:JSON.stringify(payload()),...(signal?{signal}:{})}),d=await r.json();if(destroyed)return;if(!r.ok)throw Error(d.error||String(r.status));submitted=true;form.elements.secret.value='';try{win.localStorage.removeItem(key);win.localStorage.removeItem(historyKey);}catch{}status.textContent=t('Nueva versión en cola. Esperando al renderizador…','New version queued. Waiting for renderer…');status.scrollIntoView({block:'nearest'});await watch();}
    catch(e){if(destroyed)return;status.textContent=({'revision-conflict':t('El guion cambió en otra sesión. Guarda tu borrador y vuelve a abrir la cápsula.','Script changed in another session. Save your draft and reopen the capsule.'),'render-in-progress':t('Ya hay una versión en producción. Espera a que termine.','A version is already rendering. Wait until it finishes.'),'unauthorized':t('Clave del Stock incorrecta.','Incorrect Stock key.')}[e.message]||t('No se pudo enviar: ','Could not submit: ')+e.message);button.disabled=false;status.scrollIntoView({block:'nearest'});}
   };
- }catch(e){if(destroyed)return controller;status.textContent=t('No se pudo recuperar el proyecto original: ','Could not load original project: ')+e.message;}
+ }catch(e){if(destroyed)return controller;status.textContent=t('No se pudo recuperar el proyecto original: ','Could not load original project: ')+e.message;
+  if(!payload){const retry=doc.createElement('button');retry.type='button';retry.dataset.loadRetry='';retry.textContent=t('Reintentar carga','Retry loading');retry.onclick=async()=>{retry.disabled=true;status.textContent=t('Recuperando guion original…','Loading original script…');await loadOriginal();if(!destroyed&&(inline||dialog.open))(dialog.querySelector('[data-load-retry]')||$('[data-options-toggle]'))?.focus({preventScroll:true});};status.append(retry);}
+ }
+ }
+ await loadOriginal();
  return controller;
 }
 // Keep old cached Director HTML working while library imports remain side-effect free.
