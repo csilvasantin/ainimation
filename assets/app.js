@@ -4836,6 +4836,7 @@ function stockMemberFromItem(item, endpoint, existingCount, timelineMemberCount)
   const baseName = cleanMemberName(rawName || "Admira Stock latest");
   return {
     role: "Stock",
+    stockId: item.id || null,
     name: `${baseName} ${String(existingCount + 1).padStart(2, "0")}`,
     type: memberTypeLabel(mediaType),
     mediaType,
@@ -4881,6 +4882,7 @@ function stockMemberFromImportParams(params, existingCount, timelineMemberCount)
   const stockPrompt = params.get("admiraStockPrompt") || "";
   return {
     role: "Stock",
+    stockId: params.get("admiraStockId") || null,
     name: `${cleanMemberName(rawName)} ${String(existingCount + 1).padStart(2, "0")}`,
     type: memberTypeLabel(mediaType),
     mediaType,
@@ -6606,6 +6608,12 @@ if (filmForm) {
   initStageTools();
   window.requestAnimationFrame(() => window.requestAnimationFrame(renderStageRulers));
   if (initialPlan.admiraEdit && stockExportButton) stockExportButton.textContent = initialPlan.admiraEdit.id ? 'Guardar nueva versión en Admira' : initialPlan.admiraOutput === 'interactive' ? 'Guardar interactivo en Admira' : 'Guardar vídeo en Admira';
+  const updatesButton=document.createElement('button');updatesButton.type='button';updatesButton.textContent='Actualizar recursos de Admira…';updatesButton.dataset.admiraResourceUpdates='';
+  const undoResourcesButton=document.createElement('button');undoResourcesButton.type='button';undoResourcesButton.textContent='Deshacer última sustitución de recursos';undoResourcesButton.disabled=!localStorage.getItem('ainimation:before-admira-resource-update');
+  const refreshResources=(plan,result)=>{hydrateFilmForm(plan);renderFilmPlan(plan);showAdmiraCreationNotice(plan);window.refreshDirectorWindows?.();undoResourcesButton.disabled=!localStorage.getItem('ainimation:before-admira-resource-update');document.querySelector('.admira-resource-update-status')?.remove();if(result){const status=document.createElement('p');status.className='admira-resource-update-status';status.setAttribute('role','status');status.textContent=result.type==='undone'?'Sustitución deshecha. Se ha recuperado el proyecto anterior.':`${result.count} recursos actualizados. Montaje y acciones conservados.`;if(result.type==='applied'){const undo=document.createElement('button');undo.type='button';undo.textContent='Deshacer sustitución';undo.onclick=()=>undoResourcesButton.click();status.append(' ',undo);}document.getElementById('castBin')?.insertAdjacentElement('beforebegin',status);}};
+  updatesButton.onclick=async()=>{closeArchivoMenu();try{const module=await import('./admira-resource-updates.mjs?v=updates-1');await module.openResourceUpdates({getPlan:currentPlan,savePlan:saveFilmPlan,refreshPlan:refreshResources,storage:localStorage});}catch(error){window.alert(error.message);}};
+  undoResourcesButton.onclick=async()=>{closeArchivoMenu();try{const module=await import('./admira-resource-updates.mjs?v=updates-1');refreshResources(module.undoResourceUpdate({getPlan:currentPlan,savePlan:saveFilmPlan,storage:localStorage}),{type:'undone'});}catch(error){window.alert(error.message);}};
+  stockImportButton?.insertAdjacentElement('afterend',updatesButton);updatesButton.insertAdjacentElement('afterend',undoResourcesButton);
   const reviewButton=document.createElement('button');reviewButton.type='button';reviewButton.textContent='Previsualizar y comprobar para Admira';reviewButton.dataset.admiraReview='';reviewButton.onclick=exportStageToAdmiraStock;stockExportButton?.insertAdjacentElement('beforebegin',reviewButton);
   importAdmiraStockAssetFromQuery().catch(error => { if (stockExportButton) stockExportButton.disabled = true; window.alert(error.message); });
 
