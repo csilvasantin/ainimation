@@ -3,6 +3,9 @@ document.addEventListener('pointerdown',event=>{if(event.target.closest?.('[data
 function toggleInterface(){
  const button=document.querySelector('[data-director-interface-toggle]');
  const focused=document.body.classList.toggle('director-focus');
+ // H can hide the menu or panel that currently owns keyboard focus.
+ // Keep the next Tab in the visible Stage/Score workspace.
+ if(focused&&document.activeElement instanceof HTMLElement&&!document.activeElement.getClientRects().length)button?.focus({preventScroll:true});
  document.dispatchEvent(new CustomEvent('director:interface',{detail:{visible:!focused}}));
  button?.setAttribute('aria-pressed',String(!focused));
  button?.setAttribute('aria-label',document.documentElement.lang==='en'?(focused?'Show interface · H':'Hide interface · H'):(focused?'Mostrar interfaz · H':'Ocultar interfaz · H'));
