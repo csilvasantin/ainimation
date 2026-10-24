@@ -1,0 +1,132 @@
+{
+  "feature": "history-comparison-copy-status-description",
+  "verifiedAt": "2026-10-24T22:00:28.342059+00:00",
+  "implementation": {
+    "featureCommit": "a75c3f0e9c713e8820d3fcb17f1fb5692e985299",
+    "ainimationReleaseCommit": "0981d07e2a62b1e78d055db1f290931cf5579d79",
+    "storeHelpCommit": "6ac2325b9f78d5d46385eeaf3c49e01ffa7f3e29",
+    "mcpCommit": "f7f5e6d64f2bd2a56b634ed8d014a3204eeb9712",
+    "interactiveModuleSha256": "5cf588fb58fb049fce550112235400dd1b814837de31f7ffd6cb6ebb7b1aa737",
+    "previewWorker": "5d5c5c6a-42b4-4730-9c7a-266e0ad6a7a0",
+    "mcpWorker": "3a371621-dfe3-4858-b7e2-74f15e2f2c46"
+  },
+  "preflight": {
+    "httpsAndInternalBrowserRecovered": true,
+    "previousPublicAinimationProofReadExact": true,
+    "savedBatchIdsLinksAndUtcMetadataMatchExistingBackup": true,
+    "noDnsNetworkTlsPermissionsOrConfigurationChanged": true
+  },
+  "semantics": {
+    "onlyExistingCopyComparisonSummaryButtonAddsDescription": true,
+    "existingStatusParagraphGetsGenericUniqueIdPerHistoryWithCollisionGuard": true,
+    "noPrivateDataDerivedIds": true,
+    "noNewNodesTextControlsRolesLiveAlternativeLabelsControlsExpandedTabindexOrFocus": true,
+    "nativeButtonNameAbsenceOfAriaLabelTypeAndInitialHiddenDisabledExact": true,
+    "existingRoleStatusMessagesAndUpdateTimingExact": true,
+    "reviewButtonControlsExpandedAndTextareaRemainSeparate": true,
+    "otherAccessibleRelationshipsRemainIntact": true,
+    "entireModuleByteIdenticalAfterRemovingNewCounterIdAndDescription": true,
+    "copyHandlersSummaryCalculationRevalidationsBusyStateAndCallbackGuardsByteUnchanged": true
+  },
+  "production": {
+    "initialLibraryProjects": 25,
+    "fullInitialLibraryAndOrderRetainedAfterReload": true,
+    "batches": 2,
+    "links": 10,
+    "languageAndPanelBoundsExact": true,
+    "ownDescriptionDistinctFromPairStatusMatchesFileScopeResultsFieldsAndBatchNotices": true,
+    "initialHiddenDisabledButtonAndEmptyNoticeExact": true,
+    "hiddenButtonAbsentFromAccessibleTreeInitially": true,
+    "manualComparisonCommon": 5,
+    "exclusiveFirst": 0,
+    "exclusiveSecond": 0,
+    "differentSavedStates": 0,
+    "manualPreviewMessageExact": true,
+    "summaryCharacters": 709,
+    "reviewValueExactAgainstReference": true,
+    "nativeTabFromReviewToCopyAndBackWithoutCopyActivation": true,
+    "swapInvalidatesResultNoticeAndReadonlyValue": true,
+    "manualPairRestorationAndFilteredReviewExact": true,
+    "guideFiveStepsAndBatchMetadataTextExact": true,
+    "allExistingDescriptionReferencesResolveUniquelyAfterReload": true,
+    "domAndAccessibilityTreeInspected": true,
+    "specificScreenReaderTestClaimed": false,
+    "noRealClipboardCopiesReadsWritesVersionChecksCancelCheckViewOrCheckCsv": true
+  },
+  "exports": {
+    "comparison-copy-status-summary-filtered.txt": {
+      "bytes": 723,
+      "sha256": "7b165b8ebee2f39f30a2ca2eaf2796834526495b39c08e085f15cbe15fb4fdf1"
+    },
+    "comparison-copy-status-comparison-filtered.csv": {
+      "bytes": 4626,
+      "sha256": "a1ec788484362ee9ad87e7ff5dd5d059494a3ce3778031b60acd8a236bc7b586"
+    },
+    "comparison-copy-status-v9-filtered.csv": {
+      "bytes": 1929,
+      "sha256": "34bdae288ab5fe70b4ce6fb8907dd87a33ac190ef8952a658c4ad12523ea4ac9"
+    }
+  },
+  "isolated": {
+    "languages": [
+      "es",
+      "en"
+    ],
+    "twoIndependentHistoriesAndDistinctOwnStatusIds": true,
+    "genericIdCollisionProtected": true,
+    "sameNamesAndRevisionsWithDistinctLongValidBatchIds": true,
+    "emptyIncompleteRepeatedAndReadyPairMessagesAndBlocksExact": true,
+    "selectionSearchOrderAndViewAddNoStorageReadsQueriesWritesCopiesDownloadsOrComparisons": true,
+    "onlyInjectedStorageWriteClipboardDownloadVersionRequestAndFictitiousData": true,
+    "versionQueries": 0,
+    "nativeKeyboardManualCompareAndCopy": true,
+    "busyDisablesCopyAndReviewWithExactStatus": true,
+    "successAndDeniedMessagesExact": true,
+    "deniedCopyRetainsUniqueReadonlyAreaFullSelectionFocusAndNativeKeyboard": true,
+    "payloadAndReadonlyReviewExactAgainstPureSummary": [
+      {
+        "language": "es",
+        "bytes": 725,
+        "sha256": "9c7679c779e796786381be008aff3099c22bb644e50d3c415c6fa6cd79e2ab2f",
+        "exactReadonlyPayloadAndFilteredReview": true
+      },
+      {
+        "language": "en",
+        "bytes": 681,
+        "sha256": "2b1605f1d642251157cfa3fffa5b7c251ead7e1300abcae81f15a01529308c97",
+        "exactReadonlyPayloadAndFilteredReview": true
+      }
+    ],
+    "filteredSearchOrderAndViewDoNotReduceSummary": true,
+    "eightAcceptedDeniedLateCallbacksAfterPairNewComparisonFilterAndReopenDiscarded": true,
+    "noOldNoticeReadonlyValueFallbackFocusOrCrossHistoryEffects": true,
+    "changedDeniedStorageBeforeAndAfterCopyStillBlocks": true,
+    "emptyUnreadableHistorySimulated": true,
+    "temporaryTabAndServerClosed": true
+  },
+  "validation": {
+    "interactiveTests": 231,
+    "interactiveFailures": 0,
+    "targetedMcpHelpTests": 1,
+    "unrelatedKnownMcpFailuresNotRerun": 15,
+    "standaloneWorkerBundle": true,
+    "bilingualHelpSurfacesUpdated": 10,
+    "publicBilingualHelpSurfacesVerified": 6,
+    "protectedHelpSourcesUpdatedWithoutBypass": true,
+    "actualMcpHelpBilingual": true,
+    "storeHelpCanonicalCi": 40136517154,
+    "storeHelpCanonicalCiConclusion": "success",
+    "storeHelpCanonicalDeployment": "https://427012a1.admira-store.pages.dev"
+  },
+  "preserved": {
+    "canonicalStoreLocalCss": {
+      "tokens": "7473512a",
+      "nav": "d92633d3"
+    },
+    "otherPublishedAssetsUntouchedByFunctionalCommit": true,
+    "latestPublishedSourcesIntegratedBeforeRelease": true,
+    "primaryWorkspaceUnmodified": true,
+    "inventoryHistoryProjectsReceiptsUnchanged": true,
+    "noRealClipboardVersionChecksImportsRestoresOrProductionFailures": true
+  }
+}
