@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {editContext,returnCatalogue,catalogueVersion,readEditorProject,portableProject} from '../assets/admira-roundtrip.mjs';
 test('return links keep catalogue host and language, reject foreign and privileged paths',()=>{
+ assert.equal(returnCatalogue('https://www.admira.studio/en/stock.html'),'https://www.admira.studio/en/stock.html');
  assert.equal(returnCatalogue('https://evil.test/stock.html'),'https://admira.studio/stock.html');
  assert.equal(returnCatalogue('https://admira.studio/auth/callback'),'https://admira.studio/stock.html');
  const context=editContext(new URLSearchParams({admiraStockId:'old-1',admiraReturnUrl:'https://www.admira.studio/stock.html?cliente=demo'}));

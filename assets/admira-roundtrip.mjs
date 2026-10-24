@@ -1,7 +1,7 @@
 const ID=/^[A-Za-z0-9-]{1,160}$/;
 const ORIGINS=new Set(['https://admira.studio','https://www.admira.studio','https://pixeria.com','https://www.pixeria.com']);
 export function returnCatalogue(value){
-  try{const u=new URL(value);if(ORIGINS.has(u.origin)&&/^\/stock(?:\.html|\/)?$/.test(u.pathname)){u.hash='';u.searchParams.delete('highlight');return u.href;}}catch{}
+  try{const u=new URL(value);if(ORIGINS.has(u.origin)&&/^\/(?:en\/)?stock(?:\.html|\/)?$/.test(u.pathname)){u.hash='';u.searchParams.delete('highlight');return u.href;}}catch{}
   return 'https://admira.studio/stock.html';
 }
 export function editContext(params){
