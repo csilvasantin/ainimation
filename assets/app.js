@@ -4136,8 +4136,8 @@ function renderStageAnimationBlob(onProgress) {
   // misma pieza en este equipo: 540p tarda 3,0 s y pesa 387 KB, 1080p tarda
   // 2,9 s y pesa 453 KB. Subir la resolución NO cuesta tiempo porque el reloj lo
   // marca la reproducción, no el tamaño del lienzo; sólo son unos KB más.
-  canvas.width = 1920;
-  canvas.height = 1080;
+  canvas.width = stageWidthPixels;
+  canvas.height = stageHeightPixels;
   const ctx = canvas.getContext("2d");
   if (!ctx || typeof canvas.captureStream !== "function") {
     return Promise.reject(new Error("Video export is not available in this browser yet."));
