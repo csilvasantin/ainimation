@@ -3928,13 +3928,14 @@ function stageAnimationSignature(plan = currentPlan()) {
   });
 }
 
-function getStageAnimationCapture(onProgress) {
+function getStageAnimationCapture(onProgress, signal) {
+  if(signal?.aborted)return Promise.reject(new DOMException("Cancelado", "AbortError"));
   const signature = stageAnimationSignature();
   if (stageAnimationCaptureCache?.signature === signature) {
     if (stageAnimationCaptureCache.blob) return Promise.resolve(stageAnimationCaptureCache.blob);
     if (stageAnimationCaptureCache.promise) return stageAnimationCaptureCache.promise;
   }
-  const promise = renderStageAnimationBlob(onProgress)
+  const promise = renderStageAnimationBlob(onProgress, signal)
     .then((blob) => {
       stageAnimationCaptureCache = { signature, blob };
       return blob;
@@ -4125,7 +4126,7 @@ function drawStageDomFrame(ctx, stage, width, height) {
   });
 }
 
-function renderStageAnimationBlob(onProgress) {
+function renderStageAnimationBlob(onProgress, signal) {
   const stage = document.querySelector(".stage-canvas");
   const plan = currentPlan();
   const fps = Number(document.querySelector("[data-score-fps]")?.dataset.value || 24);
@@ -4161,16 +4162,20 @@ function renderStageAnimationBlob(onProgress) {
   let stopped = false;
 
   return new Promise((resolve, reject) => {
+    const cleanup=()=>{if(animationFrame)window.clearTimeout(animationFrame);signal?.removeEventListener('abort',abort);stream.getTracks().forEach(track=>track.stop());};
+    const abort=()=>{stopped=true;cleanup();reject(new DOMException('Cancelado','AbortError'));if(recorder.state!=='inactive')recorder.stop();};
+    signal?.addEventListener('abort',abort,{once:true});
+    if(signal?.aborted){abort();return;}
     recorder.addEventListener("dataavailable", (event) => {
       if (event.data?.size) chunks.push(event.data);
     });
     recorder.addEventListener("error", () => {
-      if (animationFrame) window.clearTimeout(animationFrame);
+      stopped=true;cleanup();
       syncStageToFrame(currentTimelineFrame(), false);
       reject(new Error("Could not record Stage animation."));
     });
     recorder.addEventListener("stop", () => {
-      if (animationFrame) window.clearTimeout(animationFrame);
+      cleanup();
       syncStageToFrame(currentTimelineFrame(), false);
       resolve(new Blob(chunks, { type: "video/webm" }));
     });
@@ -5577,9 +5582,9 @@ async function exportStageToAdmiraStock() {
     const preflight = await import('./admira-preflight.mjs?v=preflight-1');
     const inspection=preflight.inspectDirector(editorProject.plan,{compileScripts:window.Admingo?.compileScripts});
     const currentSnapshot=()=>{const value=currentPlan();value.markers=window.loadTimelineMarkers?.(totalTimelineFrames(value))||value.markers||[];return value;};
-    review=await preflight.openPublicationReview({snapshot:plan,getCurrent:currentSnapshot,inspection,kind:isInteractive?'interactive':'video',makePreview:async()=>{
+    review=await preflight.openPublicationReview({snapshot:plan,getCurrent:currentSnapshot,inspection,kind:isInteractive?'interactive':'video',makePreview:async({signal})=>{
       if(isInteractive){const built=await window.ainXperiencia?.build(editorProject.plan);if(!built?.exportedHtml)throw Error('No se ha podido preparar el interactivo.');return{html:built.exportedHtml,blob:new Blob([built.exportedHtml],{type:'text/html'})};}
-      return{blob:await getStageAnimationCapture()};
+      return{blob:await getStageAnimationCapture(undefined,signal)};
     }});
     if(!review)return;
     const blob=review.artifact.blob;
