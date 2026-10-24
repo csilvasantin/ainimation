@@ -324,7 +324,7 @@ export function mountDeliveryHistory({button,storage,doc=document,download,onReu
    do{csvScope.id='ainimation-history-batch-csv-scope-'+(++batchCsvScopeSequence);}while(doc.getElementById?.(csvScope.id));exportButton.setAttribute('aria-describedby',csvScope.id);
    const links=deliveryBatchLinks(b,doc.documentElement.lang),copy=make('button',t('Copiar enlaces','Copy links')),copyStatus=make('p'),fallback=make('label',t('Enlaces del lote para copiar','Batch links to copy')),copyText=make('textarea');
    copy.type='button';copy.className='history-copy';copy.disabled=!links.count;copy.setAttribute('aria-label',t('Copiar enlaces de ','Copy links for ')+b.projectTitle+' · '+t('versión ','version ')+b.revision+' · '+b.createdAt);copyStatus.className='history-copy-status';copyStatus.setAttribute('role','status');fallback.className='history-copy-fallback';fallback.hidden=true;copyText.readOnly=true;copyText.rows=8;fallback.append(copyText);
-   do{copyStatus.id='ainimation-history-batch-copy-status-'+(++batchCopyStatusSequence);}while(doc.getElementById?.(copyStatus.id));copy.setAttribute('aria-describedby',copyStatus.id);
+   do{copyStatus.id='ainimation-history-batch-copy-status-'+(++batchCopyStatusSequence);}while(doc.getElementById?.(copyStatus.id));copy.setAttribute('aria-describedby',copyStatus.id);copyText.setAttribute('aria-describedby',copyStatus.id);
    if(!links.count)copyStatus.textContent=links.summary+'. '+t('No hay enlaces confirmados para copiar.','There are no confirmed links to copy.');
    copy.onclick=async()=>{
     if(copy.disabled)return;copy.disabled=true;fallback.hidden=true;copyStatus.textContent=t('Copiando enlaces…','Copying links…');
