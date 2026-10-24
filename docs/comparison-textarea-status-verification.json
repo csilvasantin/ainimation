@@ -1,0 +1,157 @@
+{
+  "feature": "comparison-summary-textarea-own-status-description",
+  "verifiedAt": "2026-10-24T23:40:28.132537+00:00",
+  "change": {
+    "onlyExistingTextareaDescribed": true,
+    "sameOwnStatusAsPreviewAndCopy": true,
+    "existingFieldIdAndReviewControlsSeparate": true,
+    "noNewNodesIdsOrText": true,
+    "sourceWithoutSingleAttributeByteExact": true,
+    "publicModuleSha256": "3fe25162fc5c32e5401534e97ed3bdf19def9400519737b5c1a1d7d08066b26c"
+  },
+  "validation": {
+    "interactiveTests": 231,
+    "interactiveFailures": 0,
+    "targetedRealMcpHelpTests": 1,
+    "otherKnownMcpFailuresOutOfScope": 15,
+    "localLanguages": [
+      "es",
+      "en"
+    ],
+    "twoIndependentHistories": true,
+    "genericCollisionAvoided": true,
+    "sameNamesAndRevisionsDistinctLongIds": true,
+    "emptyIncompleteSameReadyPairs": true,
+    "emptyUnreadableChangedDeniedSimulations": true,
+    "lateAcceptedAndDeniedCallbacksDiscarded": 8,
+    "nativeKeyboardReviewAndReadonlyFieldTabOrder": true,
+    "readonlyRows8NativeLabelAndParentHidingPreserved": true,
+    "noOwnHiddenDisabledAlternateLabelAdded": true,
+    "manualReviewRevalidationPreserved": true,
+    "closingReviewAddsNoReads": true,
+    "busySuccessDeniedCopyInjectedOnly": true,
+    "payloads": [
+      {
+        "lang": "es",
+        "chars": 713,
+        "bytes": 725,
+        "sha256": "9c7679c779e796786381be008aff3099c22bb644e50d3c415c6fa6cd79e2ab2f",
+        "payloadAndFallbackExact": true
+      },
+      {
+        "lang": "en",
+        "chars": 679,
+        "bytes": 681,
+        "sha256": "2b1605f1d642251157cfa3fffa5b7c251ead7e1300abcae81f15a01529308c97",
+        "payloadAndFallbackExact": true
+      }
+    ],
+    "noVersionQueries": true,
+    "noRealClipboardUse": true,
+    "noProductionVersionChecks": true,
+    "previousCopyBeforeAfterStorageGuardsPreservedByByteExactLogic": true
+  },
+  "production": {
+    "manualPairRevisions": [
+      8,
+      9
+    ],
+    "common": 5,
+    "onlyFirst": 0,
+    "onlySecond": 0,
+    "differentSavedStates": 0,
+    "fullSummaryCharacters": 709,
+    "filteredSummaryExact": true,
+    "nativeReviewOpenCloseReopen": true,
+    "nativeTabShiftTabVisibleField": true,
+    "swapInvalidatesSummaryStatusResults": true,
+    "initialProjectCount": 25,
+    "sameLibraryAfterReload": true,
+    "batchCount": 2,
+    "confirmedLinkCount": 10,
+    "guideSteps": 5,
+    "duplicateIds": 0,
+    "orphanReferences": 0,
+    "panelUnmoved": true,
+    "domAndAccessibilityTreeInspected": true,
+    "noSpecificScreenReaderClaim": true,
+    "exports": [
+      {
+        "file": "comparison-textarea-status-summary-filtered.txt",
+        "bytes": 723,
+        "sha256": "7b165b8ebee2f39f30a2ca2eaf2796834526495b39c08e085f15cbe15fb4fdf1",
+        "exact": true
+      },
+      {
+        "file": "comparison-textarea-status-comparison-filtered.csv",
+        "bytes": 4626,
+        "sha256": "a1ec788484362ee9ad87e7ff5dd5d059494a3ce3778031b60acd8a236bc7b586",
+        "exact": true
+      },
+      {
+        "file": "comparison-textarea-status-v9-filtered.csv",
+        "bytes": 1929,
+        "sha256": "34bdae288ab5fe70b4ce6fb8907dd87a33ac190ef8952a658c4ad12523ea4ac9",
+        "exact": true
+      }
+    ]
+  },
+  "help": {
+    "bilingualSourceSurfaces": 10,
+    "realMcpVerified": true,
+    "publicRoutes": [
+      {
+        "path": "admira-xp/docs/ainimation-screen-delivery.md",
+        "es": true,
+        "en": true
+      },
+      {
+        "path": "admira-xp/help.html",
+        "es": true,
+        "en": true
+      },
+      {
+        "path": "mcp/index.html",
+        "es": true,
+        "en": true
+      },
+      {
+        "path": "mcp/manifest.json",
+        "es": true,
+        "en": true
+      },
+      {
+        "path": "mcp/llms.txt",
+        "es": true,
+        "en": true
+      },
+      {
+        "path": "mcp/funcionalidades.json",
+        "es": true,
+        "en": true
+      }
+    ],
+    "canonicalStoreLocalStyles": {
+      "tokens": "4534 B, v=7473512a",
+      "nav": "4677 B, v=d92633d3"
+    }
+  },
+  "release": {
+    "ainimationFeature": "6d662aa",
+    "ainimationStamp": "08bcb02",
+    "storeHelp": "43a0d5417b6ca64debbad3dd17b0b43e3b52c542",
+    "mcpHelp": "30328c7",
+    "previewWorker": "dd4f58d1-501b-4cf4-980d-32bbd19f818c",
+    "mcpWorker": "bf3eb782-6662-40f3-afaf-8eea4911e0a6",
+    "storeHelpCi": 40143539217,
+    "storeHelpCiConclusion": "success",
+    "storeHelpDeployment": "https://6c6f84ae.admira-store.pages.dev"
+  },
+  "preserved": [
+    "all existing history/comparison relationships and functions",
+    "manual actions, current guards and exact status messages",
+    "all existing library/history/project/session data and language",
+    "other publications and canonical package with local styles"
+  ],
+  "temporaryBrowserAndServerClosed": true
+}
