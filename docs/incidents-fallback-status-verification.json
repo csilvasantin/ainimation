@@ -1,0 +1,140 @@
+{
+  "feature": "history-batch-incidents-fallback-status-description",
+  "verifiedAt": "2026-10-24T15:24:52.707978+00:00",
+  "implementation": {
+    "featureCommit": "2dc287288db1d23b54bd1de9c1ee325c7fcd0697",
+    "ainimationReleaseCommit": "9a217da91ee660f033c93433c64fd8a996a3cdb8",
+    "storeHelpCommit": "a353553e411ffc6b5dee4c22d6969ed50d317fde",
+    "mcpCommit": "ef4ffd30ad45b1c834514ed97a9845ac742f02f4",
+    "interactiveModuleSha256": "d395995f8d25ba1b1bf83637e76dcd54e7ad7b320769c540c695083c46de053e",
+    "previewWorker": "72217bf9-4263-4a91-ac4e-bb1eb0d25a8b",
+    "mcpWorker": "f47daf1b-067e-45c5-ba39-376afa1e2bc1"
+  },
+  "semantics": {
+    "onlyExistingIncidentFallbackTextareaAddsDescription": true,
+    "sameExistingGenericOwnStatusIdAsCopyButton": true,
+    "noNewIdsLabelsTextareasParagraphsTextControlsRolesLiveTabindexAlternativeLabelsControlsExpandedOrFocus": true,
+    "nativeWrappedLabelsReadonlyRowsEightValuesFocusSelectionAndVisibilityExact": true,
+    "noHiddenOrDisabledAddedToTextarea": true,
+    "existingStatusRoleMessagesAndTimingUnchanged": true,
+    "descriptionDistinctFromOtherStatusesCountsFileScopesMetadataAndFields": true,
+    "otherControlsRemainUnchanged": true,
+    "entireModuleByteIdenticalAfterRemovingSingleAddedAttribute": true,
+    "copyHandlersSummaryCalculationValidationAndCallbackGuardsByteUnchanged": true
+  },
+  "production": {
+    "batches": 2,
+    "links": 10,
+    "initialLibraryProjects": 25,
+    "fullInitialLibraryAndOrderRetainedAfterReload": true,
+    "panelBoundsAndLanguageExact": true,
+    "twoOwnDescriptionsSharedWithRespectiveCopyButtons": true,
+    "initialLabelHiddenTextareaReadonlyRowsEightEmptyNotHiddenOrDisabledItself": true,
+    "nativeNamesAttributesAndEmptyStatusExactAgainstBaseline": true,
+    "hiddenFallbackAbsentFromAccessibleTreeInitially": true,
+    "noRealCopiesClipboardReadsWritesVersionChecksCancelViewOrCheckCsv": true,
+    "nativeKeyboardAndPointerCollapseOpen": true,
+    "filterV9OwnReferenceAndClearBothWithoutOrphans": true,
+    "manualComparisonCommon": 5,
+    "exclusiveFirst": 0,
+    "exclusiveSecond": 0,
+    "differentSavedStates": 0,
+    "summaryCharacters": 709,
+    "summaryReviewExact": true,
+    "txtComparisonCsvAndOriginalCsvExactAfterReload": true,
+    "guideMetadataAndAllPreviousAccessibleRelationshipsPreserved": true,
+    "domAndAccessibilityTreeInspected": true,
+    "specificScreenReaderTestClaimed": false
+  },
+  "exports": {
+    "incidents-fallback-status-summary-filtered.txt": {
+      "bytes": 723,
+      "sha256": "7b165b8ebee2f39f30a2ca2eaf2796834526495b39c08e085f15cbe15fb4fdf1"
+    },
+    "incidents-fallback-status-comparison-filtered.csv": {
+      "bytes": 4626,
+      "sha256": "a1ec788484362ee9ad87e7ff5dd5d059494a3ce3778031b60acd8a236bc7b586"
+    },
+    "incidents-fallback-status-v9-filtered.csv": {
+      "bytes": 1929,
+      "sha256": "34bdae288ab5fe70b4ce6fb8907dd87a33ac190ef8952a658c4ad12523ea4ac9"
+    }
+  },
+  "isolated": {
+    "languages": [
+      "es",
+      "en"
+    ],
+    "sameNamesAndRevisionsWithDistinctIds": true,
+    "longValidIdsAndExistingGenericCollision": true,
+    "fourDistinctOwnDescriptionsInTwoIndependentHistories": true,
+    "allFourSavedStatesZeroSuccessAndNoIssuesBothLanguages": true,
+    "onlyInjectedVersionRequestWriteClipboardDownloadWithFictitiousData": true,
+    "deniedCopyShowsOwnNativeLabelReadonlyRowsEightExactValue": true,
+    "nativeCopyFocusAndCompleteSelectionFromZeroToLengthPreserved": true,
+    "nativeTabOutAndShiftTabBackWithoutTextareaEditing": true,
+    "successBusyDeniedMessagesSingularPluralExact": true,
+    "readonlyValuesAndPayloadsExactAgainstPureSummary": [
+      {
+        "language": "es",
+        "incidents": 1,
+        "readonlyValueAndCopyPayloadExactAgainstPureSummary": true,
+        "bytes": 278,
+        "sha256": "294e26fff60b2b3bad9c9c7ce463666be19b850e2886c5046ec7a74fa0785ac9"
+      },
+      {
+        "language": "en",
+        "incidents": 2,
+        "readonlyValueAndCopyPayloadExactAgainstPureSummary": true,
+        "bytes": 463,
+        "sha256": "0f74b6c7459312805b6ef3c225523b7ba45e92e0c14058b50fcbc23a29c4bb9b"
+      },
+      {
+        "language": "en",
+        "incidents": 1,
+        "readonlyValueAndCopyPayloadExactAgainstPureSummary": true,
+        "bytes": 240,
+        "sha256": "9c7d2e210dd43622a47695cf4950d441d53d2c47425a3f8f774bc76606668e5d"
+      },
+      {
+        "language": "es",
+        "incidents": 2,
+        "readonlyValueAndCopyPayloadExactAgainstPureSummary": true,
+        "bytes": 501,
+        "sha256": "0c36bd617fd43e0e46866fbecca80d7d5ee3509c7f320e0bcaa8416252b22f15"
+      }
+    ],
+    "fullSummaryIdenticalAcrossVisibleViews": true,
+    "sixAcceptedDeniedLateCallbacksAfterNewReportFilterReopenDiscarded": true,
+    "noStaleValuesMessagesFallbackFocusOrCrossHistoryReferences": true,
+    "combinedFiltersAndOtherNoticesIndependent": true,
+    "emptyUnreadableHistorySimulated": true,
+    "renderFilterToggleAddsNoReadsQueriesWritesCopiesDownloadsOrComparisons": true,
+    "temporaryTabAndServerClosed": true
+  },
+  "validation": {
+    "interactiveTests": 231,
+    "interactiveFailures": 0,
+    "targetedMcpHelpTests": 1,
+    "standaloneWorkerBundle": true,
+    "bilingualHelpSurfacesUpdated": 10,
+    "publicBilingualHelpSurfacesVerified": 6,
+    "protectedHelpSourcesUpdatedWithoutBypass": true,
+    "actualMcpHelpBilingual": true,
+    "unrelatedKnownMcpFailuresNotRerun": 15,
+    "storeHelpCanonicalCi": 40106614833,
+    "storeHelpCanonicalCiConclusion": "success",
+    "storeHelpCanonicalDeployment": "https://27462408.admira-store.pages.dev"
+  },
+  "preserved": {
+    "canonicalStoreLocalCss": {
+      "tokens": "7473512a",
+      "nav": "d92633d3"
+    },
+    "otherPublishedAssetsUntouchedByFunctionalCommit": true,
+    "latestPublishedSourcesIntegratedBeforeRelease": true,
+    "primaryWorkspaceUnmodified": true,
+    "inventoryHistoryProjectsReceiptsUnchanged": true,
+    "noRealClipboardVersionChecksImportsRestoresOrProductionFailures": true
+  }
+}
