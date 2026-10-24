@@ -1,0 +1,53 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Admira Walkman · Xperiencia · ainimation</title><meta name="theme-color" content="#1b1b1d">
+<style>
+:root{--mate:#2b2b2f;--acento:#e8572a;--crema:#f2efe6}
+*{box-sizing:border-box}html,body{margin:0;height:100%}
+body{min-height:100dvh;background:#141416;color:var(--crema);font-family:-apple-system,Inter,Roboto,sans-serif;display:flex;flex-direction:column;padding:env(safe-area-inset-top) 16px env(safe-area-inset-bottom)}
+main{flex:1;display:flex;flex-direction:column;gap:18px;align-items:center;justify-content:space-evenly;padding:16px 0}
+.cinta{width:min(92vw,560px);aspect-ratio:1.6;background:linear-gradient(#3a3a40,#24242a);border-radius:18px;position:relative;box-shadow:0 10px 30px #0008}
+.cinta .eti{position:absolute;inset:10% 8% auto;height:30%;background:var(--crema);color:#222;border-radius:6px;display:flex;align-items:center;justify-content:space-between;padding:0 4%;font-weight:800;font-size:clamp(11px,2.6vw,18px)}
+.bob{position:absolute;top:52%;width:22%;aspect-ratio:1;border-radius:50%;border:6px dashed #ccc;background:#111}
+.bob.i{left:18%}.bob.d{right:18%}.on .bob{animation:g 1.6s linear infinite}@keyframes g{to{transform:rotate(360deg)}}
+.teclas{display:flex;gap:10px}button{font:700 18px ui-monospace,monospace;color:#fff;background:var(--mate);border:0;border-radius:8px;width:64px;height:46px}
+button:disabled{opacity:.4}.ext{display:grid;gap:16px;justify-items:center;width:100%}
+.vu{display:grid;gap:6px;background:var(--mate);padding:10px;border-radius:8px;width:min(92vw,320px)}
+.vu div{height:8px;border-radius:4px;background:linear-gradient(90deg,#3c3,#ec3,var(--acento));transform-origin:left;transform:scaleX(0)}
+.eq{display:flex;gap:18px}.eq label{display:grid;justify-items:center;font:11px monospace;color:#aaa}
+.eq input{writing-mode:vertical-lr;direction:rtl;height:110px}
+#vacio{text-align:center;opacity:.8;font-size:14px;max-width:36ch}
+@media (max-width:599px){.ext{display:none}.cinta{width:88vw}}
+@media (min-width:600px){.cinta{width:min(86vw,760px,calc((100dvh - 520px)*1.6))}button{width:84px;height:58px;font-size:22px}.eq input{height:clamp(110px,18dvh,220px)}.vu{width:min(80vw,480px)}.vu div{height:12px}}
+</style></head><body><main id="m">
+<div class="cinta" id="cinta"><div class="eti"><span id="cara">CARA A</span><span id="tit">—</span><span>ADMIRA NR</span></div><div class="bob i"></div><div class="bob d"></div></div>
+<p id="vacio" hidden>Sin pistas para <b id="cli"></b> en hilomusical. Cuando se carguen canciones, sonarán aquí.</p>
+<div class="teclas"><button id="rw" aria-label="Retroceder">◀◀</button><button id="pp" aria-label="Play">▶</button><button id="ff" aria-label="Avanzar">▶▶</button><button id="ab" aria-label="Cara A/B">A/B</button></div>
+<section class="ext"><div class="vu"><div id="vl"></div><div id="vr"></div></div>
+<div class="eq" id="eq"></div><label><input type="checkbox" id="cinta-modo" checked> MODO CINTA</label></section>
+</main><script>
+const q=new URLSearchParams(location.search),store=q.get('store')||'starbucks';
+const API='https://api.admira.store/hilomusical/next?store='+encodeURIComponent(store);
+const F=[60,230,910,3600,14000],$=id=>document.getElementById(id);
+let lista=[],i=0,cara='A',ctx,au=new Audio(),eqs=[],an,anR,sat;au.crossOrigin='anonymous';
+F.forEach((f,k)=>{const l=document.createElement('label');l.innerHTML=`<input type=range min=-12 max=12 value=0 step=1 data-k=${k}>${f>=1000?f/1000+'k':f}`;$('eq').append(l)});
+$('eq').oninput=e=>{const k=e.target.dataset.k;if(eqs[k])eqs[k].gain.value=+e.target.value};
+function grafo(){if(ctx)return;ctx=new AudioContext();let n=ctx.createMediaElementSource(au);
+ eqs=F.map((f,k)=>{const b=ctx.createBiquadFilter();b.type=k==0?'lowshelf':k==4?'highshelf':'peaking';b.frequency.value=f;b.Q.value=1;n.connect(b);n=b;return b});
+ sat=ctx.createWaveShaper();n.connect(sat);modo();const sp=ctx.createChannelSplitter(2);sat.connect(sp);sat.connect(ctx.destination);
+ an=ctx.createAnalyser();anR=ctx.createAnalyser();sp.connect(an,0);sp.connect(anR,1);vu()}
+function modo(){if(!sat)return;const c=new Float32Array(256),on=$('cinta-modo').checked;for(let k=0;k<256;k++){const x=k/128-1;c[k]=on?Math.tanh(1.6*x)/Math.tanh(1.6):x}sat.curve=c;au.playbackRate=on?0.995:1}
+$('cinta-modo').onchange=modo;
+function vu(){const b=new Float32Array(512),r=a=>{a.getFloatTimeDomainData(b);let s=0;for(const v of b)s+=v*v;const db=20*Math.log10(Math.max(Math.sqrt(s/b.length),1e-4));return Math.max(0,Math.min(1,(db+48)/48))};
+ $('vl').style.transform=`scaleX(${r(an)})`;$('vr').style.transform=`scaleX(${r(anR)})`;requestAnimationFrame(vu)}
+const url=t=>t&&(t.url||t.src||t.audio||t.file);
+function carga(){const t=lista[i];if(!t)return;au.src=url(t);$('tit').textContent=(t.title||t.titulo||'Pista '+(i+1)).slice(0,28)}
+function estado(on){$('cinta').classList.toggle('on',on);$('pp').textContent=on?'■':'▶'}
+$('pp').onclick=async()=>{if(!lista.length)return;grafo();await ctx.resume();if(au.paused){await au.play().catch(()=>{});estado(!au.paused)}else{au.pause();estado(false)}};
+$('ff').onclick=()=>{if(!lista.length)return;i=(i+1)%lista.length;const p=!au.paused;carga();if(p)au.play()};
+$('rw').onclick=()=>{if(au.currentTime>3||!lista.length)au.currentTime=0;else{i=(i-1+lista.length)%lista.length;carga()}};
+$('ab').onclick=()=>{cara=cara=='A'?'B':'A';$('cara').textContent='CARA '+cara;if(lista.length){lista.reverse();i=0;carga()}};
+au.onended=()=>$('ff').onclick();
+fetch(API).then(r=>r.json()).then(d=>{lista=(d.playlist||[]).filter(url)}).catch(()=>{}).finally(()=>{
+ const v=!lista.length;$('vacio').hidden=!v;$('cli').textContent=store;['pp','ff','rw'].forEach(k=>$(k).disabled=v);carga()});
+</script></body></html>

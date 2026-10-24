@@ -25,6 +25,14 @@
       "url": "https://www.ainimation.studio/xperiencias/admira-en-3-pasos/",
       "plan": "https://www.ainimation.studio/xperiencias/admira-en-3-pasos/plan.json",
       "rules": "https://www.ainimation.studio/xperiencias/admira-en-3-pasos/rules.json"
+    },
+    {
+      "slug": "walkman",
+      "title": "Admira Walkman",
+      "blurb": "Cassette player Xperiencia fed by hilomusical: 5-band EQ, VU, tape mode, A/B side; compact and expanded layouts.",
+      "url": "https://www.ainimation.studio/xperiencias/walkman/",
+      "plan": "https://www.ainimation.studio/xperiencias/walkman/plan.json",
+      "rules": "https://www.ainimation.studio/xperiencias/walkman/rules.json"
     }
   ]
 }

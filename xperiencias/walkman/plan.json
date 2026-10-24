@@ -1,0 +1,5 @@
+{"title":"Admira Walkman","fps":24,"totalFrames":48,"durationSeconds":2,
+ "markers":[{"id":"m-parado","frame":1,"label":"PARADO"},{"id":"m-play","frame":2,"label":"PLAY"},{"id":"m-fin","frame":48,"label":"FIN-PLAY"}],
+ "cast":[],"stageItems":[
+  {"id":"cinta","type":"text","spriteName":"cinta","interactive":false,"startFrame":1,"durationFrames":48,"text":"ADMIRA NR","color":"#f8f7f2","keyframes":[{"frame":1,"x":10,"y":10,"w":80,"h":40,"opacity":1,"rotation":0,"easing":"linear","color":"#f8f7f2","text":"ADMIRA NR","fontWeight":"800","fontStyle":"normal","textDecoration":"none","textAlign":"center","fontSize":"4vw"}]},
+  {"id":"tecla-play","type":"text","spriteName":"tecla-play","interactive":true,"startFrame":1,"durationFrames":48,"text":"▶","color":"#ffffff","keyframes":[{"frame":1,"x":40,"y":70,"w":20,"h":12,"opacity":1,"rotation":0,"easing":"linear","color":"#ffffff","text":"▶","fontWeight":"800","fontStyle":"normal","textDecoration":"none","textAlign":"center","fontSize":"6vw"}]}]}
