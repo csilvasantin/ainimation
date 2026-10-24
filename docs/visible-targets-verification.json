@@ -1,0 +1,114 @@
+{
+  "feature": "saved-target-count-in-visible-general-history-batches",
+  "verifiedAt": "2026-10-24T00:18:04.959764+00:00",
+  "production": "https://www.ainimation.studio/interactivos/",
+  "release": {
+    "functional": "b64c683",
+    "stamp": "a5ae22b7969ef59bfb28fce3486b9bd27b19d854",
+    "worker": "1297ab80-4f8f-4a31-8f8a-eb6a91ea6ad5",
+    "preservedPublishedCapsuleCommit": "c5b3412",
+    "capsuleEditorModuleCssAndPreviewPublicByteExact": true,
+    "storeHelp": "ef41d3b21a596b6abc7d7e38690aa1242833a257",
+    "storeWorkflow": 40042507598,
+    "storeDeployment": "https://8947efcb.admira-store.pages.dev",
+    "canonicalLocalDesignCss": true,
+    "mcp": "ca392985283100e01dd9e4c7549494a766a3e8b6",
+    "mcpWorker": "c4baf861-a8be-4df5-a6ab-f1b8e8218f68"
+  },
+  "behavior": {
+    "onlyExistingGeneralFilterNoticeTextExtended": true,
+    "originalBatchCountPrefixRetained": true,
+    "sumsAllValidatedSavedEntriesOfAdmittedBatches": true,
+    "countsEverySavedState": true,
+    "repeatedIdentityCountsOnceInEachBatchWithoutDeduplicating": true,
+    "notOnlyConfirmedLinksOrSuccesses": true,
+    "existingFilterAdmissionOrderAndRowsUnchanged": true,
+    "noNewControlsAreasRolesLiveRegionsFocusOrAnnouncements": true,
+    "allExistingEmptyUnreadableAndActionNoticesPreserved": true,
+    "completeBackupScopeUnchanged": true
+  },
+  "realHistory": {
+    "unfilteredBatchCount": [
+      2,
+      2
+    ],
+    "unfilteredSavedTargets": 10,
+    "v9BatchCount": [
+      1,
+      2
+    ],
+    "v9SavedTargets": 5,
+    "nativeKeyboardClearRestoresTwoBatchesAndTenTargets": true,
+    "digit9StillMatchesBothProjectIds": true,
+    "realProjectAndCompleteKeepBothAndTen": true,
+    "noMatchingOutcomeShowsZeroTargetsAndExactEmptyMessage": true,
+    "generalFilteringRetiresComparisonWithExistingInvalidation": true,
+    "manual89CommonOnlyFirstOnlySecond": [
+      5,
+      0,
+      0
+    ],
+    "savedStateDifferences": [
+      0,
+      5
+    ],
+    "summaryCharacters": 709,
+    "summaryUtf8Bytes": 723,
+    "txtComparisonCsvOriginalCsvByteIdentical": true,
+    "historyBackupBatchesIdentical": true,
+    "noRealClipboardAccessOrVersionQueries": true
+  },
+  "isolated": {
+    "languages": [
+      "es",
+      "en"
+    ],
+    "zeroOneAndSeveralEntries": true,
+    "mixedStatesAndRepeatedIdentityAcrossBatches": true,
+    "combinedQueryProjectOutcomeFilters": true,
+    "twoHistoriesHaveIndependentCountsAndLists": true,
+    "filteringAddsNoReadsWritesQueriesCopiesDownloadsOrComparison": true,
+    "noBatchesOrUnreadableHistoryKeepsExplanationWithoutInventedCounts": true,
+    "csvSuccessAndSimulatedFailureMessagesUnchanged": true,
+    "reopeningResetsFiltersAndCounts": true,
+    "temporaryTabAndServerClosed": true
+  },
+  "preserved": {
+    "projectCount": 25,
+    "completeInitialLibraryNamesAndOrderUnchanged": true,
+    "batches": 2,
+    "confirmedLinks": 10,
+    "dialogBounds": {
+      "bottom": 708,
+      "height": 696,
+      "left": 182.5,
+      "right": 1082.5,
+      "top": 12,
+      "width": 900,
+      "x": 182.5,
+      "y": 12
+    },
+    "panelBoundsUnchanged": true,
+    "language": "es",
+    "allAccessibilityLinksGuardsValidationsAndSessionsUnchanged": true,
+    "allComparisonOutputsUnchanged": true,
+    "otherPublishedWorkRetainedWithoutDevelopingIt": true,
+    "primaryWorkspaceUntouched": true
+  },
+  "validation": {
+    "interactiveTests": 231,
+    "newMeaningfulBehaviorRegressionTests": 1,
+    "targetedMcpHelpTests": 1,
+    "publicBilingualHelpSurfaces": 6,
+    "liveMcpBilingualHelp": true,
+    "broaderUnrelatedHelpSuiteNotRepeated": true,
+    "knownPreExistingUnrelatedHelpFailures": 15,
+    "bundledRuntimeExecutesIndependently": true
+  },
+  "scope": "Only the existing general filter-notice render text gains a saved-target count calculated from already admitted validated batches in memory. No change to data, filtering, rows, identities, selection, actions, validations, accessibility structure or export bytes; no added operations, reads, queries, writes, clipboard activity, automatic comparisons/downloads, deliveries, assignments, restores or synchronization.",
+  "sha256": {
+    "txt": "7b165b8ebee2f39f30a2ca2eaf2796834526495b39c08e085f15cbe15fb4fdf1",
+    "comparisonCsv": "a1ec788484362ee9ad87e7ff5dd5d059494a3ce3778031b60acd8a236bc7b586",
+    "originalCsv": "34bdae288ab5fe70b4ce6fb8907dd87a33ac190ef8952a658c4ad12523ea4ac9"
+  }
+}
