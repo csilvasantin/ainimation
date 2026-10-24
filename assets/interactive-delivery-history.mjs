@@ -171,7 +171,7 @@ export function deliveryComparisonSummaryTxt(report,language='es'){
  const summary=deliveryComparisonSummary(report,language);
  return{filename:'ainimation-'+(language==='en'?'comparison-summary':'resumen-comparacion')+'-'+report.first.id+'-'+report.second.id+'.txt',type:'text/plain;charset=utf-8',content:summary.text};
 }
-let comparisonSummarySequence=0,comparisonResultsSequence=0,comparisonScopeSequence=0,comparisonStatusSequence=0,historyListSequence=0,historyStatusSequence=0,backupScopeSequence=0,batchCsvScopeSequence=0,comparisonMatchesSequence=0,batchRecordSequence=0;
+let comparisonSummarySequence=0,comparisonResultsSequence=0,comparisonScopeSequence=0,comparisonStatusSequence=0,historyListSequence=0,historyStatusSequence=0,backupScopeSequence=0,batchCsvScopeSequence=0,comparisonMatchesSequence=0,batchRecordSequence=0,batchCopyStatusSequence=0;
 export function mountDeliveryHistory({button,storage,doc=document,download,onReuse,writeClipboard,versionRequest=fetch,versionTimeoutMs=10000}){
  const t=(es,en)=>doc.documentElement.lang==='en'?en:es,make=(tag,value)=>{const n=doc.createElement(tag);if(value)n.textContent=value;return n;};
  const word=(n,esOne,esMany,enOne,enMany)=>t(n===1?esOne:esMany,n===1?enOne:enMany);
@@ -324,6 +324,7 @@ export function mountDeliveryHistory({button,storage,doc=document,download,onReu
    do{csvScope.id='ainimation-history-batch-csv-scope-'+(++batchCsvScopeSequence);}while(doc.getElementById?.(csvScope.id));exportButton.setAttribute('aria-describedby',csvScope.id);
    const links=deliveryBatchLinks(b,doc.documentElement.lang),copy=make('button',t('Copiar enlaces','Copy links')),copyStatus=make('p'),fallback=make('label',t('Enlaces del lote para copiar','Batch links to copy')),copyText=make('textarea');
    copy.type='button';copy.className='history-copy';copy.disabled=!links.count;copy.setAttribute('aria-label',t('Copiar enlaces de ','Copy links for ')+b.projectTitle+' · '+t('versión ','version ')+b.revision+' · '+b.createdAt);copyStatus.className='history-copy-status';copyStatus.setAttribute('role','status');fallback.className='history-copy-fallback';fallback.hidden=true;copyText.readOnly=true;copyText.rows=8;fallback.append(copyText);
+   do{copyStatus.id='ainimation-history-batch-copy-status-'+(++batchCopyStatusSequence);}while(doc.getElementById?.(copyStatus.id));copy.setAttribute('aria-describedby',copyStatus.id);
    if(!links.count)copyStatus.textContent=links.summary+'. '+t('No hay enlaces confirmados para copiar.','There are no confirmed links to copy.');
    copy.onclick=async()=>{
     if(copy.disabled)return;copy.disabled=true;fallback.hidden=true;copyStatus.textContent=t('Copiando enlaces…','Copying links…');
