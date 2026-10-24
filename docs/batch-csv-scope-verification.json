@@ -1,0 +1,96 @@
+{
+  "feature": "history-batch-csv-scope",
+  "verifiedAt": "2026-10-24T05:57:32.673081+00:00",
+  "implementation": {
+    "ainimationCommit": "6bf16957ebb8cc3cd4be7521569b9af25bd80cce",
+    "storeCommit": "aa11fc246e19e54cc46d3c64aaa1562a825dd320",
+    "mcpCommit": "ab1553a2758763959d9dd83c40ff59e121fbb95c",
+    "previewWorker": "b01760a4-7316-4359-b61b-e362eb61a329",
+    "mcpWorker": "d8b1089d-1393-4fee-89ae-fe4ac51fa4b9"
+  },
+  "scope": {
+    "oneOrdinaryParagraphPerBatch": true,
+    "insideNativeDetailsAfterActionsBeforeNotices": true,
+    "fullSavedResultsLengthAllStates": true,
+    "originalBatchOrderAndIdentityUnchanged": true,
+    "nativeCollapseHidesParagraph": true,
+    "noAddedControlsRolesLiveRegionsOrFocus": true,
+    "noNewStorageOrNetworkOperations": true
+  },
+  "production": {
+    "batches": 2,
+    "links": 10,
+    "initialLibraryProjects": 25,
+    "fullInitialLibraryAndOrderRetained": true,
+    "samePanelBoundsAndLanguage": true,
+    "eachBatchTargets": 5,
+    "filteredVersion9Batches": 1,
+    "filteredVersion9Targets": 5,
+    "clearFiltersRestoresBothWithoutDuplicates": true,
+    "comparisonInvalidationUnchanged": true,
+    "summaryCharacters": 709,
+    "summaryTxtExact": true,
+    "comparisonCsvExact": true,
+    "originalCsvExactBeforeAndAfterReload": true
+  },
+  "exports": {
+    "batch-csv-scope-summary.txt": {
+      "bytes": 723,
+      "sha256": "7b165b8ebee2f39f30a2ca2eaf2796834526495b39c08e085f15cbe15fb4fdf1"
+    },
+    "batch-csv-scope-comparison.csv": {
+      "bytes": 4626,
+      "sha256": "a1ec788484362ee9ad87e7ff5dd5d059494a3ce3778031b60acd8a236bc7b586"
+    },
+    "batch-csv-scope-original.csv": {
+      "bytes": 1929,
+      "sha256": "34bdae288ab5fe70b4ce6fb8907dd87a33ac190ef8952a658c4ad12523ea4ac9"
+    },
+    "batch-csv-scope-original-reloaded.csv": {
+      "bytes": 1929,
+      "sha256": "34bdae288ab5fe70b4ce6fb8907dd87a33ac190ef8952a658c4ad12523ea4ac9"
+    }
+  },
+  "isolated": {
+    "languages": [
+      "es",
+      "en"
+    ],
+    "singularPlural": true,
+    "allFourSavedStates": true,
+    "sameNamesDistinctIds": true,
+    "filtersCombinedAndEmpty": true,
+    "emptyAndUnreadableHistorySimulated": true,
+    "twoIndependentHistories": true,
+    "nativeKeyboardAndPointer": true,
+    "narrowBatchContainersPx": [
+      320,
+      200
+    ],
+    "noClippingOrFontReduction": true,
+    "noExtraEffectsOnToggleOrFilter": true,
+    "reopenResetsFiltersWithoutDuplicates": true,
+    "temporaryTabAndServerClosed": true
+  },
+  "validation": {
+    "interactiveTests": 231,
+    "interactiveFailures": 0,
+    "targetedMcpHelpTests": 1,
+    "standaloneWorkerBundle": true,
+    "publicHelpSurfaces": 6,
+    "bilingualHelpUpdatedSurfaces": 10,
+    "protectedHelpSourcesUpdatedWithoutBypass": true,
+    "actualMcpHelpBilingual": true,
+    "specificScreenReaderNotClaimed": true,
+    "unrelatedKnownMcpFailuresNotRerun": 15
+  },
+  "preserved": {
+    "canonicalStoreCss": {
+      "tokens": "7473512a",
+      "nav": "d92633d3"
+    },
+    "otherPublishedCapsuleAssetsExact": true,
+    "inventoryHistoryProjectsReceiptsUnchanged": true,
+    "noClipboardVersionChecksImportsRestoresOrRealFailures": true
+  }
+}
