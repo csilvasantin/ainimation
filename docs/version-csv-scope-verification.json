@@ -1,0 +1,125 @@
+{
+  "feature": "history-batch-version-csv-scope-description",
+  "verifiedAt": "2026-10-24T13:54:49.335269+00:00",
+  "implementation": {
+    "featureCommit": "1df352a19bed49691d3c2151bc7b25712ff10bae",
+    "ainimationReleaseCommit": "5806da9169bdb99ce199d11ed54d3c549cb49fe8",
+    "storeHelpCommit": "966296387a0622902d68738278d2cac69923e8b5",
+    "mcpCommit": "0638764b4578a9c17397a6219d06a59c05b43c75",
+    "interactiveModuleSha256": "18959763a8743705716dfa22ee6908c1f7347f4bb5d58ced35719675a0bb99ac",
+    "previewWorker": "324a2842-a00c-4ffd-9155-f91b7b0b1ecf",
+    "mcpWorker": "d442d4db-2347-4f99-bd22-7c42a6cdac1a"
+  },
+  "semantics": {
+    "onlyCheckCsvButtonDescribesOwnExistingScope": true,
+    "genericUniqueParagraphIdsNotDerivedFromPrivateData": true,
+    "reservedGenericIdCollisionAvoided": true,
+    "noNewParagraphTextControlsRolesLiveTabindexOrAlternativeLabels": true,
+    "namesAndInitialAriaLabelAbsenceTypeStatesAttributesAndScopeTextExactAgainstBaseline": true,
+    "ordinaryScopeSemanticsAndVisibilityPreserved": true,
+    "descriptionDistinctFromVersionSummaryVisibleMatchesMetadataOriginalCsvCopyAndOtherNotices": true,
+    "otherButtonsRemainUnrelated": true,
+    "entireModuleByteIdenticalAfterRemovingSequenceAndAddedAttributeLine": true,
+    "exportHandlersValidationFileContentsAndCallbackGuardsByteUnchanged": true
+  },
+  "production": {
+    "batches": 2,
+    "links": 10,
+    "initialLibraryProjects": 25,
+    "fullInitialLibraryAndOrderRetainedAfterReload": true,
+    "panelBoundsAndLanguageExact": true,
+    "twoDistinctOwnScopeDescriptions": true,
+    "checkCsvAndScopeHiddenInitiallyButtonDisabledAndAbsentFromAccessibleTree": true,
+    "versionChecksCancelAndCheckCsvNotActivated": true,
+    "initialNamesAttributesTextsAndCountersExact": true,
+    "nativeKeyboardAndPointerCollapseOpen": true,
+    "filterV9OwnReferenceAndClearBothWithoutOrphans": true,
+    "manualComparisonCommon": 5,
+    "exclusiveFirst": 0,
+    "exclusiveSecond": 0,
+    "differentSavedStates": 0,
+    "summaryCharacters": 709,
+    "summaryReviewExact": true,
+    "txtComparisonCsvAndOriginalCsvExactAfterReload": true,
+    "guideMetadataThreeUnitsCheckCancelCopyAndOriginalCsvReferencesPreserved": true,
+    "domAndAccessibilityTreeInspected": true,
+    "specificScreenReaderTestClaimed": false
+  },
+  "exports": {
+    "version-csv-scope-summary-filtered.txt": {
+      "bytes": 723,
+      "sha256": "7b165b8ebee2f39f30a2ca2eaf2796834526495b39c08e085f15cbe15fb4fdf1"
+    },
+    "version-csv-scope-comparison-filtered.csv": {
+      "bytes": 4626,
+      "sha256": "a1ec788484362ee9ad87e7ff5dd5d059494a3ce3778031b60acd8a236bc7b586"
+    },
+    "version-csv-scope-v9-filtered.csv": {
+      "bytes": 1929,
+      "sha256": "34bdae288ab5fe70b4ce6fb8907dd87a33ac190ef8952a658c4ad12523ea4ac9"
+    }
+  },
+  "isolated": {
+    "languages": [
+      "es",
+      "en"
+    ],
+    "sameNamesAndRevisionsWithDistinctIds": true,
+    "longValidIdsAndGenericCollision": true,
+    "fourDistinctOwnScopesInTwoIndependentHistories": true,
+    "allFourSavedStatesAndZeroSuccess": true,
+    "injectedVersionRequestAndDownloadOnlyWithFictitiousData": true,
+    "completedReportMakesExistingButtonAndScopeVisible": true,
+    "allAndIssuesCsvExactlyMatchesPureDeliveryVersionCheckCsv": [
+      {
+        "language": "es",
+        "allAndIssuesExactAgainstPureExport": true,
+        "destinations": 2,
+        "bytes": 611,
+        "sha256": "f78df21bf3d2e8efbdb84e3b1efda7d60d7352bc133d3f2ba436696cc4f4a298"
+      },
+      {
+        "language": "en",
+        "allAndIssuesExactAgainstPureExport": true,
+        "destinations": 2,
+        "bytes": 575,
+        "sha256": "73f37bed2ffa89e6afa3c533b4bfde26d63c0a93ba55f1db5c33edf05893e243"
+      }
+    ],
+    "oneInjectedDownloadPerManualActivation": true,
+    "issuesViewAndReturnAddsNoQueriesOrDownloads": true,
+    "restartAndNativeCancellationHidePreviousReportAndScope": true,
+    "requestErrorKeepsExistingReportBehavior": true,
+    "lateResponsesAfterCancelFilterAndReopenDiscarded": true,
+    "combinedFiltersOwnReferencesAndIndependentNotices": true,
+    "emptyUnreadableHistorySimulated": true,
+    "nativeKeyboardAndPointerCollapseOpen": true,
+    "renderFilterToggleAddsNoReadsWritesQueriesCopiesDownloadsOrComparisons": true,
+    "temporaryTabAndServerClosed": true
+  },
+  "validation": {
+    "interactiveTests": 231,
+    "interactiveFailures": 0,
+    "targetedMcpHelpTests": 1,
+    "standaloneWorkerBundle": true,
+    "bilingualHelpSurfacesUpdated": 10,
+    "publicBilingualHelpSurfacesVerified": 6,
+    "protectedHelpSourcesUpdatedWithoutBypass": true,
+    "actualMcpHelpBilingual": true,
+    "unrelatedKnownMcpFailuresNotRerun": 15,
+    "storeHelpCanonicalCi": 40099949694,
+    "storeHelpCanonicalCiConclusion": "success",
+    "storeHelpCanonicalDeployment": "https://60b22b67.admira-store.pages.dev"
+  },
+  "preserved": {
+    "canonicalStoreLocalCss": {
+      "tokens": "7473512a",
+      "nav": "d92633d3"
+    },
+    "otherPublishedAssetsUntouchedByFunctionalCommit": true,
+    "latestPublishedSourcesIntegratedBeforeRelease": true,
+    "primaryWorkspaceUnmodified": true,
+    "inventoryHistoryProjectsReceiptsUnchanged": true,
+    "noRealClipboardVersionChecksImportsRestoresOrProductionFailures": true
+  }
+}
