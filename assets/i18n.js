@@ -139,11 +139,54 @@
     "Skip to content": "Saltar al contenido"
   };
 
+  // Director uses the same language preference, but translates chrome only.
+  // Project copy, editable text, cast names and scripts are never walked.
+  var directorLabels = {
+    "File":"Archivo", "New":"Nuevo", "Save as…":"Guardar como…", "Projects…":"Proyectos…", "Open":"Abrir",
+    "Import":"Importar", "Export":"Exportar", "Download":"Descargar", "Share":"Compartir", "Publish Xperiencia":"Publicar Xperiencia",
+    "Edit":"Editar", "Undo":"Deshacer", "Redo":"Rehacer", "Cut":"Cortar", "Copy":"Copiar", "Paste":"Pegar",
+    "Select all":"Seleccionar todo", "Delete":"Eliminar", "Duplicate":"Duplicar", "Find and replace":"Buscar y reemplazar",
+    "Stage":"Stage", "Score":"Score", "Cast":"Cast", "Timeline":"Score",
+    "Window":"Ventana", "Tools":"Herramientas", "Brief":"Resumen", "AI Director":"Director IA", "Behaviour":"Comportamiento", "Payment":"Pagos",
+    "Collaborate":"Colaborar", "Settings":"Ajustes", "Dark":"Oscuro", "Light":"Claro", "Language":"Idioma",
+    "Control":"Control", "Templates":"Plantillas", "Menu":"Carta", "Insert":"Insertar",
+    "Import images":"Importar imágenes", "Import videos":"Importar vídeos", "Import sounds":"Importar sonidos", "Import texts":"Importar textos", "Import animations":"Importar animaciones",
+    "✨ Generate image":"✨ Generar imagen", "▶ Play (projector)":"▶ Reproducir (proyector)", "🎬 Produce video (Produce)":"🎬 Producir vídeo (Produce)",
+    "Director mode (docked)":"Modo Director (fijo)", "Floating windows":"Ventanas flotantes", "Inspector on the right":"Inspector a la derecha",
+    "Application menu":"Menú de la aplicación", "Open windows":"Abrir paneles", "Import cast members":"Importar miembros del Cast", "Studio settings":"Ajustes del Studio", "Interface mode":"Tema de la interfaz",
+    "Prompt + Generate":"Prompt + Generar", "Close":"Cerrar", "Minimize":"Minimizar", "Maximize":"Maximizar",
+    "Show interface · H":"Mostrar interfaz · H", "Hide interface · H":"Ocultar interfaz · H"
+  };
+  Object.assign(directorLabels,{"Insert": "Insertar", "🚩 New screen (marker)…": "🚩 Nueva pantalla (marca)…", "▭ Button": "▭ Botón", "T Label": "T Etiqueta", "Label": "Etiqueta", "Menu": "Carta", "🍽 Sample menu (Starbucks · fictitious)": "🍽 Carta de ejemplo (Starbucks · ficticia)", "Import menu (.json)…": "Importar carta (.json)…", "Remove menu": "Quitar la carta", "Templates": "Plantillas", "🛒 Ordering kiosk (Starbucks, vertical totem)": "🛒 Quiosco de pedidos (Starbucks, tótem vertical)", "⬇ Export project (.json)": "⬇ Exportar proyecto (.json)", "🍽 Kiosk · Linked cafeteria": "🍽 Quiosco · Cafetería vinculada", "🍽 Kiosk · Categories": "🍽 Quiosco · Categorías", "🍽 Kiosk · Products": "🍽 Quiosco · Productos", "🍽 Kiosk · Options": "🍽 Quiosco · Opciones", "🍽 Kiosk · Cart": "🍽 Quiosco · Carrito", "🍽 Kiosk · QR payment": "🍽 Quiosco · Pago QR", "🍽 Kiosk · Order number": "🍽 Quiosco · Número de pedido"});
+  var directorReverse = {};
+  Object.keys(directorLabels).forEach(function(en){if(en!=="Timeline")directorReverse[directorLabels[en]]=en;});
+  function directorText(raw,lang){
+    var key=norm(raw),aliases={'▶ Play (proyector)':'▶ Play (projector)','Mostrar interfaz / Show interface · H':'Show interface · H','Ocultar interfaz / Hide interface · H':'Hide interface · H'},en=aliases[key]||directorReverse[key]||key;
+    if(!Object.prototype.hasOwnProperty.call(directorLabels,en))return raw;
+    return raw.replace(key,lang==='es'?directorLabels[en]:en);
+  }
+  function applyDirector(lang){
+    document.querySelectorAll('.director-menubar,.window-titlebar,.window-taskbar').forEach(function(root){
+      var walk=document.createTreeWalker(root,NodeFilter.SHOW_TEXT),node;
+      while((node=walk.nextNode())){if(node.parentElement.closest('input,textarea,[contenteditable]'))continue;var next=directorText(node.nodeValue,lang);if(next!==node.nodeValue)node.nodeValue=next;}
+    });
+    document.querySelectorAll('.director-window,.director-menubar [aria-label],.director-menubar [title],.window-titlebar [aria-label],.window-titlebar [title]').forEach(function(el){
+      ['aria-label','title','data-window-title'].forEach(function(attr){var raw=el.getAttribute(attr);if(!raw)return;var next=directorText(raw,lang);
+        var action=raw.match(/^(Close|Minimize|Maximize|Cerrar|Minimizar|Maximizar) (.+)$/);
+        if(action)next=directorText(action[1],lang)+' '+directorText(action[2]==='Timeline'?'Score':action[2],lang);
+        if(raw!==next)el.setAttribute(attr,next);
+      });
+    });
+    var h=document.querySelector('[data-director-interface-toggle]');
+    if(h)h.setAttribute('aria-label',directorText(document.body.classList.contains('director-focus')?'Show interface · H':'Hide interface · H',lang));
+  }
+
   var norm = function (s) { return s.replace(/\s+/g, " ").trim(); };
   var roots = [".site-header", "main", ".site-footer"];
 
   function apply(lang) {
-    roots.forEach(function (sel) {
+    if(document.body.classList.contains('studio-page'))applyDirector(lang);
+    else roots.forEach(function (sel) {
       var root = document.querySelector(sel);
       if (!root) return;
       var walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, null);
@@ -164,13 +207,15 @@
     });
     document.documentElement.lang = lang;
     var btn = document.getElementById("langToggle");
-    if (btn) { btn.textContent = lang === "es" ? "EN" : "ES"; btn.setAttribute("aria-pressed", lang === "es"); }
+    if (btn) { btn.textContent = lang === "es" ? "EN" : "ES"; btn.setAttribute("aria-pressed", lang === "es"); btn.setAttribute("aria-label",lang === "es" ? "Cambiar a inglés" : "Switch to Spanish"); }
     try { localStorage.setItem("ain_lang", lang); } catch (e) {}
   }
 
   // Idioma de arranque: 1) elección guardada del usuario; si no hay, 2) idioma del navegador
   //    (los hispanohablantes ven ES en su primera visita); si no, 3) EN (por defecto/canonical).
   function detectLang() {
+    var requested=new URLSearchParams(location.search).get('lang');
+    if(requested==='es'||requested==='en')return requested;
     var stored = null;
     try { stored = localStorage.getItem("ain_lang"); } catch (e) {}
     if (stored === "es" || stored === "en") return stored;
@@ -180,12 +225,18 @@
 
   function init() {
     apply(detectLang());
+    if(document.body.classList.contains('studio-page')){
+      var queued=false;
+      var observer=new MutationObserver(function(records){if(!records.some(function(record){var el=record.target.nodeType===3?record.target.parentElement:record.target;return el.closest?.('.director-menubar,.window-titlebar,.window-taskbar')||Array.from(record.addedNodes||[]).some(function(n){return n.nodeType===1&&(n.matches('.window-titlebar,.window-taskbar')||n.querySelector('.window-titlebar,.window-taskbar'));});}))return;if(queued)return;queued=true;queueMicrotask(function(){queued=false;applyDirector(document.documentElement.lang);});});
+      document.querySelectorAll('.director-menubar,.director-workbench').forEach(function(root){observer.observe(root,{childList:true,subtree:true,characterData:true});});
+    }
     var btn = document.getElementById("langToggle");
     if (btn) btn.addEventListener("click", function () {
       apply(document.documentElement.lang === "es" ? "en" : "es");
     });
   }
 
+  if(document.body?.classList.contains('studio-page'))document.documentElement.lang=detectLang();
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init);
   else init();
 })();
