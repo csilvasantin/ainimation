@@ -440,8 +440,8 @@
     .replace(/[\u0300-\u036f]/g, "").toLowerCase()
     .replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "xperiencia";
 
-  function collect() {
-    const plan = window.currentPlan?.();
+  function collect(planOverride) {
+    const plan = planOverride || window.currentPlan?.();
     if (!plan) return null;
     const totalFrames = Number(window.ainTransport?.totalFrames) || 240;
     const dropped = [];
@@ -609,8 +609,8 @@
   }
 
   // Construye la pieza (sin diálogo ni descarga): la usan Publicar y la Vista responsive.
-  async function build() {
-    const gathered = collect();
+  async function build(planOverride) {
+    const gathered = collect(planOverride);
     if (!gathered) return null;
     const { piece, rules, dropped } = gathered;
     let runtime = "";
