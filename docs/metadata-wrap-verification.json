@@ -1,0 +1,125 @@
+{
+  "feature": "history-batch-metadata-wrap",
+  "verifiedAt": "2026-10-24T09:27:03.113548+00:00",
+  "implementation": {
+    "featureCommit": "4ba04a3886230d63ba052b88224457b9cd2b6f7d",
+    "ainimationReleaseCommit": "32ef1d4f7167479ced20c90ebc9d0cd85d4339d8",
+    "storeHelpCommit": "37125ea902178ec3a649bffe97a490b0c92e30b6",
+    "mcpCommit": "525d06568db37a7bd7324733a22ad4a619dfde71",
+    "interactiveModuleSha256": "43f5a69ed8a805630fc2863728a8325c89d7466a8732ace8a6c40444e9a7f3ab",
+    "previewWorker": "e18b4548-6c78-4356-bd42-9e5648fce459",
+    "mcpWorker": "dfe98fff-e7b2-41d8-875a-2b90fb4966ee"
+  },
+  "semantics": {
+    "singleExistingOrdinaryParagraphPerValidatedBatch": true,
+    "threePresentationSpansGroupLabelAndExistingValue": true,
+    "exactTextContentPrefixSpacesSeparatorsIdUtcDatesAndOrder": true,
+    "noNonbreakingSpaceOrFormatChanges": true,
+    "unitsMoveTogetherWhenTheyFit": true,
+    "oversizedUnitsWrapInternallyWithMaxWidth100Percent": true,
+    "noFixedWidthHeightFontReductionClippingOrOverflow": true,
+    "noNewHtmlIdsControlsHeadingsRolesLiveTabindexFocusOrAriaLabels": true,
+    "existingSummaryFirstActionsCsvScopeAndDescriptionUnchanged": true,
+    "nativeDetailsCollapseUnchanged": true,
+    "sourceDiffOnlyInternalPresentationGroups": true
+  },
+  "production": {
+    "batches": 2,
+    "links": 10,
+    "initialLibraryProjects": 25,
+    "fullInitialLibraryAndOrderRetained": true,
+    "panelBoundsAndLanguageExact": true,
+    "beforeAndAfterParagraphTextExact": true,
+    "allThreeLabelValueUnitsEachSingleLineAtCurrentPanelWidth": true,
+    "updatedUtcLabelAndDateMoveTogetherToNextLine": true,
+    "bothRecordMetadataExactAgainstExistingCompleteBackup": true,
+    "nativeKeyboardAndPointerCollapseOpen": true,
+    "filterV9KeepsOnlyOwnSingleRecord": true,
+    "clearRecoversBothWithoutDuplicates": true,
+    "fontSizeUnchanged": "12px",
+    "manualComparisonCommon": 5,
+    "exclusiveFirst": 0,
+    "exclusiveSecond": 0,
+    "differentSavedStates": 0,
+    "searchPressOneOfFive": true,
+    "summaryCharacters": 709,
+    "summaryReviewExact": true,
+    "txtAndComparisonCsvExactFromFilteredView": true,
+    "originalCsvExactFilteredAndAfterReload": true,
+    "metadataUnitsAndGuideFiveStepsExactAfterReload": true,
+    "domAndAccessibilityTreeInspected": true,
+    "specificScreenReaderTestClaimed": false
+  },
+  "exports": {
+    "metadata-wrap-summary.txt": {
+      "bytes": 723,
+      "sha256": "7b165b8ebee2f39f30a2ca2eaf2796834526495b39c08e085f15cbe15fb4fdf1"
+    },
+    "metadata-wrap-comparison.csv": {
+      "bytes": 4626,
+      "sha256": "a1ec788484362ee9ad87e7ff5dd5d059494a3ce3778031b60acd8a236bc7b586"
+    },
+    "metadata-wrap-original-v9.csv": {
+      "bytes": 1929,
+      "sha256": "34bdae288ab5fe70b4ce6fb8907dd87a33ac190ef8952a658c4ad12523ea4ac9"
+    },
+    "metadata-wrap-original-v9-reloaded.csv": {
+      "bytes": 1929,
+      "sha256": "34bdae288ab5fe70b4ce6fb8907dd87a33ac190ef8952a658c4ad12523ea4ac9"
+    }
+  },
+  "isolated": {
+    "languages": [
+      "es",
+      "en"
+    ],
+    "containerWidths": [
+      320,
+      200,
+      140
+    ],
+    "beforeAfterGeometryCases": 12,
+    "normalAndLongValidIds": true,
+    "exactTextContentComparedAgainstPreviousModule": true,
+    "unitRangesFitWithinParagraphAndDoNotOverlap": true,
+    "multiLineUnitsOnlyAtFullAvailableWidth": true,
+    "shortUnitsSingleLineWhenTheyFit": true,
+    "noFontReductionOrOverflow": true,
+    "exactDistinctSavedUtcDates": true,
+    "sameNamesAndRevisionsWithDistinctIds": true,
+    "allFourSavedStates": true,
+    "twoIndependentHistoriesOwnRecords": true,
+    "combinedFiltersEmptyViewClearAndReopen": true,
+    "emptyUnreadableHistorySimulated": true,
+    "noInventedParagraphsForAbsentBatches": true,
+    "nativeKeyboardAndPointerCollapseOpen": true,
+    "renderFilterToggleAddsNoReadsWritesQueriesCopiesDownloadsOrComparisons": true,
+    "existingCallbackGuardsUnchangedAndTestsPass": true,
+    "temporaryTabAndServerClosed": true
+  },
+  "validation": {
+    "interactiveTests": 231,
+    "interactiveFailures": 0,
+    "targetedMcpHelpTests": 1,
+    "standaloneWorkerBundle": true,
+    "publicBilingualHelpSurfacesVerified": 6,
+    "bilingualHelpSurfacesUpdated": 10,
+    "protectedHelpSourcesUpdatedWithoutBypass": true,
+    "actualMcpHelpBilingual": true,
+    "unrelatedKnownMcpFailuresNotRerun": 15,
+    "storeHelpCanonicalCi": 40081785606,
+    "storeHelpCanonicalCiConclusion": "success",
+    "storeHelpCanonicalDeployment": "https://6fad7138.admira-store.pages.dev"
+  },
+  "preserved": {
+    "canonicalStoreLocalCss": {
+      "tokens": "7473512a",
+      "nav": "d92633d3"
+    },
+    "otherPublishedAssetsUntouchedByFunctionalCommit": true,
+    "latestPublishedSourcesIntegratedBeforeFeature": true,
+    "primaryWorkspaceUnmodified": true,
+    "inventoryHistoryProjectsReceiptsUnchanged": true,
+    "noClipboardVersionChecksImportsRestoresOrProductionFailures": true
+  }
+}
