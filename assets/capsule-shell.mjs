@@ -28,6 +28,7 @@ export function mountCapsuleShell({dialog,form,doc=document,win=window,t}){
   const wasInside=panel.contains(doc.activeElement);
   form.hidden=key!=='advanced'||!open;options.hidden=key!=='options'||!open;
   advancedButton.setAttribute('aria-expanded',String(!form.hidden));optionsButton.setAttribute('aria-expanded',String(!options.hidden));
+  if(options.hidden)for(const media of options.querySelectorAll('video,audio'))media.pause();
   current=open?key:null;measure();
   if(open&&focus)(panel.querySelector('textarea,input,select')||panel.querySelector('button'))?.focus({preventScroll:true});
   else if(!open&&focus&&wasInside)button.focus({preventScroll:true});
