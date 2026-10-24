@@ -6835,3 +6835,29 @@ body.studio-page.director-focus:not(.ain-play) .stage-window{flex:1;min-height:0
 body.studio-page.director-focus:not(.ain-play) .score-grid{flex:1;min-height:0;overflow:auto}
 [data-director-interface-toggle]{margin-left:auto;min-width:32px;min-height:28px;font:inherit;cursor:pointer}
 @media(max-width:600px){body.studio-page.director-focus .director-score-window .window-titlebar{flex-wrap:wrap;height:auto;flex-shrink:0}body.studio-page.director-focus .director-score-window .window-titlebar .score-tools{order:2;flex:1 0 100%;box-sizing:border-box;min-width:0;max-width:100%;width:100%!important;overflow-x:auto}body.studio-page.director-focus .director-score-window .window-titlebar > strong{flex:1}}
+
+/* Authoring workspace: application chrome only, also after H reveals the panels. */
+body.studio-page > .site-header,body.studio-page > .site-footer,
+body.studio-page main > :not(.studio-workspace),body.studio-page .workspace-heading{display:none!important}
+body.studio-page main,body.studio-page .studio-workspace{margin:0;padding:0;max-width:none;width:100%}
+body.studio-page .director-shell.retro-director{max-width:none;min-height:0;margin:0;border-radius:0;box-shadow:none;background:#20252d}
+body.studio-page .director-shell.retro-director::before{display:none}
+body.studio-page .director-menubar{border-radius:0;box-shadow:none;gap:4px;padding:4px 8px;min-height:36px;justify-content:flex-start;flex-wrap:wrap}
+body.studio-page .director-menubar > .settings-menu{margin-left:auto}
+body.studio-page .director-menubar button{border-radius:2px;box-shadow:none;font-size:12px}
+body.studio-page .director-window{border-radius:2px;box-shadow:none}
+body.studio-page .window-titlebar{border-radius:0;box-shadow:none}
+body.studio-page .director-workbench.is-docked{height:calc(100dvh - 68px);min-height:420px;gap:4px;padding:4px;grid-template-columns:108px minmax(220px,.23fr) minmax(0,1fr) minmax(250px,.27fr)}
+body.studio-page .director-workbench.is-docked.is-inspector-collapsed{grid-template-columns:108px minmax(220px,.23fr) minmax(0,1fr) 0}
+body.studio-page .studio-status{border-radius:0;padding:3px 8px;font-size:11px;gap:12px;box-shadow:none}
+body.studio-page[data-interface-theme="light"] .director-shell.retro-director{background:#b9bec8}
+@media(max-width:900px){body.studio-page:not(.director-focus):not(.ain-play) .director-workbench.is-docked{height:auto;min-height:0;overflow:visible;grid-template-areas:"stage" "score" "cast" "side" "tools";grid-template-columns:minmax(0,1fr);grid-template-rows:55dvh 260px auto auto auto}body.studio-page:not(.director-focus) .director-workbench.is-docked > [data-window="cast"]{min-height:240px}body.studio-page:not(.director-focus) .director-workbench.is-docked > [data-window="tools"]{position:relative;inset:auto;width:auto;grid-area:tools}body.studio-page:not(.director-focus) .director-workbench.is-docked > .docked-side{max-height:none}body.studio-page:not(.director-focus) .director-workbench.is-docked > .docked-side > .director-window{max-height:none}}
+body.studio-page{--director-menu-bg:#242a33;--director-menu-ink:#e0e6ef;--director-menu-hover:#384150;--director-menu-line:#566171}
+body.studio-page[data-interface-theme="light"]{--director-menu-bg:#dce0e6;--director-menu-ink:#20252d;--director-menu-hover:#c0c8d4;--director-menu-line:#8792a3}
+body.studio-page .director-menubar{background:var(--director-menu-bg);color:var(--director-menu-ink);border-color:var(--director-menu-line)}
+body.studio-page .director-menubar span,body.studio-page .director-menubar button{color:inherit}
+body.studio-page .director-menubar .menu-button,body.studio-page .director-menubar .menubar-action{background:transparent;color:var(--director-menu-ink)}
+body.studio-page .director-menubar [class$="-menu-list"]{background:var(--director-menu-bg);color:var(--director-menu-ink);border:1px solid var(--director-menu-line);border-radius:2px;box-shadow:2px 2px 0 #0004}
+body.studio-page .director-menubar button:hover{background:var(--director-menu-hover);color:var(--director-menu-ink)}
+
+body.studio-page .director-cast-window .cast-empty-state [data-start-example]{display:none}
