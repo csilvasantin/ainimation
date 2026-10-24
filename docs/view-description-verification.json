@@ -1,0 +1,106 @@
+{
+  "feature": "history-comparison-view-description",
+  "verifiedAt": "2026-10-24T07:26:44.118423+00:00",
+  "implementation": {
+    "featureCommit": "76709d6",
+    "ainimationReleaseCommit": "b6c35570e062bab29273db50e3a85b24a79131ad",
+    "storeHelpCommit": "df1333d4b7c00a8f81aa9fa1438b150f9d1ac593",
+    "mcpCommit": "27935fa40709c228ac09dce386424b3322790292",
+    "interactiveModuleSha256": "e1866c9c72f9906d4758fff75cf48811470203663d9653f3a193e60f2f2b343b",
+    "previewWorker": "3113b32f-12b3-46df-84b0-62a1c44fcbdf",
+    "mcpWorker": "f46b2265-d72a-4d8c-8633-5720ec0140df"
+  },
+  "semantics": {
+    "fiveViewControlsDescribeSingleOwnVisibleCount": true,
+    "genericUniqueIdOnExistingParagraph": true,
+    "ariaControlsStillTargetsOwnResultsSeparately": true,
+    "targetDistinctFromPairStatus": true,
+    "fullNamesOptionsValuesTypesAndPreviousAttributesExact": true,
+    "paragraphRoleStatusTextTimingAndPreviousAttributesUnchanged": true,
+    "initialAndInvalidatedEmptyHiddenDisabledStatesPreserved": true,
+    "noNewControlsRolesLiveRegionsTabindexOrFocus": true,
+    "sourceDiffOnlyIdCounterAndDescriptionAttributes": true
+  },
+  "production": {
+    "batches": 2,
+    "links": 10,
+    "initialLibraryProjects": 25,
+    "fullInitialLibraryAndOrderRetained": true,
+    "panelBoundsAndLanguageExact": true,
+    "manualComparisonCommon": 5,
+    "exclusiveFirst": 0,
+    "exclusiveSecond": 0,
+    "differentSavedStates": 0,
+    "searchPressOneOfFive": true,
+    "emptyExclusiveAndDifferentViewsKeepMessagesAndGroupsHidden": true,
+    "nativeClearSearchPreservesViewAndNameOrder": true,
+    "nativeResetReturnsAllEmptySearchOriginalOrderAndSamePair": true,
+    "clearAndResetKeepExistingSearchFocus": true,
+    "resetDoesNotRepeatComparison": true,
+    "completeTotalsAndGroupMetadataIndependentOfEmptyView": true,
+    "summaryCharacters": 709,
+    "summaryTxtExactFromEmptyView": true,
+    "comparisonCsvExactFromEmptyView": true,
+    "originalCsvExactBeforeAndAfterReload": true,
+    "ownReferencesAfterReload": true,
+    "domAndAccessibilityTreeInspected": true,
+    "specificScreenReaderTestClaimed": false
+  },
+  "exports": {
+    "view-description-summary.txt": {
+      "bytes": 723,
+      "sha256": "7b165b8ebee2f39f30a2ca2eaf2796834526495b39c08e085f15cbe15fb4fdf1"
+    },
+    "view-description-comparison.csv": {
+      "bytes": 4626,
+      "sha256": "a1ec788484362ee9ad87e7ff5dd5d059494a3ce3778031b60acd8a236bc7b586"
+    },
+    "view-description-original.csv": {
+      "bytes": 1929,
+      "sha256": "34bdae288ab5fe70b4ce6fb8907dd87a33ac190ef8952a658c4ad12523ea4ac9"
+    },
+    "view-description-original-reloaded.csv": {
+      "bytes": 1929,
+      "sha256": "34bdae288ab5fe70b4ce6fb8907dd87a33ac190ef8952a658c4ad12523ea4ac9"
+    }
+  },
+  "isolated": {
+    "languages": [
+      "es",
+      "en"
+    ],
+    "mixedSavedStatesAndThreeViews": true,
+    "twoIndependentHistoriesAndVisibleCounts": true,
+    "distinctOwnIdsAndCollisionAvoided": true,
+    "searchSortingEmptyViewsAndReset": true,
+    "nativeOrderToViewKeyboard": true,
+    "nativeClearAndResetAndExistingFocus": true,
+    "emptyUnreadableHistorySimulated": true,
+    "invalidationAndReopenKeepOwnReferencesAndEmptyState": true,
+    "viewChangesAddNoReadsWritesQueriesCopiesDownloadsOrComparisons": true,
+    "existingCallbackGuardsUnchangedAndTestsPass": true,
+    "temporaryTabAndServerClosed": true
+  },
+  "validation": {
+    "interactiveTests": 231,
+    "interactiveFailures": 0,
+    "targetedMcpHelpTests": 1,
+    "standaloneWorkerBundle": true,
+    "publicBilingualHelpSurfacesVerified": 6,
+    "bilingualHelpSurfacesUpdated": 10,
+    "protectedHelpSourcesUpdatedWithoutBypass": true,
+    "actualMcpHelpBilingual": true,
+    "unrelatedKnownMcpFailuresNotRerun": 15
+  },
+  "preserved": {
+    "canonicalStoreLocalCss": {
+      "tokens": "7473512a",
+      "nav": "d92633d3"
+    },
+    "otherPublishedAssetsUntouchedByFunctionalCommit": true,
+    "latestPublishedSourcesIntegratedBeforeFeature": true,
+    "primaryWorkspaceUnmodified": true,
+    "inventoryHistoryProjectsReceiptsUnchanged": true,
+    "noClipboardVersionChecksImportsRestoresOrProductionFailures": true
+  }
+}
