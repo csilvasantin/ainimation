@@ -1,0 +1,145 @@
+{
+  "feature": "history-batch-version-matches-description",
+  "verifiedAt": "2026-10-24T14:22:16.768200+00:00",
+  "implementation": {
+    "featureCommit": "7bd2cd1eaffff69a144464afbbd16dd7cf903754",
+    "ainimationReleaseCommit": "ddaf30473a626328e5d5a706b0200bd1e68d5fa1",
+    "storeHelpCommit": "5d768cb646513b74ce3b37b1c954516aa6890041",
+    "mcpCommit": "65325f293b466afbb36d88c2bb6dc5eee9f3b87d",
+    "interactiveModuleSha256": "e24d6f54f5d9802d198d39ff9f97169f00f3b4704e66d17561292389be0d594b",
+    "previewWorker": "3082290c-06f8-485b-9521-8b6a2d182e55",
+    "mcpWorker": "efccee6c-0650-49bf-8455-4a4b322addec"
+  },
+  "semantics": {
+    "onlyCheckViewToggleDescribesOwnExistingVisibleCount": true,
+    "genericUniqueParagraphIdsNotDerivedFromPrivateData": true,
+    "reservedGenericIdCollisionAvoided": true,
+    "noNewParagraphTextControlsRolesLiveTabindexAlternativeLabelsControlsExpandedOrButtonHidden": true,
+    "namesTypeAriaPressedFocusAndInitialAttributesExactAgainstBaseline": true,
+    "existingCountRoleStatusMessagesVisibilityAndTimingPreserved": true,
+    "descriptionDistinctFromAggregateStatusRowsFileScopesMetadataCopyAndOtherNotices": true,
+    "otherButtonsRemainUnrelated": true,
+    "entireModuleByteIdenticalAfterRemovingSequenceAndAddedAttributeLine": true,
+    "viewHandlersRowAdmissionCountsValidationExportsAndCallbackGuardsByteUnchanged": true
+  },
+  "production": {
+    "batches": 2,
+    "links": 10,
+    "initialLibraryProjects": 25,
+    "fullInitialLibraryAndOrderRetainedAfterReload": true,
+    "panelBoundsAndLanguageExact": true,
+    "twoDistinctOwnVisibleCountDescriptions": true,
+    "initialViewHiddenToggleDisabledEmptyUnlabelledAndUnpressedNoticeEmpty": true,
+    "noHiddenAttributeAddedToToggle": true,
+    "checkViewToggleAbsentFromAccessibleTreeInitially": true,
+    "versionChecksCancelViewAndCheckCsvNotActivated": true,
+    "initialNamesAttributesTextsAndCountersExact": true,
+    "nativeKeyboardAndPointerCollapseOpen": true,
+    "filterV9OwnReferenceAndClearBothWithoutOrphans": true,
+    "manualComparisonCommon": 5,
+    "exclusiveFirst": 0,
+    "exclusiveSecond": 0,
+    "differentSavedStates": 0,
+    "summaryCharacters": 709,
+    "summaryReviewExact": true,
+    "txtComparisonCsvAndOriginalCsvExactAfterReload": true,
+    "guideMetadataCheckCancelCopyAndCsvScopeReferencesPreserved": true,
+    "domAndAccessibilityTreeInspected": true,
+    "specificScreenReaderTestClaimed": false
+  },
+  "exports": {
+    "version-matches-summary-filtered.txt": {
+      "bytes": 723,
+      "sha256": "7b165b8ebee2f39f30a2ca2eaf2796834526495b39c08e085f15cbe15fb4fdf1"
+    },
+    "version-matches-comparison-filtered.csv": {
+      "bytes": 4626,
+      "sha256": "a1ec788484362ee9ad87e7ff5dd5d059494a3ce3778031b60acd8a236bc7b586"
+    },
+    "version-matches-v9-filtered.csv": {
+      "bytes": 1929,
+      "sha256": "34bdae288ab5fe70b4ce6fb8907dd87a33ac190ef8952a658c4ad12523ea4ac9"
+    }
+  },
+  "isolated": {
+    "languages": [
+      "es",
+      "en"
+    ],
+    "sameNamesAndRevisionsWithDistinctIds": true,
+    "longValidIdsAndGenericCollision": true,
+    "fourDistinctOwnCountsInTwoIndependentHistories": true,
+    "allFourSavedStatesAndZeroSuccess": true,
+    "injectedVersionRequestAndDownloadOnlyWithFictitiousData": true,
+    "nativeShiftTabReturnToggleNamesPressedRowsAndCountsExact": true,
+    "mixedCountsTwoOfTwoToOneOfTwoAndBack": true,
+    "noIssuesZeroOfTwoWithExactExistingMessagesBothLanguages": true,
+    "allAndIssuesCsvExactlyMatchesPureExport": [
+      {
+        "language": "es",
+        "noIssues": false,
+        "allAndIssuesExactAgainstPureExport": true,
+        "destinations": 2,
+        "bytes": 611,
+        "sha256": "ed13546c6c8d0f7254d069a25b2662e65df1219accd36bb79ab3986837613a2b"
+      },
+      {
+        "language": "en",
+        "noIssues": false,
+        "allAndIssuesExactAgainstPureExport": true,
+        "destinations": 2,
+        "bytes": 575,
+        "sha256": "06a3e642d66af4fb1a53c7c64d158142ce7e96ba3b4db1defa9df074a7ce42e6"
+      },
+      {
+        "language": "es",
+        "noIssues": true,
+        "allAndIssuesExactAgainstPureExport": true,
+        "destinations": 2,
+        "bytes": 750,
+        "sha256": "cff43b849afc35cd3dc31e13a333f9fa720bc73672069d04932a29382c29cebc"
+      },
+      {
+        "language": "en",
+        "noIssues": true,
+        "allAndIssuesExactAgainstPureExport": true,
+        "destinations": 2,
+        "bytes": 727,
+        "sha256": "57e949b1037d0022041b8c5dccd07a4742fcccb67c97c2595705faecaa1227e7"
+      }
+    ],
+    "oneInjectedDownloadPerManualActivation": true,
+    "viewSwitchAddsNoReadsQueriesWritesCopiesDownloadsOrComparisons": true,
+    "progressCancellationFilterReopenAndLateCallbacksDoNotReviveCounts": true,
+    "combinedFiltersOwnReferencesAndIndependentNotices": true,
+    "emptyUnreadableHistorySimulated": true,
+    "nativeKeyboardAndPointerCollapseOpen": true,
+    "renderFilterToggleAddsNoNewOperations": true,
+    "temporaryTabAndServerClosed": true
+  },
+  "validation": {
+    "interactiveTests": 231,
+    "interactiveFailures": 0,
+    "targetedMcpHelpTests": 1,
+    "standaloneWorkerBundle": true,
+    "bilingualHelpSurfacesUpdated": 10,
+    "publicBilingualHelpSurfacesVerified": 6,
+    "protectedHelpSourcesUpdatedWithoutBypass": true,
+    "actualMcpHelpBilingual": true,
+    "unrelatedKnownMcpFailuresNotRerun": 15,
+    "storeHelpCanonicalCi": 40101974642,
+    "storeHelpCanonicalCiConclusion": "success",
+    "storeHelpCanonicalDeployment": "https://18b7f78c.admira-store.pages.dev"
+  },
+  "preserved": {
+    "canonicalStoreLocalCss": {
+      "tokens": "7473512a",
+      "nav": "d92633d3"
+    },
+    "otherPublishedAssetsUntouchedByFunctionalCommit": true,
+    "latestPublishedSourcesIntegratedBeforeRelease": true,
+    "primaryWorkspaceUnmodified": true,
+    "inventoryHistoryProjectsReceiptsUnchanged": true,
+    "noRealClipboardVersionChecksImportsRestoresOrProductionFailures": true
+  }
+}
