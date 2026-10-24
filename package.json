@@ -6,7 +6,8 @@
   "scripts": {
     "verify:stage": "node scripts/verify-stage-ruler.js",
     "stamp": "node scripts/stamp-version.mjs",
-    "verify:stamp": "node scripts/stamp-version.mjs --check"
+    "verify:stamp": "node scripts/stamp-version.mjs --check",
+    "verify:admira-review": "node scripts/test-admira-preflight.cjs"
   },
   "repository": {
     "type": "git",
