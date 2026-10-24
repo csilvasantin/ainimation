@@ -167,6 +167,10 @@ if($('director'))directorWorkspace=mountDirectorWorkspace({button:$('director'),
 const stockBridge=await import('./admira-roundtrip.mjs?v=roundtrip-1');
 const saveToAdmira=document.createElement('button');saveToAdmira.type='button';saveToAdmira.className='primary';saveToAdmira.textContent='Guardar nueva versión en Admira';
 $('html').parentElement.append(saveToAdmira);
+const formatPackage=document.createElement('button');formatPackage.type='button';formatPackage.textContent='Preparar paquete horizontal, vertical y táctil…';
+$('html').parentElement.append(formatPackage);
+formatPackage.onclick=async()=>{try{const module=await import('./admira-format-package.mjs?v=package-1');await module.openFormatPackage({getPlan:()=>validate(project),build:async plan=>({exportedHtml:playerHtml(plan),dropped:[]})});}catch(error){announce(error.message,true);}};
+
 saveToAdmira.onclick=async()=>{
  if(!persist())return;
  saveToAdmira.disabled=true;

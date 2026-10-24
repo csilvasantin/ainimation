@@ -6614,6 +6614,9 @@ if (filmForm) {
   updatesButton.onclick=async()=>{closeArchivoMenu();try{const module=await import('./admira-resource-updates.mjs?v=updates-1');await module.openResourceUpdates({getPlan:currentPlan,savePlan:saveFilmPlan,refreshPlan:refreshResources,storage:localStorage});}catch(error){window.alert(error.message);}};
   undoResourcesButton.onclick=async()=>{closeArchivoMenu();try{const module=await import('./admira-resource-updates.mjs?v=updates-1');refreshResources(module.undoResourceUpdate({getPlan:currentPlan,savePlan:saveFilmPlan,storage:localStorage}),{type:'undone'});}catch(error){window.alert(error.message);}};
   stockImportButton?.insertAdjacentElement('afterend',updatesButton);updatesButton.insertAdjacentElement('afterend',undoResourcesButton);
+  const packageButton=document.createElement('button');packageButton.type='button';packageButton.textContent='Preparar paquete horizontal, vertical y táctil…';packageButton.dataset.admiraFormatPackage='';
+  packageButton.onclick=async()=>{closeArchivoMenu();try{const module=await import('./admira-format-package.mjs?v=package-1');await module.openFormatPackage({getPlan:()=>{const plan=currentPlan();plan.markers=window.loadTimelineMarkers?.(totalTimelineFrames(plan))||plan.markers||[];plan.packageFps=timelineFps();return plan;},build:plan=>window.ainXperiencia.build(plan),compileScripts:window.Admingo?.compileScripts});}catch(error){window.alert(error.message);}};
+  stockExportButton?.insertAdjacentElement('beforebegin',packageButton);
   const reviewButton=document.createElement('button');reviewButton.type='button';reviewButton.textContent='Previsualizar y comprobar para Admira';reviewButton.dataset.admiraReview='';reviewButton.onclick=exportStageToAdmiraStock;stockExportButton?.insertAdjacentElement('beforebegin',reviewButton);
   importAdmiraStockAssetFromQuery().catch(error => { if (stockExportButton) stockExportButton.disabled = true; window.alert(error.message); });
 
