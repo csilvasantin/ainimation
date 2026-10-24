@@ -171,7 +171,7 @@ export function deliveryComparisonSummaryTxt(report,language='es'){
  const summary=deliveryComparisonSummary(report,language);
  return{filename:'ainimation-'+(language==='en'?'comparison-summary':'resumen-comparacion')+'-'+report.first.id+'-'+report.second.id+'.txt',type:'text/plain;charset=utf-8',content:summary.text};
 }
-let comparisonSummarySequence=0,comparisonResultsSequence=0,comparisonScopeSequence=0,comparisonStatusSequence=0,historyListSequence=0;
+let comparisonSummarySequence=0,comparisonResultsSequence=0,comparisonScopeSequence=0,comparisonStatusSequence=0,historyListSequence=0,historyStatusSequence=0;
 export function mountDeliveryHistory({button,storage,doc=document,download,onReuse,writeClipboard,versionRequest=fetch,versionTimeoutMs=10000}){
  const t=(es,en)=>doc.documentElement.lang==='en'?en:es,make=(tag,value)=>{const n=doc.createElement(tag);if(value)n.textContent=value;return n;};
  const word=(n,esOne,esMany,enOne,enMany)=>t(n===1?esOne:esMany,n===1?enOne:enMany);
@@ -202,6 +202,7 @@ export function mountDeliveryHistory({button,storage,doc=document,download,onReu
  const filters=make('div'),searchLabel=make('label',t('Buscar lotes','Search batches')),query=make('input'),projectLabel=make('label',t('Proyecto del lote','Batch project')),project=make('select'),outcomeLabel=make('label',t('Resultado del lote','Batch result')),outcome=make('select'),clear=make('button',t('Quitar filtros','Clear filters'));
  filters.className='history-filters';searchLabel.className='history-search';query.className='history-query';query.type='search';query.placeholder=t('Proyecto, versión, Xpacio o pantalla','Project, version, Xpace or screen');query.maxLength=300;project.className='history-project';outcome.className='history-outcome';clear.className='history-clear';clear.type='button';
  do{list.id='ainimation-history-batches-'+(++historyListSequence);}while(doc.getElementById?.(list.id));query.setAttribute('aria-controls',list.id);clear.setAttribute('aria-controls',list.id);project.setAttribute('aria-controls',list.id);outcome.setAttribute('aria-controls',list.id);
+ do{status.id='ainimation-history-filter-status-'+(++historyStatusSequence);}while(doc.getElementById?.(status.id));for(const control of [query,project,outcome,clear])control.setAttribute('aria-describedby',status.id);
  const option=(value,label)=>{const n=make('option',label);n.value=value;return n;};
  const outcomeText=value=>value==='complete'?t('Completo','Complete'):value==='error'?t('Con errores','With errors'):t('Sin confirmación','Unconfirmed');
  outcome.append(option('',t('Todos los resultados','All results')),...['complete','error','unconfirmed'].map(value=>option(value,outcomeText(value))));
