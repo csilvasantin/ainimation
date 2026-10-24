@@ -6815,3 +6815,23 @@ body.ain-play [data-xpl-hot] { cursor: pointer !important; }
 .cast-member .cast-instances { color: #3b4656; font: 800 0.66rem/1 ui-monospace, SFMono-Regular, Menlo, monospace; }
 .cast-member .cast-add-instance { background: #c8ff5f; border: 1px solid #7aa52a; border-radius: 4px; color: #11151b; cursor: pointer; font: 800 0.8rem/1 ui-monospace, monospace; height: 20px; padding: 0; width: 20px; }
 
+
+/* Director focus: only Stage and Score on entry. H reveals the existing UI. */
+body.studio-page.director-focus:not(.ain-play) > .site-header,
+body.studio-page.director-focus:not(.ain-play) > .site-footer,
+body.studio-page.director-focus:not(.ain-play) main > :not(.studio-workspace),
+body.studio-page.director-focus:not(.ain-play) .workspace-heading,
+body.studio-page.director-focus:not(.ain-play) .director-shell > :not(.director-workbench),
+body.studio-page.director-focus:not(.ain-play) .director-workbench > :not([data-window="stage"]):not([data-window="score"]){display:none!important}
+body.studio-page.director-focus:not(.ain-play) main,
+body.studio-page.director-focus:not(.ain-play) .studio-workspace{margin:0;padding:0;max-width:none;width:100%}
+body.studio-page.director-focus:not(.ain-play) .director-shell{margin:0;max-width:none;min-height:0;border-radius:0;box-shadow:none}
+body.studio-page.director-focus:not(.ain-play) .director-workbench{display:grid!important;grid-template-areas:"stage" "score"!important;grid-template-columns:minmax(0,1fr)!important;grid-template-rows:minmax(0,1fr) minmax(180px,28%)!important;height:100dvh;padding:4px;gap:4px;overflow:hidden}
+body.studio-page.director-focus:not(.ain-play) .director-workbench > [data-window="stage"],
+body.studio-page.director-focus:not(.ain-play) .director-workbench > [data-window="score"]{display:flex!important;flex-direction:column;position:relative!important;inset:auto!important;width:auto!important;height:auto!important;min-width:0;min-height:0;max-height:none;transform:none!important;border-radius:0;grid-area:stage}
+body.studio-page.director-focus:not(.ain-play) .director-workbench > [data-window="score"]{grid-area:score}
+body.studio-page.director-focus:not(.ain-play) .director-workbench .resize-handle{display:none!important}
+body.studio-page.director-focus:not(.ain-play) .stage-window{flex:1;min-height:0}
+body.studio-page.director-focus:not(.ain-play) .score-grid{flex:1;min-height:0;overflow:auto}
+[data-director-interface-toggle]{margin-left:auto;min-width:32px;min-height:28px;font:inherit;cursor:pointer}
+@media(max-width:600px){body.studio-page.director-focus .director-score-window .window-titlebar{flex-wrap:wrap;height:auto;flex-shrink:0}body.studio-page.director-focus .director-score-window .window-titlebar .score-tools{order:2;flex:1 0 100%;box-sizing:border-box;min-width:0;max-width:100%;width:100%!important;overflow-x:auto}body.studio-page.director-focus .director-score-window .window-titlebar > strong{flex:1}}

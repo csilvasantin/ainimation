@@ -44,7 +44,7 @@
     <link rel="manifest" href="site.webmanifest" />
     <link rel="stylesheet" href="assets/styles.css?v=b703a8e" />
   </head>
-  <body class="studio-page">
+  <body class="studio-page director-focus">
     <header class="site-header studio-site-header" aria-label="Primary">
       <a class="brand" href="index.html" aria-label="AInimation Studio home">
         <span class="brand-mark">AI</span>
@@ -586,7 +586,7 @@
                   <button type="button" data-window-action="minimize" aria-label="Minimize Timeline"></button>
                   <button type="button" data-window-action="maximize" aria-label="Maximize Timeline"></button>
                 </span>
-                <strong>Timeline</strong>
+                <strong>Score</strong><button type="button" data-director-interface-toggle aria-label="Mostrar interfaz / Show interface · H" aria-keyshortcuts="H" aria-pressed="false">H</button>
               </div>
               <div class="score-grid" id="scoreGrid"></div>
               <span class="resize-handle" aria-hidden="true"></span>
@@ -646,5 +646,6 @@
       <script src="/assets/register-sw.js" defer></script>
     <script defer src="https://www.admiranext.com/assets/sello-novedades.js?v=20261006-sello-1"></script>
   <script type="module" src="assets/interactive-director.mjs?v=b703a8e"></script><script type="module" src="assets/capsule-editor-entry.mjs?v=b703a8e"></script>
+<script type="module" src="assets/director-focus.mjs?v=focus-1"></script>
 </body>
 </html>
