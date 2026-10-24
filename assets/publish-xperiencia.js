@@ -260,7 +260,7 @@
         case "showCast":    delete hidden[value]; break;
         case "hideCast":    hidden[value] = true; break;
         case "setText":     texts[value] = arguments[3] && arguments[3].value2 || ""; break;
-        case "playSound":   var a = document.querySelector('[data-sound="' + value + '"]'); if (a) { a.currentTime = 0; a.play(); } break;
+        case "playSound":   var a = document.querySelector('[data-sound="' + value + '"]'); if (a) { a.currentTime = 0; var play = a.play(); if (play && play.catch) play.catch(function (error) { if (error.name !== "AbortError") throw error; }); } break;
         case "openUrl":     if (value) window.open(value, "_blank", "noopener"); break;
         case "stop":        playing = false; until = null; break;
         default:            if (EXT && EXT.act) EXT.act(id, value, arguments[3]);
