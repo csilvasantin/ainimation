@@ -1,0 +1,122 @@
+{
+  "feature": "restore-review-and-complete-backup-independence-audit",
+  "verifiedAt": "2026-10-25T04:30:19.150131+00:00",
+  "scope": {
+    "auditOnlyNoProductChange": true,
+    "noNewAriaOrProductControls": true,
+    "injectedDownloadRegistersPayloadAndSettlesLocalPromiseOnly": true,
+    "noWorkerRedeploy": true,
+    "nativeFileSelectionReviewCancelAndDialogEscape": true,
+    "nativeFilePickerCancellationNotClaimed": true
+  },
+  "local": {
+    "languages": [
+      "es",
+      "en"
+    ],
+    "reviewReadByBackupDownloadOutcomeMatrix": 8,
+    "singularOneBatchOneTargetCases": 2,
+    "escapeOldFileAndDownloadCallbacksDiscardedCases": 8,
+    "newCurrentFileAndDownloadAttemptsSurviveOldCallbacksCases": 4,
+    "renderFilterCollapseReopenNoAddedOperationsCases": 2,
+    "totalCases": 24,
+    "validReviewCancellationDoesNotCancelOrClearPendingBackup": true,
+    "rejectedReadErrorRetainedAcrossBackupSuccessOrFailure": true,
+    "backupBusyDisabledAndStatusEmptyPreserved": true,
+    "backupOwnSuccessErrorAndSingularPluralExact": true,
+    "reviewSummaryRowsNamesAndCleanupExact": true,
+    "fullBackupPayloadNameTypeUtf8JsonBytesExactAgainstDeliveryHistoryBackup": true,
+    "expectedSnapshotCapturedFromInitialFixtureSeedWithoutExtraProductStorageRead": true,
+    "exportedAtCapturedFromPayloadNoGlobalClockChange": true,
+    "filtersDoNotReduceFileOrInvalidateCurrentBackupCallback": true,
+    "onlyExistingManualBackupReadAndPreviewValidationRead": true,
+    "zeroAdditionalWritesBeyondInitialSeeds": true,
+    "zeroVersionQueriesClipboardCopiesOrRealDownloads": true,
+    "oneOrTwoInjectedDownloadCallsCountedExplicitly": true,
+    "restoreConfirmNeverActivated": true,
+    "nativeFocusAndFixtureControlFocusChangesDistinguished": true,
+    "allPublishedOwnAccessibleRelationshipsPreserved": true
+  },
+  "production": {
+    "readOnlyAccessAndInitialHiddenReviewInspection": true,
+    "initialProjectCount": 25,
+    "completeInitialLibraryUnchanged": true,
+    "batches": 2,
+    "confirmedLinks": 10,
+    "noRealBackupRecoveryClipboardVersionOrFileActions": true,
+    "realEscapeComparisonAndDownloadsNotRepeated": true,
+    "publishedProductModuleByteExactAgainstLastVerifiedVersion": true,
+    "guideSteps": 5,
+    "duplicateIds": 0,
+    "orphanReferences": 0,
+    "panelUnmoved": true,
+    "domAndAccessibilityTreeInspected": true,
+    "noSpecificScreenReaderOrHiddenControlNavigabilityClaim": true
+  },
+  "integrity": {
+    "unchangedModuleSha256": "9cee3c8bf17f02850cee6f933051df5d375249b0bd7cd0a4eceefbc843a224dd",
+    "priorExportReferenceHashesIntact": {
+      "copy-summary-production.txt": "7b165b8ebee2f39f30a2ca2eaf2796834526495b39c08e085f15cbe15fb4fdf1",
+      "ainimation-comparacion-v8-v9.csv": "a1ec788484362ee9ad87e7ff5dd5d059494a3ce3778031b60acd8a236bc7b586",
+      "compact-actions-v9-before.csv": "34bdae288ab5fe70b4ce6fb8907dd87a33ac190ef8952a658c4ad12523ea4ac9"
+    },
+    "summaryCharacters": 709,
+    "publicHelp": [
+      {
+        "route": "admira-xp/docs/ainimation-screen-delivery.md",
+        "es": true,
+        "en": true
+      },
+      {
+        "route": "admira-xp/help.html",
+        "es": true,
+        "en": true
+      },
+      {
+        "route": "mcp/index.html",
+        "es": true,
+        "en": true
+      },
+      {
+        "route": "mcp/manifest.json",
+        "es": true,
+        "en": true
+      },
+      {
+        "route": "mcp/llms.txt",
+        "es": true,
+        "en": true
+      },
+      {
+        "route": "mcp/funcionalidades.json",
+        "es": true,
+        "en": true
+      }
+    ]
+  },
+  "validation": {
+    "priorInteractiveRegressionBaseline": 231,
+    "priorInteractiveFailures": 0,
+    "existingBaselineReusedBecauseProductUnchanged": true,
+    "knownOtherMcpFailuresOutOfScope": 15,
+    "currentBilingualPublicHelpAndRealMcpVerified": true
+  },
+  "productBaseline": {
+    "ainimation": "5d93946efc8bc0370b5fc01e202aa2c87362e1a0",
+    "store": "ca643d6343e59b1499192d7a15ee9dec64a57dc7",
+    "mcp": "011beaa"
+  },
+  "limitations": [
+    "All download payloads and file reads used fictitious seed data and injected local promises.",
+    "No real complete-history copy or restore action was activated.",
+    "Backup callbacks retain existing attempt/dialog guards and are not invalidated merely by filters.",
+    "Old hidden Restore button text is retained according to current resetRestore; its control remains hidden and disabled.",
+    "No new product source or workers were deployed; previous export references were verified without new real downloads."
+  ],
+  "temporaryBrowserAndServerClosed": true,
+  "preserved": [
+    "all initial real library/history/project/language/session data",
+    "all published accessible relationships and functions",
+    "other publications and canonical Store package with local CSS"
+  ]
+}
