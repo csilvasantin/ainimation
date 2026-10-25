@@ -1,0 +1,166 @@
+{
+  "feature": "comparison-txt-download-scope-and-own-status-description",
+  "verifiedAt": "2026-10-25T00:10:44.028850+00:00",
+  "change": {
+    "existingTxtButtonOnly": true,
+    "descriptionOrder": [
+      "existing complete-file scope",
+      "own existing TXT status"
+    ],
+    "genericUniqueStatusIdWithCollisionProtection": true,
+    "csvRetainsOnlyItsScope": true,
+    "noOtherControlDescribesTxtStatus": true,
+    "noNewNodesOrText": true,
+    "logicWithoutSemanticAssignmentsByteExact": true,
+    "publicModuleSha256": "1251018afcac435259316fba7038033fc2f2d7378c63d2036d8471f8c5d317c3"
+  },
+  "validation": {
+    "interactiveTests": 231,
+    "interactiveFailures": 0,
+    "targetedRealMcpHelpTests": 1,
+    "otherKnownMcpFailuresOutOfScope": 15,
+    "localLanguages": [
+      "es",
+      "en"
+    ],
+    "twoIndependentHistories": true,
+    "genericCollisionAvoided": true,
+    "sameNamesAndRevisionsDistinctLongIds": true,
+    "emptyIncompleteSameReadyPairs": true,
+    "emptyUnreadableSimulations": true,
+    "beforeAndAfterDownloadChangedDeniedCases": 6,
+    "lateAcceptedAndRejectedCallbacksDiscarded": 8,
+    "nativeKeyboardInjectedDownloads": true,
+    "busyRetainsDisabledButtonAndEmptyStatus": true,
+    "successAndErrorMessagesExact": true,
+    "currentFocusBehaviorUnchanged": true,
+    "reviewCopyAndCsvNoticesIndependent": true,
+    "payloads": [
+      {
+        "lang": "es",
+        "chars": 713,
+        "bytes": 725,
+        "sha256": "9c7679c779e796786381be008aff3099c22bb644e50d3c415c6fa6cd79e2ab2f",
+        "completeFilenameTypeAndContentExact": true,
+        "bom": false,
+        "addedNewline": false
+      },
+      {
+        "lang": "en",
+        "chars": 679,
+        "bytes": 681,
+        "sha256": "2b1605f1d642251157cfa3fffa5b7c251ead7e1300abcae81f15a01529308c97",
+        "completeFilenameTypeAndContentExact": true,
+        "bom": false,
+        "addedNewline": false
+      }
+    ],
+    "noVersionQueries": true,
+    "noRealClipboardUse": true,
+    "noProductionVersionChecks": true,
+    "noAdditionalStorageReadsOrAutomaticOperations": true
+  },
+  "production": {
+    "manualPairRevisions": [
+      8,
+      9
+    ],
+    "common": 5,
+    "onlyFirst": 0,
+    "onlySecond": 0,
+    "differentSavedStates": 0,
+    "fullSummaryCharacters": 709,
+    "filteredTxtDownloadNoticeExact": true,
+    "previewAndCopyStatusIndependent": true,
+    "collapseReopenRelationsRetained": true,
+    "swapInvalidatesNoticeAndResults": true,
+    "initialProjectCount": 25,
+    "sameLibraryAfterReload": true,
+    "batchCount": 2,
+    "confirmedLinkCount": 10,
+    "guideSteps": 5,
+    "duplicateIds": 0,
+    "orphanReferences": 0,
+    "panelUnmoved": true,
+    "domAndAccessibilityTreeInspected": true,
+    "noSpecificScreenReaderClaim": true,
+    "exports": [
+      {
+        "file": "comparison-txt-status-summary-filtered.txt",
+        "bytes": 723,
+        "sha256": "7b165b8ebee2f39f30a2ca2eaf2796834526495b39c08e085f15cbe15fb4fdf1",
+        "exact": true
+      },
+      {
+        "file": "comparison-txt-status-comparison-filtered.csv",
+        "bytes": 4626,
+        "sha256": "a1ec788484362ee9ad87e7ff5dd5d059494a3ce3778031b60acd8a236bc7b586",
+        "exact": true
+      },
+      {
+        "file": "comparison-txt-status-v9-filtered.csv",
+        "bytes": 1929,
+        "sha256": "34bdae288ab5fe70b4ce6fb8907dd87a33ac190ef8952a658c4ad12523ea4ac9",
+        "exact": true
+      }
+    ]
+  },
+  "help": {
+    "bilingualSourceSurfaces": 10,
+    "realMcpVerified": true,
+    "publicRoutes": [
+      {
+        "path": "admira-xp/docs/ainimation-screen-delivery.md",
+        "es": true,
+        "en": true
+      },
+      {
+        "path": "admira-xp/help.html",
+        "es": true,
+        "en": true
+      },
+      {
+        "path": "mcp/index.html",
+        "es": true,
+        "en": true
+      },
+      {
+        "path": "mcp/manifest.json",
+        "es": true,
+        "en": true
+      },
+      {
+        "path": "mcp/llms.txt",
+        "es": true,
+        "en": true
+      },
+      {
+        "path": "mcp/funcionalidades.json",
+        "es": true,
+        "en": true
+      }
+    ],
+    "canonicalStoreLocalStyles": {
+      "tokens": "4534 B, v=7473512a",
+      "nav": "4677 B, v=d92633d3"
+    }
+  },
+  "release": {
+    "ainimationFeature": "b0ae6a3",
+    "ainimationStamp": "f2e4d48c6e606b60ea8785a358d504ebe67417bf",
+    "storeHelp": "0095046d345df20162b5a3108c77edc82d78acbc",
+    "mcpHelp": "eca0572c9c43b2ae31890f59588a49447e94fb52",
+    "previewWorker": "61830d7a-5bcf-42b7-9ab7-a29e1ea56e4a",
+    "mcpWorker": "0ac2c66b-03b6-4021-808e-2d6255de0749",
+    "storeHelpCi": 40145548461,
+    "storeHelpCiConclusion": "success",
+    "storeHelpDeployment": "https://032a70f7.admira-store.pages.dev"
+  },
+  "preserved": [
+    "all previous history and comparison relationships and functions",
+    "manual actions, validation, guards and exact status messages",
+    "all existing library/history/project/session data and language",
+    "other publications and canonical package with local styles"
+  ],
+  "temporaryBrowserAndServerClosed": true
+}
