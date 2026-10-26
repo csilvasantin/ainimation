@@ -1,6 +1,6 @@
 # Editor de cápsulas «¿Sabías que?»
 
-Abre `studio.html?mode=capsula&admiraStockId=<id>` desde el botón AI de Stock. El identificador es el ID del asset, no su número visible: #1815 es `1792700022035-lho8uh` y #1816 es `1792700036486-d767l3`.
+El botón AI de Stock conserva el editor inline actual. Cuando la API confirma una fuente `capsula/1`, su barra ofrece «Editar textos, media y tiempos», que abre `studio.html?mode=capsula&admiraStockId=<id>`. Si hay cambios locales de texto, el enlace conserva el borrador y solicita generar esa revisión o recuperar el original antes de cambiar de editor. El identificador es el ID del asset, no su número visible: #1815 es `1792700022035-lho8uh` y #1816 es `1792700036486-d767l3`.
 
 El documento `capsula/1` vive en `stock/<id>/capsula.json`, separado del MP4 publicado. Textos permite Normal, Énfasis y Cifra; la plantilla controla las fuentes y los tamaños. Media admite Stock y subida, crédito, intervalo y recorte normalizado. Tiempos modifica fronteras compartidas de gancho/giro/remate, sin huecos ni solapamientos.
 
@@ -23,3 +23,14 @@ La validación del encargo #7103 se realizó sobre copias locales de Stock y un 
 `node --test test/capsula-editor.browser.test.mjs` ejecuta Chromium headless con Playwright para comprobar sesión, escrituras concurrentes, previews por fase y rangos de estilos. `PLAYWRIGHT_MODULE` permite indicar el módulo de Playwright del entorno de ejecución.
 
 Para revisar con un Worker local, el arnés puede inyectar `window.ainCapsulaLocal={api,token}` antes de cargar la página. Este ajuste solo se lee cuando la página está servida por loopback. Nunca incluir claves de producción en la configuración del navegador.
+
+
+## Integración con main · 26 octubre 2026
+
+Se conserva el editor inline, las importaciones por lotes y las versiones de proyectos incorporadas después de la primera propuesta. La edición completa sale del modo de enfoque del Director y aísla sus atajos de teclado. No cambia el acceso de cápsulas antiguas sin fuente: la opción completa solo aparece si el GET devuelve un documento editable.
+
+Los guardados simultáneos comparten la misma petición. Un doble clic no encola dos previews; editar durante el encolado conserva el borrador nuevo y registra la revisión anterior sin presentarla como resultado de los últimos cambios. La recuperación local comprueba identidad y recalcula la duración.
+
+Validación: seis escenarios headless del editor completo con CSS reales; editor inline ES/EN; recorrido de las cápsulas #1815/#1816 con el Worker real y un bucket en memoria (texto, imagen, tiempos, sesión firmada, guardado, preview, recarga y conservación de metadatos), escritorio 1440px y móvil 390px. Estos ensayos no escriben en producción.
+
+La activación requiere desplegar AInimation, el Worker y el puente de sesión Pixeria, instalar el consumidor actualizado y cargar fuentes verificadas. El `main` actual de Studio ya aporta el editor inline; no se debe reintroducir la antigua rama de Stock que lo sustituía por el importador.

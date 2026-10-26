@@ -1,0 +1,129 @@
+{
+  "feature": "concurrent-fictitious-history-copy-reads-audit",
+  "verifiedAt": "2026-10-25T03:59:15.746957+00:00",
+  "scope": {
+    "auditOnlyNoProductChange": true,
+    "noNewAriaOrProductControls": true,
+    "onlyFixtureQueueBridgeControlsAdded": true,
+    "noWorkerRedeploy": true,
+    "nativeDialogEscapeAndFileSelection": true,
+    "nativeFilePickerCancellationNotClaimed": true
+  },
+  "local": {
+    "languages": [
+      "es",
+      "en"
+    ],
+    "concurrentPendingReadMatrixCases": 8,
+    "reopenedNewBReadCases": 8,
+    "matrixDimensions": [
+      "language",
+      "old B resolution or rejection",
+      "current A resolution or rejection"
+    ],
+    "newBDimensions": [
+      "language",
+      "A pending or already reviewed",
+      "old B resolution or rejection"
+    ],
+    "independentHistoriesLongIdsSameNamesRevisionsAndGenericCollision": true,
+    "bothInitiallyShowOnlyOwnReadingStatus": true,
+    "escapeClosesOnlyBAndKeepsAPending": true,
+    "oldBCallbackDoesNotChangeAOrReviveB": true,
+    "currentAAcceptanceShowsExactOwnMixedReview": true,
+    "currentARejectionUsesExactOwnErrorAndBlocksRestore": true,
+    "newBAttemptSurvivesOwnOldResponse": true,
+    "newBPreviewExactOneNewBatchTwoTargets": true,
+    "currentAStillCompletesIndependentlyAfterB": true,
+    "fileTextQueuesRemainPerInstance": true,
+    "onlyExistingHistoryReadsOnOpenReopenAndCurrentPreviewValidation": true,
+    "zeroAdditionalWritesBeyondSeedsPerHistory": true,
+    "zeroVersionQueriesClipboardCopiesDownloads": true,
+    "noRestoreConfirmActivation": true,
+    "nativeReviewCancelCleanupAndFocusPreserved": true,
+    "fixtureControlFocusChangesRecordedSeparatelyFromCallbackEffects": true,
+    "allPublishedOwnRelationshipsPreserved": true
+  },
+  "production": {
+    "readOnlyAccessAndInitialHiddenReviewInspection": true,
+    "initialProjectCount": 25,
+    "completeInitialLibraryUnchanged": true,
+    "batches": 2,
+    "confirmedLinks": 10,
+    "noRealRecoveryBackupClipboardVersionsOrFilesActivated": true,
+    "noRealEscapeComparisonOrDownloadsRepeated": true,
+    "publishedModuleByteExactAgainstLastVerifiedProduct": true,
+    "guideSteps": 5,
+    "duplicateIds": 0,
+    "orphanReferences": 0,
+    "panelUnmoved": true,
+    "domAndAccessibilityTreeInspected": true,
+    "noSpecificScreenReaderOrHiddenControlNavigabilityClaim": true
+  },
+  "integrity": {
+    "unchangedModuleSha256": "9cee3c8bf17f02850cee6f933051df5d375249b0bd7cd0a4eceefbc843a224dd",
+    "priorExportReferenceHashesIntact": {
+      "copy-summary-production.txt": "7b165b8ebee2f39f30a2ca2eaf2796834526495b39c08e085f15cbe15fb4fdf1",
+      "ainimation-comparacion-v8-v9.csv": "a1ec788484362ee9ad87e7ff5dd5d059494a3ce3778031b60acd8a236bc7b586",
+      "compact-actions-v9-before.csv": "34bdae288ab5fe70b4ce6fb8907dd87a33ac190ef8952a658c4ad12523ea4ac9"
+    },
+    "summaryCharacters": 709,
+    "publicHelp": [
+      {
+        "route": "admira-xp/docs/ainimation-screen-delivery.md",
+        "es": true,
+        "en": true
+      },
+      {
+        "route": "admira-xp/help.html",
+        "es": true,
+        "en": true
+      },
+      {
+        "route": "mcp/index.html",
+        "es": true,
+        "en": true
+      },
+      {
+        "route": "mcp/manifest.json",
+        "es": true,
+        "en": true
+      },
+      {
+        "route": "mcp/llms.txt",
+        "es": true,
+        "en": true
+      },
+      {
+        "route": "mcp/funcionalidades.json",
+        "es": true,
+        "en": true
+      }
+    ]
+  },
+  "validation": {
+    "priorInteractiveRegressionBaseline": 231,
+    "priorInteractiveFailures": 0,
+    "existingBaselineReusedBecauseProductUnchanged": true,
+    "knownOtherMcpFailuresOutOfScope": 15,
+    "currentBilingualPublicHelpAndRealMcpVerified": true
+  },
+  "productBaseline": {
+    "ainimation": "42ed9a3cfc13e5f54a0259fe6da6063d44c54256",
+    "store": "95d2e96a64e7641115f14cc6755441386506586f",
+    "mcp": "011beaa"
+  },
+  "limitations": [
+    "Only fictitious file text and injected promises were resolved or rejected.",
+    "Resolving controls naturally receive focus; no old callback moved focus into hidden review or restore controls.",
+    "Restore confirmation was never activated; hidden prior button text remains as existing reset logic specifies.",
+    "No concurrent reads were reproduced with real files or data.",
+    "No new product source or workers were deployed; prior export references were checked without new downloads."
+  ],
+  "temporaryBrowserAndServerClosed": true,
+  "preserved": [
+    "all initial real library/history/project/language/session data",
+    "all published accessible relationships and functions",
+    "other publications and canonical Store package with local CSS"
+  ]
+}

@@ -1,0 +1,96 @@
+{
+  "feature": "comparison-action-pairs",
+  "verifiedAt": "2026-10-23T12:57:17.122892+00:00",
+  "production": "https://www.ainimation.studio/interactivos/",
+  "release": {
+    "assets": "e7e3936",
+    "stamp": "2978cba",
+    "worker": "b737e43d-a9bf-4306-9e90-7930ce765047",
+    "storeHelp": "331c9c61a9d2e1bd6005b5dce1ff1f53ea470c4a",
+    "storeWorkflow": 39956659071,
+    "storeDeployment": "https://79f0b650.admira-store.pages.dev",
+    "canonicalLocalDesignCss": true,
+    "mcp": "60a3e68",
+    "mcpWorker": "fe0636db-52a9-4fde-94da-1aad96538ef0"
+  },
+  "realBatches": {
+    "revisions": [
+      8,
+      9
+    ],
+    "beforeButtonsPerVisualRow": [
+      3,
+      1
+    ],
+    "afterButtonsPerVisualRow": [
+      2,
+      2
+    ],
+    "actionAreaHeightBeforeAndAfter": 96,
+    "eachRowHeight": 44,
+    "actionWidth": 827,
+    "nativeKeyboardOrderBeforeAndAfter": [
+      "Descargar comparación CSV",
+      "Descargar resumen TXT",
+      "Ver resumen de comparación",
+      "Copiar resumen de comparación"
+    ],
+    "fullButtonTextsAndStatesPreserved": true,
+    "noHorizontalOverflow": true,
+    "singleScopeNoticeBelowBothRows": true,
+    "previewClosedInitially": true,
+    "nativeKeyboardOpenCloseWithoutCopying": true,
+    "summaryCharacters": 709,
+    "summaryByteIdentical": true,
+    "allScreens": 5,
+    "prensaSearchMatches": 1,
+    "differentSavedStateView": 0,
+    "pairAndSavedStatesUnchanged": true,
+    "txtAndComparisonCsvFromEmptySearchedSortedViewByteIdentical": true,
+    "noRealClipboardAccessOrVersionQueries": true
+  },
+  "preserved": {
+    "batches": 2,
+    "confirmedLinks": 10,
+    "projectCount": 25,
+    "completeInitialLibraryNamesAndOrderUnchanged": true,
+    "originalDeliveryCsvByteIdentical": true,
+    "historyBackupBatchesIdentical": true,
+    "allDataAndExportFunctionsByteIdentical": true,
+    "panelBoundsUnchanged": true,
+    "dialogBounds": {
+      "bottom": 708,
+      "height": 696,
+      "left": 182.5,
+      "right": 1082.5,
+      "top": 12,
+      "width": 900,
+      "x": 182.5,
+      "y": 12
+    },
+    "language": "es",
+    "actionsHiddenAfterReloadUntilComparing": true
+  },
+  "tests": {
+    "existingInteractive": 228,
+    "existingTestHelpersUpdatedForNestedRowsOnly": true,
+    "targetedMcpHelp": 1,
+    "broaderMcpKnownPreExistingFailures": 15,
+    "broaderUnrelatedHelpSuiteNotRepeated": true,
+    "publicBilingualHelpSurfaces": 6,
+    "liveMcpBilingualHelp": true,
+    "isolatedLanguages": [
+      "es",
+      "en"
+    ],
+    "narrowContainerPixels": 340,
+    "narrowRowsEachHeight": 96,
+    "nativeKeyboardOrderVerifiedBothLanguages": true,
+    "noClippingOrOverlap": true,
+    "mixedStatesAndEmptyViews": true,
+    "swapInvalidatesActions": true,
+    "noAdditionalQueriesWritesCopiesOrAutomaticDownloads": true,
+    "temporaryTabAndServerClosed": true
+  },
+  "scope": "Only grouping and visual layout of the four existing actions changed: CSV/TXT downloads first, preview/copy summary second. Each pair wraps when space is limited. No new buttons or headings, data/behavior changes, clipboard access, backend/version queries, project/history writes, deliveries, assignments, restores or synchronization. The app panel was neither moved nor resized."
+}

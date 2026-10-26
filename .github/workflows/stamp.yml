@@ -22,8 +22,6 @@ name: stamp
 on:
   push:
     paths: ["assets/**", "**/*.html", "scripts/stamp-version.mjs", ".github/workflows/stamp.yml"]
-  pull_request:
-    paths: ["assets/**", "**/*.html", "scripts/stamp-version.mjs"]
 
 permissions:
   contents: write
@@ -44,7 +42,9 @@ jobs:
       # Fuera de main no escribimos en el repo de nadie: solo avisamos.
       - name: Comprobar el sello
         # Solo en PR: comprueba que la rama llega sellada (Jobs/Carlos, 9-sep-2026, encargo #2908).
-        if: github.event_name == 'pull_request'
+        # Desactivado (Carlos, 24-oct-2026): el check del PR corría a la vez que el sello del push y
+        # fallaba siempre, mandando correos «Run failed: stamp». El push ya sella cada rama.
+        if: false
         run: npm run verify:stamp
 
       - name: Sellar y devolver el commit

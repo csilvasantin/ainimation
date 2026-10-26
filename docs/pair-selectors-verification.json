@@ -1,0 +1,114 @@
+{
+  "feature": "history-pair-selectors-description",
+  "verifiedAt": "2026-10-24T06:56:28.800562+00:00",
+  "implementation": {
+    "featureCommit": "c04605d",
+    "workerSourceCommit": "b0e1fbee967594a51cf2f910eccc3a7477153ca1",
+    "observedIntegrationCommitBeforeProof": "3a4039b43db40a10a0d420d2d213783877082dc0",
+    "storeCommit": "796ef4a6f4ea2098a9ea9b4132caeb689e3d663d",
+    "mcpCommit": "b3ceb36dd3afa6f228a5197c699665104aecf072",
+    "interactiveModuleSha256": "02c70f35f9aedb1a4019356ea2c9169da840a3b26c3450f8704c1ccdb82c4b49",
+    "previewWorker": "b026c854-fe48-4981-b3ed-064440272eea",
+    "mcpWorker": "c031fec0-f19c-4c1e-9d2c-2037025fa58a"
+  },
+  "semantics": {
+    "firstAndSecondSelectorsDescribeExistingOwnPairStatus": true,
+    "sameExistingIdAsCompareAndSwap": true,
+    "descriptionTargetDistinctFromResults": true,
+    "noNewIdOrParagraph": true,
+    "fullNamesOptionsValuesTypesAndPreviousAttributesExact": true,
+    "noNewControlsRolesLiveRegionsTabindexAriaControlsOrFocus": true,
+    "existingStatusRoleTextAndTimingUnchanged": true,
+    "sourceDiffOnlyAddsTwoExistingSelectorsToExistingDescription": true
+  },
+  "production": {
+    "batches": 2,
+    "links": 10,
+    "initialLibraryProjects": 25,
+    "fullInitialLibraryAndOrderRetained": true,
+    "panelBoundsAndLanguageExact": true,
+    "emptyIncompleteSameReadyMessagesAndBlockingExact": true,
+    "choosingSidesDoesNotCompare": true,
+    "nativeKeyboardOrder": [
+      "first",
+      "second",
+      "compare",
+      "swap"
+    ],
+    "keyboardManualComparison": true,
+    "commonScreens": 5,
+    "exclusiveFirst": 0,
+    "exclusiveSecond": 0,
+    "differentSavedStates": 0,
+    "swapClearsResultAndRequiresManualCompare": true,
+    "returnedToEightThenNineManually": true,
+    "searchPressOneOfFive": true,
+    "filterInvalidationUnchanged": true,
+    "summaryCharacters": 709,
+    "summaryTxtExact": true,
+    "comparisonCsvExact": true,
+    "originalCsvExactBeforeAndAfterReload": true,
+    "ownDescriptionAfterReload": true,
+    "domAndAccessibilityTreeInspected": true,
+    "specificScreenReaderTestClaimed": false
+  },
+  "exports": {
+    "pair-selectors-summary.txt": {
+      "bytes": 723,
+      "sha256": "7b165b8ebee2f39f30a2ca2eaf2796834526495b39c08e085f15cbe15fb4fdf1"
+    },
+    "pair-selectors-comparison.csv": {
+      "bytes": 4626,
+      "sha256": "a1ec788484362ee9ad87e7ff5dd5d059494a3ce3778031b60acd8a236bc7b586"
+    },
+    "pair-selectors-original.csv": {
+      "bytes": 1929,
+      "sha256": "34bdae288ab5fe70b4ce6fb8907dd87a33ac190ef8952a658c4ad12523ea4ac9"
+    },
+    "pair-selectors-original-reloaded.csv": {
+      "bytes": 1929,
+      "sha256": "34bdae288ab5fe70b4ce6fb8907dd87a33ac190ef8952a658c4ad12523ea4ac9"
+    }
+  },
+  "isolated": {
+    "languages": [
+      "es",
+      "en"
+    ],
+    "emptyEitherMissingSameReadyMessagesExact": true,
+    "sameNamesAndRevisionsDistinctBatchIds": true,
+    "twoIndependentHistoriesAndStatuses": true,
+    "sameOwnStatusReferencesThroughoutSelectionAndSwap": true,
+    "nativeKeyboardOrderCompareAndSwap": true,
+    "selectionAndSwapAddNoReadsOrActions": true,
+    "onlyExistingManualComparisonRevalidationReads": true,
+    "changedAndDeniedHistorySimulatedBlocks": true,
+    "changingSelectionDoesNotRemoveBlock": true,
+    "filtersAndReopenKeepOwnStatus": true,
+    "existingCallbackGuardsUnchangedAndTestsPass": true,
+    "temporaryTabAndServerClosed": true
+  },
+  "validation": {
+    "interactiveTests": 231,
+    "interactiveFailures": 0,
+    "targetedMcpHelpTests": 1,
+    "standaloneWorkerBundle": true,
+    "publicBilingualHelpSurfacesVerified": 6,
+    "bilingualHelpSurfacesUpdated": 10,
+    "protectedHelpSourcesUpdatedWithoutBypass": true,
+    "actualMcpHelpBilingual": true,
+    "unrelatedKnownMcpFailuresNotRerun": 15
+  },
+  "preserved": {
+    "canonicalStoreLocalCss": {
+      "tokens": "7473512a",
+      "nav": "d92633d3"
+    },
+    "otherCapsuleFilesUntouchedByFeatureCommit": true,
+    "concurrentCapsulePublicationsIntegratedWithoutDevelopingThem": true,
+    "interactiveCodeUnchangedByConcurrentPublications": true,
+    "primaryWorkspaceUnmodified": true,
+    "inventoryHistoryProjectsReceiptsUnchanged": true,
+    "noClipboardVersionChecksImportsRestoresOrProductionFailures": true
+  }
+}

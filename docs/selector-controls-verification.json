@@ -1,0 +1,116 @@
+{
+  "feature": "comparison-order-and-view-selectors-control-own-results",
+  "verifiedAt": "2026-10-23T20:42:51.160648+00:00",
+  "production": "https://www.ainimation.studio/interactivos/",
+  "release": {
+    "functional": "6cf601b",
+    "stamp": "2b9e01931c0138b351d1567bb9234990906f95c7",
+    "worker": "4bd347c2-9543-48b7-a955-4d0dd61af651",
+    "preservedPublishedCapsuleCommit": "348a74d",
+    "capsuleEditorEntryAndStylePublicByteExact": true,
+    "storeHelp": "3482728bf81092c8d1b6e26f8d91c0e1280b5993",
+    "preservedStoreVenuesCommit": "6801da5",
+    "storeWorkflow": 40021012492,
+    "storeDeployment": "https://05ccd28f.admira-store.pages.dev",
+    "canonicalLocalDesignCss": true,
+    "mcp": "9753e89",
+    "mcpWorker": "49d7b948-bb4a-4e45-926d-f42cf845bf7a"
+  },
+  "semantics": {
+    "bothComparisonSelectorsControlExactlyTheirExistingResults": true,
+    "sameTargetAsComparisonSearch": true,
+    "noNewIdOrContainer": true,
+    "distinctFromGeneralHistoryTarget": true,
+    "uniqueGenericIdPerHistory": true,
+    "noPrivateDataInId": true,
+    "stableBeforeCompareAfterInvalidationAndReopen": true,
+    "labelsNamesOptionsTextsValuesOrderNativeTypeStatesAndKeyboardUnchanged": true,
+    "noAriaLabelRolesTabindexAnnouncementsOrNewAreas": true,
+    "domAccessibilityTreeAndNativeKeyboardInspected": true,
+    "specificScreenReaderNotTested": true
+  },
+  "realBatches": {
+    "revisions": [
+      8,
+      9
+    ],
+    "initialHiddenDisabledStatesAndOptionsExact": true,
+    "nativeOrderNameSelectionVerified": true,
+    "nativeOrderToViewSequence": "history-compare-mode",
+    "threeViewsVisibleCounts": [
+      5,
+      0,
+      0
+    ],
+    "emptyMessagesAndHiddenGroupsPreserved": true,
+    "localPrensaVisible": 1,
+    "localPrensaFullCommon": 5,
+    "resetRestoresOriginalOrderAllScreensEmptySearchAndDisables": true,
+    "pairChangeInvalidatesAndDisablesWithoutChangingOwnTarget": true,
+    "reopenResetsWithoutChangingOwnTargets": true,
+    "fullCommonOnlyFirstOnlySecond": [
+      5,
+      0,
+      0
+    ],
+    "fullSavedStateDifferences": [
+      0,
+      5
+    ],
+    "summaryCharacters": 709,
+    "txtComparisonCsvAndOriginalCsvByteIdentical": true,
+    "historyBackupBatchesIdentical": true,
+    "noRealClipboardAccessOrVersionQueries": true
+  },
+  "preserved": {
+    "batches": 2,
+    "confirmedLinks": 10,
+    "projectCount": 25,
+    "completeInitialLibraryNamesAndOrderUnchanged": true,
+    "allExistingModuleCodeByteIdenticalExceptTwoAttributes": true,
+    "generalHistoryDatesStatesAndIdsUnchanged": true,
+    "panelBoundsUnchanged": true,
+    "dialogBounds": {
+      "bottom": 708,
+      "height": 696,
+      "left": 182.5,
+      "right": 1082.5,
+      "top": 12,
+      "width": 900,
+      "x": 182.5,
+      "y": 12
+    },
+    "language": "es",
+    "allOtherAccessibilityLinksAndBehaviorUnchanged": true,
+    "otherPublishedWorkPreservedWithoutDevelopingIt": true,
+    "primaryWorkspaceUntouched": true
+  },
+  "tests": {
+    "existingInteractive": 230,
+    "targetedMcpHelp": 1,
+    "broaderMcpKnownPreExistingFailures": 15,
+    "broaderUnrelatedHelpSuiteNotRepeated": true,
+    "publicBilingualHelpSurfaces": 6,
+    "liveMcpBilingualHelp": true,
+    "isolatedLanguages": [
+      "es",
+      "en"
+    ],
+    "twoHistoriesIndependentOwnResultsOrderViewsAndSearch": true,
+    "mixedPendingSendingDifferentSavedStates": true,
+    "exclusiveViewAndLocalSearchPreserved": true,
+    "nativeTabOrderEndsInOrderThenView": true,
+    "viewOrderSearchAndResetHaveNoNewReadsWritesQueriesCopiesOrDownloads": true,
+    "emptyHistoriesBothLanguagesRetainOwnHiddenResultsAndDisabledSelectors": true,
+    "invalidationOneHistoryDoesNotCrossOtherInstance": true,
+    "reopenKeepsOwnResultsId": true,
+    "temporaryTabAndServerClosed": true,
+    "bundledRuntimeExecutesIndependently": true
+  },
+  "scope": "Only aria-controls on the existing comparison Screen order and Screen view native selects, using their existing results-container ID already shared by Search this comparison. No new ID/container, logic, options, focus changes, controls, reads, writes, queries, clipboard operations, automatic downloads, deliveries, assignments, restores or synchronization. Existing hidden and disabled states, invalidation, rows and data preserved. Other published capsule and venue work and canonical local design styles retained.",
+  "sha256": {
+    "txt": "7b165b8ebee2f39f30a2ca2eaf2796834526495b39c08e085f15cbe15fb4fdf1",
+    "comparisonCsv": "a1ec788484362ee9ad87e7ff5dd5d059494a3ce3778031b60acd8a236bc7b586",
+    "originalCsv": "34bdae288ab5fe70b4ce6fb8907dd87a33ac190ef8952a658c4ad12523ea4ac9"
+  }
+}

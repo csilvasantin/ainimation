@@ -1,0 +1,62 @@
+{
+  "feature": "preview-comparison-summary-before-copy",
+  "verifiedAt": "2026-10-23T10:55:17.197890+00:00",
+  "production": "https://www.ainimation.studio/interactivos/",
+  "release": {
+    "assets": "a792adf",
+    "stamp": "929aca8",
+    "worker": "f626d948-5320-4cd2-9370-3dad1f06cb81",
+    "storeHelp": "ca38a73373a2fced1c814e3369e13b57c7eb0926",
+    "storeWorkflow": 39942058661,
+    "storeDeployment": "https://00f88764.admira-store.pages.dev",
+    "canonicalLocalDesignCss": true,
+    "mcp": "e3c7427",
+    "mcpWorker": "16f8f834-ac6c-4fe1-904e-b7ee8ef0bc1a"
+  },
+  "realBatches": {
+    "revisions": [
+      8,
+      9
+    ],
+    "startsClosed": true,
+    "summaryCharacters": 709,
+    "summaryByteIdenticalToCopiedReference": true,
+    "openedFromEmptyFilteredView": true,
+    "keyboardOpenCloseReopenExact": true,
+    "pairSearchViewOrderAndStatesPreserved": true,
+    "oneReadOnlyTextArea": true,
+    "closedHidesAndClearsText": true,
+    "copyRegressionNativeClipboardAndNativePasteExact": true,
+    "copyKeepsReviewOpen": true
+  },
+  "preserved": {
+    "batches": 2,
+    "confirmedLinks": 10,
+    "projectCount": 25,
+    "completeLibraryNamesAndOrderUnchanged": true,
+    "comparisonCsvByteIdentical": true,
+    "originalDeliveryCsvByteIdentical": true,
+    "historyBackupBatchesIdentical": true,
+    "allPreviousPureFunctionsByteIdentical": true,
+    "panelBoundsUnchanged": true,
+    "language": "es"
+  },
+  "tests": {
+    "interactive": 222,
+    "mcpHelp": 1,
+    "isolatedLanguages": [
+      "es",
+      "en"
+    ],
+    "narrowContainerPixels": 340,
+    "openCloseCopyCount": 0,
+    "deniedCopyUsesSameSingleArea": true,
+    "reviewAndClipboardFailureNoticesDistinct": true,
+    "mixedStatesAndNoSharedTargets": true,
+    "historyChangedOrDeniedBlocksPreview": true,
+    "oldCopyCallbacksCannotReviveOldPreview": true,
+    "noExtraQueriesOrWrites": true,
+    "temporaryTabAndServerClosed": true
+  },
+  "scope": "Manual optional preview only. Opening or closing does not copy or read the clipboard, query versions, prepare, assign, restore 3D screens or synchronize. Summary text and all existing exports remain unchanged."
+}

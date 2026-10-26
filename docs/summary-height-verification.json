@@ -1,0 +1,91 @@
+{
+  "feature": "adaptive-comparison-summary-height",
+  "verifiedAt": "2026-10-23T11:28:34.723487+00:00",
+  "production": "https://www.ainimation.studio/interactivos/",
+  "release": {
+    "assets": "8304c14",
+    "stamp": "220c54b",
+    "worker": "e6c5ef52-7c8e-4d60-9c41-af444ccd691c",
+    "storeHelp": "a010179dc2ac8b8841e9487eb70e73128764afc5",
+    "storeWorkflow": 39945519523,
+    "storeDeployment": "https://e94a6fe8.admira-store.pages.dev",
+    "canonicalLocalDesignCss": true,
+    "mcp": "45cf65e",
+    "mcpWorker": "42f078ff-65a7-4e5b-a140-45cf9905977f"
+  },
+  "realBatches": {
+    "revisions": [
+      8,
+      9
+    ],
+    "summaryCharacters": 709,
+    "textByteIdenticalToCopiedReference": true,
+    "before": {
+      "height": 177.5,
+      "clientHeight": 176,
+      "scrollHeight": 463
+    },
+    "after": {
+      "height": 465,
+      "clientHeight": 463,
+      "scrollHeight": 463,
+      "maxHeight": 504
+    },
+    "noInternalScrollForRealSummary": true,
+    "fontAndLineHeightUnchanged": true,
+    "noHorizontalOverflow": true,
+    "singleReadOnlyArea": true,
+    "hideClearsAdjustment": true,
+    "openCloseAndFilteredViewPreservePairAndStates": true,
+    "clipboardUntouched": true
+  },
+  "preserved": {
+    "batches": 2,
+    "confirmedLinks": 10,
+    "projectCount": 25,
+    "completeInitialLibraryNamesAndOrderUnchanged": true,
+    "comparisonCsvByteIdentical": true,
+    "originalDeliveryCsvByteIdentical": true,
+    "historyBackupBatchesIdentical": true,
+    "allPreviousPureFunctionsByteIdentical": true,
+    "panelBoundsUnchanged": true,
+    "dialogBounds": {
+      "bottom": 708,
+      "height": 696,
+      "left": 182.5,
+      "right": 1082.5,
+      "top": 12,
+      "width": 900,
+      "x": 182.5,
+      "y": 12
+    },
+    "language": "es"
+  },
+  "tests": {
+    "interactive": 222,
+    "mcpHelp": 1,
+    "publicBilingualHelpSurfaces": 6,
+    "liveMcpBilingualHelp": true,
+    "isolatedLanguages": [
+      "es",
+      "en"
+    ],
+    "narrowContainerPixels": 340,
+    "longText": {
+      "height": 504,
+      "clientHeight": 502,
+      "scrollHeight": 770,
+      "accessibleInternalScroll": true,
+      "noHorizontalOverflow": true
+    },
+    "shortTextFullyVisible": true,
+    "deniedCopyUsesSameTextAndSingleArea": true,
+    "hiddenNotMeasured": true,
+    "reopeningMeasuresCurrentArea": true,
+    "swapClearsTextAndHeight": true,
+    "noNewDeferredAdjustmentCallbacks": true,
+    "noExtraQueriesOrWrites": true,
+    "temporaryTabAndServerClosed": true
+  },
+  "scope": "Layout of the existing read-only field only. Height fits visible text and actual width, capped at 70svh (70vh fallback). Long text retains internal scrolling. The app panel was neither moved nor resized. No project/history writes, version checks, real clipboard access, deliveries, assignments, restores or synchronization."
+}

@@ -180,6 +180,9 @@
   }
 
   /* --- pintado --- */
+  var mediaUnlocked = false;
+  document.addEventListener("pointerdown", function () { mediaUnlocked = true; }, {once:true});
+  document.addEventListener("keydown", function () { mediaUnlocked = true; }, {once:true});
   var nodes = {};
   var hidden = {};
   var texts  = {};
@@ -191,14 +194,16 @@
     var live  = frame >= start && frame < end && !hidden[obj.spriteName];
     var k = at(obj, frame);
     var node = ensure(id, function () {
-      var n = document.createElement(kind === "cast" ? (obj.mediaType === "video" ? "video" : "img") : "div");
+      var n = document.createElement(kind === "cast" ? (obj.mediaType === "video" ? "video" : obj.mediaType === "audio" ? "audio" : "img") : "div");
       if (kind === "cast") { n.src = obj.src; if (obj.mediaType === "video") { n.muted = true; n.loop = true; n.playsInline = true; } }
+      if (obj.mediaType === "audio") { n.dataset.sound = obj.spriteName || obj.name || obj.id; n.controls = true; n.setAttribute("aria-label", obj.name || "Audio"); }
       n.className = "xp-item";
       if (obj.interactive) { n.dataset.sprite = obj.spriteName; n.classList.add("xp-hot"); }
       return n;
     });
     node.style.display = live ? "block" : "none";
-    if (!live) return;
+    if (!live) { if (node.pause) node.pause(); return; }
+    if (kind === "cast" && node.play && (obj.mediaType === "video" || mediaUnlocked)) { if (node.paused && !node.ended) node.play().catch(function () {}); }
     node.style.left = k.x + "%"; node.style.top = k.y + "%";
     node.style.width = k.w + "%"; node.style.height = k.h + "%";
     if (kind === "item" && EXT && EXT.paint && (obj.type === "button" || obj.type === "kiosk")) { EXT.paint(node, obj, texts); return; }
@@ -255,7 +260,7 @@
         case "showCast":    delete hidden[value]; break;
         case "hideCast":    hidden[value] = true; break;
         case "setText":     texts[value] = arguments[3] && arguments[3].value2 || ""; break;
-        case "playSound":   var a = document.querySelector('[data-sound="' + value + '"]'); if (a) { a.currentTime = 0; a.play(); } break;
+        case "playSound":   var a = document.querySelector('[data-sound="' + value + '"]'); if (a) { a.currentTime = 0; var play = a.play(); if (play && play.catch) play.catch(function (error) { if (error.name !== "AbortError") throw error; }); } break;
         case "openUrl":     if (value) window.open(value, "_blank", "noopener"); break;
         case "stop":        playing = false; until = null; break;
         default:            if (EXT && EXT.act) EXT.act(id, value, arguments[3]);
@@ -343,7 +348,6 @@
 `;
 
   const esc = (text) => String(text).replace(/</g, "\\u003c");
-  const gatheredPlanItems = () => (window.currentPlan?.()?.stageItems || []);
 
   /* ---------------------------------------------------------------------------
    * EXT_JS — puente del reproductor con los sprites de Director: botón (texto
@@ -440,10 +444,10 @@
     .replace(/[\u0300-\u036f]/g, "").toLowerCase()
     .replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "xperiencia";
 
-  function collect() {
-    const plan = window.currentPlan?.();
+  function collect(planOverride) {
+    const plan = planOverride || window.currentPlan?.();
     if (!plan) return null;
-    const totalFrames = Number(window.ainTransport?.totalFrames) || 240;
+    const totalFrames = Math.max(24,Number(plan.totalFrames)||0,...(plan.cast||[]).map(x=>Number(x.startFrame||1)+Number(x.durationFrames||0)-1),...(plan.stageItems||[]).map(x=>Number(x.startFrame||1)+Number(x.durationFrames||0)-1), (plan.admiraPackage?24:Number(window.ainTransport?.totalFrames)||240));
     const dropped = [];
     const cast = (plan.cast || []).filter((member) => {
       if (!member?.src) return false;
@@ -461,11 +465,11 @@
       dropped,
       piece: {
         title: plan.title || "Xperiencia",
-        fps: 24,
+        fps: Number(plan.packageFps)||24,
         totalFrames,
         // Cuánto le pertenece la pantalla, no cuánto dura el timeline.
         durationSeconds: limitaSegundos(plan.durationSeconds),
-        markers: window.loadTimelineMarkers?.(totalFrames) || [],
+        markers: plan.markers || window.loadTimelineMarkers?.(totalFrames) || [],
         cast,
         stageItems: plan.stageItems || [],
         stage: plan.stage || null,
@@ -574,9 +578,15 @@
 
   // Alta en el catálogo. Vive aquí y no en el canal porque el Stock es el sitio
   // donde se BUSCAN las piezas; el canal solo las emite.
-  async function altaEnStock({ nombre, slug, segundos, html }) {
+  async function altaEnStock({ nombre, slug, segundos, html, snapshot=window.currentPlan?.() }) {
     const token = leeToken();
     if (!token) return { ok: false, error: "sin credencial" };
+    if(!snapshot)return{ok:false,error:'No se encuentra el proyecto para revisar.'};
+    const preflight=await import('./admira-preflight.mjs?v=preflight-1');
+    const inspection=preflight.inspectDirector(snapshot,{markers:window.loadTimelineMarkers?.(window.ainTransport?.totalFrames)||snapshot.markers||[],compileScripts:window.Admingo?.compileScripts});
+    const review=await preflight.openPublicationReview({snapshot,getCurrent:()=>window.currentPlan?.(),inspection,kind:'interactive',makePreview:async()=>({html})});
+    if(!review)return{ok:false,cancelled:true};
+    review.setStatus('Publicando el interactivo en Admira…');
     const body = JSON.stringify({
       secret: token,
       url: `${BASE_PUBLICA}${slug}/`,
@@ -600,32 +610,34 @@
         });
         clearTimeout(timer);
         const d = await r.json().catch(() => ({}));
-        if (r.ok && d.ok) return { ok: true, id: d.id, url: d.url, actualizado: d.actualizado };
+        if (r.ok && d.ok) { review.close();return { ok: true, id: d.id, url: d.url, actualizado: d.actualizado }; }
         lastError = d.error || String(r.status);
         if (r.status < 500 && r.status !== 404) break;
       } catch (e) { lastError = String(e); }
     }
+    review.fail(lastError);
     return { ok: false, error: lastError };
   }
 
   // Construye la pieza (sin diálogo ni descarga): la usan Publicar y la Vista responsive.
-  async function build() {
-    const gathered = collect();
+  async function build(planOverride) {
+    const gathered = collect(planOverride);
     if (!gathered) return null;
     const { piece, rules, dropped } = gathered;
-    let runtime = "";
-    try { runtime = await (await fetch("assets/xpl-runtime.js")).text(); }
-    catch { console.warn("[xperiencia] no se pudo incrustar el runtime XPL: la pieza saldrá sin reglas."); }
+    async function requiredRuntime(url) {
+      const response=await fetch(url,{signal:AbortSignal.timeout(15000)});
+      if(!response.ok||/text\/html/.test(response.headers.get('content-type')||''))throw Error('No se puede cargar el reproductor: '+url);
+      const text=await response.text();if(!text.trim())throw Error('Reproductor vacío: '+url);return text;
+    }
+    let runtime = await requiredRuntime('assets/xpl-runtime.js');
     // Sprites de Director (botón / quiosco) y miembro Carta: viajan DENTRO de la pieza.
-    const usesDirector = (gatheredPlanItems()).some((i) => i.type === "button" || i.type === "kiosk");
+    const usesDirector = (piece.stageItems||[]).some((i) => i.type === "button" || i.type === "kiosk");
     // Admingo viaja dentro de la pieza (intérprete + scripts.admingo legible en el zip)
     const scripts = piece.scripts && (piece.scripts.movie || Object.keys(piece.scripts.frames || {}).length || Object.keys(piece.scripts.sprites || {}).length) ? piece.scripts : null;
-    if (scripts) { try { runtime += "\n" + await (await fetch("assets/admingo.js")).text(); } catch { console.warn("[xperiencia] no se pudo incrustar Admingo."); } }
+    if (scripts) runtime += "\n" + await requiredRuntime("assets/admingo.js");
     if (usesDirector) {
-      try {
-        const [qr, kiosk] = await Promise.all(["assets/qrcode.min.js", "assets/kiosk-sprite.js"].map(async (u) => (await fetch(u)).text()));
-        runtime += "\n" + qr + "\n" + kiosk + "\n" + EXT_JS;
-      } catch { console.warn("[xperiencia] no se pudo incrustar el quiosco."); }
+      const [qr, kiosk] = await Promise.all(["assets/qrcode.min.js", "assets/kiosk-sprite.js"].map(requiredRuntime));
+      runtime += "\n" + qr + "\n" + kiosk + "\n" + EXT_JS;
     }
     runtime = runtime.replace(/<\/script/gi, "<\\/script");
 
@@ -652,7 +664,7 @@
     plan.durationSeconds = dicho.segundos;
     window.saveFilmPlan?.(plan);
 
-    const built = await build();
+    const built = await build(plan);
     if (!built) return null;
     const { piece, rules, dropped, scripts, planJson, rulesJson, exportedHtml } = built;
     const slug = slugify(piece.title);
@@ -676,7 +688,7 @@
     // registra nada. Un fallo aquí no invalida la exportación — se dice y ya.
     let stock = null;
     if (dicho.alStock) {
-      stock = await altaEnStock({ nombre: piece.title, slug, segundos: piece.durationSeconds, html: exportedHtml });
+      stock = await altaEnStock({ nombre: piece.title, slug, segundos: piece.durationSeconds, html: exportedHtml, snapshot:plan });
       if (!stock.ok) console.warn("[xperiencia] no se pudo dar de alta en el Stock:", stock.error);
     }
 

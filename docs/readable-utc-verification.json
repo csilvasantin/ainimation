@@ -1,0 +1,97 @@
+{
+  "feature": "comparison-readable-utc-dates",
+  "verifiedAt": "2026-10-23T14:00:54.510917+00:00",
+  "production": "https://www.ainimation.studio/interactivos/",
+  "release": {
+    "assets": "619df83",
+    "stamp": "81f88e4",
+    "worker": "68cdea26-431d-4ca5-9d66-55ff4646626e",
+    "storeHelp": "37b7271c63eec1ad52774dc11b997527a09fb5c6",
+    "storeWorkflow": 39965240710,
+    "storeDeployment": "https://ed1980de.admira-store.pages.dev",
+    "canonicalLocalDesignCss": true,
+    "mcp": "db9d6c5",
+    "mcpWorker": "5f20e1c1-30f2-4334-80d9-f3ef33569c75"
+  },
+  "realBatches": {
+    "revisions": [
+      8,
+      9
+    ],
+    "datesUtc": [
+      "2026-10-22T19:35:49.422Z",
+      "2026-10-22T20:36:48.005Z"
+    ],
+    "visibleSpanishDates": [
+      "22/10/2026 · 19:35:49.422 UTC",
+      "22/10/2026 · 20:36:48.005 UTC"
+    ],
+    "optionsSelectedLabelsAndResultIdentificationsExact": true,
+    "fullProjectRevisionAndBatchIdsRetained": true,
+    "shared": 5,
+    "onlyFirst": 0,
+    "onlySecond": 0,
+    "differentSavedStates": 0,
+    "swapExactIdsInvalidatesWithoutAutomaticComparison": true,
+    "comparisonInBothDirectionsVerified": true,
+    "prensaMatches": 1,
+    "filteredDifferentStateViewMatches": 0,
+    "summaryCharacters": 709,
+    "summaryTxtAndComparisonCsvFromFilteredViewByteIdentical": true,
+    "originalDeliveryCsvBeforeAndAfterReloadByteIdentical": true,
+    "historyBackupBatchesBeforeAndAfterReloadIdentical": true,
+    "noRealClipboardAccessOrVersionQueries": true
+  },
+  "preserved": {
+    "batches": 2,
+    "confirmedLinks": 10,
+    "projectCount": 25,
+    "completeInitialLibraryNamesAndOrderUnchanged": true,
+    "allPreviousModuleCodeByteIdenticalExceptPrivateDateFormatterAndBatchLabelCall": true,
+    "allPureExportFunctionsUnchanged": true,
+    "generalHistoryDatesAndSearchUnchanged": true,
+    "panelBoundsUnchanged": true,
+    "dialogBounds": {
+      "bottom": 708,
+      "height": 696,
+      "left": 182.5,
+      "right": 1082.5,
+      "top": 12,
+      "width": 900,
+      "x": 182.5,
+      "y": 12
+    },
+    "language": "es",
+    "uniqueSummaryAriaControlsAndExpandedLifecycleUnchanged": true,
+    "twoActionRowsAndNativeKeyboardOrderUnchanged": true
+  },
+  "tests": {
+    "existingInteractive": 228,
+    "targetedMcpHelp": 1,
+    "broaderMcpKnownPreExistingFailures": 15,
+    "broaderUnrelatedHelpSuiteNotRepeated": true,
+    "publicBilingualHelpSurfaces": 6,
+    "liveMcpBilingualHelp": true,
+    "isolatedLanguages": [
+      "es",
+      "en"
+    ],
+    "leapDayAndMidnightExact": true,
+    "yearBoundaryExact": true,
+    "sameTimestampDifferentBatchIdsRetained": true,
+    "longTitleAndCompleteDateNoHorizontalOverflow": true,
+    "mixedPendingAndSendingStatesPreserved": true,
+    "swapAndGeneralFilterInvalidationVerified": true,
+    "nativeExportKeyboardOrderEnglishAndSpanish": true,
+    "hostPreferenceUnchangedTimezoneRuns": [
+      "Pacific/Honolulu",
+      "Asia/Tokyo"
+    ],
+    "timezoneLabelOutputsByteIdentical": true,
+    "unformattableExtendedYearRetainsValidatedOriginalUtc": true,
+    "isolatedCsvAndTxtMatchPreviousModuleForBothLanguages": true,
+    "fixtureEffects": "6 seed writes only; 0 queries, clipboard operations or downloads",
+    "temporaryTabAndServerClosed": true
+  },
+  "scope": "Only visible comparison batch date labels changed. UTC instants and milliseconds, IDs, metadata, general history dates, search, summaries and all exported/copied text are preserved. No extra queries, Google, project/history/preference writes, clipboard access, deliveries, assignments, restores or synchronization; panel neither moved nor resized."
+}

@@ -1,0 +1,109 @@
+{
+  "feature": "history-guide-record-dates",
+  "verifiedAt": "2026-10-24T08:53:30.870792+00:00",
+  "implementation": {
+    "featureCommit": "6306aae",
+    "ainimationReleaseCommit": "a9699777631efe9aca2323927c43ed404a1487db",
+    "storeHelpCommit": "8e8a4e82a2679ae7f6efdeeca7529d688d3e89aa",
+    "mcpCommit": "fb870b44daa1562ea8ebcac4c225ff745aa92a9d",
+    "interactiveModuleSha256": "1428ef30cb19bb5b45b487487b0bde008117a4890608697c54b967bfa7c4e466",
+    "previewWorker": "dc949304-ce46-44cc-ab2d-7237f1bff006",
+    "mcpWorker": "a1d60419-9a03-4823-a0e3-e15972478a2a"
+  },
+  "semantics": {
+    "onlyTwoExactSentencesAppendedToSecondExistingGuideStepPerLanguage": true,
+    "secondStepPreviousPrefixExact": true,
+    "otherFourStepsExact": true,
+    "fiveNativeListSteps": true,
+    "nativeGuideInitiallyCollapsedOnEveryOpen": true,
+    "noMarkupControlsRolesLiveRegionsTabindexOrFocusChanges": true,
+    "previousVersionCheckAnd3dSceneExplanationPreserved": true,
+    "entireModuleByteIdenticalAfterRemovingTwoSuffixes": true
+  },
+  "production": {
+    "batches": 2,
+    "links": 10,
+    "initialLibraryProjects": 25,
+    "fullInitialLibraryAndOrderRetained": true,
+    "panelBoundsAndLanguageExact": true,
+    "nativeKeyboardAndPointerGuideToggle": true,
+    "reopenCollapsesGuide": true,
+    "fullTextWrapsWithoutOverflow": true,
+    "fontSizeUnchanged": "12px",
+    "bothRecordMetadataExactAgainstExistingCompleteBackup": true,
+    "manualComparisonCommon": 5,
+    "exclusiveFirst": 0,
+    "exclusiveSecond": 0,
+    "differentSavedStates": 0,
+    "searchPressOneOfFive": true,
+    "summaryCharacters": 709,
+    "summaryReviewExact": true,
+    "txtAndComparisonCsvExactFromFilteredView": true,
+    "originalCsvExactFilteredAndAfterReload": true,
+    "metadataAndGuideFiveStepsExactAfterReload": true,
+    "domAndAccessibilityTreeInspected": true,
+    "specificScreenReaderTestClaimed": false
+  },
+  "exports": {
+    "guide-dates-summary.txt": {
+      "bytes": 723,
+      "sha256": "7b165b8ebee2f39f30a2ca2eaf2796834526495b39c08e085f15cbe15fb4fdf1"
+    },
+    "guide-dates-comparison.csv": {
+      "bytes": 4626,
+      "sha256": "a1ec788484362ee9ad87e7ff5dd5d059494a3ce3778031b60acd8a236bc7b586"
+    },
+    "guide-dates-original-v9.csv": {
+      "bytes": 1929,
+      "sha256": "34bdae288ab5fe70b4ce6fb8907dd87a33ac190ef8952a658c4ad12523ea4ac9"
+    },
+    "guide-dates-original-v9-reloaded.csv": {
+      "bytes": 1929,
+      "sha256": "34bdae288ab5fe70b4ce6fb8907dd87a33ac190ef8952a658c4ad12523ea4ac9"
+    }
+  },
+  "isolated": {
+    "languages": [
+      "es",
+      "en"
+    ],
+    "containerWidths": [
+      320,
+      200
+    ],
+    "twoIndependentHistoriesAndGuides": true,
+    "allFiveStepsAndPreviousTextExact": true,
+    "nativeKeyboardAndPointerGuideToggle": true,
+    "reopenCollapsesGuide": true,
+    "guideToggleAddsNoReadsWritesQueriesCopiesDownloadsOrComparisons": true,
+    "onlyExistingHistoryOpenReadOnReopen": true,
+    "noPanelResizeFontReductionOrOverflow": true,
+    "existingCallbackGuardsUnchangedAndTestsPass": true,
+    "temporaryTabAndServerClosed": true
+  },
+  "validation": {
+    "interactiveTests": 231,
+    "interactiveFailures": 0,
+    "targetedMcpHelpTests": 1,
+    "standaloneWorkerBundle": true,
+    "publicBilingualHelpSurfacesVerified": 6,
+    "bilingualHelpSurfacesUpdated": 10,
+    "protectedHelpSourcesUpdatedWithoutBypass": true,
+    "actualMcpHelpBilingual": true,
+    "unrelatedKnownMcpFailuresNotRerun": 15,
+    "storeHelpCanonicalCi": 40079623819,
+    "storeHelpCanonicalCiConclusion": "success",
+    "storeHelpCanonicalDeployment": "https://77fc6f5e.admira-store.pages.dev"
+  },
+  "preserved": {
+    "canonicalStoreLocalCss": {
+      "tokens": "7473512a",
+      "nav": "d92633d3"
+    },
+    "otherPublishedAssetsUntouchedByFunctionalCommit": true,
+    "latestPublishedSourcesIntegratedBeforeFeature": true,
+    "primaryWorkspaceUnmodified": true,
+    "inventoryHistoryProjectsReceiptsUnchanged": true,
+    "noClipboardVersionChecksImportsRestoresOrProductionFailures": true
+  }
+}

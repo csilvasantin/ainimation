@@ -1,0 +1,122 @@
+{
+  "feature": "native-escape-history-review-audit",
+  "verifiedAt": "2026-10-25T03:23:56.677256+00:00",
+  "scope": {
+    "auditOnlyNoProductChange": true,
+    "noNewAriaOrProductControls": true,
+    "noWorkerRedeploy": true,
+    "nativeDialogCancelRoute": true,
+    "nativeFileChooserEscapeNotClaimed": true
+  },
+  "local": {
+    "languages": [
+      "es",
+      "en"
+    ],
+    "nativeEscapeAfterNewMixedIdenticalReviewCases": 6,
+    "nativeEscapeDuringPendingReadLateAcceptedRejectedCallbacks": 8,
+    "oldCallbackDoesNotReplaceNewPendingAttemptCases": 4,
+    "twoHistoryUpperDialogOnlyCases": 2,
+    "filterCollapseEscapeReopenNoAddedOperationsCases": 2,
+    "fictitiousFilesOnly": true,
+    "injectedStorageVersionRequestClipboardDownloadAndFileText": true,
+    "zeroAdditionalWritesBeyondSeeds": true,
+    "zeroVersionQueriesClipboardCopiesDownloads": true,
+    "restoreConfirmNeverActivated": true,
+    "summaryListStatusFileValuePlanAndReviewClearedPerExistingReset": true,
+    "restoreConfirmHiddenDisabledPreserved": true,
+    "hiddenConfirmTextPreservedPerExistingResetRatherThanInventingTextClear": true,
+    "reopenAddsOnlyExistingHistoryReadNotFileRead": true,
+    "localNativeEscapeFocusObservedAtOpener": true,
+    "upperDialogEscapeReturnsFocusToItsOpenerInsideOtherDialog": true,
+    "otherHistoryReviewUnchanged": true,
+    "lateCallbacksDoNotRestoreSectionRowsStatusValuesOrFocus": true,
+    "currentAttemptCanCompleteAndCancelNormally": true,
+    "allExistingOwnAccessibleRelationshipsRetained": true
+  },
+  "production": {
+    "oneNativeEscapeCloseAndManualReopen": true,
+    "initialReviewHiddenEmpty": true,
+    "focusAfterEscapeObserved": "deliveryHistory",
+    "initialProjectCount": 25,
+    "sameCompleteLibraryAfterReopen": true,
+    "batchCount": 2,
+    "confirmedLinkCount": 10,
+    "allOwnRelationshipsRetained": true,
+    "guideSteps": 5,
+    "duplicateIds": 0,
+    "orphanReferences": 0,
+    "panelUnmoved": true,
+    "domAndAccessibilityTreeInspected": true,
+    "noSpecificScreenReaderOrHiddenControlNavigabilityClaim": true,
+    "noRealFilePickerBackupRestoreCancelConfirmClipboardVersionActions": true,
+    "realComparisonAndDownloadsNotRepeated": true,
+    "publishedModuleByteExactAgainstLastVerifiedVersion": true
+  },
+  "integrity": {
+    "unchangedModuleSha256": "9cee3c8bf17f02850cee6f933051df5d375249b0bd7cd0a4eceefbc843a224dd",
+    "priorExportReferenceHashesIntact": {
+      "copy-summary-production.txt": "7b165b8ebee2f39f30a2ca2eaf2796834526495b39c08e085f15cbe15fb4fdf1",
+      "ainimation-comparacion-v8-v9.csv": "a1ec788484362ee9ad87e7ff5dd5d059494a3ce3778031b60acd8a236bc7b586",
+      "compact-actions-v9-before.csv": "34bdae288ab5fe70b4ce6fb8907dd87a33ac190ef8952a658c4ad12523ea4ac9"
+    },
+    "summaryCharacters": 709,
+    "publicHelp": [
+      {
+        "route": "admira-xp/docs/ainimation-screen-delivery.md",
+        "es": true,
+        "en": true
+      },
+      {
+        "route": "admira-xp/help.html",
+        "es": true,
+        "en": true
+      },
+      {
+        "route": "mcp/index.html",
+        "es": true,
+        "en": true
+      },
+      {
+        "route": "mcp/manifest.json",
+        "es": true,
+        "en": true
+      },
+      {
+        "route": "mcp/llms.txt",
+        "es": true,
+        "en": true
+      },
+      {
+        "route": "mcp/funcionalidades.json",
+        "es": true,
+        "en": true
+      }
+    ]
+  },
+  "validation": {
+    "priorInteractiveRegressionBaseline": 231,
+    "priorInteractiveFailures": 0,
+    "existingBaselineReusedBecauseProductUnchanged": true,
+    "knownOtherMcpFailuresOutOfScope": 15,
+    "bilingualPublicHelpContractPreserved": true,
+    "realMcpCurrentHelpVerified": true
+  },
+  "productBaseline": {
+    "ainimation": "2b8870c1ecd21218a9e1da5d40f9efcc253da41c",
+    "store": "92ba935b83497c048a00d322ec6ea1afe93b9343",
+    "mcp": "011beaa"
+  },
+  "limitations": [
+    "Native dialog Escape was tested; native file-picker Escape or empty picker cancellation was not claimed.",
+    "Clearing follows current resetRestore: confirmation remains hidden and disabled; its prior hidden text is retained.",
+    "Prior real TXT/CSV reference hashes were verified; no new real downloads were performed.",
+    "Existing in-memory regression results were reused; this audit changed no product source."
+  ],
+  "temporaryBrowserAndServerClosed": true,
+  "preserved": [
+    "all initial real library/history/project/language/session data",
+    "all published accessible relationships and functions",
+    "other publications and canonical Store package with local CSS"
+  ]
+}

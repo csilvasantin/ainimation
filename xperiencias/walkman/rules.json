@@ -1,0 +1,1 @@
+[{"id":"r-play","name":"Toca tecla-play → PLAY","enabled":true,"when":{"join":"and","conds":[{"fact":"click","value":"tecla-play"}]},"do":[{"id":"goToMarker","value":"PLAY"},{"id":"playSegment","value":"FIN-PLAY"}]}]

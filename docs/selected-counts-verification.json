@@ -1,0 +1,92 @@
+{
+  "feature": "comparison-selected-batch-screen-counts",
+  "verifiedAt": "2026-10-23T14:27:55.928020+00:00",
+  "production": "https://www.ainimation.studio/interactivos/",
+  "release": {
+    "assets": "7545e07",
+    "stamp": "d6c3faa",
+    "worker": "318b2557-0d77-463d-a7d8-f2c725af46ae",
+    "storeHelp": "0ea48a6e7053c62d00feb95bd50ceb96f1cd7059",
+    "storeWorkflow": 39969247677,
+    "storeDeployment": "https://e960899d.admira-store.pages.dev",
+    "canonicalLocalDesignCss": true,
+    "mcp": "e80cc4f",
+    "mcpWorker": "b4e8e21d-492b-4613-b60e-e014d42db6b5"
+  },
+  "realBatches": {
+    "revisions": [
+      8,
+      9
+    ],
+    "selectedCountsBeforeComparing": [
+      5,
+      5
+    ],
+    "countsLinkedToExactBatchIds": true,
+    "fullProjectRevisionUtcMillisecondsAndIdRetained": true,
+    "selectorOptionsUnchanged": true,
+    "resultIdentificationUnchanged": true,
+    "swapKeepsCountsWithIdsWithoutAutomaticComparison": true,
+    "shared": 5,
+    "onlyFirst": 0,
+    "onlySecond": 0,
+    "differentSavedStates": 0,
+    "prensaMatches": 1,
+    "emptyDifferentStateViewMatches": 0,
+    "summaryCharacters": 709,
+    "txtComparisonCsvAndOriginalCsvByteIdentical": true,
+    "historyBackupBatchesIdentical": true,
+    "filterInvalidatesCountsAndResult": true,
+    "reloadStartsWithoutSelectionsOrCounts": true,
+    "noRealClipboardAccessOrVersionQueries": true
+  },
+  "preserved": {
+    "batches": 2,
+    "confirmedLinks": 10,
+    "projectCount": 25,
+    "completeInitialLibraryNamesAndOrderUnchanged": true,
+    "allOtherModuleCodeByteIdentical": true,
+    "onlyFunctionalChange": "Existing selected-label text includes the exact validated batch result count.",
+    "generalHistoryDatesSearchStatesAndExportsUnchanged": true,
+    "panelBoundsUnchanged": true,
+    "dialogBounds": {
+      "bottom": 708,
+      "height": 696,
+      "left": 182.5,
+      "right": 1082.5,
+      "top": 12,
+      "width": 900,
+      "x": 182.5,
+      "y": 12
+    },
+    "language": "es",
+    "summaryAccessibilityAndExpandedLifecycleUnchanged": true,
+    "actionRowsAndKeyboardOrderUnchanged": true
+  },
+  "tests": {
+    "existingInteractive": 228,
+    "targetedMcpHelp": 1,
+    "broaderMcpKnownPreExistingFailures": 15,
+    "broaderUnrelatedHelpSuiteNotRepeated": true,
+    "publicBilingualHelpSurfaces": 6,
+    "liveMcpBilingualHelp": true,
+    "isolatedLanguages": [
+      "es",
+      "en"
+    ],
+    "oneAndFourSavedScreensSingularPluralExact": true,
+    "allPendingSendingSuccessErrorTargetsCounted": true,
+    "equalTitlesDifferentProjectsAndIdsRemainIndependent": true,
+    "renamedSharedIdentityDoesNotChangeCounts": true,
+    "swapMovesExactCountsAndDoesNotCompare": true,
+    "sameBatchPairStillRejected": true,
+    "clearedSelectionHasNoCount": true,
+    "generalFilterAndReopenClearSelectionsAndCounts": true,
+    "zeroOrOneBatchKeepComparisonDisabledWithoutInventedZero": true,
+    "completeTextFitsNoHorizontalOverflow": true,
+    "nativeExportKeyboardOrderBothLanguages": true,
+    "fixtureEffects": "Only fixture seed writes; no queries, clipboard operations or downloads.",
+    "temporaryTabAndServerClosed": true
+  },
+  "scope": "Presentation-only count of validated saved targets per exact selected batch ID, irrespective of target status. Does not indicate availability, preparation or shared targets. No new controls, queries, Google, preference/project/history writes, clipboard access, deliveries, assignments, restores or synchronization. Panel neither moved nor resized."
+}

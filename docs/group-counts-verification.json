@@ -1,0 +1,89 @@
+{
+  "feature": "comparison-visible-and-full-group-counts",
+  "verifiedAt": "2026-10-23T15:58:43.909798+00:00",
+  "production": "https://www.ainimation.studio/interactivos/",
+  "release": {
+    "assets": "f65e27a",
+    "stamp": "6c56bad",
+    "worker": "f7d330c0-4f47-4f06-8cc8-0e47cd52a3d2",
+    "storeHelp": "09bb94d91eae7ab40131e48a6e8752c25498cfab",
+    "storeWorkflow": 39982414652,
+    "storeDeployment": "https://c7561f59.admira-store.pages.dev",
+    "canonicalLocalDesignCss": true,
+    "mcp": "ed0e19ba90d814818e7d4c779f8f24cf7c3e1d3c",
+    "mcpWorker": "a14bba7a-0c76-4b67-912f-aed2e9c36a2d"
+  },
+  "realBatches": {
+    "revisions": [
+      8,
+      9
+    ],
+    "commonHeadingAll": "Pantallas comunes · 5 de 5 pantallas",
+    "commonHeadingPrensa": "Pantallas comunes · 1 de 5 pantallas",
+    "clearSearchRestoresFiveOfFiveAndKeepsNameOrder": true,
+    "resetRestoresOriginalOrderAndFullCounts": true,
+    "exclusiveAndDifferentViewsZeroWithExistingMessagesAndHiddenGroups": true,
+    "collapsedFullCounts": [
+      5,
+      0,
+      0
+    ],
+    "nativeKeyboardReopenKeepsPairQueryViewOrder": true,
+    "swapGeneralFilterCloseReopenInvalidationVerified": true,
+    "summaryCharacters": 709,
+    "txtComparisonCsvAndOriginalCsvByteIdentical": true,
+    "historyBackupBatchesIdentical": true,
+    "noRealClipboardAccessOrVersionQueries": true
+  },
+  "preserved": {
+    "batches": 2,
+    "confirmedLinks": 10,
+    "projectCount": 25,
+    "completeInitialLibraryNamesAndOrderUnchanged": true,
+    "pureValidatorsAndExportGeneratorsByteIdentical": true,
+    "existingGroupEligibilityHidingRowsOrderStatesAndMetadataTotalsUnchanged": true,
+    "globalUnionAndFullStateSummariesUnchanged": true,
+    "projectRevisionUtcMillisecondsAndIdsExact": true,
+    "generalHistoryDatesSearchStatesAndExportsUnchanged": true,
+    "panelBoundsUnchanged": true,
+    "dialogBounds": {
+      "bottom": 708,
+      "height": 696,
+      "left": 182.5,
+      "right": 1082.5,
+      "top": 12,
+      "width": 900,
+      "x": 182.5,
+      "y": 12
+    },
+    "language": "es",
+    "summaryAccessibilityAndExpandedLifecycleUnchanged": true,
+    "nativeDisclosureSemanticsAndKeyboardUnchanged": true,
+    "noNewControlsHeadingsFocusOrAutomaticAnnouncements": true
+  },
+  "tests": {
+    "existingInteractive": 230,
+    "targetedMcpHelp": 1,
+    "broaderMcpKnownPreExistingFailures": 15,
+    "broaderUnrelatedHelpSuiteNotRepeated": true,
+    "publicBilingualHelpSurfaces": 6,
+    "liveMcpBilingualHelp": true,
+    "isolatedLanguages": [
+      "es",
+      "en"
+    ],
+    "pluralByFullGroupTotalZeroOneSeveralCorrect": true,
+    "partialCountOneOfTwoUsesPlural": true,
+    "mixedPendingSendingSuccessErrorStatesPreserved": true,
+    "equalNamesDistinctIdsAndRenamedSharedIdentity": true,
+    "exclusiveAndNoSharedTargetsVerified": true,
+    "searchViewOrderResetCombinations": true,
+    "hiddenGroupsNotForcedVisible": true,
+    "twoHistoriesIndependent": true,
+    "rapidToggleAndInvalidationDoNotReviveOldCounts": true,
+    "storageReadsAndSideEffectsUnchangedByPresentation": "reads 4, writes 2 seeds, queries 0, copies 0, downloads 0",
+    "completeTextFitsWithoutHorizontalOverflow": true,
+    "temporaryTabAndServerClosed": true
+  },
+  "scope": "Only the three existing group heading texts now show visible N of full M screens, using the same row admission count and original full totals. Hidden groups stay hidden, collapsed/global summaries stay complete and comparison snapshots/export generators stay unchanged. No new controls, headings, focus changes, announcements, storage reads, comparisons, backend/version queries, Google, preferences, history/project writes, clipboard access, automatic downloads, deliveries, assignments, restores or synchronization. Panel neither moved nor resized."
+}

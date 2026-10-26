@@ -1,0 +1,99 @@
+{
+  "feature": "collapsed-comparison-exact-per-side-versions",
+  "verifiedAt": "2026-10-23T17:58:04.848413+00:00",
+  "production": "https://www.ainimation.studio/interactivos/",
+  "release": {
+    "assets": "61ad528",
+    "stamp": "c85417c",
+    "worker": "57081422-e264-4bb0-a616-1ba8744e02c9",
+    "storeHelp": "88df6fc679592491612e0bbcd7f4faae5221fe3f",
+    "storeWorkflow": 39998915433,
+    "storeDeployment": "https://09a6bb3a.admira-store.pages.dev",
+    "canonicalLocalDesignCss": true,
+    "mcp": "9964c42",
+    "mcpWorker": "2194b05c-8d98-4189-b007-d8b548bdc983"
+  },
+  "realBatches": {
+    "revisionsInitially": [
+      8,
+      9
+    ],
+    "collapsedFirstSecondVersions": [
+      8,
+      9
+    ],
+    "swapRemovesResultWithoutComparing": true,
+    "manualRecompareShowsInvertedFirstSecondVersions": [
+      9,
+      8
+    ],
+    "manualReturnToEightNineVerified": true,
+    "fullCommonOnlyFirstOnlySecond": [
+      5,
+      0,
+      0
+    ],
+    "fullSavedStateDifferences": [
+      0,
+      5
+    ],
+    "labelsAndFullCountsIndependentOfPrensaAndEmptyView": true,
+    "openingRestoresOriginalNameAndKeepsPairSearchViewOrder": true,
+    "nativePointerAndKeyboardVerified": true,
+    "filtersAndHistoryReopenRemoveOldLabels": true,
+    "summaryCharacters": 709,
+    "txtComparisonCsvAndOriginalCsvByteIdentical": true,
+    "historyBackupBatchesIdentical": true,
+    "noRealClipboardAccessOrVersionQueries": true
+  },
+  "preserved": {
+    "batches": 2,
+    "confirmedLinks": 10,
+    "projectCount": 25,
+    "completeInitialLibraryNamesAndOrderUnchanged": true,
+    "pureValidatorsAndExportGeneratorsByteIdentical": true,
+    "projectTitlesUtcMillisecondsIdsAndExistingResultsUnchanged": true,
+    "rowsNOfMGlobalAndFullStateSummariesUnchanged": true,
+    "statesIdentitiesSearchIndicesAndValidatedSnapshotUnchanged": true,
+    "generalHistoryDatesAndExportsUnchanged": true,
+    "panelBoundsUnchanged": true,
+    "dialogBounds": {
+      "bottom": 708,
+      "height": 696,
+      "left": 182.5,
+      "right": 1082.5,
+      "top": 12,
+      "width": 900,
+      "x": 182.5,
+      "y": 12
+    },
+    "language": "es",
+    "searchSummaryAndExportAccessibilityLinksUnchanged": true,
+    "summaryExpandedLabelSingleReadonlyAreaAndAdaptiveHeightUnchanged": true,
+    "nativeDisclosureSemanticsKeyboardAndFocusUnchanged": true,
+    "noNewControlsAreasHeadingsRolesTabindexOrAnnouncements": true
+  },
+  "tests": {
+    "existingInteractive": 230,
+    "targetedMcpHelp": 1,
+    "broaderMcpKnownPreExistingFailures": 15,
+    "broaderUnrelatedHelpSuiteNotRepeated": true,
+    "publicBilingualHelpSurfaces": 6,
+    "liveMcpBilingualHelp": true,
+    "isolatedLanguages": [
+      "es",
+      "en"
+    ],
+    "sameRevisionDistinctBatchIdsRemainSeparate": true,
+    "differentProjectsAndInvertedOrderVerified": true,
+    "mixedStatesAndNoSharedScreensVerified": true,
+    "emptySearchViewAndNameOrderDoNotChangePerSideVersions": true,
+    "twoHistoriesIndependent": true,
+    "rapidToggleAndInvalidationDoNotReviveOtherLabels": true,
+    "toggleReopenEffectsUnchanged": "reads 4, writes 2 seeds, queries 0, copies 0, downloads 0",
+    "filterAndReopenRestoreOriginalName": true,
+    "completeTextWrapsWithoutClippingOrHorizontalOverflow": true,
+    "temporaryTabAndServerClosed": true
+  },
+  "scope": "Only the text of the existing native collapsed disclosure adds the exact saved version of the first and second batch in current comparison order. Opening or invalidating retains its original name. No numeric sorting, upgrade/compatibility inference, ID substitution or cross-instance state. Uses completed comparison metadata in memory without reading storage or changing snapshots, rows, states, indices, totals or files. No new controls, areas, roles, tabindex, focus changes, announcements, comparisons, queries, reads/writes, Google, clipboard operations, automatic downloads, deliveries, assignments, restores or synchronization. Panel neither moved nor resized."
+}

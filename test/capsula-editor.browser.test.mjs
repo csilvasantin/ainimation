@@ -43,11 +43,12 @@ async function fixture(t, {authenticated = true, reviews = [], put} = {}) {
     window.open = function (...args) { window.__lastOpenedPopup = open.apply(this, args); return window.__lastOpenedPopup; };
   }, {authenticated,token});
   const script = await readFile(new URL('../assets/capsula-editor.js', import.meta.url), 'utf8');
+  const styles = await readFile(new URL('../assets/styles.css',import.meta.url),'utf8') + await readFile(new URL('../assets/capsula-editor.css',import.meta.url),'utf8');
   const json = (route, body, headers = {}) => route.fulfill({status:200,contentType:'application/json',headers:{'Access-Control-Allow-Origin':'*','Access-Control-Expose-Headers':'ETag',...headers},body:JSON.stringify(body)});
   let draft = seed(), revision = 1;
   await context.route('**/*', async route => {
     const request = route.request(), url = new URL(request.url());
-    if (url.origin === origin && url.pathname === '/studio.html') return route.fulfill({contentType:'text/html',body:'<!doctype html><html lang="es"><body><script src="/assets/capsula-editor.js"></script></body></html>'});
+    if (url.origin === origin && url.pathname === '/studio.html') return route.fulfill({contentType:'text/html',body:`<!doctype html><html lang="es"><head><meta charset="utf-8"><style>${styles}</style></head><body class="studio-page director-focus"><script src="/assets/capsula-editor.js"></script></body></html>`});
     if (url.origin === origin && url.pathname === '/assets/capsula-editor.js') return route.fulfill({contentType:'application/javascript',body:script});
     if (url.origin === 'https://www.pixeria.com' && url.pathname === '/auth/bridge') return route.fulfill({contentType:'text/html',body:'<!doctype html><title>Fixture auth bridge</title><p>Esperando sesión fixture</p>'});
     if (url.origin === api) {
@@ -191,3 +192,43 @@ test('text styles cannot reuse a selection from another field or a range spannin
   assert.deepEqual(errors, []);
 });
 
+
+
+test('repeated preview requests share one save and one render job', async t => {
+  const {page,context,puts,errors} = await fixture(t);
+  const queued=[];
+  await context.route(api+'/capsula/url/encargar', async route => {
+    queued.push(route.request().postDataJSON());
+    await route.fulfill({contentType:'application/json',body:JSON.stringify({ok:true,ref:seed().ref,job:{renderId:'duplicate-check',phase:1,status:'en-cola',previewOnly:true}})});
+  });
+  await page.locator('[data-text-field="giro"]').fill('Una única revisión');
+  await page.evaluate(() => Promise.all([window.ainCapsula.queuePreview(),window.ainCapsula.queuePreview()]));
+  assert.equal(puts.length,1);
+  assert.equal(queued.length,1);
+  assert.equal(queued[0].previewOnly,true);
+  assert.equal(queued[0].capsula.textos.giro,'Una única revisión');
+  assert.equal(queued[0].capsuleVersion,9);
+  assert.deepEqual(errors,[]);
+});
+
+test('editing while a preview is queued retains the new draft without showing a stale render', async t => {
+  const {page,context,errors} = await fixture(t);
+  let release,received;
+  const started=new Promise(resolve=>{received=resolve;});
+  const gate=new Promise(resolve=>{release=resolve;});
+  await context.route(api+'/capsula/url/encargar', async route => {
+    received();await gate;
+    await route.fulfill({contentType:'application/json',body:JSON.stringify({ok:true,ref:seed().ref,job:{renderId:'earlier-copy',phase:1,status:'en-cola',previewOnly:true}})});
+  });
+  await page.evaluate(()=>{window.__queue=window.ainCapsula.queuePreview();});
+  await started;
+  await page.locator('[data-text-field="giro"]').fill('Cambios posteriores al envío');
+  release();await page.evaluate(()=>window.__queue);
+  const state=await page.evaluate(()=>window.ainCapsula.getState());
+  assert.equal(state.dirty,true);
+  assert.equal(state.capsula.textos.giro,'Cambios posteriores al envío');
+  assert.equal(state.renderResult,null);
+  assert.equal(state.reviews.at(-1).renderId,'earlier-copy');
+  assert.match(await page.locator('[data-notice]').textContent(),/edición anterior/);
+  assert.deepEqual(errors,[]);
+});

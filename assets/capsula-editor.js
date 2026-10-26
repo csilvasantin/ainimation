@@ -33,6 +33,7 @@
   const http = (value) => { try { const u = new URL(value, location.href); return /https?:/.test(u.protocol) ? u.href : ''; } catch { return ''; } };
   const label = (value) => value.charAt(0).toUpperCase() + value.slice(1);
   let capsule, history = [], phase = 0, second = 1, orientation = 'horizontal', dirty = false, activeField = 'giro', savedSelection = null, ticker = null;
+  let savePending = null, previewPending = false;
   let renderResult = null, lastQueuedSignature = '', stockItems = [], uploadBusy = false, etag = '', reviews = [], previewPoll = null, watchedRenderId = '', totalSeconds = 12, bodyStart = 0, bodyEnd = 12;
   const root = document.createElement('div');
   root.id = 'capsulaEditor';
@@ -45,9 +46,11 @@
     <div data-phase-panel="2" hidden><div class="ce-panel-title"><h2>Cada segundo cuenta.</h2><span>03 / 03</span></div><p class="ce-muted">Arrastra los extremos de cada tramo o escribe los segundos exactos.</p><label class="ce-field ce-duration"><span>Duración de la cápsula</span><output data-duration></output></label><div data-time-inputs></div><p class="ce-small">Los intervalos están en segundos de la cápsula. Mantén el orden gancho → giro → remate.</p></div>
     <footer class="ce-controls-footer"><button class="ce-btn" data-previous>← Anterior</button><button class="ce-btn ce-btn-primary" data-next>Continuar →</button></footer></section>
     <section class="ce-preview-area" aria-label="Vista previa"><div class="ce-preview-toolbar"><span class="ce-eyebrow">COMPOSICIÓN · PREVIEW EN EL NAVEGADOR</span><div class="ce-segmented" aria-label="Orientación"><button data-orientation="horizontal" aria-pressed="true">16:9</button><button data-orientation="vertical" aria-pressed="false">9:16</button></div></div><div class="ce-stage-wrap"><div class="ce-stage" data-stage data-orientation="horizontal"><div class="ce-stage-backdrop"></div><div class="ce-stage-brand"><span class="ce-logo">admira<span>Connecting things</span></span><h2>¿Sabías que?</h2><p data-preview-tipologia></p></div><div class="ce-stage-media" data-preview-media></div><div class="ce-stage-copy"><h3 data-preview-title></h3><p data-preview-line></p><small data-preview-source></small></div><div class="ce-stage-progress"></div></div></div><div class="ce-playback"><button data-play class="ce-play-button" aria-label="Reproducir composición">▶</button><input data-scrub aria-label="Instante de la composición" type="range" min="0" max="12" step="0.04" value="1"><output data-timecode>01.00 / 12.00 s</output></div><div class="ce-score"><div class="ce-score-title"><strong>Score</strong><span>25 fps · segundos</span></div><div data-score></div></div><p class="ce-preview-note">Estudio de composición. La animación, tipografía y recorte definitivos se revisan en el render v5.7.</p><div class="ce-render-card"><div><h3>Revisar antes de publicar</h3><p>Guarda el borrador y pide un render con capturas. Cada fase conserva su propia revisión.</p></div><button class="ce-btn ce-btn-primary" data-render>Renderizar preview v5.7 ↗</button><div class="ce-render-result" data-render-result></div></div></section>
-    <aside class="ce-history" aria-label="Versiones"><div class="ce-panel-title"><h2>Versiones</h2><span>↶</span></div><p class="ce-muted">La original sigue aquí.</p><div data-history></div><div class="ce-history-note"><strong>Tu siguiente versión</strong><p data-next-version>Se creará tras la revisión.</p><p>Publicación pendiente de la decisión de Carlos.</p></div><div data-reviews></div></aside></div></main>
+    <aside class="ce-history" aria-label="Versiones"><div class="ce-panel-title"><h2>Versiones</h2><span>↶</span></div><p class="ce-muted">La original sigue aquí.</p><div data-history></div><div class="ce-history-note"><strong>Tu siguiente versión</strong><p data-next-version>Se creará tras la revisión.</p><p>El original se conserva mientras revisas la nueva versión.</p></div><div data-reviews></div></aside></div></main>
     <dialog class="ce-stock-dialog"><form method="dialog" class="ce-dialog-heading"><div><p class="ce-eyebrow">BIBLIOTECA</p><h2>Elige media del Stock</h2></div><button class="ce-btn" aria-label="Cerrar selector de Stock">×</button></form><div class="ce-stock-filters"><input type="search" data-stock-search placeholder="Buscar por título o crédito" aria-label="Buscar en Stock"><select data-stock-filter aria-label="Tipo de media"><option value="">Imágenes y vídeos</option value="image">Imágenes</option><option value="video">Vídeos</option></select><button class="ce-btn" data-reload-stock>Recargar</button></div><div data-stock-results class="ce-stock-grid"></div></dialog>`;
+  document.body.classList.remove('director-focus','studio-page');
   document.body.classList.add('capsula-mode');
+  root.addEventListener('keydown',event=>event.stopPropagation());
   document.documentElement.lang = 'es';
   document.body.append(root);
   const $ = (s) => root.querySelector(s);
@@ -209,7 +212,12 @@
     let end=bodyStart;for(const name of beats){const [a,b]=rangeFor(name);if(Math.abs(a-end)>.011||a<0||b<=a||b>duration())return 'Revisa el Score: los tramos deben tener duración positiva, estar ordenados y no solaparse.';end=b;}
     return '';
   }
-  async function save() {
+  function save() {
+    if(savePending)return savePending;
+    savePending=saveDraft().finally(()=>{savePending=null;});
+    return savePending;
+  }
+  async function saveDraft() {
     if(!capsule)return false;
     const error=validate();if(error){notify(error,true);return false;}
     const snapshot=JSON.stringify(capsule);
@@ -236,21 +244,26 @@
     previewPoll=setTimeout(()=>pollPreview(ref,renderId),5000);
   }
   async function queuePreview() {
-    if(!capsule||uploadBusy)return;
+    if(!capsule||uploadBusy||previewPending)return;
+    previewPending=true;
     const reviewPhase=phase+1;
-    if(!await save())return;
+    try { if(!await save())return;
+    if(dirty)return notify('Guarda los cambios recientes antes de pedir el preview.',true);
     const source=http(capsule.origen?.url||capsule.textos.fuente?.url);
     if(!source)return notify('Falta el enlace de origen de la cápsula.',true);
     const button=$('[data-render]');button.disabled=true;button.textContent='Encolando preview…';
     try {
       const signature=JSON.stringify(capsule),data=await request('/capsula/url/encargar',{method:'POST',body:JSON.stringify({url:source,capsula:clone(capsule),phase:reviewPhase,capsuleVersion:Number(capsule.version||1)+1,previewOnly:true})});
       renderResult=data;lastQueuedSignature=signature;
-      const job=data.job||{};reviews.push({...job,phase:reviewPhase,ref:data.ref,fecha:new Date().toISOString()});updateReviews();showRender(data);
+      const job=data.job||{};reviews.push({...job,phase:reviewPhase,ref:data.ref,fecha:new Date().toISOString()});updateReviews();
+      if(JSON.stringify(capsule)!==signature){renderResult=null;notify('El preview corresponde a la edición anterior. Guarda los cambios recientes para solicitar otro.');return;}
+      showRender(data);
       notify('Preview encolado. Conserva los originales y espera las capturas del render.');
       window.dispatchEvent(new CustomEvent('ain:capsula-preview',{detail:{fase:reviewPhase,result:data}}));
       if(job.renderId){watchedRenderId=job.renderId;pollPreview(data.ref,job.renderId);}
     }catch(error){notify(`No se pudo solicitar el preview: ${error.message}`,true);}
     finally{button.disabled=false;button.textContent='Renderizar preview v5.7 ↗';}
+    } finally {previewPending=false;}
   }
   async function loadStock() {
     $('[data-stock-results]').innerHTML='<p>Cargando Stock…</p>';
@@ -292,8 +305,8 @@
       renderTextFields();renderMedia();renderTimes();updateHistory();setPhase(0);updatePreview();
       notify('Empieza por los textos. Guarda y solicita un preview al terminar cada fase.');
       let stored;try{stored=JSON.parse(localStorage.getItem(`ainimation-capsula-${stockId}`)||'null');}catch{}
-      if(stored?.capsula&&JSON.stringify(stored.capsula)!==JSON.stringify(capsule)){
-        const button=document.createElement('button');button.className='ce-inline-button';button.textContent='Recuperar borrador de este navegador';button.addEventListener('click',()=>{capsule=stored.capsula;changed();renderTextFields();renderMedia();renderTimes();updateHistory();button.remove();});$('[data-notice]').append(' ',button);
+      if(stored?.capsula?.schema==='capsula/1'&&stored.capsula.parentId===stockId&&stored.capsula.ref===capsule.ref&&stored.capsula.version===capsule.version&&JSON.stringify(stored.capsula)!==JSON.stringify(capsule)){
+        const button=document.createElement('button');button.className='ce-inline-button';button.textContent='Recuperar borrador de este navegador';button.addEventListener('click',()=>{capsule=stored.capsula;bodyStart=Number(capsule.tiempos.gancho[0]);bodyEnd=Number(capsule.tiempos.remate[1]);totalSeconds=bodyEnd+(capsule.cartelas?.postroll?4:0);changed();renderTextFields();renderMedia();renderTimes();updateHistory();button.remove();});$('[data-notice]').append(' ',button);
       }
     }catch(error){notify(`No se pudo abrir la cápsula: ${error.message}`,true);$('[data-title]').textContent='La fuente editable no está disponible';$('[data-subtitle]').textContent='La pieza del Stock se conserva. Reintenta cuando la fuente esté disponible.';$('[data-save-state]').textContent='Conexión pendiente';}
   }

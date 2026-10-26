@@ -1,0 +1,112 @@
+{
+  "feature": "general-history-filter-controls-describe-own-current-status",
+  "verifiedAt": "2026-10-24T00:47:35.295211+00:00",
+  "production": "https://www.ainimation.studio/interactivos/",
+  "release": {
+    "functional": "23ac8b2",
+    "stamp": "4f35964cdc8c818b864431947e92fa9b11998749",
+    "worker": "bfb757e1-ab47-4751-9426-a3e47a01b5cf",
+    "preservedPublishedCapsuleCommit": "c5b3412",
+    "capsuleEditorModuleCssAndPreviewPublicByteExact": true,
+    "storeHelp": "3aed6368505a0a0115679f07c5c8029c365311c2",
+    "storeWorkflow": 40046553818,
+    "storeDeployment": "https://22059273.admira-store.pages.dev",
+    "canonicalLocalDesignCss": true,
+    "mcp": "e6bd882",
+    "mcpWorker": "a45161a9-02e2-4b84-a74f-3d188929691d"
+  },
+  "semantics": {
+    "fourExistingGeneralControlsDescribeOnlyTheirExistingStatusParagraph": true,
+    "validGenericUniqueStatusIdPerHistory": true,
+    "noPrivateDataInId": true,
+    "noNewParagraphOrContainer": true,
+    "existingControlsReferencesStillPointToOwnGeneralList": true,
+    "distinctFromComparisonStatusResultsAndOtherNotices": true,
+    "allNamesLabelsPlaceholdersNativeTypesOptionsStatesFocusKeyboardUnchanged": true,
+    "statusRolePreservedWithoutNewAriaLive": true,
+    "noAlternativeLabelsExpandedRolesTabindexAnnouncementsFocusOrNewAreas": true,
+    "stableAcrossFiltersAndReopen": true,
+    "domAccessibilityTreeAndNativeKeyboardInspected": true,
+    "specificScreenReaderNotTested": true
+  },
+  "realHistory": {
+    "unfilteredBatchesAndTargets": [
+      2,
+      10
+    ],
+    "v9BatchesAndTargets": [
+      1,
+      5
+    ],
+    "nativeTabThroughGeneralFiltersAndEnterClearsFilters": true,
+    "clearReturnsTwoBatchesTenTargetsAndDisabledState": true,
+    "realProjectAndCompletePreserveBothBatches": true,
+    "zeroMatchesRetainExactEmptyMessageAndOwnDescriptions": true,
+    "digit9StillMatchesBothProjectIds": true,
+    "filteringInvalidatesComparisonExactlyAsBefore": true,
+    "manual89CommonOnlyFirstOnlySecond": [
+      5,
+      0,
+      0
+    ],
+    "savedStateDifferences": [
+      0,
+      5
+    ],
+    "summaryCharacters": 709,
+    "txtComparisonCsvOriginalCsvByteIdentical": true,
+    "historyBackupBatchesIdentical": true,
+    "csvPreparedNoticeStillExactAndDescribedBySameParagraph": true,
+    "noRealClipboardAccessOrVersionQueries": true
+  },
+  "isolated": {
+    "languages": [
+      "es",
+      "en"
+    ],
+    "twoHistoriesHaveDifferentStatusIdsAndOwnOnlyReferences": true,
+    "independentFiltersCountsAndNotices": true,
+    "noAdditionalReadsWritesQueriesCopiesDownloadsOrComparisonsDuringFiltering": true,
+    "csvSuccessAndSimulatedFailureMessagesUnchanged": true,
+    "emptyAndUnreadableHistoryExplanationsUnchangedWithOwnReferences": true,
+    "reopenResetsFiltersAndKeepsStatusId": true,
+    "temporaryTabAndServerClosed": true
+  },
+  "preserved": {
+    "projectCount": 25,
+    "completeInitialLibraryNamesAndOrderUnchanged": true,
+    "batches": 2,
+    "confirmedLinks": 10,
+    "dialogBounds": {
+      "bottom": 708,
+      "height": 696,
+      "left": 182.5,
+      "right": 1082.5,
+      "top": 12,
+      "width": 900,
+      "x": 182.5,
+      "y": 12
+    },
+    "panelBoundsUnchanged": true,
+    "language": "es",
+    "previousModuleBytesExactExceptIdSequenceAndDescriptionAssignments": true,
+    "allComparisonOutputsOtherLinksGuardsValidationSessionsUnchanged": true,
+    "otherPublishedWorkRetainedWithoutDevelopingIt": true,
+    "primaryWorkspaceUntouched": true
+  },
+  "validation": {
+    "existingInteractiveTests": 231,
+    "targetedMcpHelpTests": 1,
+    "publicBilingualHelpSurfaces": 6,
+    "liveMcpBilingualHelp": true,
+    "broaderUnrelatedHelpSuiteNotRepeated": true,
+    "knownPreExistingUnrelatedHelpFailures": 15,
+    "bundledRuntimeExecutesIndependently": true
+  },
+  "scope": "Only a generic unique ID on the existing general filter-status paragraph and aria-describedby on Search batches, Batch project, Batch result and Clear filters. All texts, actions, logic, filtering, counts, data, exports, focus, keyboard and existing semantic roles retained. No added controls, announcements, operations, reads, queries, writes, clipboard activity, automatic comparisons/downloads, deliveries, assignments, restores or synchronization.",
+  "sha256": {
+    "txt": "7b165b8ebee2f39f30a2ca2eaf2796834526495b39c08e085f15cbe15fb4fdf1",
+    "comparisonCsv": "a1ec788484362ee9ad87e7ff5dd5d059494a3ce3778031b60acd8a236bc7b586",
+    "originalCsv": "34bdae288ab5fe70b4ce6fb8907dd87a33ac190ef8952a658c4ad12523ea4ac9"
+  }
+}

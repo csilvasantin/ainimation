@@ -1,0 +1,100 @@
+{
+  "feature": "history-batch-csv-description",
+  "verifiedAt": "2026-10-24T06:21:27.854183+00:00",
+  "implementation": {
+    "ainimationCommit": "05517e7b139a7c252f3c0896e0d3ea50523caee2",
+    "storeCommit": "8ee65144add615f558a73af9c85119175cc5f8d4",
+    "mcpCommit": "3432f452b890de92c72e7d013f20ec95b3787d9e",
+    "previewWorker": "12b37dfa-b243-437d-9712-1fa1f258fb4c",
+    "mcpWorker": "9f5c7ac2-928c-49e2-8875-2a6ed27a100d"
+  },
+  "semantics": {
+    "onlyBatchCsvButtonGetsDescription": true,
+    "existingScopeParagraphGetsGenericUniqueId": true,
+    "everyReferenceResolvesToOwnBatchScopeOnce": true,
+    "idsDoNotContainUserData": true,
+    "otherBatchButtonsHaveNoNewDescription": true,
+    "buttonFullAccessibleNameAndPreviousAttributesExact": true,
+    "scopeTextAndPreviousAttributesExact": true,
+    "samePositionAndNativeCollapse": true,
+    "noNewControlsRolesLiveRegionsTabindexOrFocus": true,
+    "sourceDiffOnlyCounterIdAndDescription": true
+  },
+  "production": {
+    "batches": 2,
+    "links": 10,
+    "initialLibraryProjects": 25,
+    "fullInitialLibraryAndOrderRetained": true,
+    "panelBoundsAndLanguageExact": true,
+    "eachBatchTargets": 5,
+    "version9FilterOwnDescription": true,
+    "clearFiltersBothWithoutDuplicatesOrOrphanReferences": true,
+    "keyboardOriginalCsvDownloadedOnceFromFilter": true,
+    "comparisonInvalidationUnchanged": true,
+    "summaryCharacters": 709,
+    "summaryTxtExact": true,
+    "comparisonCsvExact": true,
+    "originalCsvExactBeforeAndAfterReload": true,
+    "ownDescriptionAfterReload": true,
+    "domAndAccessibilityTreeInspected": true,
+    "specificScreenReaderTestClaimed": false
+  },
+  "exports": {
+    "batch-csv-description-summary.txt": {
+      "bytes": 723,
+      "sha256": "7b165b8ebee2f39f30a2ca2eaf2796834526495b39c08e085f15cbe15fb4fdf1"
+    },
+    "batch-csv-description-comparison.csv": {
+      "bytes": 4626,
+      "sha256": "a1ec788484362ee9ad87e7ff5dd5d059494a3ce3778031b60acd8a236bc7b586"
+    },
+    "batch-csv-description-original.csv": {
+      "bytes": 1929,
+      "sha256": "34bdae288ab5fe70b4ce6fb8907dd87a33ac190ef8952a658c4ad12523ea4ac9"
+    },
+    "batch-csv-description-original-reloaded.csv": {
+      "bytes": 1929,
+      "sha256": "34bdae288ab5fe70b4ce6fb8907dd87a33ac190ef8952a658c4ad12523ea4ac9"
+    }
+  },
+  "isolated": {
+    "languages": [
+      "es",
+      "en"
+    ],
+    "oneAndSeveralSavedTargets": true,
+    "allFourSavedStates": true,
+    "sameNamesAndRevisionsDistinctBatchIds": true,
+    "twoIndependentHistoriesFourDistinctScopeIds": true,
+    "idCollisionAvoided": true,
+    "combinedFiltersAndNoMatches": true,
+    "emptyAndUnreadableHistorySimulated": true,
+    "uniqueOwnReferencesAfterEachRenderAndReopen": true,
+    "nativeKeyboardCollapseAndManualDownload": true,
+    "existingActionMessagePreserved": true,
+    "noExtraReadsWritesQueriesCopiesDownloadsOrComparisons": true,
+    "existingCallbackGuardsUnchanged": true,
+    "temporaryTabAndServerClosed": true
+  },
+  "validation": {
+    "interactiveTests": 231,
+    "interactiveFailures": 0,
+    "targetedMcpHelpTests": 1,
+    "standaloneWorkerBundle": true,
+    "publicBilingualHelpSurfacesVerified": 6,
+    "bilingualHelpSurfacesUpdated": 10,
+    "protectedHelpSourcesUpdatedWithoutBypass": true,
+    "actualMcpHelpBilingual": true,
+    "unrelatedKnownMcpFailuresNotRerun": 15
+  },
+  "preserved": {
+    "canonicalStoreLocalCss": {
+      "tokens": "7473512a",
+      "nav": "d92633d3"
+    },
+    "otherPublishedCapsuleAssetsByteExact": true,
+    "primaryWorkspaceUnmodified": true,
+    "inventoryHistoryProjectsReceiptsUnchanged": true,
+    "noClipboardVersionChecksImportsRestoresOrProductionFailures": true
+  }
+}

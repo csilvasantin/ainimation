@@ -1,0 +1,107 @@
+{
+  "feature": "history-guide-comparison-files",
+  "verifiedAt": "2026-10-24T08:01:23.459680+00:00",
+  "implementation": {
+    "featureCommit": "a97d3e399bffc0ef28e58a6243b400ebb47b0acd",
+    "ainimationReleaseCommit": "9842f933c1cb41315acebfec689149cd61e62870",
+    "storeHelpCommit": "d5ec2730424c69ef3d43633baba033a1604e4b62",
+    "mcpCommit": "57d646bc9516ab356fcd43f88802554f3871522a",
+    "interactiveModuleSha256": "6ba3cd44db0548e2c44a5324ad1344da77230460805558cd3d58a2fe3e140c42",
+    "previewWorker": "f97f115b-5430-4237-805c-154760f671b7",
+    "mcpWorker": "67d7be9a-3475-490e-941a-7930e2790542"
+  },
+  "semantics": {
+    "onlyTwoExactSentencesAppendedToFirstExistingGuideStepPerLanguage": true,
+    "firstStepPreviousPrefixExact": true,
+    "otherFourStepsExact": true,
+    "fiveNativeListSteps": true,
+    "nativeGuideInitiallyCollapsedOnEveryOpen": true,
+    "noMarkupControlsRolesLiveRegionsTabindexOrFocusChanges": true,
+    "previousBackupAndBatchCsvDistinctionPreserved": true
+  },
+  "production": {
+    "batches": 2,
+    "links": 10,
+    "initialLibraryProjects": 25,
+    "fullInitialLibraryAndOrderRetained": true,
+    "panelBoundsAndLanguageExact": true,
+    "nativeKeyboardAndPointerGuideToggle": true,
+    "reopenCollapsesGuide": true,
+    "fullTextWrapsWithoutOverflow": true,
+    "fontSizeUnchanged": "12px",
+    "manualComparisonCommon": 5,
+    "exclusiveFirst": 0,
+    "exclusiveSecond": 0,
+    "differentSavedStates": 0,
+    "searchPressOneOfFive": true,
+    "filteredHistoryOneBatchFiveTargetsAndFullBackupTwoBatchesTenTargets": true,
+    "summaryCharacters": 709,
+    "summaryReviewExact": true,
+    "txtAndComparisonCsvExactFromFilteredView": true,
+    "originalCsvExactFilteredAndAfterReload": true,
+    "domAndAccessibilityTreeInspected": true,
+    "specificScreenReaderTestClaimed": false
+  },
+  "exports": {
+    "guide-comparison-production-summary.txt": {
+      "bytes": 723,
+      "sha256": "7b165b8ebee2f39f30a2ca2eaf2796834526495b39c08e085f15cbe15fb4fdf1"
+    },
+    "guide-comparison-production.csv": {
+      "bytes": 4626,
+      "sha256": "a1ec788484362ee9ad87e7ff5dd5d059494a3ce3778031b60acd8a236bc7b586"
+    },
+    "guide-comparison-original-v9.csv": {
+      "bytes": 1929,
+      "sha256": "34bdae288ab5fe70b4ce6fb8907dd87a33ac190ef8952a658c4ad12523ea4ac9"
+    },
+    "guide-comparison-original-v9-reloaded.csv": {
+      "bytes": 1929,
+      "sha256": "34bdae288ab5fe70b4ce6fb8907dd87a33ac190ef8952a658c4ad12523ea4ac9"
+    }
+  },
+  "isolated": {
+    "languages": [
+      "es",
+      "en"
+    ],
+    "containerWidths": [
+      320,
+      200
+    ],
+    "twoIndependentHistories": true,
+    "allFiveStepsAndPreviousTextExact": true,
+    "nativeKeyboardAndPointerGuideToggle": true,
+    "reopenCollapsesGuide": true,
+    "guideToggleAddsNoReadsWritesQueriesCopiesDownloadsOrComparisons": true,
+    "onlyExistingHistoryOpenReadOnReopen": true,
+    "noPanelResizeFontReductionOrOverflow": true,
+    "existingCallbackGuardsUnchangedAndTestsPass": true,
+    "temporaryTabAndServerClosed": true
+  },
+  "validation": {
+    "interactiveTests": 231,
+    "interactiveFailures": 0,
+    "targetedMcpHelpTests": 1,
+    "standaloneWorkerBundle": true,
+    "publicBilingualHelpSurfacesVerified": 6,
+    "bilingualHelpSurfacesUpdated": 10,
+    "protectedHelpSourcesUpdatedWithoutBypass": true,
+    "actualMcpHelpBilingual": true,
+    "unrelatedKnownMcpFailuresNotRerun": 15,
+    "storeHelpCanonicalCi": 40075818005,
+    "storeHelpCanonicalCiConclusion": "success",
+    "storeHelpCanonicalDeployment": "https://0bf36b06.admira-store.pages.dev"
+  },
+  "preserved": {
+    "canonicalStoreLocalCss": {
+      "tokens": "7473512a",
+      "nav": "d92633d3"
+    },
+    "otherPublishedAssetsUntouchedByFunctionalCommit": true,
+    "latestPublishedSourcesIntegratedBeforeFeature": true,
+    "primaryWorkspaceUnmodified": true,
+    "inventoryHistoryProjectsReceiptsUnchanged": true,
+    "noClipboardVersionChecksImportsRestoresOrProductionFailures": true
+  }
+}

@@ -1,0 +1,111 @@
+{
+  "feature": "complete-history-copy-and-batch-csv-scope-in-first-guide-step",
+  "verifiedAt": "2026-10-24T03:31:20.453497+00:00",
+  "production": "https://www.ainimation.studio/interactivos/",
+  "release": {
+    "functional": "daa1fb0",
+    "stamp": "d62c4160a107b413f1361db63a9059820dce80b6",
+    "worker": "a1658532-ea92-420a-b6f6-aa7eaa04810f",
+    "preservedPublishedCapsuleCommit": "c5b3412",
+    "capsuleEditorModuleCssAndPreviewPublicByteExact": true,
+    "storeHelp": "1e155462625b7681a550058cd0e833742be4d5fb",
+    "storeWorkflow": 40055300506,
+    "storeDeployment": "https://edf47328.admira-store.pages.dev",
+    "canonicalLocalDesignCss": true,
+    "mcp": "5d08a42",
+    "mcpWorker": "21529fff-8504-470c-94f0-c8f10c80845a",
+    "transientDeploymentConnectivityRetriedSuccessfully": true
+  },
+  "guide": {
+    "onlyFirstExistingListItemExtended": true,
+    "addedSpanish": "La copia completa incluye todos los lotes y destinos guardados en este navegador, con cualquier filtro. El CSV de un lote incluye sólo ese lote y todos sus destinos guardados.",
+    "addedEnglish": "The complete history copy includes every batch and target saved in this browser, with any filters. A batch CSV includes only that batch and all its saved targets.",
+    "existingFirstStepPrefixUnchanged": true,
+    "otherFourStepsByteIdentical": true,
+    "totalSteps": 5,
+    "initiallyCollapsedOnEveryHistoryOpen": true,
+    "nativeSummaryNameSemanticsKeyboardFocusUnchanged": true,
+    "noNewStepsParagraphsHeadingsControlsRolesLiveRegionsTabindexLabelsAnnouncementsOrFocusMoves": true,
+    "nativeEnterAndPointerOpenCloseVerified": true,
+    "openingClosingOnlyChangesPresentation": true,
+    "fullTextWrapsWithoutOverflowOrFontReduction": true
+  },
+  "realHistory": {
+    "v9VisibleBatchesAndTargets": [
+      1,
+      5
+    ],
+    "completeBackupScopeBatchesAndTargets": [
+      2,
+      10
+    ],
+    "guideReopenResetsCollapsed": true,
+    "manual89CommonOnlyFirstOnlySecond": [
+      5,
+      0,
+      0
+    ],
+    "savedStateDifferences": [
+      0,
+      5
+    ],
+    "summaryCharacters": 709,
+    "txtComparisonCsvOriginalCsvByteIdentical": true,
+    "completeBackupNotRepeatedBecauseExactBatchesAndAllLinksRetained": true,
+    "noRealClipboardAccessVersionQueriesImportsOrRestores": true
+  },
+  "isolated": {
+    "languages": [
+      "es",
+      "en"
+    ],
+    "narrowGuideContainerWidths": [
+      320,
+      200
+    ],
+    "fiveStepsAndExactPreviousTextVerified": true,
+    "fontSizeUnchanged": true,
+    "noGuideStepOrDialogHorizontalOverflow": true,
+    "twoHistoriesHaveIndependentOpenStates": true,
+    "closingReopeningOneKeepsOtherGuideState": true,
+    "noAdditionalReadsQueriesWritesCopiesDownloadsOrComparisonsOnGuideToggle": true,
+    "temporaryTabAndServerClosed": true
+  },
+  "preserved": {
+    "projectCount": 25,
+    "completeInitialLibraryNamesAndOrderUnchanged": true,
+    "batches": 2,
+    "confirmedLinks": 10,
+    "dialogBounds": {
+      "bottom": 708,
+      "height": 696,
+      "left": 182.5,
+      "right": 1082.5,
+      "top": 12,
+      "width": 900,
+      "x": 182.5,
+      "y": 12
+    },
+    "panelBoundsUnchanged": true,
+    "language": "es",
+    "previousModuleBytesExactExceptTwoAddedSentencesPerLanguage": true,
+    "allActionsFilesGuardsValidationSessionsAndAccessibilityLinksUnchanged": true,
+    "otherPublishedWorkRetainedWithoutDevelopingIt": true,
+    "primaryWorkspaceUntouched": true
+  },
+  "validation": {
+    "existingInteractiveTests": 231,
+    "targetedMcpHelpTests": 1,
+    "publicBilingualHelpSurfaces": 6,
+    "liveMcpBilingualHelp": true,
+    "broaderUnrelatedHelpSuiteNotRepeated": true,
+    "knownPreExistingUnrelatedHelpFailures": 15,
+    "bundledRuntimeExecutesIndependently": true
+  },
+  "scope": "Only two sentences appended to the first existing history-guide step in Spanish and English, clarifying complete backup versus batch CSV. All other text and runtime code remain byte identical. No new controls, reads, operations, queries, writes, clipboard activity, automatic comparisons/downloads, deliveries, assignments, imports, restores or synchronization.",
+  "sha256": {
+    "txt": "7b165b8ebee2f39f30a2ca2eaf2796834526495b39c08e085f15cbe15fb4fdf1",
+    "comparisonCsv": "a1ec788484362ee9ad87e7ff5dd5d059494a3ce3778031b60acd8a236bc7b586",
+    "originalCsv": "34bdae288ab5fe70b4ce6fb8907dd87a33ac190ef8952a658c4ad12523ea4ac9"
+  }
+}

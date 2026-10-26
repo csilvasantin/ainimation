@@ -1,0 +1,111 @@
+{
+  "feature": "comparison-clear-and-reset-buttons-control-own-results",
+  "verifiedAt": "2026-10-23T21:12:38.945843+00:00",
+  "production": "https://www.ainimation.studio/interactivos/",
+  "release": {
+    "functional": "aa36dc5",
+    "stamp": "71d72ca2a70aaffd52f090dd8e276c2e8dbf3149",
+    "worker": "095f63db-4fba-4084-82cd-50912bcc5cfd",
+    "preservedPublishedCapsuleCommit": "9c47af6",
+    "capsuleEditorAndPreviewModulesPublicByteExact": true,
+    "storeHelp": "df8e48b587de828c1b98caccf39c04b7c59610a7",
+    "storeWorkflow": 40024754990,
+    "storeDeployment": "https://7d516d08.admira-store.pages.dev",
+    "canonicalLocalDesignCss": true,
+    "mcp": "6699cac",
+    "mcpWorker": "ef6959df-0ece-44f5-bac7-022ffa83f27c"
+  },
+  "semantics": {
+    "bothButtonsControlExactlyTheirExistingComparisonResults": true,
+    "sameTargetAsComparisonSearchOrderAndView": true,
+    "noNewIdOrContainer": true,
+    "distinctFromGeneralHistoryTarget": true,
+    "uniqueGenericIdPerHistory": true,
+    "noPrivateDataInId": true,
+    "stableBeforeCompareAfterInvalidationAndReopen": true,
+    "namesTextsNativeButtonTypeStatesFocusAndKeyboardUnchanged": true,
+    "noAriaLabelRolesTabindexAnnouncementsOrNewAreas": true,
+    "domAccessibilityTreeAndNativeKeyboardInspected": true,
+    "specificScreenReaderNotTested": true
+  },
+  "realBatches": {
+    "revisions": [
+      8,
+      9
+    ],
+    "initialHiddenDisabledStatesNamesAndTypesExact": true,
+    "PrensaVisibleOutOfFive": 1,
+    "exclusiveEmptyViewPreserved": true,
+    "nativeClearEmptiesOnlySearchKeepsNameOrderAndExclusiveView": true,
+    "nativeResetRestoresAllOriginalOrderEmptySearchFiveIdentities": true,
+    "existingFocusToSearchAfterBothActions": true,
+    "bothButtonsDisabledWhenInitialView": true,
+    "samePairTotalsStatesAndComparisonSnapshotPreserved": true,
+    "pairChangeInvalidatesAndDisablesWithoutChangingOwnTarget": true,
+    "reopenResetsWithoutChangingOwnTargets": true,
+    "fullCommonOnlyFirstOnlySecond": [
+      5,
+      0,
+      0
+    ],
+    "fullSavedStateDifferences": [
+      0,
+      5
+    ],
+    "summaryCharacters": 709,
+    "txtComparisonCsvAndOriginalCsvByteIdentical": true,
+    "historyBackupBatchesIdentical": true,
+    "noRealClipboardAccessOrVersionQueries": true
+  },
+  "preserved": {
+    "batches": 2,
+    "confirmedLinks": 10,
+    "projectCount": 25,
+    "completeInitialLibraryNamesAndOrderUnchanged": true,
+    "allExistingModuleCodeByteIdenticalExceptTwoAttributes": true,
+    "generalHistoryDatesStatesAndIdsUnchanged": true,
+    "panelBoundsUnchanged": true,
+    "dialogBounds": {
+      "bottom": 708,
+      "height": 696,
+      "left": 182.5,
+      "right": 1082.5,
+      "top": 12,
+      "width": 900,
+      "x": 182.5,
+      "y": 12
+    },
+    "language": "es",
+    "allOtherAccessibilityLinksAndBehaviorUnchanged": true,
+    "otherPublishedWorkPreservedWithoutDevelopingIt": true,
+    "primaryWorkspaceUntouched": true
+  },
+  "tests": {
+    "existingInteractive": 230,
+    "targetedMcpHelp": 1,
+    "broaderMcpKnownPreExistingFailures": 15,
+    "broaderUnrelatedHelpSuiteNotRepeated": true,
+    "publicBilingualHelpSurfaces": 6,
+    "liveMcpBilingualHelp": true,
+    "isolatedLanguages": [
+      "es",
+      "en"
+    ],
+    "twoHistoriesIndependentOwnResultsAndActions": true,
+    "mixedPendingSendingDifferentSavedStates": true,
+    "nativeClearKeepsViewOrderAndFocusesSearch": true,
+    "nativeResetRestoresInitialViewAndFocusesSearch": true,
+    "noNewReadsWritesQueriesCopiesOrDownloadsWhenClearOrReset": true,
+    "emptyHistoriesBothLanguagesRetainOwnHiddenResultsAndDisabledButtons": true,
+    "invalidationOneHistoryDoesNotCrossOtherInstance": true,
+    "reopenKeepsOwnResultsId": true,
+    "temporaryTabAndServerClosed": true,
+    "bundledRuntimeExecutesIndependently": true
+  },
+  "scope": "Only aria-controls on the existing Clear comparison search and Reset comparison view buttons using their existing results-container ID. Existing actions remain distinct: clear changes only search; reset changes search/view/order while retaining the validated pair. No new ID/container, behavior, focus movement, controls, reads, writes, queries, clipboard operations, automatic downloads, deliveries, assignments, restores or synchronization. All other published work and canonical local design styles retained.",
+  "sha256": {
+    "txt": "7b165b8ebee2f39f30a2ca2eaf2796834526495b39c08e085f15cbe15fb4fdf1",
+    "comparisonCsv": "a1ec788484362ee9ad87e7ff5dd5d059494a3ce3778031b60acd8a236bc7b586",
+    "originalCsv": "34bdae288ab5fe70b4ce6fb8907dd87a33ac190ef8952a658c4ad12523ea4ac9"
+  }
+}

@@ -1,0 +1,97 @@
+{
+  "feature": "readable-collapsed-comparison-detail-wrapping",
+  "verifiedAt": "2026-10-23T18:31:43.482997+00:00",
+  "production": "https://www.ainimation.studio/interactivos/",
+  "release": {
+    "assets": "b95552d",
+    "stamp": "642c7a9",
+    "worker": "8bd3be0c-f952-42e2-bd5a-6d09d53716cf",
+    "storeHelp": "3e726d8a244b82ecfc4f3f9d93205a3850f8ffe0",
+    "storeWorkflow": 40003567748,
+    "storeDeployment": "https://12efc4ec.admira-store.pages.dev",
+    "canonicalLocalDesignCss": true,
+    "mcp": "fc0f334",
+    "mcpWorker": "d17d5c4f-d245-4d6d-90b5-643cd519c031"
+  },
+  "realBatches": {
+    "revisions": [
+      8,
+      9
+    ],
+    "exactTextSeparatorsOrderAndAccessibleNamePreserved": true,
+    "existingSixDetailsWrapAsWholeUnits": true,
+    "beforeSummaryHeight": 40.78125,
+    "afterSummaryHeight": 40.78125,
+    "nativeMarkerAndTwelvePixelFontUnchanged": true,
+    "fullCommonOnlyFirstOnlySecond": [
+      5,
+      0,
+      0
+    ],
+    "fullSavedStateDifferences": [
+      0,
+      5
+    ],
+    "fullDataIndependentOfPrensaAndEmptyView": true,
+    "nativePointerAndKeyboardToggleKeepPairQueryViewOrder": true,
+    "openingInvalidationAndReopenRemoveAllPresentationParts": true,
+    "summaryCharacters": 709,
+    "txtComparisonCsvAndOriginalCsvByteIdentical": true,
+    "historyBackupBatchesIdentical": true,
+    "noRealClipboardAccessOrVersionQueries": true
+  },
+  "preserved": {
+    "batches": 2,
+    "confirmedLinks": 10,
+    "projectCount": 25,
+    "completeInitialLibraryNamesAndOrderUnchanged": true,
+    "pureValidatorsAndExportGeneratorsByteIdentical": true,
+    "versionsStatesIdentitiesRowsCountsAndValidatedSnapshotUnchanged": true,
+    "generalHistoryDatesIndicesAndExportsUnchanged": true,
+    "panelBoundsUnchanged": true,
+    "dialogBounds": {
+      "bottom": 708,
+      "height": 696,
+      "left": 182.5,
+      "right": 1082.5,
+      "top": 12,
+      "width": 900,
+      "x": 182.5,
+      "y": 12
+    },
+    "language": "es",
+    "existingSearchSummaryAndDownloadAccessibilityLinksUnchanged": true,
+    "nativeDisclosureListItemMarkerKeyboardFocusAndAccessibleNameUnchanged": true,
+    "noNewControlsOperationalAreasHeadingsRolesTabindexOrAnnouncements": true
+  },
+  "tests": {
+    "existingInteractive": 230,
+    "targetedMcpHelp": 1,
+    "broaderMcpKnownPreExistingFailures": 15,
+    "broaderUnrelatedHelpSuiteNotRepeated": true,
+    "publicBilingualHelpSurfaces": 6,
+    "liveMcpBilingualHelp": true,
+    "isolatedLanguages": [
+      "es",
+      "en"
+    ],
+    "isolatedCases": 9,
+    "localContainerWidths": [
+      600,
+      320,
+      200,
+      140
+    ],
+    "maxSafeIntegerVersionLabelsAndNoSharedScreensVerified": true,
+    "longerUnitsWrapInternallyWithoutOverflow": true,
+    "allUnitBoundsWithinContainerAndNoOverlap": true,
+    "exactDomTextAndAccessibleNameVerified": true,
+    "noTypographyReductionOrFixedWidthOrHeightAdded": true,
+    "twoHistoriesIndependent": true,
+    "rapidToggleInvalidationDoesNotReviveParts": true,
+    "filterAndReopenClearParts": true,
+    "toggleReopenEffectsUnchanged": "reads 4, writes 2 seeds, queries 0, copies 0, downloads 0",
+    "temporaryTabAndServerClosed": true
+  },
+  "scope": "Only presentational inline units inside the existing native disclosure and scoped flexible wrapping styles. Exact text, separators, order, accessible name, native marker, keyboard and font remain. Units fit together when possible and wrap internally if wider than their container. No new controls, operational areas, roles, focus changes, tabindex, announcements, data, calculations, comparisons, storage reads/writes, Google/backend/version queries, clipboard operations, automatic downloads, deliveries, assignments, restores or synchronization. Panel neither moved nor resized; all files remain exact."
+}

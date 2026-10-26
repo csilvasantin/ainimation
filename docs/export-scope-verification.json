@@ -1,0 +1,80 @@
+{
+  "feature": "comparison-export-scope-notice",
+  "verifiedAt": "2026-10-23T12:23:56.848380+00:00",
+  "production": "https://www.ainimation.studio/interactivos/",
+  "release": {
+    "assets": "59de496",
+    "stamp": "de9fdd0",
+    "worker": "3f23172c-7b00-4b01-b6f3-5a8c990b6d9b",
+    "storeHelp": "19812f66cf0e7c5386fedba4e5ea06412166a386",
+    "storeWorkflow": 39952560451,
+    "storeDeployment": "https://db14f839.admira-store.pages.dev",
+    "canonicalLocalDesignCss": true,
+    "mcp": "3cfde5f",
+    "mcpWorker": "2c50fe2f-8b4a-4696-a6ed-a0f3edef017c"
+  },
+  "realBatches": {
+    "revisions": [
+      8,
+      9
+    ],
+    "oneScopeNotice": true,
+    "immediatelyAfterExportActionsBeforeNoticesAndPreview": true,
+    "visibleBeforeOpeningPreview": true,
+    "explainsFullCsvOriginalOrderAndCompleteTxtSummary": true,
+    "allScreens": 5,
+    "prensaSearchMatches": 1,
+    "exclusiveScreens": 0,
+    "differentSavedStates": 0,
+    "noticeRetainedInEmptySearchedSortedView": true,
+    "txtDownloadedFromEmptyViewByteIdentical": true,
+    "comparisonCsvDownloadedFromEmptyViewByteIdentical": true,
+    "summaryCharacters": 709,
+    "previewClosedInitially": true,
+    "previewTextAndAdaptiveHeightUnchanged": true,
+    "noNewFocusableControls": true,
+    "noClipboardAccessOrVersionChecks": true
+  },
+  "preserved": {
+    "batches": 2,
+    "confirmedLinks": 10,
+    "projectCount": 25,
+    "completeInitialLibraryNamesAndOrderUnchanged": true,
+    "originalDeliveryCsvByteIdentical": true,
+    "historyBackupBatchesIdentical": true,
+    "allDataAndExportFunctionsByteIdentical": true,
+    "panelBoundsUnchanged": true,
+    "dialogBounds": {
+      "bottom": 708,
+      "height": 696,
+      "left": 182.5,
+      "right": 1082.5,
+      "top": 12,
+      "width": 900,
+      "x": 182.5,
+      "y": 12
+    },
+    "language": "es",
+    "noticeHiddenAfterReloadUntilComparing": true
+  },
+  "tests": {
+    "existingInteractive": 228,
+    "targetedMcpHelp": 1,
+    "broaderMcpKnownPreExistingFailures": 15,
+    "broaderUnrelatedHelpSuiteNotRepeated": true,
+    "publicBilingualHelpSurfaces": 6,
+    "liveMcpBilingualHelp": true,
+    "isolatedLanguages": [
+      "es",
+      "en"
+    ],
+    "narrowContainerPixels": 340,
+    "singleNoticeNoHorizontalOverflow": true,
+    "mixedStatesAndEmptyViews": true,
+    "nativeKeyboardPreviewAndSwap": true,
+    "swapInvalidatesNotice": true,
+    "noAdditionalQueriesWritesCopiesOrAutomaticDownloads": true,
+    "temporaryTabAndServerClosed": true
+  },
+  "scope": "Only existing scope notice text and position changed. The complete CSV/TXT exports and all comparison data, validation, session and actions remain unchanged. No backend/version queries, clipboard access, project/history writes, deliveries, assignments, restores or synchronization. The panel was neither moved nor resized."
+}

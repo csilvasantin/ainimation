@@ -1,0 +1,159 @@
+{
+  "feature": "history-restore-review-own-summary-description",
+  "verifiedAt": "2026-10-25T02:53:44.558764+00:00",
+  "change": {
+    "existingReviewSectionOnly": true,
+    "descriptionSameOwnExistingSummaryAsRestoreCancel": true,
+    "noNewIdsNodesOrText": true,
+    "existingSectionElementAriaLabelNameAndHidingPreserved": true,
+    "noAddedRoleLiveTabindexFocusControlsOrExpanded": true,
+    "openCopyRetainsSeparateOwnRestoreStatus": true,
+    "inputListAndOtherControlsNoNewRelationships": true,
+    "logicWithoutNewDescriptionByteExact": true,
+    "publicModuleSha256": "9cee3c8bf17f02850cee6f933051df5d375249b0bd7cd0a4eceefbc843a224dd"
+  },
+  "validation": {
+    "existingInteractiveRegressionTests": 231,
+    "interactiveFailures": 0,
+    "targetedMcpHelpTests": 1,
+    "otherKnownMcpFailuresOutOfScope": 15,
+    "languages": [
+      "es",
+      "en"
+    ],
+    "twoIndependentHistories": true,
+    "genericCollisionAvoided": true,
+    "sameNamesAndRevisionsDistinctLongIds": true,
+    "validNewMixedIdenticalSummariesAndButtonNamesExact": true,
+    "initialHiddenDisabledEmptyStatePreserved": true,
+    "nativeTabShiftTabFocusWithoutActivation": true,
+    "nativeFictitiousFileSelectionAndReviewCancel": true,
+    "invalidConflictCapacityEmptyMalformedOversizeFiles": true,
+    "simulatedUnreadableFileEmptyUnreadableHistory": true,
+    "lateAcceptedRejectedReadsDiscarded": 8,
+    "noRestoreConfirmActivatedInNewUiTests": true,
+    "onlySeedStorageWritesInNewUiTests": true,
+    "renderFilterCollapseNoFilePickerReadsOrOtherOperations": true,
+    "zeroVersionQueriesClipboardCopiesDownloadsInNewUiTests": true,
+    "pendingCancelSimulatedOnlyInLocalFixture": true,
+    "existingInMemoryRestoreValidationGuardRegressionsReused": true,
+    "nativeKeyboardPointerReviewCancelClearsAllAndReturnsFocusToOpen": true,
+    "cancelNoOwnHiddenDisabledAdded": true,
+    "twoHistoryCancelDoesNotClearOtherReview": true,
+    "reviewSectionNameAttributesAndSummaryExactEsEn": true,
+    "noNewSectionKeyboardStop": true,
+    "nativeOpenToFirstPreviewSummaryAndRestoreCancelSequencePreserved": true,
+    "noSectionFocusClaim": true
+  },
+  "production": {
+    "noRealFilesChosenImportedRestored": true,
+    "restoreConfirmOwnHiddenDisabledInitially": true,
+    "reviewParentHiddenAndSummaryInitiallyEmpty": true,
+    "initialConfirmTextEmptyPreserved": true,
+    "filtersCloseReopenOwnReferences": true,
+    "manualComparisonRevisions": [
+      8,
+      9
+    ],
+    "common": 5,
+    "onlyFirst": 0,
+    "onlySecond": 0,
+    "differentSavedStates": 0,
+    "fullSummaryCharacters": 709,
+    "initialProjectCount": 25,
+    "sameCompleteLibraryAfterReload": true,
+    "batches": 2,
+    "confirmedLinks": 10,
+    "guideSteps": 5,
+    "duplicateIds": 0,
+    "orphanReferences": 0,
+    "panelUnmoved": true,
+    "domAndAccessibilityTreeInspected": true,
+    "noSpecificScreenReaderOrHiddenControlNavigabilityClaim": true,
+    "noRealClipboardOrVersionOperations": true,
+    "allPublishedRelationshipsRetained": true,
+    "exports": [
+      {
+        "file": "restore-review-summary-production.txt",
+        "bytes": 723,
+        "sha256": "7b165b8ebee2f39f30a2ca2eaf2796834526495b39c08e085f15cbe15fb4fdf1",
+        "exact": true
+      },
+      {
+        "file": "restore-review-summary-production.csv",
+        "bytes": 4626,
+        "sha256": "a1ec788484362ee9ad87e7ff5dd5d059494a3ce3778031b60acd8a236bc7b586",
+        "exact": true
+      },
+      {
+        "file": "restore-review-summary-original-v9.csv",
+        "bytes": 1929,
+        "sha256": "34bdae288ab5fe70b4ce6fb8907dd87a33ac190ef8952a658c4ad12523ea4ac9",
+        "exact": true
+      }
+    ],
+    "restoreOpenBackupCancelConfirmNotActivated": true,
+    "reviewSectionDescribesOnlyOwnSummary": true,
+    "sectionNativeNameAndHiddenStatePreserved": true,
+    "sectionHasNoAddedKeyboardStopOrRole": true
+  },
+  "help": {
+    "bilingualSourceSurfaces": 10,
+    "publicRoutes": [
+      {
+        "route": "admira-xp/docs/ainimation-screen-delivery.md",
+        "es": true,
+        "en": true
+      },
+      {
+        "route": "admira-xp/help.html",
+        "es": true,
+        "en": true
+      },
+      {
+        "route": "mcp/index.html",
+        "es": true,
+        "en": true
+      },
+      {
+        "route": "mcp/manifest.json",
+        "es": true,
+        "en": true
+      },
+      {
+        "route": "mcp/llms.txt",
+        "es": true,
+        "en": true
+      },
+      {
+        "route": "mcp/funcionalidades.json",
+        "es": true,
+        "en": true
+      }
+    ],
+    "realMcpVerified": true,
+    "canonicalStoreLocalStyles": {
+      "tokens": "4534 B, v=7473512a",
+      "nav": "4677 B, v=d92633d3"
+    }
+  },
+  "release": {
+    "ainimationFeature": "6ab5d36",
+    "ainimationStamp": "e6f2ef58c244b57ee33f8b4fc68f41c2eb4377da",
+    "storeHelp": "9d7f0bef2eb61e5e7f35c091a97cf8a369ce7977",
+    "mcpHelp": "011beaa",
+    "previewWorker": "84b4b5c5-db70-4b5e-90a5-a11c3f552eb6",
+    "mcpWorker": "36417cee-edeb-41be-80b4-8735e47535d0",
+    "ainimationHelpCi": 40156086942,
+    "storeHelpCi": 40156089085,
+    "storeHelpCiConclusion": "success",
+    "storeCanonicalHelpDeployment": "https://024b454a.admira-store.pages.dev"
+  },
+  "preserved": [
+    "all previous history and comparison functions and accessible relationships",
+    "manual file selection and preview validation, messages and guards",
+    "all initial library, history, projects, language and session",
+    "other publications and canonical package with local styles"
+  ],
+  "temporaryBrowserAndServerClosed": true
+}

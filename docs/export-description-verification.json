@@ -1,0 +1,93 @@
+{
+  "feature": "comparison-download-scope-accessible-description",
+  "verifiedAt": "2026-10-23T16:57:04.396900+00:00",
+  "production": "https://www.ainimation.studio/interactivos/",
+  "release": {
+    "assets": "933b930",
+    "stamp": "30ebf5c",
+    "worker": "3e4db161-e682-4d2b-92d4-56119e676637",
+    "storeHelp": "f515c4271c98b60ac2f0d14a7fbfeb41c8370f99",
+    "storeWorkflow": 39990648209,
+    "storeDeployment": "https://2fb73e2a.admira-store.pages.dev",
+    "canonicalLocalDesignCss": true,
+    "mcp": "c276efa",
+    "mcpWorker": "81ec925e-8b3f-499a-874e-0c7502c626aa"
+  },
+  "realBatches": {
+    "revisions": [
+      8,
+      9
+    ],
+    "bothButtonsDescribedByExactlyOneOwnScopeNotice": true,
+    "scopeIdValidUniqueAndNotDerivedFromPrivateData": true,
+    "namesAndExistingScopeTextUnchanged": true,
+    "noAlternateAriaLabelsAdded": true,
+    "scopeAndActionsHiddenBeforeCompareAndAfterInvalidation": true,
+    "targetStableAcrossSwapGeneralFiltersAndReopen": true,
+    "noticeStaysVisibleAndExactFromPrensaAndEmptyViews": true,
+    "successMessagesRemainIndependentAndNotDescriptionTargets": true,
+    "nativeKeyboardOrder": [
+      "CSV",
+      "TXT",
+      "View/Hide",
+      "Copy"
+    ],
+    "sharedScreens": 5,
+    "exclusiveScreens": 0,
+    "differentSavedStates": 0,
+    "prensaMatches": 1,
+    "summaryCharacters": 709,
+    "txtComparisonCsvAndOriginalCsvByteIdentical": true,
+    "historyBackupBatchesIdentical": true,
+    "noRealClipboardAccessOrVersionQueries": true
+  },
+  "preserved": {
+    "batches": 2,
+    "confirmedLinks": 10,
+    "projectCount": 25,
+    "completeInitialLibraryNamesAndOrderUnchanged": true,
+    "pureValidatorsAndExportGeneratorsByteIdentical": true,
+    "existingSearchAriaControlsViewsSortRowsCountsStatesAndTextsUnchanged": true,
+    "generalHistoryDatesAndExportsUnchanged": true,
+    "panelBoundsUnchanged": true,
+    "dialogBounds": {
+      "bottom": 708,
+      "height": 696,
+      "left": 182.5,
+      "right": 1082.5,
+      "top": 12,
+      "width": 900,
+      "x": 182.5,
+      "y": 12
+    },
+    "language": "es",
+    "summaryControlsExpandedLabelAndSingleReadonlyAreaUnchanged": true,
+    "twoActionRowsAndScopePositionUnchanged": true,
+    "noNewControlsAreasHeadingsRolesTabindexFocusChangesOrAnnouncements": true
+  },
+  "tests": {
+    "existingInteractive": 230,
+    "targetedMcpHelp": 1,
+    "broaderMcpKnownPreExistingFailures": 15,
+    "broaderUnrelatedHelpSuiteNotRepeated": true,
+    "publicBilingualHelpSurfaces": 6,
+    "liveMcpBilingualHelp": true,
+    "isolatedLanguages": [
+      "es",
+      "en"
+    ],
+    "twoMountedHistoriesDistinctScopeIdsAndOnlyOwnButtonReferences": true,
+    "nativeEnglishAndSpanishActionKeyboardOrderVerified": true,
+    "domAndAccessibilityTreeInspected": true,
+    "specificScreenReaderTestPerformed": false,
+    "emptyViewsKeepCompleteScopeText": true,
+    "invalidationOfOneHistoryDoesNotChangeTheOther": true,
+    "rapidToggleAndInvalidationDoNotReviveOtherNotices": true,
+    "filterAndReopenPreserveOwnTargetsAndHiddenInitialState": true,
+    "existingDownloadFailureAndLateCallbackTestsPassed": true,
+    "isolatedPresentationEffects": "reads 4, writes 2 seeds, queries 0, copies 0, downloads 0; unchanged by keyboard navigation",
+    "noHorizontalOverflow": true,
+    "temporaryTabAndServerClosed": true
+  },
+  "scope": "Only a unique collision-checked per-history ID on the existing scope notice and aria-describedby on the existing CSV and TXT comparison download buttons. Names, notice text, appearance, focus, keyboard order, disabled/hidden states, actions, messages, data, validation and exports remain unchanged. No new controls, areas, roles, tabindex, announcements, queries, comparisons, reads/writes, clipboard operations, automatic downloads, deliveries, assignments, restores or synchronization. Panel neither moved nor resized."
+}

@@ -1,0 +1,113 @@
+{
+  "feature": "complete-history-backup-describes-own-existing-scope",
+  "verifiedAt": "2026-10-24T01:13:20.543055+00:00",
+  "production": "https://www.ainimation.studio/interactivos/",
+  "release": {
+    "functional": "2156935",
+    "stamp": "b19232770099a4e7f4251c23d84e2437a3cf2195",
+    "worker": "50d83f84-d3d7-400e-9151-e2f07dbf35b0",
+    "preservedPublishedCapsuleCommit": "c5b3412",
+    "capsuleEditorModuleCssAndPreviewPublicByteExact": true,
+    "storeHelp": "1ff8797406667b245ce1521587ba0ab745cf61de",
+    "storeWorkflow": 40048586307,
+    "storeDeployment": "https://234e633e.admira-store.pages.dev",
+    "canonicalLocalDesignCss": true,
+    "mcp": "cbe36a3",
+    "mcpWorker": "06a9e914-135c-43f0-b9f1-5c3b67d88a48"
+  },
+  "semantics": {
+    "backupButtonDescribesExactlyItsExistingOwnScopeParagraph": true,
+    "validGenericUniqueIdPerHistory": true,
+    "noPrivateDataInId": true,
+    "noNewParagraphOrContainer": true,
+    "notDownloadSuccessErrorFilterOrComparisonNotice": true,
+    "openHistoryCopyImportNotLinked": true,
+    "namesTextsNativeTypeDisabledHiddenFocusAndKeyboardUnchanged": true,
+    "scopeParagraphRoleAndLiveRegionUnchanged": true,
+    "noAlternativeLabelsExpandedRolesTabindexAnnouncementsFocusOrNewAreas": true,
+    "stableAcrossFilteringClearingAndReopen": true,
+    "domAccessibilityTreeAndNativeKeyboardInspected": true,
+    "specificScreenReaderNotTested": true
+  },
+  "realHistory": {
+    "v9VisibleBatchesAndTargets": [
+      1,
+      5
+    ],
+    "completeBackupScopeBatchesAndTargets": [
+      2,
+      10
+    ],
+    "nativeShiftTabToBackupAndEnterRunsOneManualDownload": true,
+    "completeBackupDownloadsThisVerification": 1,
+    "downloadedBatchesExactlyMatchReference": true,
+    "bothExactBatchIdsAndAllTenSavedTargetsRetained": true,
+    "exportedAtGeneratedNormallyNotForced": true,
+    "noImportOrRestorePerformed": true,
+    "separatePreparedNoticeAndScopeTextExact": true,
+    "manual89CommonOnlyFirstOnlySecond": [
+      5,
+      0,
+      0
+    ],
+    "savedStateDifferences": [
+      0,
+      5
+    ],
+    "summaryCharacters": 709,
+    "txtComparisonCsvOriginalCsvByteIdentical": true,
+    "noRealClipboardAccessOrVersionQueries": true
+  },
+  "isolated": {
+    "languages": [
+      "es",
+      "en"
+    ],
+    "twoHistoriesDifferentScopeIdsAndOwnOnlyDescriptions": true,
+    "independentFiltersAndDownloadNotices": true,
+    "filteredListNeverReducesCompleteScope": true,
+    "openingFilteringReopeningAddsNoAutomaticDownloadOrOtherOperations": true,
+    "emptyUnreadableDisabledStatesPreserved": true,
+    "manualRevalidationDeniedAndDownloadFailuresSimulatedWithControlledSeparateMessages": true,
+    "reopenKeepsIdAndClearsOldNotice": true,
+    "existingBackupFailureAndLateCallbackTestsPass": true,
+    "temporaryTabAndServerClosed": true
+  },
+  "preserved": {
+    "projectCount": 25,
+    "completeInitialLibraryNamesAndOrderUnchanged": true,
+    "batches": 2,
+    "confirmedLinks": 10,
+    "dialogBounds": {
+      "bottom": 708,
+      "height": 696,
+      "left": 182.5,
+      "right": 1082.5,
+      "top": 12,
+      "width": 900,
+      "x": 182.5,
+      "y": 12
+    },
+    "panelBoundsUnchanged": true,
+    "language": "es",
+    "previousModuleBytesExactExceptIdSequenceAndDescriptionAssignment": true,
+    "allComparisonOutputsOtherLinksGuardsValidationSessionsUnchanged": true,
+    "otherPublishedWorkRetainedWithoutDevelopingIt": true,
+    "primaryWorkspaceUntouched": true
+  },
+  "validation": {
+    "existingInteractiveTests": 231,
+    "targetedMcpHelpTests": 1,
+    "publicBilingualHelpSurfaces": 6,
+    "liveMcpBilingualHelp": true,
+    "broaderUnrelatedHelpSuiteNotRepeated": true,
+    "knownPreExistingUnrelatedHelpFailures": 15,
+    "bundledRuntimeExecutesIndependently": true
+  },
+  "scope": "Only a generic unique ID on the existing complete-backup scope paragraph and aria-describedby on the existing complete-history download button. Existing names, text, manual actions, scope, validation, reads, callbacks, disabled states, focus, keyboard and exported data unchanged. No new controls, operations, queries, writes, clipboard activity, automatic downloads/comparisons, deliveries, assignments, imports, restores or synchronization.",
+  "sha256": {
+    "txt": "7b165b8ebee2f39f30a2ca2eaf2796834526495b39c08e085f15cbe15fb4fdf1",
+    "comparisonCsv": "a1ec788484362ee9ad87e7ff5dd5d059494a3ce3778031b60acd8a236bc7b586",
+    "originalCsv": "34bdae288ab5fe70b4ce6fb8907dd87a33ac190ef8952a658c4ad12523ea4ac9"
+  }
+}

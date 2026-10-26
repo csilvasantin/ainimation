@@ -7,6 +7,9 @@
     "verify:stage": "node scripts/verify-stage-ruler.js",
     "stamp": "node scripts/stamp-version.mjs",
     "verify:stamp": "node scripts/stamp-version.mjs --check",
+    "verify:admira-review": "node scripts/test-admira-preflight.cjs",
+    "verify:admira-resource-updates": "node scripts/test-admira-resource-updates.cjs",
+    "verify:admira-format-package": "node scripts/test-admira-format-package.cjs",
     "verify:capsula": "node --test test/capsula-editor.browser.test.mjs"
   },
   "repository": {

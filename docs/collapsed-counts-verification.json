@@ -1,0 +1,83 @@
+{
+  "feature": "comparison-collapsed-full-counts",
+  "verifiedAt": "2026-10-23T15:31:44.646687+00:00",
+  "production": "https://www.ainimation.studio/interactivos/",
+  "release": {
+    "assets": "ca5e4f1",
+    "stamp": "245e1b4",
+    "worker": "1aaa2821-78b3-4006-8dbc-7a43e9e3da1e",
+    "storeHelp": "0e4aee449c81fc61be31c1ab4240b26e9f4dedea",
+    "storeWorkflow": 39978350972,
+    "storeDeployment": "https://8252bd9d.admira-store.pages.dev",
+    "canonicalLocalDesignCss": true,
+    "mcp": "77e9353",
+    "mcpWorker": "df200c56-54b2-47b6-8419-4accfb286a8e"
+  },
+  "realBatches": {
+    "revisions": [
+      8,
+      9
+    ],
+    "initialNativeDisclosureNameUnchangedWithoutCounts": true,
+    "collapsedShared": 5,
+    "collapsedOnlyFirst": 0,
+    "collapsedOnlySecond": 0,
+    "fullCountsFromPrensaSearchAndEmptyDifferentStateView": true,
+    "reopeningRestoresOriginalName": true,
+    "pairQueryViewAndNameOrderRetained": true,
+    "nativePointerAndKeyboardCollapseReopenVerified": true,
+    "swapGeneralFilterAndHistoryReopenRemoveCounts": true,
+    "summaryCharacters": 709,
+    "txtComparisonCsvAndOriginalCsvByteIdentical": true,
+    "historyBackupBatchesIdentical": true,
+    "noRealClipboardAccessOrVersionQueries": true
+  },
+  "preserved": {
+    "batches": 2,
+    "confirmedLinks": 10,
+    "projectCount": 25,
+    "completeInitialLibraryNamesAndOrderUnchanged": true,
+    "pureValidatorsAndExportGeneratorsByteIdentical": true,
+    "projectRevisionUtcMillisecondsAndIdsExact": true,
+    "generalHistoryDatesSearchStatesAndExportsUnchanged": true,
+    "panelBoundsUnchanged": true,
+    "dialogBounds": {
+      "bottom": 708,
+      "height": 696,
+      "left": 182.5,
+      "right": 1082.5,
+      "top": 12,
+      "width": 900,
+      "x": 182.5,
+      "y": 12
+    },
+    "language": "es",
+    "summaryAccessibilityAndExpandedLifecycleUnchanged": true,
+    "nativeDisclosureSemanticsAndKeyboardUnchanged": true,
+    "noNewControlsOrAutomaticAnnouncements": true
+  },
+  "tests": {
+    "existingInteractive": 230,
+    "targetedMcpHelp": 1,
+    "broaderMcpKnownPreExistingFailures": 15,
+    "broaderUnrelatedHelpSuiteNotRepeated": true,
+    "publicBilingualHelpSurfaces": 6,
+    "liveMcpBilingualHelp": true,
+    "isolatedLanguages": [
+      "es",
+      "en"
+    ],
+    "singularPluralZeroOneSeveralCorrect": true,
+    "mixedPendingSendingSuccessErrorStatesPreserved": true,
+    "exclusiveAndNoSharedTargetsVerified": true,
+    "emptySearchViewDoesNotChangeFullCounts": true,
+    "twoHistoriesIndependent": true,
+    "rapidToggleAndInvalidationDoNotReviveOldCounts": true,
+    "filterAndReopenResetDisclosureName": true,
+    "storageReadsBeforeAndAfterCollapseReopenEqual": true,
+    "isolatedDisclosureEffects": "reads 4, writes 2 seeds, queries 0, copies 0, downloads 0; unchanged by collapse/reopen",
+    "completeTextFitsWithoutHorizontalOverflow": true,
+    "temporaryTabAndServerClosed": true
+  },
+  "scope": "Only the existing native disclosure text adds complete counts for the current completed comparison while collapsed. Opening or invalidating restores its original name. No extra storage reads, comparisons, backend/version queries, Google, preferences, project/history writes, clipboard access, deliveries, assignments, restores or synchronization. Native focus/keyboard/semantics and all exports remain; panel neither moved nor resized."
+}

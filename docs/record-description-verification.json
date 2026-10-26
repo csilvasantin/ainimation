@@ -1,0 +1,114 @@
+{
+  "feature": "history-batch-record-description",
+  "verifiedAt": "2026-10-24T10:07:36.911896+00:00",
+  "implementation": {
+    "featureCommit": "ed0595ee10eedd313d6a655cdac92dea9ae072d4",
+    "ainimationReleaseCommit": "70b24d6b21f13174cf0acb911b3e4f3014215d47",
+    "storeHelpCommit": "69f7b11756dabc6d65e0118099f464751840fa90",
+    "mcpCommit": "c14bed5b52d674eb8cb60cba369f95e0322208fe",
+    "interactiveModuleSha256": "dfcb3db393023f5a1d311e2425eb28cd7606c5ec3eb8daf90e117e6712703ef2",
+    "previewWorker": "e2ca08be-3316-481b-b4ab-469168156263",
+    "mcpWorker": "81347d44-ec51-4708-b38b-1d9a75d0e1c5"
+  },
+  "semantics": {
+    "onlyNativeBatchSummaryDescribesOwnExistingRecordParagraph": true,
+    "genericUniqueParagraphIdsNotDerivedFromPrivateData": true,
+    "collisionAvoided": true,
+    "summaryNamesTextMarkerNativeStateFocusKeyboardUnchanged": true,
+    "noNewParagraphControlsHeadingsRolesLiveTabindexOrAriaLabelsControlsExpanded": true,
+    "paragraphTextAndThreeFlexibleUnitsExact": true,
+    "summaryFirstRecordBeforeActionsNativeCollapsePreserved": true,
+    "csvStillDescribesSeparateOwnScope": true,
+    "noOtherBatchButtonDescribesRecordMetadata": true,
+    "sourceDiffOnlyCounterIdAndDescriptionAttribute": true
+  },
+  "production": {
+    "batches": 2,
+    "links": 10,
+    "initialLibraryProjects": 25,
+    "fullInitialLibraryAndOrderRetained": true,
+    "panelBoundsAndLanguageExact": true,
+    "twoDistinctOwnRecordIds": true,
+    "nativeNamesAndParagraphTextExactAgainstBaseline": true,
+    "metadataExactAgainstExistingCompleteBackup": true,
+    "nativeKeyboardAndPointerCollapseOpen": true,
+    "foldedParagraphVisuallyHiddenScreenshotVerified": true,
+    "filterV9KeepsOnlyOwnReference": true,
+    "clearRecoversBothWithoutDuplicateOrOrphanedReferences": true,
+    "manualComparisonCommon": 5,
+    "exclusiveFirst": 0,
+    "exclusiveSecond": 0,
+    "differentSavedStates": 0,
+    "searchPressOneOfFive": true,
+    "summaryCharacters": 709,
+    "summaryReviewExact": true,
+    "txtAndComparisonCsvExactFromFilteredView": true,
+    "originalCsvExactFilteredAndAfterReload": true,
+    "recordReferencesAndGuideFiveStepsExactAfterReload": true,
+    "domAndAccessibilityTreeInspected": true,
+    "specificScreenReaderTestClaimed": false
+  },
+  "exports": {
+    "record-description-summary.txt": {
+      "bytes": 723,
+      "sha256": "7b165b8ebee2f39f30a2ca2eaf2796834526495b39c08e085f15cbe15fb4fdf1"
+    },
+    "record-description-comparison.csv": {
+      "bytes": 4626,
+      "sha256": "a1ec788484362ee9ad87e7ff5dd5d059494a3ce3778031b60acd8a236bc7b586"
+    },
+    "record-description-original-v9.csv": {
+      "bytes": 1929,
+      "sha256": "34bdae288ab5fe70b4ce6fb8907dd87a33ac190ef8952a658c4ad12523ea4ac9"
+    },
+    "record-description-original-v9-reloaded.csv": {
+      "bytes": 1929,
+      "sha256": "34bdae288ab5fe70b4ce6fb8907dd87a33ac190ef8952a658c4ad12523ea4ac9"
+    }
+  },
+  "isolated": {
+    "languages": [
+      "es",
+      "en"
+    ],
+    "sameNamesAndRevisionsWithDistinctIds": true,
+    "longValidIdsAndExactDistinctUtcDates": true,
+    "twoIndependentHistoriesFourDistinctOwnReferences": true,
+    "reservedGenericIdCollisionAvoided": true,
+    "combinedFiltersEmptyViewClearAndReopen": true,
+    "retiredNodesRemovedNoCrossReferences": true,
+    "namesTextAndUnitsUnchangedAfterRenders": true,
+    "emptyUnreadableHistorySimulated": true,
+    "changedDeniedHistoryBlocksComparisonWithoutStaleResults": true,
+    "noInventedParagraphsForAbsentBatches": true,
+    "nativeKeyboardAndPointerCollapseOpen": true,
+    "renderFilterToggleAddsNoReadsWritesQueriesCopiesDownloadsOrComparisons": true,
+    "existingCallbackGuardsUnchangedAndTestsPass": true,
+    "temporaryTabAndServerClosed": true
+  },
+  "validation": {
+    "interactiveTests": 231,
+    "interactiveFailures": 0,
+    "targetedMcpHelpTests": 1,
+    "standaloneWorkerBundle": true,
+    "publicBilingualHelpSurfacesVerified": 6,
+    "bilingualHelpSurfacesUpdated": 10,
+    "protectedHelpSourcesUpdatedWithoutBypass": true,
+    "actualMcpHelpBilingual": true,
+    "unrelatedKnownMcpFailuresNotRerun": 15,
+    "storeHelpCanonicalCi": 40084387052,
+    "storeHelpCanonicalCiConclusion": "success",
+    "storeHelpCanonicalDeployment": "https://bd8b1cad.admira-store.pages.dev"
+  },
+  "preserved": {
+    "canonicalStoreLocalCss": {
+      "tokens": "7473512a",
+      "nav": "d92633d3"
+    },
+    "otherPublishedAssetsUntouchedByFunctionalCommit": true,
+    "latestPublishedSourcesIntegratedBeforeFeature": true,
+    "primaryWorkspaceUnmodified": true,
+    "inventoryHistoryProjectsReceiptsUnchanged": true,
+    "noClipboardVersionChecksImportsRestoresOrProductionFailures": true
+  }
+}
