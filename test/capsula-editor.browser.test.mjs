@@ -48,7 +48,7 @@ async function fixture(t, {authenticated = true, reviews = [], put} = {}) {
   let draft = seed(), revision = 1;
   await context.route('**/*', async route => {
     const request = route.request(), url = new URL(request.url());
-    if (url.origin === origin && url.pathname === '/studio.html') return route.fulfill({contentType:'text/html',body:`<!doctype html><html lang="es"><head><meta charset="utf-8"><style>${styles}</style></head><body class="studio-page director-focus"><script src="/assets/capsula-editor.js"></script></body></html>`});
+    if (url.origin === origin && url.pathname === '/studio.html') return route.fulfill({contentType:'text/html',body:`<!doctype html><html lang="es"><head><meta charset="utf-8"><style>${styles}</style></head><body class="studio-page director-focus studio-entering studio-entered"><script src="/assets/capsula-editor.js"></script></body></html>`});
     if (url.origin === origin && url.pathname === '/assets/capsula-editor.js') return route.fulfill({contentType:'application/javascript',body:script});
     if (url.origin === 'https://www.pixeria.com' && url.pathname === '/auth/bridge') return route.fulfill({contentType:'text/html',body:'<!doctype html><title>Fixture auth bridge</title><p>Esperando sesión fixture</p>'});
     if (url.origin === api) {
@@ -75,6 +75,7 @@ async function fixture(t, {authenticated = true, reviews = [], put} = {}) {
     await page.waitForFunction(() => !document.querySelector('[data-save]').disabled);
   };
   await load();
+  assert.equal(await page.locator('.ce-main').evaluate(el=>getComputedStyle(el).overflow),'visible');
   return {page,context,puts,polls,errors,load};
 }
 

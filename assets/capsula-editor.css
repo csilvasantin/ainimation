@@ -3,3 +3,5 @@ body.capsula-mode{background:#101312;color:#ecede8;margin:0;font:14px/1.5 -apple
 #capsulaEditor .ce-heading>div{min-width:0;flex:1}
 #capsulaEditor .ce-heading h1{max-width:none;width:auto;text-transform:none;overflow-wrap:anywhere}
 #capsulaEditor .ce-draft-badge{flex-shrink:0}
+/* The Director's boot animation constrains every main; capsule editing scrolls as a page. */
+#capsulaEditor .ce-main{height:auto;overflow:visible}
