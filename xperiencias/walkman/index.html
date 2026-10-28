@@ -50,5 +50,7 @@ $('ab').onclick=()=>{cara=cara=='A'?'B':'A';$('cara').textContent='CARA '+cara;i
 au.onended=()=>$('ff').onclick();
 fetch(API).then(r=>r.json()).then(d=>{lista=(d.playlist||[]).filter(url)}).catch(()=>{}).finally(()=>{
  if(!lista.length&&q.get('demo')=='1')lista=[{url:'demo.m4a',title:'Demo Admira (prueba)'}];
- const v=!lista.length;$('vacio').hidden=!v;$('cli').textContent=store;['pp','ff','rw'].forEach(k=>$(k).disabled=v);carga()});
+ const v=!lista.length;$('vacio').hidden=!v;$('cli').textContent=store;['pp','ff','rw'].forEach(k=>$(k).disabled=v);carga();
+ if(!v&&q.get('autoplay')=='1')au.play().catch(()=>{au.muted=true;return au.play()}).then(()=>estado(!au.paused)).catch(()=>{});
+ if(q.get('debug')=='1')setInterval(()=>{$('vacio').hidden=false;$('vacio').textContent='debug · t='+au.currentTime.toFixed(1)+' s · '+(au.paused?'pausa':'sonando')+(au.muted?' (silenciado)':'')+' · '+(au.currentSrc.split('/').pop())},500)});
 </script></body></html>
