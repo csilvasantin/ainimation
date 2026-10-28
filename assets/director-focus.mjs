@@ -1,6 +1,7 @@
 document.addEventListener('pointerdown',event=>{if(event.target.closest?.('[data-director-interface-toggle]'))event.stopPropagation();},true);
 // View-only: never change the plan, saved window geometry or Admira reference.
 function toggleInterface(){
+ if(document.body.classList.contains('capsula-mode'))return;
  const button=document.querySelector('[data-director-interface-toggle]');
  const focused=document.body.classList.toggle('director-focus');
  // H can hide the menu or panel that currently owns keyboard focus.

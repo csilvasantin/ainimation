@@ -4923,6 +4923,8 @@ function showAdmiraCreationNotice(plan) {
 
 async function importAdmiraStockAssetFromQuery() {
   const params = new URLSearchParams(window.location.search);
+  // Editable capsules load their source through the capsule editor, not as flattened video.
+  if (params.get("mode") === "capsula") return false;
   if (new URLSearchParams(location.hash.slice(1)).has('admiraBatch')) {
     const {batchFromHash,batchPlan}=await import('./admira-resource-batch.mjs?v=batch-1');
     const batch=batchFromHash(location.hash);

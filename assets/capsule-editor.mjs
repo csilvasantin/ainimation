@@ -78,6 +78,19 @@ export async function mountCapsuleEditor({doc=document,win=window,fetcher=fetch,
   const stockId=params.get('admiraStockId')||project.existing?.horizontal?.id||project.existing?.vertical?.id||'';const stockLink=new URL(inline?(returnUrl||win.location.href):'https://admira.studio/stock',win.location.origin);stockLink.searchParams.set('highlight',stockId);$('[data-stock]').href=stockLink.href;if(inline){$('[data-stock]').removeAttribute('target');$('[data-stock]').textContent=t('Ver versión publicada','View published version');}
   const preview=params.get('admiraStockUrl')||Object.values(project.existing||{}).find(item=>item.id===stockId)?.url||project.existing?.horizontal?.url||project.existing?.vertical?.url||'';try{const u=new URL(preview);if(u.protocol==='https:'&&['api.admira.store','stock.admira.store'].includes(u.hostname))$('.capsule-reference video').src=u.href;}catch{}
   $('[data-version]').textContent=t('Versión de origen: ','Source version: ')+project.capsuleVersion;
+  // Full-source editing is offered only after the draft API confirms a source.
+  // Older capsules keep the existing text editor until their source is seeded.
+  if(stockId){
+   read(API+'/stock/capsula/'+encodeURIComponent(stockId)).then(source=>{
+    if(destroyed||signal?.aborted||source.capsula?.schema!=='capsula/1')return;
+    const complete=doc.createElement('a');complete.dataset.fullCapsuleEditor='';
+    const href=new URL('https://www.ainimation.studio/studio.html');href.searchParams.set('mode','capsula');href.searchParams.set('admiraStockId',stockId);
+    complete.href=href.href;complete.target='_blank';complete.rel='noopener';
+    complete.textContent=t('Editar textos, media y tiempos ↗','Edit text, media and timing ↗');
+    complete.onclick=event=>{if(scriptChanges(project,payload(),FIELDS).length){event.preventDefault();stash();status.textContent=t('Tu borrador de textos queda guardado en este navegador. Genera esa revisión o recupera el original antes de abrir la edición completa.','Your text draft is saved in this browser. Render that revision or restore the original before opening the full editor.');}};
+    $('.capsule-preview-tools').append(complete);
+   }).catch(()=>{});
+  }
   shell=mountCapsuleShell({dialog,form,doc,win,t});
   $('.capsule-editor-grid').hidden=false;status.textContent=restored?t('Borrador local recuperado.','Local draft restored.'):t('Guion original listo para editar.','Original script ready to edit.');
   $('[data-save]').onclick=()=>autosave();
