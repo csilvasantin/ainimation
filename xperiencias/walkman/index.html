@@ -49,5 +49,6 @@ $('rw').onclick=()=>{if(au.currentTime>3||!lista.length)au.currentTime=0;else{i=
 $('ab').onclick=()=>{cara=cara=='A'?'B':'A';$('cara').textContent='CARA '+cara;if(lista.length){lista.reverse();i=0;carga()}};
 au.onended=()=>$('ff').onclick();
 fetch(API).then(r=>r.json()).then(d=>{lista=(d.playlist||[]).filter(url)}).catch(()=>{}).finally(()=>{
+ if(!lista.length&&q.get('demo')=='1')lista=[{url:'demo.m4a',title:'Demo Admira (prueba)'}];
  const v=!lista.length;$('vacio').hidden=!v;$('cli').textContent=store;['pp','ff','rw'].forEach(k=>$(k).disabled=v);carga()});
 </script></body></html>
