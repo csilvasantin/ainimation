@@ -1786,6 +1786,8 @@ const timelineControlsWidthStorageKey = "ainimation-timeline-controls-width";
 const castViewStorageKey = "ainimation-cast-view";
 const castFilterStorageKey = "ainimation-cast-filters";
 const castFilterTypes = ["image", "video", "audio", "music"];
+const castLibraryView = { query: "", usage: "all", sort: "original" };
+const collapsedCastGroups = new Set();
 // Resolución del Stage: ya no es fija. 16:9 (1920×1080) por defecto; tótem vertical 1080×1920
 // y otras se eligen en el chip de tamaño del Stage (assets/director-kiosk.js) y viajan en plan.stage.
 let stageWidthPixels = 1920;
@@ -2273,8 +2275,56 @@ function renderCastToolbar(totalCount, visibleCount, filter, viewMode) {
     ["music", "Música", "Música"],
   ];
   if (castToolbar) {
-    castToolbar.hidden = true;
-    castToolbar.innerHTML = "";
+    castToolbar.hidden = false;
+    if (!castToolbar.querySelector('[data-cast-search]')) {
+      castToolbar.innerHTML = `
+        <label class="cast-library-search"><span>Buscar / Search</span><input type="search" data-cast-search aria-controls="castBin" placeholder="Nombre, archivo, tipo…" autocomplete="off" /></label>
+        <button type="button" data-cast-reset aria-label="Restablecer filtros del Cast / Reset Cast filters" title="Restablecer filtros / Reset filters">↺</button>
+        <label><span>Uso / Usage</span><select data-cast-usage aria-controls="castBin"><option value="all">Todos / All</option><option value="used">En escena / In use</option><option value="unused">Sin usar / Unused</option></select></label>
+        <label><span>Orden / Sort</span><select data-cast-sort aria-controls="castBin"><option value="original">Original</option><option value="name">Nombre / Name</option><option value="type">Tipo / Type</option><option value="grouped">Grupos por tipo / Type groups</option></select></label>
+        <div class="cast-group-actions" data-cast-group-actions hidden>
+          <button type="button" data-cast-groups-open aria-controls="castBin" aria-label="Abrir todos los grupos encontrados / Expand all matching groups">Abrir todos / Expand all</button>
+          <button type="button" data-cast-groups-close aria-controls="castBin" aria-label="Plegar todos los grupos encontrados / Collapse all matching groups">Plegar todos / Collapse all</button>
+        </div>
+        <small data-cast-results role="status" aria-live="polite" aria-atomic="true"></small>`;
+      castToolbar.addEventListener('pointerdown', event => event.stopPropagation());
+      const groupActions = castToolbar.querySelector('[data-cast-group-actions]');
+      groupActions.addEventListener('keydown', event => {
+        if (event.key === ' ' || event.key === 'Enter') event.stopPropagation();
+      });
+      for (const [selector, open] of [['[data-cast-groups-open]', true], ['[data-cast-groups-close]', false]]) {
+        castToolbar.querySelector(selector).addEventListener('click', () => {
+          // Only the matching groups; hidden categories keep their previous view.
+          castBin.querySelectorAll('details[data-cast-category]').forEach(group => {
+            group.open = open;
+            if (open) collapsedCastGroups.delete(group.dataset.castCategory);
+            else collapsedCastGroups.add(group.dataset.castCategory);
+          });
+        });
+      }
+      castToolbar.querySelector('[data-cast-search]').addEventListener('input', event => {
+        castLibraryView.query = event.target.value;
+        renderCastLibrary(currentPlan());
+      });
+      for (const key of ['usage', 'sort']) castToolbar.querySelector(`[data-cast-${key}]`).addEventListener('change', event => {
+        castLibraryView[key] = event.target.value;
+        renderCastLibrary(currentPlan());
+      });
+      castToolbar.querySelector('[data-cast-reset]').addEventListener('click', () => {
+        Object.assign(castLibraryView, {query: '', usage: 'all', sort: 'original'});
+        collapsedCastGroups.clear();
+        saveCastFilterMode(castFilterTypes);
+        renderCastLibrary(currentPlan(), {resetGroups: true});
+        castToolbar.querySelector('[data-cast-search]').focus({preventScroll: true});
+      });
+    }
+    for (const key of ['query', 'usage', 'sort']) {
+      const control = castToolbar.querySelector(`[data-cast-${key === 'query' ? 'search' : key}]`);
+      if (control.value !== castLibraryView[key]) control.value = castLibraryView[key];
+    }
+    const result = `${visibleCount} / ${totalCount} recursos · assets`;
+    const status = castToolbar.querySelector('[data-cast-results]');
+    if (status.textContent !== result) status.textContent = result;
   }
   if (castViewControls) {
     castViewControls.innerHTML = `
@@ -2285,7 +2335,7 @@ function renderCastToolbar(totalCount, visibleCount, filter, viewMode) {
           </button>
         `).join("")}
       </span>
-      <span class="cast-count" aria-label="${visibleCount} de ${totalCount} miembros visibles">${visibleCount}/${totalCount}</span>
+      <span class="cast-count" aria-label="${visibleCount} de ${totalCount} miembros encontrados">${visibleCount}/${totalCount}</span>
       <span class="cast-view-group" aria-label="Vista del Cast">
       <button type="button" data-cast-view="icons" aria-pressed="${viewMode === "icons" ? "true" : "false"}" aria-label="Vista iconos">▦</button>
       <button type="button" data-cast-view="list" aria-pressed="${viewMode === "list" ? "true" : "false"}" aria-label="Vista listado">☰</button>
@@ -2299,14 +2349,14 @@ function renderCastToolbar(totalCount, visibleCount, filter, viewMode) {
     button.addEventListener("pointerdown", (event) => event.stopPropagation());
     button.addEventListener("click", () => {
       toggleCastFilterMode(button.dataset.castFilter || "", selected);
-      renderFilmPlan(currentPlan());
+      renderCastLibrary(currentPlan());
     });
   });
   castViewControls?.querySelectorAll("button[data-cast-view]").forEach((button) => {
     button.addEventListener("pointerdown", (event) => event.stopPropagation());
     button.addEventListener("click", () => {
       saveCastViewMode(button.dataset.castView || "icons");
-      renderFilmPlan(currentPlan());
+      renderCastLibrary(currentPlan());
     });
   });
 }
@@ -3408,15 +3458,129 @@ function activateCastMemberFromDrop(castIndex, options = {}) {
   return true;
 }
 
-function renderFilmPlan(plan) {
+function renderCastLibrary(plan, {resetGroups = false} = {}) {
+  // toggle is asynchronous: capture the current native state before replacing cards.
+  if (!resetGroups) castBin?.querySelectorAll('details[data-cast-category]').forEach(group => {
+    if (group.open) collapsedCastGroups.delete(group.dataset.castCategory);
+    else collapsedCastGroups.add(group.dataset.castCategory);
+  });
   const castMembers = plan.cast || makeCast(plan);
   const castFilter = loadCastFilterMode();
   const castViewMode = loadCastViewMode();
-  const availableCastMembers = castMembers
-    .map((member, index) => ({ member, index }))
-    .filter(({ member }) => member.imported || member.src);
-  const visibleCastMembers = availableCastMembers
-    .filter(({ member }) => castMemberMatchesFilter(member, castFilter));
+  const {available: availableCastMembers, visible: visibleCastMembers, groups} = window.ainCastLibrary.entries(
+    {...plan, cast: castMembers}, {...castLibraryView, types: castFilter}, stockMemberCategory);
+  if (castBin) {
+    castBin.dataset.castView = castViewMode;
+    castBin.dataset.castFilter = castFilter.join(",");
+    castBin.dataset.castGrouped = String(castLibraryView.sort === "grouped");
+    renderCastToolbar(availableCastMembers.length, visibleCastMembers.length, castFilter, castViewMode);
+    const groupActions = castToolbar?.querySelector('[data-cast-group-actions]');
+    if (groupActions) {
+      groupActions.hidden = castLibraryView.sort !== 'grouped';
+      groupActions.querySelectorAll('button').forEach(button => { button.disabled = !groups.length; });
+    }
+    const renderMember = ({ member, index }) => {
+      const instanceCount = member.src ? castInstancesOf(plan, index).length : 0;
+      const media = member.src && ["animation", "image"].includes(member.mediaType)
+        ? `<img src="${escapeHtml(member.src)}" alt="" crossorigin="anonymous" />`
+        : member.src && member.mediaType === "video"
+          ? `<video src="${escapeHtml(member.src)}" muted playsinline crossorigin="anonymous"></video>`
+          : member.src
+            ? `<b class="cast-member-kind">${escapeHtml(member.mediaType || "asset")}</b>`
+            : "";
+      return `
+      <article class="cast-member ${member.imported ? "imported-member" : ""} ${member.onStage !== false ? "is-on-stage" : ""}" data-media-type="${escapeHtml(member.mediaType || "generated")}" data-cast-index="${index}" role="button" tabindex="0" draggable="true" aria-pressed="${member.onStage !== false}">
+        ${media}
+        <span>${String(index + 1).padStart(2, "0")}</span>
+        <div>
+          <strong>${escapeHtml(member.name)}</strong>
+          <small>${escapeHtml(member.role)} · ${escapeHtml(member.type)}</small>
+        </div>
+        ${member.src && member.imported ? `<span class="cast-instance-tools">${instanceCount ? `<em class="cast-instances" title="${instanceCount + 1} sprites en el Stage">×${instanceCount + 1}</em>` : ""}<button type="button" class="cast-add-instance" data-cast-instance="${index}" title="Otro sprite de este miembro en el Stage" aria-label="Añadir otra instancia de ${escapeHtml(member.name)}">＋</button></span>` : ""}
+      </article>
+    `;
+    };
+    const labels = {image: "Imágenes / Images", video: "Vídeos / Videos", audio: "Audio", music: "Música / Music"};
+    const cards = castLibraryView.sort === "grouped"
+      ? groups.map((group, i) => `<details class="cast-library-group" data-cast-category="${escapeHtml(group.category)}" ${collapsedCastGroups.has(group.category) ? "" : "open"}><summary title="Plegar o desplegar grupo / Collapse or expand group"><h3 id="cast-library-group-${i}">${escapeHtml(labels[group.category] || group.category)} <span>${group.items.length}/${group.total}</span></h3></summary><div class="cast-library-group-items" aria-labelledby="cast-library-group-${i}">${group.items.map(renderMember).join("")}</div></details>`).join("")
+      : visibleCastMembers.map(renderMember).join("");
+    castBin.innerHTML = visibleCastMembers.length ? cards : (availableCastMembers.length
+      ? `<p class="cast-empty-state">Sin resultados / No matching assets. Restablece los filtros para ver todos los recursos.</p>`
+      // Con el Cast vacío el cartel era una vía muerta: decía qué falta pero no
+      // daba por dónde empezar. Ahora el propio hueco arranca la película.
+      : `<div class="cast-empty-state">
+          <p>Nothing in the Cast yet.</p>
+          <button class="button primary" type="button" data-start-example>Start from an example</button>
+          <small>Or import your own from Tools.</small>
+        </div>`);
+
+    castBin.querySelectorAll("details[data-cast-category]").forEach(group => {
+      // Keep native disclosure keys from triggering the editor's global Play shortcut.
+      group.querySelector('summary').addEventListener('keydown', event => {
+        if (event.key === ' ' || event.key === 'Enter') event.stopPropagation();
+      });
+      group.addEventListener('toggle', () => {
+        if (!group.isConnected) return;
+        if (group.open) collapsedCastGroups.delete(group.dataset.castCategory);
+        else collapsedCastGroups.add(group.dataset.castCategory);
+      });
+    });
+
+    castBin.querySelectorAll("[data-cast-instance]").forEach((button) => {
+      button.addEventListener("click", (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        const nextPlan = currentPlan();
+        const sourceIndex = Number(button.dataset.castInstance);
+        if (nextPlan.cast?.[sourceIndex]?.onStage === false) scheduleCastMember(nextPlan, sourceIndex, { startFrame: currentTimelineFrame() });
+        else addCastInstance(nextPlan, sourceIndex, { startFrame: currentTimelineFrame() });
+        playUiTick("stage");
+        saveFilmPlan(nextPlan);
+        renderFilmPlan(nextPlan);
+      });
+    });
+    castBin.querySelectorAll("[data-cast-index]").forEach((item) => {
+      const castIndex = Number(item.dataset.castIndex);
+      const toggleCastMember = () => {
+        const nextPlan = currentPlan();
+        if (!Number.isInteger(castIndex) || !nextPlan.cast?.[castIndex]?.src) return;
+        const wasSelected = nextPlan.cast[castIndex].onStage !== false;
+        if (wasSelected) {
+          nextPlan.cast[castIndex] = {
+            ...nextPlan.cast[castIndex],
+            onStage: false,
+          };
+        } else {
+          scheduleCastMember(nextPlan, castIndex);
+        }
+        playUiTick(wasSelected ? "select" : "stage");
+        saveFilmPlan(nextPlan);
+        renderFilmPlan(nextPlan);
+      };
+      item.addEventListener("click", toggleCastMember);
+      item.addEventListener("keydown", (event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          toggleCastMember();
+        }
+      });
+      item.addEventListener("dragstart", (event) => {
+        item.classList.add("is-dragging");
+        event.dataTransfer.effectAllowed = "copyMove";
+        event.dataTransfer.setData("text/plain", `cast:${item.dataset.castIndex}`);
+        event.dataTransfer.setData("application/x-ainimation-cast-index", item.dataset.castIndex);
+      });
+      item.addEventListener("dragend", () => {
+        item.classList.remove("is-dragging");
+      });
+      initCastPointerDrag(item, castIndex, toggleCastMember);
+    });
+  }
+
+}
+
+function renderFilmPlan(plan) {
+  const castMembers = plan.cast || makeCast(plan);
   const importedTimelineMembers = castMembers.filter((member) => (
     member.imported &&
     member.src &&
@@ -3481,91 +3645,7 @@ function renderFilmPlan(plan) {
     </article>
   `).join("");
 
-  if (castBin) {
-    castBin.dataset.castView = castViewMode;
-    castBin.dataset.castFilter = castFilter.join(",");
-    renderCastToolbar(availableCastMembers.length, visibleCastMembers.length, castFilter, castViewMode);
-    castBin.innerHTML = visibleCastMembers.length ? visibleCastMembers.map(({ member, index }) => {
-      if (member.instanceOf) return "";
-      const instanceCount = member.src ? castInstancesOf(plan, index).length : 0;
-      const media = member.src && ["animation", "image"].includes(member.mediaType)
-        ? `<img src="${escapeHtml(member.src)}" alt="" crossorigin="anonymous" />`
-        : member.src && member.mediaType === "video"
-          ? `<video src="${escapeHtml(member.src)}" muted playsinline crossorigin="anonymous"></video>`
-          : member.src
-            ? `<b class="cast-member-kind">${escapeHtml(member.mediaType || "asset")}</b>`
-            : "";
-      return `
-      <article class="cast-member ${member.imported ? "imported-member" : ""} ${member.onStage !== false ? "is-on-stage" : ""}" data-media-type="${escapeHtml(member.mediaType || "generated")}" data-cast-index="${index}" role="button" tabindex="0" draggable="true" aria-pressed="${member.onStage !== false}">
-        ${media}
-        <span>${String(index + 1).padStart(2, "0")}</span>
-        <div>
-          <strong>${escapeHtml(member.name)}</strong>
-          <small>${escapeHtml(member.role)} · ${escapeHtml(member.type)}</small>
-        </div>
-        ${member.src && member.imported ? `<span class="cast-instance-tools">${instanceCount ? `<em class="cast-instances" title="${instanceCount + 1} sprites en el Stage">×${instanceCount + 1}</em>` : ""}<button type="button" class="cast-add-instance" data-cast-instance="${index}" title="Otro sprite de este miembro en el Stage" aria-label="Añadir otra instancia de ${escapeHtml(member.name)}">＋</button></span>` : ""}
-      </article>
-    `;
-    }).join("") : (availableCastMembers.length
-      ? `<p class="cast-empty-state">No cast members match this filter</p>`
-      // Con el Cast vacío el cartel era una vía muerta: decía qué falta pero no
-      // daba por dónde empezar. Ahora el propio hueco arranca la película.
-      : `<div class="cast-empty-state">
-          <p>Nothing in the Cast yet.</p>
-          <button class="button primary" type="button" data-start-example>Start from an example</button>
-          <small>Or import your own from Tools.</small>
-        </div>`);
-
-    castBin.querySelectorAll("[data-cast-instance]").forEach((button) => {
-      button.addEventListener("click", (event) => {
-        event.preventDefault();
-        event.stopPropagation();
-        const nextPlan = currentPlan();
-        const sourceIndex = Number(button.dataset.castInstance);
-        if (nextPlan.cast?.[sourceIndex]?.onStage === false) scheduleCastMember(nextPlan, sourceIndex, { startFrame: currentTimelineFrame() });
-        else addCastInstance(nextPlan, sourceIndex, { startFrame: currentTimelineFrame() });
-        playUiTick("stage");
-        saveFilmPlan(nextPlan);
-        renderFilmPlan(nextPlan);
-      });
-    });
-    castBin.querySelectorAll("[data-cast-index]").forEach((item) => {
-      const castIndex = Number(item.dataset.castIndex);
-      const toggleCastMember = () => {
-        const nextPlan = currentPlan();
-        if (!Number.isInteger(castIndex) || !nextPlan.cast?.[castIndex]?.src) return;
-        const wasSelected = nextPlan.cast[castIndex].onStage !== false;
-        if (wasSelected) {
-          nextPlan.cast[castIndex] = {
-            ...nextPlan.cast[castIndex],
-            onStage: false,
-          };
-        } else {
-          scheduleCastMember(nextPlan, castIndex);
-        }
-        playUiTick(wasSelected ? "select" : "stage");
-        saveFilmPlan(nextPlan);
-        renderFilmPlan(nextPlan);
-      };
-      item.addEventListener("click", toggleCastMember);
-      item.addEventListener("keydown", (event) => {
-        if (event.key === "Enter" || event.key === " ") {
-          event.preventDefault();
-          toggleCastMember();
-        }
-      });
-      item.addEventListener("dragstart", (event) => {
-        item.classList.add("is-dragging");
-        event.dataTransfer.effectAllowed = "copyMove";
-        event.dataTransfer.setData("text/plain", `cast:${item.dataset.castIndex}`);
-        event.dataTransfer.setData("application/x-ainimation-cast-index", item.dataset.castIndex);
-      });
-      item.addEventListener("dragend", () => {
-        item.classList.remove("is-dragging");
-      });
-      initCastPointerDrag(item, castIndex, toggleCastMember);
-    });
-  }
+  renderCastLibrary(plan);
 
   const stageWindow = document.querySelector(".stage-canvas") || document.querySelector(".stage-window");
   if (stageWindow) {

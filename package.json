@@ -10,7 +10,8 @@
     "verify:admira-review": "node scripts/test-admira-preflight.cjs",
     "verify:admira-resource-updates": "node scripts/test-admira-resource-updates.cjs",
     "verify:admira-format-package": "node scripts/test-admira-format-package.cjs",
-    "verify:capsula": "node --test test/capsula-editor.browser.test.mjs"
+    "verify:capsula": "node --test test/capsula-editor.browser.test.mjs",
+    "verify:cast": "node --test test/cast-library.test.mjs test/cast-library.browser.test.mjs"
   },
   "repository": {
     "type": "git",

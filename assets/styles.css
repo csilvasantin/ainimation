@@ -6861,3 +6861,33 @@ body.studio-page .director-menubar [class$="-menu-list"]{background:var(--direct
 body.studio-page .director-menubar button:hover{background:var(--director-menu-hover);color:var(--director-menu-ink)}
 
 body.studio-page .director-cast-window .cast-empty-state [data-start-example]{display:none}
+
+/* Cast library controls occupy their own row; the movie and window geometry stay intact. */
+.director-cast-window { grid-template-rows: auto auto minmax(0, 1fr); }
+.director-cast-window .cast-bin { min-height: 0; }
+.cast-toolbar { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+.cast-toolbar label { display: grid; gap: 2px; min-width: 0; font-size: 10px; }
+.cast-toolbar input, .cast-toolbar select { box-sizing: border-box; width: 100%; min-width: 0; padding: 4px; font: 11px system-ui; border: 1px solid #8995a7; border-radius: 4px; background: #fff; color: #17202d; }
+.cast-toolbar .cast-library-search { grid-column: 1 / -1; padding-right: 32px; }
+.cast-toolbar { position: relative; }
+.cast-toolbar [data-cast-reset] { position: absolute; right: 8px; top: 18px; width: 27px; height: 27px; padding: 2px; color: #17202d; background: #fff; border: 1px solid #8995a7; border-radius: 4px; }
+.cast-toolbar [data-cast-results] { grid-column: 1 / -1; font: 10px system-ui; }
+.cast-toolbar :is(input, select, button):focus-visible { outline: 2px solid #1468d4; outline-offset: 2px; }
+.director-cast-window { grid-template-columns: minmax(0, 1fr); }
+.director-cast-window > .window-titlebar { min-width: 0; overflow: hidden; }
+.director-cast-window > .window-titlebar > strong { flex-shrink: 0; }
+
+.director-cast-window .cast-bin[data-cast-grouped="true"] { grid-template-columns: minmax(0, 1fr); grid-auto-rows: auto; }
+.cast-library-group { min-width: 0; }
+.cast-library-group h3 { display: flex; justify-content: space-between; gap: 8px; margin: 2px 0 6px; padding: 4px 2px; font: 600 11px system-ui; color: #dfe8f5; border-bottom: 1px solid #445068; }
+.cast-library-group-items { display: grid; gap: 5px; grid-template-columns: repeat(auto-fill, 122px); grid-auto-rows: 74px; }
+.cast-bin[data-cast-view="list"] .cast-library-group-items { grid-template-columns: minmax(0, 1fr); grid-auto-rows: 46px; }
+
+.cast-library-group summary { cursor: pointer; color: #dfe8f5; }
+.cast-library-group summary h3 { display: inline-flex; vertical-align: middle; box-sizing: border-box; width: calc(100% - 20px); }
+.cast-library-group summary:focus-visible { outline: 2px solid #7cc3ff; outline-offset: 2px; border-radius: 3px; }
+
+.cast-group-actions { grid-column: 1 / -1; display: flex; gap: 4px; flex-wrap: wrap; }
+.cast-group-actions[hidden] { display: none; }
+.cast-group-actions button { flex: 1 1 100px; padding: 4px; font: 10px system-ui; border: 1px solid #8995a7; border-radius: 4px; background: #fff; color: #17202d; }
+.cast-group-actions button:disabled { opacity: .55; }
