@@ -1,5 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import "./assets/cast-library.js";
 import { readFile } from "node:fs/promises";
 
 const html = await readFile(new URL("./studio.html", import.meta.url), "utf8");
@@ -42,7 +43,11 @@ test("Corrección · sin tope de 6 en el Stage, sprites multi-instancia desde el
   assert.match(js, /function addCastInstance\(plan, sourceIndex/); assert.match(js, /instanceOf: key/);
   assert.match(js, /current\.onStage !== false && current\.imported\s*\? addCastInstance/, "soltar otra vez un miembro que ya está en el Stage crea otro sprite");
   assert.match(js, /if \(plan\.cast\[castIndex\]\.instanceOf\) \{[\s\S]*plan\.cast\.splice\(castIndex, 1\)/, "quitar una instancia la elimina, no la devuelve al Cast");
-  assert.match(js, /if \(member\.instanceOf\) return "";/, "las instancias no son tarjetas nuevas del Cast");
+  const castView = globalThis.ainCastLibrary.entries({cast: [
+    {id: "source", src: "source.png", imported: true},
+    {instanceOf: "source", src: "source.png", imported: true},
+  ]});
+  assert.equal(castView.available.length, 1, "las instancias no son tarjetas nuevas del Cast");
   assert.match(js, /data-cast-instance=/); assert.match(js, /name: member\.instanceOf \? `\$\{member\.name\} ·\$\{member\.instanceIndex \|\| 2\}` : member\.name/, "cada instancia es un canal propio del Score");
   assert.match(html, /data-window-title="Brief"/); assert.match(html, /<strong>Brief<\/strong>/); assert.doesNotMatch(html, /data-open-window="inspector">Score</);
 });

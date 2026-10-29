@@ -6861,3 +6861,18 @@ body.studio-page .director-menubar [class$="-menu-list"]{background:var(--direct
 body.studio-page .director-menubar button:hover{background:var(--director-menu-hover);color:var(--director-menu-ink)}
 
 body.studio-page .director-cast-window .cast-empty-state [data-start-example]{display:none}
+
+/* Cast library controls occupy their own row; the movie and window geometry stay intact. */
+.director-cast-window { grid-template-rows: auto auto minmax(0, 1fr); }
+.director-cast-window .cast-bin { min-height: 0; }
+.cast-toolbar { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+.cast-toolbar label { display: grid; gap: 2px; min-width: 0; font-size: 10px; }
+.cast-toolbar input, .cast-toolbar select { box-sizing: border-box; width: 100%; min-width: 0; padding: 4px; font: 11px system-ui; border: 1px solid #8995a7; border-radius: 4px; background: #fff; color: #17202d; }
+.cast-toolbar .cast-library-search { grid-column: 1 / -1; padding-right: 32px; }
+.cast-toolbar { position: relative; }
+.cast-toolbar [data-cast-reset] { position: absolute; right: 8px; top: 18px; width: 27px; height: 27px; padding: 2px; color: #17202d; background: #fff; border: 1px solid #8995a7; border-radius: 4px; }
+.cast-toolbar [data-cast-results] { grid-column: 1 / -1; font: 10px system-ui; }
+.cast-toolbar :is(input, select, button):focus-visible { outline: 2px solid #1468d4; outline-offset: 2px; }
+.director-cast-window { grid-template-columns: minmax(0, 1fr); }
+.director-cast-window > .window-titlebar { min-width: 0; overflow: hidden; }
+.director-cast-window > .window-titlebar > strong { flex-shrink: 0; }
