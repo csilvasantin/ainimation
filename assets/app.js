@@ -2282,8 +2282,26 @@ function renderCastToolbar(totalCount, visibleCount, filter, viewMode) {
         <button type="button" data-cast-reset aria-label="Restablecer filtros del Cast / Reset Cast filters" title="Restablecer filtros / Reset filters">↺</button>
         <label><span>Uso / Usage</span><select data-cast-usage aria-controls="castBin"><option value="all">Todos / All</option><option value="used">En escena / In use</option><option value="unused">Sin usar / Unused</option></select></label>
         <label><span>Orden / Sort</span><select data-cast-sort aria-controls="castBin"><option value="original">Original</option><option value="name">Nombre / Name</option><option value="type">Tipo / Type</option><option value="grouped">Grupos por tipo / Type groups</option></select></label>
+        <div class="cast-group-actions" data-cast-group-actions hidden>
+          <button type="button" data-cast-groups-open aria-controls="castBin" aria-label="Abrir todos los grupos encontrados / Expand all matching groups">Abrir todos / Expand all</button>
+          <button type="button" data-cast-groups-close aria-controls="castBin" aria-label="Plegar todos los grupos encontrados / Collapse all matching groups">Plegar todos / Collapse all</button>
+        </div>
         <small data-cast-results role="status" aria-live="polite" aria-atomic="true"></small>`;
       castToolbar.addEventListener('pointerdown', event => event.stopPropagation());
+      const groupActions = castToolbar.querySelector('[data-cast-group-actions]');
+      groupActions.addEventListener('keydown', event => {
+        if (event.key === ' ' || event.key === 'Enter') event.stopPropagation();
+      });
+      for (const [selector, open] of [['[data-cast-groups-open]', true], ['[data-cast-groups-close]', false]]) {
+        castToolbar.querySelector(selector).addEventListener('click', () => {
+          // Only the matching groups; hidden categories keep their previous view.
+          castBin.querySelectorAll('details[data-cast-category]').forEach(group => {
+            group.open = open;
+            if (open) collapsedCastGroups.delete(group.dataset.castCategory);
+            else collapsedCastGroups.add(group.dataset.castCategory);
+          });
+        });
+      }
       castToolbar.querySelector('[data-cast-search]').addEventListener('input', event => {
         castLibraryView.query = event.target.value;
         renderCastLibrary(currentPlan());
@@ -3456,6 +3474,11 @@ function renderCastLibrary(plan, {resetGroups = false} = {}) {
     castBin.dataset.castFilter = castFilter.join(",");
     castBin.dataset.castGrouped = String(castLibraryView.sort === "grouped");
     renderCastToolbar(availableCastMembers.length, visibleCastMembers.length, castFilter, castViewMode);
+    const groupActions = castToolbar?.querySelector('[data-cast-group-actions]');
+    if (groupActions) {
+      groupActions.hidden = castLibraryView.sort !== 'grouped';
+      groupActions.querySelectorAll('button').forEach(button => { button.disabled = !groups.length; });
+    }
     const renderMember = ({ member, index }) => {
       const instanceCount = member.src ? castInstancesOf(plan, index).length : 0;
       const media = member.src && ["animation", "image"].includes(member.mediaType)

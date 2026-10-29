@@ -53,9 +53,13 @@ test('sorting and usage preserve drag payload and insert the original resource',
 });
 test('controls stay inside a narrow Cast and leave scrollable library space',async t=>{
   const p=await fixture(t,900);await p.evaluate(()=>applyLayoutMode('floating'));await p.addStyleTag({content:'.director-window:not([data-window="cast"]) { visibility: hidden; }'});await p.locator('[data-window="cast"]').evaluate(el=>{el.style.width='300px';el.style.minWidth='300px';el.style.height='370px';});
-  const dimensions=await p.locator('#castToolbar').evaluate(el=>{const r=el.getBoundingClientRect();return {width:el.clientWidth,overflow:el.scrollWidth>el.clientWidth,inputs:[...el.querySelectorAll('input,select,button')].every(c=>{const q=c.getBoundingClientRect();return q.left>=r.left&&q.right<=r.right+1;}),libraryHeight:document.querySelector('#castBin').getBoundingClientRect().height};});
+  const measure=()=>p.locator('#castToolbar').evaluate(el=>{const r=el.getBoundingClientRect();return {width:el.clientWidth,overflow:el.scrollWidth>el.clientWidth,inputs:[...el.querySelectorAll('input,select,button')].filter(c=>c.getClientRects().length).every(c=>{const q=c.getBoundingClientRect();return q.left>=r.left&&q.right<=r.right+1;}),libraryHeight:document.querySelector('#castBin').getBoundingClientRect().height};});
+  const dimensions=await measure();
   const folder=process.env.CAST_SCREENSHOT_DIR;if(folder){await mkdir(folder,{recursive:true});await p.locator('[data-window="cast"]').screenshot({path:resolve(folder,'cast-library.png')});}
   assert.ok(dimensions.width<=300,JSON.stringify(dimensions));assert.equal(dimensions.overflow,false);assert.equal(dimensions.inputs,true);assert.ok(dimensions.libraryHeight>80);
+  await p.locator('[data-cast-sort]').selectOption('grouped');const grouped=await measure();
+  assert.equal(grouped.overflow,false,JSON.stringify(grouped));assert.equal(grouped.inputs,true,JSON.stringify(grouped));assert.ok(grouped.libraryHeight>80,JSON.stringify(grouped));
+  await p.locator('[data-cast-sort]').selectOption('original');
   if(folder){await p.locator('[data-window="cast"]').evaluate(el=>{el.style.width='430px';el.style.height='370px';});await p.locator('[data-window="cast"]').screenshot({path:resolve(folder,'cast-library-wide.png')});}
 });
 
@@ -93,4 +97,27 @@ test('groups collapse by keyboard, keep their state across filters and reset wit
   await summary.press('Enter');await p.waitForFunction(()=>!document.querySelector('details[data-cast-category="image"]').open);
   const folder=process.env.CAST_SCREENSHOT_DIR;if(folder){await p.evaluate(()=>applyLayoutMode('floating'));await p.addStyleTag({content:'.director-window:not([data-window="cast"]) { visibility:hidden; }'});await p.locator('[data-window="cast"]').evaluate(el=>{el.style.width='430px';el.style.height='400px';});await mkdir(folder,{recursive:true});await p.locator('[data-window="cast"]').screenshot({path:resolve(folder,'cast-library-collapsed.png')});}
   await p.locator('[data-cast-reset]').click();await p.locator('[data-cast-sort]').selectOption('grouped');assert.notEqual(await images.getAttribute('open'),null);
+});
+
+test('bulk disclosure controls affect matching groups only and never toggle playback',async t=>{
+  const p=await fixture(t);const actions=p.locator('[data-cast-group-actions]');assert.equal(await actions.isVisible(),false);
+  await p.locator('[data-cast-sort]').selectOption('grouped');assert.equal(await actions.isVisible(),true);
+  await p.locator('[data-cast-search]').fill('arbol');
+  const close=p.locator('[data-cast-groups-close]');await close.focus();await close.press('Space');
+  assert.equal(await p.locator('details[open]').count(),0);assert.equal(await close.evaluate(el=>el===document.activeElement),true);
+  assert.equal(await p.evaluate(()=>window.ainTransport.isPlaying()),false);
+  await p.locator('[data-cast-search]').fill('');
+  assert.equal(await p.locator('details[data-cast-category="image"]').getAttribute('open'),null);
+  assert.notEqual(await p.locator('details[data-cast-category="video"]').getAttribute('open'),null);
+  await p.evaluate(()=>{window.__transportBefore=window.ainTransport;window.ainTransport.setFrame(1);window.ainTransport.play();});
+  assert.equal(await p.evaluate(()=>window.ainTransport.isPlaying()),true);
+  await p.locator('[data-cast-groups-close]').click();assert.equal(await p.locator('details[open]').count(),0);
+  await p.locator('[data-cast-groups-open]').press('Enter');assert.equal(await p.locator('details[open]').count(),2);
+  assert.equal(await p.evaluate(()=>window.ainTransport===window.__transportBefore&&window.ainTransport.isPlaying()),true);
+  await p.evaluate(()=>window.ainTransport.stop());
+  assert.equal(await p.evaluate(()=>localStorage.getItem('ainimation-film-plan')===window.__savedBefore),true);
+  assert.equal(await p.evaluate(()=>document.querySelector('.stage-imported-member')===window.__stageBefore),true);
+  await p.locator('[data-cast-search]').fill('missing');assert.equal(await close.isDisabled(),true);assert.equal(await p.locator('[data-cast-groups-open]').isDisabled(),true);
+  await p.locator('[data-cast-reset]').click();await p.locator('[data-cast-sort]').selectOption('grouped');
+  const folder=process.env.CAST_SCREENSHOT_DIR;if(folder){await p.evaluate(()=>applyLayoutMode('floating'));await p.addStyleTag({content:'.director-window:not([data-window="cast"]) { visibility:hidden; }'});await p.locator('[data-window="cast"]').evaluate(el=>{el.style.width='430px';el.style.height='430px';});await mkdir(folder,{recursive:true});await p.locator('[data-cast-groups-close]').click();await p.locator('[data-window="cast"]').screenshot({path:resolve(folder,'cast-library-bulk.png')});}
 });

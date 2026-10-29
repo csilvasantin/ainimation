@@ -6886,3 +6886,8 @@ body.studio-page .director-cast-window .cast-empty-state [data-start-example]{di
 .cast-library-group summary { cursor: pointer; color: #dfe8f5; }
 .cast-library-group summary h3 { display: inline-flex; vertical-align: middle; box-sizing: border-box; width: calc(100% - 20px); }
 .cast-library-group summary:focus-visible { outline: 2px solid #7cc3ff; outline-offset: 2px; border-radius: 3px; }
+
+.cast-group-actions { grid-column: 1 / -1; display: flex; gap: 4px; flex-wrap: wrap; }
+.cast-group-actions[hidden] { display: none; }
+.cast-group-actions button { flex: 1 1 100px; padding: 4px; font: 10px system-ui; border: 1px solid #8995a7; border-radius: 4px; background: #fff; color: #17202d; }
+.cast-group-actions button:disabled { opacity: .55; }
