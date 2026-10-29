@@ -75,3 +75,22 @@ test('group headings count filtered originals and preserve keyboard insertion in
   const folder=process.env.CAST_SCREENSHOT_DIR;if(folder){await p.evaluate(()=>applyLayoutMode('floating'));await p.addStyleTag({content:'.director-window:not([data-window="cast"]) { visibility:hidden; }'});await p.locator('[data-window="cast"]').evaluate(el=>{el.style.width='430px';el.style.height='400px';});await mkdir(folder,{recursive:true});await p.locator('[data-window="cast"]').screenshot({path:resolve(folder,'cast-library-grouped.png')});}
   await p.locator('[data-cast-reset]').click();assert.equal(await p.locator('.cast-library-group').count(),0);
 });
+
+test('groups collapse by keyboard, keep their state across filters and reset without movie changes',async t=>{
+  const p=await fixture(t);await p.locator('[data-cast-sort]').selectOption('grouped');
+  const images=p.locator('details[data-cast-category="image"]');const summary=images.locator('summary');
+  await summary.focus();await summary.press('Enter');await p.waitForFunction(()=>!document.querySelector('details[data-cast-category="image"]').open);
+  assert.equal(await images.locator('[data-cast-index="1"]').isVisible(),false);
+  assert.equal(await summary.evaluate(el=>el===document.activeElement),true);
+  assert.equal(await p.evaluate(()=>localStorage.getItem('ainimation-film-plan')===window.__savedBefore),true);
+  assert.equal(await p.evaluate(()=>document.querySelector('.stage-imported-member')===window.__stageBefore),true);
+  await p.locator('[data-cast-search]').fill('zorro');assert.equal(await images.getAttribute('open'),null);
+  await p.locator('[data-cast-search]').fill('arbol');assert.equal(await images.getAttribute('open'),null);
+  await p.locator('[data-cast-search]').fill('');
+  await summary.focus();await summary.press('Space');await p.waitForFunction(()=>document.querySelector('details[data-cast-category="image"]').open);
+  assert.equal(await images.locator('[data-cast-index="1"]').isVisible(),true);
+  assert.equal(await p.evaluate(()=>window.ainTransport.isPlaying()),false);
+  await summary.press('Enter');await p.waitForFunction(()=>!document.querySelector('details[data-cast-category="image"]').open);
+  const folder=process.env.CAST_SCREENSHOT_DIR;if(folder){await p.evaluate(()=>applyLayoutMode('floating'));await p.addStyleTag({content:'.director-window:not([data-window="cast"]) { visibility:hidden; }'});await p.locator('[data-window="cast"]').evaluate(el=>{el.style.width='430px';el.style.height='400px';});await mkdir(folder,{recursive:true});await p.locator('[data-window="cast"]').screenshot({path:resolve(folder,'cast-library-collapsed.png')});}
+  await p.locator('[data-cast-reset]').click();await p.locator('[data-cast-sort]').selectOption('grouped');assert.notEqual(await images.getAttribute('open'),null);
+});

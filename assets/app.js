@@ -1787,6 +1787,7 @@ const castViewStorageKey = "ainimation-cast-view";
 const castFilterStorageKey = "ainimation-cast-filters";
 const castFilterTypes = ["image", "video", "audio", "music"];
 const castLibraryView = { query: "", usage: "all", sort: "original" };
+const collapsedCastGroups = new Set();
 // Resolución del Stage: ya no es fija. 16:9 (1920×1080) por defecto; tótem vertical 1080×1920
 // y otras se eligen en el chip de tamaño del Stage (assets/director-kiosk.js) y viajan en plan.stage.
 let stageWidthPixels = 1920;
@@ -2293,8 +2294,9 @@ function renderCastToolbar(totalCount, visibleCount, filter, viewMode) {
       });
       castToolbar.querySelector('[data-cast-reset]').addEventListener('click', () => {
         Object.assign(castLibraryView, {query: '', usage: 'all', sort: 'original'});
+        collapsedCastGroups.clear();
         saveCastFilterMode(castFilterTypes);
-        renderCastLibrary(currentPlan());
+        renderCastLibrary(currentPlan(), {resetGroups: true});
         castToolbar.querySelector('[data-cast-search]').focus({preventScroll: true});
       });
     }
@@ -2315,7 +2317,7 @@ function renderCastToolbar(totalCount, visibleCount, filter, viewMode) {
           </button>
         `).join("")}
       </span>
-      <span class="cast-count" aria-label="${visibleCount} de ${totalCount} miembros visibles">${visibleCount}/${totalCount}</span>
+      <span class="cast-count" aria-label="${visibleCount} de ${totalCount} miembros encontrados">${visibleCount}/${totalCount}</span>
       <span class="cast-view-group" aria-label="Vista del Cast">
       <button type="button" data-cast-view="icons" aria-pressed="${viewMode === "icons" ? "true" : "false"}" aria-label="Vista iconos">▦</button>
       <button type="button" data-cast-view="list" aria-pressed="${viewMode === "list" ? "true" : "false"}" aria-label="Vista listado">☰</button>
@@ -3438,7 +3440,12 @@ function activateCastMemberFromDrop(castIndex, options = {}) {
   return true;
 }
 
-function renderCastLibrary(plan) {
+function renderCastLibrary(plan, {resetGroups = false} = {}) {
+  // toggle is asynchronous: capture the current native state before replacing cards.
+  if (!resetGroups) castBin?.querySelectorAll('details[data-cast-category]').forEach(group => {
+    if (group.open) collapsedCastGroups.delete(group.dataset.castCategory);
+    else collapsedCastGroups.add(group.dataset.castCategory);
+  });
   const castMembers = plan.cast || makeCast(plan);
   const castFilter = loadCastFilterMode();
   const castViewMode = loadCastViewMode();
@@ -3472,7 +3479,7 @@ function renderCastLibrary(plan) {
     };
     const labels = {image: "Imágenes / Images", video: "Vídeos / Videos", audio: "Audio", music: "Música / Music"};
     const cards = castLibraryView.sort === "grouped"
-      ? groups.map((group, i) => `<section class="cast-library-group" aria-labelledby="cast-library-group-${i}"><h3 id="cast-library-group-${i}">${escapeHtml(labels[group.category] || group.category)} <span>${group.items.length}/${group.total}</span></h3><div class="cast-library-group-items">${group.items.map(renderMember).join("")}</div></section>`).join("")
+      ? groups.map((group, i) => `<details class="cast-library-group" data-cast-category="${escapeHtml(group.category)}" ${collapsedCastGroups.has(group.category) ? "" : "open"}><summary title="Plegar o desplegar grupo / Collapse or expand group"><h3 id="cast-library-group-${i}">${escapeHtml(labels[group.category] || group.category)} <span>${group.items.length}/${group.total}</span></h3></summary><div class="cast-library-group-items" aria-labelledby="cast-library-group-${i}">${group.items.map(renderMember).join("")}</div></details>`).join("")
       : visibleCastMembers.map(renderMember).join("");
     castBin.innerHTML = visibleCastMembers.length ? cards : (availableCastMembers.length
       ? `<p class="cast-empty-state">Sin resultados / No matching assets. Restablece los filtros para ver todos los recursos.</p>`
@@ -3483,6 +3490,18 @@ function renderCastLibrary(plan) {
           <button class="button primary" type="button" data-start-example>Start from an example</button>
           <small>Or import your own from Tools.</small>
         </div>`);
+
+    castBin.querySelectorAll("details[data-cast-category]").forEach(group => {
+      // Keep native disclosure keys from triggering the editor's global Play shortcut.
+      group.querySelector('summary').addEventListener('keydown', event => {
+        if (event.key === ' ' || event.key === 'Enter') event.stopPropagation();
+      });
+      group.addEventListener('toggle', () => {
+        if (!group.isConnected) return;
+        if (group.open) collapsedCastGroups.delete(group.dataset.castCategory);
+        else collapsedCastGroups.add(group.dataset.castCategory);
+      });
+    });
 
     castBin.querySelectorAll("[data-cast-instance]").forEach((button) => {
       button.addEventListener("click", (event) => {
