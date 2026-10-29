@@ -35,3 +35,9 @@ test('blank queries, empty libraries and duplicate names have stable results',()
   assert.equal(entries({cast:[]},{query:'  '}).visible.length,0);
   const p=seed();p.cast[1].name=p.cast[0].name;assert.deepEqual(entries(p,{sort:'name',types:['image']}).visible.map(x=>x.index),[0,1]);
 });
+
+test('groups expose filtered and total counts without sprites or movie mutation',()=>{
+  const p=seed(),before=structuredClone(p);const result=entries(p,{sort:'grouped',query:'zorro'});
+  assert.deepEqual(result.groups.map(g=>[g.category,g.items.length,g.total,g.items.map(x=>x.index)]),[['image',1,2,[0]],['video',1,1,[2]]]);
+  assert.equal(entries(p,{sort:'grouped',query:'nothing'}).groups.length,0);assert.deepEqual(p,before);
+});

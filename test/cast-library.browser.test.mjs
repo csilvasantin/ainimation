@@ -58,3 +58,20 @@ test('controls stay inside a narrow Cast and leave scrollable library space',asy
   assert.ok(dimensions.width<=300,JSON.stringify(dimensions));assert.equal(dimensions.overflow,false);assert.equal(dimensions.inputs,true);assert.ok(dimensions.libraryHeight>80);
   if(folder){await p.locator('[data-window="cast"]').evaluate(el=>{el.style.width='430px';el.style.height='370px';});await p.locator('[data-window="cast"]').screenshot({path:resolve(folder,'cast-library-wide.png')});}
 });
+
+test('group headings count filtered originals and preserve keyboard insertion in list view',async t=>{
+  const p=await fixture(t);await p.locator('[data-cast-sort]').selectOption('grouped');
+  assert.equal(await p.locator('.cast-library-group').count(),2);
+  assert.deepEqual(await p.locator('.cast-library-group h3 span').allTextContents(),['2/2','1/1']);
+  await p.locator('[data-cast-search]').fill('zorro');
+  assert.deepEqual(await p.locator('.cast-library-group h3 span').allTextContents(),['1/2','1/1']);
+  assert.equal(await p.evaluate(()=>localStorage.getItem('ainimation-film-plan')===window.__savedBefore),true);
+  assert.equal(await p.evaluate(()=>document.querySelector('.stage-imported-member')===window.__stageBefore),true);
+  await p.locator('[data-cast-view="list"]').click();
+  await p.locator('#castBin [data-cast-index="0"]').press('Enter');
+  assert.equal(await p.evaluate(()=>currentPlan().cast[0].onStage),true);
+  assert.equal(await p.locator('#castBin [data-cast-index]').count(),2);
+  await p.locator('[data-cast-search]').fill('');
+  const folder=process.env.CAST_SCREENSHOT_DIR;if(folder){await p.evaluate(()=>applyLayoutMode('floating'));await p.addStyleTag({content:'.director-window:not([data-window="cast"]) { visibility:hidden; }'});await p.locator('[data-window="cast"]').evaluate(el=>{el.style.width='430px';el.style.height='400px';});await mkdir(folder,{recursive:true});await p.locator('[data-window="cast"]').screenshot({path:resolve(folder,'cast-library-grouped.png')});}
+  await p.locator('[data-cast-reset]').click();assert.equal(await p.locator('.cast-library-group').count(),0);
+});

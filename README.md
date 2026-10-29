@@ -36,7 +36,7 @@ See [`CLAUDE.md`](CLAUDE.md).
 
 ## Organizar el Cast
 
-En Author (`studio.html`), el Cast permite buscar por nombre, archivo, tipo y origen; la búsqueda ignora tildes. Combina el texto con los filtros de tipo y con **En escena / Sin usar**, y ordena por nombre, tipo u orden original. El contador muestra recursos originales, no sus sprites duplicados. Un recurso con alguna instancia activa cuenta como «En escena».
+En Author (`studio.html`), el Cast permite buscar por nombre, archivo, tipo y origen; la búsqueda ignora tildes. Combina el texto con los filtros de tipo y con **En escena / Sin usar**, y ordena por nombre, tipo u orden original. La opción **Grupos por tipo** añade secciones con recuentos de visibles/total y funciona también en vista de listado. El contador muestra recursos originales, no sus sprites duplicados. Un recurso con alguna instancia activa cuenta como «En escena».
 
 Son controles de vista: no reordenan el proyecto guardado, no cambian sus tiempos y no reinician la reproducción. **↺** restablece la búsqueda, los filtros y el orden, manteniendo el proyecto. La búsqueda vuelve vacía al recargar.
 

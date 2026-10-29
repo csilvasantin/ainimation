@@ -2280,7 +2280,7 @@ function renderCastToolbar(totalCount, visibleCount, filter, viewMode) {
         <label class="cast-library-search"><span>Buscar / Search</span><input type="search" data-cast-search aria-controls="castBin" placeholder="Nombre, archivo, tipo…" autocomplete="off" /></label>
         <button type="button" data-cast-reset aria-label="Restablecer filtros del Cast / Reset Cast filters" title="Restablecer filtros / Reset filters">↺</button>
         <label><span>Uso / Usage</span><select data-cast-usage aria-controls="castBin"><option value="all">Todos / All</option><option value="used">En escena / In use</option><option value="unused">Sin usar / Unused</option></select></label>
-        <label><span>Orden / Sort</span><select data-cast-sort aria-controls="castBin"><option value="original">Original</option><option value="name">Nombre / Name</option><option value="type">Tipo / Type</option></select></label>
+        <label><span>Orden / Sort</span><select data-cast-sort aria-controls="castBin"><option value="original">Original</option><option value="name">Nombre / Name</option><option value="type">Tipo / Type</option><option value="grouped">Grupos por tipo / Type groups</option></select></label>
         <small data-cast-results role="status" aria-live="polite" aria-atomic="true"></small>`;
       castToolbar.addEventListener('pointerdown', event => event.stopPropagation());
       castToolbar.querySelector('[data-cast-search]').addEventListener('input', event => {
@@ -3442,13 +3442,14 @@ function renderCastLibrary(plan) {
   const castMembers = plan.cast || makeCast(plan);
   const castFilter = loadCastFilterMode();
   const castViewMode = loadCastViewMode();
-  const {available: availableCastMembers, visible: visibleCastMembers} = window.ainCastLibrary.entries(
+  const {available: availableCastMembers, visible: visibleCastMembers, groups} = window.ainCastLibrary.entries(
     {...plan, cast: castMembers}, {...castLibraryView, types: castFilter}, stockMemberCategory);
   if (castBin) {
     castBin.dataset.castView = castViewMode;
     castBin.dataset.castFilter = castFilter.join(",");
+    castBin.dataset.castGrouped = String(castLibraryView.sort === "grouped");
     renderCastToolbar(availableCastMembers.length, visibleCastMembers.length, castFilter, castViewMode);
-    castBin.innerHTML = visibleCastMembers.length ? visibleCastMembers.map(({ member, index }) => {
+    const renderMember = ({ member, index }) => {
       const instanceCount = member.src ? castInstancesOf(plan, index).length : 0;
       const media = member.src && ["animation", "image"].includes(member.mediaType)
         ? `<img src="${escapeHtml(member.src)}" alt="" crossorigin="anonymous" />`
@@ -3468,7 +3469,12 @@ function renderCastLibrary(plan) {
         ${member.src && member.imported ? `<span class="cast-instance-tools">${instanceCount ? `<em class="cast-instances" title="${instanceCount + 1} sprites en el Stage">×${instanceCount + 1}</em>` : ""}<button type="button" class="cast-add-instance" data-cast-instance="${index}" title="Otro sprite de este miembro en el Stage" aria-label="Añadir otra instancia de ${escapeHtml(member.name)}">＋</button></span>` : ""}
       </article>
     `;
-    }).join("") : (availableCastMembers.length
+    };
+    const labels = {image: "Imágenes / Images", video: "Vídeos / Videos", audio: "Audio", music: "Música / Music"};
+    const cards = castLibraryView.sort === "grouped"
+      ? groups.map((group, i) => `<section class="cast-library-group" aria-labelledby="cast-library-group-${i}"><h3 id="cast-library-group-${i}">${escapeHtml(labels[group.category] || group.category)} <span>${group.items.length}/${group.total}</span></h3><div class="cast-library-group-items">${group.items.map(renderMember).join("")}</div></section>`).join("")
+      : visibleCastMembers.map(renderMember).join("");
+    castBin.innerHTML = visibleCastMembers.length ? cards : (availableCastMembers.length
       ? `<p class="cast-empty-state">Sin resultados / No matching assets. Restablece los filtros para ver todos los recursos.</p>`
       // Con el Cast vacío el cartel era una vía muerta: decía qué falta pero no
       // daba por dónde empezar. Ahora el propio hueco arranca la película.
