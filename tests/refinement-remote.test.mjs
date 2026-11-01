@@ -33,6 +33,7 @@ test('a correlated conflict rejects once with the current revision and never ret
 test('conflict images require the exact request, source, revision, origin and resource allowlist',async()=>{
   const s=setup(),p=generatorProject(source()),draft=editField(p,'closing-title','Nuestro borrador'),pending=s.api.save(changesBetween(p,draft)),after=source();after.updatedAt='r2';const url='/presentaciones/fixture-source/images/slide-01-cover.jpg';after.thumbnailMedia=[{url,label:'Arte actual'}];const current=generatorProject(after);
   s.emit({type:'admiranext:refinement:conflict',requestId,project:current});await assert.rejects(pending,/otra revisión/);
+  s.emit({type:'admiranext:refinement:error',requestId,error:'Fallback para inspectores anteriores'});
   const message={type:'admiranext:refinement:conflict-assets',requestId,source:current.source,assets:{[url]:'data:image/jpeg;base64,YQ==','https://evil.test/x':'data:image/jpeg;base64,YQ=='}};
   s.emit({...message,requestId:'wrong'});s.emit({...message,source:{...current.source,revision:'r3'}});s.emit(message,{origin:'https://evil.test'});assert.equal(s.assetEvents.length,0);
   s.emit(message);assert.deepEqual(s.assetEvents[0].assets,{[url]:'data:image/jpeg;base64,YQ=='});
