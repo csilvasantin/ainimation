@@ -8,10 +8,16 @@ import {THUMBNAIL_ART} from './thumbnail-model.mjs';
 import {renderConflict} from './conflict-view.mjs';
 import {conflictFixture,conflictFixtureAssets} from './conflict-fixtures.mjs';
 import {changesBetween} from './project.mjs';
+import {resolutionAssets} from './conflict-resolution.mjs';
 const $=id=>document.getElementById(id),sessions=new Map(['site','presentation'].map(kind=>[kind,createSession(fixture(kind))]));
-let kind='site',selected='thumbnail',compare=false,mobile=false,busy=false,remoteAssets={};
-let remote=null;const conflicts=new Map(),fixtureAssets=new Map();
+let kind='site',selected='thumbnail',compare=false,mobile=false,busy=false;
+let remote=null;const conflicts=new Map(),revisionAssets=new Map();
 const session=()=>sessions.get(kind);
+const assetKey=project=>JSON.stringify(project.source);
+const assetsFor=project=>revisionAssets.get(assetKey(project))||{};
+const keepAssets=(project,assets)=>revisionAssets.set(assetKey(project),{...assetsFor(project),...assets});
+const activeConflict=()=>conflicts.get(kind)?.get(session().original.source.revision);
+function keepConflict(key,original,conflict){if(!conflicts.has(key))conflicts.set(key,new Map());conflicts.get(key).set(original.source.revision,{...conflict,decisions:{}});keepAssets(conflict.current,conflict.assets||{});}
 const componentList=()=>isGeneratorProject(session().draft)?generatorComponents(session().draft):components;
 const choiceLabels={system:'Sistema','fira-sans':'Fira Sans',impact:'Impacto · imagen protagonista',editorial:'Editorial · panel de color',original:'Original',white:'Blanco'};
 const status=message=>{$('status').textContent=message;};
@@ -50,7 +56,7 @@ function paintPreview(){
   document.querySelector('.canvas-wrap').classList.toggle('comparing',compare);
   document.querySelector('.canvas-wrap').classList.toggle('mobile',mobile);
   $('desktop').setAttribute('aria-pressed',String(!mobile));$('mobile').setAttribute('aria-pressed',String(mobile));
-  const assets=kind==='remote'?remoteAssets:fixtureAssets.get(kind)||{};
+  const assets=assetsFor(session().original);
   renderPreview($('draft-preview'),session().draft,{selected,onSelect:select,assets,onStatus:status});
   if(compare)renderPreview($('original-preview'),session().original,{selected,interactive:false,assets,onStatus:status});
 }
@@ -67,16 +73,19 @@ function paintChanges(){
 function paintHistory(){
   $('undo').disabled=!session().canUndo;$('redo').disabled=!session().canRedo;
   const clean=!session().changes.changes.length;$('reset').disabled=clean;$('download').disabled=clean;
-  $('save').hidden=!isGeneratorProject(session().draft);$('save').disabled=clean||busy||!remote||conflicts.has(kind);
-  $('review-conflict').hidden=!conflicts.has(kind);$('review-conflict').disabled=busy;
+  $('save').hidden=!isGeneratorProject(session().draft);$('save').disabled=clean||busy||!remote||!!activeConflict();
+  $('review-conflict').hidden=!activeConflict();$('review-conflict').disabled=busy;
   $('export-thumbnail').disabled=busy||!session().draft.document.components.thumbnail;
 }
 function paintConflict(){
-  const conflict=conflicts.get(kind);$('conflict-panel').hidden=!conflict?.open;
+  const conflict=activeConflict();$('conflict-panel').hidden=!conflict?.open;
   if(!conflict?.open)return;
-  renderConflict($('conflict-panel'),{original:session().original,draft:session().draft,current:conflict.current,originalAssets:kind==='remote'?remoteAssets:fixtureAssets.get(kind)||{},currentAssets:conflict.assets,phase:conflict.phase,onClose(){conflict.open=false;$('conflict-panel').hidden=true;}});
+  renderConflict($('conflict-panel'),{original:session().original,draft:session().draft,current:conflict.current,originalAssets:assetsFor(session().original),currentAssets:assetsFor(conflict.current),phase:conflict.phase,decisions:conflict.decisions,historyReviewed:conflict.historyReviewed,onDecision(field,choice){conflict.decisions[field]=choice;},onHistoryReview(value){conflict.historyReviewed=value;},onResolve({current,draft}){
+    const assets=resolutionAssets(assetsFor(session().original),assetsFor(current),draft);
+    session().rebase(current,draft);keepAssets(current,assets);paintAll();status('Borrador combinado preparado sobre '+current.source.revision+'. No se ha guardado. Deshacer recupera la comparación anterior.');$('undo').focus({preventScroll:true});
+  },onClose(){conflict.open=false;$('conflict-panel').hidden=true;}});
 }
-function paintAll(){paintInspector();paintPreview();paintChanges();paintHistory();paintConflict();}
+function paintAll(){if(!componentList().some(c=>c.id===selected))selected=componentList()[0].id;paintComponents();paintSource();paintInspector();paintPreview();paintChanges();paintHistory();paintConflict();}
 function paintComponents(){
 $('components').replaceChildren(...componentList().map(component=>{
   const button=document.createElement('button'),title=document.createElement('strong'),description=document.createElement('span');
@@ -92,12 +101,12 @@ function paintSource(){
   $('scope-note').textContent=live?'Miniatura guardada por idioma. El diseño de las escenas se conserva en el generador.':'Las muestras no modifican ni publican proyectos reales.';
   document.querySelector('.component-panel').classList.toggle('is-live',live);
 }
-$('project').onchange=()=>{kind=$('project').value;if(!componentList().some(c=>c.id===selected))selected=componentList()[0].id;paintComponents();paintSource();paintAll();status('Proyecto cargado.');};
+$('project').onchange=()=>{kind=$('project').value;paintAll();status('Proyecto cargado.');};
 $('undo').onclick=()=>{session().undo();paintAll();status('Ajuste deshecho.');};
 $('redo').onclick=()=>{session().redo();paintAll();status('Ajuste rehecho.');};
 $('reset').onclick=()=>{session().reset();paintAll();status('Original recuperado. Puedes deshacer esta recuperación.');};
 $('compare').onclick=()=>{compare=!compare;paintPreview();};
-$('review-conflict').onclick=()=>{const conflict=conflicts.get(kind);if(conflict){conflict.open=true;paintConflict();}};
+$('review-conflict').onclick=()=>{const conflict=activeConflict();if(conflict){conflict.open=true;paintConflict();}};
 $('desktop').onclick=()=>{mobile=false;paintPreview();};$('mobile').onclick=()=>{mobile=true;paintPreview();};
 $('fields').onsubmit=event=>event.preventDefault();
 document.addEventListener('keydown',event=>{
@@ -108,26 +117,27 @@ $('download').onclick=()=>{
   const url=URL.createObjectURL(new Blob([JSON.stringify(session().changes,null,2)],{type:'application/json'})),link=document.createElement('a');
   link.href=url;link.download=session().draft.source.id+'.ajustes.json';link.click();setTimeout(()=>URL.revokeObjectURL(url),1000);status('Ajustes descargados. El proyecto original no se ha modificado.');
 };
-function setBusy(value){busy=value;document.querySelectorAll('input,textarea,select,button').forEach(el=>el.disabled=value);if(!value){paintComponents();paintSource();paintAll();}}
+function setBusy(value){busy=value;document.querySelectorAll('input,textarea,select,button').forEach(el=>el.disabled=value);if(!value)paintAll();}
 $('save').onclick=async()=>{
-  if(!remote||busy||conflicts.has(kind)||!isGeneratorProject(session().draft))return;
+  if(!remote||busy||activeConflict()||!isGeneratorProject(session().draft))return;
   const changes=session().changes;if(!changes.changes.length)return;
+  const original=session().original,saveAssets=assetsFor(original);
   setBusy(true);status('Guardando y verificando la nueva revisión en el generador…');
-  try{const saved=await remote.save(changes);sessions.set('remote',createSession(saved));kind='remote';const option=$('project').querySelector('option[value="remote"]');if(option)option.textContent=saved.title;setBusy(false);status('Guardado confirmado en el generador · '+saved.source.revision);}
-  catch(error){if(error.code==='source_conflict')conflicts.set('remote',{current:error.current,assets:error.assets,phase:error.phase,open:true});setBusy(false);status(error.message+' El borrador se conserva.');}
+  try{const saved=await remote.save(changes);keepAssets(saved,saveAssets);sessions.set('remote',createSession(saved));conflicts.delete('remote');kind='remote';const option=$('project').querySelector('option[value="remote"]');if(option)option.textContent=saved.title;setBusy(false);status('Guardado confirmado en el generador · '+saved.source.revision);}
+  catch(error){if(error.code==='source_conflict')keepConflict('remote',original,{current:error.current,assets:error.assets,phase:error.phase,open:true});setBusy(false);status(error.message+' El borrador se conserva.');}
 };
-remote=connectGenerator({onStatus:status,onConflictAssets({current,assets}){const conflict=conflicts.get('remote');if(conflict&&['id','adapter','revision'].every(key=>conflict.current.source[key]===current.source[key])){conflict.assets=assets;if(kind==='remote')paintConflict();}},onLoad(project,{assets={}}={}){
+remote=connectGenerator({onStatus:status,onConflictAssets({current,assets}){const matches=[...(conflicts.get('remote')?.values()||[])].filter(conflict=>['id','adapter','revision'].every(key=>conflict.current.source[key]===current.source[key]));if(matches.length){keepAssets(current,assets);if(kind==='remote'){paintPreview();paintConflict();}}},onLoad(project,{assets={}}={}){
   const list=generatorComponents(project);
   if(sessions.get('remote')?.changes.changes.length)throw Error('Hay ajustes sin guardar. Guárdalos o recupéralos antes de cargar otra presentación.');
   if(!list.length)throw Error('La presentación no contiene componentes.');
-  sessions.set('remote',createSession(project));conflicts.delete('remote');remoteAssets=assets;kind='remote';selected=list[0].id;
+  sessions.set('remote',createSession(project));conflicts.delete('remote');keepAssets(project,assets);kind='remote';selected=list[0].id;
   let option=$('project').querySelector('option[value="remote"]');if(!option){option=document.createElement('option');option.value='remote';$('project').append(option);}option.textContent=project.title;$('project').value='remote';
-  paintComponents();paintSource();paintAll();status('Presentación real cargada. Afina su miniatura o sus textos y guarda para confirmar los ajustes.');
+  paintAll();status('Presentación real cargada. Afina su miniatura o sus textos y guarda para confirmar los ajustes.');
 }});
-$('export-thumbnail').onclick=async()=>{if(busy)return;const project=session().draft;try{$('export-thumbnail').disabled=true;const blob=await exportThumbnail(project,{assets:kind==='remote'?remoteAssets:fixtureAssets.get(kind)||{}});status('Miniatura JPG descargada · 3840 × 2160 · '+Math.round(blob.size/1024)+' KB.');}catch(error){status(error.message);}finally{$('export-thumbnail').disabled=busy;}};
+$('export-thumbnail').onclick=async()=>{if(busy)return;const project=session().draft;try{$('export-thumbnail').disabled=true;const blob=await exportThumbnail(project,{assets:assetsFor(session().original)});status('Miniatura JPG descargada · 3840 × 2160 · '+Math.round(blob.size/1024)+' KB.');}catch(error){status(error.message);}finally{$('export-thumbnail').disabled=busy;}};
 const demoKind=new URLSearchParams(location.search).get('conflictFixture');
 if(!remote&&['localhost','127.0.0.1'].includes(location.hostname)&&['site','presentation'].includes(demoKind)){
   const demo=conflictFixture(demoKind),demoSession=createSession(demo.original);for(const change of changesBetween(demo.original,demo.draft).changes)demoSession.edit(change.field,change.after);
-  sessions.set(demoKind,demoSession);kind=demoKind;$('project').value=kind;const assets=conflictFixtureAssets(demo.resources);fixtureAssets.set(kind,assets);conflicts.set(kind,{current:demo.current,assets,phase:'before-save',open:true});
+  sessions.set(demoKind,demoSession);kind=demoKind;$('project').value=kind;const assets=conflictFixtureAssets(demo.resources),phase=new URLSearchParams(location.search).get('conflictPhase')==='after-save'?'after-save':'before-save';keepAssets(demo.original,assets);keepConflict(kind,demo.original,{current:demo.current,assets,phase,open:true});
 }
-paintComponents();paintSource();paintAll();
+paintAll();

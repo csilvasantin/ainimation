@@ -64,13 +64,38 @@ miniaturas usan sus propios recursos, y los campos se clasifican como ajustes
 distintos, sólo del borrador, sólo del origen o coincidentes. Los componentes
 retirados, los contratos modificados y los bindings de diapositivas diferentes
 se marcan como no comparables. También se conservan los metadatos fuera de los
-campos editables. La comparación trabaja sobre copias y no aplica ajustes.
+campos editables. La comparación trabaja sobre copias. La resolución parte siempre de la revisión actual y sólo cambia los campos elegidos.
 
-Guardar queda detenido en esa sesión; el borrador sigue editable, descargable
-y reversible. Cerrar la revisión sólo oculta el panel. La resolución y el rebase
-manual son un incremento posterior. Una lectura posterior distinta del acuse
-se identifica como guardado sin confirmar: el ajuste pudo haberse aplicado.
-Una lectura todavía antigua conserva el error de confirmación original.
+Cada campo cambiado permite conservar el borrador, el estado actual o el valor
+original. Los ajustes sólo de un lado y los coincidentes tienen una propuesta;
+los valores distintos requieren una elección explícita. Los componentes retirados
+o con otro contrato/binding sólo permiten conservar su estado actual; si tenían
+un ajuste propio, hay que reconocerlo expresamente. Los campos nuevos y los datos
+no editables siempre parten de la revisión actual.
+
+La cuarta miniatura muestra el resultado combinado y señala si todavía quedan
+campos pendientes. Incluye imagen, titular, antetítulo, color, composición,
+tipografía, logotipo y su versión. Continuar prepara un borrador local sobre la
+revisión actual, sin guardar. Toda la resolución es un paso de historial:
+Deshacer recupera la revisión, borrador y comparación anteriores; Rehacer vuelve
+a la resolución. Las decisiones y cada comparación se conservan durante la
+sesión, incluso ante varios conflictos consecutivos. Cerrar sólo oculta el panel.
+Recargar la pestaña todavía reinicia estos datos; se puede descargar el changeset.
+
+El guardado posterior requiere otra acción. El conector conserva el proyecto
+canónico devuelto en el conflicto, relee de nuevo y valida revisión, campos y
+valores previos. Si el origen volvió a cambiar, muestra otro conflicto sin
+escribir ni reintentar. Sólo un acuse con relectura exacta confirma el guardado.
+Una lectura posterior distinta del acuse se identifica como incierta: el ajuste
+pudo haberse aplicado, y la interfaz pide revisar su historial antes de preparar
+otro borrador. Una lectura todavía antigua conserva el error de confirmación.
+
+Los recursos actuales prevalecen cuando comparten la misma referencia; una
+imagen antigua sólo puede recuperarse por una referencia distinta. Los bytes
+anteriores de una URL reutilizada no son un recurso versionado recuperable.
+El servidor nativo sigue validando que cada imagen o logotipo exista y esté
+aprobado para esa propuesta. Ninguna resolución copia metadatos antiguos ni
+escribe automáticamente.
 
 El mensaje de conflicto y las imágenes posteriores se correlacionan con ventana,
 origen, canal, petición y revisión. Las imágenes llegan aparte para que su carga
@@ -83,6 +108,8 @@ Ensayo exclusivamente local con datos ficticios:
 - `/presentaciones/?conflictFixture=site`
 - `/presentaciones/?conflictFixture=presentation`
 
-Estos parámetros sólo activan el ensayo en loopback y sin conector remoto.
+Añade `&conflictPhase=after-save` para ensayar un guardado incierto y su
+revisión de historial. Estos parámetros sólo activan el ensayo en loopback y
+sin conector remoto.
 Los fixtures usan el artwork ficticio público de Órbita bajo dos referencias de
 muestra y logotipos de prueba dibujados en Canvas. No leen datos de clientes.

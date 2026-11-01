@@ -34,7 +34,7 @@
     "Conector de textos del generador con guardado nativo y confirmación por relectura",
     "Miniatura por propuesta: imagen de portada del origen o ilustración inicial, texto/color/composición editables, comparación, JPG 3840×2160 bajo 2 MB y guardado por idioma con versión y relectura"
   ],
-  "nextVerticalSlice": "Resolución manual de campos tras comparar el borrador con la revisión actual, con confirmación explícita y conservación de componentes no editados.",
+  "nextVerticalSlice": "Recuperación local del borrador y sus decisiones tras recargar, ensayada con datos ficticios antes de ampliar el uso.",
   "notImplementedYet": [
     "Edición visual de cualquier site real",
     "Adaptadores de repositorios y publicación de sites",
@@ -43,11 +43,13 @@
   "publishedExperience": "Inspector común en /presentaciones/; el conector real guarda textos y miniaturas. El reproductor se conserva en /presentaciones/reproductor/.",
   "conflictReviewDraft": {
     "status": "draft-only",
-    "scope": "read-only original/draft/current comparison, including thumbnail image/logo/font",
+    "scope": "original/draft/current comparison and explicit per-field resolution onto current",
     "sourceWritesOnPreflightConflict": 0,
     "automaticWriteRetries": 0,
     "keepsOriginalAndDraft": true,
     "currentAssetsSeparated": true,
-    "manualResolution": "future increment"
+    "manualResolution": "implemented with combined thumbnail and reversible rebase",
+    "historyIncludesSourceRevision": true,
+    "published": false
   }
 }
