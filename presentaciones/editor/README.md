@@ -47,3 +47,11 @@ copias JPEG limitadas al editor por el canal autorizado. No se transmiten cookie
 tokens ni notas. Las referencias guardadas se limitan a assets de la propia
 presentación o a la ilustración inicial. Si falta el asset, el preview lo avisa
 y la exportación no sustituye silenciosamente una imagen que falte.
+
+Las miniaturas también admiten imágenes y logotipos independientes de la biblioteca
+privada aprobada del propio cliente. No se asignan a las láminas al usarlas aquí.
+El logotipo conserva sus proporciones, se coloca arriba a la derecha y puede
+mantener su color original o usar una máscara blanca sobre transparencia. La
+fuente opcional Fira Sans 900 se sirve desde assets propios con licencia OFL.
+Los diseños anteriores se normalizan a fuente del sistema y sin logotipo,
+conservando sus valores originales.
