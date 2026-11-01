@@ -12,6 +12,7 @@
     "Blocks": "Bloques",
     "Engine": "Motor",
     "Contact": "Contacto",
+    "Presentations": "Presentaciones",
     // Hero
     "Admira Director, powered by AI.": "Admira Director, con IA.",
     "Cast, stage, score, script, image, video, music, and voice in one authoring environment. The classic multimedia metaphor, rebuilt for generative production.":
