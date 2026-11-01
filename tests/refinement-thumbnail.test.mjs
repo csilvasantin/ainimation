@@ -23,3 +23,10 @@ test('thumbnail image references stay bound to their own source and asset messag
   assert.deepEqual(thumbnailAssetMap({[image]:'data:image/jpeg;base64,YQ==','https://evil.test':'data:image/jpeg;base64,YQ=='},p),{[image]:'data:image/jpeg;base64,YQ=='});
   assert.deepEqual(thumbnailAssetMap({[image]:'data:image/svg+xml;base64,YQ=='},p),{});
 });
+test('legacy thumbnails retain their design and new library logos stay source-bound',()=>{
+  const legacy={title:'Una idea',kicker:'Marca',image:THUMBNAIL_ART,accent:'#005782',layout:'impact'},normalized=validateThumbnail(legacy,'sample-proposal');
+  assert.equal(normalized.font,'system');assert.equal(normalized.logo,'');assert.equal(normalized.logoStyle,'original');assert.equal(normalized.title,legacy.title);
+  const logo='/presentaciones/sample-proposal/media/library-es-1234567890123456.png';assert.equal(validateThumbnail({...legacy,font:'fira-sans',logo,logoStyle:'white'},'sample-proposal').logo,logo);
+  assert.throws(()=>validateThumbnail({...legacy,logo:'/presentaciones/another/media/library-es-1234567890123456.png'},'sample-proposal'));
+  assert.throws(()=>validateThumbnail({...legacy,font:'url(https://evil.test)'},'sample-proposal'));
+});

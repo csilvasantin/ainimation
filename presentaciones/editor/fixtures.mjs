@@ -14,7 +14,7 @@ export function fixture(kind='site') {
   return validateProject({format:PROJECT,version:1,kind,title:site?'Órbita · site de muestra':'Órbita · presentación de muestra',
     source:{adapter:site?'owned-site-fixture':'presentation-fixture',id:site?'orbita-site':'orbita-presentation',revision:'demo-r1'},
     document:{brand:'ÓRBITA',components:{
-      thumbnail:{title:site?'Aquí empiezan las buenas ideas.':'Dale otra órbita a tu próxima idea.',kicker:'ÓRBITA / DISEÑO + TECNOLOGÍA',image:THUMBNAIL_ART,accent:site?'#c3ff6b':'#e3b4ff',layout:'impact'},
+      thumbnail:{title:site?'Aquí empiezan las buenas ideas.':'Dale otra órbita a tu próxima idea.',kicker:'ÓRBITA / DISEÑO + TECNOLOGÍA',image:THUMBNAIL_ART,accent:site?'#c3ff6b':'#e3b4ff',layout:'impact',font:'system',logo:'',logoStyle:'original'},
       hero:{eyebrow:site?'ENCUENTROS QUE DEJAN HUELLA':'UNA IDEA. MUCHAS POSIBILIDADES.',title:site?'Un lugar para las buenas ideas.':'Las buenas ideas merecen un escenario.',message:site?'Un encuentro ficticio de diseño, tecnología y cultura. Ven a compartir lo que imaginas.':'Explora una propuesta, encuentra su intención y decide cómo quieres contarla.',color:site?'#c3ff6b':'#e3b4ff',x:6},
       action:{label:site?'Descubrir el encuentro':'Explorar la propuesta',color:site?'#c3ff6b':'#e3b4ff',target:site?'#programa':'scene-2',behavior:{type:site?'scroll':'go-to-scene',enabled:true}},
       detail:{title:site?'Ideas que se encuentran.':'Del mensaje al movimiento.',body:site?'Conversaciones, talleres y nuevas miradas. Este bloque forma parte de una muestra: no hay un evento ni una inscripción reales.':'Una escena puede abrir una conversación y dar paso a un recorrido. Este contenido es ficticio y sirve para probar el mismo editor.'}},

@@ -10,6 +10,7 @@ let kind='site',selected='thumbnail',compare=false,mobile=false,busy=false,remot
 let remote=null;
 const session=()=>sessions.get(kind);
 const componentList=()=>isGeneratorProject(session().draft)?generatorComponents(session().draft):components;
+const choiceLabels={system:'Sistema','fira-sans':'Fira Sans',impact:'Impacto · imagen protagonista',editorial:'Editorial · panel de color',original:'Original',white:'Blanco'};
 const status=message=>{$('status').textContent=message;};
 function select(id){
   selected=id;
@@ -23,9 +24,9 @@ function paintInspector(){
   const draft=session().draft;$('selected-title').textContent=componentList().find(c=>c.id===selected).label;
   $('fields').replaceChildren(...componentFields(draft,selected).map(field=>{
     const label=document.createElement('label');label.textContent=field.label;label.htmlFor='field-'+field.id;
-    const pickImage=field.id==='thumbnail-image',input=document.createElement(pickImage||field.type==='choice'?'select':field.type==='text'?'textarea':'input');input.id='field-'+field.id;input.name=field.id;
-    if(pickImage||field.type==='choice'){
-      const entries=pickImage?[[THUMBNAIL_ART,'Órbita · ilustración original'],...(draft.document.thumbnailMedia||[]).map(item=>[item.url,item.label])]:field.options.map(value=>[value,value==='impact'?'Impacto · imagen protagonista':'Editorial · panel de color']);
+    const pickImage=field.id==='thumbnail-image',pickLogo=field.id==='thumbnail-logo',input=document.createElement(pickImage||pickLogo||field.type==='choice'?'select':field.type==='text'?'textarea':'input');input.id='field-'+field.id;input.name=field.id;
+    if(pickImage||pickLogo||field.type==='choice'){
+      const entries=pickImage||pickLogo?[pickLogo?['','Sin logotipo']:[THUMBNAIL_ART,'Órbita · ilustración original'],...(draft.document.thumbnailMedia||[]).map(item=>[item.url,item.label])]:field.options.map(value=>[value,choiceLabels[value]||value]);
       const current=fieldValue(draft,field);if(!entries.some(([value])=>value===current))entries.push([current,'Imagen guardada en el origen']);
       for(const [value,text]of entries){const option=document.createElement('option');option.value=value;option.textContent=text;input.append(option);}
     }
@@ -52,7 +53,7 @@ function paintPreview(){
 }
 function paintChanges(){
   const changes=session().changes.changes,draft=session().draft;
-  const display=(field,value)=>field==='thumbnail-layout'?(value==='impact'?'Impacto':'Editorial'):field==='thumbnail-image'?(value===THUMBNAIL_ART?'Órbita · ilustración original':draft.document.thumbnailMedia?.find(item=>item.url===value)?.label||'Imagen guardada'):String(value)||'(vacío)';
+  const display=(field,value)=>draft.fields.find(f=>f.id===field)?.type==='choice'?(choiceLabels[value]||value):['thumbnail-image','thumbnail-logo'].includes(field)?(value===THUMBNAIL_ART?'Órbita · ilustración original':value===''?'Sin logotipo':draft.document.thumbnailMedia?.find(item=>item.url===value)?.label||'Imagen guardada'):String(value)||'(vacío)';
   $('changes-title').textContent=changes.length?`${changes.length} ${changes.length===1?'ajuste':'ajustes'}`:'Sin ajustes';
   $('changes').replaceChildren(...changes.map(change=>{
     const row=document.createElement('article'),title=document.createElement('strong');title.textContent=draft.fields.find(f=>f.id===change.field).label;row.append(title);
