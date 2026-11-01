@@ -1,32 +1,17 @@
-# Presentaciones AdmiraNeXT × AINimation — primera conexión
+# AINimation · Presentaciones y sites
 
-`/presentaciones/` reproduce un paquete v1 de texto visible del generador: portada,
-objetivo, bloques activos y cierre. La demo inicial es ficticia. Incluye mapa de
-escenas, detalle, teclado (flechas, Home, End, M y espacio), pausa y movimiento
-reducido. El paquete puede abrirse y descargarse sin guardar una película.
+`/presentaciones/` abre el inspector común. Las muestras ficticias permiten
+ajustar textos, colores y posición, comparar y deshacer. El conector de
+AdmiraNeXT carga los textos de una presentación real y guarda mediante el
+editor original del generador, con versiones, sincronización de idiomas y
+confirmación por relectura. Sus credenciales permanecen en el origen.
 
-El laboratorio del generador vive en `/pruebas/ainimation-presentaciones/` de
-admiranext.com. Transfiere una copia mediante postMessage: se verifican origen
-exacto, ventana y canal aleatorio por apertura. No lleva contraseñas, brief,
-notas del presentador, archivos adjuntos ni credenciales. La revisión de origen
-es informativa: no hay sincronización de vuelta ni actualizaciones automáticas.
+El conector real de esta entrega guarda textos; el preview de contenido es
+orientativo. No sustituye el diseño original, los decks, medios o comportamientos.
+Una URL sola no da acceso a editar una fuente. Ver `editor/README.md` para
+el contrato compartido y sus límites.
 
-**Afinar en Director** prepara una película nativa con sprites editables,
-keyframes, marcas y reglas XPL. Los textos largos se dividen en páginas sin
-recortarlos. Guarda película, marcas y etiquetas anteriores bajo una clave de
-recuperación única, accesible también tras recargar el reproductor. Recuperar
-la anterior conserva además una copia de la película que se está sustituyendo.
-Guardar una película sigue usando Archivo en Director.
-
-La vista cinematográfica y Director son dos representaciones del mismo guion;
-las órbitas decorativas y el mapa de la vista no se convierten en sprites.
-No incorpora decks de imágenes, medios adjuntos, embeds ni el mando de audiencia.
-No carga recursos remotos contenidos en el paquete y no ejecuta sus textos.
-
-Despliegue coordinado: publicar primero el receptor de AINimation y después el
-laboratorio del generador. Sin receptor, el laboratorio ofrece descarga y avisa
-de falta de conexión. La nueva conexión no está publicada por crear esta rama.
-
-Verificación: `node --test tests/presentation-bridge.test.mjs tests/interactive-director.test.mjs`.
-El contrato v1 está replicado en el laboratorio del generador; cualquier cambio
-de contrato requiere compatibilidad y pruebas en ambos repositorios.
+El reproductor de la primera demo permanece en `/presentaciones/reproductor/`.
+Permite mapa de escenas, detalle, teclado y apertura de una copia en Director.
+Esa copia de Director es independiente del guardado del inspector en el generador.
+Los paquetes del reproductor no contienen notas privadas ni credenciales.
