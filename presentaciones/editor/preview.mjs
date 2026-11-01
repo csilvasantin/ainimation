@@ -1,7 +1,9 @@
 import {isGeneratorProject} from './generator.mjs';
+import {renderThumbnailPreview} from './thumbnail.mjs';
 // Content preview; it does not execute imported HTML or replace the original deck.
 // All edited copy becomes textContent, and styles come from validated typed fields.
-export function renderPreview(root,project,{selected='hero',onSelect=()=>{},interactive=true}={}) {
+export function renderPreview(root,project,{selected='hero',onSelect=()=>{},interactive=true,assets={},onStatus=()=>{}}={}) {
+  if(selected==='thumbnail')return renderThumbnailPreview(root,project,{assets,onStatus});
   if(isGeneratorProject(project))return generatorPreview(root,project,{selected,onSelect,interactive});
   const doc=root.ownerDocument,p=project.document;
   root.replaceChildren();root.className='preview-document '+project.kind;

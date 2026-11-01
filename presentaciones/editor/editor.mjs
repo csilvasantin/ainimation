@@ -3,8 +3,10 @@ import {createSession} from './session.mjs';
 import {renderPreview} from './preview.mjs';
 import {generatorComponents,isGeneratorProject} from './generator.mjs';
 import {connectGenerator} from './remote.mjs';
+import {exportThumbnail} from './thumbnail.mjs';
+import {THUMBNAIL_ART} from './thumbnail-model.mjs';
 const $=id=>document.getElementById(id),sessions=new Map(['site','presentation'].map(kind=>[kind,createSession(fixture(kind))]));
-let kind='site',selected='hero',compare=false,mobile=false,busy=false;
+let kind='site',selected='thumbnail',compare=false,mobile=false,busy=false,remoteAssets={};
 let remote=null;
 const session=()=>sessions.get(kind);
 const componentList=()=>isGeneratorProject(session().draft)?generatorComponents(session().draft):components;
@@ -21,8 +23,13 @@ function paintInspector(){
   const draft=session().draft;$('selected-title').textContent=componentList().find(c=>c.id===selected).label;
   $('fields').replaceChildren(...componentFields(draft,selected).map(field=>{
     const label=document.createElement('label');label.textContent=field.label;label.htmlFor='field-'+field.id;
-    const input=document.createElement(field.type==='text'?'textarea':'input');input.id='field-'+field.id;input.name=field.id;
-    if(field.type==='text'){input.maxLength=field.maxLength;input.rows=field.id.includes('message')||field.id.includes('body')?4:3;}
+    const pickImage=field.id==='thumbnail-image',input=document.createElement(pickImage||field.type==='choice'?'select':field.type==='text'?'textarea':'input');input.id='field-'+field.id;input.name=field.id;
+    if(pickImage||field.type==='choice'){
+      const entries=pickImage?[[THUMBNAIL_ART,'Órbita · ilustración original'],...(draft.document.thumbnailMedia||[]).map(item=>[item.url,item.label])]:field.options.map(value=>[value,value==='impact'?'Impacto · imagen protagonista':'Editorial · panel de color']);
+      const current=fieldValue(draft,field);if(!entries.some(([value])=>value===current))entries.push([current,'Imagen guardada en el origen']);
+      for(const [value,text]of entries){const option=document.createElement('option');option.value=value;option.textContent=text;input.append(option);}
+    }
+    else if(field.type==='text'){input.maxLength=field.maxLength;input.rows=field.id.includes('message')||field.id.includes('body')?4:field.id.startsWith('thumbnail-')?2:3;}
     else input.type=field.type==='color'?'color':'number';
     if(field.type==='number'){input.min=field.min;input.max=field.max;input.step='1';}
     input.value=fieldValue(draft,field);
@@ -39,15 +46,17 @@ function paintPreview(){
   document.querySelector('.canvas-wrap').classList.toggle('comparing',compare);
   document.querySelector('.canvas-wrap').classList.toggle('mobile',mobile);
   $('desktop').setAttribute('aria-pressed',String(!mobile));$('mobile').setAttribute('aria-pressed',String(mobile));
-  renderPreview($('draft-preview'),session().draft,{selected,onSelect:select});
-  if(compare)renderPreview($('original-preview'),session().original,{interactive:false});
+  const assets=kind==='remote'?remoteAssets:{};
+  renderPreview($('draft-preview'),session().draft,{selected,onSelect:select,assets,onStatus:status});
+  if(compare)renderPreview($('original-preview'),session().original,{selected,interactive:false,assets,onStatus:status});
 }
 function paintChanges(){
   const changes=session().changes.changes,draft=session().draft;
+  const display=(field,value)=>field==='thumbnail-layout'?(value==='impact'?'Impacto':'Editorial'):field==='thumbnail-image'?(value===THUMBNAIL_ART?'Órbita · ilustración original':draft.document.thumbnailMedia?.find(item=>item.url===value)?.label||'Imagen guardada'):String(value)||'(vacío)';
   $('changes-title').textContent=changes.length?`${changes.length} ${changes.length===1?'ajuste':'ajustes'}`:'Sin ajustes';
   $('changes').replaceChildren(...changes.map(change=>{
     const row=document.createElement('article'),title=document.createElement('strong');title.textContent=draft.fields.find(f=>f.id===change.field).label;row.append(title);
-    for(const [label,value]of [['Antes',change.before],['Ahora',change.after]]){const p=document.createElement('p'),caption=document.createElement('span');caption.textContent=label+': ';p.append(caption,document.createTextNode(String(value)||'(vacío)'));row.append(p);}return row;
+    for(const [label,value]of [['Antes',change.before],['Ahora',change.after]]){const p=document.createElement('p'),caption=document.createElement('span');caption.textContent=label+': ';p.append(caption,document.createTextNode(display(change.field,value)));row.append(p);}return row;
   }));
   if(!changes.length){const p=document.createElement('p');p.textContent='El borrador coincide con el original.';$('changes').append(p);}
 }
@@ -55,6 +64,7 @@ function paintHistory(){
   $('undo').disabled=!session().canUndo;$('redo').disabled=!session().canRedo;
   const clean=!session().changes.changes.length;$('reset').disabled=clean;$('download').disabled=clean;
   $('save').hidden=!isGeneratorProject(session().draft);$('save').disabled=clean||busy||!remote;
+  $('export-thumbnail').disabled=busy||!session().draft.document.components.thumbnail;
 }
 function paintAll(){paintInspector();paintPreview();paintChanges();paintHistory();}
 function paintComponents(){
@@ -66,10 +76,10 @@ $('components').replaceChildren(...componentList().map(component=>{
 function paintSource(){
   const project=session().draft,live=isGeneratorProject(project);
   $('kind').textContent=live?'PRESENTACIÓN REAL · '+project.document.language.toUpperCase():kind==='site'?'SITE DE MUESTRA':'PRESENTACIÓN DE MUESTRA';
-  $('source-title').textContent=project.title;$('source-hint').textContent=live?'Guardar en el generador confirma la nueva revisión y sincroniza sus idiomas.': 'Los ajustes quedan en esta pestaña. Cambiar de muestra conserva su borrador durante la sesión.';
+  $('source-title').textContent=project.title;$('source-hint').textContent=live?'Miniatura y textos se guardan con la revisión de origen. Los textos de las escenas sincronizan sus idiomas.': 'Los ajustes quedan en esta pestaña. Cambiar de muestra conserva su borrador durante la sesión.';
   $('context-label').textContent=live?'CONECTADO A ADMIRANEXT':'MUESTRA FICTICIA';
-  $('canvas-label').textContent=live?'VISTA DE CONTENIDO · TEXTOS EDITABLES':'BORRADOR · SELECCIONA UN ELEMENTO';
-  $('scope-note').textContent=live?'Los textos se guardan en su presentación original. La composición del preview es orientativa.':'Las muestras no modifican ni publican proyectos reales.';
+  $('canvas-label').textContent=live?'MINIATURA Y CONTENIDO EDITABLE':'BORRADOR · SELECCIONA UN ELEMENTO';
+  $('scope-note').textContent=live?'Miniatura guardada por idioma. El diseño de las escenas se conserva en el generador.':'Las muestras no modifican ni publican proyectos reales.';
   document.querySelector('.component-panel').classList.toggle('is-live',live);
 }
 $('project').onchange=()=>{kind=$('project').value;if(!componentList().some(c=>c.id===selected))selected=componentList()[0].id;paintComponents();paintSource();paintAll();status('Proyecto cargado.');};
@@ -95,12 +105,13 @@ $('save').onclick=async()=>{
   try{const saved=await remote.save(changes);sessions.set('remote',createSession(saved));kind='remote';const option=$('project').querySelector('option[value="remote"]');if(option)option.textContent=saved.title;setBusy(false);status('Guardado confirmado en el generador · '+saved.source.revision);}
   catch(error){setBusy(false);status(error.message+' El borrador se conserva.');}
 };
-remote=connectGenerator({onStatus:status,onLoad(project){
+remote=connectGenerator({onStatus:status,onLoad(project,{assets={}}={}){
   const list=generatorComponents(project);
   if(sessions.get('remote')?.changes.changes.length)throw Error('Hay ajustes sin guardar. Guárdalos o recupéralos antes de cargar otra presentación.');
   if(!list.length)throw Error('La presentación no contiene componentes.');
-  sessions.set('remote',createSession(project));kind='remote';selected=list[0].id;
+  sessions.set('remote',createSession(project));remoteAssets=assets;kind='remote';selected=list[0].id;
   let option=$('project').querySelector('option[value="remote"]');if(!option){option=document.createElement('option');option.value='remote';$('project').append(option);}option.textContent=project.title;$('project').value='remote';
-  paintComponents();paintSource();paintAll();status('Presentación real cargada. Edita un texto y guarda para confirmar los ajustes.');
+  paintComponents();paintSource();paintAll();status('Presentación real cargada. Afina su miniatura o sus textos y guarda para confirmar los ajustes.');
 }});
+$('export-thumbnail').onclick=async()=>{if(busy)return;const project=session().draft;try{$('export-thumbnail').disabled=true;const blob=await exportThumbnail(project,{assets:kind==='remote'?remoteAssets:{}});status('Miniatura JPG descargada · 3840 × 2160 · '+Math.round(blob.size/1024)+' KB.');}catch(error){status(error.message);}finally{$('export-thumbnail').disabled=busy;}};
 paintComponents();paintSource();paintAll();

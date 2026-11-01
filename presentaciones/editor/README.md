@@ -15,8 +15,8 @@ ventana, origen y nonce; una confirmación sólo se acepta para la petición en
 curso, una revisión nueva y los valores exactos enviados. No hay guardado directo
 desde una URL ni una importación de cualquier site sin conector autorizado.
 
-El primer conector real permite textos, conserva una versión anterior, sincroniza
-los idiomas usando el editor nativo y confirma por relectura. Su vista de contenido
+El conector real permite textos y miniaturas, conserva una versión anterior, sincroniza
+los idiomas de las escenas usando el editor nativo y confirma por relectura. Su vista de contenido
 es orientativa; el diseño original, medios, decks y comportamientos se conservan
 en el generador. Los colores y posiciones de las muestras no se prometen como
 ajustes guardables en ese origen. Un conflicto mantiene el borrador.
@@ -24,3 +24,26 @@ ajustes guardables en ese origen. Un conflicto mantiene el borrador.
 Escritorio/Móvil sólo modifica el canvas interno. El preview usa DOM/textContent,
 sin ejecutar HTML importado. La siguiente conexión para sites necesita su fuente
 editable y una confirmación de guardado del adaptador correspondiente.
+
+## Miniaturas de todas las propuestas
+
+Cada proyecto del inspector incluye una miniatura 16:9. El catálogo privado del
+generador muestra una composición por propuesta sin migraciones ni escrituras
+masivas. Usa la imagen de portada existente cuando está disponible; sin ella
+ofrece una ilustración inicial de Órbita, claramente seleccionable y sustituible
+por la portada del origen. Esto no genera automáticamente una ilustración única
+por cliente ni llama a un proveedor de imágenes durante la carga.
+
+El titular, antetítulo, color y composición de la miniatura son independientes
+del guion. Se editan, comparan y deshacen con el mismo núcleo. El JPG exportado
+mide 3840×2160 y se comprime bajo 2 MB. El render usa Canvas; no ejecuta contenido
+importado. La miniatura real se guarda por idioma en ideas.thumbnails, con revisión,
+versiones antes/después y relectura. Los guardados normales del guion y su
+regeneración conservan esos diseños. La traducción de escenas no traduce
+automáticamente el titular de una miniatura ajustada en otro idioma.
+
+Las imágenes privadas las lee el generador con su sesión y transmite sólo
+copias JPEG limitadas al editor por el canal autorizado. No se transmiten cookies,
+tokens ni notas. Las referencias guardadas se limitan a assets de la propia
+presentación o a la ilustración inicial. Si falta el asset, el preview lo avisa
+y la exportación no sustituye silenciosamente una imagen que falte.
