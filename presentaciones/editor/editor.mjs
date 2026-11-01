@@ -1,9 +1,13 @@
 import {fixture,components,componentFields,fieldValue} from './fixtures.mjs';
 import {createSession} from './session.mjs';
 import {renderPreview} from './preview.mjs';
+import {generatorComponents,isGeneratorProject} from './generator.mjs';
+import {connectGenerator} from './remote.mjs';
 const $=id=>document.getElementById(id),sessions=new Map(['site','presentation'].map(kind=>[kind,createSession(fixture(kind))]));
-let kind='site',selected='hero',compare=false,mobile=false;
+let kind='site',selected='hero',compare=false,mobile=false,busy=false;
+let remote=null;
 const session=()=>sessions.get(kind);
+const componentList=()=>isGeneratorProject(session().draft)?generatorComponents(session().draft):components;
 const status=message=>{$('status').textContent=message;};
 function select(id){
   selected=id;
@@ -11,10 +15,10 @@ function select(id){
     if(node.tagName==='BUTTON'){node.classList.toggle('selected',node.dataset.component===id);node.setAttribute('aria-pressed',String(node.dataset.component===id));}
   });
   document.querySelectorAll('[data-component-id]').forEach(node=>node.setAttribute('aria-pressed',String(node.dataset.componentId===id)));
-  paintInspector();status('');
+  paintInspector();if(isGeneratorProject(session().draft))paintPreview();status('');
 }
 function paintInspector(){
-  const draft=session().draft;$('selected-title').textContent=components.find(c=>c.id===selected).label;
+  const draft=session().draft;$('selected-title').textContent=componentList().find(c=>c.id===selected).label;
   $('fields').replaceChildren(...componentFields(draft,selected).map(field=>{
     const label=document.createElement('label');label.textContent=field.label;label.htmlFor='field-'+field.id;
     const input=document.createElement(field.type==='text'?'textarea':'input');input.id='field-'+field.id;input.name=field.id;
@@ -50,13 +54,25 @@ function paintChanges(){
 function paintHistory(){
   $('undo').disabled=!session().canUndo;$('redo').disabled=!session().canRedo;
   const clean=!session().changes.changes.length;$('reset').disabled=clean;$('download').disabled=clean;
+  $('save').hidden=!isGeneratorProject(session().draft);$('save').disabled=clean||busy||!remote;
 }
 function paintAll(){paintInspector();paintPreview();paintChanges();paintHistory();}
-$('components').replaceChildren(...components.map(component=>{
+function paintComponents(){
+$('components').replaceChildren(...componentList().map(component=>{
   const button=document.createElement('button'),title=document.createElement('strong'),description=document.createElement('span');
   button.type='button';button.dataset.componentId=component.id;button.setAttribute('aria-pressed',String(selected===component.id));title.textContent=component.label;description.textContent=component.description;button.append(title,description);button.onclick=()=>select(component.id);return button;
 }));
-$('project').onchange=()=>{kind=$('project').value;$('kind').textContent=kind==='site'?'SITE DE MUESTRA':'PRESENTACIÓN DE MUESTRA';$('source-title').textContent=session().draft.title;paintAll();status('Muestra cargada. Sus destinos y estructura se conservan.');};
+}
+function paintSource(){
+  const project=session().draft,live=isGeneratorProject(project);
+  $('kind').textContent=live?'PRESENTACIÓN REAL · '+project.document.language.toUpperCase():kind==='site'?'SITE DE MUESTRA':'PRESENTACIÓN DE MUESTRA';
+  $('source-title').textContent=project.title;$('source-hint').textContent=live?'Guardar en el generador confirma la nueva revisión y sincroniza sus idiomas.': 'Los ajustes quedan en esta pestaña. Cambiar de muestra conserva su borrador durante la sesión.';
+  $('context-label').textContent=live?'CONECTADO A ADMIRANEXT':'MUESTRA FICTICIA';
+  $('canvas-label').textContent=live?'VISTA DE CONTENIDO · TEXTOS EDITABLES':'BORRADOR · SELECCIONA UN ELEMENTO';
+  $('scope-note').textContent=live?'Los textos se guardan en su presentación original. La composición del preview es orientativa.':'Las muestras no modifican ni publican proyectos reales.';
+  document.querySelector('.component-panel').classList.toggle('is-live',live);
+}
+$('project').onchange=()=>{kind=$('project').value;if(!componentList().some(c=>c.id===selected))selected=componentList()[0].id;paintComponents();paintSource();paintAll();status('Proyecto cargado.');};
 $('undo').onclick=()=>{session().undo();paintAll();status('Ajuste deshecho.');};
 $('redo').onclick=()=>{session().redo();paintAll();status('Ajuste rehecho.');};
 $('reset').onclick=()=>{session().reset();paintAll();status('Original recuperado. Puedes deshacer esta recuperación.');};
@@ -71,4 +87,20 @@ $('download').onclick=()=>{
   const url=URL.createObjectURL(new Blob([JSON.stringify(session().changes,null,2)],{type:'application/json'})),link=document.createElement('a');
   link.href=url;link.download=session().draft.source.id+'.ajustes.json';link.click();setTimeout(()=>URL.revokeObjectURL(url),1000);status('Ajustes descargados. El proyecto original no se ha modificado.');
 };
-$('kind').textContent='SITE DE MUESTRA';$('source-title').textContent=session().draft.title;paintAll();
+function setBusy(value){busy=value;document.querySelectorAll('input,textarea,select,button').forEach(el=>el.disabled=value);if(!value){paintComponents();paintSource();paintAll();}}
+$('save').onclick=async()=>{
+  if(!remote||busy||!isGeneratorProject(session().draft))return;
+  const changes=session().changes;if(!changes.changes.length)return;
+  setBusy(true);status('Guardando y verificando la nueva revisión en el generador…');
+  try{const saved=await remote.save(changes);sessions.set('remote',createSession(saved));kind='remote';const option=$('project').querySelector('option[value="remote"]');if(option)option.textContent=saved.title;setBusy(false);status('Guardado confirmado en el generador · '+saved.source.revision);}
+  catch(error){setBusy(false);status(error.message+' El borrador se conserva.');}
+};
+remote=connectGenerator({onStatus:status,onLoad(project){
+  const list=generatorComponents(project);
+  if(sessions.get('remote')?.changes.changes.length)throw Error('Hay ajustes sin guardar. Guárdalos o recupéralos antes de cargar otra presentación.');
+  if(!list.length)throw Error('La presentación no contiene componentes.');
+  sessions.set('remote',createSession(project));kind='remote';selected=list[0].id;
+  let option=$('project').querySelector('option[value="remote"]');if(!option){option=document.createElement('option');option.value='remote';$('project').append(option);}option.textContent=project.title;$('project').value='remote';
+  paintComponents();paintSource();paintAll();status('Presentación real cargada. Edita un texto y guarda para confirmar los ajustes.');
+}});
+paintComponents();paintSource();paintAll();

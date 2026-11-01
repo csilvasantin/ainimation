@@ -1,6 +1,8 @@
-// A renderer for these two fictitious documents only, not an arbitrary-site importer.
+import {isGeneratorProject} from './generator.mjs';
+// Content preview; it does not execute imported HTML or replace the original deck.
 // All edited copy becomes textContent, and styles come from validated typed fields.
 export function renderPreview(root,project,{selected='hero',onSelect=()=>{},interactive=true}={}) {
+  if(isGeneratorProject(project))return generatorPreview(root,project,{selected,onSelect,interactive});
   const doc=root.ownerDocument,p=project.document;
   root.replaceChildren();root.className='preview-document '+project.kind;
   const el=(tag,className,text)=>{const node=doc.createElement(tag);node.className=className;if(text!==undefined)node.textContent=text;return node;};
@@ -22,4 +24,15 @@ export function renderPreview(root,project,{selected='hero',onSelect=()=>{},inte
   const detail=component('detail','Segundo bloque');detail.classList.add('preview-detail');detail.append(el('span','preview-detail-kicker',project.kind==='site'?'EL PROGRAMA / MUESTRA':'LA SIGUIENTE ESCENA / MUESTRA'),el('span','preview-detail-title',p.components.detail.title),el('span','preview-detail-body',p.components.detail.body));
   const footer=el('div','preview-footer',project.kind==='site'?'ÓRBITA · DISEÑO / TECNOLOGÍA / CULTURA':'ÓRBITA · RELATO / MOVIMIENTO / INTERACCIÓN');
   root.append(header,hero,detail,footer);
+}
+function generatorPreview(root,project,{selected,onSelect,interactive}){
+  const doc=root.ownerDocument,node=project.document.components[selected]||project.document.components[project.document.order[0]];
+  root.replaceChildren();root.className='preview-document presentation generator-preview';
+  const make=(tag,cls,text)=>{const el=doc.createElement(tag);el.className=cls;el.textContent=text;return el;};
+  const header=make('div','preview-header','');header.append(make('strong','preview-brand',project.document.brand),make('span','preview-nav',project.document.language.toUpperCase()+' / '+node.label));
+  const scene=make(interactive?'button':'div','preview-component generator-scene','');
+  if(interactive){scene.type='button';scene.dataset.component=selected;scene.setAttribute('aria-label','Seleccionar '+node.label);scene.onclick=()=>onSelect(selected);}
+  const keys=project.fields.filter(f=>f.path[1]===selected).map(f=>f.path[2]);
+  for(const key of keys){const text=node[key];if(!text)continue;const cls=key==='title'?'preview-title':key==='eyebrow'?'preview-eyebrow':'preview-message';scene.append(make('span',cls,text));}
+  root.append(header,scene,make('div','preview-footer','VISTA DE CONTENIDO · EL DISEÑO ORIGINAL SE CONSERVA EN EL GENERADOR'));
 }

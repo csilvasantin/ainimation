@@ -29,15 +29,14 @@
     "Ajustes reversibles",
     "Detección de revisión distinta",
     "Conservación de componentes no editados",
-    "Inspector local con muestras ficticias de site y presentación, comparación, deshacer/rehacer y descarga de ajustes"
+    "Inspector local con muestras ficticias de site y presentación, comparación, deshacer/rehacer y descarga de ajustes",
+    "Conector de textos del generador con guardado nativo y confirmación por relectura"
   ],
   "nextVerticalSlice": "Conector de fuente autorizado: cargar una revisión real, aplicar los ajustes con comprobación de revisión y confirmar el guardado",
   "notImplementedYet": [
-    "Inspector común de producción",
     "Edición visual de cualquier site real",
-    "Guardado de vuelta al generador",
     "Adaptadores de repositorios y publicación de sites",
     "Editor de interacción y tiempos común"
   ],
-  "publishedExperience": "La zona publicada es por ahora una demo/reproductor de presentaciones con importación a Director"
+  "publishedExperience": "Inspector común en /presentaciones/; el conector real guarda textos. El reproductor se conserva en /presentaciones/reproductor/."
 }

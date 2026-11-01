@@ -1,35 +1,26 @@
-# Inspector común — ensayo local
+# Afinar sites y presentaciones
 
-Abrir `/presentaciones/editor/` desde un servidor local del checkout. La rama
-incluye únicamente dos documentos ficticios, creados por `fixtures.mjs`: un
-site y una presentación. No importa ni modifica sites reales y no guarda en
-el generador. No se ha fusionado ni publicado esta interfaz.
+`/presentaciones/` es la entrada al inspector; `/presentaciones/editor/` mantiene
+la misma interfaz como ruta directa. El reproductor anterior se conserva en
+`/presentaciones/reproductor/`.
 
-El mismo inspector selecciona Portada, Llamada a la acción o Segundo bloque
-desde la lista o desde la vista. Edita los campos declarados por el núcleo
-`project.mjs`, incluyendo texto, color y posición horizontal. La vista previa
-se construye con DOM y textContent; los textos no se ejecutan como HTML.
+Las dos muestras ficticias permiten texto, color y posición, comparación,
+deshacer/rehacer y descarga de ajustes. Conservan un borrador independiente en
+la pestaña; recargar los reinicia. Descargar no guarda en el origen.
 
-Comparar muestra original y borrador. Deshacer, Rehacer y Recuperar original
-funcionan sobre un historial independiente por proyecto (hasta 100 estados).
-Cambiar entre las muestras conserva sus borradores durante la pestaña;
-recargar los reinicia. No se usa almacenamiento persistente ni hay autosave
-remoto. Una recuperación del original también puede deshacerse.
+Conectar presentación real abre el laboratorio privado del generador. El
+inspector recibe una proyección de textos de audiencia vinculados a una revisión.
+Las credenciales y el guardado permanecen en el origen. El canal comprueba
+ventana, origen y nonce; una confirmación sólo se acepta para la petición en
+curso, una revisión nueva y los valores exactos enviados. No hay guardado directo
+desde una URL ni una importación de cualquier site sin conector autorizado.
 
-Descargar ajustes genera un changeset vinculado al origen y revisión. Se ha
-probado su descarga en navegador y su aplicación exacta al fixture original,
-conservando navegación y los componentes no editados. Descargar no equivale
-a guardar ni publicar en el origen. Los botones de acción del preview sirven
-para seleccionar componentes; no simulan una inscripción ni un envío.
+El primer conector real permite textos, conserva una versión anterior, sincroniza
+los idiomas usando el editor nativo y confirma por relectura. Su vista de contenido
+es orientativa; el diseño original, medios, decks y comportamientos se conservan
+en el generador. Los colores y posiciones de las muestras no se prometen como
+ajustes guardables en ese origen. Un conflicto mantiene el borrador.
 
-Escritorio/Móvil cambia sólo el ancho del preview, sin tocar la ventana.
-En pantallas estrechas la comparación se apila para conservar legibilidad.
-
-Verificación:
-
-```
-node --test tests/refinement-session.test.mjs tests/refinement-project.test.mjs tests/presentation-bridge.test.mjs tests/interactive-director.test.mjs
-```
-
-El siguiente incremento necesita un conector autorizado a un origen real,
-con carga de revisión, guardado confirmado y comprobación de conflictos.
+Escritorio/Móvil sólo modifica el canvas interno. El preview usa DOM/textContent,
+sin ejecutar HTML importado. La siguiente conexión para sites necesita su fuente
+editable y una confirmación de guardado del adaptador correspondiente.

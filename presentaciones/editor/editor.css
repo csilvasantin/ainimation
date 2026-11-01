@@ -7,3 +7,5 @@
 @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;animation:none!important;transition:none!important}}
 
 .preview-component{cursor:default}button.preview-component{cursor:pointer}
+
+.connect-link{color:var(--lime);font-size:12px;text-decoration:none;padding:10px}.component-panel.is-live #components{max-height:60svh;overflow:auto}.generator-scene{width:100%;min-height:440px;padding:45px 7%;border:0}.generator-scene span{display:block;white-space:pre-wrap}.generator-scene .preview-title{font-size:clamp(26px,6cqw,62px)}.generator-scene .preview-message{max-width:100%}.generator-preview .preview-brand{font-size:14px;overflow-wrap:anywhere;max-width:70%}.generator-preview .preview-nav{font-size:9px}@media(max-width:699px){.component-panel.is-live #components{grid-template-columns:1fr;max-height:180px}.component-panel.is-live #components button span{display:block}.generator-scene{min-height:320px}}
