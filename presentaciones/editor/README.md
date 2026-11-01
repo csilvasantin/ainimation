@@ -80,7 +80,9 @@ revisión actual, sin guardar. Toda la resolución es un paso de historial:
 Deshacer recupera la revisión, borrador y comparación anteriores; Rehacer vuelve
 a la resolución. Las decisiones y cada comparación se conservan durante la
 sesión, incluso ante varios conflictos consecutivos. Cerrar sólo oculta el panel.
-Recargar la pestaña todavía reinicia estos datos; se puede descargar el changeset.
+En los proyectos normales, recargar todavía reinicia estos datos; se puede
+descargar el changeset. El ensayo local ficticio descrito abajo conserva su
+borrador y decisiones en la misma pestaña.
 
 El guardado posterior requiere otra acción. El conector conserva el proyecto
 canónico devuelto en el conflicto, relee de nuevo y valida revisión, campos y
@@ -113,3 +115,37 @@ revisión de historial. Estos parámetros sólo activan el ensayo en loopback y
 sin conector remoto.
 Los fixtures usan el artwork ficticio público de Órbita bajo dos referencias de
 muestra y logotipos de prueba dibujados en Canvas. No leen datos de clientes.
+
+
+## Recuperar el ensayo ficticio después de recargar (en borrador)
+
+Sólo las dos rutas de conflicto en HTTP loopback, sin parámetros de origen/canal
+ni conector remoto, activan una copia en `sessionStorage`. Un aviso visible señala
+su alcance: sobrevive a recargar durante la sesión de esa pestaña; no ofrece
+recuperación entre pestañas. Cada tipo de muestra y fase de conflicto usa una
+clave separada. No se
+habilita en producción, en las muestras normales ni en proyectos conectados.
+
+La copia guarda comandos tipados y decisiones sobre los fixtures conocidos del
+código, junto con su base ficticia exacta. No acepta un proyecto importado, una
+identidad de cliente ni bytes de imágenes, credenciales o recursos arbitrarios.
+Las imágenes y logos se reconstruyen desde los assets ficticios del código. La
+revisión de origen, las decisiones parciales, el panel cerrado y la revisión de
+historial del ensayo incierto se recuperan al recargar. Las operaciones se
+reproducen usando la sesión y resolución existentes; Deshacer/Rehacer conserva
+sus revisiones y el límite de historial del núcleo.
+
+No se escribe al cargar ni se reescriben copias idénticas. Cada cambio válido
+intenta actualizar la copia una vez, previa relectura y validación de su replay.
+Si la copia está dañada, es futura o corresponde a otra base, no se aplica ni
+sustituye. Si cambia fuera del controlador, se deniega el almacenamiento o se
+alcanza un límite, la recuperación se detiene sin reintentos. El borrador sigue
+en memoria y puede descargarse. No se borra ni repara automáticamente la copia
+previa. El ensayo limita cada copia a 180 kB y 300 comandos.
+
+Validación: `node --test tests/refinement-*.test.mjs` incluye rechazo de copias
+incompatibles/corruptas, guardas de producción/conector, fallos de cuota,
+aislamiento y recuperación de historial. La revisión visual local verifica
+ambos formatos, miniatura recuperada y exportable, y conserva literalmente las
+copias corruptas/futuras al intentar nuevos cambios. El guardado remoto nativo
+no forma parte de esta recuperación.

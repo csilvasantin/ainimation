@@ -9,15 +9,28 @@ import {renderConflict} from './conflict-view.mjs';
 import {conflictFixture,conflictFixtureAssets} from './conflict-fixtures.mjs';
 import {changesBetween} from './project.mjs';
 import {resolutionAssets} from './conflict-resolution.mjs';
+import {createFixtureRecovery,fixtureRecoveryMessage} from './fixture-recovery.mjs';
 const $=id=>document.getElementById(id),sessions=new Map(['site','presentation'].map(kind=>[kind,createSession(fixture(kind))]));
 let kind='site',selected='thumbnail',compare=false,mobile=false,busy=false;
 let remote=null;const conflicts=new Map(),revisionAssets=new Map();
+let fixtureRecovery=null,recoveryBanner=null;
 const session=()=>sessions.get(kind);
 const assetKey=project=>JSON.stringify(project.source);
 const assetsFor=project=>revisionAssets.get(assetKey(project))||{};
 const keepAssets=(project,assets)=>revisionAssets.set(assetKey(project),{...assetsFor(project),...assets});
 const activeConflict=()=>conflicts.get(kind)?.get(session().original.source.revision);
-function keepConflict(key,original,conflict){if(!conflicts.has(key))conflicts.set(key,new Map());conflicts.get(key).set(original.source.revision,{...conflict,decisions:{}});keepAssets(conflict.current,conflict.assets||{});}
+function keepConflict(key,original,conflict){if(!conflicts.has(key))conflicts.set(key,new Map());conflicts.get(key).set(original.source.revision,{...conflict,decisions:conflict.decisions||{}});keepAssets(conflict.current,conflict.assets||{});}
+function paintRecovery(){
+  if(!recoveryBanner)return;
+  recoveryBanner.hidden=kind!==fixtureRecovery.kind;recoveryBanner.dataset.state=fixtureRecovery.state;
+  recoveryBanner.querySelector('[role="status"]').textContent=fixtureRecoveryMessage(fixtureRecovery.state);
+}
+function rememberFixture(){
+  if(!fixtureRecovery||kind!==fixtureRecovery.kind)return;
+  const conflict=conflicts.get(kind)?.get(fixtureRecovery.data.original.source.revision);
+  if(conflict)fixtureRecovery.persist({decisions:conflict.decisions,open:conflict.open,historyReviewed:!!conflict.historyReviewed});
+  paintRecovery();
+}
 const componentList=()=>isGeneratorProject(session().draft)?generatorComponents(session().draft):components;
 const choiceLabels={system:'Sistema','fira-sans':'Fira Sans',impact:'Impacto · imagen protagonista',editorial:'Editorial · panel de color',original:'Original',white:'Blanco'};
 const status=message=>{$('status').textContent=message;};
@@ -44,7 +57,7 @@ function paintInspector(){
     if(field.type==='number'){input.min=field.min;input.max=field.max;input.step='1';}
     input.value=fieldValue(draft,field);
     input.oninput=()=>{
-      try{session().edit(field.id,field.type==='number'?input.valueAsNumber:input.value);input.setCustomValidity('');paintPreview();paintChanges();paintHistory();paintConflict();status('Ajuste aplicado al borrador.');}
+      try{session().edit(field.id,field.type==='number'?input.valueAsNumber:input.value);input.setCustomValidity('');paintPreview();paintChanges();paintHistory();paintConflict();rememberFixture();status('Ajuste aplicado al borrador.');}
       catch(error){input.setCustomValidity(error.message);status('Valor no aplicado: '+error.message);}
     };
     label.append(input);return label;
@@ -80,12 +93,12 @@ function paintHistory(){
 function paintConflict(){
   const conflict=activeConflict();$('conflict-panel').hidden=!conflict?.open;
   if(!conflict?.open)return;
-  renderConflict($('conflict-panel'),{original:session().original,draft:session().draft,current:conflict.current,originalAssets:assetsFor(session().original),currentAssets:assetsFor(conflict.current),phase:conflict.phase,decisions:conflict.decisions,historyReviewed:conflict.historyReviewed,onDecision(field,choice){conflict.decisions[field]=choice;},onHistoryReview(value){conflict.historyReviewed=value;},onResolve({current,draft}){
+  renderConflict($('conflict-panel'),{original:session().original,draft:session().draft,current:conflict.current,originalAssets:assetsFor(session().original),currentAssets:assetsFor(conflict.current),phase:conflict.phase,decisions:conflict.decisions,historyReviewed:conflict.historyReviewed,onDecision(field,choice){conflict.decisions[field]=choice;rememberFixture();},onHistoryReview(value){conflict.historyReviewed=value;rememberFixture();},onResolve({current,draft,plan}){
     const assets=resolutionAssets(assetsFor(session().original),assetsFor(current),draft);
-    session().rebase(current,draft);keepAssets(current,assets);paintAll();status('Borrador combinado preparado sobre '+current.source.revision+'. No se ha guardado. Deshacer recupera la comparación anterior.');$('undo').focus({preventScroll:true});
-  },onClose(){conflict.open=false;$('conflict-panel').hidden=true;}});
+    session().rebase(current,draft,Object.fromEntries(plan.rows.map(row=>[row.field,row.choice])));keepAssets(current,assets);paintAll();rememberFixture();status('Borrador combinado preparado sobre '+current.source.revision+'. No se ha guardado. Deshacer recupera la comparación anterior.');$('undo').focus({preventScroll:true});
+  },onClose(){conflict.open=false;$('conflict-panel').hidden=true;rememberFixture();}});
 }
-function paintAll(){if(!componentList().some(c=>c.id===selected))selected=componentList()[0].id;paintComponents();paintSource();paintInspector();paintPreview();paintChanges();paintHistory();paintConflict();}
+function paintAll(){if(!componentList().some(c=>c.id===selected))selected=componentList()[0].id;paintComponents();paintSource();paintInspector();paintPreview();paintChanges();paintHistory();paintConflict();paintRecovery();}
 function paintComponents(){
 $('components').replaceChildren(...componentList().map(component=>{
   const button=document.createElement('button'),title=document.createElement('strong'),description=document.createElement('span');
@@ -102,11 +115,11 @@ function paintSource(){
   document.querySelector('.component-panel').classList.toggle('is-live',live);
 }
 $('project').onchange=()=>{kind=$('project').value;paintAll();status('Proyecto cargado.');};
-$('undo').onclick=()=>{session().undo();paintAll();status('Ajuste deshecho.');};
-$('redo').onclick=()=>{session().redo();paintAll();status('Ajuste rehecho.');};
-$('reset').onclick=()=>{session().reset();paintAll();status('Original recuperado. Puedes deshacer esta recuperación.');};
+$('undo').onclick=()=>{session().undo();paintAll();rememberFixture();status('Ajuste deshecho.');};
+$('redo').onclick=()=>{session().redo();paintAll();rememberFixture();status('Ajuste rehecho.');};
+$('reset').onclick=()=>{session().reset();paintAll();rememberFixture();status('Original recuperado. Puedes deshacer esta recuperación.');};
 $('compare').onclick=()=>{compare=!compare;paintPreview();};
-$('review-conflict').onclick=()=>{const conflict=activeConflict();if(conflict){conflict.open=true;paintConflict();}};
+$('review-conflict').onclick=()=>{const conflict=activeConflict();if(conflict){conflict.open=true;paintConflict();rememberFixture();}};
 $('desktop').onclick=()=>{mobile=false;paintPreview();};$('mobile').onclick=()=>{mobile=true;paintPreview();};
 $('fields').onsubmit=event=>event.preventDefault();
 document.addEventListener('keydown',event=>{
@@ -137,7 +150,10 @@ remote=connectGenerator({onStatus:status,onConflictAssets({current,assets}){cons
 $('export-thumbnail').onclick=async()=>{if(busy)return;const project=session().draft;try{$('export-thumbnail').disabled=true;const blob=await exportThumbnail(project,{assets:assetsFor(session().original)});status('Miniatura JPG descargada · 3840 × 2160 · '+Math.round(blob.size/1024)+' KB.');}catch(error){status(error.message);}finally{$('export-thumbnail').disabled=busy;}};
 const demoKind=new URLSearchParams(location.search).get('conflictFixture');
 if(!remote&&['localhost','127.0.0.1'].includes(location.hostname)&&['site','presentation'].includes(demoKind)){
-  const demo=conflictFixture(demoKind),demoSession=createSession(demo.original);for(const change of changesBetween(demo.original,demo.draft).changes)demoSession.edit(change.field,change.after);
-  sessions.set(demoKind,demoSession);kind=demoKind;$('project').value=kind;const assets=conflictFixtureAssets(demo.resources),phase=new URLSearchParams(location.search).get('conflictPhase')==='after-save'?'after-save':'before-save';keepAssets(demo.original,assets);keepConflict(kind,demo.original,{current:demo.current,assets,phase,open:true});
+  fixtureRecovery=createFixtureRecovery({location,remote:!!remote,storage:()=>window.sessionStorage});
+  const demo=fixtureRecovery?.data||conflictFixture(demoKind),demoSession=fixtureRecovery?.session||createSession(demo.original);
+  if(!fixtureRecovery)for(const change of changesBetween(demo.original,demo.draft).changes)demoSession.edit(change.field,change.after);
+  sessions.set(demoKind,demoSession);kind=demoKind;$('project').value=kind;const assets=conflictFixtureAssets(demo.resources),phase=new URLSearchParams(location.search).get('conflictPhase')==='after-save'?'after-save':'before-save';keepAssets(demo.original,assets);keepAssets(demo.current,assets);keepConflict(kind,demo.original,{current:demo.current,assets,phase,...(fixtureRecovery?.ui||{open:true})});
+  if(fixtureRecovery){recoveryBanner=document.createElement('section');recoveryBanner.id='fixture-recovery';recoveryBanner.className='fixture-recovery';recoveryBanner.setAttribute('aria-label','Recuperación del ensayo ficticio');const title=document.createElement('strong'),note=document.createElement('p');title.textContent='ENSAYO LOCAL · SOBREVIVE A RECARGAR EN ESTA PESTAÑA';note.setAttribute('role','status');recoveryBanner.append(title,note);$('conflict-panel').before(recoveryBanner);}
 }
 paintAll();
