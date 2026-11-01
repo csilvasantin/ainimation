@@ -55,3 +55,34 @@ mantener su color original o usar una máscara blanca sobre transparencia. La
 fuente opcional Fira Sans 900 se sirve desde assets propios con licencia OFL.
 Los diseños anteriores se normalizan a fuente del sistema y sin logotipo,
 conservando sus valores originales.
+
+## Comparar revisiones en un conflicto (incremento en borrador)
+
+Cuando el conector devuelve otra revisión, el inspector mantiene su original,
+su borrador y su historial. La revisión del origen se muestra aparte: las tres
+miniaturas usan sus propios recursos, y los campos se clasifican como ajustes
+distintos, sólo del borrador, sólo del origen o coincidentes. Los componentes
+retirados, los contratos modificados y los bindings de diapositivas diferentes
+se marcan como no comparables. También se conservan los metadatos fuera de los
+campos editables. La comparación trabaja sobre copias y no aplica ajustes.
+
+Guardar queda detenido en esa sesión; el borrador sigue editable, descargable
+y reversible. Cerrar la revisión sólo oculta el panel. La resolución y el rebase
+manual son un incremento posterior. Una lectura posterior distinta del acuse
+se identifica como guardado sin confirmar: el ajuste pudo haberse aplicado.
+Una lectura todavía antigua conserva el error de confirmación original.
+
+El mensaje de conflicto y las imágenes posteriores se correlacionan con ventana,
+origen, canal, petición y revisión. Las imágenes llegan aparte para que su carga
+no retrase la respuesta al guardado. Cada vista conserva sus recursos: los
+recursos actuales no sustituyen los que se abrieron originalmente. Las imágenes
+se comparan por su referencia versionada.
+
+Ensayo exclusivamente local con datos ficticios:
+
+- `/presentaciones/?conflictFixture=site`
+- `/presentaciones/?conflictFixture=presentation`
+
+Estos parámetros sólo activan el ensayo en loopback y sin conector remoto.
+Los fixtures usan el artwork ficticio público de Órbita bajo dos referencias de
+muestra y logotipos de prueba dibujados en Canvas. No leen datos de clientes.

@@ -34,11 +34,20 @@
     "Conector de textos del generador con guardado nativo y confirmación por relectura",
     "Miniatura por propuesta: imagen de portada del origen o ilustración inicial, texto/color/composición editables, comparación, JPG 3840×2160 bajo 2 MB y guardado por idioma con versión y relectura"
   ],
-  "nextVerticalSlice": "Comparar borrador conservado y revisión actual en un conflicto, incluyendo la miniatura",
+  "nextVerticalSlice": "Resolución manual de campos tras comparar el borrador con la revisión actual, con confirmación explícita y conservación de componentes no editados.",
   "notImplementedYet": [
     "Edición visual de cualquier site real",
     "Adaptadores de repositorios y publicación de sites",
     "Editor de interacción y tiempos común"
   ],
-  "publishedExperience": "Inspector común en /presentaciones/; el conector real guarda textos y miniaturas. El reproductor se conserva en /presentaciones/reproductor/."
+  "publishedExperience": "Inspector común en /presentaciones/; el conector real guarda textos y miniaturas. El reproductor se conserva en /presentaciones/reproductor/.",
+  "conflictReviewDraft": {
+    "status": "draft-only",
+    "scope": "read-only original/draft/current comparison, including thumbnail image/logo/font",
+    "sourceWritesOnPreflightConflict": 0,
+    "automaticWriteRetries": 0,
+    "keepsOriginalAndDraft": true,
+    "currentAssetsSeparated": true,
+    "manualResolution": "future increment"
+  }
 }

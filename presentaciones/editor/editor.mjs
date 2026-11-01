@@ -5,9 +5,12 @@ import {generatorComponents,isGeneratorProject} from './generator.mjs';
 import {connectGenerator} from './remote.mjs';
 import {exportThumbnail} from './thumbnail.mjs';
 import {THUMBNAIL_ART} from './thumbnail-model.mjs';
+import {renderConflict} from './conflict-view.mjs';
+import {conflictFixture,conflictFixtureAssets} from './conflict-fixtures.mjs';
+import {changesBetween} from './project.mjs';
 const $=id=>document.getElementById(id),sessions=new Map(['site','presentation'].map(kind=>[kind,createSession(fixture(kind))]));
 let kind='site',selected='thumbnail',compare=false,mobile=false,busy=false,remoteAssets={};
-let remote=null;
+let remote=null;const conflicts=new Map(),fixtureAssets=new Map();
 const session=()=>sessions.get(kind);
 const componentList=()=>isGeneratorProject(session().draft)?generatorComponents(session().draft):components;
 const choiceLabels={system:'Sistema','fira-sans':'Fira Sans',impact:'Impacto · imagen protagonista',editorial:'Editorial · panel de color',original:'Original',white:'Blanco'};
@@ -35,7 +38,7 @@ function paintInspector(){
     if(field.type==='number'){input.min=field.min;input.max=field.max;input.step='1';}
     input.value=fieldValue(draft,field);
     input.oninput=()=>{
-      try{session().edit(field.id,field.type==='number'?input.valueAsNumber:input.value);input.setCustomValidity('');paintPreview();paintChanges();paintHistory();status('Ajuste aplicado al borrador.');}
+      try{session().edit(field.id,field.type==='number'?input.valueAsNumber:input.value);input.setCustomValidity('');paintPreview();paintChanges();paintHistory();paintConflict();status('Ajuste aplicado al borrador.');}
       catch(error){input.setCustomValidity(error.message);status('Valor no aplicado: '+error.message);}
     };
     label.append(input);return label;
@@ -47,7 +50,7 @@ function paintPreview(){
   document.querySelector('.canvas-wrap').classList.toggle('comparing',compare);
   document.querySelector('.canvas-wrap').classList.toggle('mobile',mobile);
   $('desktop').setAttribute('aria-pressed',String(!mobile));$('mobile').setAttribute('aria-pressed',String(mobile));
-  const assets=kind==='remote'?remoteAssets:{};
+  const assets=kind==='remote'?remoteAssets:fixtureAssets.get(kind)||{};
   renderPreview($('draft-preview'),session().draft,{selected,onSelect:select,assets,onStatus:status});
   if(compare)renderPreview($('original-preview'),session().original,{selected,interactive:false,assets,onStatus:status});
 }
@@ -64,10 +67,16 @@ function paintChanges(){
 function paintHistory(){
   $('undo').disabled=!session().canUndo;$('redo').disabled=!session().canRedo;
   const clean=!session().changes.changes.length;$('reset').disabled=clean;$('download').disabled=clean;
-  $('save').hidden=!isGeneratorProject(session().draft);$('save').disabled=clean||busy||!remote;
+  $('save').hidden=!isGeneratorProject(session().draft);$('save').disabled=clean||busy||!remote||conflicts.has(kind);
+  $('review-conflict').hidden=!conflicts.has(kind);$('review-conflict').disabled=busy;
   $('export-thumbnail').disabled=busy||!session().draft.document.components.thumbnail;
 }
-function paintAll(){paintInspector();paintPreview();paintChanges();paintHistory();}
+function paintConflict(){
+  const conflict=conflicts.get(kind);$('conflict-panel').hidden=!conflict?.open;
+  if(!conflict?.open)return;
+  renderConflict($('conflict-panel'),{original:session().original,draft:session().draft,current:conflict.current,originalAssets:kind==='remote'?remoteAssets:fixtureAssets.get(kind)||{},currentAssets:conflict.assets,phase:conflict.phase,onClose(){conflict.open=false;$('conflict-panel').hidden=true;}});
+}
+function paintAll(){paintInspector();paintPreview();paintChanges();paintHistory();paintConflict();}
 function paintComponents(){
 $('components').replaceChildren(...componentList().map(component=>{
   const button=document.createElement('button'),title=document.createElement('strong'),description=document.createElement('span');
@@ -88,6 +97,7 @@ $('undo').onclick=()=>{session().undo();paintAll();status('Ajuste deshecho.');};
 $('redo').onclick=()=>{session().redo();paintAll();status('Ajuste rehecho.');};
 $('reset').onclick=()=>{session().reset();paintAll();status('Original recuperado. Puedes deshacer esta recuperación.');};
 $('compare').onclick=()=>{compare=!compare;paintPreview();};
+$('review-conflict').onclick=()=>{const conflict=conflicts.get(kind);if(conflict){conflict.open=true;paintConflict();}};
 $('desktop').onclick=()=>{mobile=false;paintPreview();};$('mobile').onclick=()=>{mobile=true;paintPreview();};
 $('fields').onsubmit=event=>event.preventDefault();
 document.addEventListener('keydown',event=>{
@@ -100,19 +110,24 @@ $('download').onclick=()=>{
 };
 function setBusy(value){busy=value;document.querySelectorAll('input,textarea,select,button').forEach(el=>el.disabled=value);if(!value){paintComponents();paintSource();paintAll();}}
 $('save').onclick=async()=>{
-  if(!remote||busy||!isGeneratorProject(session().draft))return;
+  if(!remote||busy||conflicts.has(kind)||!isGeneratorProject(session().draft))return;
   const changes=session().changes;if(!changes.changes.length)return;
   setBusy(true);status('Guardando y verificando la nueva revisión en el generador…');
   try{const saved=await remote.save(changes);sessions.set('remote',createSession(saved));kind='remote';const option=$('project').querySelector('option[value="remote"]');if(option)option.textContent=saved.title;setBusy(false);status('Guardado confirmado en el generador · '+saved.source.revision);}
-  catch(error){setBusy(false);status(error.message+' El borrador se conserva.');}
+  catch(error){if(error.code==='source_conflict')conflicts.set('remote',{current:error.current,assets:error.assets,phase:error.phase,open:true});setBusy(false);status(error.message+' El borrador se conserva.');}
 };
-remote=connectGenerator({onStatus:status,onLoad(project,{assets={}}={}){
+remote=connectGenerator({onStatus:status,onConflictAssets({current,assets}){const conflict=conflicts.get('remote');if(conflict&&['id','adapter','revision'].every(key=>conflict.current.source[key]===current.source[key])){conflict.assets=assets;if(kind==='remote')paintConflict();}},onLoad(project,{assets={}}={}){
   const list=generatorComponents(project);
   if(sessions.get('remote')?.changes.changes.length)throw Error('Hay ajustes sin guardar. Guárdalos o recupéralos antes de cargar otra presentación.');
   if(!list.length)throw Error('La presentación no contiene componentes.');
-  sessions.set('remote',createSession(project));remoteAssets=assets;kind='remote';selected=list[0].id;
+  sessions.set('remote',createSession(project));conflicts.delete('remote');remoteAssets=assets;kind='remote';selected=list[0].id;
   let option=$('project').querySelector('option[value="remote"]');if(!option){option=document.createElement('option');option.value='remote';$('project').append(option);}option.textContent=project.title;$('project').value='remote';
   paintComponents();paintSource();paintAll();status('Presentación real cargada. Afina su miniatura o sus textos y guarda para confirmar los ajustes.');
 }});
-$('export-thumbnail').onclick=async()=>{if(busy)return;const project=session().draft;try{$('export-thumbnail').disabled=true;const blob=await exportThumbnail(project,{assets:kind==='remote'?remoteAssets:{}});status('Miniatura JPG descargada · 3840 × 2160 · '+Math.round(blob.size/1024)+' KB.');}catch(error){status(error.message);}finally{$('export-thumbnail').disabled=busy;}};
+$('export-thumbnail').onclick=async()=>{if(busy)return;const project=session().draft;try{$('export-thumbnail').disabled=true;const blob=await exportThumbnail(project,{assets:kind==='remote'?remoteAssets:fixtureAssets.get(kind)||{}});status('Miniatura JPG descargada · 3840 × 2160 · '+Math.round(blob.size/1024)+' KB.');}catch(error){status(error.message);}finally{$('export-thumbnail').disabled=busy;}};
+const demoKind=new URLSearchParams(location.search).get('conflictFixture');
+if(!remote&&['localhost','127.0.0.1'].includes(location.hostname)&&['site','presentation'].includes(demoKind)){
+  const demo=conflictFixture(demoKind),demoSession=createSession(demo.original);for(const change of changesBetween(demo.original,demo.draft).changes)demoSession.edit(change.field,change.after);
+  sessions.set(demoKind,demoSession);kind=demoKind;$('project').value=kind;const assets=conflictFixtureAssets(demo.resources);fixtureAssets.set(kind,assets);conflicts.set(kind,{current:demo.current,assets,phase:'before-save',open:true});
+}
 paintComponents();paintSource();paintAll();
