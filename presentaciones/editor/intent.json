@@ -1,0 +1,19 @@
+{
+  "product": "AINimation /presentaciones",
+  "purpose": "Editor común para afinar los sites y presentaciones que creamos",
+  "inputs": ["Sites propios con componentes editables", "Presentaciones del generador", "Películas Director mediante su adaptador"],
+  "workflow": ["Abrir proyecto y revisión de origen", "Seleccionar componente", "Ajustar texto, diseño, movimiento o interacción", "Comparar original y borrador", "Guardar una revisión recuperable", "Publicar en el destino original mediante su conector"],
+  "invariants": [
+    "Conservar estructura, componentes, recursos, enlaces y comportamientos no editados",
+    "La vista de site y la vista de presentación editan el mismo proyecto de origen",
+    "Cada conector declara los campos y ajustes que admite",
+    "Una URL sola sirve como referencia; la edición necesita fuente o conector del proyecto",
+    "La autorización y la revisión se comprueban en el origen al guardar",
+    "Las notas y credenciales no entran en los documentos de audiencia",
+    "Vista previa, borrador, guardado confirmado y publicación son estados distintos"
+  ],
+  "implementedInThisBranch": ["Contrato común site/presentation", "Campos tipados con límites", "Ajustes reversibles", "Detección de revisión distinta", "Conservación de componentes no editados"],
+  "nextVerticalSlice": "Inspector de componentes con vista previa de un site y una presentación ficticios; comparación y deshacer",
+  "notImplementedYet": ["Inspector común de producción", "Edición visual de cualquier site real", "Guardado de vuelta al generador", "Adaptadores de repositorios y publicación de sites", "Editor de interacción y tiempos común"],
+  "publishedExperience": "La zona publicada es por ahora una demo/reproductor de presentaciones con importación a Director"
+}
