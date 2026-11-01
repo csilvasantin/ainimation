@@ -1,6 +1,8 @@
 import {PROJECT,validateProject} from './project.mjs';
+import {THUMBNAIL_ART,thumbnailFields} from './thumbnail-model.mjs';
 
 export const components=[
+  {id:'thumbnail',label:'Miniatura',description:'Imagen, titular y composición'},
   {id:'hero',label:'Portada',description:'Titular, mensaje, color y posición'},
   {id:'action',label:'Llamada a la acción',description:'Texto y color del botón'},
   {id:'detail',label:'Segundo bloque',description:'Título y desarrollo'}
@@ -12,6 +14,7 @@ export function fixture(kind='site') {
   return validateProject({format:PROJECT,version:1,kind,title:site?'Órbita · site de muestra':'Órbita · presentación de muestra',
     source:{adapter:site?'owned-site-fixture':'presentation-fixture',id:site?'orbita-site':'orbita-presentation',revision:'demo-r1'},
     document:{brand:'ÓRBITA',components:{
+      thumbnail:{title:site?'Aquí empiezan las buenas ideas.':'Dale otra órbita a tu próxima idea.',kicker:'ÓRBITA / DISEÑO + TECNOLOGÍA',image:THUMBNAIL_ART,accent:site?'#c3ff6b':'#e3b4ff',layout:'impact'},
       hero:{eyebrow:site?'ENCUENTROS QUE DEJAN HUELLA':'UNA IDEA. MUCHAS POSIBILIDADES.',title:site?'Un lugar para las buenas ideas.':'Las buenas ideas merecen un escenario.',message:site?'Un encuentro ficticio de diseño, tecnología y cultura. Ven a compartir lo que imaginas.':'Explora una propuesta, encuentra su intención y decide cómo quieres contarla.',color:site?'#c3ff6b':'#e3b4ff',x:6},
       action:{label:site?'Descubrir el encuentro':'Explorar la propuesta',color:site?'#c3ff6b':'#e3b4ff',target:site?'#programa':'scene-2',behavior:{type:site?'scroll':'go-to-scene',enabled:true}},
       detail:{title:site?'Ideas que se encuentran.':'Del mensaje al movimiento.',body:site?'Conversaciones, talleres y nuevas miradas. Este bloque forma parte de una muestra: no hay un evento ni una inscripción reales.':'Una escena puede abrir una conversación y dar paso a un recorrido. Este contenido es ficticio y sirve para probar el mismo editor.'}},
@@ -19,6 +22,7 @@ export function fixture(kind='site') {
       media:{id:'abstract-orbit',kind:'illustration',credit:'Composición de muestra'},
       extension:{preserve:'La estructura, los destinos y las extensiones no se editan en este ensayo.'}},
     fields:[
+      ...thumbnailFields(),
       field('hero-title','Titular',['components','hero','title'],'text',{maxLength:160}),
       field('hero-message','Mensaje',['components','hero','message'],'text',{maxLength:700}),
       field('hero-color','Color de acento',['components','hero','color'],'color'),

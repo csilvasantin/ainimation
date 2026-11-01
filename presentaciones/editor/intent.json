@@ -21,7 +21,8 @@
     "Una URL sola sirve como referencia; la edición necesita fuente o conector del proyecto",
     "La autorización y la revisión se comprueban en el origen al guardar",
     "Las notas y credenciales no entran en los documentos de audiencia",
-    "Vista previa, borrador, guardado confirmado y publicación son estados distintos"
+    "Vista previa, borrador, guardado confirmado y publicación son estados distintos",
+    "Cada propuesta debe tener una miniatura espectacular 16:9, con imagen protagonista y titular breve legible en pequeño"
   ],
   "implementedInThisBranch": [
     "Contrato común site/presentation",
@@ -30,13 +31,14 @@
     "Detección de revisión distinta",
     "Conservación de componentes no editados",
     "Inspector local con muestras ficticias de site y presentación, comparación, deshacer/rehacer y descarga de ajustes",
-    "Conector de textos del generador con guardado nativo y confirmación por relectura"
+    "Conector de textos del generador con guardado nativo y confirmación por relectura",
+    "Miniatura por propuesta: imagen de portada del origen o ilustración inicial, texto/color/composición editables, comparación, JPG 3840×2160 bajo 2 MB y guardado por idioma con versión y relectura"
   ],
-  "nextVerticalSlice": "Conector de fuente autorizado: cargar una revisión real, aplicar los ajustes con comprobación de revisión y confirmar el guardado",
+  "nextVerticalSlice": "Comparar borrador conservado y revisión actual en un conflicto, incluyendo la miniatura",
   "notImplementedYet": [
     "Edición visual de cualquier site real",
     "Adaptadores de repositorios y publicación de sites",
     "Editor de interacción y tiempos común"
   ],
-  "publishedExperience": "Inspector común en /presentaciones/; el conector real guarda textos. El reproductor se conserva en /presentaciones/reproductor/."
+  "publishedExperience": "Inspector común en /presentaciones/; el conector real guarda textos y miniaturas. El reproductor se conserva en /presentaciones/reproductor/."
 }

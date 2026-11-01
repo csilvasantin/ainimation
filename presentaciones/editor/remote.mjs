@@ -1,5 +1,6 @@
 import {generatorOrigin,validChannel,isGeneratorProject} from './generator.mjs';
 import {validateProject} from './project.mjs';
+import {thumbnailAssetMap} from './thumbnail-model.mjs';
 export function connectGenerator({win=window,onLoad,onStatus}) {
   const params=new URLSearchParams(win.location.search),origin=params.get('origin'),channel=params.get('channel');
   const host=win.parent!==win?win.parent:win.opener;
@@ -10,7 +11,7 @@ export function connectGenerator({win=window,onLoad,onStatus}) {
     if(event.origin!==origin||event.source!==host||event.data?.channel!==channel)return;
     const data=event.data;
     try{
-      if(data.type==='admiranext:refinement:load'&&!pending){const project=validateProject(data.project);if(!isGeneratorProject(project))throw Error('Origen de edición no compatible.');onLoad(project);send('ainimation:refinement:loaded',{id:project.source.id});}
+      if(data.type==='admiranext:refinement:load'&&!pending){const project=validateProject(data.project);if(!isGeneratorProject(project))throw Error('Origen de edición no compatible.');onLoad(project,{assets:thumbnailAssetMap(data.assets,project)});send('ainimation:refinement:loaded',{id:project.source.id});}
       if(!pending||data.requestId!==pending.id)return;
       if(data.type==='admiranext:refinement:saved'){
         const project=validateProject(data.project);
