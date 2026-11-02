@@ -19,6 +19,9 @@
 @keyframes mb-cine-entrada{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
 @keyframes mb-cine-neon{0%,20%,40%{opacity:0}10%,30%,100%{opacity:1}}
 @keyframes mb-cine-iris{from{clip-path:circle(0% at 50% 50%)}to{clip-path:circle(75% at 50% 50%)}}
+/* Fase 2 (02-11-2026): fondo en bucle generado con ainimation.studio, detrás del grano y del tinte, y su crédito visible. */
+[data-mb-tema] .mb-cine-escena>.mb-cine-fondo{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;opacity:var(--mb-cine-fondo-opacidad,.6);pointer-events:none}
+[data-mb-tema] .mb-cine-escena>.mb-cine-credito{position:absolute;right:.9em;bottom:.7em;z-index:3;font:500 11px/1.2 var(--mb-fuente-texto,system-ui);color:var(--mb-texto-suave,inherit);opacity:.85;pointer-events:none}
 @media (prefers-reduced-motion:reduce){[data-mb-tema] .mb-cine-escena::before,[data-mb-tema] .mb-cine-entrada{animation:none!important}}
 .mb-cine-sonido{font:inherit;border:1px solid var(--mb-borde,#888);background:transparent;color:inherit;border-radius:999px;padding:.35em .9em;cursor:pointer}
 .mb-cine-sonido[aria-pressed="true"]{background:var(--mb-acento,#ffb000);color:var(--mb-acento-texto,#000)}

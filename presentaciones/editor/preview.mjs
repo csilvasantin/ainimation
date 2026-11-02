@@ -1,4 +1,4 @@
-import {aplicarCine} from './temas-cine.mjs';
+import {aplicarCine,pintarFondoCine} from './temas-cine.mjs';
 import {isGeneratorProject} from './generator.mjs';
 import {renderThumbnailPreview} from './thumbnail.mjs';
 // Content preview; it does not execute imported HTML or replace the original deck.
@@ -42,5 +42,7 @@ function generatorPreview(root,project,{selected,onSelect,interactive}){
   // Tema de cine: atmósfera (paleta, tipografía, grano, viñeta, barras); el acento sigue siendo el de la marca.
   if(aplicarCine(root,project.document.components.style?.tema))scene.classList.add('mb-cine-escena');else delete root.dataset.mbTema;
   for(const key of keys){if(key==='align'||key==='accent'||key==='tema')continue;const text=node[key];if(!text)continue;const cls=key==='title'?'preview-title':key==='eyebrow'?'preview-eyebrow':'preview-message';scene.append(make('span',cls,text));}
+  // Fase 2 de /modo (02-11-2026): fondo en bucle generado con ainimation.studio y su crédito, si el tema lo trae.
+  if(scene.classList.contains('mb-cine-escena'))pintarFondoCine(scene,project.document.components.style?.tema);
   root.append(header,scene,make('div','preview-footer','VISTA DE CONTENIDO · EL DISEÑO ORIGINAL SE CONSERVA EN EL GENERADOR'));
 }

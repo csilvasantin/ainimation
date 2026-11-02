@@ -97,7 +97,24 @@ export function variablesCine(id){
   const t=temaDe(id);if(!t)return {};
   const v={'--mb-cine-grano':String(t.grano),'--mb-cine-vineta':String(t.vineta),'--mb-cine-saturacion':String(t.gradacion.saturacion),'--mb-cine-contraste':String(t.gradacion.contraste),'--mb-cine-tinte':t.gradacion.tinte,'--mb-cine-tinte-fuerza':String(t.gradacion.tinteFuerza),'--mb-cine-aspecto':t.aspecto.replace(':',' / '),'--mb-cine-duracion':t.motion.duracionMs+'ms','--mb-cine-sombra-titulo':t.titulo.sombra||'none','--mb-fuente-titulos':t.tipografia.titulos,'--mb-fuente-texto':t.tipografia.texto,'--mb-transform-titulos':t.tipografia.transformTitulos,'--mb-tracking-titulos':t.tipografia.trackingTitulos};
   for(const [k,val] of Object.entries(t.colores))v['--mb-'+k.replace(/[A-Z]/g,m=>'-'+m.toLowerCase())]=val;
+  if(t.fondo)v['--mb-cine-fondo-opacidad']=String(t.fondo.opacidad??0.6);
   return v;
+}
+// Fase 2 (Carlos, 02-11-2026): fondo en bucle generado con ainimation.studio, con crédito visible. Va detrás de la
+// escena: vídeo mudo en bucle o, con prefers-reduced-motion, solo el póster. Solo de Stock de la suite (FONDO_HOST).
+// marcablanca.js hace lo mismo en cada .mb-cine-escena de la página.
+export const FONDO_HOST=/^https:\/\/(stock\.admira\.store|(www\.)?pixeria\.com|stock\.pixeria\.com)\//;
+export function pintarFondoCine(escena,id,win=globalThis){
+  if(!escena||typeof escena.querySelectorAll!=='function')return false;
+  for(const n of [...escena.querySelectorAll('.mb-cine-fondo,.mb-cine-credito')])if(n.parentNode===escena)escena.removeChild(n);
+  const f=temaDe(id)?.fondo;if(!f||!FONDO_HOST.test(f.video)||!FONDO_HOST.test(f.poster))return false;
+  const doc=escena.ownerDocument;let reducido=false;try{reducido=!!win.matchMedia?.('(prefers-reduced-motion: reduce)').matches;}catch{}
+  let m;
+  if(reducido){m=doc.createElement('img');m.src=f.poster;m.alt='';}
+  else{m=doc.createElement('video');Object.assign(m,{muted:true,loop:true,autoplay:true,playsInline:true,preload:'auto',poster:f.poster,src:f.video});for(const a of ['muted','loop','autoplay','playsinline'])m.setAttribute(a,'');}
+  m.className='mb-cine-fondo';m.setAttribute('aria-hidden','true');
+  const c=doc.createElement('small');c.className='mb-cine-credito';c.textContent=f.credito;
+  escena.insertBefore(m,escena.firstChild);escena.appendChild(c);return true;
 }
 export function aplicarCine(el,id){
   if(!el)return null;const prev=el.dataset.mbTema;
