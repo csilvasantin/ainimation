@@ -15,11 +15,17 @@ ventana, origen y nonce; una confirmación sólo se acepta para la petición en
 curso, una revisión nueva y los valores exactos enviados. No hay guardado directo
 desde una URL ni una importación de cualquier site sin conector autorizado.
 
-El conector real permite textos y miniaturas, conserva una versión anterior, sincroniza
-los idiomas de las escenas usando el editor nativo y confirma por relectura. Su vista de contenido
-es orientativa; el diseño original, medios, decks y comportamientos se conservan
-en el generador. Los colores y posiciones de las muestras no se prometen como
-ajustes guardables en ese origen. Un conflicto mantiene el borrador.
+El conector real permite textos, miniaturas, un color de acento por presentación
+(`accent`, hexadecimal en minúsculas `#rrggbb`) y la alineación de cada lámina
+(`align`: `left`, `center` o `right`). Conserva una versión anterior, sincroniza los
+idiomas de las escenas usando el editor nativo (acento y alineación no se traducen:
+son de la presentación y de la lámina) y confirma por relectura exacta, con un máximo
+de 20 ajustes por guardado. Acento y alineación solo se pintan por ahora en
+`/pruebas/ainimation-presentaciones/` de admiranext.com; el deck público los ignora
+hasta su revisión. Su vista de contenido es orientativa; el diseño original, medios,
+decks y comportamientos se conservan en el generador. La posición en % de las
+muestras no se promete como ajuste guardable en ese origen. Un conflicto mantiene
+el borrador.
 
 Escritorio/Móvil sólo modifica el canvas interno. El preview usa DOM/textContent,
 sin ejecutar HTML importado. La siguiente conexión para sites necesita su fuente
