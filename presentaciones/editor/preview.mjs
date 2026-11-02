@@ -1,3 +1,4 @@
+import {aplicarCine} from './temas-cine.mjs';
 import {isGeneratorProject} from './generator.mjs';
 import {renderThumbnailPreview} from './thumbnail.mjs';
 // Content preview; it does not execute imported HTML or replace the original deck.
@@ -38,6 +39,8 @@ function generatorPreview(root,project,{selected,onSelect,interactive}){
   // Acento y alineación son estilo validado (#rrggbb y lista cerrada), nunca texto.
   const accent=project.document.components.style?.accent;if(/^#[0-9a-f]{6}$/.test(accent||''))scene.style.borderLeft='6px solid '+accent;
   if(['left','center','right'].includes(node.align))scene.style.textAlign=node.align;
-  for(const key of keys){if(key==='align'||key==='accent')continue;const text=node[key];if(!text)continue;const cls=key==='title'?'preview-title':key==='eyebrow'?'preview-eyebrow':'preview-message';scene.append(make('span',cls,text));}
+  // Tema de cine: atmósfera (paleta, tipografía, grano, viñeta, barras); el acento sigue siendo el de la marca.
+  if(aplicarCine(root,project.document.components.style?.tema))scene.classList.add('mb-cine-escena');else delete root.dataset.mbTema;
+  for(const key of keys){if(key==='align'||key==='accent'||key==='tema')continue;const text=node[key];if(!text)continue;const cls=key==='title'?'preview-title':key==='eyebrow'?'preview-eyebrow':'preview-message';scene.append(make('span',cls,text));}
   root.append(header,scene,make('div','preview-footer','VISTA DE CONTENIDO · EL DISEÑO ORIGINAL SE CONSERVA EN EL GENERADOR'));
 }

@@ -6,7 +6,7 @@ const ideas=()=>({client:'demo-test',displayName:'Demo',updatedAt:'r1',hero:{tit
 test('adapter exposes audience fields only and preserves stable block bindings',()=>{
   const p=generatorProject(ideas());assert.equal(p.document.order.length,6);assert.equal(p.document.order[1],'style');assert.equal(p.document.bindings['block-0-title'].blockId,'stable-id');
   for(const secret of ['PRIVATE-NOTES','PRIVATE-KEY','No mostrar'])assert.equal(JSON.stringify(p).includes(secret),false);
-  assert.ok(p.fields.filter(f=>!f.id.startsWith('thumbnail-')&&f.id!=='style-accent'&&!f.id.endsWith('-align')).every(f=>f.type==='text'));assert.equal(p.fields.find(f=>f.id==='style-accent').type,'color');assert.deepEqual(p.fields.find(f=>f.id==='block-0-align').options,['left','center','right']);assert.equal(generatorProject(ideas(),'en').document.components.cover.title,'Cover');assert.throws(()=>generatorProject(ideas(),'ca'));
+  assert.ok(p.fields.filter(f=>!f.id.startsWith('thumbnail-')&&f.id!=='style-accent'&&f.id!=='style-tema'&&!f.id.endsWith('-align')).every(f=>f.type==='text'));assert.equal(p.fields.find(f=>f.id==='style-accent').type,'color');assert.deepEqual(p.fields.find(f=>f.id==='block-0-align').options,['left','center','right']);assert.equal(generatorProject(ideas(),'en').document.components.cover.title,'Cover');assert.throws(()=>generatorProject(ideas(),'ca'));
 });
 test('native save payload is bounded and uses the original revision, field and block identity',()=>{
   const p=generatorProject(ideas()),draft=editField(p,'block-0-title','Título nuevo'),changes=changesBetween(p,draft);

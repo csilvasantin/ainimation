@@ -1,3 +1,4 @@
+import {TEMA_IDS,temaDe,NONE as NO_TEMA,sonarTema} from './temas-cine.mjs';
 import {fixture,components,componentFields,fieldValue} from './fixtures.mjs';
 import {createSession} from './session.mjs';
 import {renderPreview} from './preview.mjs';
@@ -32,7 +33,7 @@ function rememberFixture(){
   paintRecovery();
 }
 const componentList=()=>isGeneratorProject(session().draft)?generatorComponents(session().draft):components;
-const choiceLabels={system:'Sistema','fira-sans':'Fira Sans',impact:'Impacto · imagen protagonista',editorial:'Editorial · panel de color',original:'Original',white:'Blanco',left:'Izquierda',center:'Centro',right:'Derecha'};
+const choiceLabels={system:'Sistema','fira-sans':'Fira Sans',impact:'Impacto · imagen protagonista',editorial:'Editorial · panel de color',original:'Original',white:'Blanco',left:'Izquierda',center:'Centro',right:'Derecha',...Object.fromEntries([[NO_TEMA,'Sin tema'],...TEMA_IDS.map(id=>[id,temaDe(id).nombre])])};
 const status=message=>{$('status').textContent=message;};
 function select(id){
   selected=id;
@@ -157,3 +158,7 @@ if(!remote&&['localhost','127.0.0.1'].includes(location.hostname)&&['site','pres
   if(fixtureRecovery){recoveryBanner=document.createElement('section');recoveryBanner.id='fixture-recovery';recoveryBanner.className='fixture-recovery';recoveryBanner.setAttribute('aria-label','Recuperación del ensayo ficticio');const title=document.createElement('strong'),note=document.createElement('p');title.textContent='ENSAYO LOCAL · SOBREVIVE A RECARGAR EN ESTA PESTAÑA';note.setAttribute('role','status');recoveryBanner.append(title,note);$('conflict-panel').before(recoveryBanner);}
 }
 paintAll();
+
+// Sonido del tema: apagado por defecto, solo sintético y solo tras pulsar el botón (nunca autoplay).
+{const button=$('tema-sound');let stop=null;const off=()=>{if(stop){stop();stop=null;}button.setAttribute('aria-pressed','false');button.textContent='♪ Sonido del tema: apagado';};
+ if(button){off();button.onclick=()=>{if(stop)return off();const id=session().draft?.document?.components?.style?.tema;if(!temaDe(id)){status('Elige un tema de cine para escuchar su ambiente.');return;}stop=sonarTema(id);button.setAttribute('aria-pressed','true');button.textContent='♪ Sonido del tema: activado';};}}
