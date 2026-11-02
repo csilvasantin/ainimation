@@ -1,4 +1,5 @@
 import {PROJECT,validateProject,applyChanges} from './project.mjs';
+import {TEMA_OPCIONES,NONE as NO_TEMA} from './temas-cine.mjs';
 import {sourceThumbnail,thumbnailMedia,thumbnailFields,validateThumbnail} from './thumbnail-model.mjs';
 const LANGUAGES=['es','ca','en'];
 const limits={eyebrow:120,title:220,summary:900,objective:1200,blockTitle:180,message:900,detail:1600,closingTitle:220,action:700};
@@ -6,6 +7,7 @@ const text=value=>typeof value==='string'?value:'';
 // Acento por presentación y alineación por lámina (Carlos, 02-11-2026). Valores cerrados:
 // el generador los valida igual y el deck público los ignora; solo /pruebas los pinta.
 export const ACCENT=/^#[0-9a-f]{6}$/,ALIGNS=['left','center','right'],DEFAULT_ACCENT='#ffb000';
+const temaOf=ideas=>TEMA_OPCIONES.includes(ideas?.tema)?ideas.tema:NO_TEMA;
 const accentOf=ideas=>ACCENT.test(ideas?.accent||'')?ideas.accent:DEFAULT_ACCENT;
 const alignOf=(ideas,id)=>{const value=(ideas?.skeleton||[]).find(b=>b?.id===id)?.align;return ALIGNS.includes(value)?value:'left';};
 export function generatorProject(ideas,language='es') {
@@ -15,8 +17,10 @@ export function generatorProject(ideas,language='es') {
   if(!content||!Array.isArray(content.skeleton))throw Error('No hay contenido guardado en este idioma.');
   const components={},order=[],fields=[],bindings={};
   components.thumbnail={label:'Miniatura',...sourceThumbnail(ideas,language)};order.push('thumbnail');fields.push(...thumbnailFields());
-  components.style={label:'Estilo',accent:accentOf(ideas)};order.push('style');
+  components.style={label:'Estilo',accent:accentOf(ideas),tema:temaOf(ideas)};order.push('style');
   fields.push({id:'style-accent',label:'Color de acento',type:'color',path:['components','style','accent']});bindings['style-accent']={field:'accent'};
+  // Tema cinematográfico: la marca conserva el acento; el tema solo pone la atmósfera.
+  fields.push({id:'style-tema',label:'Tema de cine',type:'choice',options:[...TEMA_OPCIONES],path:['components','style','tema']});bindings['style-tema']={field:'tema'};
   const add=(id,label,values)=>{components[id]={label};order.push(id);for(const [key,value,native,limit,blockId]of values){
     components[id][key]=text(value);const fid=id+'-'+key;
     fields.push({id:fid,label:native==='hero.title'?'Titular de portada':native==='closing.title'?'Título del cierre':key==='title'?'Título':key==='message'?'Mensaje':key==='detail'?'Desarrollo':key==='eyebrow'?'Antetítulo':key==='summary'?'Entradilla':key==='action'?'Siguiente acción':'Objetivo',type:'text',path:['components',id,key],maxLength:limit});
@@ -44,12 +48,13 @@ export function generatorProject(ideas,language='es') {
     source:{adapter:'admiranext-presentation:'+language,id:ideas.client,revision:ideas.updatedAt},
     document:{brand:text(ideas.displayName)||ideas.client,language,components,order,bindings,thumbnailMedia:thumbnailMedia(ideas)},fields});
 }
-const isLayout=(project,change)=>['accent','skeleton.align'].includes(project.document.bindings[change.field]?.field);
+const isLayout=(project,change)=>['accent','tema','skeleton.align'].includes(project.document.bindings[change.field]?.field);
 function layoutEdits(project,changeset){
   const layout={},align=[];
   for(const change of changeset.changes.filter(c=>isLayout(project,c))){
     const binding=project.document.bindings[change.field];
-    if(binding.field==='accent'){if(!ACCENT.test(change.after))throw Error('El acento debe ser un color hexadecimal en minúsculas (#rrggbb).');layout.accent=change.after;}
+    if(binding.field==='tema'){if(!TEMA_OPCIONES.includes(change.after))throw Error('El tema no existe. Elige uno del catálogo.');layout.tema=change.after;}
+    else if(binding.field==='accent'){if(!ACCENT.test(change.after))throw Error('El acento debe ser un color hexadecimal en minúsculas (#rrggbb).');layout.accent=change.after;}
     else{if(!ALIGNS.includes(change.after))throw Error('La alineación debe ser izquierda, centro o derecha.');align.push({blockId:binding.blockId,value:change.after});}
   }
   if(align.length)layout.align=align;
@@ -79,7 +84,7 @@ export function confirmSaved(project,changeset,ack,ideas) {
   return actual;
 }
 export function generatorComponents(project) {
-  return project.document.order.map(id=>({id,label:project.document.components[id].label,description:id==='thumbnail'?'Imagen, titular y composición':id==='style'?'Color de acento de la presentación':id==='cover'?'Textos de portada':id==='closing'?'Cierre y siguiente acción':'Textos y alineación de la diapositiva'}));
+  return project.document.order.map(id=>({id,label:project.document.components[id].label,description:id==='thumbnail'?'Imagen, titular y composición':id==='style'?'Color de acento y tema de cine de la presentación':id==='cover'?'Textos de portada':id==='closing'?'Cierre y siguiente acción':'Textos y alineación de la diapositiva'}));
 }
 export function isGeneratorProject(project){return /^admiranext-presentation:(es|ca|en)$/.test(project?.source?.adapter||'');}
 export function generatorOrigin(origin){return ['https://www.admiranext.com','https://admiranext.com'].includes(origin)||/^http:\/\/(127\.0\.0\.1|localhost):\d+$/.test(origin||'');}

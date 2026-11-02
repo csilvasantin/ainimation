@@ -1,3 +1,4 @@
+import {pintarCineCanvas} from './temas-cine.mjs';
 import {THUMBNAIL_ART} from './thumbnail-model.mjs';
 const artwork=new URL('./assets/orbita-key-art.png',import.meta.url).href;
 const cache=new Map();
@@ -53,6 +54,8 @@ export async function drawThumbnail(canvas,project,{assets={},width=1280,strict=
   ctx.fillStyle=value.accent;ctx.fillRect(64,625,56,5);ctx.fillStyle='#e8e8ee';ctx.font='700 18px Arial, sans-serif';ctx.fillText(project.kind==='site'?'UNA IDEA PARA EXPLORAR':'UNA PROPUESTA PARA CONVERSAR',64,658);
   ctx.strokeStyle=value.accent;ctx.lineWidth=5;ctx.beginPath();ctx.moveTo(1170,638);ctx.lineTo(1210,598);ctx.lineTo(1177,598);ctx.moveTo(1210,598);ctx.lineTo(1210,631);ctx.stroke();
   if(logo){const mark=logoMark(logo,canvas.ownerDocument,value.logoStyle==='white'),scale=Math.min(220/mark.width,100/mark.height),w=mark.width*scale,h=mark.height*scale;ctx.drawImage(mark,1216-w,52,w,h);}
+  // Capa de cine sobre la miniatura (4K incluida). Grano con semilla fija para que la exportación sea estable.
+  {let seed=7;pintarCineCanvas(ctx,project.document.components.style?.tema,1280,720,()=>((seed=(seed*16807)%2147483647)/2147483647));}
   canvas.setAttribute('role','img');canvas.setAttribute('aria-label','Miniatura: '+value.title);return {fallback};
 }
 export function renderThumbnailPreview(root,project,{assets={},onStatus=()=>{}}={}) {
