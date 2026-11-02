@@ -1,19 +1,19 @@
 {
-  "version": "v.15.10.2026.r1.20:44",
-  "deployer": "MerovingioMacMini",
+  "version": "v.02.11.2026.r1.19:37",
+  "deployer": "MorfeoMacMini",
   "machine": "MacMini",
-  "signature": "MerovingioMacMini · MacMini",
-  "git": "ed79a24fad24761e471f7e416c6560eed497fdbc",
-  "gitShort": "ed79a24",
-  "gitFull": "ed79a24fad24761e471f7e416c6560eed497fdbc",
-  "dirty": false,
-  "returnTag": "retorno/pre-alsea-demo-20261015",
-  "previousVersion": "v.14.10.2026.r1.20:59",
-  "note": "Editor del quiosco en español para la demo de Alsea: título, brief y sello. El ensayo es la sala starbucks-qa.",
+  "signature": "MorfeoMacMini · MacMini",
+  "returnTag": "rollback-pre-modo-estudios-20261102",
+  "previousVersion": "v.15.10.2026.r1.20:44",
+  "note": "Presentaciones: 9 temas de cine nuevos para /modo (4 bases de estudio y 5 producciones de Universal), con el mismo módulo que admiranext.com.",
   "novedades": [
-    "La plantilla Quiosco de pedidos abre en español, con su título y su brief, y ya no deja The Last Signal en pantalla",
-    "El sello del editor coincide con esta versión. El punto de retorno es retorno/pre-alsea-demo-20261015"
+    "El editor de Presentaciones ofrece 9 temas de cine nuevos: Noche de estreno, Gran estudio clásico, Minimal de consola, Acción aérea, Aventura jurásica, Amarillo travieso, Escuela de magia, Viaje en el tiempo 85 y Mundo de plataformas",
+    "Cada tema evoca una atmósfera con colores, tipografía libre, grano y entrada propia; ningún texto visible nombra estudios ni películas, y el sonido sigue sonando solo tras un clic"
   ],
-  "sourceGit": "ed79a24fad24761e471f7e416c6560eed497fdbc",
-  "preparedAt": "2026-10-15T18:44:00+00:00"
+  "preparedAt": "2026-11-02T19:37:22+01:00",
+  "git": "2fab8a5d90b1ee47d549cd2222e6af15b099e1ac",
+  "gitShort": "2fab8a5",
+  "gitFull": "2fab8a5d90b1ee47d549cd2222e6af15b099e1ac",
+  "sourceGit": "2fab8a5d90b1ee47d549cd2222e6af15b099e1ac",
+  "dirty": false
 }
