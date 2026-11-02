@@ -34,11 +34,41 @@
     "Conector de textos del generador con guardado nativo y confirmación por relectura",
     "Miniatura por propuesta: imagen de portada del origen o ilustración inicial, texto/color/composición editables, comparación, JPG 3840×2160 bajo 2 MB y guardado por idioma con versión y relectura"
   ],
-  "nextVerticalSlice": "Comparar borrador conservado y revisión actual en un conflicto, incluyendo la miniatura",
+  "nextVerticalSlice": "Revisión del incremento en borrador antes de una futura publicación; la recuperación de proyectos reales sigue fuera del alcance.",
   "notImplementedYet": [
     "Edición visual de cualquier site real",
     "Adaptadores de repositorios y publicación de sites",
     "Editor de interacción y tiempos común"
   ],
-  "publishedExperience": "Inspector común en /presentaciones/; el conector real guarda textos y miniaturas. El reproductor se conserva en /presentaciones/reproductor/."
+  "publishedExperience": "Inspector común en /presentaciones/; el conector real guarda textos y miniaturas. El reproductor se conserva en /presentaciones/reproductor/.",
+  "conflictReviewDraft": {
+    "status": "draft-only",
+    "scope": "original/draft/current comparison and explicit per-field resolution onto current",
+    "sourceWritesOnPreflightConflict": 0,
+    "automaticWriteRetries": 0,
+    "keepsOriginalAndDraft": true,
+    "currentAssetsSeparated": true,
+    "manualResolution": "implemented with combined thumbnail and reversible rebase",
+    "historyIncludesSourceRevision": true,
+    "published": false
+  },
+  "fixtureRecoveryDraft": {
+    "status": "draft-only",
+    "enabledFor": "HTTP loopback conflict fixtures without remote origin/channel",
+    "storage": "sessionStorage, scoped to tab/kind/phase",
+    "restores": [
+      "draft",
+      "source revision",
+      "decisions",
+      "undo/redo history",
+      "panel state"
+    ],
+    "realClientPersistence": false,
+    "productionPersistence": false,
+    "storesAssetBytes": false,
+    "automaticWriteRetries": 0,
+    "preservesIncompatibleOrCorruptCopy": true,
+    "maxBytes": 180000,
+    "maxActions": 300
+  }
 }
