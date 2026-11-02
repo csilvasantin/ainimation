@@ -14,6 +14,23 @@
 [data-mb-tema="neon-lluvioso"] .mb-cine-entrada{animation-name:mb-cine-neon}
 [data-mb-tema="noir"] .mb-cine-entrada{animation-name:mb-cine-iris}
 [data-mb-tema="simetria-pastel"] .mb-cine-escena{text-align:center}
+/* Fase 1 · /modo (02-11-2026): entrada propia de las bases de estudio y de las producciones. */
+[data-mb-tema="noche-de-estreno"] .mb-cine-entrada{animation-name:mb-cine-zoom}
+[data-mb-tema="gran-estudio-clasico"] .mb-cine-entrada{animation-name:mb-cine-orbita}
+[data-mb-tema="minimal-de-consola"] .mb-cine-entrada{animation-name:mb-cine-linea}
+[data-mb-tema="accion-aerea"] .mb-cine-entrada{animation-name:mb-cine-diagonal}
+[data-mb-tema="aventura-jurasica"] .mb-cine-entrada{animation-name:mb-cine-temblor}
+[data-mb-tema="amarillo-travieso"] .mb-cine-entrada,[data-mb-tema="mundo-de-plataformas"] .mb-cine-entrada{animation-name:mb-cine-rebote}
+[data-mb-tema="escuela-de-magia"] .mb-cine-entrada{animation-name:mb-cine-chispa}
+[data-mb-tema="viaje-en-el-tiempo"] .mb-cine-entrada{animation-name:mb-cine-destello}
+@keyframes mb-cine-zoom{from{opacity:0;transform:scale(1.12)}to{opacity:1;transform:none}}
+@keyframes mb-cine-orbita{from{opacity:0;transform:perspective(800px) rotateX(18deg) translateY(16px)}to{opacity:1;transform:none}}
+@keyframes mb-cine-linea{from{opacity:0;clip-path:inset(0 100% 0 0)}to{opacity:1;clip-path:inset(0 0 0 0)}}
+@keyframes mb-cine-diagonal{from{opacity:0;transform:translateX(-24px) skewX(-8deg)}to{opacity:1;transform:none}}
+@keyframes mb-cine-temblor{0%{opacity:0;transform:translateY(8px)}30%{opacity:1;transform:translate(-2px,0)}45%{transform:translate(2px,-1px)}60%{transform:translate(-1px,1px)}100%{transform:none}}
+@keyframes mb-cine-rebote{0%{opacity:0;transform:translateY(-18px)}55%{opacity:1;transform:translateY(4px)}75%{transform:translateY(-2px)}100%{transform:none}}
+@keyframes mb-cine-chispa{from{opacity:0;filter:brightness(2.2) blur(2px)}to{opacity:1;filter:none}}
+@keyframes mb-cine-destello{0%{opacity:0}20%{opacity:1;filter:brightness(2)}35%{opacity:.4}50%{opacity:1;filter:none}100%{opacity:1}}
 @keyframes mb-cine-grano{0%{transform:translate(0,0)}33%{transform:translate(-2%,1%)}66%{transform:translate(1%,-2%)}100%{transform:translate(0,0)}}
 @keyframes mb-cine-entrada{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
 @keyframes mb-cine-neon{0%,20%,40%{opacity:0}10%,30%,100%{opacity:1}}
