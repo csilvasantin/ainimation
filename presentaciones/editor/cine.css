@@ -11,9 +11,10 @@
 [data-mb-tema] .mb-cine-escena::after{content:"";position:absolute;inset:0;pointer-events:none;z-index:1;background:var(--mb-cine-tinte,transparent);opacity:var(--mb-cine-tinte-fuerza,0);mix-blend-mode:soft-light}
 [data-mb-tema] .mb-cine-escena>*{position:relative;z-index:3}
 [data-mb-tema] .mb-cine-entrada{animation:mb-cine-entrada var(--mb-cine-duracion,800ms) ease-out both}
-[data-mb-tema="neon-lluvioso"] .mb-cine-entrada{animation-name:mb-cine-neon}
-[data-mb-tema="noir"] .mb-cine-entrada{animation-name:mb-cine-iris}
 [data-mb-tema="simetria-pastel"] .mb-cine-escena{text-align:center}
+/* Fase 1 · /modo (02-11-2026): entrada propia de cada producción publicada. */
+[data-mb-tema="aventura-jurasica"] .mb-cine-entrada{animation-name:mb-cine-temblor}
+@keyframes mb-cine-temblor{0%{opacity:0;transform:translateY(8px)}30%{opacity:1;transform:translate(-2px,0)}45%{transform:translate(2px,-1px)}60%{transform:translate(-1px,1px)}100%{transform:none}}
 @keyframes mb-cine-grano{0%{transform:translate(0,0)}33%{transform:translate(-2%,1%)}66%{transform:translate(1%,-2%)}100%{transform:translate(0,0)}}
 @keyframes mb-cine-entrada{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
 @keyframes mb-cine-neon{0%,20%,40%{opacity:0}10%,30%,100%{opacity:1}}
