@@ -1,14 +1,16 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
-import {TEMAS,TEMA_IDS,contraste,pintarCineCanvas,sonarTema} from '../presentaciones/editor/temas-cine.mjs';
+import {TEMAS,TEMA_IDS,ESTUDIOS,resolverEstudio,contraste,pintarCineCanvas,sonarTema} from '../presentaciones/editor/temas-cine.mjs';
 import {generatorProject,nativeEdits,confirmSaved} from '../presentaciones/editor/generator.mjs';
 import {editField,changesBetween} from '../presentaciones/editor/project.mjs';
 const read=f=>readFile(new URL('../'+f,import.meta.url),'utf8');
-const PROHIBIDO=/netflix|stranger\s*things|wednesday|merlina|al\s+este\s+del\s+ed[eé]n|east\s+of\s+eden|reina\s+del\s+flow|bridgerton|logo\s+oficial/i;
+// Ni la plataforma, ni los estudios de /modo, ni las series o películas de referencia (02-11-2026).
+const PROHIBIDO=/netflix|stranger\s*things|wednesday|merlina|al\s+este\s+del\s+ed[eé]n|east\s+of\s+eden|reina\s+del\s+flow|bridgerton|logo\s+oficial|universal|sony|playstation|skydance|jurassic|minions?\b|harry\s*potter|hogwarts|wizarding|regreso\s+al\s+futuro|back\s*(?:to|2)\s*the\s*future|nintendo|super\s*mario/i;
 const ideas=()=>({client:'sample-proposal',updatedAt:'r1',accent:'#00aa11',hero:{title:'Título'},objective:'O',skeleton:[{id:'a',title:'A',message:'m',align:'center'},{id:'b',title:'B'}],closing:{title:'C',action:'X'},translations:{}});
-test('5 temas, lista cerrada y AA',()=>{
-  assert.deepEqual(TEMA_IDS,['ochenta-mundo-del-reves','academia-gotica','epica-familiar-1950','urbano-colombiano-neon','regencia-romantica']);
+test('6 temas, lista cerrada y AA',()=>{
+  // /modo (02-11-2026): Aventura jurásica es la única producción publicada (Jobs); el resto espera en preview.
+  assert.deepEqual(TEMA_IDS,['ochenta-mundo-del-reves','academia-gotica','epica-familiar-1950','urbano-colombiano-neon','regencia-romantica','aventura-jurasica']);
   for(const t of Object.values(TEMAS)){assert.ok(contraste(t.colores.texto,t.colores.fondo)>=4.5);assert.ok(contraste(t.colores.textoSuave,t.colores.fondo)>=4.5);assert.ok(!('acento' in t.colores));}
 });
 test('ningún texto visible nombra la plataforma ni las series',async()=>{
@@ -31,4 +33,12 @@ test('la capa de canvas pinta y el sonido es sintético y solo bajo demanda',asy
   assert.equal(typeof sonarTema('academia-gotica',undefined),'function');
   const html=await read('presentaciones/editor/index.html');assert.match(html,/id="tema-sound"[^>]*aria-pressed="false"/);assert.doesNotMatch(html,/<audio|autoplay/i);
   const mod=await read('presentaciones/editor/temas-cine.mjs');assert.doesNotMatch(mod,/\.mp3|\.ogg|\.wav|new Audio\(/);
+});
+test('/modo (02-11-2026): universal jurassic lleva a «Aventura jurásica» del editor; el comando es lo único con nombres reales',()=>{
+  assert.deepEqual(Object.keys(ESTUDIOS),['universal']);assert.deepEqual(Object.keys(ESTUDIOS.universal.producciones),['jurassic']);
+  assert.equal(resolverEstudio('universal jurassic world').tema,'aventura-jurasica');
+  assert.equal(resolverEstudio('jurasic').tema,'aventura-jurasica');
+  assert.deepEqual(resolverEstudio('universal'),{error:'base',estudio:'universal'});
+  assert.equal(TEMAS['aventura-jurasica'].nombre,'Aventura jurásica');
+  assert.ok(generatorProject(ideas()).fields.find(f=>f.id==='style-tema').options.includes('aventura-jurasica'));
 });
