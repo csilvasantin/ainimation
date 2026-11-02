@@ -35,6 +35,9 @@ function generatorPreview(root,project,{selected,onSelect,interactive}){
   const scene=make(interactive?'button':'div','preview-component generator-scene','');
   if(interactive){scene.type='button';scene.dataset.component=selected;scene.setAttribute('aria-label','Seleccionar '+node.label);scene.onclick=()=>onSelect(selected);}
   const keys=project.fields.filter(f=>f.path[1]===selected).map(f=>f.path[2]);
-  for(const key of keys){const text=node[key];if(!text)continue;const cls=key==='title'?'preview-title':key==='eyebrow'?'preview-eyebrow':'preview-message';scene.append(make('span',cls,text));}
+  // Acento y alineación son estilo validado (#rrggbb y lista cerrada), nunca texto.
+  const accent=project.document.components.style?.accent;if(/^#[0-9a-f]{6}$/.test(accent||''))scene.style.borderLeft='6px solid '+accent;
+  if(['left','center','right'].includes(node.align))scene.style.textAlign=node.align;
+  for(const key of keys){if(key==='align'||key==='accent')continue;const text=node[key];if(!text)continue;const cls=key==='title'?'preview-title':key==='eyebrow'?'preview-eyebrow':'preview-message';scene.append(make('span',cls,text));}
   root.append(header,scene,make('div','preview-footer','VISTA DE CONTENIDO · EL DISEÑO ORIGINAL SE CONSERVA EN EL GENERADOR'));
 }

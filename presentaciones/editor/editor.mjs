@@ -32,7 +32,7 @@ function rememberFixture(){
   paintRecovery();
 }
 const componentList=()=>isGeneratorProject(session().draft)?generatorComponents(session().draft):components;
-const choiceLabels={system:'Sistema','fira-sans':'Fira Sans',impact:'Impacto · imagen protagonista',editorial:'Editorial · panel de color',original:'Original',white:'Blanco'};
+const choiceLabels={system:'Sistema','fira-sans':'Fira Sans',impact:'Impacto · imagen protagonista',editorial:'Editorial · panel de color',original:'Original',white:'Blanco',left:'Izquierda',center:'Centro',right:'Derecha'};
 const status=message=>{$('status').textContent=message;};
 function select(id){
   selected=id;
