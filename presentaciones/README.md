@@ -1,3 +1,22 @@
+# Presentaciones
+
+Hub de Presentaciones en https://www.ainimation.studio/presentaciones/ con cuatro opciones en orden alfabético:
+
+| Opción | Estado | Ruta |
+|---|---|---|
+| A. Afinar (editor fino) | Disponible | `presentaciones/editor/` |
+| B. Bucle de kiosco | Próximamente | `presentaciones/reproductor/` |
+| C. Con interactivos dentro | Próximamente | |
+| D. MCP y API para agentes | Próximamente | |
+
+- `index.html` + `hub.css`: el hub (ES/EN).
+- `editor/`: el editor fino. Antes se servía también en `/presentaciones/`; ahora el hub enlaza a él de forma visible.
+- `reproductor/`, `player.*`, `contract.mjs`, `director.mjs`: reproductor y puente con Director.
+
+Test: `node --test tests/presentaciones-hub.test.mjs`.
+
+---
+
 # AINimation · Presentaciones y sites
 
 `/presentaciones/` abre el inspector común. Las muestras ficticias permiten
