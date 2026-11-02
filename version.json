@@ -1,19 +1,19 @@
 {
-  "version": "v.15.10.2026.r1.20:44",
-  "deployer": "MerovingioMacMini",
+  "version": "v.02.11.2026.r1.19:42",
+  "deployer": "MorfeoMacMini",
   "machine": "MacMini",
-  "signature": "MerovingioMacMini · MacMini",
-  "git": "ed79a24fad24761e471f7e416c6560eed497fdbc",
-  "gitShort": "ed79a24",
-  "gitFull": "ed79a24fad24761e471f7e416c6560eed497fdbc",
+  "signature": "MorfeoMacMini · MacMini",
+  "git": "466383d0263a207e3a79b82425e607d0ca29adb4",
+  "gitShort": "466383d",
+  "gitFull": "466383d0263a207e3a79b82425e607d0ca29adb4",
   "dirty": false,
-  "returnTag": "retorno/pre-alsea-demo-20261015",
-  "previousVersion": "v.14.10.2026.r1.20:59",
-  "note": "Editor del quiosco en español para la demo de Alsea: título, brief y sello. El ensayo es la sala starbucks-qa.",
+  "returnTag": "rollback-pre-modo-estudios-20261102",
+  "previousVersion": "v.15.10.2026.r1.20:44",
+  "note": "Presentaciones: tema de cine «Aventura jurásica» para /modo universal jurassic, con el mismo módulo que admiranext.com.",
   "novedades": [
-    "La plantilla Quiosco de pedidos abre en español, con su título y su brief, y ya no deja The Last Signal en pantalla",
-    "El sello del editor coincide con esta versión. El punto de retorno es retorno/pre-alsea-demo-20261015"
+    "El editor de Presentaciones ofrece el tema de cine Aventura jurásica: selva, ámbar y rojo de alerta, titular robusto y grano de película de aventuras",
+    "Es el primer tema de /modo: evoca la atmósfera sin nombrar estudios ni películas, y el sonido sigue sonando solo tras un clic"
   ],
-  "sourceGit": "ed79a24fad24761e471f7e416c6560eed497fdbc",
-  "preparedAt": "2026-10-15T18:44:00+00:00"
+  "sourceGit": "466383d0263a207e3a79b82425e607d0ca29adb4",
+  "preparedAt": "2026-11-02T19:42:08+01:00"
 }
