@@ -1,4 +1,4 @@
-import {mountCafeEditor} from './interactive-cafeteria-editor.mjs?v=cafe-stock-1';
+import {mountCafeEditor} from './interactive-cafeteria-editor.mjs?v=cafe-stock-picker-1';
 import {fromDirector,saveDirectorInteractive,restoreDirectorWorkspace} from './interactive-director-bridge.mjs?v=cafe-stock-1';
 import {playerHtml} from './interactive-project.mjs?v=cafe-stock-1';
 const q=new URLSearchParams(location.search),id=q.get('interactive');

@@ -1,4 +1,4 @@
-import {mountCafeEditor} from './interactive-cafeteria-editor.mjs?v=cafe-stock-1';
+import {mountCafeEditor} from './interactive-cafeteria-editor.mjs?v=cafe-stock-picker-1';
 import {cafeteriaCatalog} from './interactive-cafeteria.mjs?v=cafe-stock-1';
 import {createDemoCopy} from './interactive-demo-project.mjs';
 import {sortedImages,prepareImage,projectFromImages,appendProjectImages,MAX_IMAGES} from './interactive-image-import.mjs';
