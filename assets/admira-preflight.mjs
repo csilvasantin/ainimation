@@ -4,6 +4,7 @@ const issue=(level,message)=>({level,message});
 export function inspectDirector(plan,{markers=plan.markers||[],compileScripts}={}){
  const issues=[],resources=[];let actions=0;
  const cast=plan.cast||[],sprites=[...cast,...(plan.stageItems||[])],names=new Set(sprites.map(s=>s.spriteName).filter(Boolean)),sounds=new Set(cast.filter(s=>s.mediaType==='audio').map(s=>s.spriteName||s.name||s.id).filter(Boolean)),marks=new Set(markers.map(m=>m.label));
+ for(const product of plan.cafeteria?.products||[])if(product.image)resources.push({name:product.name,src:product.image.src,type:'image'});
  for(const member of cast){if(member.src)resources.push({name:member.name||member.src,src:member.src,type:member.mediaType==='animation'?'video':member.mediaType||'image'});else if(member.onStage)issues.push(issue('error','Falta el recurso de '+(member.name||'un miembro del Cast')+'.'));}
  if(!resources.length&&!(plan.stageItems||[]).length)issues.push(issue('error','La pieza no tiene recursos ni elementos en Stage.'));
  let rules=(plan.rules||[]).filter(r=>r.enabled!==false);
@@ -22,6 +23,7 @@ export function inspectStructured(project){
  const issues=[],resources=[],ids=new Set((project.scenes||[]).map(s=>s.id));let actions=0;
  if(!ids.has(project.start))issues.push(issue('error','La pantalla inicial no existe.'));
  for(const scene of project.scenes||[]){if(scene.image)resources.push({name:scene.title||scene.id,src:scene.image,type:'image'});for(const b of [...(scene.buttons||[]),...(scene.hotspots||[])]){actions++;if(!ids.has(b.target))issues.push(issue('error','Destino inexistente en '+(scene.title||scene.id)+': '+b.target));if(!b.label)issues.push(issue('warning','Hay una acción sin etiqueta.'));}}
+ if(project.presentation==='cafeteria')for(const product of project.cafeteria?.products||[])if(product.image)resources.push({name:product.name,src:product.image.src,type:'image'});
  if(!actions)issues.push(issue('warning','No hay acciones de navegación. Comprueba si es el comportamiento esperado.'));
  return{issues,resources,actions};
 }

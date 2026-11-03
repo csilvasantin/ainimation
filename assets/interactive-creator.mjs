@@ -1,5 +1,5 @@
-import {mountCafeEditor} from './interactive-cafeteria-editor.mjs?v=director-cafe-3';
-import {cafeteriaCatalog} from './interactive-cafeteria.mjs?v=director-cafe-3';
+import {mountCafeEditor} from './interactive-cafeteria-editor.mjs?v=cafe-stock-1';
+import {cafeteriaCatalog} from './interactive-cafeteria.mjs?v=cafe-stock-1';
 import {createDemoCopy} from './interactive-demo-project.mjs';
 import {sortedImages,prepareImage,projectFromImages,appendProjectImages,MAX_IMAGES} from './interactive-image-import.mjs';
 // Keep the new synchronization controls and their scope implementation together.
@@ -12,10 +12,10 @@ const authModule=new URL('./interactive-auth.mjs',import.meta.url);authModule.se
 const {mountGoogleAuth}=await import(authModule.href);
 const directorWorkspaceModule=new URL('./interactive-director-workspace.mjs',import.meta.url);directorWorkspaceModule.search=new URL(import.meta.url).search;
 const {mountDirectorWorkspace}=await import(directorWorkspaceModule.href);
-import {prepareDirector,restoreDirectorWorkspace} from './interactive-director-bridge.mjs?v=director-cafe-3';
+import {prepareDirector,restoreDirectorWorkspace} from './interactive-director-bridge.mjs?v=cafe-stock-1';
 const deliveryModule=new URL('./interactive-delivery.mjs?v=five-touch-1',import.meta.url);deliveryModule.search=new URL(import.meta.url).search;
 const {mountInteractiveDelivery}=await import(deliveryModule.href);
-import {template,validate,playerHtml} from './interactive-project.mjs?v=director-cafe-3';
+import {template,validate,playerHtml} from './interactive-project.mjs?v=cafe-stock-1';
 const libraryModule=new URL('./interactive-library.mjs',import.meta.url);libraryModule.search=new URL(import.meta.url).search;
 const {loadLibrary,readLibrary,updateProject,createProject,openProject,duplicateProject,renameProject,LIBRARY_KEY}=await import(libraryModule.href);
 const $=id=>document.getElementById(id),status=$('status');

@@ -1,4 +1,4 @@
-import {validate} from './interactive-project.mjs?v=director-cafe-3';
+import {validate} from './interactive-project.mjs?v=cafe-stock-1';
 import {readLibrary,updateProject} from './interactive-library.mjs';
 const FILM='ainimation-film-plan',MARKERS='ainimation-timeline-markers';
 const box=(x,y,w,h,fontSize=4)=>({x,y,w,h,fontSize,color:'transparent',textColor:'#ffffff',radius:0});
