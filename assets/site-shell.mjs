@@ -1,3 +1,4 @@
+import {attachPanelResize} from './panel-resize.mjs';
 const ICONS = {
   options:'<path d="M2 3h12M2 7h12M2 11h12"/>',
   advanced:'<rect x="1" y="1" width="14" height="12"/><path d="M10 1v12"/>',
@@ -14,7 +15,7 @@ export function mountQuadraticHeader(header, {doc=header.ownerDocument, win=doc.
   const t = (es,en) => (win.AINLanguage?.read() || doc.documentElement.lang) === 'en' ? en : es;
   const labelled = (node,es,en) => { node.dataset.shellEs=es; node.dataset.shellEn=en; node.textContent=t(es,en); return node; };
   const create = (tag,es,en) => labelled(doc.createElement(tag),es,en);
-  const order=[], controls={}, layers={};
+  const order=[], controls={}, layers={}, resizers=[];
   header.classList.add('ain-quad-header');
   let tools=header.querySelector('.ain-quad-tools');
   if (!tools) { tools=doc.createElement('div'); tools.className='ain-quad-tools'; header.append(tools); }
@@ -22,6 +23,7 @@ export function mountQuadraticHeader(header, {doc=header.ownerDocument, win=doc.
   function measure() {
     const top=Math.max(0,header.getBoundingClientRect().bottom);
     for (const layer of Object.values(layers)) layer.style.setProperty('--ain-quad-top',top+'px');
+    for (const resizer of resizers) resizer.sync();
   }
   function set(name,open,focus=true) {
     const layer=layers[name], button=controls[name];
@@ -45,6 +47,7 @@ export function mountQuadraticHeader(header, {doc=header.ownerDocument, win=doc.
     button.innerHTML='<svg viewBox="0 0 16 14" aria-hidden="true">'+ICONS[name]+'</svg>';
     button.setAttribute('aria-controls',layer.id);button.setAttribute('aria-expanded','false');controls[name]=button;
     button.onclick=()=>set(name,layer.hidden);
+    resizers.push(attachPanelResize(layer,{edge:({options:'right',advanced:'left',expert:'top'})[name],name,win,getTop:()=>Math.max(0,header.getBoundingClientRect().bottom)}));
     if(!buttons[name]) { if(name==='options')header.prepend(button);else tools.append(button); }
   }
   if(!panels.options) {
@@ -94,14 +97,21 @@ export function mountQuadraticHeader(header, {doc=header.ownerDocument, win=doc.
   const observer=typeof win.ResizeObserver==='function'?new win.ResizeObserver(measure):null;observer?.observe(header);
   if(!tools.children.length)tools.remove();
   translate();measure();
-  return header.ainQuadraticUI={show:name=>set(name,true),hide:name=>set(name,false),isOpen:name=>Boolean(layers[name]&&!layers[name].hidden),panels:layers,buttons:controls,destroy(){observer?.disconnect();doc.removeEventListener('keydown',onKey,true);win.removeEventListener('ainimation:language',translate);win.removeEventListener('resize',measure);doc.removeEventListener('scroll',measure,true);}};
+  return header.ainQuadraticUI={show:name=>set(name,true),hide:name=>set(name,false),isOpen:name=>Boolean(layers[name]&&!layers[name].hidden),panels:layers,buttons:controls,destroy(){for(const resizer of resizers)resizer.destroy();observer?.disconnect();doc.removeEventListener('keydown',onKey,true);win.removeEventListener('ainimation:language',translate);win.removeEventListener('resize',measure);doc.removeEventListener('scroll',measure,true);}};
 }
 
 export function mountSiteShell(doc=document,win=window) {
   for(const header of doc.querySelectorAll('[data-ain-shell]')) {
     if(header.ainQuadraticUI)continue;
     const page=header.dataset.ainShell;
-    if(page==='native')continue; // Sites and Produce keep their existing real panels.
+    if(page==='native'){
+      // Keep the native toggles and real controls in Sites and Produce.
+      for(const [name,rail] of [['options','left'],['advanced','right'],['expert','bottom']]){
+        const panel=doc.getElementById(name+'-panel')||doc.querySelector('.rail-'+rail);
+        if(panel){panel.id||='produce-'+rail;attachPanelResize(panel,{edge:({options:'right',advanced:'left',expert:'top'})[name],name,win,getTop:()=>Math.max(0,header.getBoundingClientRect().bottom)});}
+      }
+      continue;
+    }
     if(page==='director'&&new URLSearchParams(win.location.search).get('mode')==='capsula')continue;
     const panels={};
     if(page==='presentation-editor') {
