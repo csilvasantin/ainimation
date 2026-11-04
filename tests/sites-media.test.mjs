@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {JSDOM} from 'jsdom';
 import {prepareLocalFile,createMediaLibrary,verifyMediaRecords,sniffMedia,importMedia,exportMedia,exportMediaURLs,referencedMedia,MAX_IMAGE,MAX_VIDEO,MAX_LIBRARY} from '../sites/media.mjs';
-import {createSiteSession} from '../sites/model.mjs';
+import {createSiteSession,validateSite,DEFAULT_MEDIA_WIDTH,MIN_MEDIA_WIDTH,MAX_MEDIA_WIDTH} from '../sites/model.mjs';
 import {mediaDropReplacement} from '../sites/drop.mjs';
 const dom=new JSDOM('<!doctype html>');globalThis.window=dom.window;globalThis.DOMParser=dom.window.DOMParser;
 globalThis.FileReader=class {readAsDataURL(blob){blob.arrayBuffer().then(bytes=>{this.result='data:'+blob.type+';base64,'+Buffer.from(bytes).toString('base64');this.onload();}).catch(()=>this.onerror());}};
@@ -180,4 +180,39 @@ test('el orden de medios locales se conserva al guardar, empaquetar y exportar s
     const doc=new DOMParser().parseFromString(buildDocument(restored.draft,options),'text/html');assert.deepEqual([...doc.querySelectorAll('#ain-added-media [data-ain-id]')].map(e=>e.dataset.ainId),order);
     const el=doc.querySelector('[data-ain-id="'+last+'"]');assert.equal(el.alt,'Foto final');assert.equal(el.dataset.ainAnimation,'rise');
   }
+});
+test('el ancho de imagen y vídeo añadido cambia en un paso reversible y el valor inicial no crea cambios',()=>{
+  for(const type of ['image','video']){
+    const s=createSiteSession(project()),id=s.addMedia(type,'https://media.org/'+(type==='image'?'cover.jpg':'clip.mp4')),before=s.draft;
+    assert.equal(s.canSetMediaWidth(id),true);s.edit(id,{maxWidth:DEFAULT_MEDIA_WIDTH});assert.deepEqual(s.draft,before);s.undo();assert.deepEqual(s.draft,s.original);s.redo();
+    s.edit(id,{maxWidth:320});const after=s.draft;assert.deepEqual(after.items.find(i=>i.id===id),{...before.items.find(i=>i.id===id),maxWidth:320});
+    s.undo();assert.deepEqual(s.draft,before);s.redo();assert.deepEqual(s.draft,after);s.edit(id,{maxWidth:DEFAULT_MEDIA_WIDTH});assert.deepEqual(s.draft,before);s.undo();assert.deepEqual(s.draft,after);
+  }
+});
+test('el ancho rechaza valores vacíos, fracciones, límites y paquetes manipulados sin cambios parciales',()=>{
+  const s=createSiteSession(project()),id=s.addMedia('image','https://media.org/cover.jpg');
+  for(const maxWidth of [MIN_MEDIA_WIDTH,MAX_MEDIA_WIDTH]){s.edit(id,{maxWidth});assert.equal(s.draft.items.find(i=>i.id===id).maxWidth,maxWidth);}
+  const before=s.draft;
+  for(const maxWidth of [0,MIN_MEDIA_WIDTH-1,MAX_MEDIA_WIDTH+1,1.5,NaN,Infinity,'320','320px;position:fixed',null,undefined]){
+    assert.throws(()=>s.edit(id,{maxWidth}),/ancho/);assert.deepEqual(s.draft,before);const draft=structuredClone(before);draft.items.find(i=>i.id===id).maxWidth=maxWidth;assert.throws(()=>validateSite(draft),/ancho/);
+  }
+  s.undo();assert.equal(s.draft.items.find(i=>i.id===id).maxWidth,MIN_MEDIA_WIDTH);
+});
+test('el ancho no se edita ni se aplica a originales, otros tipos o marcas de inserción falsas',()=>{
+  const p=project();p.html=p.html.replace('</body>','<img data-ain-id="ain-1" style="width:123px;height:auto"></body>');p.items.push({...p.items[0],id:'ain-1',type:'image',value:'https://media.org/original.jpg',inserted:true});
+  const draft=structuredClone(p);draft.items.push({...p.items[1],id:'ain-2',inserted:'true'},{...p.items[0],id:'ain-3',inserted:true},{...p.items[1],id:'ain-4',type:'background'});const s=createSiteSession(p,draft),before=s.draft;
+  for(const id of ['ain-0','ain-1','ain-2','ain-3','ain-4']){assert.equal(s.canSetMediaWidth(id),false);assert.throws(()=>s.edit(id,{maxWidth:320}),/no editable/);}
+  assert.deepEqual(s.draft,before);assert.deepEqual(s.original,p);const doc=new DOMParser().parseFromString(buildDocument(s.original),'text/html');assert.equal(doc.querySelector('img').style.width,'123px');
+  for(const id of ['ain-0','ain-2','ain-3','ain-4']){const bad=structuredClone(draft);bad.items.find(i=>i.id===id).maxWidth=320;assert.throws(()=>validateSite(bad),/ancho/);}
+});
+test('guardar, duplicar, ordenar y exportar conservan anchos y archivos sin cambiar animaciones ni referencias',async()=>{
+  const a=await image(),v=await video(),lib=createMediaLibrary([a,v]),s=createSiteSession(project()),[photo,clip]=s.addMediaBatch([{type:'image',value:a.id},{type:'video',value:v.id}]);
+  s.edit(photo,{alt:'Foto de prueba',animation:'rise',duration:1.8,delay:.2});const before=s.draft;s.edit(photo,{maxWidth:320});s.edit(clip,{maxWidth:480});
+  for(const old of before.items){const now=s.draft.items.find(i=>i.id===old.id),{maxWidth,...rest}=now;assert.deepEqual(rest,old);}
+  const copy=s.duplicateMedia(photo);s.moveMedia(copy,1);assert.equal(s.draft.items.find(i=>i.id===copy).maxWidth,320);
+  const entries=await exportMedia(lib,referencedMedia(s.original,s.draft));assert.equal(entries.length,2);assert.equal(lib.size,a.size+v.size);
+  const reopened=await importMedia(JSON.parse(JSON.stringify(entries)),{inspect:skip}),restored=createSiteSession(s.original,JSON.parse(JSON.stringify(s.draft)));assert.deepEqual(restored.draft,s.draft);
+  const html=buildDocument(restored.draft,{media:await exportMediaURLs(reopened,restored.draft)}),doc=new DOMParser().parseFromString(html,'text/html');
+  for(const [id,width]of [[photo,320],[clip,480],[copy,320]]){const el=doc.querySelector('[data-ain-id="'+id+'"]');assert.equal(el.style.width,'min(100%, '+width+'px)');assert.equal(el.style.height,'auto');}
+  assert.equal(doc.querySelectorAll('script').length,0);const legacy=createSiteSession(project());const id=legacy.addMedia('image','https://media.org/old.jpg');const oldDoc=new DOMParser().parseFromString(buildDocument(legacy.draft),'text/html');assert.equal(oldDoc.querySelector('[data-ain-id="'+id+'"]').style.width,'min(100%, 640px)');
 });

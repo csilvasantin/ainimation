@@ -1,5 +1,5 @@
 import {cleanDocument,cssURLs} from './import.mjs';
-import {validateSite} from './model.mjs';
+import {validateSite,DEFAULT_MEDIA_WIDTH} from './model.mjs?v=20261104-width-1';
 import {localReference} from './media.mjs';
 import {fileDropBridge} from './drop.mjs?v=20261104-replace-1';
 import {previewSoundBridge} from './sound.mjs?v=20261104-sound-1';
@@ -34,7 +34,7 @@ export function buildDocument(input,{channel='',interactive=false,dropChannel=''
     let el=doc.querySelector('[data-ain-id="'+item.id+'"]');
     if(!el&&item.inserted===true&&['image','video'].includes(item.type)){
       let area=doc.getElementById('ain-added-media');if(!area){area=doc.createElement('section');area.id='ain-added-media';area.style.cssText='position:relative;inset:auto;padding:48px 6vw;background:#071b14;display:flex;gap:24px;flex-wrap:wrap';doc.body.append(area);}
-      el=doc.createElement(item.type==='image'?'img':'video');el.setAttribute('data-ain-id',item.id);el.style.cssText='display:block;position:relative;inset:auto;width:min(100%,640px);height:auto;object-fit:contain';area.append(el);
+      el=doc.createElement(item.type==='image'?'img':'video');el.setAttribute('data-ain-id',item.id);el.style.cssText='display:block;position:relative;inset:auto;width:min(100%,'+(item.maxWidth??DEFAULT_MEDIA_WIDTH)+'px);height:auto;object-fit:contain';area.append(el);
     }
     if(!el)throw Error('Falta un componente en la copia.');
     if(interactive&&localReference(item.value)){el.setAttribute('data-ain-local',item.value);el.setAttribute('data-ain-local-type',item.type);}

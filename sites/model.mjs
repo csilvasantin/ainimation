@@ -1,5 +1,7 @@
 import {localReference} from './media.mjs';
 export const ANIMATIONS=['none','fade','rise','zoom','float'];
+export const DEFAULT_MEDIA_WIDTH=640,MIN_MEDIA_WIDTH=80,MAX_MEDIA_WIDTH=3840;
+const validMediaWidth=value=>Number.isInteger(value)&&value>=MIN_MEDIA_WIDTH&&value<=MAX_MEDIA_WIDTH;
 export function normalizeURL(value){
   const u=new URL(/^[a-z]+:/i.test(value.trim())?value.trim():'https://'+value.trim());
   if(u.protocol!=='https:'||u.username||u.password)throw Error('Introduce una URL HTTPS.');
@@ -22,6 +24,7 @@ export function validateSite(p){
        !ANIMATIONS.includes(item.animation)||!Number.isFinite(item.duration)||item.duration<.2||item.duration>10||
        !Number.isFinite(item.delay)||item.delay<0||item.delay>10||typeof item.alt!=='string'||item.alt.length>1000)throw Error('El site contiene un componente incompatible.');
     if(['image','video','background'].includes(item.type)&&item.value)mediaReference(item.value);
+    if(Object.hasOwn(item,'maxWidth')&&(item.inserted!==true||!['image','video'].includes(item.type)||!validMediaWidth(item.maxWidth)))throw Error('El ancho de un medio añadido debe ser un entero entre 80 y 3840 píxeles.');
     ids.add(item.id);
   }
   return structuredClone(p);
@@ -38,11 +41,12 @@ export function createSiteSession(input,saved){
     return -1;
   };
   return {get draft(){return read();},get original(){return structuredClone(original);},get canUndo(){return cursor>0;},get canRedo(){return cursor<states.length-1;},
-    canRemoveMedia:addedMedia,canDuplicateMedia:addedMedia,
+    canRemoveMedia:addedMedia,canDuplicateMedia:addedMedia,canSetMediaWidth:addedMedia,
     canMoveMedia:(id,direction)=>mediaNeighbor(id,direction)>=0,
     edit(id,patch){const p=read(),item=p.items.find(i=>i.id===id);if(!item)throw Error('Componente desconocido.');
-      const keys=['value','animation','duration','delay','alt'];if(Object.keys(patch).some(k=>!keys.includes(k)))throw Error('Propiedad no editable.');
-      Object.assign(item,patch);validateSite(p);if(JSON.stringify(p)===JSON.stringify(states[cursor]))return;
+      const keys=['value','animation','duration','delay','alt',...(addedMedia(id)?['maxWidth']:[])];if(Object.keys(patch).some(k=>!keys.includes(k)))throw Error('Propiedad no editable.');
+      if(Object.hasOwn(patch,'maxWidth')&&!validMediaWidth(patch.maxWidth))throw Error('Introduce un ancho entero entre 80 y 3840 píxeles.');
+      Object.assign(item,patch);if(Object.hasOwn(patch,'maxWidth')&&patch.maxWidth===DEFAULT_MEDIA_WIDTH)delete item.maxWidth;validateSite(p);if(JSON.stringify(p)===JSON.stringify(states[cursor]))return;
       states=states.slice(0,cursor+1);states.push(p);if(states.length>100)states.shift();cursor=states.length-1;},
     addMedia(type,value){return this.addMediaBatch([{type,value}])[0];},
     addMediaBatch(media){if(!Array.isArray(media)||!media.length||media.length>10)throw Error('Selecciona de uno a diez archivos.');const p=read();if(p.items.length+media.length>500)throw Error('Límite de componentes alcanzado.');
