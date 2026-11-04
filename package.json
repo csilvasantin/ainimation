@@ -10,7 +10,9 @@
     "verify:admira-review": "node scripts/test-admira-preflight.cjs",
     "verify:admira-resource-updates": "node scripts/test-admira-resource-updates.cjs",
     "verify:admira-format-package": "node scripts/test-admira-format-package.cjs",
-    "verify:capsula": "node --test test/capsula-editor.browser.test.mjs"
+    "verify:capsula": "node --test test/capsula-editor.browser.test.mjs",
+    "verify:sites": "node --test tests/sites-import.test.mjs",
+    "preview:sites": "node scripts/sites-preview.mjs"
   },
   "repository": {
     "type": "git",
@@ -24,6 +26,8 @@
   },
   "homepage": "https://github.com/csilvasantin/ainimation#readme",
   "devDependencies": {
+    "dompurify": "^3.4.17",
+    "jsdom": "^30.1.3",
     "playwright": "^1.60.0"
   }
 }
