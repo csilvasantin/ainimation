@@ -9,17 +9,38 @@ function fixture(t,edge='right'){
   const dom=new JSDOM('<html lang="es"><body><aside id="panel"></aside><main><input value="Proyecto intacto"><iframe></iframe></main></body></html>',{url:'https://www.ainimation.studio/'});
   const win=dom.window,doc=win.document,panel=doc.querySelector('aside');
   Object.defineProperty(win,'localStorage',{get(){throw Error('Do not persist panel size');}});
-  let top=70;
+  let top=70,defaultWidth=360,defaultHeight=380;
   panel.getBoundingClientRect=()=>{
-    const width=parseFloat(panel.style.width)||360,height=edge==='top'?(parseFloat(panel.style.height)||380):win.innerHeight-top;
+    const width=parseFloat(panel.style.width)||defaultWidth,height=edge==='top'?(parseFloat(panel.style.height)||defaultHeight):win.innerHeight-top;
     const left=edge==='left'?win.innerWidth-width:0,y=edge==='top'?win.innerHeight-height:top;
     return {left,top:y,right:left+width,bottom:y+height,width,height};
   };
   const ui=attachPanelResize(panel,{edge,name:edge==='top'?'expert':edge==='left'?'advanced':'options',getTop:()=>top});
   const pointer=(target,type,x,y,id=4)=>{const e=new win.MouseEvent(type,{bubbles:true,cancelable:true,button:0,clientX:x,clientY:y});Object.defineProperty(e,'pointerId',{value:id});target.dispatchEvent(e);};
   t.after(()=>{ui.destroy();win.close();});
-  return {win,doc,panel,ui,pointer,setTop:value=>top=value,key:(key,shiftKey=false)=>ui.handle.dispatchEvent(new win.KeyboardEvent('keydown',{key,shiftKey,bubbles:true,cancelable:true}))};
+  return {win,doc,panel,ui,pointer,setTop:value=>top=value,setDefaults:(width,height)=>{defaultWidth=width;defaultHeight=height;},key:(key,shiftKey=false)=>ui.handle.dispatchEvent(new win.KeyboardEvent('keydown',{key,shiftKey,bubbles:true,cancelable:true}))};
 }
+test('doble clic restaura el CSS de cada panel sin cerrar, modificar el centro ni guardar datos',t=>{
+  for(const edge of ['right','left','top']){
+    const f=fixture(t,edge),dimension=edge==='top'?'height':'width',before=f.doc.querySelector('main').outerHTML;
+    f.key('End');assert.ok(f.panel.style.getPropertyValue(dimension));
+    const event=new f.win.MouseEvent('dblclick',{bubbles:true,cancelable:true});f.ui.handle.dispatchEvent(event);
+    assert.equal(event.defaultPrevented,true);assert.equal(f.panel.style.getPropertyValue(dimension),'');assert.equal(f.panel.hidden,false);assert.equal(f.doc.querySelector('main').outerHTML,before);
+    assert.equal(f.ui.handle.getAttribute('aria-valuenow'),edge==='top'?'380':'360');
+    f.win.dispatchEvent(new f.win.Event('resize'));assert.equal(f.panel.style.getPropertyValue(dimension),'');
+  }
+});
+test('Intro restablece el tamaño adaptable actual, no el medido antes del cambio de pantalla',t=>{
+  const f=fixture(t);f.key('End');f.setDefaults(280,260);f.key('Enter');
+  assert.equal(f.panel.style.width,'');assert.equal(f.ui.handle.getAttribute('aria-valuenow'),'280');
+  f.key('ArrowRight');assert.equal(f.panel.style.width,'296px');
+});
+test('restablecer libera un arrastre pendiente y desmontar elimina también el doble clic',t=>{
+  const f=fixture(t);f.pointer(f.ui.handle,'pointerdown',360,100);f.pointer(f.win,'pointermove',460,100);
+  f.ui.handle.dispatchEvent(new f.win.MouseEvent('dblclick',{bubbles:true,cancelable:true}));assert.equal(f.doc.documentElement.classList.contains('ain-panel-resizing'),false);assert.equal(f.panel.style.width,'');
+  f.pointer(f.win,'pointermove',800,100);assert.equal(f.panel.style.width,'');
+  f.ui.destroy();f.panel.style.width='410px';f.ui.handle.dispatchEvent(new f.win.MouseEvent('dblclick',{bubbles:true,cancelable:true}));assert.equal(f.panel.style.width,'410px');
+});
 test('arrastrar ambos laterales cambia sólo su ancho y conserva el centro',t=>{
   for(const edge of ['right','left']){
     const f=fixture(t,edge),before=f.doc.querySelector('main').outerHTML;

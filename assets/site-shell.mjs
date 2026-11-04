@@ -1,4 +1,7 @@
-import {attachPanelResize} from './panel-resize.mjs';
+// Keep the helper on the same release token as its stamped entry module.
+const resizeModuleURL=new URL('./panel-resize.mjs',import.meta.url);
+resizeModuleURL.search=new URL(import.meta.url).search;
+const {attachPanelResize}=await import(resizeModuleURL.href);
 const ICONS = {
   options:'<path d="M2 3h12M2 7h12M2 11h12"/>',
   advanced:'<rect x="1" y="1" width="14" height="12"/><path d="M10 1v12"/>',

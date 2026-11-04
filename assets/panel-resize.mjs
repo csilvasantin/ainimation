@@ -23,7 +23,7 @@ export function attachPanelResize(panel, {edge, name, getTop=()=>0, win=panel.ow
   function translate(){
     const en=(win.AINLanguage?.read()||doc.documentElement.lang)==='en',label=(LABELS[name]||[name,name])[en?1:0];
     handle.setAttribute('aria-label',(en?'Resize ':'Redimensionar ')+label);
-    handle.title=en?'Drag to resize · arrow keys to adjust':'Arrastra para redimensionar · ajusta con las flechas';
+    handle.title=en?'Drag or use arrows to resize · double-click or Enter to reset':'Arrastra o usa las flechas · doble clic o Intro para restablecer';
   }
   function sync(){
     if(stopped)return;
@@ -55,7 +55,16 @@ export function attachPanelResize(panel, {edge, name, getTop=()=>0, win=panel.ow
     event.preventDefault();apply(drag.size+sign*((vertical?event.clientX:event.clientY)-drag.position));
   }
   function up(event){if(drag&&event.pointerId===drag.id)finish();}
+  function reset(event){
+    if(stopped)return;
+    event.preventDefault();event.stopPropagation();finish();
+    selected=null;
+    // Remove our override: each surface keeps its responsive CSS default.
+    panel.style.setProperty(dimension,original.value,original.priority);
+    sync();
+  }
   function key(event){
+    if(event.key==='Enter'){reset(event);return;}
     const directions=vertical?{ArrowLeft:-1,ArrowRight:1}:{ArrowUp:-1,ArrowDown:1};
     let value;
     if(event.key==='Home')value=bounds().min;
@@ -69,6 +78,7 @@ export function attachPanelResize(panel, {edge, name, getTop=()=>0, win=panel.ow
   // cover browsers that decline capture or cancel a touch gesture.
   win.addEventListener('pointermove',move,{passive:false});win.addEventListener('pointerup',up);win.addEventListener('pointercancel',up);
   handle.addEventListener('lostpointercapture',finish);handle.addEventListener('keydown',key);
+  handle.addEventListener('dblclick',reset);
   win.addEventListener('blur',finish);win.addEventListener('resize',sync);doc.addEventListener('scroll',sync,true);
   win.addEventListener('ainimation:language',translate);
   const resize=typeof win.ResizeObserver==='function'?new win.ResizeObserver(sync):null;resize?.observe(panel);
@@ -80,6 +90,7 @@ export function attachPanelResize(panel, {edge, name, getTop=()=>0, win=panel.ow
   const api={handle,sync,destroy(){
     stopped=true;finish();resize?.disconnect();observer.disconnect();languageObserver.disconnect();
     handle.removeEventListener('pointerdown',down);handle.removeEventListener('lostpointercapture',finish);handle.removeEventListener('keydown',key);
+    handle.removeEventListener('dblclick',reset);
     win.removeEventListener('pointermove',move);win.removeEventListener('pointerup',up);win.removeEventListener('pointercancel',up);
     win.removeEventListener('blur',finish);win.removeEventListener('resize',sync);doc.removeEventListener('scroll',sync,true);win.removeEventListener('ainimation:language',translate);
     panel.style.setProperty(dimension,original.value,original.priority);handle.remove();delete panel[KEY];
