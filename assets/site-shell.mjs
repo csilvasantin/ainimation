@@ -4,7 +4,7 @@ const ICONS = {
   expert:'<rect x="1" y="1" width="14" height="12"/><path d="M1 9h14"/>'
 };
 const LABELS = {options:['Opciones','Options'],advanced:['Avanzado','Advanced'],expert:['Experto','Expert']};
-const ROUTES = {interactivos:'/interactivos/',presentaciones:'/presentaciones/',sites:'/sites/',capsulas:'/capsulas/',login:'/interactivos/?login=1'};
+const ROUTES = {xperiencias:'/xperiencias/',interactivos:'/interactivos/',presentaciones:'/presentaciones/',sites:'/sites/',capsulas:'/capsulas/',login:'/interactivos/?login=1'};
 
 export function mountQuadraticHeader(header, {doc=header.ownerDocument, win=doc.defaultView, panels={}, buttons={}, host=header.closest('dialog,#capsulaEditor')||doc.body, navigate=href=>win.location.assign(href)}={}) {
   if (header.ainQuadraticUI) return header.ainQuadraticUI;
@@ -49,7 +49,7 @@ export function mountQuadraticHeader(header, {doc=header.ownerDocument, win=doc.
   }
   if(!panels.options) {
     const nav=doc.createElement('nav');nav.className='ain-quad-links';nav.setAttribute('aria-label',t('Secciones','Sections'));
-    for(const [key,label,en] of [['interactivos','Interactivos','Interactives'],['presentaciones','Presentaciones','Presentations'],['sites','Sites','Sites'],['capsulas','Cápsulas','Capsules'],['login','Login','Login']]) {
+    for(const [key,label,en] of [['xperiencias','Xperiencias','Xperiencias'],['interactivos','Interactivos','Interactivos'],['presentaciones','Presentaciones','Presentations'],['capsulas','Cápsulas','Capsules'],['login','Login','Login']]) {
       const a=create('a',label,en);a.href=ROUTES[key];a.dataset.languageLink='';nav.append(a);
     }
     layers.options.append(nav);
@@ -62,14 +62,14 @@ export function mountQuadraticHeader(header, {doc=header.ownerDocument, win=doc.
   language.onchange=()=>{if(win.AINLanguage)win.AINLanguage.set(language.value);};
   layers.advanced.append(languageLabel);
   if(!panels.expert) {
-    const log=create('pre','/help · /idioma es|en · /abrir interactivos|presentaciones|sites|capsulas|login · /estado','/help · /language es|en · /open interactivos|presentaciones|sites|capsulas|login · /status');
+    const log=create('pre','/help · /idioma es|en · /abrir xperiencias|interactivos|presentaciones|sites|capsulas|login · /estado','/help · /language es|en · /open xperiencias|interactivos|presentaciones|sites|capsulas|login · /status');
     log.className='ain-quad-log';log.setAttribute('role','log');log.setAttribute('aria-live','polite');
     const form=doc.createElement('form');form.className='ain-quad-command';
     const label=create('label','Comando','Command'),input=doc.createElement('input');input.type='text';input.autocomplete='off';input.spellcheck=false;input.maxLength=300;
     label.append(input);const run=create('button','Ejecutar','Run');run.type='submit';form.append(label,run);
     form.onsubmit=event=>{
       event.preventDefault();const text=input.value.trim(),[command,arg,...rest]=text.split(/\s+/);let answer;
-      if(/^\/(?:help|ayuda)$/.test(command)&&!arg)answer=t('Órdenes: /idioma es|en, /abrir interactivos|presentaciones|sites|capsulas|login, /estado, /cerrar.','Commands: /language es|en, /open interactivos|presentaciones|sites|capsulas|login, /status, /close.');
+      if(/^\/(?:help|ayuda)$/.test(command)&&!arg)answer=t('Órdenes: /idioma es|en, /abrir xperiencias|interactivos|presentaciones|sites|capsulas|login, /estado, /cerrar.','Commands: /language es|en, /open xperiencias|interactivos|presentaciones|sites|capsulas|login, /status, /close.');
       else if(/^\/(?:idioma|language)$/.test(command)&&/^(es|en)$/.test(arg)&&!rest.length){win.AINLanguage?.set(arg);answer=t('Idioma actualizado.','Language updated.');}
       else if(/^\/(?:abrir|open)$/.test(command)&&Object.hasOwn(ROUTES,arg)&&!rest.length){const url=new URL(ROUTES[arg],win.location.origin);url.searchParams.set('lang',win.AINLanguage?.read()||doc.documentElement.lang);navigate(url.href);return;}
       else if(/^\/(?:estado|status)$/.test(command)&&!arg)answer=doc.title+' · '+(win.AINLanguage?.read()||doc.documentElement.lang).toUpperCase();
