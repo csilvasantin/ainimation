@@ -117,3 +117,35 @@ test('se puede retirar el último componente y volver a añadir después de desh
   s.removeMedia(id);assert.equal(s.draft.items.length,0);assert.doesNotThrow(()=>buildDocument(s.draft));s.undo();assert.equal(s.draft.items[0].id,id);s.redo();s.undo();
   s.addMedia('video','https://media.org/clip.mp4');assert.equal(s.canRedo,false);assert.equal(s.draft.items.length,2);
 });
+test('duplicar imagen o vídeo añadido crea un ID nuevo y conserva todas sus propiedades en un paso reversible',()=>{
+  for(const type of ['image','video']){
+    const s=createSiteSession(project()),source=s.addMedia(type,'https://media.org/'+(type==='image'?'cover.jpg':'clip.mp4'));
+    s.edit(source,{alt:'Descripción accesible',animation:'rise',duration:2.3,delay:.4});const before=s.draft,original=s.original,item=before.items.find(i=>i.id===source);
+    assert.equal(s.canDuplicateMedia(source),true);const id=s.duplicateMedia(source),after=s.draft;
+    assert.notEqual(id,source);assert.equal(before.items.some(i=>i.id===id),false);assert.deepEqual(after.items.find(i=>i.id===id),{...item,id});assert.equal(after.items.findIndex(i=>i.id===id),after.items.findIndex(i=>i.id===source)+1);
+    assert.deepEqual(s.original,original);s.undo();assert.deepEqual(s.draft,before);s.redo();assert.deepEqual(s.draft,after);
+    s.edit(id,{alt:'Otra descripción',animation:'float'});assert.deepEqual(s.draft.items.find(i=>i.id===source),item);
+  }
+});
+test('duplicar rechaza originales, marcas falsas y otros tipos sin cambiar el historial',()=>{
+  const p=project();p.items.push({...p.items[0],id:'ain-1',type:'image',value:'https://media.org/original.jpg',inserted:true});
+  const draft=structuredClone(p);draft.items.push({...p.items[1],id:'ain-2',inserted:'true'},{...p.items[0],id:'ain-3',inserted:true},{...p.items[1],id:'ain-4',type:'background'});
+  const s=createSiteSession(p,draft),before=s.draft,undo=s.canUndo,redo=s.canRedo;
+  for(const id of ['ain-0','ain-1','ain-2','ain-3','ain-4','ain-999','']){assert.equal(s.canDuplicateMedia(id),false);assert.throws(()=>s.duplicateMedia(id),/Sólo puedes duplicar/);}
+  assert.deepEqual(s.draft,before);assert.equal(s.canUndo,undo);assert.equal(s.canRedo,redo);assert.deepEqual(s.original,p);
+});
+test('duplicar respeta el límite de 500 componentes sin aplicar cambios parciales',()=>{
+  const p=project(),draft=structuredClone(p);
+  for(let n=1;n<499;n++)draft.items.push({...p.items[0],id:'ain-'+n,type:'image',value:'https://media.org/cover.jpg',inserted:true});
+  const s=createSiteSession(p,draft),id=s.duplicateMedia('ain-1');assert.equal(s.draft.items.length,500);assert.equal(id,'ain-499');const full=s.draft;
+  assert.throws(()=>s.duplicateMedia('ain-1'),/Límite/);assert.deepEqual(s.draft,full);s.undo();assert.deepEqual(s.draft,draft);s.redo();assert.deepEqual(s.draft,full);
+});
+test('las instancias duplicadas comparten bytes y sobreviven a guardado, paquete, exportación y retirada independiente',async()=>{
+  const a=await image(),v=await video(),lib=createMediaLibrary([a,v]),s=createSiteSession(project());
+  const [sourceImage,sourceVideo]=s.addMediaBatch([{type:'image',value:a.id},{type:'video',value:v.id}]);s.edit(sourceImage,{alt:'Foto compartida',animation:'zoom',duration:1.8,delay:.3});
+  const copyImage=s.duplicateMedia(sourceImage),copyVideo=s.duplicateMedia(sourceVideo);assert.equal(lib.size,a.size+v.size);assert.equal(referencedMedia(s.draft).size,2);
+  const entries=await exportMedia(lib,referencedMedia(s.original,s.draft));assert.equal(entries.length,2);const reopened=await importMedia(JSON.parse(JSON.stringify(entries)),{inspect:skip}),restored=createSiteSession(s.original,JSON.parse(JSON.stringify(s.draft)));
+  assert.deepEqual(restored.draft,s.draft);assert.equal(restored.draft.items.find(i=>i.id===copyImage).value,a.id);assert.equal(restored.draft.items.find(i=>i.id===copyVideo).value,v.id);
+  const doc=new DOMParser().parseFromString(buildDocument(restored.draft,{media:await exportMediaURLs(reopened,restored.draft)}),'text/html');assert.equal(doc.querySelectorAll('#ain-added-media img').length,2);assert.equal(doc.querySelectorAll('#ain-added-media video').length,2);assert.equal(doc.querySelectorAll('script').length,0);
+  restored.removeMedia(copyImage);assert.equal(restored.draft.items.find(i=>i.id===sourceImage).value,a.id);assert.equal((await exportMedia(reopened,referencedMedia(restored.original,restored.draft))).length,2);
+});
