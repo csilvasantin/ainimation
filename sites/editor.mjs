@@ -1,5 +1,5 @@
 import {importSite} from './import.mjs';
-import {createSiteSession,validateSite} from './model.mjs';
+import {createSiteSession,validateSite} from './model.mjs?v=20261104-remove-1';
 import {buildDocument} from './preview.mjs?v=20261104-paste-1';
 import {listSites,saveSite} from './storage.mjs';
 import {createMediaLibrary,verifyMediaRecords,prepareLocalFile,referencedMedia,localReference,exportMedia,importMedia,exportMediaURLs,IMAGE_ACCEPT,VIDEO_ACCEPT,FILE_ACCEPT,MAX_PACKAGE,MAX_LIBRARY} from './media.mjs';
@@ -72,7 +72,10 @@ function paintComponents(){
   }));
 }
 function inspector(){
-  const item=session.draft.items.find(i=>i.id===selected);$('fields').replaceChildren();if(!item)return;
+  const item=session.draft.items.find(i=>i.id===selected);$('fields').replaceChildren();
+  const remove=$('remove-added-media');remove.hidden=!session.canRemoveMedia(selected);remove.disabled=mediaBusy||importing;
+  const removeLabel=item?.type==='video'?'Retirar vídeo añadido de la copia':item?.type==='image'?'Retirar imagen añadida de la copia':'Retirar medio añadido de la copia';remove.setAttribute('aria-label',removeLabel);remove.title=removeLabel;
+  if(!item){$('selected-title').textContent='Selecciona un elemento';return;}
   $('selected-title').textContent=labels[item.type];
   function field(key,labelText,type,options){
     const label=document.createElement('label');label.textContent=labelText;label.htmlFor='field-'+key;
@@ -97,11 +100,11 @@ function inspector(){
   if(item.type==='image')field('alt','Descripción de la imagen','text');
   field('animation','Animación','select',motionLabels);field('duration','Duración · segundos','number');field('delay','Retraso · segundos','number');
 }
-function paint(){if(!session.draft.items.some(i=>i.id===selected))selected=session.draft.items[0].id;paintComponents();inspector();preview();history();}
+function paint(){if(!session.draft.items.some(i=>i.id===selected))selected=session.draft.items[0]?.id||'';paintComponents();inspector();preview();history();}
 async function open(record,prepared){
   const next=createSiteSession(record.original,record.draft),nextLibrary=prepared||await verifyMediaRecords(record.assets||[]);
   try{buildDocument(next.draft,{interactive:true,media:nextLibrary.previewMedia(next.draft)});buildDocument(next.original,{interactive:true,media:nextLibrary.previewMedia(next.original)});}catch(e){nextLibrary.dispose();throw e;}
-  mediaLibrary.dispose();mediaLibrary=nextLibrary;session=next;recordID=record.id;selected=session.draft.items[0].id;$('filter').value='';
+  mediaLibrary.dispose();mediaLibrary=nextLibrary;session=next;recordID=record.id;selected=session.draft.items[0]?.id||'';$('filter').value='';
   $('workspace').hidden=false;$('project-options').hidden=false;$('empty').hidden=true;$('site-title').textContent=session.draft.title;
   $('site-url').value=session.draft.url;$('source-url').href=session.draft.url;$('source-url').textContent=new URL(session.draft.url).hostname+' ↗';
   $('warnings').replaceChildren(...(session.draft.warnings||[]).map(w=>{const p=document.createElement('p');p.textContent=w;return p;}));
@@ -126,6 +129,13 @@ $('undo').onclick=()=>{session.undo();paint();remember();say('Cambio deshecho.')
 $('compare').onclick=()=>{comparing=!comparing;preview();};$('replay').onclick=preview;
 $('desktop').onclick=()=>{mobile=false;preview();};$('mobile').onclick=()=>{mobile=true;preview();};
 $('fields').onsubmit=e=>e.preventDefault();
+$('remove-added-media').onclick=()=>{
+  if(mediaBusy||importing||!session)return;
+  try{const index=session.draft.items.findIndex(i=>i.id===selected);session.removeMedia(selected);
+    const items=session.draft.items;selected=items[Math.min(index,items.length-1)]?.id||'';selectScroll=!!selected;paint();remember();
+    $('selected-title').focus({preventScroll:true});say('Medio añadido retirado de la copia. Puedes deshacer el cambio.');
+  }catch(e){say(e.message);}
+};
 $('add-media').onclick=()=>{try{selected=session.addMedia($('media-type').value,$('media-url').value);selectScroll=true;paint();remember();quad.hide('options');quad.show('advanced');say('Medio añadido después del contenido original.');}catch(e){say(e.message);}};
 $('download-project').onclick=async()=>{if(mediaBusy)return;lockMedia(true);say('Preparando el proyecto con sus archivos locales…');try{const assets=await exportMedia(mediaLibrary,referencedMedia(session.original,session.draft));download(new Blob([JSON.stringify({format:'ainimation-site-workspace',version:2,original:session.original,draft:session.draft,assets})],{type:'application/json'}),filename()+'.ainimation.json');say('Proyecto descargado con sus imágenes y vídeos locales.');}catch(e){say(e.message);}finally{lockMedia(false);}};
 $('download-html').onclick=async()=>{if(mediaBusy)return;lockMedia(true);say('Preparando el HTML con sus archivos locales…');try{const media=await exportMediaURLs(mediaLibrary,session.draft);download(new Blob([buildDocument(session.draft,{media})],{type:'text/html;charset=utf-8'}),filename()+'.html');say('HTML exportado con los archivos locales incluidos. Los medios por URL conservan sus enlaces.');}catch(e){say(e.message);}finally{lockMedia(false);}};
