@@ -58,3 +58,7 @@ try{stage(sessionStorage.getItem('ainimation:ui:stage')==='workspace'?'workspace
 
 window.addEventListener('interactive-signed-out',()=>stage('entry'));
 window.addEventListener('interactive-demo-created',()=>stage('workspace'));
+
+// The home Login link opens the existing account dialog, including when a
+// returning visitor has already entered the workspace in this tab.
+if(new URLSearchParams(window.location.search).get('login')==='1')$('loginButton').click();
