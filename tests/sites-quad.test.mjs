@@ -15,6 +15,10 @@ test('la retirada de medios empieza oculta y muestra sólo un icono con nombre a
  const doc=new JSDOM(html).window.document,button=doc.getElementById('remove-added-media');
  assert.equal(button.hidden,true);assert.equal(button.type,'button');assert.equal(button.textContent.trim(),'');assert.equal(button.querySelectorAll('svg').length,1);assert.equal(button.getAttribute('aria-label'),'Retirar medio añadido de la copia');assert.equal(button.title,button.getAttribute('aria-label'));assert.ok(doc.getElementById('advanced-panel').contains(button));
 });
+test('duplicar empieza oculto junto a retirar y muestra sólo un icono con nombre accesible y tooltip',()=>{
+ const doc=new JSDOM(html).window.document,button=doc.getElementById('duplicate-added-media');
+ assert.equal(button.hidden,true);assert.equal(button.type,'button');assert.equal(button.textContent.trim(),'');assert.equal(button.querySelectorAll('svg').length,1);assert.equal(button.getAttribute('aria-label'),'Duplicar medio añadido');assert.equal(button.title,button.getAttribute('aria-label'));assert.equal(button.parentElement,doc.getElementById('remove-added-media').parentElement);assert.ok(doc.getElementById('advanced-panel').contains(button));
+});
 test('los tres paneles se cargan cerrados y se abren de forma independiente',()=>{
  const dom=new JSDOM(html),doc=dom.window.document;let reads=0,writes=0;
  Object.defineProperty(dom.window,'localStorage',{value:{getItem(){reads++;},setItem(){writes++;}}});

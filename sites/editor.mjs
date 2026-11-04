@@ -1,5 +1,5 @@
 import {importSite} from './import.mjs';
-import {createSiteSession,validateSite} from './model.mjs?v=20261104-remove-1';
+import {createSiteSession,validateSite} from './model.mjs?v=20261104-duplicate-1';
 import {buildDocument} from './preview.mjs?v=20261104-paste-1';
 import {listSites,saveSite} from './storage.mjs';
 import {createMediaLibrary,verifyMediaRecords,prepareLocalFile,referencedMedia,localReference,exportMedia,importMedia,exportMediaURLs,IMAGE_ACCEPT,VIDEO_ACCEPT,FILE_ACCEPT,MAX_PACKAGE,MAX_LIBRARY} from './media.mjs';
@@ -73,8 +73,10 @@ function paintComponents(){
 }
 function inspector(){
   const item=session.draft.items.find(i=>i.id===selected);$('fields').replaceChildren();
-  const remove=$('remove-added-media');remove.hidden=!session.canRemoveMedia(selected);remove.disabled=mediaBusy||importing;
-  const removeLabel=item?.type==='video'?'Retirar vídeo añadido de la copia':item?.type==='image'?'Retirar imagen añadida de la copia':'Retirar medio añadido de la copia';remove.setAttribute('aria-label',removeLabel);remove.title=removeLabel;
+  for(const [action,verb,allowed]of [['remove','Retirar',session.canRemoveMedia(selected)],['duplicate','Duplicar',session.canDuplicateMedia(selected)]]){
+    const button=$(action+'-added-media'),label=verb+(item?.type==='video'?' vídeo añadido':item?.type==='image'?' imagen añadida':' medio añadido')+(action==='remove'?' de la copia':'');
+    button.hidden=!allowed;button.disabled=mediaBusy||importing;button.setAttribute('aria-label',label);button.title=label;
+  }
   if(!item){$('selected-title').textContent='Selecciona un elemento';return;}
   $('selected-title').textContent=labels[item.type];
   function field(key,labelText,type,options){
@@ -129,6 +131,12 @@ $('undo').onclick=()=>{session.undo();paint();remember();say('Cambio deshecho.')
 $('compare').onclick=()=>{comparing=!comparing;preview();};$('replay').onclick=preview;
 $('desktop').onclick=()=>{mobile=false;preview();};$('mobile').onclick=()=>{mobile=true;preview();};
 $('fields').onsubmit=e=>e.preventDefault();
+$('duplicate-added-media').onclick=()=>{
+  if(mediaBusy||importing||!session)return;
+  try{selected=session.duplicateMedia(selected);selectScroll=true;paint();remember();
+    $('selected-title').focus({preventScroll:true});say('Medio añadido duplicado. Puedes deshacer el cambio.');
+  }catch(e){say(e.message);}
+};
 $('remove-added-media').onclick=()=>{
   if(mediaBusy||importing||!session)return;
   try{const index=session.draft.items.findIndex(i=>i.id===selected);session.removeMedia(selected);
