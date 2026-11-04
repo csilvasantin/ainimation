@@ -64,20 +64,21 @@
         <span>AInimation Studio</span>
       </a>
       <nav class="nav-links" aria-label="Site">
-        <a href="#blocks">Blocks</a>
+        <a href="#blocks" data-session-only hidden>Blocks</a>
         <!-- Dos superficies, dos entradas con nombre propio. Antes había un solo
              «Studio» que llevaba al editor, mientras los bloques de abajo llevaban
              a la superficie de autoría: se entraba por una puerta y no se
              encontraba la otra. -->
-        <a href="xperiencias/">Xperiencias</a>
-        <a href="studio.html">Author</a>
+        <a href="xperiencias/" data-session-only hidden>Xperiencias</a>
+        <a href="studio.html" data-session-only hidden>Author</a>
         <a href="interactivos/">Interactivos</a>
         <a href="presentaciones/">Presentations</a>
         <a href="sites/">Sites</a>
-        <a href="studio-live.html">Produce</a>
+        <a href="capsulas/">Capsules</a>
+        <a href="studio-live.html" data-session-only hidden>Produce</a>
         <a href="interactivos/?login=1">Login</a>
         <button id="langToggle" class="nav-lang" type="button" aria-label="Cambiar idioma / Switch language">ES</button>
-        <a href="#contact">Contact</a>
+        <a href="#contact" data-session-only hidden>Contact</a>
       </nav>
     </header>
 
@@ -351,6 +352,7 @@
     </footer>
 
     <script src="assets/i18n.js" defer></script>
+    <script type="module" src="assets/site-session.mjs"></script>
     <script src="assets/app.js?v=0974da8" defer></script>
     <script src="/assets/analytics.js" defer></script>
       <script src="/assets/register-sw.js" defer></script>

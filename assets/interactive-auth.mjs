@@ -1,5 +1,6 @@
 // Keep Google's frames in their original parents. Reparenting an active GSI
 // iframe reloads it and can leave its popup without the matching message channel.
+import {rememberVerifiedSession,clearSiteSession} from './site-session.mjs';
 export function mountGoogleAuth({endpoint,doc=document,win=window,request=fetch,onVerified=()=>{},onSignedOut=()=>{},sdk}={}){
  const $=id=>doc.getElementById(id),t=(es,en)=>doc.documentElement.lang==='en'?en:es;
  const library=$('googleLogin'),dialog=$('loginDialog'),status=$('cloudStatus');
@@ -17,12 +18,13 @@ export function mountGoogleAuth({endpoint,doc=document,win=window,request=fetch,
    const check=await request(endpoint+'/projects',{headers:{authorization:'Bearer '+response.credential},signal:AbortSignal.timeout(30000)});
    if(attempt!==generation)return;
    if(!check.ok)throw Error(t('Esta cuenta no tiene acceso o la sesión ha caducado.','This account does not have access or the session expired.'));
+   rememberVerifiedSession(response.credential,win);
    authenticated=true;promptGeneration++;controls(true);
    status.dataset.googleSignInMethod=String(response.select_by||'google').slice(0,40);
    status.dataset.googleSignInButton=String(response.state||'unknown').slice(0,40);
    explain(t('Cuenta verificada. Pulsa sincronizar para conservar y combinar tus proyectos.','Account verified. Sync to keep and combine your projects.'));
    onVerified(response.credential);
-  }catch(error){if(attempt===generation&&!authenticated)explain(error.name==='TimeoutError'?t('Google respondió, pero no se pudo comprobar la cuenta a tiempo. Tus proyectos se conservan.','Google responded, but account verification timed out. Your projects are preserved.'):error.message);}
+  }catch(error){if(attempt===generation&&!authenticated){clearSiteSession(win);explain(error.name==='TimeoutError'?t('Google respondió, pero no se pudo comprobar la cuenta a tiempo. Tus proyectos se conservan.','Google responded, but account verification timed out. Your projects are preserved.'):error.message);}}
  }
  function render(host,name){
   if(!google||rendered.has(host))return;rendered.add(host);
@@ -49,5 +51,5 @@ export function mountGoogleAuth({endpoint,doc=document,win=window,request=fetch,
    win.dispatchEvent(new Event('interactive-login-ready'));
   }catch{explain(t('No se puede conectar con Google. Tus proyectos locales se conservan.','Cannot connect to Google. Your local projects are preserved.'));}
  })();
- return {ready,signOut(){accepting=false;authenticated=false;generation++;promptGeneration++;controls(false);google?.cancel?.();google?.disableAutoSelect?.();delete status.dataset.googleSignInMethod;delete status.dataset.googleSignInButton;explain(t('Cuenta desconectada. Tus proyectos locales se conservan.','Account disconnected. Your local projects are preserved.'));onSignedOut();}};
+ return {ready,signOut(){accepting=false;authenticated=false;generation++;promptGeneration++;clearSiteSession(win);controls(false);google?.cancel?.();google?.disableAutoSelect?.();delete status.dataset.googleSignInMethod;delete status.dataset.googleSignInButton;explain(t('Cuenta desconectada. Tus proyectos locales se conservan.','Account disconnected. Your local projects are preserved.'));onSignedOut();}};
 }

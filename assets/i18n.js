@@ -13,6 +13,13 @@
     "Engine": "Motor",
     "Contact": "Contacto",
     "Presentations": "Presentaciones",
+    "Capsules": "Cápsulas",
+    "Choose an existing capsule to edit its text, media and timing.": "Elige una cápsula existente para editar sus textos, medios y tiempos.",
+    "Capsule link or ID": "Enlace o ID de la cápsula",
+    "Paste the full link from Stock or the editor, or the capsule's asset ID.": "Pega el enlace completo del Stock o del editor, o el ID de archivo de la cápsula.",
+    "Open capsule editor": "Abrir editor de cápsulas",
+    "Choose a capsule in Stock ↗": "Elegir una cápsula en el Stock ↗",
+    "Opening the editor does not change or publish your capsule.": "Abrir el editor no modifica ni publica tu cápsula.",
     // Hero
     "Admira Director, powered by AI.": "Admira Director, con IA.",
     "Cast, stage, score, script, image, video, music, and voice in one authoring environment. The classic multimedia metaphor, rebuilt for generative production.":

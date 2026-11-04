@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Capsules · AInimation Studio</title>
+  <meta name="description" content="Open an existing capsule in the AInimation editor.">
+  <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/assets/styles.css">
+  <style>
+    main{max-width:820px;margin:0 auto;padding:140px 24px 64px}
+    h1{font-size:clamp(2.5rem,8vw,4.5rem);line-height:1.05;max-width:none}
+    .capsule-intro{color:#c0c2c8;font-size:1.15rem;max-width:60ch}
+    form{margin:32px 0;padding:clamp(20px,4vw,32px);border:1px solid #ffffff30;background:#ffffff05}
+    label{display:block;font-weight:700;margin-bottom:12px}
+    input{width:100%;box-sizing:border-box;background:#0f1115;border:1px solid #ffffff50;color:#f8f7f2;font:inherit;padding:14px}
+    input:focus-visible{outline:2px solid #c8ff5f;outline-offset:3px}
+    form .button{margin-top:20px;cursor:pointer;font:inherit;font-weight:700}
+    #capsuleError{color:#ffb4a9;margin:16px 0 0}
+    .capsule-help{color:#c0c2c8;font-size:.95rem;margin-top:12px}
+    .stock-link{color:#c8ff5f;text-decoration:underline;text-underline-offset:4px}
+  </style>
+</head>
+<body class="home-page">
+  <header class="site-header"><a class="brand" href="/" aria-label="AInimation Studio home"><span class="brand-mark">AI</span><span>AInimation Studio</span></a><button id="langToggle" type="button">ES</button></header>
+  <main>
+    <p class="eyebrow">AInimation Studio</p>
+    <h1>Capsules</h1>
+    <p class="capsule-intro">Choose an existing capsule to edit its text, media and timing.</p>
+    <form id="capsuleOpen">
+      <label for="capsuleLink">Capsule link or ID</label>
+      <input id="capsuleLink" name="capsule" type="text" required autocomplete="off" spellcheck="false" aria-describedby="capsuleHelp capsuleError">
+      <p id="capsuleHelp" class="capsule-help">Paste the full link from Stock or the editor, or the capsule's asset ID.</p>
+      <button class="button primary" type="submit">Open capsule editor</button>
+      <p id="capsuleError" role="alert" hidden></p>
+    </form>
+    <a class="stock-link" href="https://admira.studio/stock.html">Choose a capsule in Stock ↗</a>
+    <p class="capsule-help">Opening the editor does not change or publish your capsule.</p>
+  </main>
+  <script src="/assets/i18n.js" defer></script>
+  <script type="module" src="/assets/capsule-launcher.mjs"></script>
+</body>
+</html>

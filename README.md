@@ -13,6 +13,13 @@ an open-source agentic video system.
 - `studio.html` — **Author**: the Director surface (cast · stage · score · XPL
   behaviours). `?play=1` runs it as a projector, without the authoring chrome.
 - `studio-live.html` — **Produce**: a brief in, a real 1080p video out.
+- `capsulas/` — opens an existing capsule in its editor from a Stock link or asset ID.
+
+Before Google sign-in, the home navigation shows Interactives, Presentations,
+Sites, Capsules and Login, alongside the language control. Other links appear
+after server-verified Google sign-in in the same tab, and hide on sign-out or
+expiry. This navigation preference stores only an expiry time in sessionStorage;
+credentials remain in memory and API authorization is unchanged.
 
 ## Local preview
 ```bash

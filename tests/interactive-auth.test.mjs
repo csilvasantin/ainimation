@@ -11,6 +11,7 @@ function fixture({verify=async()=>new Response('{}'),lang='es'}={}){
  const elements=new Map(['googleLogin','loginDialog','loginTarget','cloudStatus','loginExplanation','cloudLogout','cloudSync','cloudPull','cloudProjectSync','entryLogin'].map(id=>[id,new Element()]));
  elements.get('entryLogin').nextElementSibling=new Element();
  const head=new Element('head'),win=new EventTarget(),calls=[],accepted=[];let initialized=0,config,moment;
+ const saved=new Map();win.sessionStorage={getItem:k=>saved.get(k)||null,setItem:(k,v)=>saved.set(k,v),removeItem:k=>saved.delete(k)};
  const sdk={initialize:c=>{initialized++;config=c;},renderButton:(host,options)=>{const frame=new Element('iframe');host.append(frame);calls.push({host,options,frame});},prompt:fn=>{moment=fn;},cancel(){},disableAutoSelect(){}};
  const doc={documentElement:{lang},head,getElementById:id=>elements.get(id),createElement:tag=>new Element(tag)};
  const auth=mountGoogleAuth({endpoint:'https://api.example/api',doc,win,sdk,request:async url=>url.endsWith('/config')?new Response(JSON.stringify({clientId:'configured-client'})):verify(),onVerified:token=>accepted.push(token)});
@@ -26,6 +27,21 @@ test('biblioteca y cuenta mantienen sus botones Google independientes al abrir y
 test('sólo la respuesta aceptada por el servidor habilita la sesión',async()=>{
  const failed=fixture({verify:async()=>new Response('{}',{status:401})});await failed.auth.ready;await failed.credential({credential:'test-invalid'});assert.equal(failed.accepted.length,0);assert.equal(failed.elements.get('cloudSync').disabled,true);assert.match(failed.elements.get('cloudStatus').textContent,/no tiene acceso/);
  const ok=fixture();await ok.auth.ready;await ok.credential({credential:'test-verified',select_by:'btn',state:'account'});assert.deepEqual(ok.accepted,['test-verified']);assert.equal(ok.elements.get('cloudSync').disabled,false);assert.equal(ok.elements.get('cloudStatus').dataset.googleSignInMethod,'btn');assert.match(ok.elements.get('cloudStatus').textContent,/Cuenta verificada/);
+});
+
+test('el menú se habilita sólo tras verificar Google y se limpia al salir o rechazar el acceso',async()=>{
+ const credential='test.'+Buffer.from(JSON.stringify({exp:Math.floor(Date.now()/1000)+1200})).toString('base64url')+'.test';
+ const key='ainimation:site-session';
+ const ok=fixture();await ok.auth.ready;
+ assert.equal(ok.win.sessionStorage.getItem(key),null);
+ await ok.credential({credential});
+ assert.ok(JSON.parse(ok.win.sessionStorage.getItem(key)).expiresAt>Date.now());
+ ok.auth.signOut();
+ assert.equal(ok.win.sessionStorage.getItem(key),null);
+ const failed=fixture({verify:async()=>new Response('{}',{status:401})});await failed.auth.ready;
+ failed.win.sessionStorage.setItem(key,JSON.stringify({expiresAt:Date.now()+60000}));
+ await failed.credential({credential});
+ assert.equal(failed.win.sessionStorage.getItem(key),null);
 });
 test('salir durante una comprobación impide que una respuesta tardía restaure la sesión',async()=>{
  let finish;const f=fixture({verify:()=>new Promise(r=>{finish=r;})});await f.auth.ready;const pending=f.credential({credential:'test-pending'});f.auth.signOut();finish(new Response('{}'));await pending;assert.equal(f.accepted.length,0);assert.equal(f.elements.get('cloudSync').disabled,true);assert.match(f.elements.get('cloudStatus').textContent,/desconectada/);
