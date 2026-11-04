@@ -1,0 +1,19 @@
+Para importar una web, entra en AINimation Studio y abre Sites, en el menú de la portada.
+
+Abre Opciones. Pega la URL de la página o selecciona un site guardado. Usaremos PortAventura NeXT.
+
+Pulsa Importar página. AINimation prepara una copia editable, sin modificar la web original.
+
+La vista previa muestra el diseño y sus componentes. Los scripts, el canvas y los datos en directo originales necesitan recrearse.
+
+Haz clic sobre un texto de la página para seleccionar su elemento. También puedes usar la lista de componentes.
+
+En Avanzado, cambia el texto en sus propiedades. El resultado se aplica solo a tu borrador y puedes deshacerlo.
+
+Elige una animación y ajusta su duración o retraso. Los efectos respetan la preferencia de movimiento reducido.
+
+Vuelve a Opciones. En Añadir imagen o vídeo, pulsa Cargar desde el ordenador para incluir tus archivos en la copia.
+
+Experto es opcional. Abre su consola y escribe barra help para consultar las órdenes disponibles sobre tu copia.
+
+Descarga el proyecto para seguir editando, o exporta HTML. Los archivos locales quedan incluidos. La web original permanece intacta.

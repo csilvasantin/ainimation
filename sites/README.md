@@ -98,3 +98,20 @@ Pruebas adicionales: `tests/sites-media.test.mjs`. Ensayo visual sobre una copia
 PortAventura: carga conjunta de PNG y MP4, reemplazo por JPEG y MP4 distintos, deshacer,
 rechazo de imagen al reemplazar vídeo, recarga, paquete descargado/reabierto y HTML
 exportado con imagen y vídeo reproducibles.
+
+## Interfaz cuadrática
+
+Barra superior: Opciones a la izquierda, Avanzado y Experto a la derecha, en ese
+orden. Opciones contiene importación, biblioteca, componentes y medios. Avanzado
+contiene las propiedades y avisos de importación. Experto ofrece una consola de
+órdenes tipadas (`/help`), sin ejecutar JavaScript. El centro conserva el lienzo,
+historial, comparación y descargas.
+
+Los tres paneles son independientes, se superponen al contenido y arrancan
+cerrados en cada carga. No se recuerda su apertura. Escape dentro de un panel lo
+cierra y devuelve el foco al botón correspondiente. Seleccionar en la página o en
+la lista abre Avanzado. Importar correctamente cierra Opciones. Ningún cambio de
+panel mueve o redimensiona el centro ni sus iframes.
+
+El tutorial en `/help/#importar-sites` muestra esta interfaz con narración en
+español, subtítulos ES/EN, transcripción y capturas ampliadas del recorrido real.

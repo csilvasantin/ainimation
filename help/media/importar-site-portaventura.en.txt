@@ -1,0 +1,19 @@
+To import a web page, open AINimation Studio and choose Sites from the home-page menu.
+
+Open Options. Paste the page URL or select a saved site. We will use PortAventura NeXT.
+
+Click Import page. AINimation creates an editable copy without changing the original website.
+
+The preview shows the design and its components. Original scripts, canvas and live data need to be recreated.
+
+Click text on the page to select its element. You can also use the components list.
+
+In Advanced, change the text in its properties. The change applies only to your draft and can be undone.
+
+Choose an animation and adjust its duration or delay. Effects respect the visitor’s reduced-motion preference.
+
+Return to Options. Under Add image or video, choose Load from computer to include your files in the copy.
+
+Expert is optional. Open its console and type slash help to see the commands available for your copy.
+
+Download the project to keep editing, or export HTML. Local files are included. The original website stays unchanged.

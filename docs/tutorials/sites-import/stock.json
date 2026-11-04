@@ -1,0 +1,46 @@
+{
+  "sha256": "96780ffbf9408dd6e5cb09c1914aa9932cd01497a6b6d447c65198d6314c96fd",
+  "bytes": 2205463,
+  "catalogue": "https://www.pixeria.com/stock.html?catalogo=demos-ainimation",
+  "result": {
+    "ok": true,
+    "id": "1793815054156-cxqmo2",
+    "num": 1947,
+    "index": {
+      "status": "ready",
+      "mode": "incremental",
+      "builtAt": "2026-11-04T17:57:39.333Z"
+    },
+    "orientacion": "horizontal",
+    "tags": [
+      "demos",
+      "ainimation",
+      "portaventura",
+      "sites",
+      "tutorial",
+      "catalogo",
+      "admiranext",
+      "demos-ainimation",
+      "good",
+      "horizontal",
+      "landscape"
+    ],
+    "url": "https://api.admira.store/stock/asset/1793815054156-cxqmo2",
+    "createdAt": "2026-11-04T17:57:34.156Z",
+    "contentHash": "96780ffbf9408dd6e5cb09c1914aa9932cd01497a6b6d447c65198d6314c96fd",
+    "composition": null,
+    "poster": "https://api.admira.store/stock/poster/1793815054156-cxqmo2",
+    "thumbnail": "https://stock.admira.store/stock/1793815054156-cxqmo2/poster.jpg?v=141037",
+    "validacion": {
+      "ok": true,
+      "negros": 0,
+      "muestras": 1811,
+      "duracion": 72.46,
+      "motivo": "Decodificación íntegra H.264/AAC sin errores y blackdetect sin intervalos negros; revisión visual de las capturas.",
+      "por": "DeepAgent Trinity",
+      "ancho": 1920,
+      "alto": 1080,
+      "at": "2026-11-04T17:57:34.156Z"
+    }
+  }
+}

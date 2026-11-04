@@ -1,0 +1,61 @@
+WEBVTT
+
+00:00:00.000 --> 00:00:02.920 line:12% position:50% align:center size:90%
+Para importar una web, entra en AINimation Studio y
+
+00:00:02.920 --> 00:00:05.840 line:12% position:50% align:center size:90%
+abre Sites, en el menú de la portada.
+
+00:00:05.840 --> 00:00:09.420 line:12% position:50% align:center size:90%
+Abre Opciones. Pega la URL de la página
+
+00:00:09.420 --> 00:00:13.000 line:12% position:50% align:center size:90%
+o selecciona un site guardado. Usaremos PortAventura NeXT.
+
+00:00:13.000 --> 00:00:16.240 line:12% position:50% align:center size:90%
+Pulsa Importar página. AINimation prepara una copia
+
+00:00:16.240 --> 00:00:19.480 line:12% position:50% align:center size:90%
+editable, sin modificar la web original.
+
+00:00:19.480 --> 00:00:23.680 line:12% position:50% align:center size:90%
+La vista previa muestra el diseño y sus componentes. Los scripts,
+
+00:00:23.680 --> 00:00:27.880 line:12% position:50% align:center size:90%
+el canvas y los datos en directo originales necesitan recrearse.
+
+00:00:27.880 --> 00:00:31.280 line:12% position:50% align:center size:90%
+Haz clic sobre un texto de la página para seleccionar
+
+00:00:31.280 --> 00:00:34.680 line:12% position:50% align:center size:90%
+su elemento. También puedes usar la lista de componentes.
+
+00:00:34.680 --> 00:00:38.260 line:12% position:50% align:center size:90%
+En Avanzado, cambia el texto en sus propiedades. El resultado
+
+00:00:38.260 --> 00:00:41.840 line:12% position:50% align:center size:90%
+se aplica solo a tu borrador y puedes deshacerlo.
+
+00:00:41.840 --> 00:00:45.400 line:12% position:50% align:center size:90%
+Elige una animación y ajusta su duración o retraso.
+
+00:00:45.400 --> 00:00:48.960 line:12% position:50% align:center size:90%
+Los efectos respetan la preferencia de movimiento reducido.
+
+00:00:48.960 --> 00:00:52.560 line:12% position:50% align:center size:90%
+Vuelve a Opciones. En Añadir imagen o vídeo, pulsa Cargar
+
+00:00:52.560 --> 00:00:56.160 line:12% position:50% align:center size:90%
+desde el ordenador para incluir tus archivos en la copia.
+
+00:00:56.160 --> 00:00:59.720 line:12% position:50% align:center size:90%
+Experto es opcional. Abre su consola y escribe barra
+
+00:00:59.720 --> 00:01:03.280 line:12% position:50% align:center size:90%
+help para consultar las órdenes disponibles sobre tu copia.
+
+00:01:03.280 --> 00:01:07.860 line:12% position:50% align:center size:90%
+Descarga el proyecto para seguir editando, o exporta HTML. Los
+
+00:01:07.860 --> 00:01:12.440 line:12% position:50% align:center size:90%
+archivos locales quedan incluidos. La web original permanece intacta.
