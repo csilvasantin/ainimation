@@ -7,7 +7,7 @@
   "height": 1080,
   "fps": 25,
   "duration": 72.461333,
-  "sha256": "bedda1f72d4b1ad2d02be645b835a661885d4d3182c5c61624d6b8302d0a9db7",
+  "sha256": "96780ffbf9408dd6e5cb09c1914aa9932cd01497a6b6d447c65198d6314c96fd",
   "scenes": [
     {
       "shot": "01-home",
@@ -35,13 +35,13 @@
       "action": "En Opciones, importa una página.",
       "crop": [
         0,
-        112,
+        0,
         335,
         502
       ],
       "target": [
-        164,
-        301
+        30,
+        32
       ],
       "es": "Abre Opciones. Pega la URL de la página o selecciona un site guardado. Usaremos PortAventura NeXT.",
       "en": "Open Options. Paste the page URL or select a saved site. We will use PortAventura NeXT.",

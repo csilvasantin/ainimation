@@ -24,7 +24,7 @@ SCENES=[
   'target':[846,35],
   'es':'Para importar una web, entra en AINimation Studio y abre Sites, en el menú de la portada.',
   'en':'To import a web page, open AINimation Studio and choose Sites from the home-page menu.'},
- {'shot':'02-url','title':'Pega\nla URL.','action':'En Opciones, importa una página.','crop':[0,112,335,502],'target':[164,301],
+ {'shot':'02-url','title':'Pega\nla URL.','action':'En Opciones, importa una página.','crop':[0,0,335,502],'target':[30,32],
   'es':'Abre Opciones. Pega la URL de la página o selecciona un site guardado. Usaremos PortAventura NeXT.',
   'en':'Open Options. Paste the page URL or select a saved site. We will use PortAventura NeXT.'},
  {'shot':'03-import','title':'Importa\nuna copia.','action':'Pulsa «Importar página».','crop':[0,112,335,502],'target':[164,356],

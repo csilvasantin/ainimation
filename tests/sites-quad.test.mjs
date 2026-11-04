@@ -5,6 +5,12 @@ import {JSDOM} from 'jsdom';
 import {createQuadraticUI} from '../sites/quad.mjs';
 import {parseExpertCommand} from '../sites/expert.mjs';
 const html=readFileSync(new URL('../sites/index.html',import.meta.url),'utf8');
+test('los toggles cuadráticos sólo muestran iconos y llevan nombre accesible y tooltip',()=>{
+ const doc=new JSDOM(html).window.document;
+ for(const [id,label]of [['options','Opciones'],['advanced','Avanzado'],['expert','Experto']]){
+  const button=doc.getElementById(id+'-toggle');assert.equal(button.textContent.trim(),'');assert.equal(button.querySelectorAll('svg').length,1);assert.equal(button.getAttribute('aria-label'),label);assert.equal(button.title,label);
+ }
+});
 test('los tres paneles se cargan cerrados y se abren de forma independiente',()=>{
  const dom=new JSDOM(html),doc=dom.window.document;let reads=0,writes=0;
  Object.defineProperty(dom.window,'localStorage',{value:{getItem(){reads++;},setItem(){writes++;}}});
