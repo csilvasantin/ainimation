@@ -6,3 +6,5 @@
 .workspace-status{flex:none;min-height:28px;padding:5px 14px;margin:0;border-top:1px solid var(--line);font-size:11px;color:var(--lime);line-height:1.5}
 
 .quad-toggle{width:42px;height:42px;padding:10px;justify-content:center}.quad-toggle svg{width:18px;height:16px}@media(max-width:480px){.quad-toggle{width:38px;height:38px;padding:8px}}
+
+.media-drop-overlay{position:fixed;inset:var(--topbar) 0 0;z-index:60;display:grid;place-items:center;pointer-events:none;background:#0c0c14ce;border:3px dashed var(--lime);padding:24px;text-align:center}.media-drop-overlay>div{max-width:520px;padding:28px;background:#15151f;border:1px solid var(--lime)}.media-drop-overlay strong{font-size:clamp(19px,3vw,28px);line-height:1.3;color:var(--lime)}.media-drop-overlay p{font-size:13px;color:var(--dim);line-height:1.5}
