@@ -1,0 +1,213 @@
+{
+  "format": "ainimation-help-video",
+  "version": 1,
+  "source": "Real CUA screenshots of the AINimation UI, including the quadratic interface in local QA and the public PortAventura page",
+  "voice": "Mónica, es-ES, local macOS synthesis",
+  "width": 1920,
+  "height": 1080,
+  "fps": 25,
+  "duration": 72.461333,
+  "sha256": "bedda1f72d4b1ad2d02be645b835a661885d4d3182c5c61624d6b8302d0a9db7",
+  "scenes": [
+    {
+      "shot": "01-home",
+      "title": "Abre\nSites.",
+      "action": "Desde el menú de la portada.",
+      "crop": [
+        0,
+        0,
+        1010,
+        590
+      ],
+      "target": [
+        846,
+        35
+      ],
+      "es": "Para importar una web, entra en AINimation Studio y abre Sites, en el menú de la portada.",
+      "en": "To import a web page, open AINimation Studio and choose Sites from the home-page menu.",
+      "start": 0,
+      "end": 5.84,
+      "duration": 5.84
+    },
+    {
+      "shot": "02-url",
+      "title": "Pega\nla URL.",
+      "action": "En Opciones, importa una página.",
+      "crop": [
+        0,
+        112,
+        335,
+        502
+      ],
+      "target": [
+        164,
+        301
+      ],
+      "es": "Abre Opciones. Pega la URL de la página o selecciona un site guardado. Usaremos PortAventura NeXT.",
+      "en": "Open Options. Paste the page URL or select a saved site. We will use PortAventura NeXT.",
+      "start": 5.84,
+      "end": 13.0,
+      "duration": 7.16
+    },
+    {
+      "shot": "03-import",
+      "title": "Importa\nuna copia.",
+      "action": "Pulsa «Importar página».",
+      "crop": [
+        0,
+        112,
+        335,
+        502
+      ],
+      "target": [
+        164,
+        356
+      ],
+      "es": "Pulsa Importar página. AINimation prepara una copia editable, sin modificar la web original.",
+      "en": "Click Import page. AINimation creates an editable copy without changing the original website.",
+      "start": 13.0,
+      "end": 19.48,
+      "duration": 6.48
+    },
+    {
+      "shot": "04-imported",
+      "title": "Revisa\nel resultado.",
+      "action": "Diseño y componentes disponibles.",
+      "crop": [
+        10,
+        155,
+        1015,
+        855
+      ],
+      "target": [
+        400,
+        450
+      ],
+      "es": "La vista previa muestra el diseño y sus componentes. Los scripts, el canvas y los datos en directo originales necesitan recrearse.",
+      "en": "The preview shows the design and its components. Original scripts, canvas and live data need to be recreated.",
+      "start": 19.48,
+      "end": 27.880000000000003,
+      "duration": 8.4
+    },
+    {
+      "shot": "05-select",
+      "title": "Selecciona\nun texto.",
+      "action": "Haz clic directamente en la página.",
+      "crop": [
+        10,
+        155,
+        1015,
+        855
+      ],
+      "target": [
+        230,
+        450
+      ],
+      "es": "Haz clic sobre un texto de la página para seleccionar su elemento. También puedes usar la lista de componentes.",
+      "en": "Click text on the page to select its element. You can also use the components list.",
+      "start": 27.880000000000003,
+      "end": 34.68,
+      "duration": 6.8
+    },
+    {
+      "shot": "06-text",
+      "title": "Edita\nel borrador.",
+      "action": "Avanzado · propiedades del elemento.",
+      "crop": [
+        652,
+        160,
+        1025,
+        610
+      ],
+      "target": [
+        837,
+        300
+      ],
+      "es": "En Avanzado, cambia el texto en sus propiedades. El resultado se aplica solo a tu borrador y puedes deshacerlo.",
+      "en": "In Advanced, change the text in its properties. The change applies only to your draft and can be undone.",
+      "start": 34.68,
+      "end": 41.84,
+      "duration": 7.16
+    },
+    {
+      "shot": "07-animation",
+      "title": "Añade\nmovimiento.",
+      "action": "Elige animación y duración.",
+      "crop": [
+        652,
+        160,
+        1025,
+        610
+      ],
+      "target": [
+        837,
+        460
+      ],
+      "es": "Elige una animación y ajusta su duración o retraso. Los efectos respetan la preferencia de movimiento reducido.",
+      "en": "Choose an animation and adjust its duration or delay. Effects respect the visitor’s reduced-motion preference.",
+      "start": 41.84,
+      "end": 48.96,
+      "duration": 7.12
+    },
+    {
+      "shot": "08-media",
+      "title": "Carga\ntus medios.",
+      "action": "Imágenes y vídeos del ordenador.",
+      "crop": [
+        0,
+        540,
+        335,
+        950
+      ],
+      "target": [
+        160,
+        680
+      ],
+      "es": "Vuelve a Opciones. En Añadir imagen o vídeo, pulsa Cargar desde el ordenador para incluir tus archivos en la copia.",
+      "en": "Return to Options. Under Add image or video, choose Load from computer to include your files in the copy.",
+      "start": 48.96,
+      "end": 56.160000000000004,
+      "duration": 7.2
+    },
+    {
+      "shot": "09-expert",
+      "title": "Experto,\na tu ritmo.",
+      "action": "Consola opcional · empieza con /help.",
+      "crop": [
+        0,
+        829,
+        1025,
+        1169
+      ],
+      "target": [
+        470,
+        1125
+      ],
+      "es": "Experto es opcional. Abre su consola y escribe barra help para consultar las órdenes disponibles sobre tu copia.",
+      "en": "Expert is optional. Open its console and type slash help to see the commands available for your copy.",
+      "start": 56.160000000000004,
+      "end": 63.28,
+      "duration": 7.12
+    },
+    {
+      "shot": "10-export",
+      "title": "Descarga\ntu versión.",
+      "action": "Proyecto editable o HTML.",
+      "crop": [
+        0,
+        56,
+        1025,
+        650
+      ],
+      "target": [
+        750,
+        90
+      ],
+      "es": "Descarga el proyecto para seguir editando, o exporta HTML. Los archivos locales quedan incluidos. La web original permanece intacta.",
+      "en": "Download the project to keep editing, or export HTML. Local files are included. The original website stays unchanged.",
+      "start": 63.28,
+      "end": 72.44,
+      "duration": 9.16
+    }
+  ]
+}

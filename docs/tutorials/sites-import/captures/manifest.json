@@ -1,0 +1,102 @@
+[
+  {
+    "name": "01-home",
+    "url": "https://www.ainimation.studio/",
+    "focus": {
+      "height": 72.21875,
+      "width": 1010,
+      "x": 0,
+      "y": 0
+    }
+  },
+  {
+    "name": "02-url",
+    "url": "http://127.0.0.1:9138/sites/",
+    "focus": {
+      "height": 363.375,
+      "width": 287,
+      "x": 19,
+      "y": 150
+    }
+  },
+  {
+    "name": "03-import",
+    "url": "http://127.0.0.1:9138/sites/",
+    "focus": {
+      "height": 38,
+      "width": 287,
+      "x": 19,
+      "y": 337
+    }
+  },
+  {
+    "name": "04-imported",
+    "url": "http://127.0.0.1:9138/sites/",
+    "focus": {
+      "height": 950.609375,
+      "width": 1005,
+      "x": 10,
+      "y": 182.390625
+    }
+  },
+  {
+    "name": "05-select",
+    "url": "http://127.0.0.1:9138/sites/",
+    "focus": {
+      "height": 1105,
+      "width": 365,
+      "x": 660,
+      "y": 64
+    }
+  },
+  {
+    "name": "06-text",
+    "url": "http://127.0.0.1:9138/sites/",
+    "focus": {
+      "height": 368,
+      "width": 327,
+      "x": 679,
+      "y": 215
+    }
+  },
+  {
+    "name": "07-animation",
+    "url": "http://127.0.0.1:9138/sites/",
+    "focus": {
+      "height": 368,
+      "width": 327,
+      "x": 679,
+      "y": 215
+    }
+  },
+  {
+    "name": "08-media",
+    "url": "http://127.0.0.1:9138/sites/",
+    "focus": {
+      "height": 42,
+      "width": 261,
+      "x": 32,
+      "y": 660.5625
+    }
+  },
+  {
+    "name": "09-expert",
+    "url": "http://127.0.0.1:9138/sites/",
+    "focus": {
+      "height": 340,
+      "width": 1025,
+      "x": 0,
+      "y": 829
+    }
+  },
+  {
+    "name": "10-export",
+    "url": "http://127.0.0.1:9138/sites/",
+    "focus": {
+      "height": 53,
+      "width": 1025,
+      "x": 0,
+      "y": 64
+    }
+  }
+]

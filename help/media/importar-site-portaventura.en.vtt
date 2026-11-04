@@ -1,0 +1,61 @@
+WEBVTT
+
+00:00:00.000 --> 00:00:02.920 line:12% position:50% align:center size:90%
+To import a web page, open AINimation Studio
+
+00:00:02.920 --> 00:00:05.840 line:12% position:50% align:center size:90%
+and choose Sites from the home-page menu.
+
+00:00:05.840 --> 00:00:09.420 line:12% position:50% align:center size:90%
+Open Options. Paste the page URL or select
+
+00:00:09.420 --> 00:00:13.000 line:12% position:50% align:center size:90%
+a saved site. We will use PortAventura NeXT.
+
+00:00:13.000 --> 00:00:16.240 line:12% position:50% align:center size:90%
+Click Import page. AINimation creates an editable
+
+00:00:16.240 --> 00:00:19.480 line:12% position:50% align:center size:90%
+copy without changing the original website.
+
+00:00:19.480 --> 00:00:23.680 line:12% position:50% align:center size:90%
+The preview shows the design and its components. Original
+
+00:00:23.680 --> 00:00:27.880 line:12% position:50% align:center size:90%
+scripts, canvas and live data need to be recreated.
+
+00:00:27.880 --> 00:00:31.280 line:12% position:50% align:center size:90%
+Click text on the page to select its
+
+00:00:31.280 --> 00:00:34.680 line:12% position:50% align:center size:90%
+element. You can also use the components list.
+
+00:00:34.680 --> 00:00:38.260 line:12% position:50% align:center size:90%
+In Advanced, change the text in its properties. The change
+
+00:00:38.260 --> 00:00:41.840 line:12% position:50% align:center size:90%
+applies only to your draft and can be undone.
+
+00:00:41.840 --> 00:00:45.400 line:12% position:50% align:center size:90%
+Choose an animation and adjust its duration or
+
+00:00:45.400 --> 00:00:48.960 line:12% position:50% align:center size:90%
+delay. Effects respect the visitor’s reduced-motion preference.
+
+00:00:48.960 --> 00:00:52.560 line:12% position:50% align:center size:90%
+Return to Options. Under Add image or video, choose Load
+
+00:00:52.560 --> 00:00:56.160 line:12% position:50% align:center size:90%
+from computer to include your files in the copy.
+
+00:00:56.160 --> 00:00:59.720 line:12% position:50% align:center size:90%
+Expert is optional. Open its console and type slash
+
+00:00:59.720 --> 00:01:03.280 line:12% position:50% align:center size:90%
+help to see the commands available for your copy.
+
+00:01:03.280 --> 00:01:07.860 line:12% position:50% align:center size:90%
+Download the project to keep editing, or export HTML.
+
+00:01:07.860 --> 00:01:12.440 line:12% position:50% align:center size:90%
+Local files are included. The original website stays unchanged.
