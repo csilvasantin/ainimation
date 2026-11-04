@@ -25,6 +25,9 @@ test('subir y bajar empiezan ocultos y deshabilitados, sólo con icono, nombre a
   const button=doc.getElementById('move-'+name+'-media');assert.equal(button.hidden,true);assert.equal(button.disabled,true);assert.equal(button.type,'button');assert.equal(button.textContent.trim(),'');assert.equal(button.querySelectorAll('svg').length,1);assert.equal(button.getAttribute('aria-label'),label);assert.equal(button.title,label);assert.equal(button.parentElement,doc.getElementById('duplicate-added-media').parentElement);
  }
 });
+test('el control de visibilidad empieza oculto y usa sólo un icono accesible con estado y tooltip',()=>{
+ const doc=new JSDOM(html).window.document,button=doc.getElementById('visibility-added-media');assert.equal(button.hidden,true);assert.equal(button.type,'button');assert.equal(button.textContent.trim(),'');assert.equal(button.querySelectorAll('svg').length,1);assert.equal(button.getAttribute('aria-label'),'Ocultar medio añadido');assert.equal(button.title,button.getAttribute('aria-label'));assert.equal(button.getAttribute('aria-pressed'),'false');assert.equal(button.parentElement,doc.getElementById('duplicate-added-media').parentElement);
+});
 test('los tres paneles se cargan cerrados y se abren de forma independiente',()=>{
  const dom=new JSDOM(html),doc=dom.window.document;let reads=0,writes=0;
  Object.defineProperty(dom.window,'localStorage',{value:{getItem(){reads++;},setItem(){writes++;}}});
