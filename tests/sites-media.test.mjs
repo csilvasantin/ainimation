@@ -250,3 +250,26 @@ test('el estado oculto sólo se aplica a nodos añadidos y conserva los original
   const s=createSiteSession(p),id=s.addMedia('image','https://media.org/added.jpg');s.edit(id,{hidden:true});
   const doc=new DOMParser().parseFromString(buildDocument(s.draft),'text/html');assert.equal(doc.querySelector('[data-ain-id="ain-1"]').hidden,false);assert.equal(doc.querySelector('[data-ain-id="ain-1"]').style.display,'block');assert.equal(doc.querySelector('[data-ain-id="'+id+'"]').hidden,true);assert.equal(s.canSetMediaVisibility('ain-1'),false);
 });
+test('nombrar imagen y vídeo añadido normaliza el texto y cambia sólo su etiqueta en un paso reversible',()=>{
+  for(const type of ['image','video']){
+    const s=createSiteSession(project()),id=s.addMedia(type,'https://media.org/'+(type==='image'?'cover.jpg':'clip.mp4'));s.edit(id,{maxWidth:320,hidden:true,alt:'Descripción accesible',animation:'rise',duration:1.8,delay:.3});
+    const before=s.draft,patch={label:'  Portada principal  '};assert.equal(s.canRenameMedia(id),true);s.edit(id,patch);const after=s.draft;
+    assert.equal(patch.label,'  Portada principal  ');assert.deepEqual(after.items.find(i=>i.id===id),{...before.items.find(i=>i.id===id),label:'Portada principal'});
+    s.edit(id,{label:' Portada principal '});s.undo();assert.deepEqual(s.draft,before);s.redo();assert.deepEqual(s.draft,after);assert.deepEqual(s.original,project());
+  }
+});
+test('renombrar rechaza vacíos, nombres largos, originales y otros tipos sin cambios parciales',()=>{
+  const p=project();p.items.push({...p.items[0],id:'ain-1',type:'image',value:'https://media.org/original.jpg',inserted:true});const draft=structuredClone(p);draft.items.push({...p.items[1],id:'ain-2',inserted:'true'},{...p.items[0],id:'ain-3',inserted:true},{...p.items[1],id:'ain-4',type:'background'});
+  const s=createSiteSession(p,draft),before=s.draft;
+  for(const id of ['ain-0','ain-1','ain-2','ain-3','ain-4']){assert.equal(s.canRenameMedia(id),false);assert.throws(()=>s.edit(id,{label:'Nombre nuevo'}),/no editable/);}
+  assert.deepEqual(s.draft,before);const id=s.addMedia('video','https://media.org/clip.mp4');s.edit(id,{label:'a'.repeat(200)});const valid=s.draft;
+  for(const label of ['', ' \t\n ', 'a'.repeat(201), null, undefined, 123, {}]){assert.throws(()=>s.edit(id,{label}),/1 a 200/);assert.deepEqual(s.draft,valid);}
+  s.undo();assert.equal(s.draft.items.find(i=>i.id===id).label,'Vídeo añadido');
+});
+test('guardar, duplicar y reabrir conservan nombres independientes sin renombrar archivos, proyecto ni descripción',async()=>{
+  const a=await image(),v=await video(),lib=createMediaLibrary([a,v]),s=createSiteSession(project()),[photo,clip]=s.addMediaBatch([{type:'image',value:a.id,label:a.name},{type:'video',value:v.id,label:v.name}]);
+  s.edit(photo,{maxWidth:320,hidden:true,alt:'Descripción de la foto',animation:'float'});const beforeHTML=buildDocument(s.draft,{media:await exportMediaURLs(lib,s.draft)});s.edit(photo,{label:'Portada principal'});s.edit(clip,{label:'Vídeo de cabecera'});
+  assert.equal(buildDocument(s.draft,{media:await exportMediaURLs(lib,s.draft)}),beforeHTML);const copy=s.duplicateMedia(photo);assert.equal(s.draft.items.find(i=>i.id===copy).label,'Portada principal');s.edit(copy,{label:'Portada secundaria'});assert.equal(s.draft.items.find(i=>i.id===photo).label,'Portada principal');
+  const entries=await exportMedia(lib,referencedMedia(s.original,s.draft));assert.equal(entries.length,2);assert.deepEqual(entries.map(a=>a.name),[a.name,v.name]);assert.equal(lib.size,a.size+v.size);assert.equal(s.draft.title,project().title);assert.equal(s.draft.url,project().url);
+  const reopened=await importMedia(JSON.parse(JSON.stringify(entries)),{inspect:skip}),restored=createSiteSession(s.original,JSON.parse(JSON.stringify(s.draft)));assert.deepEqual(restored.draft,s.draft);assert.equal(restored.draft.items.find(i=>i.id===photo).alt,'Descripción de la foto');assert.equal(restored.draft.items.find(i=>i.id===copy).hidden,true);assert.equal(restored.draft.items.find(i=>i.id===copy).maxWidth,320);assert.equal(reopened.records()[0].name,a.name);
+});
