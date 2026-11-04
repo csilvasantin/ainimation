@@ -40,7 +40,7 @@ la dependencia correspondiente, manteniendo ambas copias sincronizadas. La copia
 se vuelve a limpiar al previsualizar y al exportar, incluso al abrir un JSON.
 Los iframes carecen de acceso al origen de AINimation. Sólo se ejecuta el puente
 del editor, con nonce CSP: selección y medios en el borrador; recepción de
-archivos arrastrados en ambas vistas. El puente valida ventana y canal; no se
+archivos arrastrados y control de sonido en ambas vistas. El puente valida ventana y canal; no se
 habilitan navegación superior, formularios ni conexiones desde la copia.
 
 ## Servicio de lectura
@@ -144,3 +144,19 @@ panel mueve o redimensiona el centro ni sus iframes.
 
 El tutorial en `/help/#importar-sites` muestra esta interfaz con narración en
 español, subtítulos ES/EN, transcripción y capturas ampliadas del recorrido real.
+
+## Sonido de las vistas
+
+El botón de altavoz de la barra de edición sólo muestra un icono, con tooltip y
+nombre accesible. Silencia o activa todos los vídeos del borrador y comparación
+sin iniciar, parar ni rebobinar su reproducción. Sigue disponible durante las
+cargas. La preferencia se recuerda localmente y se aplica al reconstruir las
+vistas o añadir medios. Cerrar la comparación descarga su reproductor para que no
+quede sonido oculto.
+
+Los controles nativos se conservan. Un cambio individual incompatible con la
+preferencia global libera esa preferencia; el botón refleja el estado de los
+vídeos presentes. Sin una preferencia explícita se respetan sus estados iniciales.
+Los mensajes validan ventana, canal, revisión y tipos. Es un ajuste de la vista:
+no modifica el proyecto, su historial ni las exportaciones. El HTML exportado
+continúa sin scripts del editor. Pruebas: `tests/sites-sound.test.mjs`.

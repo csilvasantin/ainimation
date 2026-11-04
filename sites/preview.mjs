@@ -2,6 +2,7 @@ import {cleanDocument,cssURLs} from './import.mjs';
 import {validateSite} from './model.mjs';
 import {localReference} from './media.mjs';
 import {fileDropBridge} from './drop.mjs?v=20261104-replace-1';
+import {previewSoundBridge} from './sound.mjs?v=20261104-sound-1';
 const animations=`
 @keyframes ain-fade{from{opacity:0}to{opacity:1}}
 @keyframes ain-rise{from{opacity:0;translate:0 24px}to{opacity:1;translate:0 0}}
@@ -52,7 +53,7 @@ export function buildDocument(input,{channel='',interactive=false,dropChannel=''
   const style=doc.createElement('style');style.textContent=animations+(interactive?'[data-ain-id]{cursor:pointer!important}[data-ain-selected]{outline:2px solid #c3ff6b!important;outline-offset:4px}':'');doc.head.append(style);
   if(bridge){
     const script=doc.createElement('script');script.setAttribute('nonce',nonce);
-    script.textContent=fileDropBridge(interactive?channel:dropChannel)+(interactive?`(()=>{const channel=${JSON.stringify(channel)},urls=new Map();document.addEventListener('click',e=>{if(e.target.closest('a,button'))e.preventDefault();e.stopPropagation();const el=e.target.closest('[data-ain-id]');if(el)parent.postMessage({channel,type:'select',id:el.dataset.ainId},'*')},true);window.addEventListener('message',e=>{
+    script.textContent=fileDropBridge(interactive?channel:dropChannel)+previewSoundBridge(interactive?channel:dropChannel)+(interactive?`(()=>{const channel=${JSON.stringify(channel)},urls=new Map();document.addEventListener('click',e=>{if(e.target.closest('a,button'))e.preventDefault();e.stopPropagation();const el=e.target.closest('[data-ain-id]');if(el)parent.postMessage({channel,type:'select',id:el.dataset.ainId},'*')},true);window.addEventListener('message',e=>{
       if(e.source!==parent||e.data?.channel!==channel)return;
       if(e.data.type==='media'&&Array.isArray(e.data.assets)&&e.data.assets.length<=500){
         for(const a of e.data.assets){if(!/^ain-local:[a-f0-9]{64}$/.test(a.id)||!(a.blob instanceof Blob)||!['image/png','image/jpeg','image/webp','image/gif','image/avif','video/mp4','video/webm'].includes(a.blob.type)||a.blob.size>52428800)continue;
