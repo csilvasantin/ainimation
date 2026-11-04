@@ -39,7 +39,8 @@ DOMPurify 3.4.17 está vendorizado con su licencia en `vendor/`; actualizarlo de
 la dependencia correspondiente, manteniendo ambas copias sincronizadas. La copia
 se vuelve a limpiar al previsualizar y al exportar, incluso al abrir un JSON.
 Los iframes carecen de acceso al origen de AINimation. Sólo se ejecuta el puente
-de selección del editor, con nonce CSP. El puente valida ventana y canal; no se
+del editor, con nonce CSP: selección y medios en el borrador; recepción de
+archivos arrastrados en ambas vistas. El puente valida ventana y canal; no se
 habilitan navegación superior, formularios ni conexiones desde la copia.
 
 ## Servicio de lectura
@@ -72,6 +73,13 @@ a la vez. En las propiedades de un medio, **Sustituir desde el ordenador** reemp
 su fuente conservando la identidad, animación e historial del componente. Una carga
 múltiple es un solo paso de deshacer/rehacer. Se comprueba el lote antes de editar.
 
+También se pueden **arrastrar y soltar imágenes y vídeos** sobre el editor o
+cualquiera de las dos vistas de comparación. Un aviso superpuesto indica dónde
+soltar sin redimensionar el lienzo. Utiliza la misma carga por archivos y conserva
+sus límites, historial, persistencia y empaquetado. Las carpetas se rechazan y los
+arrastres de texto o URL mantienen su comportamiento normal. Durante una carga o
+importación se espera a que termine; sin proyecto abierto se muestra Opciones.
+
 Formatos: PNG, JPEG, WebP, GIF y AVIF (10 MB por imagen); MP4 y WebM (50 MB por vídeo).
 El navegador debe poder decodificar sus dimensiones y metadatos. El tipo se reconoce
 por los bytes, no por la extensión o el MIME declarado. No se admite SVG como archivo
@@ -94,7 +102,14 @@ medios permanecen, aunque el historial completo sigue siendo de sesión.
 animaciones y CSP sin scripts importados. No depende de URLs blob temporales ni de los
 archivos originales del ordenador. Los recursos que ya eran remotos siguen remotos.
 
-Pruebas adicionales: `tests/sites-media.test.mjs`. Ensayo visual sobre una copia de
+Pruebas adicionales: `tests/sites-media.test.mjs` y `tests/sites-drop.test.mjs`.
+Ensayo del arrastre con eventos DataTransfer en el editor real y en ambas vistas
+aisladas: JPG + MP4, rechazo de lote inválido, deshacer/rehacer, recarga, selector y
+sustitución por archivo, descarga con dos recursos y hashes verificados. El aviso
+conservó exactamente la geometría del iframe. Se usan controles de prueba locales;
+no se automatiza un arrastre del Finder ni se publica ese arnés de pruebas.
+
+Ensayo visual inicial sobre una copia de
 PortAventura: carga conjunta de PNG y MP4, reemplazo por JPEG y MP4 distintos, deshacer,
 rechazo de imagen al reemplazar vídeo, recarga, paquete descargado/reabierto y HTML
 exportado con imagen y vídeo reproducibles.

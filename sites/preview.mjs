@@ -1,6 +1,7 @@
 import {cleanDocument,cssURLs} from './import.mjs';
 import {validateSite} from './model.mjs';
 import {localReference} from './media.mjs';
+import {fileDropBridge} from './drop.mjs';
 const animations=`
 @keyframes ain-fade{from{opacity:0}to{opacity:1}}
 @keyframes ain-rise{from{opacity:0;translate:0 24px}to{opacity:1;translate:0 0}}
@@ -11,7 +12,7 @@ const animations=`
 [data-ain-animation]:not([data-ain-animation="none"]):is(span){display:inline-block}
 @media(prefers-reduced-motion:reduce){[data-ain-animation]{animation:none!important}}
 `;
-export function buildDocument(input,{channel='',interactive=false,media=new Map()}={}){
+export function buildDocument(input,{channel='',interactive=false,dropChannel='',media=new Map()}={}){
   const p=validateSite(input),doc=cleanDocument(p.html);
   // Recheck saved/imported packages. No package can introduce code or an active document.
   doc.querySelectorAll('link').forEach(el=>el.remove());
@@ -42,16 +43,16 @@ export function buildDocument(input,{channel='',interactive=false,media=new Map(
     el.setAttribute('data-ain-animation',item.animation);
     el.style.setProperty('--ain-name','ain-'+item.animation);el.style.setProperty('--ain-duration',item.duration+'s');el.style.setProperty('--ain-delay',item.delay+'s');
   }
-  const nonce=crypto.randomUUID().replaceAll('-','');
+  const nonce=crypto.randomUUID().replaceAll('-',''),bridge=interactive||!!dropChannel;
   const meta=doc.createElement('meta');meta.httpEquiv='Content-Security-Policy';
-  meta.content=`default-src 'none'; img-src https: data: blob:; media-src https: data: blob:; style-src 'unsafe-inline' https:; font-src https: data:; script-src ${interactive?"'nonce-"+nonce+"'":"'none'"}; connect-src 'none'; frame-src 'none'; object-src 'none'; form-action 'none'; base-uri 'none'`;
+  meta.content=`default-src 'none'; img-src https: data: blob:; media-src https: data: blob:; style-src 'unsafe-inline' https:; font-src https: data:; script-src ${bridge?"'nonce-"+nonce+"'":"'none'"}; connect-src 'none'; frame-src 'none'; object-src 'none'; form-action 'none'; base-uri 'none'`;
   doc.head.prepend(meta);
   const charset=doc.createElement('meta');charset.setAttribute('charset','utf-8');doc.head.prepend(charset);
   const viewport=doc.createElement('meta');viewport.name='viewport';viewport.content='width=device-width,initial-scale=1';doc.head.append(viewport);
   const style=doc.createElement('style');style.textContent=animations+(interactive?'[data-ain-id]{cursor:pointer!important}[data-ain-selected]{outline:2px solid #c3ff6b!important;outline-offset:4px}':'');doc.head.append(style);
-  if(interactive){
+  if(bridge){
     const script=doc.createElement('script');script.setAttribute('nonce',nonce);
-    script.textContent=`(()=>{const channel=${JSON.stringify(channel)},urls=new Map();document.addEventListener('click',e=>{if(e.target.closest('a,button'))e.preventDefault();e.stopPropagation();const el=e.target.closest('[data-ain-id]');if(el)parent.postMessage({channel,type:'select',id:el.dataset.ainId},'*')},true);window.addEventListener('message',e=>{
+    script.textContent=fileDropBridge(interactive?channel:dropChannel)+(interactive?`(()=>{const channel=${JSON.stringify(channel)},urls=new Map();document.addEventListener('click',e=>{if(e.target.closest('a,button'))e.preventDefault();e.stopPropagation();const el=e.target.closest('[data-ain-id]');if(el)parent.postMessage({channel,type:'select',id:el.dataset.ainId},'*')},true);window.addEventListener('message',e=>{
       if(e.source!==parent||e.data?.channel!==channel)return;
       if(e.data.type==='media'&&Array.isArray(e.data.assets)&&e.data.assets.length<=500){
         for(const a of e.data.assets){if(!/^ain-local:[a-f0-9]{64}$/.test(a.id)||!(a.blob instanceof Blob)||!['image/png','image/jpeg','image/webp','image/gif','image/avif','video/mp4','video/webm'].includes(a.blob.type)||a.blob.size>52428800)continue;
@@ -60,7 +61,7 @@ export function buildDocument(input,{channel='',interactive=false,media=new Map(
         }
       }
       if(e.data.type==='highlight'){document.querySelectorAll('[data-ain-selected]').forEach(n=>n.removeAttribute('data-ain-selected'));const el=[...document.querySelectorAll('[data-ain-id]')].find(n=>n.dataset.ainId===e.data.id);if(el){el.setAttribute('data-ain-selected','');if(e.data.scroll)el.scrollIntoView({block:'center',behavior:'instant'})}}
-    });window.addEventListener('pagehide',()=>{for(const url of urls.values())URL.revokeObjectURL(url)});parent.postMessage({channel,type:'ready'},'*')})();`;
+    });window.addEventListener('pagehide',()=>{for(const url of urls.values())URL.revokeObjectURL(url)});parent.postMessage({channel,type:'ready'},'*')})();`:'');
     doc.body.append(script);
   }
   return '<!doctype html>\n'+doc.documentElement.outerHTML;

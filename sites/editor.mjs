@@ -1,10 +1,11 @@
 import {importSite} from './import.mjs';
 import {createSiteSession,validateSite} from './model.mjs';
-import {buildDocument} from './preview.mjs';
+import {buildDocument} from './preview.mjs?v=20261104-drop-1';
 import {listSites,saveSite} from './storage.mjs';
 import {createMediaLibrary,verifyMediaRecords,prepareLocalFile,referencedMedia,localReference,exportMedia,importMedia,exportMediaURLs,IMAGE_ACCEPT,VIDEO_ACCEPT,FILE_ACCEPT,MAX_PACKAGE,MAX_LIBRARY} from './media.mjs';
 import {createQuadraticUI} from './quad.mjs';
 import {parseExpertCommand,EXPERT_HELP} from './expert.mjs';
+import {createFileDrop,previewMessageSource} from './drop.mjs';
 const $=id=>document.getElementById(id),library=new Map();
 const quad=createQuadraticUI();
 let session=null,recordID='',selected='',channel='',comparing=false,mobile=false,importing=false,persistTimer;
@@ -12,6 +13,8 @@ let mediaLibrary=createMediaLibrary(),mediaBusy=false,selectScroll=false;
 const labels={text:'Texto',image:'Imagen',video:'Vídeo',graphic:'SVG',background:'Fondo'};
 const motionLabels={none:'Sin animación',fade:'Aparecer',rise:'Entrada desde abajo',zoom:'Acercamiento suave',float:'Flotar en bucle'};
 const say=message=>{$('edit-status').textContent=message;$('workspace-status').textContent=message;};
+function dropFeedback(message){say(message);if(!session){$('import-status').textContent=message;quad.show('options');}}
+const fileDrop=createFileDrop({document,overlay:$('media-drop-overlay'),onFiles:files=>loadLocalFiles(files),onError:dropFeedback,getMessage:()=>!session?'Importa o abre un site primero':mediaBusy||importing?'Espera a que termine la operación en curso':'Suelta imágenes o vídeos para añadirlos a tu copia'});
 $('start-import').onclick=()=>quad.show('options',true);
 function download(blob,name){const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}
 function filename(){return new URL(session.draft.url).hostname.replaceAll('.','-');}
@@ -32,10 +35,15 @@ async function preview(){
   document.querySelector('.canvas-wrap').classList.toggle('mobile',mobile);
   $('compare').setAttribute('aria-pressed',String(comparing));$('compare').textContent=comparing?'Cerrar comparación':'Comparar';
   $('desktop').setAttribute('aria-pressed',String(!mobile));$('mobile').setAttribute('aria-pressed',String(mobile));
-  if(comparing){const token=channel;try{const media=await exportMediaURLs(mediaLibrary,session.original);if(token===channel)$('original-frame').srcdoc=buildDocument(session.original,{media});}catch(e){say(e.message);}}
+  if(comparing){const token=channel;try{const media=await exportMediaURLs(mediaLibrary,session.original);if(token===channel)$('original-frame').srcdoc=buildDocument(session.original,{media,dropChannel:channel});}catch(e){say(e.message);}}
 }
 window.addEventListener('message',event=>{
-  if(event.source!==$('draft-frame').contentWindow||event.data?.channel!==channel)return;
+  const source=previewMessageSource(event,channel,$('draft-frame').contentWindow,comparing?$('original-frame').contentWindow:null);
+  if(!source)return;const draft=source==='draft';
+  if(event.data.type==='file-drag'){fileDrop.show();return;}
+  if(event.data.type==='file-folder'){fileDrop.rejectFolder();return;}
+  if(event.data.type==='file-drop'&&Array.isArray(event.data.files)){fileDrop.drop(event.data.files);return;}
+  if(!draft)return;
   if(event.data.type==='ready'){highlight(selectScroll);selectScroll=false;$('draft-frame').contentWindow.postMessage({channel,type:'media',assets:mediaLibrary.records(referencedMedia(session.draft)).map(a=>({id:a.id,blob:a.blob}))},'*');}
   if(event.data.type==='select'&&session?.draft.items.some(i=>i.id===event.data.id)){selected=event.data.id;paintComponents();inspector();highlight();quad.show('advanced');}
 });
@@ -71,7 +79,7 @@ function inspector(){
     if(local){const asset=mediaLibrary.records(new Set([item.value]))[0],note=document.createElement('p');note.className='local-media-note';note.textContent=asset.name+' · archivo local · '+(asset.size/1024/1024).toFixed(1)+' MB';$('fields').append(note);}
     field('value',item.type==='video'?(local?'Sustituir por URL de vídeo':'URL del vídeo (MP4 o WebM)'):(local?'Sustituir por URL de imagen':'URL de la imagen'),'url');
     const label=document.createElement('label');label.className='local-file-control';label.textContent='Sustituir desde el ordenador';label.htmlFor='replace-local';
-    const file=document.createElement('input');file.id='replace-local';file.type='file';file.disabled=mediaBusy;file.accept=item.type==='video'?VIDEO_ACCEPT:IMAGE_ACCEPT;file.onchange=e=>loadLocalFiles(e,{replace:item.id,expected:item.type==='video'?'video':'image'});label.append(file);$('fields').append(label);
+    const file=document.createElement('input');file.id='replace-local';file.type='file';file.disabled=mediaBusy;file.accept=item.type==='video'?VIDEO_ACCEPT:IMAGE_ACCEPT;file.onchange=e=>loadPicker(e,{replace:item.id,expected:item.type==='video'?'video':'image'});label.append(file);$('fields').append(label);
   }
   if(item.type==='image')field('alt','Descripción de la imagen','text');
   field('animation','Animación','select',motionLabels);field('duration','Duración · segundos','number');field('delay','Retraso · segundos','number');
@@ -108,8 +116,10 @@ $('fields').onsubmit=e=>e.preventDefault();
 $('add-media').onclick=()=>{try{selected=session.addMedia($('media-type').value,$('media-url').value);selectScroll=true;paint();remember();quad.hide('options');quad.show('advanced');say('Medio añadido después del contenido original.');}catch(e){say(e.message);}};
 $('download-project').onclick=async()=>{if(mediaBusy)return;lockMedia(true);say('Preparando el proyecto con sus archivos locales…');try{const assets=await exportMedia(mediaLibrary,referencedMedia(session.original,session.draft));download(new Blob([JSON.stringify({format:'ainimation-site-workspace',version:2,original:session.original,draft:session.draft,assets})],{type:'application/json'}),filename()+'.ainimation.json');say('Proyecto descargado con sus imágenes y vídeos locales.');}catch(e){say(e.message);}finally{lockMedia(false);}};
 $('download-html').onclick=async()=>{if(mediaBusy)return;lockMedia(true);say('Preparando el HTML con sus archivos locales…');try{const media=await exportMediaURLs(mediaLibrary,session.draft);download(new Blob([buildDocument(session.draft,{media})],{type:'text/html;charset=utf-8'}),filename()+'.html');say('HTML exportado con los archivos locales incluidos. Los medios por URL conservan sus enlaces.');}catch(e){say(e.message);}finally{lockMedia(false);}};
-async function loadLocalFiles(event,{replace='',expected}={}){
-  if(mediaBusy)return;const files=[...event.target.files];if(!files.length)return;
+async function loadLocalFiles(inputFiles,{replace='',expected}={}){
+  const files=Array.from(inputFiles);if(!files.length)return;
+  if(mediaBusy||importing){dropFeedback('Espera a que termine la operación en curso.');return;}
+  if(!session){dropFeedback('Importa o abre primero un site para añadir archivos a su copia.');return;}
   const target=session;lockMedia(true);say('Comprobando y cargando archivos locales…');
   try{
     if(files.length>10||(replace&&files.length!==1))throw Error('Selecciona hasta diez archivos; para sustituir un componente, selecciona uno.');
@@ -122,9 +132,10 @@ async function loadLocalFiles(event,{replace='',expected}={}){
     else selected=session.addMediaBatch(assets.map(a=>({type:a.type,value:a.id,label:a.name})))[0];
     selectScroll=true;paint();await persist();quad.hide('options');quad.show('advanced');say(replace?'Archivo sustituido en tu copia. Puedes deshacer el cambio.':assets.length+' '+(assets.length===1?'archivo local añadido.':'archivos locales añadidos.'));
   }catch(e){say(e.message+' La copia anterior se conserva.');}
-  finally{event.target.value='';lockMedia(false);}
+  finally{lockMedia(false);}
 }
-$('add-local').accept=FILE_ACCEPT;$('add-local').onchange=e=>loadLocalFiles(e);
+function loadPicker(event,options){const input=event.target;return loadLocalFiles(input.files,options).finally(()=>{input.value='';});}
+$('add-local').accept=FILE_ACCEPT;$('add-local').onchange=loadPicker;
 async function openFile(event){
   if(mediaBusy)return;
   try{const file=event.target.files[0];if(!file)return;if(file.size>MAX_PACKAGE)throw Error('El proyecto supera 145 MB.');lockMedia(true);$('import-status').textContent='Abriendo proyecto y comprobando archivos locales…';
