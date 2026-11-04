@@ -1,12 +1,13 @@
 import {importSite} from './import.mjs';
 import {createSiteSession,validateSite} from './model.mjs';
-import {buildDocument} from './preview.mjs?v=20261104-sound-1';
+import {buildDocument} from './preview.mjs?v=20261104-paste-1';
 import {listSites,saveSite} from './storage.mjs';
 import {createMediaLibrary,verifyMediaRecords,prepareLocalFile,referencedMedia,localReference,exportMedia,importMedia,exportMediaURLs,IMAGE_ACCEPT,VIDEO_ACCEPT,FILE_ACCEPT,MAX_PACKAGE,MAX_LIBRARY} from './media.mjs';
 import {createQuadraticUI} from './quad.mjs';
 import {parseExpertCommand,EXPERT_HELP} from './expert.mjs';
 import {createFileDrop,previewMessageSource,mediaDropReplacement} from './drop.mjs?v=20261104-replace-1';
 import {createPreviewSound} from './sound.mjs?v=20261104-sound-1';
+import {createImagePaste} from './paste.mjs?v=20261104-paste-1';
 const $=id=>document.getElementById(id),library=new Map();
 const quad=createQuadraticUI();
 let session=null,recordID='',selected='',channel='',comparing=false,mobile=false,importing=false,persistTimer;
@@ -22,6 +23,7 @@ const fileDrop=createFileDrop({document,overlay:$('media-drop-overlay'),onFiles:
   if(!session)return 'Importa o abre un site primero';if(mediaBusy||importing)return 'Espera a que termine la operación en curso';
   const target=replacement(context);return target?'Suelta '+(target.expected==='video'?'un vídeo':'una imagen')+' para sustituir «'+target.label+'»':'Suelta imágenes o vídeos para añadirlos a tu copia';
 },getDetail:context=>replacement(context)?'Un archivo del mismo tipo · conserva descripción, animación e historial. Puedes deshacer.':'Hasta 10 archivos · imágenes de 10 MB y vídeos de 50 MB'});
+createImagePaste({document,onFiles:files=>loadLocalFiles(files,{expected:'image'})});
 $('start-import').onclick=()=>quad.show('options',true);
 function download(blob,name){const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}
 function filename(){return new URL(session.draft.url).hostname.replaceAll('.','-');}
@@ -53,6 +55,7 @@ window.addEventListener('message',event=>{
   if(event.data.type==='file-drag'){fileDrop.show(context);return;}
   if(event.data.type==='file-folder'){fileDrop.rejectFolder();return;}
   if(event.data.type==='file-drop'&&Array.isArray(event.data.files)){fileDrop.drop(event.data.files,context);return;}
+  if(event.data.type==='image-paste'&&Array.isArray(event.data.files)){loadLocalFiles(event.data.files,{expected:'image'});return;}
   if(!draft)return;
   if(event.data.type==='ready'){highlight(selectScroll);selectScroll=false;$('draft-frame').contentWindow.postMessage({channel,type:'media',assets:mediaLibrary.records(referencedMedia(session.draft)).map(a=>({id:a.id,blob:a.blob}))},'*');}
   if(event.data.type==='select'&&session?.draft.items.some(i=>i.id===event.data.id)){selected=event.data.id;paintComponents();inspector();highlight();quad.show('advanced');}
