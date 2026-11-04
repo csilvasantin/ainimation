@@ -1,6 +1,6 @@
 import {importSite} from './import.mjs';
-import {createSiteSession,validateSite,DEFAULT_MEDIA_WIDTH,MIN_MEDIA_WIDTH,MAX_MEDIA_WIDTH} from './model.mjs?v=20261104-width-1';
-import {buildDocument} from './preview.mjs?v=20261104-width-1';
+import {createSiteSession,validateSite,DEFAULT_MEDIA_WIDTH,MIN_MEDIA_WIDTH,MAX_MEDIA_WIDTH} from './model.mjs?v=20261104-visibility-1';
+import {buildDocument} from './preview.mjs?v=20261104-visibility-1';
 import {listSites,saveSite} from './storage.mjs';
 import {createMediaLibrary,verifyMediaRecords,prepareLocalFile,referencedMedia,localReference,exportMedia,importMedia,exportMediaURLs,IMAGE_ACCEPT,VIDEO_ACCEPT,FILE_ACCEPT,MAX_PACKAGE,MAX_LIBRARY} from './media.mjs';
 import {createQuadraticUI} from './quad.mjs';
@@ -70,15 +70,18 @@ function movement(){
 function lockMedia(value){mediaBusy=value;document.querySelectorAll('button,input,select,textarea').forEach(el=>{if(el.id!=='mute-videos')el.disabled=value;});history();movement();}
 function paintComponents(){
   const filter=$('filter').value.toLocaleLowerCase(),items=session.draft.items;
+  const hidden=item=>session.canSetMediaVisibility(item.id)&&item.hidden===true;
   $('component-count').textContent='· '+items.length;
-  $('components').replaceChildren(...items.filter(i=>(i.label+' '+i.value+' '+labels[i.type]).toLocaleLowerCase().includes(filter)).map(i=>{
+  $('components').replaceChildren(...items.filter(i=>(i.label+' '+i.value+' '+labels[i.type]+(hidden(i)?' oculto':'')).toLocaleLowerCase().includes(filter)).map(i=>{
     const b=document.createElement('button'),strong=document.createElement('strong'),small=document.createElement('span');b.type='button';b.disabled=mediaBusy;b.dataset.item=i.id;
-    strong.textContent=i.label;small.textContent=labels[i.type]+(i.animation==='none'?'':' · '+motionLabels[i.animation]);b.append(strong,small);b.setAttribute('aria-pressed',String(i.id===selected));
+    strong.textContent=i.label;small.textContent=labels[i.type]+(hidden(i)?' · Oculto':'')+(i.animation==='none'?'':' · '+motionLabels[i.animation]);b.append(strong,small);b.setAttribute('aria-pressed',String(i.id===selected));
     b.onclick=()=>{selected=i.id;paintComponents();inspector();highlight(true);quad.show('advanced');};return b;
   }));
 }
 function inspector(){
   const item=session.draft.items.find(i=>i.id===selected);$('fields').replaceChildren();
+  const visibility=$('visibility-added-media'),isHidden=item?.hidden===true,visibilityLabel=(isHidden?'Mostrar':'Ocultar')+(item?.type==='video'?' vídeo añadido':item?.type==='image'?' imagen añadida':' medio añadido');
+  visibility.hidden=!session.canSetMediaVisibility(selected);visibility.disabled=mediaBusy||importing;visibility.setAttribute('aria-pressed',String(isHidden));visibility.setAttribute('aria-label',visibilityLabel);visibility.title=visibilityLabel;
   for(const [action,verb,allowed]of [['remove','Retirar',session.canRemoveMedia(selected)],['duplicate','Duplicar',session.canDuplicateMedia(selected)]]){
     const button=$(action+'-added-media'),label=verb+(item?.type==='video'?' vídeo añadido':item?.type==='image'?' imagen añadida':' medio añadido')+(action==='remove'?' de la copia':'');
     button.hidden=!allowed;button.disabled=mediaBusy||importing;button.setAttribute('aria-label',label);button.title=label;
@@ -139,6 +142,12 @@ $('undo').onclick=()=>{session.undo();paint();remember();say('Cambio deshecho.')
 $('compare').onclick=()=>{comparing=!comparing;preview();};$('replay').onclick=preview;
 $('desktop').onclick=()=>{mobile=false;preview();};$('mobile').onclick=()=>{mobile=true;preview();};
 $('fields').onsubmit=e=>e.preventDefault();
+$('visibility-added-media').onclick=()=>{
+  if(mediaBusy||importing||!session||!session.canSetMediaVisibility(selected))return;
+  try{const hidden=session.draft.items.find(i=>i.id===selected).hidden!==true;session.edit(selected,{hidden});selectScroll=!hidden;paint();remember();
+    $('selected-title').focus({preventScroll:true});say(hidden?'Medio añadido oculto. Puedes recuperarlo desde Opciones o con el icono de mostrar.':'Medio añadido visible. Puedes deshacer el cambio.');
+  }catch(e){say(e.message);}
+};
 for(const [name,direction]of [['up',-1],['down',1]])$('move-'+name+'-media').onclick=()=>{
   if(mediaBusy||importing||!session)return;
   try{if(!session.moveMedia(selected,direction))return;selectScroll=true;paint();remember();

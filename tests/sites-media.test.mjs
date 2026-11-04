@@ -216,3 +216,37 @@ test('guardar, duplicar, ordenar y exportar conservan anchos y archivos sin camb
   for(const [id,width]of [[photo,320],[clip,480],[copy,320]]){const el=doc.querySelector('[data-ain-id="'+id+'"]');assert.equal(el.style.width,'min(100%, '+width+'px)');assert.equal(el.style.height,'auto');}
   assert.equal(doc.querySelectorAll('script').length,0);const legacy=createSiteSession(project());const id=legacy.addMedia('image','https://media.org/old.jpg');const oldDoc=new DOMParser().parseFromString(buildDocument(legacy.draft),'text/html');assert.equal(oldDoc.querySelector('[data-ain-id="'+id+'"]').style.width,'min(100%, 640px)');
 });
+test('ocultar y mostrar imagen o vídeo añadido es un paso reversible que conserva todas las propiedades',()=>{
+  for(const type of ['image','video']){
+    const s=createSiteSession(project()),id=s.addMedia(type,'https://media.org/'+(type==='image'?'cover.jpg':'clip.mp4')),added=s.draft;
+    assert.equal(s.canSetMediaVisibility(id),true);s.edit(id,{hidden:false});assert.deepEqual(s.draft,added);s.undo();assert.deepEqual(s.draft,s.original);s.redo();
+    s.edit(id,{maxWidth:320,alt:'Descripción accesible',animation:'rise',duration:1.8,delay:.3});const before=s.draft;s.edit(id,{hidden:true});const hidden=s.draft;
+    assert.deepEqual(hidden.items.find(i=>i.id===id),{...before.items.find(i=>i.id===id),hidden:true});s.undo();assert.deepEqual(s.draft,before);s.redo();assert.deepEqual(s.draft,hidden);
+    s.edit(id,{hidden:false});assert.deepEqual(s.draft,before);s.undo();assert.deepEqual(s.draft,hidden);assert.deepEqual(s.original,project());
+  }
+});
+test('la visibilidad rechaza estados falsos, originales y otros tipos sin cambiar copia ni historial',()=>{
+  const p=project();p.items.push({...p.items[0],id:'ain-1',type:'image',value:'https://media.org/original.jpg',inserted:true});
+  const draft=structuredClone(p);draft.items.push({...p.items[1],id:'ain-2',inserted:'true'},{...p.items[0],id:'ain-3',inserted:true},{...p.items[1],id:'ain-4',type:'background'});
+  const s=createSiteSession(p,draft),before=s.draft;
+  for(const id of ['ain-0','ain-1','ain-2','ain-3','ain-4']){assert.equal(s.canSetMediaVisibility(id),false);assert.throws(()=>s.edit(id,{hidden:true}),/no editable/);}
+  assert.deepEqual(s.draft,before);const id=s.addMedia('video','https://media.org/clip.mp4'),added=s.draft;
+  for(const hidden of ['true','false','until-found',0,1,null,undefined,{}]){assert.throws(()=>s.edit(id,{hidden}),/verdadero o falso/);assert.deepEqual(s.draft,added);const bad=structuredClone(added);bad.items.find(i=>i.id===id).hidden=hidden;assert.throws(()=>validateSite(bad),/verdadero o falso/);}
+  for(const target of ['ain-0','ain-2','ain-3','ain-4']){const bad=structuredClone(added);bad.items.find(i=>i.id===target).hidden=true;assert.throws(()=>validateSite(bad),/verdadero o falso/);}
+  s.undo();assert.deepEqual(s.draft,before);
+});
+test('los medios ocultos conservan archivos al guardar, duplicar, ordenar, reabrir y exportar',async()=>{
+  const a=await image(),v=await video(),lib=createMediaLibrary([a,v]),s=createSiteSession(project()),[photo,clip]=s.addMediaBatch([{type:'image',value:a.id},{type:'video',value:v.id}]);
+  s.edit(photo,{maxWidth:320,animation:'float',hidden:true});s.edit(clip,{maxWidth:480,hidden:true});const copy=s.duplicateMedia(photo);s.moveMedia(copy,1);
+  assert.equal(s.draft.items.find(i=>i.id===copy).hidden,true);assert.equal(s.draft.items.find(i=>i.id===copy).maxWidth,320);const entries=await exportMedia(lib,referencedMedia(s.original,s.draft));assert.equal(entries.length,2);assert.equal(lib.size,a.size+v.size);
+  const reopened=await importMedia(JSON.parse(JSON.stringify(entries)),{inspect:skip}),restored=createSiteSession(s.original,JSON.parse(JSON.stringify(s.draft)));assert.deepEqual(restored.draft,s.draft);
+  let doc=new DOMParser().parseFromString(buildDocument(restored.draft,{media:await exportMediaURLs(reopened,restored.draft)}),'text/html');
+  for(const id of [photo,clip,copy]){const el=doc.querySelector('[data-ain-id="'+id+'"]');assert.equal(el.hidden,true);assert.equal(el.style.display,'none');assert.equal(el.style.getPropertyPriority('display'),'important');assert.ok(el.getAttribute('src').startsWith('data:'));}
+  assert.equal(doc.querySelector('video').controls,true);assert.equal(doc.querySelector('video').autoplay,false);assert.equal(doc.querySelectorAll('script').length,0);
+  restored.edit(copy,{hidden:false});doc=new DOMParser().parseFromString(buildDocument(restored.draft,{media:await exportMediaURLs(reopened,restored.draft)}),'text/html');assert.equal(doc.querySelector('[data-ain-id="'+copy+'"]').hidden,false);assert.equal(doc.querySelector('[data-ain-id="'+copy+'"]').style.display,'block');assert.equal(doc.querySelector('[data-ain-id="'+photo+'"]').hidden,true);assert.equal((await exportMedia(reopened,referencedMedia(restored.original,restored.draft))).length,2);
+});
+test('el estado oculto sólo se aplica a nodos añadidos y conserva los originales aunque traigan marcas de inserción',()=>{
+  const p=project();p.html=p.html.replace('</body>','<img data-ain-id="ain-1" style="display:block;width:123px"></body>');p.items.push({...p.items[0],id:'ain-1',type:'image',value:'https://media.org/original.jpg',inserted:true,hidden:true});
+  const s=createSiteSession(p),id=s.addMedia('image','https://media.org/added.jpg');s.edit(id,{hidden:true});
+  const doc=new DOMParser().parseFromString(buildDocument(s.draft),'text/html');assert.equal(doc.querySelector('[data-ain-id="ain-1"]').hidden,false);assert.equal(doc.querySelector('[data-ain-id="ain-1"]').style.display,'block');assert.equal(doc.querySelector('[data-ain-id="'+id+'"]').hidden,true);assert.equal(s.canSetMediaVisibility('ain-1'),false);
+});
