@@ -1,3 +1,4 @@
+import {mountQuadraticHeader} from './site-shell.mjs';
 // Contextual four-band chrome inside the existing detail, never a second site header.
 // Panels overlay the canvas; opening them must not resize or reposition it.
 export function mountCapsuleShell({dialog,form,doc=document,win=window,t}){
@@ -21,25 +22,8 @@ export function mountCapsuleShell({dialog,form,doc=document,win=window,t}){
  for(const selector of ['[data-undo]','[data-redo]','[data-save]'])tools.append($(selector));
  const review=doc.createElement('button');review.type='button';review.dataset.reviewRender='';review.textContent=t('Revisar y generar','Review and render');tools.append(review);
  const statusbar=doc.createElement('div');statusbar.className='capsule-statusbar';header.after(statusbar);statusbar.append($('[data-status]'),$('[data-save-status]'));
- let current=null;
- function measure(){if(!current)return;const h=header.getBoundingClientRect(),r=dialog.getBoundingClientRect();dialog.style.setProperty('--capsule-rail-top',Math.max(8,h.bottom+4)+'px');dialog.style.setProperty('--capsule-rail-left',Math.max(8,r.left)+'px');dialog.style.setProperty('--capsule-rail-right',Math.max(8,win.innerWidth-r.right)+'px');}
- function toggle(key,open,focus=true){
-  const panel=key==='advanced'?form:options,button=key==='advanced'?advancedButton:optionsButton;
-  const wasInside=panel.contains(doc.activeElement);
-  form.hidden=key!=='advanced'||!open;options.hidden=key!=='options'||!open;
-  advancedButton.setAttribute('aria-expanded',String(!form.hidden));optionsButton.setAttribute('aria-expanded',String(!options.hidden));
-  if(options.hidden)for(const media of options.querySelectorAll('video,audio'))media.pause();
-  current=open?key:null;measure();
-  if(open&&focus)(panel.querySelector('textarea,input,select')||panel.querySelector('button'))?.focus({preventScroll:true});
-  else if(!open&&focus&&wasInside)button.focus({preventScroll:true});
- }
- optionsButton.disabled=false;advancedButton.disabled=false;
- optionsButton.onclick=()=>toggle('options',options.hidden);
- advancedButton.onclick=()=>toggle('advanced',form.hidden);
- closeOptions.onclick=()=>toggle('options',false);closeAdvanced.onclick=()=>toggle('advanced',false);
- review.onclick=()=>{toggle('advanced',true,false);form.elements.secret.focus({preventScroll:true});form.elements.secret.scrollIntoView({block:'nearest'});};
- function escape(event){if(event.key!=='Escape'||!current)return;const panel=current==='advanced'?form:options;if(panel.contains(event.target)||event.target===advancedButton||event.target===optionsButton){event.preventDefault();event.stopImmediatePropagation();toggle(current,false);}}
- dialog.addEventListener('keydown',escape,true);win.addEventListener('resize',measure);doc.addEventListener('scroll',measure,true);
- const observer=new ResizeObserver(measure);observer.observe(header);
- return {openAdvanced:()=>toggle('advanced',true),destroy(){observer.disconnect();dialog.removeEventListener('keydown',escape,true);win.removeEventListener('resize',measure);doc.removeEventListener('scroll',measure,true);}};
+ const ui=mountQuadraticHeader(header,{doc,win,panels:{options,advanced:form},buttons:{options:optionsButton,advanced:advancedButton,expert:$('[data-expert-reserved]')},host:dialog});
+ closeOptions.onclick=()=>ui.hide('options');closeAdvanced.onclick=()=>ui.hide('advanced');
+ review.onclick=()=>{ui.show('advanced');form.elements.secret.focus({preventScroll:true});};
+ return {openAdvanced:()=>ui.show('advanced'),destroy:()=>ui.destroy()};
 }

@@ -224,12 +224,15 @@
     document.documentElement.lang = lang;
     var btn = document.getElementById("langToggle");
     if (btn) { btn.textContent = lang === "es" ? "EN" : "ES"; btn.setAttribute("aria-pressed", lang === "es"); btn.setAttribute("aria-label",lang === "es" ? "Cambiar a inglés" : "Switch to Spanish"); }
-    try { localStorage.setItem("ain_lang", lang); } catch (e) {}
+    if(window.AINLanguage)window.AINLanguage.remember(lang);
+    else try { localStorage.setItem("ain_lang", lang); } catch (e) {}
   }
 
   // Idioma de arranque: 1) elección guardada del usuario; si no hay, 2) idioma del navegador
   //    (los hispanohablantes ven ES en su primera visita); si no, 3) EN (por defecto/canonical).
+  window.AINSetLanguage = apply;
   function detectLang() {
+    if(window.AINLanguage)return window.AINLanguage.read();
     var requested=new URLSearchParams(location.search).get('lang');
     if(requested==='es'||requested==='en')return requested;
     var stored = null;

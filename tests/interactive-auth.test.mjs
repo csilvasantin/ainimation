@@ -24,6 +24,10 @@ test('biblioteca y cuenta mantienen sus botones Google independientes al abrir y
  for(let i=0;i<4;i++){f.open();f.elements.get('loginDialog').open=false;}
  assert.equal(f.initialized(),1);assert.equal(f.calls.length,2);assert.equal(first.frame.parent,parent);assert.equal(first.options.state,'library');assert.equal(f.calls[1].options.state,'account');assert.notEqual(first.host.parent,f.calls[1].host.parent);
 });
+test('Google renderiza el botón en el idioma elegido al abrir Login',async()=>{
+ for(const lang of ['es','en']){const f=fixture({lang});await f.auth.ready;f.open();assert.equal(f.calls[0].options.locale,lang);assert.equal(f.calls[1].options.locale,lang);}
+});
+
 test('sólo la respuesta aceptada por el servidor habilita la sesión',async()=>{
  const failed=fixture({verify:async()=>new Response('{}',{status:401})});await failed.auth.ready;await failed.credential({credential:'test-invalid'});assert.equal(failed.accepted.length,0);assert.equal(failed.elements.get('cloudSync').disabled,true);assert.match(failed.elements.get('cloudStatus').textContent,/no tiene acceso/);
  const ok=fixture();await ok.auth.ready;await ok.credential({credential:'test-verified',select_by:'btn',state:'account'});assert.deepEqual(ok.accepted,['test-verified']);assert.equal(ok.elements.get('cloudSync').disabled,false);assert.equal(ok.elements.get('cloudStatus').dataset.googleSignInMethod,'btn');assert.match(ok.elements.get('cloudStatus').textContent,/Cuenta verificada/);

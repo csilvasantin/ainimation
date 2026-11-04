@@ -42,9 +42,9 @@
     }
     </script>
     <link rel="manifest" href="site.webmanifest" />
-    <link rel="stylesheet" href="assets/styles.css?v=a74f7f7" />
+    <link rel="stylesheet" href="assets/styles.css?v=a74f7f7-dirty" />
     <link rel="stylesheet" href="assets/capsula-editor.css" />
-  </head>
+  <link rel="stylesheet" href="/assets/site-shell.css?v=a74f7f7-dirty"><script src="/assets/site-language.js?v=a74f7f7-dirty"></script></head>
   <body class="studio-page director-focus">
     <header class="site-header studio-site-header" aria-label="Primary">
       <a class="brand" href="index.html" aria-label="AInimation Studio home">
@@ -193,7 +193,7 @@
             <button class="collab-close" type="button" aria-label="Close team bar">×</button>
           </div>
 
-          <div class="director-menubar" aria-label="Application menu">
+          <div class="director-menubar" data-ain-shell="director" aria-label="Application menu">
             <span class="member-menu">
               <button class="menu-button" type="button" aria-expanded="false" data-member-menu>Archivo</button>
               <span class="member-menu-list" aria-label="Archivo">
@@ -621,26 +621,26 @@
 
     <!-- XPL: el Lingo ejecutable. El runtime va ANTES que app.js para que la
          ventana Behaviour ya tenga catálogo cuando se pinte el primer plan. -->
-    <script src="assets/xpl-runtime.js?v=a74f7f7"></script>
-    <script src="assets/i18n.js?v=a74f7f7" defer></script>
-    <script src="assets/app.js?v=a74f7f7" defer></script>
-    <script src="assets/payment-authoring.js?v=a74f7f7" defer></script>
-    <script src="assets/xpl-studio.js?v=a74f7f7" defer></script>
+    <script src="assets/xpl-runtime.js?v=a74f7f7-dirty"></script>
+    <script src="assets/i18n.js?v=a74f7f7-dirty" defer></script>
+    <script src="assets/app.js?v=a74f7f7-dirty" defer></script>
+    <script src="assets/payment-authoring.js?v=a74f7f7-dirty" defer></script>
+    <script src="assets/xpl-studio.js?v=a74f7f7-dirty" defer></script>
     <!-- Va el último: necesita el plan ya cargado para poder sobrescribirlo con
          el que venga en el enlace ?p= y repintar. -->
-    <script src="assets/share-plan.js?v=a74f7f7" defer></script>
-    <script src="assets/publish-xperiencia.js?v=a74f7f7" defer></script>
-    <script src="assets/cast-ai.js?v=a74f7f7" defer></script>
-    <script src="assets/qrcode.min.js?v=a74f7f7" defer></script>
-    <script src="assets/kiosk-sprite.js?v=a74f7f7" defer></script>
-    <script src="assets/director-kiosk.js?v=a74f7f7" defer></script>
-    <script src="assets/admingo.js?v=a74f7f7" defer></script>
-    <script src="assets/admingo-editor.js?v=a74f7f7" defer></script>
+    <script src="assets/share-plan.js?v=a74f7f7-dirty" defer></script>
+    <script src="assets/publish-xperiencia.js?v=a74f7f7-dirty" defer></script>
+    <script src="assets/cast-ai.js?v=a74f7f7-dirty" defer></script>
+    <script src="assets/qrcode.min.js?v=a74f7f7-dirty" defer></script>
+    <script src="assets/kiosk-sprite.js?v=a74f7f7-dirty" defer></script>
+    <script src="assets/director-kiosk.js?v=a74f7f7-dirty" defer></script>
+    <script src="assets/admingo.js?v=a74f7f7-dirty" defer></script>
+    <script src="assets/admingo-editor.js?v=a74f7f7-dirty" defer></script>
     <script src="/assets/analytics.js" defer></script>
       <script src="/assets/register-sw.js" defer></script>
     <script defer src="https://www.admiranext.com/assets/sello-novedades.js?v=20261006-sello-1"></script>
-  <script type="module" src="assets/interactive-director.mjs?v=a74f7f7"></script><script type="module" src="assets/capsule-editor-entry.mjs?v=a74f7f7"></script>
-<script type="module" src="assets/director-focus.mjs?v=a74f7f7"></script>
-<script src="assets/capsula-editor.js" defer></script>
-</body>
+  <script type="module" src="assets/interactive-director.mjs?v=a74f7f7-dirty"></script><script type="module" src="assets/capsule-editor-entry.mjs?v=a74f7f7-dirty"></script>
+<script type="module" src="assets/director-focus.mjs?v=a74f7f7-dirty"></script>
+<script src="assets/capsula-editor.js?v=a74f7f7-dirty" defer></script>
+<script type="module" src="/assets/site-shell.mjs?v=a74f7f7-dirty"></script></body>
 </html>

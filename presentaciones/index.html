@@ -1,7 +1,7 @@
 <!doctype html>
-<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>AINimation · Presentaciones</title><meta name="description" content="Presentaciones, con entidad propia en AINimation Studio: afinar, bucle de kiosco, interactivos dentro y MCP para agentes."><link rel="canonical" href="https://www.ainimation.studio/presentaciones/"><link rel="stylesheet" href="./hub.css"></head>
+<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>AINimation · Presentaciones</title><meta name="description" content="Presentaciones, con entidad propia en AINimation Studio: afinar, bucle de kiosco, interactivos dentro y MCP para agentes."><link rel="canonical" href="https://www.ainimation.studio/presentaciones/"><link rel="stylesheet" href="./hub.css"><link rel="stylesheet" href="/assets/site-shell.css?v=a74f7f7-dirty"><script src="/assets/site-language.js?v=a74f7f7-dirty"></script></head>
 <body>
-<header class="hub-header"><a href="/" class="brand">A<span>IN</span>IMATION <small>/ PRESENTACIONES</small></a><button id="lang" class="lang" type="button" aria-label="Cambiar idioma / Switch language">EN</button></header>
+<header data-ain-shell="hub" class="hub-header"><a href="/" class="brand">A<span>IN</span>IMATION <small>/ PRESENTACIONES</small></a><button id="lang" class="lang" type="button" aria-label="Cambiar idioma / Switch language">EN</button></header>
 <main>
 <section class="hero"><p class="eyebrow" data-es="ESTUDIO / PRESENTACIONES" data-en="STUDIO / PRESENTATIONS">ESTUDIO / PRESENTACIONES</p><h1 data-es="Presentaciones, con entidad propia" data-en="Presentations, in their own right">Presentaciones, con entidad propia</h1><p data-es="Cuatro formas de llevar una presentación más allá de la diapositiva." data-en="Four ways to take a presentation beyond the slide.">Cuatro formas de llevar una presentación más allá de la diapositiva.</p><a id="open-editor" class="cta" href="./editor/" data-es="Abrir el editor →" data-en="Open the editor →">Abrir el editor →</a></section>
 <ol class="cards" aria-label="Opciones">
@@ -13,5 +13,5 @@
 </main>
 <p style="max-width:1180px;margin:0 auto 32px;padding:0 32px"><a class="cta" href="/sites/">Sites · Importar una web por URL →</a></p>
 <footer class="hub-footer"><span data-es="¿Usabas la ruta antigua? El editor sigue en" data-en="Used the old route? The editor now lives at">¿Usabas la ruta antigua? El editor sigue en</span> <a href="./editor/">/presentaciones/editor/</a></footer>
-<script>(()=>{const b=document.getElementById('lang');let l=localStorage.getItem('ain-lang')||'es';const s=()=>{document.documentElement.lang=l;document.querySelectorAll('[data-es]').forEach(e=>e.textContent=e.dataset[l]);b.textContent=l==='es'?'EN':'ES'};b.onclick=()=>{l=l==='es'?'en':'es';try{localStorage.setItem('ain-lang',l)}catch{}s()};s()})();</script>
-</body></html>
+<script>(()=>{const b=document.getElementById('lang');let l=window.AINLanguage?.read()||'es';const s=()=>{document.documentElement.lang=l;window.AINLanguage?.remember(l);document.querySelectorAll('[data-es]').forEach(e=>e.textContent=e.dataset[l]);b.textContent=l==='es'?'EN':'ES'};window.AINSetLanguage=next=>{l=next;s()};b.onclick=()=>{l=l==='es'?'en':'es';try{localStorage.setItem('ain-lang',l)}catch{}s()};s()})();</script>
+<script type="module" src="/assets/site-shell.mjs?v=a74f7f7-dirty"></script></body></html>

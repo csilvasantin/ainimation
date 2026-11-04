@@ -46,7 +46,7 @@
       /* ── Barra superior (menú principal) — coherente con la home de ainimation.studio ── */
       .studio-site-header { position:fixed; top:0; left:0; right:0; z-index:30; display:flex;
         align-items:center; gap:24px; justify-content:space-between;
-        padding:12px clamp(16px,4vw,40px); height:var(--bar-h);
+        padding:12px clamp(16px,4vw,40px); min-height:60px;height:auto;
         background:rgba(20,17,15,.85); backdrop-filter:blur(18px); border-bottom:1px solid var(--line); }
       .brand { display:flex; align-items:center; gap:10px; font-size:.9rem; font-weight:800;
         text-transform:uppercase; color:var(--ink); text-decoration:none; letter-spacing:0; }
@@ -85,19 +85,12 @@
         padding:1rem clamp(1rem,3vw,2.2rem) 1.4rem; }
       .rail-bottom .rail-head { margin-bottom:.5rem; }
 
-      /* toggles ocultan cada raíl (patrón portería: body.pf-*-off) y el grid se re-cuadra */
-      body.pf-left-off   .rail-left   { display:none; }
-      body.pf-right-off  .rail-right  { display:none; }
-      body.pf-bottom-off .rail-bottom { display:none; }
-      body.pf-left-off   .frame { grid-template-columns:minmax(0,1fr) 270px; }
-      body.pf-right-off  .frame { grid-template-columns:250px minmax(0,1fr); }
-      body.pf-left-off.pf-right-off .frame { grid-template-columns:minmax(0,1fr); }
-
-      @media (max-width:900px){
-        .frame, body.pf-left-off .frame, body.pf-right-off .frame,
-        body.pf-left-off.pf-right-off .frame { grid-template-columns:1fr; }
-        .rail { position:static; max-height:none; border:0; border-bottom:1px solid var(--line); }
-      }
+      /* Panels overlay a stable center and always enter closed. */
+      .frame { grid-template-columns:minmax(0,1fr); }
+      .rail { position:fixed; z-index:140; top:var(--bar-h); bottom:0; width:min(300px,calc(100vw - 16px)); max-height:none; overflow:auto; }
+      .rail-left { left:0; } .rail-right { right:0; }
+      .rail-bottom { position:fixed; z-index:150; bottom:0; left:0; right:0; height:min(340px,45svh); overflow:auto; }
+      body.pf-left-off .rail-left,body.pf-right-off .rail-right,body.pf-bottom-off .rail-bottom { display:none; }
 
       h1 { font-size:1.5rem; margin:.1rem 0 .1rem; }
       .sub { color:var(--muted); margin:0 0 1.1rem; }
@@ -147,10 +140,10 @@
       .payment-grid .payment-wide{grid-column:1/-1}.payment-grid select{width:100%;background:#24201c;border:1px solid var(--line);color:var(--ink);border-radius:8px;padding:.6rem .7rem;font-size:.95rem}
       @media(max-width:720px){.payment-grid{grid-template-columns:1fr}.payment-grid .payment-wide{grid-column:auto}}
     </style>
-  </head>
-  <body>
+  <link rel="stylesheet" href="/assets/site-shell.css?v=a74f7f7-dirty"><script src="/assets/site-language.js?v=a74f7f7-dirty"></script></head>
+  <body class="pf-left-off pf-right-off pf-bottom-off">
     <!-- Barra 1 (superior) — menú principal, coherente con la home -->
-    <header class="studio-site-header" aria-label="Primary">
+    <header data-ain-shell="native" class="studio-site-header" aria-label="Primary">
       <a class="brand" href="/#top" aria-label="AInimation Studio home">
         <span class="brand-mark">AI</span>
         <span>AInimation Studio</span>
@@ -625,28 +618,23 @@
     </script>
 
     <script>
-      // ── Cuadratura: iconos toggle para mostrar/ocultar cada raíl (opciones · avanzado · experto).
-      //    Persiste la preferencia por navegador (localStorage), patrón portería (body.pf-*-off).
+      // Independent overlay rails. Open state is never saved or restored.
       (function () {
-        const RAILS = { left: 'pf-left-off', right: 'pf-right-off', bottom: 'pf-bottom-off' };
-        const btns = document.querySelectorAll('.rtoggle');
-        Object.keys(RAILS).forEach((r) => {
-          if (localStorage.getItem('ain_rail_' + r) === '0') document.body.classList.add(RAILS[r]);
-        });
-        window.syncToggles = function () {
-          btns.forEach((b) => b.classList.toggle('off', document.body.classList.contains(RAILS[b.dataset.rail])));
-        };
-        btns.forEach((b) => {
-          b.addEventListener('click', () => {
-            const off = document.body.classList.toggle(RAILS[b.dataset.rail]);
-            localStorage.setItem('ain_rail_' + b.dataset.rail, off ? '0' : '1');
-            window.syncToggles();
-          });
-        });
-        window.syncToggles();
+        const RAILS={left:'pf-left-off',right:'pf-right-off',bottom:'pf-bottom-off'},order=[];
+        const btns=Array.from(document.querySelectorAll('.rtoggle'));
+        function sync(){for(const b of btns){const off=document.body.classList.contains(RAILS[b.dataset.rail]);b.classList.toggle('off',off);b.setAttribute('aria-expanded',String(!off));}}
+        window.syncToggles=sync;
+        for(const b of btns){const panel=document.querySelector('.rail-'+b.dataset.rail);panel.id='produce-'+b.dataset.rail;b.setAttribute('aria-controls',panel.id);b.setAttribute('aria-label',({left:'Opciones',right:'Avanzado',bottom:'Experto'})[b.dataset.rail]);b.onclick=()=>{const open=document.body.classList.toggle(RAILS[b.dataset.rail])===false;const i=order.indexOf(b);if(i>=0)order.splice(i,1);if(open){order.push(b);panel.querySelector('input,select,textarea,button')?.focus({preventScroll:true});}sync();};}
+        document.addEventListener('keydown',event=>{if(event.key!=='Escape'||event.defaultPrevented)return;const button=btns.find(b=>document.getElementById(b.getAttribute('aria-controls')).contains(event.target))||order.at(-1);if(button){document.body.classList.add(RAILS[button.dataset.rail]);const i=order.indexOf(button);if(i>=0)order.splice(i,1);sync();button.focus({preventScroll:true});event.preventDefault();}});
+        const header=document.querySelector('.studio-site-header');
+        header.prepend(btns.find(b=>b.dataset.rail==='left'));
+        const icons={left:'<path d="M2 3h12M2 7h12M2 11h12"/>',right:'<rect x="1" y="1" width="14" height="12"/><path d="M10 1v12"/>',bottom:'<rect x="1" y="1" width="14" height="12"/><path d="M1 9h14"/>'};
+        for(const b of btns){b.classList.add('ain-quad-control');b.innerHTML='<svg viewBox="0 0 16 14" aria-hidden="true">'+icons[b.dataset.rail]+'</svg>';}
+        const measure=()=>document.documentElement.style.setProperty('--bar-h',header.getBoundingClientRect().height+'px');
+        new ResizeObserver(measure).observe(header);measure();sync();
       })();
     </script>
     <script src="/assets/analytics.js" defer></script>
       <script src="/assets/register-sw.js" defer></script>
-  </body>
+  <script type="module" src="/assets/site-shell.mjs?v=a74f7f7-dirty"></script></body>
 </html>
