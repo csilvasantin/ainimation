@@ -80,6 +80,14 @@ sus límites, historial, persistencia y empaquetado. Las carpetas se rechazan y 
 arrastres de texto o URL mantienen su comportamiento normal. Durante una carga o
 importación se espera a que termine; sin proyecto abierto se muestra Opciones.
 
+En el borrador, **soltar un archivo sobre una imagen o vídeo seleccionado lo
+sustituye**. El aviso previo indica el nombre del componente y pide un solo
+archivo del mismo tipo. Se conservan identidad, descripción alternativa,
+animación, duración y retraso; la sustitución es un paso de deshacer/rehacer.
+Soltar en un elemento no seleccionado, en el resto del editor o en la comparación
+original sigue añadiendo medios a la copia. Las ventanas y el canal del mensaje
+se validan antes de resolver el destino.
+
 Formatos: PNG, JPEG, WebP, GIF y AVIF (10 MB por imagen); MP4 y WebM (50 MB por vídeo).
 El navegador debe poder decodificar sus dimensiones y metadatos. El tipo se reconoce
 por los bytes, no por la extensión o el MIME declarado. No se admite SVG como archivo
@@ -108,6 +116,12 @@ aisladas: JPG + MP4, rechazo de lote inválido, deshacer/rehacer, recarga, selec
 sustitución por archivo, descarga con dos recursos y hashes verificados. El aviso
 conservó exactamente la geometría del iframe. Se usan controles de prueba locales;
 no se automatiza un arrastre del Finder ni se publica ese arnés de pruebas.
+
+Ensayo adicional de sustitución: PNG sobre imagen seleccionada y MP4 sobre vídeo
+seleccionado, aviso previo con su nombre, rechazo de otro tipo y de dos archivos,
+identificadores conservados, alt y animación con duración/retraso no predeterminados,
+deshacer/rehacer, alta fuera del elemento, recarga, descarga y reapertura. Los dos
+recursos empaquetados conservan sus hashes. Los vídeos mantienen sus controles.
 
 Ensayo visual inicial sobre una copia de
 PortAventura: carga conjunta de PNG y MP4, reemplazo por JPEG y MP4 distintos, deshacer,
