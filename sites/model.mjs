@@ -42,13 +42,14 @@ export function createSiteSession(input,saved){
     return -1;
   };
   return {get draft(){return read();},get original(){return structuredClone(original);},get canUndo(){return cursor>0;},get canRedo(){return cursor<states.length-1;},
-    canRemoveMedia:addedMedia,canDuplicateMedia:addedMedia,canSetMediaWidth:addedMedia,canSetMediaVisibility:addedMedia,
+    canRemoveMedia:addedMedia,canDuplicateMedia:addedMedia,canSetMediaWidth:addedMedia,canSetMediaVisibility:addedMedia,canRenameMedia:addedMedia,
     canMoveMedia:(id,direction)=>mediaNeighbor(id,direction)>=0,
     edit(id,patch){const p=read(),item=p.items.find(i=>i.id===id);if(!item)throw Error('Componente desconocido.');
-      const keys=['value','animation','duration','delay','alt',...(addedMedia(id)?['maxWidth','hidden']:[])];if(Object.keys(patch).some(k=>!keys.includes(k)))throw Error('Propiedad no editable.');
+      const keys=['value','animation','duration','delay','alt',...(addedMedia(id)?['maxWidth','hidden','label']:[])];if(Object.keys(patch).some(k=>!keys.includes(k)))throw Error('Propiedad no editable.');
+      if(Object.hasOwn(patch,'label')&&(typeof patch.label!=='string'||!patch.label.trim()||patch.label.trim().length>200))throw Error('Escribe un nombre de 1 a 200 caracteres.');
       if(Object.hasOwn(patch,'maxWidth')&&!validMediaWidth(patch.maxWidth))throw Error('Introduce un ancho entero entre 80 y 3840 píxeles.');
       if(Object.hasOwn(patch,'hidden')&&typeof patch.hidden!=='boolean')throw Error('El estado oculto debe ser verdadero o falso.');
-      Object.assign(item,patch);if(Object.hasOwn(patch,'maxWidth')&&patch.maxWidth===DEFAULT_MEDIA_WIDTH)delete item.maxWidth;if(Object.hasOwn(patch,'hidden')&&patch.hidden===false)delete item.hidden;validateSite(p);if(JSON.stringify(p)===JSON.stringify(states[cursor]))return;
+      Object.assign(item,patch);if(Object.hasOwn(patch,'label'))item.label=item.label.trim();if(Object.hasOwn(patch,'maxWidth')&&patch.maxWidth===DEFAULT_MEDIA_WIDTH)delete item.maxWidth;if(Object.hasOwn(patch,'hidden')&&patch.hidden===false)delete item.hidden;validateSite(p);if(JSON.stringify(p)===JSON.stringify(states[cursor]))return;
       states=states.slice(0,cursor+1);states.push(p);if(states.length>100)states.shift();cursor=states.length-1;},
     addMedia(type,value){return this.addMediaBatch([{type,value}])[0];},
     addMediaBatch(media){if(!Array.isArray(media)||!media.length||media.length>10)throw Error('Selecciona de uno a diez archivos.');const p=read();if(p.items.length+media.length>500)throw Error('Límite de componentes alcanzado.');
