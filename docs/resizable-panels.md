@@ -8,6 +8,9 @@ siguen el idioma de la aplicación.
 Con el asa enfocada, las flechas ajustan 16 px y Mayúsculas + flecha, 64 px.
 Inicio reduce al mínimo y Fin amplía hasta el límite disponible. Los tamaños se
 limitan al área visible bajo la cabecera y se reajustan si cambia el viewport.
+Doble clic en el borde o Intro con el asa enfocada restablecen el tamaño CSS
+original de esa superficie, adaptado al viewport actual. No cierran el panel ni
+modifican su contenido. La ayuda del borde explica ambos gestos.
 
 Los paneles siguen superpuestos: redimensionar no modifica la posición ni el
 tamaño del lienzo, los datos del proyecto o la ventana. Cada panel conserva su
