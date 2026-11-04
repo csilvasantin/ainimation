@@ -1,11 +1,12 @@
 import {importSite} from './import.mjs';
 import {createSiteSession,validateSite} from './model.mjs';
-import {buildDocument} from './preview.mjs?v=20261104-replace-1';
+import {buildDocument} from './preview.mjs?v=20261104-sound-1';
 import {listSites,saveSite} from './storage.mjs';
 import {createMediaLibrary,verifyMediaRecords,prepareLocalFile,referencedMedia,localReference,exportMedia,importMedia,exportMediaURLs,IMAGE_ACCEPT,VIDEO_ACCEPT,FILE_ACCEPT,MAX_PACKAGE,MAX_LIBRARY} from './media.mjs';
 import {createQuadraticUI} from './quad.mjs';
 import {parseExpertCommand,EXPERT_HELP} from './expert.mjs';
 import {createFileDrop,previewMessageSource,mediaDropReplacement} from './drop.mjs?v=20261104-replace-1';
+import {createPreviewSound} from './sound.mjs?v=20261104-sound-1';
 const $=id=>document.getElementById(id),library=new Map();
 const quad=createQuadraticUI();
 let session=null,recordID='',selected='',channel='',comparing=false,mobile=false,importing=false,persistTimer;
@@ -13,6 +14,8 @@ let mediaLibrary=createMediaLibrary(),mediaBusy=false,selectScroll=false;
 const labels={text:'Texto',image:'Imagen',video:'Vídeo',graphic:'SVG',background:'Fondo'};
 const motionLabels={none:'Sin animación',fade:'Aparecer',rise:'Entrada desde abajo',zoom:'Acercamiento suave',float:'Flotar en bucle'};
 const say=message=>{$('edit-status').textContent=message;$('workspace-status').textContent=message;};
+let soundStorage;try{soundStorage=window.localStorage;}catch{}
+const sound=createPreviewSound({button:$('mute-videos'),storage:soundStorage,getChannel:()=>channel,getFrames:()=>({draft:$('draft-frame').contentWindow,...(comparing?{original:$('original-frame').contentWindow}:{})})});
 function dropFeedback(message){say(message);if(!session){$('import-status').textContent=message;quad.show('options');}}
 const replacement=context=>mediaDropReplacement(session?.draft,selected,context);
 const fileDrop=createFileDrop({document,overlay:$('media-drop-overlay'),onFiles:(files,context)=>loadLocalFiles(files,replacement(context)||{}),onError:dropFeedback,getMessage:context=>{
@@ -32,7 +35,8 @@ async function persist(){
 function remember(){ $('saved-status').textContent='Guardando copia…';clearTimeout(persistTimer);persistTimer=setTimeout(persist,250);}
 function highlight(scroll=false){$('draft-frame').contentWindow?.postMessage({channel,type:'highlight',id:selected,scroll},'*');}
 async function preview(){
-  if(!session)return;channel=crypto.randomUUID();
+  if(!session)return;channel=crypto.randomUUID();sound.reset();
+  if($('original-frame').srcdoc)$('original-frame').srcdoc='';
   $('draft-frame').srcdoc=buildDocument(session.draft,{channel,interactive:true,media:mediaLibrary.previewMedia(session.draft)});
   $('original-wrap').hidden=!comparing;
   document.querySelector('.canvas-wrap').classList.toggle('comparing',comparing);
@@ -44,6 +48,7 @@ async function preview(){
 window.addEventListener('message',event=>{
   const source=previewMessageSource(event,channel,$('draft-frame').contentWindow,comparing?$('original-frame').contentWindow:null);
   if(!source)return;const draft=source==='draft';
+  if(event.data.type==='sound-ready'||event.data.type==='sound-state'){sound.receive(source,event.data);return;}
   const context={source,id:event.data.id};
   if(event.data.type==='file-drag'){fileDrop.show(context);return;}
   if(event.data.type==='file-folder'){fileDrop.rejectFolder();return;}
@@ -53,7 +58,7 @@ window.addEventListener('message',event=>{
   if(event.data.type==='select'&&session?.draft.items.some(i=>i.id===event.data.id)){selected=event.data.id;paintComponents();inspector();highlight();quad.show('advanced');}
 });
 function history(){ $('undo').disabled=mediaBusy||!session?.canUndo;$('redo').disabled=mediaBusy||!session?.canRedo;}
-function lockMedia(value){mediaBusy=value;document.querySelectorAll('button,input,select,textarea').forEach(el=>el.disabled=value);history();}
+function lockMedia(value){mediaBusy=value;document.querySelectorAll('button,input,select,textarea').forEach(el=>{if(el.id!=='mute-videos')el.disabled=value;});history();}
 function paintComponents(){
   const filter=$('filter').value.toLocaleLowerCase(),items=session.draft.items;
   $('component-count').textContent='· '+items.length;

@@ -62,12 +62,12 @@ test('un mensaje sólo se acepta desde la vista autorizada con el canal actual',
  assert.equal(previewMessageSource(event,'actual',draft,original),'draft');assert.equal(previewMessageSource({...event,source:original},'actual',draft,original),'original');
  assert.equal(previewMessageSource({...event,source:foreign},'actual',draft,original),'');assert.equal(previewMessageSource(event,'viejo',draft,original),'');assert.equal(previewMessageSource({...event,source:original},'actual',draft,null),'');assert.equal(previewMessageSource({source:draft,data:{channel:''}},'',draft,original),'');
 });
-test('la comparación recibe sólo el puente de archivos y el HTML exportado sigue sin scripts',()=>{
+test('la comparación sólo ejecuta puentes de vista autorizados y el HTML exportado sigue sin scripts',()=>{
  const p={format:'ainimation-imported-site',version:1,title:'Prueba',url:'https://www.portaventuranext.com/',html:'<!doctype html><html><body><p data-ain-id="ain-0">Texto</p><script>window.originalScript=true</script></body></html>',warnings:[],links:[],items:[{id:'ain-0',type:'text',value:'Texto',label:'Texto',alt:'',animation:'none',duration:1.2,delay:0}]};
  const html=buildDocument(p,{dropChannel:'comparacion'}),dom=new JSDOM(html,{runScripts:'outside-only'}),win=dom.window,messages=[];
  Object.defineProperty(win,'parent',{value:{postMessage:data=>messages.push(data)}});
  const script=win.document.querySelector('script');assert.ok(script.nonce);assert.equal(win.document.querySelectorAll('script').length,1);assert.ok(win.document.querySelector('meta[http-equiv]').content.includes("'nonce-"+script.nonce+"'"));win.eval(script.textContent);
- win.document.querySelector('p').click();assert.equal(messages.length,0);assert.equal(win.originalScript,undefined);
- drag(win,win.document.body,'drop',{types:['Files'],files:[new win.File(['x'],'foto.png')],items:[]});assert.equal(messages[0].channel,'comparacion');assert.equal(messages[0].type,'file-drop');
+ win.document.querySelector('p').click();assert.equal(messages.filter(m=>m.type==='select').length,0);assert.equal(win.originalScript,undefined);
+ drag(win,win.document.body,'drop',{types:['Files'],files:[new win.File(['x'],'foto.png')],items:[]});assert.equal(messages.at(-1).channel,'comparacion');assert.equal(messages.at(-1).type,'file-drop');
  const exported=new DOMParser().parseFromString(buildDocument(p),'text/html');assert.equal(exported.querySelectorAll('script').length,0);assert.ok(exported.querySelector('meta[http-equiv]').content.includes("script-src 'none'"));dom.window.close();
 });
