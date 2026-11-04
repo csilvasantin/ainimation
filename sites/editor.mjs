@@ -8,11 +8,12 @@ import {parseExpertCommand,EXPERT_HELP} from './expert.mjs';
 import {createFileDrop,previewMessageSource,mediaDropReplacement} from './drop.mjs?v=20261104-replace-1';
 import {createPreviewSound} from './sound.mjs?v=20261104-sound-1';
 import {createImagePaste} from './paste.mjs?v=20261104-paste-1';
+import {COMPONENT_LABELS,createComponentFilter} from './filter.mjs?v=20261105-filter-1';
 const $=id=>document.getElementById(id),library=new Map();
 const quad=createQuadraticUI();
 let session=null,recordID='',selected='',channel='',comparing=false,mobile=false,importing=false,persistTimer;
 let mediaLibrary=createMediaLibrary(),mediaBusy=false,selectScroll=false;
-const labels={text:'Texto',image:'Imagen',video:'Vídeo',graphic:'SVG',background:'Fondo'};
+const labels=COMPONENT_LABELS,componentFilter=createComponentFilter({onChange:paintComponents});
 const motionLabels={none:'Sin animación',fade:'Aparecer',rise:'Entrada desde abajo',zoom:'Acercamiento suave',float:'Flotar en bucle'};
 const say=message=>{$('edit-status').textContent=message;$('workspace-status').textContent=message;};
 let soundStorage;try{soundStorage=window.localStorage;}catch{}
@@ -69,10 +70,10 @@ function movement(){
 }
 function lockMedia(value){mediaBusy=value;document.querySelectorAll('button,input,select,textarea').forEach(el=>{if(el.id!=='mute-videos')el.disabled=value;});history();movement();}
 function paintComponents(){
-  const filter=$('filter').value.toLocaleLowerCase(),items=session.draft.items;
+  const items=session.draft.items;
   const hidden=item=>session.canSetMediaVisibility(item.id)&&item.hidden===true;
   $('component-count').textContent='· '+items.length;
-  $('components').replaceChildren(...items.filter(i=>(i.label+' '+i.value+' '+labels[i.type]+(hidden(i)?' oculto':'')).toLocaleLowerCase().includes(filter)).map(i=>{
+  $('components').replaceChildren(...componentFilter.apply(items,hidden).map(i=>{
     const b=document.createElement('button'),strong=document.createElement('strong'),small=document.createElement('span');b.type='button';b.disabled=mediaBusy;b.dataset.item=i.id;
     strong.textContent=i.label;small.textContent=labels[i.type]+(hidden(i)?' · Oculto':'')+(i.animation==='none'?'':' · '+motionLabels[i.animation]);b.append(strong,small);b.setAttribute('aria-pressed',String(i.id===selected));
     b.onclick=()=>{selected=i.id;paintComponents();inspector();highlight(true);quad.show('advanced');};return b;
@@ -118,7 +119,7 @@ function paint(){if(!session.draft.items.some(i=>i.id===selected))selected=sessi
 async function open(record,prepared){
   const next=createSiteSession(record.original,record.draft),nextLibrary=prepared||await verifyMediaRecords(record.assets||[]);
   try{buildDocument(next.draft,{interactive:true,media:nextLibrary.previewMedia(next.draft)});buildDocument(next.original,{interactive:true,media:nextLibrary.previewMedia(next.original)});}catch(e){nextLibrary.dispose();throw e;}
-  mediaLibrary.dispose();mediaLibrary=nextLibrary;session=next;recordID=record.id;selected=session.draft.items[0]?.id||'';$('filter').value='';
+  mediaLibrary.dispose();mediaLibrary=nextLibrary;session=next;recordID=record.id;selected=session.draft.items[0]?.id||'';componentFilter.reset();
   $('workspace').hidden=false;$('project-options').hidden=false;$('empty').hidden=true;$('site-title').textContent=session.draft.title;
   $('site-url').value=session.draft.url;$('source-url').href=session.draft.url;$('source-url').textContent=new URL(session.draft.url).hostname+' ↗';
   $('warnings').replaceChildren(...(session.draft.warnings||[]).map(w=>{const p=document.createElement('p');p.textContent=w;return p;}));
@@ -138,7 +139,6 @@ $('site-library').onchange=async()=>{
   else{$('site-url').value=value==='preset'?'https://www.portaventuranext.com/':'';$('site-url').focus();$('import-status').textContent='Introduce o revisa la URL y pulsa Importar página.';if(session)await persist();}
 };
 $('site-pages').onchange=()=>{if(!$('site-pages').value)return;$('site-url').value=$('site-pages').value;$('import-status').textContent='Página seleccionada. Pulsa Importar página para crear otra copia.';$('import-button').focus();};
-$('filter').oninput=paintComponents;
 $('undo').onclick=()=>{session.undo();paint();remember();say('Cambio deshecho.');};$('redo').onclick=()=>{session.redo();paint();remember();say('Cambio rehecho.');};
 $('compare').onclick=()=>{comparing=!comparing;preview();};$('replay').onclick=preview;
 $('desktop').onclick=()=>{mobile=false;preview();};$('mobile').onclick=()=>{mobile=true;preview();};

@@ -16,3 +16,5 @@
 .media-actions{display:flex;flex-wrap:wrap;align-items:center;gap:6px;max-width:100%;margin-left:auto}
 
 .visibility-media-button .visibility-slash{display:none}.visibility-media-button[aria-pressed="true"] .visibility-slash{display:block}
+
+.component-filters{display:grid;gap:10px}.component-filters>*{min-width:0}.component-filters select{width:100%;font-size:12px}.component-results{font-size:11px;line-height:1.5;color:var(--dim);margin:10px 0 0}
