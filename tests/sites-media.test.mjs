@@ -149,3 +149,35 @@ test('las instancias duplicadas comparten bytes y sobreviven a guardado, paquete
   const doc=new DOMParser().parseFromString(buildDocument(restored.draft,{media:await exportMediaURLs(reopened,restored.draft)}),'text/html');assert.equal(doc.querySelectorAll('#ain-added-media img').length,2);assert.equal(doc.querySelectorAll('#ain-added-media video').length,2);assert.equal(doc.querySelectorAll('script').length,0);
   restored.removeMedia(copyImage);assert.equal(restored.draft.items.find(i=>i.id===sourceImage).value,a.id);assert.equal((await exportMedia(reopened,referencedMedia(restored.original,restored.draft))).length,2);
 });
+test('subir y bajar medios añadidos conserva identidad y propiedades en un paso reversible',()=>{
+  const s=createSiteSession(project()),[a,b,c]=s.addMediaBatch([{type:'image',value:'https://media.org/a.jpg'},{type:'video',value:'https://media.org/b.mp4'},{type:'image',value:'https://media.org/c.jpg'}]);
+  s.edit(b,{alt:'Vídeo accesible',animation:'float',duration:2.4,delay:.3});const before=s.draft,original=s.original;
+  assert.equal(s.canMoveMedia(a,-1),false);assert.equal(s.canMoveMedia(a,1),true);assert.equal(s.canMoveMedia(c,1),false);
+  assert.equal(s.moveMedia(b,-1),true);const moved=s.draft;assert.deepEqual(moved.items.map(i=>i.id),['ain-0',b,a,c]);
+  assert.deepEqual([...moved.items].sort((a,b)=>a.id.localeCompare(b.id)),[...before.items].sort((a,b)=>a.id.localeCompare(b.id)));
+  s.undo();assert.deepEqual(s.draft,before);s.redo();assert.deepEqual(s.draft,moved);assert.equal(s.moveMedia(b,1),true);assert.deepEqual(s.draft,before);assert.deepEqual(s.original,original);
+});
+test('ordenar no mueve originales intercalados ni admite marcas falsas, otros tipos o direcciones inválidas',()=>{
+  const p=project();p.items.push({...p.items[0],id:'ain-1',type:'image',value:'https://media.org/original.jpg',inserted:true});
+  const draft=structuredClone(p),a={...p.items[1],id:'ain-2'},b={...p.items[1],id:'ain-3',type:'video',value:'https://media.org/clip.mp4'},fake={...a,id:'ain-4',inserted:'true'},text={...p.items[0],id:'ain-5',inserted:true};
+  draft.items=[p.items[0],a,p.items[1],fake,text,b];const s=createSiteSession(p,draft),before=s.draft;
+  for(const id of ['ain-0','ain-1','ain-4','ain-5','ain-999']){assert.equal(s.canMoveMedia(id,1),false);assert.throws(()=>s.moveMedia(id,1),/Sólo puedes ordenar/);}
+  for(const direction of [0,2,-2,'1',null,NaN]){assert.equal(s.canMoveMedia('ain-2',direction),false);assert.throws(()=>s.moveMedia('ain-2',direction),/Dirección/);}
+  assert.deepEqual(s.draft,before);s.moveMedia('ain-3',-1);assert.deepEqual(s.draft.items.map(i=>i.id),['ain-0','ain-3','ain-1','ain-4','ain-5','ain-2']);
+  for(const index of [0,2,3,4])assert.deepEqual(s.draft.items[index],before.items[index]);assert.deepEqual(s.original,p);
+});
+test('los límites y un único medio no crean pasos de historial ni descartan Rehacer',()=>{
+  const s=createSiteSession(project()),a=s.addMedia('image','https://media.org/a.jpg');assert.equal(s.canMoveMedia(a,-1),false);assert.equal(s.canMoveMedia(a,1),false);
+  const before=s.draft;assert.equal(s.moveMedia(a,-1),false);assert.equal(s.moveMedia(a,1),false);s.undo();assert.deepEqual(s.draft,project());s.redo();assert.deepEqual(s.draft,before);
+  const b=s.addMedia('video','https://media.org/b.mp4');s.moveMedia(a,1);s.undo();assert.equal(s.canRedo,true);assert.equal(s.moveMedia(a,-1),false);assert.equal(s.canRedo,true);s.redo();assert.deepEqual(s.draft.items.map(i=>i.id),['ain-0',b,a]);
+});
+test('el orden de medios locales se conserva al guardar, empaquetar y exportar sin duplicar archivos',async()=>{
+  const a=await image(),v=await video(),lib=createMediaLibrary([a,v]),s=createSiteSession(project()),[first,clip,last]=s.addMediaBatch([{type:'image',value:a.id},{type:'video',value:v.id},{type:'image',value:a.id}]);
+  s.edit(last,{alt:'Foto final',animation:'rise',duration:1.8,delay:.2});s.moveMedia(last,-1);s.moveMedia(last,-1);const order=[last,first,clip];
+  assert.equal(lib.size,a.size+v.size);const entries=await exportMedia(lib,referencedMedia(s.original,s.draft));assert.equal(entries.length,2);
+  const reopened=await importMedia(JSON.parse(JSON.stringify(entries)),{inspect:skip}),restored=createSiteSession(s.original,JSON.parse(JSON.stringify(s.draft)));assert.deepEqual(restored.draft,s.draft);
+  for(const options of [{interactive:true,media:reopened.previewMedia(restored.draft)},{media:await exportMediaURLs(reopened,restored.draft)}]){
+    const doc=new DOMParser().parseFromString(buildDocument(restored.draft,options),'text/html');assert.deepEqual([...doc.querySelectorAll('#ain-added-media [data-ain-id]')].map(e=>e.dataset.ainId),order);
+    const el=doc.querySelector('[data-ain-id="'+last+'"]');assert.equal(el.alt,'Foto final');assert.equal(el.dataset.ainAnimation,'rise');
+  }
+});

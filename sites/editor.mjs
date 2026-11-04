@@ -1,5 +1,5 @@
 import {importSite} from './import.mjs';
-import {createSiteSession,validateSite} from './model.mjs?v=20261104-duplicate-1';
+import {createSiteSession,validateSite} from './model.mjs?v=20261104-order-1';
 import {buildDocument} from './preview.mjs?v=20261104-paste-1';
 import {listSites,saveSite} from './storage.mjs';
 import {createMediaLibrary,verifyMediaRecords,prepareLocalFile,referencedMedia,localReference,exportMedia,importMedia,exportMediaURLs,IMAGE_ACCEPT,VIDEO_ACCEPT,FILE_ACCEPT,MAX_PACKAGE,MAX_LIBRARY} from './media.mjs';
@@ -61,7 +61,13 @@ window.addEventListener('message',event=>{
   if(event.data.type==='select'&&session?.draft.items.some(i=>i.id===event.data.id)){selected=event.data.id;paintComponents();inspector();highlight();quad.show('advanced');}
 });
 function history(){ $('undo').disabled=mediaBusy||!session?.canUndo;$('redo').disabled=mediaBusy||!session?.canRedo;}
-function lockMedia(value){mediaBusy=value;document.querySelectorAll('button,input,select,textarea').forEach(el=>{if(el.id!=='mute-videos')el.disabled=value;});history();}
+function movement(){
+  for(const [name,direction]of [['up',-1],['down',1]]){
+    const button=$('move-'+name+'-media');button.hidden=!session?.canRemoveMedia(selected);button.disabled=mediaBusy||importing||!session?.canMoveMedia(selected,direction);
+    const item=session?.draft.items.find(i=>i.id===selected),label=(direction===-1?'Subir':'Bajar')+(item?.type==='video'?' vídeo añadido':item?.type==='image'?' imagen añadida':' medio añadido');button.setAttribute('aria-label',label);button.title=label;
+  }
+}
+function lockMedia(value){mediaBusy=value;document.querySelectorAll('button,input,select,textarea').forEach(el=>{if(el.id!=='mute-videos')el.disabled=value;});history();movement();}
 function paintComponents(){
   const filter=$('filter').value.toLocaleLowerCase(),items=session.draft.items;
   $('component-count').textContent='· '+items.length;
@@ -77,6 +83,7 @@ function inspector(){
     const button=$(action+'-added-media'),label=verb+(item?.type==='video'?' vídeo añadido':item?.type==='image'?' imagen añadida':' medio añadido')+(action==='remove'?' de la copia':'');
     button.hidden=!allowed;button.disabled=mediaBusy||importing;button.setAttribute('aria-label',label);button.title=label;
   }
+  movement();
   if(!item){$('selected-title').textContent='Selecciona un elemento';return;}
   $('selected-title').textContent=labels[item.type];
   function field(key,labelText,type,options){
@@ -131,6 +138,12 @@ $('undo').onclick=()=>{session.undo();paint();remember();say('Cambio deshecho.')
 $('compare').onclick=()=>{comparing=!comparing;preview();};$('replay').onclick=preview;
 $('desktop').onclick=()=>{mobile=false;preview();};$('mobile').onclick=()=>{mobile=true;preview();};
 $('fields').onsubmit=e=>e.preventDefault();
+for(const [name,direction]of [['up',-1],['down',1]])$('move-'+name+'-media').onclick=()=>{
+  if(mediaBusy||importing||!session)return;
+  try{if(!session.moveMedia(selected,direction))return;selectScroll=true;paint();remember();
+    $('selected-title').focus({preventScroll:true});say('Medio añadido '+(direction===-1?'subido':'bajado')+'. Puedes deshacer el cambio.');
+  }catch(e){say(e.message);}
+};
 $('duplicate-added-media').onclick=()=>{
   if(mediaBusy||importing||!session)return;
   try{selected=session.duplicateMedia(selected);selectScroll=true;paint();remember();

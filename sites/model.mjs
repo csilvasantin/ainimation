@@ -31,8 +31,15 @@ export function createSiteSession(input,saved){
   if(saved){const draft=validateSite(saved);if(draft.url!==original.url||draft.html!==original.html)throw Error('El borrador pertenece a otra importación.');if(JSON.stringify(draft)!==JSON.stringify(original)){states.push(draft);cursor=1;}}
   const read=()=>structuredClone(states[cursor]);
   const addedMedia=id=>{const item=states[cursor].items.find(i=>i.id===id);return item?.inserted===true&&['image','video'].includes(item.type)&&!original.items.some(i=>i.id===id);};
+  const mediaNeighbor=(id,direction)=>{
+    if(![-1,1].includes(direction)||!addedMedia(id))return -1;
+    const items=states[cursor].items,index=items.findIndex(i=>i.id===id);
+    for(let next=index+direction;next>=0&&next<items.length;next+=direction)if(addedMedia(items[next].id))return next;
+    return -1;
+  };
   return {get draft(){return read();},get original(){return structuredClone(original);},get canUndo(){return cursor>0;},get canRedo(){return cursor<states.length-1;},
     canRemoveMedia:addedMedia,canDuplicateMedia:addedMedia,
+    canMoveMedia:(id,direction)=>mediaNeighbor(id,direction)>=0,
     edit(id,patch){const p=read(),item=p.items.find(i=>i.id===id);if(!item)throw Error('Componente desconocido.');
       const keys=['value','animation','duration','delay','alt'];if(Object.keys(patch).some(k=>!keys.includes(k)))throw Error('Propiedad no editable.');
       Object.assign(item,patch);validateSite(p);if(JSON.stringify(p)===JSON.stringify(states[cursor]))return;
@@ -47,6 +54,11 @@ export function createSiteSession(input,saved){
       const index=p.items.findIndex(i=>i.id===id),copy={...p.items[index],id:'ain-'+Math.max(0,...[...original.items,...p.items].map(i=>Number(i.id.slice(4))+1))};
       p.items.splice(index+1,0,copy);validateSite(p);
       states=states.slice(0,cursor+1);states.push(p);if(states.length>100)states.shift();cursor=states.length-1;return copy.id;},
+    moveMedia(id,direction){if(![-1,1].includes(direction))throw Error('Dirección no compatible.');
+      if(!addedMedia(id))throw Error('Sólo puedes ordenar imágenes o vídeos añadidos a esta copia.');
+      const next=mediaNeighbor(id,direction);if(next<0)return false;
+      const p=read(),index=p.items.findIndex(i=>i.id===id);[p.items[index],p.items[next]]=[p.items[next],p.items[index]];validateSite(p);
+      states=states.slice(0,cursor+1);states.push(p);if(states.length>100)states.shift();cursor=states.length-1;return true;},
     removeMedia(id){if(!addedMedia(id))throw Error('Sólo puedes retirar imágenes o vídeos añadidos a esta copia.');
       const p=read();p.items=p.items.filter(i=>i.id!==id);validateSite(p);
       states=states.slice(0,cursor+1);states.push(p);if(states.length>100)states.shift();cursor=states.length-1;},
