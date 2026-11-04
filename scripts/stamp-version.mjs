@@ -41,6 +41,9 @@ try {
 try {
   if (readdirSync(join(root, "interactivos")).includes("index.html")) htmlFiles.push("interactivos/index.html");
 } catch {}
+try {
+  if (readdirSync(join(root, "capsulas")).includes("index.html")) htmlFiles.push("capsulas/index.html");
+} catch {}
 let changed = 0;
 let stale = [];
 
@@ -51,6 +54,12 @@ for (const file of htmlFiles) {
   let after = before.replace(
     /(\bhref="\/?assets\/[^"?]+|\bsrc="\/?assets\/[^"?]+)\?v=[^"]*/g,
     (_m, head) => `${head}?v=${version}`,
+  );
+  // These shared entry modules used to load without a token. A cached i18n
+  // dictionary otherwise leaves new navigation labels untranslated after deploy.
+  after = after.replace(
+    /(\bsrc="\/?assets\/(?:i18n\.js|site-session\.mjs|capsule-launcher\.mjs))(?:\?v=[^"]*)?"/g,
+    (_m, head) => `${head}?v=${version}"`,
   );
   if (file === "interactivos/index.html") after = after.replace(
     /(\b(?:href|src)="\.\.\/assets\/[^"?]+)(?:\?v=[^"]*)?/g,
