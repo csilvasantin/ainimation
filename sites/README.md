@@ -10,13 +10,14 @@ NeXT como primera URL y conserva las copias importadas en IndexedDB del navegado
    se rastrea el dominio entero. Los enlaces del mismo dominio permiten seleccionar
    otra página y crear otra copia independiente.
 2. Seleccionar un texto, imagen, vídeo o SVG desde la página o la lista. Editar
-   textos, URLs de imágenes/vídeos y descripción alternativa. También admite fondos
-   declarados en estilos inline. Se pueden añadir imágenes o vídeos por URL al final.
+   textos, imágenes/vídeos por URL o archivo local y descripción alternativa. También admite fondos
+   declarados en estilos inline. Se pueden añadir imágenes o vídeos por URL o archivo al final.
 3. Elegir aparecer, entrada desde abajo, acercamiento o flotar, con duración y
    retraso. Son animaciones CSS, no generación de vídeo con IA; respetan movimiento
    reducido. Deshacer/rehacer y comparación conservan el original importado.
 4. Descargar el proyecto editable (original y borrador), reabrirlo o exportar HTML
-   con los ajustes y animaciones. Los medios siguen enlazados a sus URLs públicas.
+   con los ajustes y animaciones. Los archivos locales se incluyen; los medios remotos
+   conservan sus URLs públicas.
 
 El original nunca se modifica. La copia se guarda en el navegador, no en una cuenta
 ni en un servidor de proyectos. Cada nueva importación tiene su propia identidad;
@@ -63,3 +64,37 @@ No comparte bindings, secretos ni despliegue con el MCP o los kioscos.
 Ensayo inicial: la portada pública de `https://www.portaventuranext.com/`
 produjo 22 componentes (19 textos y 3 gráficos). Su canvas y programas originales
 no se ejecutan; el trazado SVG y los estilos se conservan.
+
+## Imágenes y vídeos desde el ordenador
+
+**Añadir imagen o vídeo → Cargar desde el ordenador** admite hasta diez archivos
+a la vez. En las propiedades de un medio, **Sustituir desde el ordenador** reemplaza
+su fuente conservando la identidad, animación e historial del componente. Una carga
+múltiple es un solo paso de deshacer/rehacer. Se comprueba el lote antes de editar.
+
+Formatos: PNG, JPEG, WebP, GIF y AVIF (10 MB por imagen); MP4 y WebM (50 MB por vídeo).
+El navegador debe poder decodificar sus dimensiones y metadatos. El tipo se reconoce
+por los bytes, no por la extensión o el MIME declarado. No se admite SVG como archivo
+local activo. Límite de archivos por copia: 100 MB. Una carga rechazada conserva la copia.
+
+Los archivos no se envían a un servidor: sus Blobs se guardan con la copia en IndexedDB.
+Las referencias SHA-256 permiten deduplicar archivos idénticos. El iframe recibe copias
+de los Blobs por el canal validado y crea sus URLs dentro de su propio origen aislado;
+no se añade `allow-same-origin`. Las URLs se liberan al abandonar la vista. Las
+animaciones y controles de reproducción funcionan también para estos medios.
+
+El JSON de proyecto versión 2 empaqueta una sola copia de cada archivo usado por
+original o borrador, con tamaño, MIME e identidad. Al reabrir se verifican bytes,
+identidad, límites y reproducción antes de sustituir el proyecto abierto. Se siguen
+aceptando proyectos versión 1 sin archivos locales. Los JSON nuevos requieren esta
+versión del editor; el límite de paquete es 145 MB. Tras recargar, el borrador y sus
+medios permanecen, aunque el historial completo sigue siendo de sesión.
+
+**Exportar HTML** incorpora los archivos locales como datos, con declaración UTF-8,
+animaciones y CSP sin scripts importados. No depende de URLs blob temporales ni de los
+archivos originales del ordenador. Los recursos que ya eran remotos siguen remotos.
+
+Pruebas adicionales: `tests/sites-media.test.mjs`. Ensayo visual sobre una copia de
+PortAventura: carga conjunta de PNG y MP4, reemplazo por JPEG y MP4 distintos, deshacer,
+rechazo de imagen al reemplazar vídeo, recarga, paquete descargado/reabierto y HTML
+exportado con imagen y vídeo reproducibles.

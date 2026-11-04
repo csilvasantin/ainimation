@@ -11,7 +11,7 @@
     "verify:admira-resource-updates": "node scripts/test-admira-resource-updates.cjs",
     "verify:admira-format-package": "node scripts/test-admira-format-package.cjs",
     "verify:capsula": "node --test test/capsula-editor.browser.test.mjs",
-    "verify:sites": "node --test tests/sites-import.test.mjs",
+    "verify:sites": "node --test tests/sites-import.test.mjs tests/sites-media.test.mjs",
     "preview:sites": "node scripts/sites-preview.mjs"
   },
   "repository": {
