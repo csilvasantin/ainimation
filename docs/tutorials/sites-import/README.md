@@ -22,12 +22,19 @@ esa sección desde Ayuda. No hay reproducción automática. El reproductor inclu
 un botón de silencio siempre visible, además de los controles nativos; el icono
 y su tooltip se sincronizan con el estado y el idioma.
 
-Archivado en el Stock compartido de Pixeria/Admira: catálogo **Demos · AINimation**,
-proyecto `ainimation`, etiquetas `demos`, `ainimation`, `portaventura`, `sites` y
-`tutorial`. Asset **1947** (`1793815054156-cxqmo2`); recibo y hash en `stock.json`.
-Acceso: https://www.pixeria.com/stock.html?catalogo=demos-ainimation.
-Las siguientes demos de este proyecto deben guardarse en ese catálogo, conservar
-la etiqueta del proyecto y ofrecer siempre la opción de silenciar.
+Archivado en el Stock compartido de Pixeria/Admira, junto a **Cápsulas**, como
+**cápsula de producto**. Nombre: **ainimation.studio**. Etiquetas: `capsula`,
+`capsula producto`, `producto`, `ainimation.studio` y `ainimation`, además del
+contexto de PortAventura/Sites y las medidas del vídeo. Asset **1947**
+(`1793815054156-cxqmo2`); recibo, corrección de clasificación y hash en `stock.json`.
+Acceso: https://www.pixeria.com/stock.html?type=capsula&highlight=1793815054156-cxqmo2.
+
+Regla para las siguientes demos: guardarlas junto a las cápsulas como cápsulas de
+producto, con la etiqueta `capsula` que activa esa vista, `capsula producto` y
+`producto` para distinguirlas, y el nombre/etiqueta del producto o proyecto
+(aquí, `ainimation.studio`). Mantener siempre una opción de silenciar. La
+corrección de Carlos del 4 de noviembre sustituye el catálogo Demos anterior;
+no se crea una segunda pieza ni se cambia su formato de vídeo.
 
 Reproducción local: `npm run preview:sites`. Para reconstruir, instala Pillow en
 un entorno Python y ejecuta `python scripts/render-sites-help.py`; requiere
