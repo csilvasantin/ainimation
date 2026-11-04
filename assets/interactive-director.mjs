@@ -1,6 +1,6 @@
-import {mountCafeEditor} from './interactive-cafeteria-editor.mjs?v=director-cafe-3';
-import {fromDirector,saveDirectorInteractive,restoreDirectorWorkspace} from './interactive-director-bridge.mjs?v=director-cafe-3';
-import {playerHtml} from './interactive-project.mjs?v=director-cafe-3';
+import {mountCafeEditor} from './interactive-cafeteria-editor.mjs?v=cafe-stock-picker-1';
+import {fromDirector,saveDirectorInteractive,restoreDirectorWorkspace} from './interactive-director-bridge.mjs?v=cafe-stock-1';
+import {playerHtml} from './interactive-project.mjs?v=cafe-stock-1';
 const q=new URLSearchParams(location.search),id=q.get('interactive');
 const t=(es,en)=>document.documentElement.lang==='en'?en:es;
 if(!location.pathname.includes('/interactivos')&&id){

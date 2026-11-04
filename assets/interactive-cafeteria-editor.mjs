@@ -1,4 +1,5 @@
-import {validateCafeteria,basketDefaults} from './interactive-cafeteria.mjs?v=director-cafe-3';
+import {openCafeteriaStockPicker} from './cafeteria-stock-picker.mjs?v=cafe-stock-picker-1';
+import {validateCafeteria,basketDefaults,cafeteriaStockImage} from './interactive-cafeteria.mjs?v=cafe-stock-1';
 // Shared by Creator and Director: edits retain IDs, artwork and reference metadata.
 export function mountCafeEditor(host,catalog,onChange=()=>{},lang='es'){
  const readers=[];const doc=host.ownerDocument,t=(es,en)=>lang==='en'?en:es;host.replaceChildren();host.classList.add('cafe-editor');
@@ -23,6 +24,11 @@ export function mountCafeEditor(host,catalog,onChange=()=>{},lang='es'){
  field(d,product,'category',t('Categoría','Category'),{choices:catalog.categories.map(c=>[c.id,c.name])});
  field(d,product,'customization',t('Opciones del producto','Product options'),{choices:[['plain',t('Sin opciones','No options')],['milk',t('Leche, temperatura y miel','Milk, temperature and honey')],['coffee',t('Café, leche, temperatura y miel','Coffee, milk, temperature and honey')]]});
  field(d,product,'available',t('Disponible en el catálogo','Available in catalog'),{type:'checkbox'});
+ const imageLabel=node('label',t('Imagen de Stock de Admira (opcional)','Admira Stock image (optional)')),image=node('input'),imageStatus=node('p');image.type='url';image.maxLength=2048;image.value=product.image?.src||'';image.placeholder='https://stock.admira.store/stock/…/asset.jpg';imageStatus.setAttribute('role','status');
+ const readImage=()=>{const value=image.value.trim();if(!value){delete product.image;image.setCustomValidity('');return;}try{product.image=cafeteriaStockImage(value);image.setCustomValidity('');}catch(error){image.setCustomValidity(t(error.message,'Use the HTTPS URL of an Admira Stock image (PNG, JPG or WebP).'));throw error;}};
+ readers.push(readImage);image.oninput=()=>{image.setCustomValidity('');imageStatus.textContent='';};image.onchange=()=>{try{readImage();imageStatus.textContent=t('Imagen vinculada. Se comprobará antes de publicar.','Image linked. It will be checked before publishing.');onChange();}catch{imageStatus.textContent=image.validationMessage;}};imageLabel.append(image);
+ const pick=node('button',t('Elegir imagen de Stock…','Choose Stock image…'));pick.type='button';pick.onclick=async()=>{pick.disabled=true;try{const selected=await openCafeteriaStockPicker(doc,{lang});if(selected&&host.contains(image)){image.value=selected.src;readImage();imageStatus.textContent=t('Imagen vinculada. Se comprobará antes de publicar.','Image linked. It will be checked before publishing.');onChange();}}catch(error){imageStatus.textContent=error.message;}finally{pick.disabled=false;if(pick.isConnected)pick.focus();}};
+ d.append(imageLabel,pick,node('p',t('Elige una imagen del Stock o pega su URL. Deja el campo vacío para recuperar la ilustración.','Choose a Stock image or paste its URL. Leave empty to restore the illustration.')),imageStatus);
  d.addEventListener('change',()=>{d.querySelector('summary').textContent=product.name+' · '+(product.price/100).toFixed(2)+' €';});}
  return {read:()=>{for(const read of readers)read();if(JSON.stringify(b)!==beforeBasket)catalog.basket={...catalog.basket,...b};return validateCafeteria(catalog);}};
 }
