@@ -1,0 +1,7 @@
+.ain-update-notice{position:fixed;z-index:180;inset:auto 16px max(22px,env(safe-area-inset-bottom));margin-inline:auto;width:max-content;max-width:calc(100% - 32px);box-sizing:border-box;display:flex;align-items:center;gap:20px;padding:14px 18px;border:1px solid #ceff61;border-radius:12px;background:#15191e;color:#f1f4eb;box-shadow:0 8px 32px #0008;font:500 14px/1.5 system-ui,sans-serif}
+.ain-update-notice[hidden]{display:none}
+.ain-update-actions{display:flex;gap:8px;flex-shrink:0}
+.ain-update-actions button{min-height:44px;padding:8px 14px;border:1px solid #ceff61;border-radius:6px;background:#ceff61;color:#101217;font:600 14px system-ui,sans-serif;cursor:pointer}
+.ain-update-actions .ain-update-later{background:transparent;color:#f1f4eb;border-color:#72796b}
+.ain-update-actions button:focus-visible{outline:2px solid #fff;outline-offset:3px}
+@media(max-width:600px){.ain-update-notice{flex-direction:column;align-items:stretch;gap:10px;padding:14px}.ain-update-actions button{flex:1}}

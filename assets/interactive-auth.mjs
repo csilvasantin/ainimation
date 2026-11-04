@@ -29,7 +29,7 @@ export function mountGoogleAuth({endpoint,doc=document,win=window,request=fetch,
  function render(host,name){
   if(!google||rendered.has(host))return;rendered.add(host);
   const buttonHost=doc.createElement('div');buttonHost.className='google-signin-button';host.append(buttonHost);
-  google.renderButton(buttonHost,{theme:'outline',size:'large',text:'signin_with',state:name,click_listener:()=>{accepting=true;promptGeneration++;status.dataset.googleSignInAttempt='popup';}});
+  google.renderButton(buttonHost,{theme:'outline',size:'large',text:'signin_with',locale:doc.documentElement.lang==='en'?'en':'es',state:name,click_listener:()=>{accepting=true;promptGeneration++;status.dataset.googleSignInAttempt='popup';}});
   const inline=doc.createElement('button');inline.type='button';inline.className='quiet';inline.textContent=t('Continuar con Google aquí','Continue with Google here');inline.onclick=()=>{
    if(!dialog.open)dialog.showModal();render(dialogHost,'account');accepting=true;const attempt=++promptGeneration;
    status.dataset.googleSignInAttempt='inline';explain(t('Completa la confirmación de Google en esta página.','Complete the Google confirmation on this page.'));
@@ -42,7 +42,7 @@ export function mountGoogleAuth({endpoint,doc=document,win=window,request=fetch,
   if(!endpoint)return;
   try{
    const response=await request(endpoint+'/config');if(!response.ok)throw Error();const config=await response.json();if(!config.clientId)throw Error();
-   if(!sdk)await new Promise((resolve,reject)=>{const script=doc.createElement('script');script.src='https://accounts.google.com/gsi/client';script.referrerPolicy='strict-origin-when-cross-origin';script.onload=resolve;script.onerror=reject;doc.head.append(script);});
+   if(!sdk)await new Promise((resolve,reject)=>{const script=doc.createElement('script');script.src='https://accounts.google.com/gsi/client?hl='+(doc.documentElement.lang==='en'?'en':'es');script.referrerPolicy='strict-origin-when-cross-origin';script.onload=resolve;script.onerror=reject;doc.head.append(script);});
    google=sdk||win.google?.accounts?.id;if(!google)throw Error();
    google.initialize({client_id:config.clientId,ux_mode:'popup',auto_select:true,prompt_parent_id:'googleInlinePrompt',callback:credential});
    render(library,'library');if(dialog.open)render(dialogHost,'account');

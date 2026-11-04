@@ -51,8 +51,9 @@
   document.body.classList.remove('director-focus','studio-page');
   document.body.classList.add('capsula-mode');
   root.addEventListener('keydown',event=>event.stopPropagation());
-  document.documentElement.lang = 'es';
+  document.documentElement.lang = window.AINLanguage?.read() || 'es';
   document.body.append(root);
+  import('./site-shell.mjs').then(({mountQuadraticHeader})=>mountQuadraticHeader(root.querySelector('header')));
   const $ = (s) => root.querySelector(s);
   const $$ = (s) => [...root.querySelectorAll(s)];
   function notify(message, error = false) { $('[data-notice]').textContent = message; $('[data-notice]').classList.toggle('is-error', error); }

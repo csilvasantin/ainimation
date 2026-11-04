@@ -1,0 +1,32 @@
+/* Four bands: panels always overlay the page, start closed and never persist. */
+.ain-quad-header{gap:12px!important;min-width:0;flex-wrap:wrap}
+.ain-quad-header>.brand{flex-shrink:0}
+.ain-quad-header>.nav-links{gap:clamp(8px,1.2vw,16px);min-width:0;flex:1;overflow-x:auto}
+.ain-quad-tools{display:flex;align-items:center;gap:6px;margin-left:auto;flex-shrink:0}
+.ain-quad-header .ain-quad-control,.ain-quad-control{display:inline-flex;align-items:center;justify-content:center;flex:0 0 40px;width:40px;height:40px;min-height:40px;padding:0;border:1px solid #80808066;border-radius:0;background:transparent;color:inherit;cursor:pointer;font:inherit;box-sizing:border-box}
+.ain-quad-control svg{width:16px;height:14px;fill:none;stroke:currentColor;stroke-width:1.35;pointer-events:none}
+.ain-quad-control[aria-expanded=true]{color:#c8ff5f;border-color:currentColor}
+.ain-quad-control:focus-visible,.ain-quad-panel :focus-visible{outline:2px solid #c8ff5f;outline-offset:3px}
+.ain-quad-panel{display:block!important;position:fixed!important;z-index:12000;top:var(--ain-quad-top,70px)!important;bottom:0;width:min(360px,calc(100vw - 16px));max-height:none;margin:0!important;padding:22px!important;overflow:auto;background:#14171c!important;color:#f8f7f2!important;border:1px solid #ffffff40!important;border-radius:0!important;box-shadow:0 12px 45px #0008;box-sizing:border-box;font:14px/1.5 system-ui,sans-serif;min-width:0}
+.ain-quad-panel[hidden]{display:none!important}
+.ain-quad-options{left:0;right:auto}
+.ain-quad-advanced{right:0;left:auto}
+.ain-quad-expert{top:auto!important;left:0;right:0;bottom:0;width:auto;height:min(380px,48svh);max-height:70svh}
+.ain-quad-panel-heading{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:22px;padding:0!important;border:0!important}
+.ain-quad-panel-heading h2{font:700 16px/1.4 system-ui,sans-serif;margin:0!important;color:inherit;letter-spacing:0;text-transform:none}
+.ain-quad-panel-heading button{min-height:36px;padding:4px 10px;background:transparent;color:inherit;border:1px solid #ffffff55;cursor:pointer;font:inherit}
+.ain-quad-panel label{display:block;color:#e6e6e6;font:inherit;margin:14px 0}
+.ain-quad-panel select,.ain-quad-panel input:not([type=checkbox]):not([type=color]){box-sizing:border-box;width:100%;max-width:100%;min-width:0;padding:10px;margin:8px 0;background:#101217;color:#f8f7f2;border:1px solid #ffffff50;font:inherit}
+.ain-quad-panel a{color:#c8ff5f;text-decoration:underline;text-underline-offset:3px}
+.ain-quad-links{display:grid;gap:14px;margin:0;padding:0;border:0}
+.ain-quad-panel button{max-width:100%;white-space:normal}
+.ain-quad-panel p{font-size:14px;line-height:1.6;color:inherit}
+.ain-quad-log{white-space:pre-wrap;overflow-wrap:anywhere;font:13px/1.5 ui-monospace,monospace;max-height:150px;overflow:auto}
+.ain-quad-command{display:flex;align-items:end;gap:12px}
+.ain-quad-command label{flex:1;min-width:0;margin:0}
+.ain-quad-command button{min-height:42px;padding:8px 18px;color:#101217;background:#c8ff5f;border:1px solid #c8ff5f;cursor:pointer;font:inherit}
+.ain-quad-panel .expert-commands{border:0;padding:0;margin:0}
+.ain-quad-panel .reference{margin-top:20px}
+.ain-presentation-quad .editor-layout{grid-template-columns:minmax(0,1fr)}
+.ain-quad-header .badge{display:none}
+@media(max-width:640px){.ain-quad-header{padding:12px!important;gap:8px!important}.ain-quad-header>.brand{font-size:14px}.ain-quad-header .brand small{display:none}.ain-quad-header>.nav-links{order:3;flex-basis:100%;width:100%;justify-content:flex-start}.ain-quad-control{flex-basis:38px;width:38px;height:38px;min-height:38px}.ain-quad-command{flex-wrap:wrap}.ain-quad-command label{flex-basis:100%}}

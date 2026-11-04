@@ -21,6 +21,20 @@ after server-verified Google sign-in in the same tab, and hide on sign-out or
 expiry. This navigation preference stores only an expiry time in sessionStorage;
 credentials remain in memory and API authorization is unchanged.
 
+## Shared header and language
+
+The public header, Login and authoring pages share `assets/site-language.js`.
+An explicit `lang=es|en` wins, then the last UI choice; header links carry it
+even when storage is blocked. Google sign-in buttons use that locale too.
+
+Application headers use the four-band shell: Options on the left, Advanced and
+Expert on the right, with independent overlay panels that always start closed.
+Existing Sites panels remain native; Interactives and the presentation editor
+keep their actual fields and commands in the corresponding panels. Produced
+experiences and fullscreen playback keep their own presentation surfaces.
+
+Validation: `node --test tests/site-language.test.mjs tests/site-shell.test.mjs tests/sites-quad.test.mjs`.
+
 ## Local preview
 ```bash
 python3 -m http.server 9134

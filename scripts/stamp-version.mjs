@@ -17,6 +17,7 @@ import { execFileSync } from "node:child_process";
 import { readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+import { stampPageRevision } from './page-revision.mjs';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const checkOnly = process.argv.slice(2).some((a) => a === "-c" || a === "--check");
@@ -44,6 +45,9 @@ try {
 try {
   if (readdirSync(join(root, "capsulas")).includes("index.html")) htmlFiles.push("capsulas/index.html");
 } catch {}
+for (const directory of ['presentaciones', 'presentaciones/editor', 'presentaciones/reproductor', 'sites']) {
+  try { if (readdirSync(join(root, directory)).includes('index.html')) htmlFiles.push(directory + '/index.html'); } catch {}
+}
 let changed = 0;
 let stale = [];
 
@@ -58,13 +62,14 @@ for (const file of htmlFiles) {
   // These shared entry modules used to load without a token. A cached i18n
   // dictionary otherwise leaves new navigation labels untranslated after deploy.
   after = after.replace(
-    /(\bsrc="\/?assets\/(?:i18n\.js|site-session\.mjs|capsule-launcher\.mjs))(?:\?v=[^"]*)?"/g,
+    /(\b(?:src|href)="\/?assets\/(?:i18n\.js|site-session\.mjs|capsule-launcher\.mjs|site-language\.js|site-shell\.(?:mjs|css)|update-notice\.(?:mjs|css)|capsula-editor\.js))(?:\?v=[^"]*)?"/g,
     (_m, head) => `${head}?v=${version}"`,
   );
   if (file === "interactivos/index.html") after = after.replace(
     /(\b(?:href|src)="\.\.\/assets\/[^"?]+)(?:\?v=[^"]*)?/g,
     (_m, head) => `${head}?v=${version}`,
   );
+  if (file === 'index.html') after = stampPageRevision(after);
   if (after === before) continue;
   stale.push(file);
   if (!checkOnly) {
