@@ -21,7 +21,7 @@ name: stamp
 
 on:
   push:
-    paths: ["assets/**", "**/*.html", "scripts/stamp-version.mjs", ".github/workflows/stamp.yml"]
+    paths: ["assets/**", "**/*.html", "scripts/stamp-version.mjs", "scripts/page-revision.mjs", ".github/workflows/stamp.yml"]
 
 permissions:
   contents: write
