@@ -1,7 +1,7 @@
 import {cleanDocument,cssURLs} from './import.mjs';
 import {validateSite} from './model.mjs';
 import {localReference} from './media.mjs';
-import {fileDropBridge} from './drop.mjs';
+import {fileDropBridge} from './drop.mjs?v=20261104-replace-1';
 const animations=`
 @keyframes ain-fade{from{opacity:0}to{opacity:1}}
 @keyframes ain-rise{from{opacity:0;translate:0 24px}to{opacity:1;translate:0 0}}

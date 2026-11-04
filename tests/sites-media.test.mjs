@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import {JSDOM} from 'jsdom';
 import {prepareLocalFile,createMediaLibrary,verifyMediaRecords,sniffMedia,importMedia,exportMedia,exportMediaURLs,referencedMedia,MAX_IMAGE,MAX_VIDEO,MAX_LIBRARY} from '../sites/media.mjs';
 import {createSiteSession} from '../sites/model.mjs';
+import {mediaDropReplacement} from '../sites/drop.mjs';
 const dom=new JSDOM('<!doctype html>');globalThis.window=dom.window;globalThis.DOMParser=dom.window.DOMParser;
 globalThis.FileReader=class {readAsDataURL(blob){blob.arrayBuffer().then(bytes=>{this.result='data:'+blob.type+';base64,'+Buffer.from(bytes).toString('base64');this.onload();}).catch(()=>this.onerror());}};
 const {buildDocument}=await import('../sites/preview.mjs');
@@ -41,6 +42,15 @@ test('sustituye medios locales sin cambiar el original ni romper el historial',a
   const id=s.addMedia('image','https://public.org/original.jpg');s.edit(id,{value:a.id});s.edit(id,{animation:'float'});
   assert.equal(s.draft.items.find(i=>i.id===id).value,a.id);assert.equal(s.original.items.length,1);
   s.undo();s.undo();assert.equal(s.draft.items.find(i=>i.id===id).value,'https://public.org/original.jpg');s.redo();assert.equal(s.draft.items.find(i=>i.id===id).value,a.id);
+});
+test('la sustitución por arrastre conserva identidad, descripción y animación en un paso reversible',async()=>{
+  const s=createSiteSession(project()),a=await image();
+  const id=s.addMedia('image','https://public.org/original.jpg');s.edit(id,{alt:'Portada accesible',animation:'rise',duration:2,delay:.4});
+  const before=s.draft,options=mediaDropReplacement(s.draft,id,{source:'draft',id});
+  await assert.rejects(prepareLocalFile(file(mp4,'clip.mp4'),{expected:options.expected,inspect:skip}),/imagen/);assert.deepEqual(s.draft,before);
+  s.edit(options.replace,{value:a.id});const current=s.draft.items.find(i=>i.id===id);
+  assert.deepEqual(current,{...before.items.find(i=>i.id===id),value:a.id});assert.deepEqual(s.original,createSiteSession(project()).original);
+  s.undo();assert.deepEqual(s.draft,before);s.redo();assert.equal(s.draft.items.find(i=>i.id===id).value,a.id);
 });
 test('reabre blobs conservados y detecta corrupción e identidades falsas',async()=>{
   const a=await image(),lib=await verifyMediaRecords(structuredClone([a]),{inspect:skip});assert.equal(lib.records()[0].id,a.id);
