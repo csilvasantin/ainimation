@@ -82,3 +82,38 @@ test('un medio no puede resolverse como otro tipo ni como documento activo',asyn
   assert.throws(()=>buildDocument(s.draft,{media:new Map([[a.id,{type:'image',url:'blob:local'}]])}),/compatible/);
   assert.throws(()=>buildDocument(s.draft,{media:new Map([[a.id,{type:'video',url:'data:text/html,<script>alert(1)</script>'}]])}),/compatible/);
 });
+test('retirar un medio añadido es un paso reversible que conserva identidad y propiedades',()=>{
+  const s=createSiteSession(project()),imageID=s.addMedia('image','https://media.org/cover.jpg'),videoID=s.addMedia('video','https://media.org/clip.mp4');
+  s.edit(imageID,{alt:'Portada accesible',animation:'rise',duration:2,delay:.4});s.edit(videoID,{animation:'fade',duration:1.8});
+  const before=s.draft,original=s.original;assert.equal(s.canRemoveMedia(imageID),true);assert.equal(s.canRemoveMedia(videoID),true);
+  s.removeMedia(imageID);const removed=s.draft;assert.equal(removed.items.some(i=>i.id===imageID),false);assert.deepEqual(removed.items.find(i=>i.id===videoID),before.items.find(i=>i.id===videoID));
+  let doc=new DOMParser().parseFromString(buildDocument(removed),'text/html');assert.equal(doc.querySelectorAll('#ain-added-media img').length,0);assert.equal(doc.querySelectorAll('#ain-added-media video').length,1);
+  s.undo();assert.deepEqual(s.draft,before);s.redo();assert.deepEqual(s.draft,removed);s.removeMedia(videoID);assert.deepEqual(s.draft,original);
+  s.undo();assert.deepEqual(s.draft,removed);s.redo();assert.deepEqual(s.draft,original);assert.deepEqual(s.original,original);
+  doc=new DOMParser().parseFromString(buildDocument(s.draft),'text/html');assert.equal(doc.querySelector('#ain-added-media'),null);
+});
+test('la retirada rechaza componentes originales, marcas falsas, otros tipos e IDs desconocidos sin tocar el historial',()=>{
+  const p=project();p.items.push({...p.items[0],id:'ain-1',type:'image',value:'https://media.org/original.jpg',inserted:true});
+  const saved=structuredClone(p);saved.items.push({...p.items[1],id:'ain-2',inserted:'true'},{...p.items[0],id:'ain-3',inserted:true},{...p.items[1],id:'ain-4',type:'background'});
+  const s=createSiteSession(p,saved),before=s.draft,undo=s.canUndo,redo=s.canRedo;
+  for(const id of ['ain-0','ain-1','ain-2','ain-3','ain-4','ain-999','']){assert.equal(s.canRemoveMedia(id),false);assert.throws(()=>s.removeMedia(id),/Sólo puedes retirar/);}
+  assert.deepEqual(s.draft,before);assert.equal(s.canUndo,undo);assert.equal(s.canRedo,redo);assert.deepEqual(s.original,p);
+});
+test('retirar instancias conserva archivos compartidos; el guardado y paquete sólo incluyen las referencias vigentes',async()=>{
+  const a=await image(),v=await video(),lib=createMediaLibrary([a,v]),s=createSiteSession(project());
+  const [first,second,clip]=s.addMediaBatch([{type:'image',value:a.id},{type:'image',value:a.id},{type:'video',value:v.id}]);
+  s.removeMedia(first);let assets=await exportMedia(lib,referencedMedia(s.original,s.draft));assert.equal(assets.length,2);
+  const reopen=await importMedia(JSON.parse(JSON.stringify(assets)),{inspect:skip}),restored=createSiteSession(s.original,JSON.parse(JSON.stringify(s.draft)));
+  assert.equal(restored.canRemoveMedia(second),true);assert.equal(restored.canRemoveMedia(first),false);assert.deepEqual(restored.draft,s.draft);
+  let html=buildDocument(restored.draft,{media:await exportMediaURLs(reopen,restored.draft)}),doc=new DOMParser().parseFromString(html,'text/html');assert.equal(doc.querySelectorAll('#ain-added-media img').length,1);assert.equal(doc.querySelectorAll('#ain-added-media video').length,1);
+  s.removeMedia(clip);assets=await exportMedia(lib,referencedMedia(s.original,s.draft));assert.deepEqual(assets.map(a=>a.id),[a.id]);
+  s.removeMedia(second);assert.equal((await exportMedia(lib,referencedMedia(s.original,s.draft))).length,0);
+  assert.equal(lib.size,a.size+v.size);s.undo();s.undo();s.undo();
+  html=buildDocument(s.draft,{media:await exportMediaURLs(lib,s.draft)});doc=new DOMParser().parseFromString(html,'text/html');assert.equal(doc.querySelectorAll('#ain-added-media img').length,2);assert.equal(doc.querySelectorAll('#ain-added-media video').length,1);
+  assert.equal(s.draft.items.find(i=>i.id===first).value,a.id);
+});
+test('se puede retirar el último componente y volver a añadir después de deshacer sin conservar una rama de rehacer',()=>{
+  const p=project();p.items=[];p.html='<!doctype html><html><body></body></html>';const s=createSiteSession(p),id=s.addMedia('image','https://media.org/cover.jpg');
+  s.removeMedia(id);assert.equal(s.draft.items.length,0);assert.doesNotThrow(()=>buildDocument(s.draft));s.undo();assert.equal(s.draft.items[0].id,id);s.redo();s.undo();
+  s.addMedia('video','https://media.org/clip.mp4');assert.equal(s.canRedo,false);assert.equal(s.draft.items.length,2);
+});

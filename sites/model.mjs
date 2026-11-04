@@ -30,7 +30,9 @@ export function createSiteSession(input,saved){
   const original=validateSite(input);let states=[original],cursor=0;
   if(saved){const draft=validateSite(saved);if(draft.url!==original.url||draft.html!==original.html)throw Error('El borrador pertenece a otra importación.');if(JSON.stringify(draft)!==JSON.stringify(original)){states.push(draft);cursor=1;}}
   const read=()=>structuredClone(states[cursor]);
+  const removable=id=>{const item=states[cursor].items.find(i=>i.id===id);return item?.inserted===true&&['image','video'].includes(item.type)&&!original.items.some(i=>i.id===id);};
   return {get draft(){return read();},get original(){return structuredClone(original);},get canUndo(){return cursor>0;},get canRedo(){return cursor<states.length-1;},
+    canRemoveMedia:removable,
     edit(id,patch){const p=read(),item=p.items.find(i=>i.id===id);if(!item)throw Error('Componente desconocido.');
       const keys=['value','animation','duration','delay','alt'];if(Object.keys(patch).some(k=>!keys.includes(k)))throw Error('Propiedad no editable.');
       Object.assign(item,patch);validateSite(p);if(JSON.stringify(p)===JSON.stringify(states[cursor]))return;
@@ -40,6 +42,9 @@ export function createSiteSession(input,saved){
       let next=Math.max(0,...p.items.map(i=>Number(i.id.slice(4))+1));const ids=[];
       for(const {type,value,label}of media){if(!['image','video'].includes(type))throw Error('Medio incompatible.');const id='ain-'+next++;ids.push(id);p.items.push({id,type,value:mediaReference(value),label:label||(type==='image'?'Imagen añadida':'Vídeo añadido'),alt:'',animation:'none',duration:1.2,delay:0,inserted:true});}
       validateSite(p);states=states.slice(0,cursor+1);states.push(p);if(states.length>100)states.shift();cursor=states.length-1;return ids;},
+    removeMedia(id){if(!removable(id))throw Error('Sólo puedes retirar imágenes o vídeos añadidos a esta copia.');
+      const p=read();p.items=p.items.filter(i=>i.id!==id);validateSite(p);
+      states=states.slice(0,cursor+1);states.push(p);if(states.length>100)states.shift();cursor=states.length-1;},
     undo(){if(cursor>0)cursor--;},redo(){if(cursor<states.length-1)cursor++;},reset(){states=states.slice(0,cursor+1);states.push(structuredClone(original));cursor=states.length-1;}
   };
 }
