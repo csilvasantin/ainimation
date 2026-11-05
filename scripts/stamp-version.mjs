@@ -62,7 +62,7 @@ for (const file of htmlFiles) {
   // These shared entry modules used to load without a token. A cached i18n
   // dictionary otherwise leaves new navigation labels untranslated after deploy.
   after = after.replace(
-    /(\b(?:src|href)="\/?assets\/(?:i18n\.js|site-session\.mjs|capsule-launcher\.mjs|site-language\.js|site-shell\.(?:mjs|css)|update-notice\.(?:mjs|css)|capsula-editor\.js))(?:\?v=[^"]*)?"/g,
+    /(\b(?:src|href)="\/?assets\/(?:i18n\.js|site-session\.mjs|capsule-launcher\.mjs|site-language\.js|site-shell\.(?:mjs|css)|meta-style\.css|update-notice\.(?:mjs|css)|capsula-editor\.js))(?:\?v=[^"]*)?"/g,
     (_m, head) => `${head}?v=${version}"`,
   );
   if (file === "interactivos/index.html") after = after.replace(

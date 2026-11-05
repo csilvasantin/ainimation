@@ -7,7 +7,7 @@
 .ain-quad-control svg{width:16px;height:14px;fill:none;stroke:currentColor;stroke-width:1.35;pointer-events:none}
 .ain-quad-control[aria-expanded=true]{color:#c8ff5f;border-color:currentColor}
 .ain-quad-control:focus-visible,.ain-quad-panel :focus-visible{outline:2px solid #c8ff5f;outline-offset:3px}
-.ain-quad-panel{display:block!important;position:fixed!important;z-index:12000;top:var(--ain-quad-top,70px)!important;bottom:0;width:min(360px,calc(100vw - 16px));max-height:none;margin:0!important;padding:22px!important;overflow:auto;background:#14171c!important;color:#f8f7f2!important;border:1px solid #ffffff40!important;border-radius:0!important;box-shadow:0 12px 45px #0008;box-sizing:border-box;font:14px/1.5 system-ui,sans-serif;min-width:0}
+.ain-quad-panel{display:block!important;position:fixed!important;z-index:12000;top:var(--ain-quad-top,70px)!important;bottom:0;width:min(360px,calc(100vw - 16px));max-height:none;margin:0!important;padding:22px!important;overflow:auto;background:var(--ain-surface,#14171c)!important;color:var(--ain-ink,#f8f7f2)!important;border:1px solid #ffffff40!important;border-radius:0!important;box-shadow:0 12px 45px #0008;box-sizing:border-box;font:14px/1.5 system-ui,sans-serif;min-width:0}
 .ain-quad-panel[hidden]{display:none!important}
 .ain-quad-options{left:0;right:auto}
 .ain-quad-advanced{right:0;left:auto}
@@ -27,7 +27,7 @@ html.ain-panel-resizing iframe{pointer-events:none!important}
 .ain-quad-panel-heading button{min-height:36px;padding:4px 10px;background:transparent;color:inherit;border:1px solid #ffffff55;cursor:pointer;font:inherit}
 .ain-quad-panel label{display:block;color:#e6e6e6;font:inherit;margin:14px 0}
 .ain-quad-panel select,.ain-quad-panel input:not([type=checkbox]):not([type=color]){box-sizing:border-box;width:100%;max-width:100%;min-width:0;padding:10px;margin:8px 0;background:#101217;color:#f8f7f2;border:1px solid #ffffff50;font:inherit}
-.ain-quad-panel a{color:#c8ff5f;text-decoration:underline;text-underline-offset:3px}
+.ain-quad-panel a{color:var(--ain-accent,#c8ff5f);text-decoration:underline;text-underline-offset:3px}
 .ain-quad-links{display:grid;gap:14px;margin:0;padding:0;border:0}
 .ain-quad-panel button{max-width:100%;white-space:normal}
 .ain-quad-panel p{font-size:14px;line-height:1.6;color:inherit}
