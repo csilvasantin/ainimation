@@ -10,6 +10,7 @@ import {createPreviewSound} from './sound.mjs?v=20261104-sound-1';
 import {createImagePaste} from './paste.mjs?v=20261104-paste-1';
 import {COMPONENT_LABELS,createComponentFilter} from './filter.mjs?v=20261105-file-search-1';
 import {createActiveSitePreference} from './active-site.mjs?v=20261105-active-1';
+import {updateSavedSiteOption,refreshLibraryTitle} from './library-label.mjs?v=20261105-library-date-1';
 const $=id=>document.getElementById(id),library=new Map();
 const quad=createQuadraticUI();
 let session=null,recordID='',selected='',channel='',comparing=false,mobile=false,importing=false,persistTimer;
@@ -30,11 +31,11 @@ createImagePaste({document,onFiles:files=>loadLocalFiles(files,{expected:'image'
 $('start-import').onclick=()=>quad.show('options',true);
 function download(blob,name){const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}
 function filename(){return new URL(session.draft.url).hostname.replaceAll('.','-');}
-function addOption(id,project){let option=[...$('site-library').options].find(o=>o.value===id);if(!option){option=document.createElement('option');option.value=id;$('site-library').append(option);}option.textContent=project.title+' · copia '+new Date(project.importedAt||Date.now()).toLocaleTimeString('es',{hour:'2-digit',minute:'2-digit'});}
+function addOption(record){updateSavedSiteOption($('site-library'),record);}
 async function persist(){
   if(!session)return;clearTimeout(persistTimer);
   const record={id:recordID,original:session.original,draft:session.draft,assets:mediaLibrary.records(referencedMedia(session.original,session.draft)),updatedAt:Date.now()};
-  try{await saveSite(record);library.set(record.id,record);addOption(record.id,record.draft);if(record.id===recordID){$('saved-status').textContent='Copia guardada en este navegador · '+new Date().toLocaleTimeString('es');activeSitePreference.remember(record.id,library);}}
+  try{await saveSite(record);library.set(record.id,record);addOption(record);if(record.id===recordID){$('saved-status').textContent='Copia guardada en este navegador · '+new Date().toLocaleTimeString('es');activeSitePreference.remember(record.id,library);}}
   catch{$('saved-status').textContent='No se pudo guardar en este navegador. Descarga el proyecto para conservarlo.';}
 }
 function remember(){ $('saved-status').textContent='Guardando copia…';clearTimeout(persistTimer);persistTimer=setTimeout(persist,250);}
@@ -128,7 +129,7 @@ async function open(record,prepared){
   $('site-url').value=session.draft.url;$('source-url').href=session.draft.url;$('source-url').textContent=new URL(session.draft.url).hostname+' ↗';
   $('warnings').replaceChildren(...(session.draft.warnings||[]).map(w=>{const p=document.createElement('p');p.textContent=w;return p;}));
   $('site-pages').replaceChildren(new Option('Seleccionar página…',''),...(session.draft.links||[]).map(url=>new Option(new URL(url).pathname,url)));
-  addOption(record.id,session.draft);$('site-library').value=record.id;paint();say('Selecciona un elemento en la página o en la lista.');
+  addOption(record);$('site-library').value=record.id;refreshLibraryTitle($('site-library'));paint();say('Selecciona un elemento en la página o en la lista.');
 }
 $('import-form').onsubmit=async e=>{
   e.preventDefault();if(importing)return;importing=true;$('import-button').disabled=true;$('site-library').disabled=true;$('site-url').disabled=true;
@@ -138,8 +139,8 @@ $('import-form').onsubmit=async e=>{
   finally{importing=false;$('import-button').disabled=false;$('site-library').disabled=false;$('site-url').disabled=false;}
 };
 $('site-library').onchange=async()=>{
-  const value=$('site-library').value;
-  if(library.has(value)){try{lockMedia(true);if(session)await persist();await activeSitePreference.openSaved(value,library,open);$('import-status').textContent='Copia recuperada del navegador. Puedes seguir editando.';}catch(e){$('site-library').value=recordID||'preset';$('import-status').textContent='No se ha abierto la copia: '+e.message;}finally{lockMedia(false);}}
+  const value=$('site-library').value;refreshLibraryTitle($('site-library'));
+  if(library.has(value)){try{lockMedia(true);if(session)await persist();await activeSitePreference.openSaved(value,library,open);$('import-status').textContent='Copia recuperada del navegador. Puedes seguir editando.';}catch(e){$('site-library').value=recordID||'preset';refreshLibraryTitle($('site-library'));$('import-status').textContent='No se ha abierto la copia: '+e.message;}finally{lockMedia(false);}}
   else{$('site-url').value=value==='preset'?'https://www.portaventuranext.com/':'';$('site-url').focus();$('import-status').textContent='Introduce o revisa la URL y pulsa Importar página.';if(session)await persist();}
 };
 $('site-pages').onchange=()=>{if(!$('site-pages').value)return;$('site-url').value=$('site-pages').value;$('import-status').textContent='Página seleccionada. Pulsa Importar página para crear otra copia.';$('import-button').focus();};
@@ -233,6 +234,6 @@ $('expert-form').onsubmit=event=>{
 $('expert-command').onkeydown=event=>{if(!['ArrowUp','ArrowDown'].includes(event.key)||!commandHistory.length)return;event.preventDefault();if(commandCursor===commandHistory.length)commandDraft=event.target.value;commandCursor=Math.max(0,Math.min(commandHistory.length,commandCursor+(event.key==='ArrowUp'?-1:1)));event.target.value=commandCursor===commandHistory.length?commandDraft:commandHistory[commandCursor];};
 document.addEventListener('keydown',e=>{if(mediaBusy||!session||!(e.ctrlKey||e.metaKey)||e.altKey||e.target.closest('input,textarea,select'))return;if(e.key.toLowerCase()==='z'){e.preventDefault();(e.shiftKey?$('redo'):$('undo')).click();}});
 document.addEventListener('visibilitychange',()=>{if(document.hidden&&session)persist();});
-try{const records=await listSites();for(const r of records){try{validateSite(r.draft);validateSite(r.original);library.set(r.id,r);addOption(r.id,r.draft);}catch{}}
+try{const records=await listSites();for(const r of records){try{validateSite(r.draft);validateSite(r.original);library.set(r.id,r);addOption(r);}catch{}}
   const last=activeSitePreference.read();if(library.has(last)){lockMedia(true);try{await open(library.get(last));$('saved-status').textContent='Copia recuperada de este navegador, con sus archivos locales.';}finally{lockMedia(false);}}
 }catch{$('import-status').textContent+=' El almacenamiento del navegador no está disponible; podrás descargar tu proyecto.';}
