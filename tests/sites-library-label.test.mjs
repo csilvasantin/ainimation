@@ -70,3 +70,19 @@ test('el tooltip de la selección conserva su URL al actualizar y ordenar copias
   const updated={...a,updatedAt:400};updateSavedSiteOption(select,updated);orderSavedSiteOptions(select,[updated,b]);assert.equal(select.value,'B');assert.equal(select.selectedOptions[0],options[3]);assert.equal(select.title,savedSiteTooltip(b));assert.equal(dom.window.document.activeElement,select);
   select.value='A';refreshLibraryTitle(select);assert.equal(select.title,savedSiteTooltip(updated));select.value='new';refreshLibraryTitle(select);assert.equal(select.title,'Otra URL…');assert.equal(JSON.stringify([a,b]),before);
 });
+test('la ayuda cuenta todos los componentes cargados, incluidos ocultos, con singular y plural y sin cambiar los registros',()=>{
+  for(const [count,text]of [[0,'0 componentes'],[1,'1 componente'],[29,'29 componentes']]){
+    const items=Object.freeze(Array.from({length:count},(_,index)=>Object.freeze({id:'ain-'+index,hidden:index%2===0}))),r=Object.freeze({id:'A',updatedAt:1790000000000,draft:Object.freeze({title:'Portada',url:'https://example.org/',items})}),before=JSON.stringify(r);
+    assert.equal(savedSiteTooltip(r),savedSiteLabel(r)+'\nhttps://example.org/\n'+text);assert.equal(JSON.stringify(r),before);assert.equal(r.draft.items,items);
+    const withoutURL={...r,draft:{...r.draft,url:'no válida'}};assert.equal(savedSiteTooltip(withoutURL),savedSiteLabel(withoutURL)+'\n'+text);
+  }
+  for(const items of [undefined,null,'29',29,{length:29},new Set([1,2])]){
+    const r={...record('A',1790000000000),draft:{title:'Portada',url:'https://example.org/',items}};assert.equal(savedSiteTooltip(r),savedSiteLabel(r)+'\nhttps://example.org/');
+  }
+});
+test('el recuento se sincroniza al actualizar y ordenar opciones sin cambiar texto visible, selección o archivos compartidos',()=>{
+  const asset=Object.freeze({id:'local',name:'compartido.png'}),a={...record('A',300),draft:{title:'Copia A',url:'https://example.org/a',items:[{id:'ain-0',hidden:true}]}},b={...record('B',200),draft:{title:'Copia B',url:'https://example.org/b',items:[]}};a.assets=b.assets=Object.freeze([asset]);
+  const {dom,select}=libraryUI([a,b]),nodes=[...select.options],before=JSON.stringify([a,b]);select.value='A';select.focus();refreshLibraryTitle(select);assert.ok(select.title.endsWith('\n1 componente'));
+  const updated={...a,draft:{...a.draft,items:[...a.draft.items,{id:'ain-1'}]}};updateSavedSiteOption(select,updated);orderSavedSiteOptions(select,[updated,b]);assert.ok(select.title.endsWith('\n2 componentes'));assert.equal(select.value,'A');assert.equal(select.selectedOptions[0],nodes[2]);assert.equal(nodes[2].textContent,savedSiteLabel(a));assert.equal(dom.window.document.activeElement,select);
+  select.value='B';refreshLibraryTitle(select);assert.ok(select.title.endsWith('\n0 componentes'));assert.equal(JSON.stringify([a,b]),before);assert.equal(a.assets,b.assets);assert.equal(a.assets[0],asset);
+});

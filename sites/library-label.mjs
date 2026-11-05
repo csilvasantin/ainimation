@@ -9,9 +9,10 @@ export function savedSiteLabel(record){
   return project.title+' · copia'+(date?' · '+dateFormat.format(date):'');
 }
 export function savedSiteTooltip(record){
-  const label=savedSiteLabel(record),value=record.draft.url;
-  if(typeof value!=='string')return label;
-  try{const url=new URL(value);return url.protocol==='https:'&&!url.username&&!url.password?label+'\n'+value:label;}catch{return label;}
+  let tooltip=savedSiteLabel(record);const {url:value,items}=record.draft;
+  if(typeof value==='string')try{const url=new URL(value);if(url.protocol==='https:'&&!url.username&&!url.password)tooltip+='\n'+value;}catch{}
+  if(Array.isArray(items))tooltip+='\n'+items.length+' '+(items.length===1?'componente':'componentes');
+  return tooltip;
 }
 export function refreshLibraryTitle(select){const option=select.selectedOptions[0];select.title=option?.title||option?.textContent||'';}
 export function updateSavedSiteOption(select,record){
