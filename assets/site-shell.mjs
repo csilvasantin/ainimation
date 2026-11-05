@@ -69,11 +69,15 @@ export function mountQuadraticHeader(header, {doc=header.ownerDocument, win=doc.
   language.onchange=()=>{if(win.AINLanguage)win.AINLanguage.set(language.value);};
   layers.advanced.append(languageLabel);
   if(!panels.expert) {
-    const log=create('pre','/help · /idioma es|en · /abrir xperiencias|interactivos|presentaciones|sites|capsulas|login · /estado','/help · /language es|en · /open xperiencias|interactivos|presentaciones|sites|capsulas|login · /status');
+    layers.expert.classList.add('ain-quad-expert-cli');
+    const log=doc.createElement('pre');
     log.className='ain-quad-log';log.setAttribute('role','log');log.setAttribute('aria-live','polite');
     const form=doc.createElement('form');form.className='ain-quad-command';
-    const label=create('label','Comando','Command'),input=doc.createElement('input');input.type='text';input.autocomplete='off';input.spellcheck=false;input.maxLength=300;
-    label.append(input);const run=create('button','Ejecutar','Run');run.type='submit';form.append(label,run);
+    const label=doc.createElement('label'),labelText=create('span','Comando','Command'),input=doc.createElement('input');input.type='text';input.autocomplete='off';input.autocapitalize='none';input.spellcheck=false;input.maxLength=300;
+    labelText.className='ain-quad-command-label';
+    input.dataset.shellPlaceholderEs='/help · /idioma es|en · /abrir xperiencias|interactivos|presentaciones|sites|capsulas|login · /estado';
+    input.dataset.shellPlaceholderEn='/help · /language es|en · /open xperiencias|interactivos|presentaciones|sites|capsulas|login · /status';
+    label.append(labelText,input);const run=create('button','Ejecutar','Run');run.type='submit';form.append(label,run);
     form.onsubmit=event=>{
       event.preventDefault();const text=input.value.trim(),[command,arg,...rest]=text.split(/\s+/);let answer;
       if(/^\/(?:help|ayuda)$/.test(command)&&!arg)answer=t('Órdenes: /idioma es|en, /abrir xperiencias|interactivos|presentaciones|sites|capsulas|login, /estado, /cerrar.','Commands: /language es|en, /open xperiencias|interactivos|presentaciones|sites|capsulas|login, /status, /close.');
@@ -82,9 +86,11 @@ export function mountQuadraticHeader(header, {doc=header.ownerDocument, win=doc.
       else if(/^\/(?:estado|status)$/.test(command)&&!arg)answer=doc.title+' · '+(win.AINLanguage?.read()||doc.documentElement.lang).toUpperCase();
       else if(/^\/(?:cerrar|close)$/.test(command)&&!arg){set('expert',false);return;}
       else answer=t('Comando no reconocido. Escribe /help.','Unknown command. Enter /help.');
-      delete log.dataset.shellEs;delete log.dataset.shellEn;log.textContent=(log.textContent+'\n› '+text+'\n'+answer).slice(-6000);log.scrollTop=log.scrollHeight;input.value='';
+      log.textContent=(log.textContent+(log.textContent?'\n':'')+'› '+text+'\n'+answer).slice(-6000);log.scrollTop=log.scrollHeight;input.value='';
     };
-    layers.expert.append(log,form);
+    const heading=layers.expert.querySelector('.ain-quad-panel-heading');
+    heading.insertBefore(form,heading.querySelector('[data-ain-quad-close]'));
+    layers.expert.append(log);
   }
   function translate(){
     for(const [name,button] of Object.entries(controls)){const label=t(...LABELS[name]);button.title=label;button.setAttribute('aria-label',label);layers[name].querySelector('[data-ain-quad-close]').setAttribute('aria-label',t('Cerrar ','Close ')+label);}
@@ -93,6 +99,7 @@ export function mountQuadraticHeader(header, {doc=header.ownerDocument, win=doc.
       if(node.children.length) {const text=Array.from(node.childNodes).find(n=>n.nodeType===3);if(text)text.nodeValue=t(node.dataset.shellEs,node.dataset.shellEn);}
       else node.textContent=t(node.dataset.shellEs,node.dataset.shellEn);
     }
+    for(const input of layers.expert.querySelectorAll('[data-shell-placeholder-es]'))input.placeholder=t(input.dataset.shellPlaceholderEs,input.dataset.shellPlaceholderEn);
     language.value=win.AINLanguage?.read()||doc.documentElement.lang;
     win.AINLanguage?.links();
   }
