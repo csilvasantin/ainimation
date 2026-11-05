@@ -27,7 +27,7 @@ export function createComponentFilter({document=globalThis.document,onChange,get
       const query=searchKey(search.value.trim()),kind=type.value,state=visibility.value,motion=animation.value;
       const words=query?query.split(/\s+/u):[];
       const matches=items.filter(item=>{
-        const hidden=isHidden(item),animated=hasConfiguredAnimation(item),matchesType=kind==='all'||item.type===kind,matchesVisibility=state==='all'||(state==='hidden'?hidden:!hidden),matchesAnimation=motion==='all'||(motion==='animated'?animated:!animated);
+        const hidden=isHidden(item),animated=hasConfiguredAnimation(item),matchesType=kind==='all'||item.type===kind,matchesVisibility=state==='all'||(state==='hidden'?hidden:!hidden),matchesAnimation=motion==='all'||(motion==='animated'?animated:motion==='unanimated'?!animated:animated&&item.animation===motion);
         if(!matchesType||!matchesVisibility||!matchesAnimation)return false;
         const fileName=['image','video'].includes(item.type)&&localReference(item.value)?getMediaName(item.value)||'':'';
         const content=searchKey(item.label+' '+item.value+' '+COMPONENT_LABELS[item.type]+(hidden?' oculto':'')+(item.type==='image'?' '+(item.alt??''):'')+' '+fileName);
