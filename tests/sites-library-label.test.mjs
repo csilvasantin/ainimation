@@ -73,8 +73,8 @@ test('el tooltip de la selección conserva su URL al actualizar y ordenar copias
 test('la ayuda cuenta todos los componentes cargados, incluidos ocultos, con singular y plural y sin cambiar los registros',()=>{
   for(const [count,text]of [[0,'0 componentes'],[1,'1 componente'],[29,'29 componentes']]){
     const items=Object.freeze(Array.from({length:count},(_,index)=>Object.freeze({id:'ain-'+index,hidden:index%2===0}))),r=Object.freeze({id:'A',updatedAt:1790000000000,draft:Object.freeze({title:'Portada',url:'https://example.org/',items})}),before=JSON.stringify(r);
-    assert.equal(savedSiteTooltip(r),savedSiteLabel(r)+'\nhttps://example.org/\n'+text+'\n0 imágenes · 0 vídeos');assert.equal(JSON.stringify(r),before);assert.equal(r.draft.items,items);
-    const withoutURL={...r,draft:{...r.draft,url:'no válida'}};assert.equal(savedSiteTooltip(withoutURL),savedSiteLabel(withoutURL)+'\n'+text+'\n0 imágenes · 0 vídeos');
+    assert.equal(savedSiteTooltip(r),savedSiteLabel(r)+'\nhttps://example.org/\n'+text+'\n0 imágenes · 0 vídeos\n0 componentes con animación configurada');assert.equal(JSON.stringify(r),before);assert.equal(r.draft.items,items);
+    const withoutURL={...r,draft:{...r.draft,url:'no válida'}};assert.equal(savedSiteTooltip(withoutURL),savedSiteLabel(withoutURL)+'\n'+text+'\n0 imágenes · 0 vídeos\n0 componentes con animación configurada');
   }
   for(const items of [undefined,null,'29',29,{length:29},new Set([1,2])]){
     const r={...record('A',1790000000000),draft:{title:'Portada',url:'https://example.org/',items}};assert.equal(savedSiteTooltip(r),savedSiteLabel(r)+'\nhttps://example.org/');
@@ -90,12 +90,24 @@ test('el desglose cuenta sólo imágenes y vídeos, incluidos ocultos y archivos
   const shared='ain-local:'+'a'.repeat(64),image=()=>({type:'image',value:shared,hidden:true}),video=()=>({type:'video',value:shared,hidden:true});
   for(const [items,line]of [[[],'0 imágenes · 0 vídeos'],[[image()],'1 imagen · 0 vídeos'],[[video()],'0 imágenes · 1 vídeo'],[[image(),image(),video(),video(),{type:'background'},{type:'graphic'},{type:'text'},{type:'IMAGE'},null],'2 imágenes · 2 vídeos']]){
     for(const item of items)if(item)Object.freeze(item);Object.freeze(items);const r=Object.freeze({id:'A',draft:Object.freeze({title:'PortAventura',url:'https://example.org/',items})}),before=JSON.stringify(r);
-    assert.ok(savedSiteTooltip(r).endsWith('\n'+line));assert.ok(savedSiteTooltip(r).includes('\n'+items.length+' '+(items.length===1?'componente':'componentes')+'\n'));assert.equal(JSON.stringify(r),before);assert.equal(r.draft.items,items);
+    assert.ok(savedSiteTooltip(r).includes('\n'+line+'\n'));assert.ok(savedSiteTooltip(r).includes('\n'+items.length+' '+(items.length===1?'componente':'componentes')+'\n'));assert.equal(JSON.stringify(r),before);assert.equal(r.draft.items,items);
   }
 });
 test('el desglose del selector se actualiza al guardar y ordenar sin cambiar nombre, selección, foco o referencias compartidas',()=>{
   const shared='https://media.org/shared',a={...record('A',300),draft:{title:'Copia A',url:'https://example.org/a',items:[{type:'image',value:shared,hidden:true}]}},b={...record('B',200),draft:{title:'Copia B',url:'https://example.org/b',items:[{type:'video',value:shared}]}};
-  const {dom,select}=libraryUI([a,b]),before=JSON.stringify([a,b]),nodes=[...select.options];select.value='A';select.focus();refreshLibraryTitle(select);assert.ok(select.title.endsWith('\n1 imagen · 0 vídeos'));
-  const updated={...a,draft:{...a.draft,items:[...a.draft.items,{type:'video',value:shared}]}};updateSavedSiteOption(select,updated);orderSavedSiteOptions(select,[updated,b]);assert.ok(select.title.endsWith('\n1 imagen · 1 vídeo'));assert.equal(select.value,'A');assert.equal(select.selectedOptions[0],nodes[2]);assert.equal(nodes[2].textContent,savedSiteLabel(a));assert.equal(dom.window.document.activeElement,select);
-  select.value='B';refreshLibraryTitle(select);assert.ok(select.title.endsWith('\n0 imágenes · 1 vídeo'));assert.equal(JSON.stringify([a,b]),before);assert.equal(updated.draft.items[0],a.draft.items[0]);assert.equal(updated.draft.items[1].value,a.draft.items[0].value);
+  const {dom,select}=libraryUI([a,b]),before=JSON.stringify([a,b]),nodes=[...select.options];select.value='A';select.focus();refreshLibraryTitle(select);assert.ok(select.title.includes('\n1 imagen · 0 vídeos\n'));
+  const updated={...a,draft:{...a.draft,items:[...a.draft.items,{type:'video',value:shared}]}};updateSavedSiteOption(select,updated);orderSavedSiteOptions(select,[updated,b]);assert.ok(select.title.includes('\n1 imagen · 1 vídeo\n'));assert.equal(select.value,'A');assert.equal(select.selectedOptions[0],nodes[2]);assert.equal(nodes[2].textContent,savedSiteLabel(a));assert.equal(dom.window.document.activeElement,select);
+  select.value='B';refreshLibraryTitle(select);assert.ok(select.title.includes('\n0 imágenes · 1 vídeo\n'));assert.equal(JSON.stringify([a,b]),before);assert.equal(updated.draft.items[0],a.draft.items[0]);assert.equal(updated.draft.items[1].value,a.draft.items[0].value);
+});
+test('sólo los presets de animación admitidos distintos de none cuentan, incluidos ocultos y referencias compartidas',()=>{
+  const shared='https://media.org/shared',valid=['fade','rise','zoom','float'].map(animation=>({type:'image',value:shared,animation,hidden:true})),invalid=['none','FADE','otro','',undefined,null,0,false,{toString(){throw Error('No convertir objetos');}}].map(animation=>({animation}));
+  const items=[...valid,...invalid,{label:'fade',css:'animation:rise 1s'},null];for(const item of items)if(item)Object.freeze(item);Object.freeze(items);
+  const r=Object.freeze({id:'A',draft:Object.freeze({title:'Copia',url:'https://example.org/',items})}),before=JSON.stringify(r);assert.ok(savedSiteTooltip(r).endsWith('\n4 componentes con animación configurada'));assert.equal(JSON.stringify(r),before);assert.equal(r.draft.items,items);
+  const one={...r,draft:{...r.draft,items:[valid[0]]}},zero={...r,draft:{...r.draft,items:[]}};assert.ok(savedSiteTooltip(one).endsWith('\n1 componente con animación configurada'));assert.ok(savedSiteTooltip(zero).endsWith('\n0 componentes con animación configurada'));
+});
+test('el recuento de animación se sincroniza al guardar y ordenar sin cambiar selección, etiquetas, foco o datos',()=>{
+  const a={...record('A',300),draft:{title:'Copia A',url:'https://example.org/a',items:[{type:'video',value:'https://media.org/shared',animation:'fade',hidden:true}]}},b={...record('B',200),draft:{title:'Copia B',url:'https://example.org/b',items:[{type:'image',animation:'none'}]}};
+  const {dom,select}=libraryUI([a,b]),nodes=[...select.options],before=JSON.stringify([a,b]);select.value='A';select.focus();refreshLibraryTitle(select);assert.ok(select.title.endsWith('\n1 componente con animación configurada'));
+  const updated={...a,draft:{...a.draft,items:[...a.draft.items,{...a.draft.items[0],animation:'zoom'}]}};updateSavedSiteOption(select,updated);orderSavedSiteOptions(select,[updated,b]);assert.ok(select.title.endsWith('\n2 componentes con animación configurada'));assert.equal(select.value,'A');assert.equal(select.selectedOptions[0],nodes[2]);assert.equal(nodes[2].textContent,savedSiteLabel(a));assert.equal(dom.window.document.activeElement,select);
+  select.value='B';refreshLibraryTitle(select);assert.ok(select.title.endsWith('\n0 componentes con animación configurada'));assert.equal(JSON.stringify([a,b]),before);assert.equal(updated.draft.items[0],a.draft.items[0]);assert.equal(updated.draft.items[1].value,a.draft.items[0].value);
 });

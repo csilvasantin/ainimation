@@ -1,3 +1,5 @@
+import {ANIMATIONS} from './model.mjs?v=20261105-names-1';
+const animatedPresets=new Set(ANIMATIONS.filter(preset=>preset!=='none'));
 const dateFormat=new Intl.DateTimeFormat('es',{year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit'});
 function validDate(value){
   if(!['number','string'].includes(typeof value)||(typeof value==='string'&&!value.trim()))return null;
@@ -12,9 +14,10 @@ export function savedSiteTooltip(record){
   let tooltip=savedSiteLabel(record);const {url:value,items}=record.draft;
   if(typeof value==='string')try{const url=new URL(value);if(url.protocol==='https:'&&!url.username&&!url.password)tooltip+='\n'+value;}catch{}
   if(Array.isArray(items)){
-    let images=0,videos=0;for(const item of items){if(item?.type==='image')images++;else if(item?.type==='video')videos++;}
+    let images=0,videos=0,animated=0;for(const item of items){if(item?.type==='image')images++;else if(item?.type==='video')videos++;if(animatedPresets.has(item?.animation))animated++;}
     tooltip+='\n'+items.length+' '+(items.length===1?'componente':'componentes');
     tooltip+='\n'+images+' '+(images===1?'imagen':'imágenes')+' · '+videos+' '+(videos===1?'vídeo':'vídeos');
+    tooltip+='\n'+animated+' '+(animated===1?'componente':'componentes')+' con animación configurada';
   }
   return tooltip;
 }
