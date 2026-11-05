@@ -42,3 +42,26 @@ test('filtrar deja intactos componentes, referencias compartidas y el historial 
   const {filter,type,search}=setup();for(const kind of ['image','video','all']){type.value=kind;search.value='oculto';filter.apply(session.draft.items,i=>session.canSetMediaVisibility(i.id)&&i.hidden===true);}
   filter.reset();assert.equal(JSON.stringify({original:session.original,draft:session.draft}),before);session.undo();assert.equal(session.draft.items.some(i=>i.id===copy),false);session.redo();assert.equal(JSON.stringify({original:session.original,draft:session.draft}),before);
 });
+test('localizar selección empieza deshabilitado y sólo muestra un icono con nombre accesible y tooltip',()=>{
+  const {doc}=setup(),button=doc.getElementById('locate-selection');
+  assert.equal(button.disabled,true);assert.equal(button.type,'button');assert.equal(button.textContent.trim(),'');assert.equal(button.querySelectorAll('svg').length,1);assert.equal(button.getAttribute('aria-label'),'Localizar selección en la lista');assert.equal(button.title,button.getAttribute('aria-label'));assert.equal(button.getAttribute('aria-controls'),'components');
+});
+function layout(selectedTop,selectedBottom,scrollTop=0){
+  const ui=setup(),{doc}=ui,list=doc.getElementById('components'),row=doc.createElement('button'),name=doc.createElement('strong');
+  row.dataset.item='ain-30';name.textContent='Portada secundaria';row.append(name);list.append(row);
+  list.scrollTop=scrollTop;list.scrollLeft=7;list.getBoundingClientRect=()=>({top:200});Object.defineProperty(list,'clientTop',{value:1});Object.defineProperty(list,'clientHeight',{value:340});row.getBoundingClientRect=()=>({top:selectedTop,bottom:selectedBottom});
+  doc.getElementById('options-panel').scrollTop=73;doc.documentElement.scrollTop=29;doc.getElementById('draft-frame').srcdoc='<p>Lienzo intacto</p>';
+  const control=doc.getElementById('locate-selection');control.disabled=false;control.focus();return {...ui,list,control};
+}
+test('localizar una fila inferior desplaza sólo la lista y anuncia su nombre sin mover foco ni lienzo',()=>{
+  const {doc,filter,list,control,status}=layout(680,732,40),frame=doc.getElementById('draft-frame').srcdoc;
+  assert.equal(filter.locate('ain-30'),true);assert.equal(list.scrollTop,231);assert.equal(list.scrollLeft,7);assert.equal(doc.getElementById('options-panel').scrollTop,73);assert.equal(doc.documentElement.scrollTop,29);assert.equal(doc.activeElement,control);assert.equal(doc.getElementById('draft-frame').srcdoc,frame);assert.equal(status.hidden,false);assert.equal(status.textContent,'Selección localizada: Portada secundaria');
+});
+test('localizar una fila superior la recupera y una fila ya visible no cambia el desplazamiento',()=>{
+  const upper=layout(150,202,100);upper.filter.locate('ain-30');assert.equal(upper.list.scrollTop,49);
+  const visible=layout(250,302,100);visible.filter.locate('ain-30');assert.equal(visible.list.scrollTop,100);
+});
+test('una selección ausente no cambia filtros, resultados ni desplazamiento',()=>{
+  const {filter,search,type,status,list}=layout(250,302,100);type.value='video';search.value='oculto';status.textContent='Sin resultados';const before=status.outerHTML;
+  assert.equal(filter.locate('ain-999'),false);assert.equal(type.value,'video');assert.equal(search.value,'oculto');assert.equal(status.outerHTML,before);assert.equal(list.scrollTop,100);
+});
