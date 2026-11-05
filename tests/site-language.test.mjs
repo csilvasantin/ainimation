@@ -24,6 +24,9 @@ test('Login conserva ES y EN, con preferencia anterior contradictoria o almacena
     assert.equal(login.window.document.getElementById('entryLanguageToggle').textContent,lang==='es'?'ENG':'ESP');
     assert.equal(login.window.document.getElementById('loginDialog').open,true);
     assert.equal(login.window.document.querySelector('#loginDialog h2').textContent,lang==='en'?'Your AINimation account':'Tu cuenta AINimation');
+    const produce=page('studio-live.html','https://www.ainimation.studio/studio-live.html?lang='+lang,{blocked});
+    assert.equal(produce.window.document.querySelector('header [data-language-en="Interactives"]').textContent,lang==='en'?'Interactives':'Interactivos');
+    produce.window.close();
     login.window.close();home.window.close();
   }
 });

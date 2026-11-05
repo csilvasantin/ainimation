@@ -2,7 +2,10 @@
 
 `assets/meta-style.css` centraliza la paleta de la interfaz: fondo #0f1115,
 superficie #171a1f, texto #f8f7f2, acento lima #c8ff5f, bordes, tipografía y radios.
-La portada consume los mismos tokens que la entrada de Presentaciones y su editor.
+La portada usa una variante Matrix de esos tokens: fondo #020805, superficie
+#041109, texto #d1ffda, texto secundario #83bc90, bordes #176b32 y acento #00ff41,
+igual que la entrada de Interactivos. La variante está limitada a la home mediante
+`data-ain-meta="matrix"`. Presentaciones y su editor mantienen la variante Studio.
 La adaptación `data-ain-meta="studio"` aplica la identidad de AINimation al entorno
 de trabajo, con botones de texto oscuro sobre lima, controles cuadrados y marca
 compartida. La entrada de Presentaciones usa las cinco secciones de navegación

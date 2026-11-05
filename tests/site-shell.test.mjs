@@ -22,7 +22,7 @@ test('la navegación pública y Opciones conservan sólo las cinco secciones aco
     const dom=new JSDOM(source('index.html'),{url:'https://www.ainimation.studio/'}),doc=dom.window.document;doc.documentElement.lang=lang;
     const ui=mountQuadraticHeader(doc.querySelector('header'));
     assert.deepEqual(routes(ui.panels.options.querySelector('nav')),expected);
-    assert.deepEqual(Array.from(ui.panels.options.querySelectorAll('nav a')).map(a=>a.textContent),lang==='es'?['Xperiencias','Interactivos','Presentaciones','Cápsulas','Login']:['Xperiencias','Interactivos','Presentations','Capsules','Login']);
+    assert.deepEqual(Array.from(ui.panels.options.querySelectorAll('nav a')).map(a=>a.textContent),lang==='es'?['Xperiencias','Interactivos','Presentaciones','Cápsulas','Login']:['Xperiencias','Interactives','Presentations','Capsules','Login']);
     ui.destroy();dom.window.close();
   }
 });

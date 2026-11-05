@@ -24,6 +24,7 @@
         if (url.origin !== win.location.origin || !(/\/$|\.html$/.test(url.pathname))) continue;
         url.searchParams.set('lang', current);
         link.setAttribute('href', url.pathname + url.search + url.hash);
+        if(link.dataset.languageEs&&link.dataset.languageEn)link.textContent=current==='es'?link.dataset.languageEs:link.dataset.languageEn;
       } catch {}
     }
   }
