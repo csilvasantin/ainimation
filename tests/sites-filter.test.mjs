@@ -5,13 +5,14 @@ import {JSDOM} from 'jsdom';
 import {createComponentFilter} from '../sites/filter.mjs';
 import {createSiteSession} from '../sites/model.mjs';
 import {createMediaLibrary} from '../sites/media.mjs';
+import {savedSiteTooltip} from '../sites/library-label.mjs';
 const html=readFileSync(new URL('../sites/index.html',import.meta.url),'utf8');
 const item=(id,type,label,value='')=>({id:'ain-'+id,type,label,value,alt:'',animation:'none',duration:1.2,delay:0});
 const items=[item(0,'text','Portada'),item(1,'image','Portada principal','https://media.org/photo.jpg'),item(2,'video','Portada vídeo','https://media.org/clip.mp4'),item(3,'graphic','Logotipo'),item(4,'background','Fondo','https://media.org/bg.jpg')];
 function setup(onChange=()=>{},getMediaName){
   const dom=new JSDOM(html),doc=dom.window.document;doc.getElementById('options-panel').hidden=false;doc.getElementById('project-options').hidden=false;
   Object.defineProperty(dom.window,'localStorage',{get(){throw Error('El filtro no guarda preferencias');}});
-  return {dom,doc,filter:createComponentFilter({document:doc,onChange,getMediaName}),search:doc.getElementById('filter'),type:doc.getElementById('component-type'),visibility:doc.getElementById('component-visibility'),status:doc.getElementById('component-results')};
+  return {dom,doc,filter:createComponentFilter({document:doc,onChange,getMediaName}),search:doc.getElementById('filter'),type:doc.getElementById('component-type'),visibility:doc.getElementById('component-visibility'),animation:doc.getElementById('component-animation'),status:doc.getElementById('component-results')};
 }
 test('el selector accesible filtra todos los tipos admitidos y Todos devuelve el orden completo',()=>{
   const {doc,filter,type,status}=setup();
@@ -19,6 +20,21 @@ test('el selector accesible filtra todos los tipos admitidos y Todos devuelve el
   assert.deepEqual([...type.options].map(o=>[o.value,o.text]),[['all','Todos'],['text','Texto'],['image','Imagen'],['video','Vídeo'],['graphic','SVG'],['background','Fondo']]);
   for(const [index,kind]of ['text','image','video','graphic','background'].entries()){type.value=kind;assert.deepEqual(filter.apply(items,()=>false),[items[index]]);assert.equal(status.hidden,false);assert.equal(status.textContent,'1 de 5 componentes');}
   type.value='all';assert.deepEqual(filter.apply(items,()=>false),items);assert.equal(status.hidden,true);
+});
+test('el selector de animación es accesible, empieza en Todos y comparte el criterio exacto de la biblioteca',()=>{
+  const {doc,filter,animation,status}=setup(),valid=['fade','rise','zoom','float'].map((preset,index)=>({...item(index,'image','Con animación'),animation:preset,hidden:true})),invalid=['none','FADE','otra',undefined,null,0,false,{toString(){throw Error('No convertir objetos');}}].map((preset,index)=>({...item(index+4,'text','fade · animation:rise'),animation:preset})),media=[...valid,...invalid],before=JSON.stringify(media);
+  assert.ok(doc.querySelector('label[for="component-animation"]').textContent.startsWith('Animación del editor'));assert.equal(animation.getAttribute('aria-controls'),'components');assert.equal(animation.getAttribute('aria-describedby'),'component-results');assert.equal(animation.value,'all');assert.deepEqual([...animation.options].map(o=>[o.value,o.text]),[['all','Todos'],['animated','Con animación'],['unanimated','Sin animación']]);
+  assert.deepEqual(filter.apply(media,()=>false),media);animation.value='animated';assert.deepEqual(filter.apply(media,()=>false),valid);assert.equal(status.textContent,'4 de 12 componentes');assert.equal(status.hidden,false);assert.ok(savedSiteTooltip({draft:{title:'Copia',items:media}}).endsWith('\n4 componentes con animación configurada'));
+  animation.value='unanimated';assert.deepEqual(filter.apply(media,()=>false),invalid);animation.value='animated';filter.apply(valid,()=>false);assert.equal(status.textContent,'4 de 4 componentes');assert.equal(status.hidden,false);assert.equal(JSON.stringify(media),before);
+  filter.reset();assert.equal(animation.value,'all');assert.deepEqual(filter.apply(media,()=>false),media);assert.equal(status.hidden,true);
+});
+test('animación se combina con tipo, ocultación autorizada y búsqueda Unicode por nombre, alt y archivo sin alterar la consulta',()=>{
+  const ref='ain-local:'+'a'.repeat(64),media=[{...item(0,'image','Introducción año',ref),alt:'Foto del pingüino',animation:'rise',hidden:true},{...item(1,'image','Introducción año',ref),alt:'Foto del pingüino',hidden:true},{...item(2,'video','Cabecera','https://media.org/video.mp4'),animation:'zoom'},{...item(3,'graphic','SVG fade'),hidden:true}],before=JSON.stringify(media),{filter,type,visibility,animation,search,status}=setup(()=>{},()=> 'captura.png'),hidden=i=>i.id==='ain-0'||i.id==='ain-1';
+  type.value='image';visibility.value='hidden';animation.value='animated';search.value='  PINGUINO captura INTRODUCCIO\u0301N AÑO  ';assert.deepEqual(filter.apply(media,hidden).map(i=>i.id),['ain-0']);assert.equal(search.value,'  PINGUINO captura INTRODUCCIO\u0301N AÑO  ');assert.equal(status.textContent,'1 de 4 componentes');
+  animation.value='unanimated';assert.deepEqual(filter.apply(media,hidden).map(i=>i.id),['ain-1']);visibility.value='shown';assert.deepEqual(filter.apply(media,hidden),[]);assert.match(status.textContent,/No hay coincidencias/);assert.equal(status.hidden,false);
+  animation.value='animated';type.value='video';visibility.value='all';search.value='video cabecera';assert.deepEqual(filter.apply(media,hidden).map(i=>i.id),['ain-2']);
+  animation.value='unanimated';type.value='graphic';visibility.value='shown';search.value='fade';assert.deepEqual(filter.apply(media,hidden).map(i=>i.id),['ain-3']);visibility.value='hidden';assert.deepEqual(filter.apply(media,hidden),[]);assert.equal(JSON.stringify(media),before);
+  filter.reset();assert.equal(search.value,'');assert.equal(type.value,'all');assert.equal(visibility.value,'all');assert.equal(animation.value,'all');assert.deepEqual(filter.apply(media,hidden),media);
 });
 test('tipo y búsqueda se combinan con nombres, referencias y el estado oculto autorizado',()=>{
   const {filter,search,type}=setup(),media=[...items,{...item(5,'image','Portada secundaria','https://media.org/shared.jpg'),hidden:true},{...item(6,'video','Clip secundario','https://media.org/shared.mp4'),hidden:true}];
@@ -86,16 +102,16 @@ test('sólo referencias locales válidas de imagen o vídeo consultan un nombre 
   const withoutResolver=setup();withoutResolver.search.value='archivo';assert.deepEqual(withoutResolver.filter.apply(media,()=>false),[]);
 });
 test('los cambios se anuncian sin mover el foco y restablecer limpia todos los filtros sin otra acción',()=>{
-  let changes=0;const {dom,filter,search,type,visibility,status}=setup(()=>changes++);
+  let changes=0;const {dom,filter,search,type,visibility,animation,status}=setup(()=>changes++);
   assert.equal(status.getAttribute('role'),'status');assert.equal(status.getAttribute('aria-live'),'polite');
-  type.focus();type.value='video';type.dispatchEvent(new dom.window.Event('change'));search.value='No existe';search.dispatchEvent(new dom.window.Event('input'));visibility.value='hidden';visibility.dispatchEvent(new dom.window.Event('change'));
-  assert.equal(changes,3);assert.equal(dom.window.document.activeElement,type);assert.deepEqual(filter.apply(items,()=>false),[]);assert.equal(status.hidden,false);assert.match(status.textContent,/No hay coincidencias/);
-  filter.reset();assert.equal(changes,3);assert.equal(search.value,'');assert.equal(type.value,'all');assert.equal(visibility.value,'all');assert.deepEqual(filter.apply(items,()=>false),items);assert.equal(status.hidden,true);
+  type.focus();type.value='video';type.dispatchEvent(new dom.window.Event('change'));search.value='No existe';search.dispatchEvent(new dom.window.Event('input'));visibility.value='hidden';visibility.dispatchEvent(new dom.window.Event('change'));animation.value='animated';animation.dispatchEvent(new dom.window.Event('change'));
+  assert.equal(changes,4);assert.equal(dom.window.document.activeElement,type);assert.deepEqual(filter.apply(items,()=>false),[]);assert.equal(status.hidden,false);assert.match(status.textContent,/No hay coincidencias/);
+  filter.reset();assert.equal(changes,4);assert.equal(search.value,'');assert.equal(type.value,'all');assert.equal(visibility.value,'all');assert.equal(animation.value,'all');assert.deepEqual(filter.apply(items,()=>false),items);assert.equal(status.hidden,true);
 });
 test('filtrar deja intactos componentes, referencias compartidas y el historial del proyecto',()=>{
   const original={format:'ainimation-imported-site',version:1,title:'PortAventura',url:'https://www.portaventuranext.com/',html:'<main>PortAventura</main>',items,warnings:[],links:[]};
-  const session=createSiteSession(original),id=session.addMedia('image','https://media.org/shared.jpg');session.edit(id,{label:'Portada añadida',hidden:true,maxWidth:320});const copy=session.duplicateMedia(id),before=JSON.stringify({original:session.original,draft:session.draft});
-  const {filter,type,search,visibility}=setup();for(const kind of ['image','video','all'])for(const state of ['all','shown','hidden']){type.value=kind;visibility.value=state;search.value='oculto';filter.apply(session.draft.items,i=>session.canSetMediaVisibility(i.id)&&i.hidden===true);}
+  const session=createSiteSession(original),id=session.addMedia('image','https://media.org/shared.jpg');session.edit(id,{label:'Portada añadida',hidden:true,maxWidth:320,animation:'rise'});const copy=session.duplicateMedia(id),before=JSON.stringify({original:session.original,draft:session.draft});
+  const {filter,type,search,visibility,animation}=setup();for(const kind of ['image','video','all'])for(const state of ['all','shown','hidden'])for(const motion of ['all','animated','unanimated']){type.value=kind;visibility.value=state;animation.value=motion;search.value='oculto';filter.apply(session.draft.items,i=>session.canSetMediaVisibility(i.id)&&i.hidden===true);}
   filter.reset();assert.equal(JSON.stringify({original:session.original,draft:session.draft}),before);session.undo();assert.equal(session.draft.items.some(i=>i.id===copy),false);session.redo();assert.equal(JSON.stringify({original:session.original,draft:session.draft}),before);
 });
 test('visibilidad usa sólo la ocultación autorizada del editor, sin confundir originales, nombres o CSS',()=>{
