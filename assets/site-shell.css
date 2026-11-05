@@ -12,7 +12,8 @@
 .ain-quad-panel[hidden]{display:none!important}
 .ain-quad-options{left:0;right:auto}
 .ain-quad-advanced{right:0;left:auto}
-.ain-quad-expert{top:auto!important;left:0;right:0;bottom:0;width:auto;height:56px;max-height:calc(100dvh - var(--ain-quad-top,70px) - 8px)}
+/* Keep the CLI above the floating version stamp at z-index 2147481999. */
+.ain-quad-expert{z-index:2147482000;top:auto!important;left:0;right:0;bottom:0;width:auto;height:56px;max-height:calc(100dvh - var(--ain-quad-top,70px) - 8px)}
 .ain-panel-resize{position:fixed!important;z-index:2;box-sizing:border-box;touch-action:none;user-select:none;background:transparent;opacity:.7;outline-offset:-3px;pointer-events:auto}
 .ain-panel-resize::after{content:'';position:absolute;background:#c8ff5f;opacity:.55;border-radius:3px}
 .ain-panel-resize-right,.ain-panel-resize-left{cursor:ew-resize}
