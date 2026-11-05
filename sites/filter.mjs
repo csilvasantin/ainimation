@@ -11,10 +11,12 @@ export function createComponentFilter({document=globalThis.document,onChange}){
   return {
     apply(items,isHidden){
       const query=searchKey(search.value.trim()),kind=type.value,state=visibility.value;
+      const words=query?query.split(/\s+/u):[];
       const matches=items.filter(item=>{
-        const hidden=isHidden(item);
-        return (kind==='all'||item.type===kind)&&(state==='all'||(state==='hidden'?hidden:!hidden))&&
-          searchKey(item.label+' '+item.value+' '+COMPONENT_LABELS[item.type]+(hidden?' oculto':'')).includes(query);
+        const hidden=isHidden(item),matchesType=kind==='all'||item.type===kind,matchesVisibility=state==='all'||(state==='hidden'?hidden:!hidden);
+        if(!matchesType||!matchesVisibility)return false;
+        const content=searchKey(item.label+' '+item.value+' '+COMPONENT_LABELS[item.type]+(hidden?' oculto':''));
+        return words.every(word=>content.includes(word));
       });
       status.textContent=matches.length?matches.length+' de '+items.length+' componentes':'No hay coincidencias. Prueba otros filtros o búsqueda.';
       status.hidden=kind==='all'&&state==='all'&&!query&&matches.length>0;

@@ -42,6 +42,18 @@ test('ñ sigue siendo distinta de n en nombres y consultas compuestos o descompu
   for(const query of ['año','AÑO','an\u0303o']){search.value=query;assert.deepEqual(filter.apply(media,()=>false).map(i=>i.id),['ain-0','ain-2']);}
   search.value='ano';assert.deepEqual(filter.apply(media,()=>false).map(i=>i.id),['ain-1']);assert.equal(JSON.stringify(media),before);
 });
+test('varias palabras coinciden todas en el mismo componente, sin importar orden o espacios',()=>{
+  const {filter,search,type,visibility,status}=setup(),media=[{...item(0,'video','Cabecera hero','https://media.org/promo.mp4'),hidden:true},{...item(1,'video','Pie de página'),hidden:true},item(2,'video','Cabecera visible'),{...item(3,'image','Cabecera imagen'),hidden:true},item(4,'text','video oculto'),item(5,'text','cabecera')],before=JSON.stringify(media),hidden=i=>i.hidden===true;
+  for(const query of ['video oculto cabecera','cabecera video oculto','  VIDEO\t oculto\u00a0  cabecera  ']){search.value=query;assert.deepEqual(filter.apply(media,hidden).map(i=>i.id),['ain-0']);assert.equal(search.value,query);}
+  type.value='video';visibility.value='hidden';search.value='promo.mp4 cabecera';assert.deepEqual(filter.apply(media,hidden).map(i=>i.id),['ain-0']);visibility.value='shown';assert.deepEqual(filter.apply(media,hidden),[]);
+  type.value='all';visibility.value='all';search.value='cabecera inexistente';assert.deepEqual(filter.apply(media,hidden),[]);assert.match(status.textContent,/No hay coincidencias/);
+  search.value='cabecera';assert.deepEqual(filter.apply(media,hidden).map(i=>i.id),['ain-0','ain-2','ain-3','ain-5']);search.value=' \t\u00a0 ';assert.deepEqual(filter.apply(media,hidden),media);assert.equal(status.hidden,true);assert.equal(JSON.stringify(media),before);
+});
+test('las palabras son literales y conservan la comparación Unicode, vocales y ñ',()=>{
+  const {filter,search}=setup(),media=[item(0,'image','Introducción pingüino año a+b [demo] .*'),item(1,'image','Introduccio\u0301n PINGU\u0308INO ano'),item(2,'text','Cualquier texto')],before=JSON.stringify(media);
+  for(const [query,ids]of [['pinguino introduccion año',['ain-0']],['AN\u0303O INTRODUCCIO\u0301N PINGU\u0308INO',['ain-0']],['introduccion pinguino ano',['ain-1']],['[demo] a+b',['ain-0']],['.* [demo]',['ain-0']],['(a|b)',[]],['OR a+b',[]]]){search.value=query;assert.deepEqual(filter.apply(media,()=>false).map(i=>i.id),ids,query);}
+  assert.equal(JSON.stringify(media),before);
+});
 test('los cambios se anuncian sin mover el foco y restablecer limpia todos los filtros sin otra acción',()=>{
   let changes=0;const {dom,filter,search,type,visibility,status}=setup(()=>changes++);
   assert.equal(status.getAttribute('role'),'status');assert.equal(status.getAttribute('aria-live'),'polite');
