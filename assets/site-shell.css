@@ -1,7 +1,7 @@
-/* Four bands: panels always overlay the page, start closed and never persist. */
+/* Panels overlay the page and start closed; only their dimensions persist. */
 .ain-quad-header{gap:12px!important;min-width:0;flex-wrap:wrap}
 .ain-quad-header>.brand{flex-shrink:0}
-.ain-quad-header>.nav-links{gap:clamp(8px,1.2vw,16px);min-width:0;flex:1;overflow-x:auto}
+.ain-quad-header>.nav-links,.ain-quad-header>nav[aria-label="Secciones"]{gap:clamp(8px,1.2vw,16px);min-width:0;flex:1;overflow-x:auto;justify-content:flex-end;justify-content:safe flex-end}
 .ain-quad-tools{display:flex;align-items:center;gap:6px;margin-left:auto;flex-shrink:0}
 .ain-quad-header .ain-quad-control,.ain-quad-control{display:inline-flex;align-items:center;justify-content:center;flex:0 0 40px;width:40px;height:40px;min-height:40px;padding:0;border:1px solid #80808066;border-radius:0;background:transparent;color:inherit;cursor:pointer;font:inherit;box-sizing:border-box}
 .ain-quad-control svg{width:16px;height:14px;fill:none;stroke:currentColor;stroke-width:1.35;pointer-events:none}
@@ -39,4 +39,4 @@ html.ain-panel-resizing iframe{pointer-events:none!important}
 .ain-quad-panel .reference{margin-top:20px}
 .ain-presentation-quad .editor-layout{grid-template-columns:minmax(0,1fr)}
 .ain-quad-header .badge{display:none}
-@media(max-width:640px){.ain-quad-header{padding:12px!important;gap:8px!important}.ain-quad-header>.brand{font-size:14px}.ain-quad-header .brand small{display:none}.ain-quad-header>.nav-links{order:3;flex-basis:100%;width:100%;justify-content:flex-start}.ain-quad-control{flex-basis:38px;width:38px;height:38px;min-height:38px}.ain-quad-command{flex-wrap:wrap}.ain-quad-command label{flex-basis:100%}}
+@media(max-width:640px){.ain-quad-header{padding:12px!important;gap:8px!important}.ain-quad-header>.brand{font-size:14px}.ain-quad-header .brand small{display:none}.ain-quad-header>.nav-links,.ain-quad-header>nav[aria-label="Secciones"]{order:3;flex-basis:100%;width:100%;justify-content:flex-start}.ain-quad-control{flex-basis:38px;width:38px;height:38px;min-height:38px}.ain-quad-command{flex-wrap:wrap}.ain-quad-command label{flex-basis:100%}}
