@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {JSDOM} from 'jsdom';
-import {localFileTooltip,localMediaName} from '../sites/file-tooltip.mjs';
+import {localFileTooltip,localMediaName,componentTooltip} from '../sites/file-tooltip.mjs';
 import {createMediaLibrary} from '../sites/media.mjs';
 const ref=n=>'ain-local:'+n.repeat(64);
 const item=(type='image',value=ref('a'))=>({id:'ain-1',type,value,label:'Introducción',alt:'Foto del pingüino'});
@@ -24,4 +24,17 @@ test('ausencia de descriptor o nombre inválido no inventa ayuda ni convierte ob
 test('title trata el nombre como texto literal y deja texto visible, nombre accesible y alt intactos',()=>{
   const dom=new JSDOM('<button aria-pressed="true"><strong>Introducción</strong><span>Imagen · Añadido</span></button>'),button=dom.window.document.querySelector('button'),photo=item(),before=JSON.stringify(photo),visible=button.textContent,name='<img src=x onerror="alert(1)"> & pingüino.png';button.title=localFileTooltip(photo,'Imagen · Añadido',()=>name);
   assert.equal(button.title,'Introducción\nImagen · Añadido\nArchivo local: '+name);assert.equal(button.textContent,visible);assert.equal(button.getAttribute('aria-label'),null);assert.equal(button.getAttribute('aria-pressed'),'true');assert.equal(button.querySelectorAll('img,script').length,0);assert.equal(JSON.stringify(photo),before);
+});
+test('la ayuda de imagen añade su alt literal, local o remoto, sin cargar archivos ni normalizar Unicode',()=>{
+  const remote={...item('image','https://example.org/photo.jpg'),alt:'  Descripcio\u0301n del AN\u0303O · pingüino  '};let calls=0;const getName=()=>{calls++;return 'captura.png';},local={...remote,value:ref('a')},copy={...local,id:'ain-2',label:'Otra imagen',alt:'Otra descripción'},before=JSON.stringify([remote,local,copy]);
+  assert.equal(componentTooltip(remote,'Imagen · Importado',getName),'Introducción\nImagen · Importado\nDescripción de la imagen: '+remote.alt);assert.equal(calls,0);
+  assert.equal(componentTooltip(local,'Imagen · Añadido · Oculto',getName),'Introducción\nImagen · Añadido · Oculto\nArchivo local: captura.png\nDescripción de la imagen: '+local.alt);assert.ok(componentTooltip(copy,'Imagen · Añadido',getName).endsWith('Archivo local: captura.png\nDescripción de la imagen: Otra descripción'));assert.equal(calls,2);assert.equal(JSON.stringify([remote,local,copy]),before);
+});
+test('alt ausente, vacío o no textual conserva la ayuda y otros tipos nunca usan su alt',()=>{
+  const getName=()=> 'archivo.png';for(const alt of [undefined,null,0,false,'','  \t\n ',{toString(){throw Error('No convertir objetos');}}])for(const value of [ref('a'),'https://example.org/photo.jpg']){const photo={...item('image',value),alt};assert.equal(componentTooltip(photo,'Imagen',getName),localFileTooltip(photo,'Imagen',getName));}
+  for(const type of ['video','text','graphic','background']){const other={...item(type),alt:'Descripción que sólo debe usar una imagen'};assert.equal(componentTooltip(other,'Detalle',getName),localFileTooltip(other,'Detalle',getName));}
+});
+test('descripción larga con apariencia de HTML permanece literal y no cambia DOM, nombre, selección o alt',()=>{
+  const dom=new JSDOM('<button aria-pressed="true"><strong>Introducción</strong><span>Imagen · Añadido</span></button>'),button=dom.window.document.querySelector('button'),alt=('<img src=x onerror="alert(1)"> & Oculto · pingüino '.repeat(30)).slice(0,1000),photo={...item(),alt},before=JSON.stringify(photo),visible=button.textContent;button.title=componentTooltip(photo,'Imagen · Añadido',()=> 'captura.png');
+  assert.ok(button.title.endsWith('Descripción de la imagen: '+alt));assert.equal(button.textContent,visible);assert.equal(button.getAttribute('aria-label'),null);assert.equal(button.getAttribute('aria-pressed'),'true');assert.equal(button.querySelectorAll('img,script,a').length,0);assert.equal(JSON.stringify(photo),before);
 });
