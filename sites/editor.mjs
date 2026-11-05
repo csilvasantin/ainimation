@@ -8,7 +8,7 @@ import {parseExpertCommand,EXPERT_HELP} from './expert.mjs';
 import {createFileDrop,previewMessageSource,mediaDropReplacement} from './drop.mjs?v=20261104-replace-1';
 import {createPreviewSound} from './sound.mjs?v=20261104-sound-1';
 import {createImagePaste} from './paste.mjs?v=20261104-paste-1';
-import {COMPONENT_LABELS,createComponentFilter,createComponentProvenance} from './filter.mjs?v=20261105-selection-status-1';
+import {COMPONENT_LABELS,createComponentFilter,createComponentProvenance} from './filter.mjs?v=20261105-description-filter-1';
 import {componentTooltip,localMediaName,hasImageDescription} from './file-tooltip.mjs?v=20261105-empty-description-1';
 import {createActiveSitePreference} from './active-site.mjs?v=20261105-active-1';
 import {updateSavedSiteOption,refreshLibraryTitle,orderSavedSiteOptions} from './library-label.mjs?v=20261105-animation-filter-1';
