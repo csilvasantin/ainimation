@@ -9,10 +9,10 @@ import {savedSiteTooltip} from '../sites/library-label.mjs';
 const html=readFileSync(new URL('../sites/index.html',import.meta.url),'utf8');
 const item=(id,type,label,value='')=>({id:'ain-'+id,type,label,value,alt:'',animation:'none',duration:1.2,delay:0});
 const items=[item(0,'text','Portada'),item(1,'image','Portada principal','https://media.org/photo.jpg'),item(2,'video','Portada vídeo','https://media.org/clip.mp4'),item(3,'graphic','Logotipo'),item(4,'background','Fondo','https://media.org/bg.jpg')];
-function setup(onChange=()=>{},getMediaName){
+function setup(onChange=()=>{},getMediaName,isLocked){
   const dom=new JSDOM(html),doc=dom.window.document;doc.getElementById('options-panel').hidden=false;doc.getElementById('project-options').hidden=false;
   Object.defineProperty(dom.window,'localStorage',{get(){throw Error('El filtro no guarda preferencias');}});
-  return {dom,doc,filter:createComponentFilter({document:doc,onChange,getMediaName}),search:doc.getElementById('filter'),type:doc.getElementById('component-type'),visibility:doc.getElementById('component-visibility'),animation:doc.getElementById('component-animation'),status:doc.getElementById('component-results')};
+  return {dom,doc,filter:createComponentFilter({document:doc,onChange,getMediaName,isLocked}),search:doc.getElementById('filter'),type:doc.getElementById('component-type'),visibility:doc.getElementById('component-visibility'),animation:doc.getElementById('component-animation'),resetButton:doc.getElementById('reset-component-filters'),status:doc.getElementById('component-results')};
 }
 test('el selector accesible filtra todos los tipos admitidos y Todos devuelve el orden completo',()=>{
   const {doc,filter,type,status}=setup();
@@ -20,6 +20,23 @@ test('el selector accesible filtra todos los tipos admitidos y Todos devuelve el
   assert.deepEqual([...type.options].map(o=>[o.value,o.text]),[['all','Todos'],['text','Texto'],['image','Imagen'],['video','Vídeo'],['graphic','SVG'],['background','Fondo']]);
   for(const [index,kind]of ['text','image','video','graphic','background'].entries()){type.value=kind;assert.deepEqual(filter.apply(items,()=>false),[items[index]]);assert.equal(status.hidden,false);assert.equal(status.textContent,'1 de 5 componentes');}
   type.value='all';assert.deepEqual(filter.apply(items,()=>false),items);assert.equal(status.hidden,true);
+});
+test('restablecer filtros empieza deshabilitado y muestra sólo un icono SVG con nombre accesible y tooltip',()=>{
+  const {resetButton}=setup();assert.equal(resetButton.disabled,true);assert.equal(resetButton.type,'button');assert.equal(resetButton.textContent.trim(),'');assert.equal(resetButton.querySelectorAll('svg').length,1);assert.equal(resetButton.getAttribute('aria-label'),'Restablecer filtros');assert.equal(resetButton.title,'Restablecer filtros');assert.equal(resetButton.getAttribute('aria-controls'),'components');assert.equal(resetButton.getAttribute('aria-describedby'),'component-results');
+});
+test('restablecer limpia sólo cuatro filtros, pinta una vez y anuncia el total sin localizar, mover el lienzo o cambiar otros campos',()=>{
+  let ui,changes=0;ui=setup(()=>{changes++;ui.filter.apply(items,()=>false);});const {doc,filter,search,type,visibility,animation,resetButton,status}=ui;
+  doc.getElementById('site-url').value='https://example.org/otra';doc.getElementById('site-library').value='new';doc.getElementById('fields').textContent='Inspector intacto';doc.getElementById('draft-frame').srcdoc='<p>Lienzo intacto</p>';doc.getElementById('options-panel').scrollTop=37;doc.documentElement.scrollTop=19;doc.getElementById('components').scrollTop=73;
+  const before={fields:doc.getElementById('fields').innerHTML,frame:doc.getElementById('draft-frame').srcdoc};filter.locate=()=>{throw Error('No localizar la selección');};search.value='inexistente';type.value='image';visibility.value='hidden';animation.value='animated';filter.apply(items,()=>false);assert.equal(resetButton.disabled,false);
+  resetButton.focus();resetButton.click();assert.equal(changes,1);assert.equal(search.value,'');assert.equal(type.value,'all');assert.equal(visibility.value,'all');assert.equal(animation.value,'all');assert.equal(resetButton.disabled,true);assert.equal(status.hidden,false);assert.equal(status.textContent,'Filtros restablecidos. 5 componentes.');
+  assert.equal(doc.getElementById('site-url').value,'https://example.org/otra');assert.equal(doc.getElementById('site-library').value,'new');assert.equal(doc.getElementById('fields').innerHTML,before.fields);assert.equal(doc.getElementById('draft-frame').srcdoc,before.frame);assert.equal(doc.getElementById('options-panel').scrollTop,37);assert.equal(doc.documentElement.scrollTop,19);assert.equal(doc.getElementById('components').scrollTop,73);
+});
+test('los espacios se pueden limpiar y el bloqueo de carga conserva el estado correcto al desbloquear',()=>{
+  for(const count of [0,1]){
+    let locked=false,changes=0,ui;ui=setup(()=>{changes++;ui.filter.apply(items.slice(0,count),()=>false);},undefined,()=>locked);const {filter,search,resetButton,status}=ui;
+    search.value='   ';filter.apply(items.slice(0,count),()=>false);assert.equal(resetButton.disabled,false);locked=true;filter.syncAvailability();assert.equal(resetButton.disabled,true);resetButton.click();assert.equal(changes,0);assert.equal(search.value,'   ');
+    locked=false;filter.syncAvailability();assert.equal(resetButton.disabled,false);resetButton.click();assert.equal(changes,1);assert.equal(search.value,'');assert.equal(status.textContent,'Filtros restablecidos. '+count+' '+(count===1?'componente.':'componentes.'));assert.equal(status.hidden,false);filter.syncAvailability();assert.equal(resetButton.disabled,true);
+  }
 });
 test('el selector de animación es accesible, empieza en Todos y comparte el criterio exacto de la biblioteca',()=>{
   const {doc,filter,animation,status}=setup(),valid=['fade','rise','zoom','float'].map((preset,index)=>({...item(index,'image','Con animación'),animation:preset,hidden:true})),invalid=['none','FADE','otra',undefined,null,0,false,{toString(){throw Error('No convertir objetos');}}].map((preset,index)=>({...item(index+4,'text','fade · animation:rise'),animation:preset})),media=[...valid,...invalid],before=JSON.stringify(media);

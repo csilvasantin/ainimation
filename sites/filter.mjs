@@ -5,14 +5,25 @@ export const COMPONENT_LABELS=Object.freeze({text:'Texto',image:'Imagen',video:'
 const SEARCH_VOWELS={á:'a',é:'e',í:'i',ó:'o',ú:'u',ü:'u'};
 const searchKey=text=>text.normalize('NFC').toLocaleLowerCase('es').replace(/[áéíóúü]/g,letter=>SEARCH_VOWELS[letter]);
 
-export function createComponentFilter({document=globalThis.document,onChange,getMediaName=()=>''}){
+export function createComponentFilter({document=globalThis.document,onChange,getMediaName=()=>'',isLocked=()=>false}){
   const search=document.getElementById('filter'),type=document.getElementById('component-type'),visibility=document.getElementById('component-visibility'),animation=document.getElementById('component-animation'),status=document.getElementById('component-results');
+  const resetButton=document.getElementById('reset-component-filters');let total=0;
+  const hasFilters=()=>search.value!==''||type.value!=='all'||visibility.value!=='all'||animation.value!=='all';
+  function syncAvailability(){resetButton.disabled=isLocked()||!hasFilters();}
+  function reset(){search.value='';type.value='all';visibility.value='all';animation.value='all';syncAvailability();}
   type.replaceChildren(...Object.entries({all:'Todos',...COMPONENT_LABELS}).map(([value,label])=>{
     const option=document.createElement('option');option.value=value;option.textContent=label;return option;
   }));
-  search.addEventListener('input',onChange);type.addEventListener('change',onChange);visibility.addEventListener('change',onChange);animation.addEventListener('change',onChange);
+  const changed=event=>{syncAvailability();onChange(event);};
+  search.addEventListener('input',changed);type.addEventListener('change',changed);visibility.addEventListener('change',changed);animation.addEventListener('change',changed);
+  resetButton.addEventListener('click',()=>{
+    if(isLocked()||!hasFilters())return;
+    reset();onChange();status.textContent='Filtros restablecidos. '+total+' '+(total===1?'componente.':'componentes.');status.hidden=false;
+  });
+  syncAvailability();
   return {
     apply(items,isHidden){
+      total=items.length;syncAvailability();
       const query=searchKey(search.value.trim()),kind=type.value,state=visibility.value,motion=animation.value;
       const words=query?query.split(/\s+/u):[];
       const matches=items.filter(item=>{
@@ -26,7 +37,7 @@ export function createComponentFilter({document=globalThis.document,onChange,get
       status.hidden=kind==='all'&&state==='all'&&motion==='all'&&!query&&matches.length>0;
       return matches;
     },
-    reset(){search.value='';type.value='all';visibility.value='all';animation.value='all';},
+    reset,syncAvailability,
     locate(id){
       const list=document.getElementById('components'),target=[...list.children].find(node=>node.dataset.item===id);
       if(!target)return false;
