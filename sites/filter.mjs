@@ -15,6 +15,14 @@ export function createComponentFilter({document=globalThis.document,onChange}){
       status.hidden=kind==='all'&&!query&&matches.length>0;
       return matches;
     },
-    reset(){search.value='';type.value='all';}
+    reset(){search.value='';type.value='all';},
+    locate(id){
+      const list=document.getElementById('components'),target=[...list.children].find(node=>node.dataset.item===id);
+      if(!target)return false;
+      status.textContent='Selección localizada: '+target.querySelector('strong').textContent;status.hidden=false;
+      const bounds=list.getBoundingClientRect(),row=target.getBoundingClientRect(),top=bounds.top+list.clientTop,bottom=top+list.clientHeight;
+      if(row.top<top)list.scrollTop+=row.top-top;else if(row.bottom>bottom)list.scrollTop+=row.bottom-bottom;
+      return true;
+    }
   };
 }

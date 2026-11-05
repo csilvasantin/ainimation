@@ -8,7 +8,7 @@ import {parseExpertCommand,EXPERT_HELP} from './expert.mjs';
 import {createFileDrop,previewMessageSource,mediaDropReplacement} from './drop.mjs?v=20261104-replace-1';
 import {createPreviewSound} from './sound.mjs?v=20261104-sound-1';
 import {createImagePaste} from './paste.mjs?v=20261104-paste-1';
-import {COMPONENT_LABELS,createComponentFilter} from './filter.mjs?v=20261105-filter-1';
+import {COMPONENT_LABELS,createComponentFilter} from './filter.mjs?v=20261105-locate-1';
 const $=id=>document.getElementById(id),library=new Map();
 const quad=createQuadraticUI();
 let session=null,recordID='',selected='',channel='',comparing=false,mobile=false,importing=false,persistTimer;
@@ -68,7 +68,8 @@ function movement(){
     const item=session?.draft.items.find(i=>i.id===selected),label=(direction===-1?'Subir':'Bajar')+(item?.type==='video'?' vídeo añadido':item?.type==='image'?' imagen añadida':' medio añadido');button.setAttribute('aria-label',label);button.title=label;
   }
 }
-function lockMedia(value){mediaBusy=value;document.querySelectorAll('button,input,select,textarea').forEach(el=>{if(el.id!=='mute-videos')el.disabled=value;});history();movement();}
+function locateAvailability(){$('locate-selection').disabled=mediaBusy||!session?.draft.items.some(i=>i.id===selected);}
+function lockMedia(value){mediaBusy=value;document.querySelectorAll('button,input,select,textarea').forEach(el=>{if(el.id!=='mute-videos')el.disabled=value;});history();movement();locateAvailability();}
 function paintComponents(){
   const items=session.draft.items;
   const hidden=item=>session.canSetMediaVisibility(item.id)&&item.hidden===true;
@@ -78,6 +79,7 @@ function paintComponents(){
     strong.textContent=i.label;small.textContent=labels[i.type]+(hidden(i)?' · Oculto':'')+(i.animation==='none'?'':' · '+motionLabels[i.animation]);b.append(strong,small);b.setAttribute('aria-pressed',String(i.id===selected));
     b.onclick=()=>{selected=i.id;paintComponents();inspector();highlight(true);quad.show('advanced');};return b;
   }));
+  locateAvailability();
 }
 function inspector(){
   const item=session.draft.items.find(i=>i.id===selected);$('fields').replaceChildren();
@@ -139,6 +141,10 @@ $('site-library').onchange=async()=>{
   else{$('site-url').value=value==='preset'?'https://www.portaventuranext.com/':'';$('site-url').focus();$('import-status').textContent='Introduce o revisa la URL y pulsa Importar página.';if(session)await persist();}
 };
 $('site-pages').onchange=()=>{if(!$('site-pages').value)return;$('site-url').value=$('site-pages').value;$('import-status').textContent='Página seleccionada. Pulsa Importar página para crear otra copia.';$('import-button').focus();};
+$('locate-selection').onclick=()=>{
+  if(mediaBusy||!session?.draft.items.some(i=>i.id===selected))return;
+  componentFilter.reset();paintComponents();componentFilter.locate(selected);
+};
 $('undo').onclick=()=>{session.undo();paint();remember();say('Cambio deshecho.');};$('redo').onclick=()=>{session.redo();paint();remember();say('Cambio rehecho.');};
 $('compare').onclick=()=>{comparing=!comparing;preview();};$('replay').onclick=preview;
 $('desktop').onclick=()=>{mobile=false;preview();};$('mobile').onclick=()=>{mobile=true;preview();};
