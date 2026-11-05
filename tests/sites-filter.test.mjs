@@ -10,7 +10,7 @@ const items=[item(0,'text','Portada'),item(1,'image','Portada principal','https:
 function setup(onChange=()=>{}){
   const dom=new JSDOM(html),doc=dom.window.document;doc.getElementById('options-panel').hidden=false;doc.getElementById('project-options').hidden=false;
   Object.defineProperty(dom.window,'localStorage',{get(){throw Error('El filtro no guarda preferencias');}});
-  return {dom,doc,filter:createComponentFilter({document:doc,onChange}),search:doc.getElementById('filter'),type:doc.getElementById('component-type'),status:doc.getElementById('component-results')};
+  return {dom,doc,filter:createComponentFilter({document:doc,onChange}),search:doc.getElementById('filter'),type:doc.getElementById('component-type'),visibility:doc.getElementById('component-visibility'),status:doc.getElementById('component-results')};
 }
 test('el selector accesible filtra todos los tipos admitidos y Todos devuelve el orden completo',()=>{
   const {doc,filter,type,status}=setup();
@@ -29,18 +29,35 @@ test('tipo y búsqueda se combinan con nombres, referencias y el estado oculto a
   search.value='shared.jpg';assert.deepEqual(filter.apply(media,isHidden).map(i=>i.id),['ain-5']);
   search.value='oculto';assert.equal(filter.apply(media,()=>false).length,0);
 });
-test('los cambios se anuncian sin mover el foco y restablecer limpia ambos filtros sin otra acción',()=>{
-  let changes=0;const {dom,filter,search,type,status}=setup(()=>changes++);
+test('los cambios se anuncian sin mover el foco y restablecer limpia todos los filtros sin otra acción',()=>{
+  let changes=0;const {dom,filter,search,type,visibility,status}=setup(()=>changes++);
   assert.equal(status.getAttribute('role'),'status');assert.equal(status.getAttribute('aria-live'),'polite');
-  type.focus();type.value='video';type.dispatchEvent(new dom.window.Event('change'));search.value='No existe';search.dispatchEvent(new dom.window.Event('input'));
-  assert.equal(changes,2);assert.equal(dom.window.document.activeElement,type);assert.deepEqual(filter.apply(items,()=>false),[]);assert.equal(status.hidden,false);assert.match(status.textContent,/No hay coincidencias/);
-  filter.reset();assert.equal(changes,2);assert.equal(search.value,'');assert.equal(type.value,'all');assert.deepEqual(filter.apply(items,()=>false),items);assert.equal(status.hidden,true);
+  type.focus();type.value='video';type.dispatchEvent(new dom.window.Event('change'));search.value='No existe';search.dispatchEvent(new dom.window.Event('input'));visibility.value='hidden';visibility.dispatchEvent(new dom.window.Event('change'));
+  assert.equal(changes,3);assert.equal(dom.window.document.activeElement,type);assert.deepEqual(filter.apply(items,()=>false),[]);assert.equal(status.hidden,false);assert.match(status.textContent,/No hay coincidencias/);
+  filter.reset();assert.equal(changes,3);assert.equal(search.value,'');assert.equal(type.value,'all');assert.equal(visibility.value,'all');assert.deepEqual(filter.apply(items,()=>false),items);assert.equal(status.hidden,true);
 });
 test('filtrar deja intactos componentes, referencias compartidas y el historial del proyecto',()=>{
   const original={format:'ainimation-imported-site',version:1,title:'PortAventura',url:'https://www.portaventuranext.com/',html:'<main>PortAventura</main>',items,warnings:[],links:[]};
   const session=createSiteSession(original),id=session.addMedia('image','https://media.org/shared.jpg');session.edit(id,{label:'Portada añadida',hidden:true,maxWidth:320});const copy=session.duplicateMedia(id),before=JSON.stringify({original:session.original,draft:session.draft});
-  const {filter,type,search}=setup();for(const kind of ['image','video','all']){type.value=kind;search.value='oculto';filter.apply(session.draft.items,i=>session.canSetMediaVisibility(i.id)&&i.hidden===true);}
+  const {filter,type,search,visibility}=setup();for(const kind of ['image','video','all'])for(const state of ['all','shown','hidden']){type.value=kind;visibility.value=state;search.value='oculto';filter.apply(session.draft.items,i=>session.canSetMediaVisibility(i.id)&&i.hidden===true);}
   filter.reset();assert.equal(JSON.stringify({original:session.original,draft:session.draft}),before);session.undo();assert.equal(session.draft.items.some(i=>i.id===copy),false);session.redo();assert.equal(JSON.stringify({original:session.original,draft:session.draft}),before);
+});
+test('visibilidad usa sólo la ocultación autorizada del editor, sin confundir originales, nombres o CSS',()=>{
+  const original={format:'ainimation-imported-site',version:1,title:'PortAventura',url:'https://www.portaventuranext.com/',html:'<style>main{display:none}</style><main>Oculto por CSS</main>',items:items.map(i=>({...i})),warnings:[],links:[]};original.items[1]={...original.items[1],inserted:true,hidden:true};
+  const session=createSiteSession(original),photo=session.addMedia('image','https://media.org/photo-added.jpg'),clip=session.addMedia('video','https://media.org/clip-added.mp4'),shown=session.addMedia('image','https://media.org/shown.jpg');session.edit(photo,{hidden:true});session.edit(clip,{hidden:true});session.edit(shown,{label:'Oculto sólo en el nombre'});
+  const {doc,filter,visibility,status}=setup(),hidden=i=>session.canSetMediaVisibility(i.id)&&i.hidden===true;
+  assert.ok(doc.querySelector('label[for="component-visibility"]').textContent.startsWith('Visibilidad en el editor'));assert.deepEqual([...visibility.options].map(o=>[o.value,o.text]),[['all','Todos'],['shown','Sin ocultar'],['hidden','Ocultos']]);
+  visibility.value='hidden';assert.deepEqual(filter.apply(session.draft.items,hidden).map(i=>i.id),[photo,clip]);assert.equal(status.textContent,'2 de 8 componentes');
+  visibility.value='shown';assert.deepEqual(filter.apply(session.draft.items,hidden).map(i=>i.id),[...items.map(i=>i.id),shown]);
+  visibility.value='all';assert.equal(filter.apply(session.draft.items,hidden).length,8);assert.equal(status.hidden,true);
+});
+test('visibilidad, tipo y búsqueda se combinan y anuncian también la ausencia de coincidencias',()=>{
+  const {filter,type,search,visibility,status}=setup(),media=[...items,{...item(5,'image','Portada oculta','https://media.org/hidden.jpg'),hidden:true},{...item(6,'video','Clip oculto','https://media.org/hidden.mp4'),hidden:true}],hidden=i=>i.hidden===true;
+  visibility.value='hidden';type.value='image';search.value='PORTADA';assert.deepEqual(filter.apply(media,hidden).map(i=>i.id),['ain-5']);assert.equal(status.textContent,'1 de 7 componentes');
+  visibility.value='shown';assert.deepEqual(filter.apply(media,hidden).map(i=>i.id),['ain-1']);
+  visibility.value='hidden';search.value='oculto';type.value='video';assert.deepEqual(filter.apply(media,hidden).map(i=>i.id),['ain-6']);
+  type.value='text';assert.deepEqual(filter.apply(media,hidden),[]);assert.equal(status.hidden,false);assert.match(status.textContent,/No hay coincidencias/);
+  search.value='';type.value='all';visibility.value='shown';filter.apply(items,()=>false);assert.equal(status.hidden,false);assert.equal(status.textContent,'5 de 5 componentes');
 });
 test('localizar selección empieza deshabilitado y sólo muestra un icono con nombre accesible y tooltip',()=>{
   const {doc}=setup(),button=doc.getElementById('locate-selection');
