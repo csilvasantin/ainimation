@@ -4,13 +4,14 @@ import {readFileSync} from 'node:fs';
 import {JSDOM} from 'jsdom';
 import {createComponentFilter} from '../sites/filter.mjs';
 import {createSiteSession} from '../sites/model.mjs';
+import {createMediaLibrary} from '../sites/media.mjs';
 const html=readFileSync(new URL('../sites/index.html',import.meta.url),'utf8');
 const item=(id,type,label,value='')=>({id:'ain-'+id,type,label,value,alt:'',animation:'none',duration:1.2,delay:0});
 const items=[item(0,'text','Portada'),item(1,'image','Portada principal','https://media.org/photo.jpg'),item(2,'video','Portada vídeo','https://media.org/clip.mp4'),item(3,'graphic','Logotipo'),item(4,'background','Fondo','https://media.org/bg.jpg')];
-function setup(onChange=()=>{}){
+function setup(onChange=()=>{},getMediaName){
   const dom=new JSDOM(html),doc=dom.window.document;doc.getElementById('options-panel').hidden=false;doc.getElementById('project-options').hidden=false;
   Object.defineProperty(dom.window,'localStorage',{get(){throw Error('El filtro no guarda preferencias');}});
-  return {dom,doc,filter:createComponentFilter({document:doc,onChange}),search:doc.getElementById('filter'),type:doc.getElementById('component-type'),visibility:doc.getElementById('component-visibility'),status:doc.getElementById('component-results')};
+  return {dom,doc,filter:createComponentFilter({document:doc,onChange,getMediaName}),search:doc.getElementById('filter'),type:doc.getElementById('component-type'),visibility:doc.getElementById('component-visibility'),status:doc.getElementById('component-results')};
 }
 test('el selector accesible filtra todos los tipos admitidos y Todos devuelve el orden completo',()=>{
   const {doc,filter,type,status}=setup();
@@ -66,6 +67,23 @@ test('sólo se busca alt de imágenes como texto literal y no se deduce de él e
   for(const query of ['[demo] a+b','<script>alert(1)</script>','oculto anotacion']){search.value=query;assert.deepEqual(filter.apply(media,()=>false).map(i=>i.id),['ain-0']);}
   visibility.value='hidden';assert.deepEqual(filter.apply(media,()=>false),[]);visibility.value='shown';assert.deepEqual(filter.apply(media,()=>false).map(i=>i.id),['ain-0']);
   assert.equal(doc.querySelectorAll('script').length,scripts);assert.equal(JSON.stringify(media),before);
+});
+test('el nombre del archivo propio encuentra medios renombrados y referencias compartidas sin leer bytes',()=>{
+  const ref=n=>'ain-local:'+String(n).repeat(64),asset=(id,name,type,mime)=>{
+    const blob=new Blob(['x'],{type:mime});blob.arrayBuffer=()=>{throw Error('La búsqueda no debe leer bytes');};blob.stream=()=>{throw Error('La búsqueda no debe abrir archivos');};return {id,name,type,mime,size:blob.size,blob};
+  };
+  const assets=[asset(ref(1),'Año · pingüino.png','image','image/png'),asset(ref(2),'Clip introduccio\u0301n.mp4','video','video/mp4'),asset(ref(3),'Huérfano sin referencia.jpg','image','image/png')],library=createMediaLibrary(assets),media=[item(0,'image','Portada principal',ref(1)),{...item(1,'image','Portada secundaria',ref(1)),hidden:true},item(2,'video','Cabecera',ref(2))],before=JSON.stringify(media),size=library.size;
+  const {filter,search,type,visibility}=setup(()=>{},id=>library.records(new Set([id]))[0].name),hidden=i=>i.hidden===true;
+  for(const [query,ids]of [['pinguino año',['ain-0','ain-1']],['PINGU\u0308INO AN\u0303O',['ain-0','ain-1']],['cabecera introduccion',['ain-2']],['huerfano',[]],['pinguino introduccion',[]],['portada principal png',['ain-0']]]){search.value=query;assert.deepEqual(filter.apply(media,hidden).map(i=>i.id),ids,query);assert.equal(search.value,query);}
+  type.value='image';visibility.value='hidden';search.value='pinguino portada';assert.deepEqual(filter.apply(media,hidden).map(i=>i.id),['ain-1']);visibility.value='shown';assert.deepEqual(filter.apply(media,hidden).map(i=>i.id),['ain-0']);
+  assert.equal(JSON.stringify(media),before);assert.equal(library.size,size);assert.deepEqual(library.records().map(a=>a.name),assets.map(a=>a.name));assert.equal(library.records(new Set([ref(1)]))[0].blob,assets[0].blob);
+});
+test('sólo referencias locales válidas de imagen o vídeo consultan un nombre y lo tratan como texto literal',()=>{
+  const valid='ain-local:'+'a'.repeat(64),missing='ain-local:'+'b'.repeat(64),calls=[],media=[item(0,'image','Portada',valid),item(1,'video','Sin descriptor',missing),...['text','graphic','background'].map((type,index)=>item(index+2,type,'Otro tipo',valid)),item(5,'image','Remota','https://media.org/photo.jpg'),item(6,'video','Referencia inválida','ain-local:no')];
+  const {filter,search,visibility}=setup(()=>{},id=>{calls.push(id);return id===valid?'archivo oculto [demo].png':undefined;});
+  search.value='[demo] archivo';assert.deepEqual(filter.apply(media,()=>false).map(i=>i.id),['ain-0']);assert.deepEqual(new Set(calls),new Set([valid,missing]));
+  visibility.value='hidden';assert.deepEqual(filter.apply(media,()=>false),[]);visibility.value='shown';assert.deepEqual(filter.apply(media,()=>false).map(i=>i.id),['ain-0']);search.value='undefined';assert.deepEqual(filter.apply(media,()=>false),[]);
+  const withoutResolver=setup();withoutResolver.search.value='archivo';assert.deepEqual(withoutResolver.filter.apply(media,()=>false),[]);
 });
 test('los cambios se anuncian sin mover el foco y restablecer limpia todos los filtros sin otra acción',()=>{
   let changes=0;const {dom,filter,search,type,visibility,status}=setup(()=>changes++);
