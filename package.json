@@ -11,7 +11,7 @@
     "verify:admira-resource-updates": "node scripts/test-admira-resource-updates.cjs",
     "verify:admira-format-package": "node scripts/test-admira-format-package.cjs",
     "verify:capsula": "node --test test/capsula-editor.browser.test.mjs",
-    "verify:sites": "node --test tests/sites-import.test.mjs tests/sites-media.test.mjs tests/sites-quad.test.mjs tests/sites-drop.test.mjs tests/sites-sound.test.mjs tests/sites-paste.test.mjs tests/sites-filter.test.mjs tests/sites-active-site.test.mjs tests/sites-library-label.test.mjs",
+    "verify:sites": "node --test tests/sites-import.test.mjs tests/sites-media.test.mjs tests/sites-quad.test.mjs tests/sites-drop.test.mjs tests/sites-sound.test.mjs tests/sites-paste.test.mjs tests/sites-filter.test.mjs tests/sites-file-tooltip.test.mjs tests/sites-active-site.test.mjs tests/sites-library-label.test.mjs",
     "preview:sites": "node scripts/sites-preview.mjs"
   },
   "repository": {
