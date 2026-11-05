@@ -5,6 +5,7 @@ import {hasImageDescription,componentMediaMime,MEDIA_FORMAT_LABELS,componentMedi
 export const COMPONENT_LABELS=Object.freeze({text:'Texto',image:'Imagen',video:'Vídeo',graphic:'SVG',background:'Fondo'});
 const SEARCH_VOWELS={á:'a',é:'e',í:'i',ó:'o',ú:'u',ü:'u'};
 const searchKey=text=>text.normalize('NFC').toLocaleLowerCase('es').replace(/[áéíóúü]/g,letter=>SEARCH_VOWELS[letter]);
+const nameCollator=new Intl.Collator('es',{numeric:true,sensitivity:'variant'});
 
 export function createComponentProvenance(session){
   const importedIDs=new Set(session.original.items.map(item=>item.id));
@@ -15,6 +16,7 @@ export function createComponentFilter({document=globalThis.document,onChange,get
   const search=document.getElementById('filter'),type=document.getElementById('component-type'),visibility=document.getElementById('component-visibility'),animation=document.getElementById('component-animation'),provenance=document.getElementById('component-provenance'),status=document.getElementById('component-results');
   const description=document.getElementById('component-description'),format=document.getElementById('component-format'),resetButton=document.getElementById('reset-component-filters');let total=0;
   const usage=document.getElementById('component-usage');
+  const sortButton=document.getElementById('sort-components');let alphabetical=false;
   const selectors=document.getElementById('component-selectors'),toggleButton=document.getElementById('toggle-component-selectors');
   const selectorControls=[type,visibility,animation,provenance,description,format,usage],activeSelectorCount=()=>selectorControls.filter(control=>control.value!=='all').length;
   function syncToggleHelp(){
@@ -24,7 +26,9 @@ export function createComponentFilter({document=globalThis.document,onChange,get
     selectors.hidden=!expanded;toggleButton.setAttribute('aria-expanded',String(expanded));syncToggleHelp();
   }
   const hasFilters=()=>search.value!==''||activeSelectorCount()>0;
-  function syncAvailability(){resetButton.disabled=isLocked()||!hasFilters();toggleButton.disabled=isLocked();syncToggleHelp();}
+  function syncSortHelp(){const label=alphabetical?'Restaurar orden original de la lista':'Ordenar lista por nombre';sortButton.setAttribute('aria-label',label);sortButton.title=label;sortButton.setAttribute('aria-pressed',String(alphabetical));}
+  function resetOrder(){alphabetical=false;syncSortHelp();}
+  function syncAvailability(){resetButton.disabled=isLocked()||!hasFilters();toggleButton.disabled=isLocked();sortButton.disabled=isLocked();syncToggleHelp();syncSortHelp();}
   function reset(){search.value='';type.value='all';visibility.value='all';animation.value='all';provenance.value='all';description.value='all';format.value='all';usage.value='all';syncAvailability();}
   type.replaceChildren(...Object.entries({all:'Todos',...COMPONENT_LABELS}).map(([value,label])=>{
     const option=document.createElement('option');option.value=value;option.textContent=label;return option;
@@ -37,6 +41,12 @@ export function createComponentFilter({document=globalThis.document,onChange,get
     reset();onChange();status.textContent='Filtros restablecidos. '+total+' '+(total===1?'componente.':'componentes.');status.hidden=false;
   });
   toggleButton.addEventListener('click',()=>{if(!isLocked())setSelectorsExpanded(selectors.hidden);});
+  sortButton.addEventListener('click',()=>{
+    if(isLocked())return;
+    alphabetical=!alphabetical;syncSortHelp();onChange();
+    if(!alphabetical)status.textContent='Orden original de la lista. '+status.textContent;
+    status.hidden=false;
+  });
   setSelectorsExpanded(true);
   syncAvailability();
   return {
@@ -59,11 +69,11 @@ export function createComponentFilter({document=globalThis.document,onChange,get
         return words.every(word=>content.includes(word));
       });
       const selectionOutside=items.some(item=>item.id===selected)&&!matches.some(item=>item.id===selected);
-      status.textContent=(matches.length?matches.length+' de '+items.length+' componentes':'No hay coincidencias. Prueba otros filtros o búsqueda.')+(selectionOutside?' La selección actual no aparece con estos filtros.':'');
-      status.hidden=kind==='all'&&state==='all'&&motion==='all'&&origin==='all'&&altState==='all'&&mime==='all'&&usageState==='all'&&!query&&matches.length>0&&!selectionOutside;
-      return matches;
+      status.textContent=(alphabetical?'Orden por nombre. ':'')+(matches.length?matches.length+' de '+items.length+' componentes':'No hay coincidencias. Prueba otros filtros o búsqueda.')+(selectionOutside?' La selección actual no aparece con estos filtros.':'');
+      status.hidden=!alphabetical&&kind==='all'&&state==='all'&&motion==='all'&&origin==='all'&&altState==='all'&&mime==='all'&&usageState==='all'&&!query&&matches.length>0&&!selectionOutside;
+      return alphabetical?matches.map((item,index)=>({item,index})).sort((a,b)=>nameCollator.compare(a.item.label,b.item.label)||a.index-b.index).map(entry=>entry.item):matches;
     },
-    reset,syncAvailability,expandSelectors:()=>setSelectorsExpanded(true),
+    reset,resetOrder,syncAvailability,expandSelectors:()=>setSelectorsExpanded(true),
     locate(id){
       const list=document.getElementById('components'),target=[...list.children].find(node=>node.dataset.item===id);
       if(!target)return false;
