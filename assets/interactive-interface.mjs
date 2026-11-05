@@ -16,7 +16,7 @@ const dictionary={
 'Escribe /demo interactivo para abrir el vídeo de creación.':'Enter /demo interactivo to open the creation video.',
 'Demo · Creador de interactivos':'Demo · Interactive creator','Cerrar demo':'Close demo','Abrir vídeo ↗':'Open video ↗',
 'Una guía de 1:14 con voz en español: crea, conecta y prueba. Demostración local con capturas reales de Chrome.':'A 1:14 guide with Spanish narration: create, connect and test. Local demonstration with real Chrome captures.',
-'Entra. Elige tu idioma.':'Sign in. Choose your language.',
+'Entra.':'Sign in.',
 'Crea tu interactivo.':'Create your interactive.',
 'Tu espacio para diseñar experiencias que responden.':'Your space to design responsive experiences.',
 '01 / ACCESO':'01 / SIGN IN','02 / IDIOMA':'02 / LANGUAGE',
@@ -40,21 +40,20 @@ const dictionary={
 };
 // Only shell text is translated; authored project text and input values are untouched.
 const nodes=[];const walker=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT);while(walker.nextNode()){const n=walker.currentNode;if(['SCRIPT','STYLE','OPTION'].includes(n.parentElement?.tagName)||n.parentElement?.closest('#sceneName,#scenes,.library-card h3'))continue;const key=n.textContent.trim();if(dictionary[key])nodes.push({n,key});}
-function apply(){document.documentElement.lang=language;window.AINLanguage?.remember(language);const account=document.getElementById('accountButton');if(account)account.textContent=language==='en'?'Account / Language':'Cuenta / Idioma';const closeLabel=language==='en'?'Close account':'Cerrar cuenta';$('closeLogin').setAttribute('aria-label',closeLabel);$('closeLogin').title=closeLabel;document.body.dataset.mode=mode;$('uiLanguage').value=language;for(const {n,key}of nodes)n.textContent=language==='en'?dictionary[key]:key;for(const b of document.querySelectorAll('[data-mode-choice]'))b.setAttribute('aria-pressed',String(b.dataset.modeChoice===mode));const hints={es:{basic:'Lo esencial: crea pantallas, añade imágenes y conecta botones.',advanced:'Avanzado: formato, color, pantalla inicial y reinicio automático.',expert:'Experto: todas las herramientas, exportación HTML y referencias.'},en:{basic:'The essentials: create screens, add images and connect buttons.',advanced:'Advanced: layout, color, start screen and automatic reset.',expert:'Expert: all tools, HTML export and references.'}};$('modeHint').textContent=hints[language][mode];try{localStorage.setItem('ainimation:ui:language',language);localStorage.setItem('ainimation:ui:mode',mode);}catch{}}
+function apply(){document.documentElement.lang=language;window.AINLanguage?.remember(language);const account=document.getElementById('accountButton');if(account)account.textContent=language==='en'?'Account':'Cuenta';const closeLabel=language==='en'?'Close account':'Cerrar cuenta';$('closeLogin').setAttribute('aria-label',closeLabel);$('closeLogin').title=closeLabel;document.body.dataset.mode=mode;const toggle=$('entryLanguageToggle');toggle.textContent=language==='es'?'ENG':'ESP';toggle.setAttribute('aria-label',language==='es'?'Cambiar a inglés':'Switch to Spanish');toggle.title=toggle.getAttribute('aria-label');for(const {n,key}of nodes)n.textContent=language==='en'?dictionary[key]:key;for(const b of document.querySelectorAll('[data-mode-choice]'))b.setAttribute('aria-pressed',String(b.dataset.modeChoice===mode));const hints={es:{basic:'Lo esencial: crea pantallas, añade imágenes y conecta botones.',advanced:'Avanzado: formato, color, pantalla inicial y reinicio automático.',expert:'Experto: todas las herramientas, exportación HTML y referencias.'},en:{basic:'The essentials: create screens, add images and connect buttons.',advanced:'Advanced: layout, color, start screen and automatic reset.',expert:'Expert: all tools, HTML export and references.'}};$('modeHint').textContent=hints[language][mode];try{localStorage.setItem('ainimation:ui:language',language);localStorage.setItem('ainimation:ui:mode',mode);}catch{}}
 window.AINSetLanguage=next=>{if(!['es','en'].includes(next))return;language=next;apply();};
-$('uiLanguage').onchange=e=>{language=e.target.value;apply();};
+$('entryLanguageToggle').onclick=()=>{const next=language==='es'?'en':'es';if(window.AINLanguage)window.AINLanguage.set(next);else{language=next;apply();}};
 for(const b of document.querySelectorAll('[data-mode-choice]'))b.onclick=()=>{mode=mode===b.dataset.modeChoice?'basic':b.dataset.modeChoice;apply();};
 $('loginButton').onclick=()=>{if($('googleLogin').childElementCount)$('loginExplanation').textContent=language==='en'?'Sign in with your Google account to sync your library.':'Inicia sesión con tu cuenta Google para sincronizar tu biblioteca.';$('loginDialog').showModal();window.dispatchEvent(new Event('interactive-account-open'));};
 $('closeLogin').onclick=()=>$('loginDialog').close();apply();
 
-const sessionTools=document.querySelector('.session-tools'),languageLabel=$('uiLanguage').closest('label');
-$('entryLanguage').append(languageLabel);
-const accountButton=document.createElement('button');accountButton.id='accountButton';accountButton.textContent=language==='en'?'Account / Language':'Cuenta / Idioma';accountButton.onclick=()=>{if($('googleLogin').hidden)$('loginExplanation').textContent=language==='en'?'Account connected. Your local projects are preserved.':'Cuenta conectada. Tus proyectos locales se conservan.';else $('loginExplanation').textContent=language==='en'?'Sign in with Google to sync your library.':'Inicia sesión con Google para sincronizar tu biblioteca.';$('loginDialog').showModal();window.dispatchEvent(new Event('interactive-account-open'));};
+const sessionTools=document.querySelector('.session-tools');
+const accountButton=document.createElement('button');accountButton.id='accountButton';accountButton.textContent=language==='en'?'Account':'Cuenta';accountButton.onclick=()=>{if($('googleLogin').hidden)$('loginExplanation').textContent=language==='en'?'Account connected. Your local projects are preserved.':'Cuenta conectada. Tus proyectos locales se conservan.';else $('loginExplanation').textContent=language==='en'?'Sign in with Google to sync your library.':'Inicia sesión con Google para sincronizar tu biblioteca.';$('loginDialog').showModal();window.dispatchEvent(new Event('interactive-account-open'));};
 sessionTools.append(accountButton);
 // The verified account already has its controls in the library. Keep the
-// header's account/language entry available only before verification.
+// header's account entry available only before verification.
 sessionTools.hidden=$('googleLogin').hidden;
-function stage(value){document.body.dataset.stage=value;if(value==='entry'){$('entryLanguage').append(languageLabel);mode='basic';apply();}try{sessionStorage.setItem('ainimation:ui:stage',value);}catch{}}
+function stage(value){document.body.dataset.stage=value;if(value==='entry'){mode='basic';apply();}try{sessionStorage.setItem('ainimation:ui:stage',value);}catch{}}
 $('entryLogin').onclick=()=>$('loginButton').click();
 $('enterPreview').onclick=()=>stage('workspace');
 $('backToEntry').onclick=()=>{$('loginDialog').close();stage('entry');};

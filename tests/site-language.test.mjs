@@ -21,7 +21,7 @@ test('Login conserva ES y EN, con preferencia anterior contradictoria o almacena
     const login=page('interactivos/index.html',href,{blocked,stored:{'ainimation:ui:language':lang==='en'?'es':'en'}});
     login.window.eval(interfaceCode);
     assert.equal(login.window.document.documentElement.lang,lang);
-    assert.equal(login.window.document.getElementById('uiLanguage').value,lang);
+    assert.equal(login.window.document.getElementById('entryLanguageToggle').textContent,lang==='es'?'ENG':'ESP');
     assert.equal(login.window.document.getElementById('loginDialog').open,true);
     assert.equal(login.window.document.querySelector('#loginDialog h2').textContent,lang==='en'?'Your AINimation account':'Tu cuenta AINimation');
     login.window.close();home.window.close();
@@ -35,4 +35,38 @@ test('cambiar idioma en Login actualiza la portada y recargar conserva la últim
   const home=win.document.querySelector('header a.brand');assert.equal(new URL(home.href).searchParams.get('lang'),'es');
   assert.equal(win.document.querySelector('#loginDialog h2').textContent,'Tu cuenta AINimation');
   dom.window.close();
+});
+
+test('el botón inverso guarda la elección entre visitas, secciones y enlaces con otro idioma',()=>{
+  for(const initial of ['es','en']){
+    const dom=page('interactivos/index.html','https://www.ainimation.studio/interactivos/?lang='+initial),win=dom.window,doc=win.document;
+    win.eval(interfaceCode);
+    const project=doc.getElementById('title');project.value='Mi proyecto conserva su texto';
+    doc.getElementById('entryLanguageToggle').click();
+    const chosen=initial==='es'?'en':'es';
+    assert.equal(doc.documentElement.lang,chosen);
+    assert.equal(doc.getElementById('entryLanguageToggle').textContent,initial==='es'?'ESP':'ENG');
+    assert.equal(project.value,'Mi proyecto conserva su texto');
+    assert.equal(doc.querySelectorAll('#entryScreen select').length,0);
+    assert.doesNotMatch(doc.querySelector('#entryScreen').textContent,/Elige tu idioma|Choose your language/);
+    const stored=Object.fromEntries(Object.keys(win.localStorage).map(key=>[key,win.localStorage.getItem(key)]));
+    for(const [file,path] of [['index.html','/'],['interactivos/index.html','/interactivos/'],['presentaciones/index.html','/presentaciones/']]){
+      const returning=page(file,'https://www.ainimation.studio'+path+'?lang='+initial,{stored});
+      if(file==='interactivos/index.html')returning.window.eval(interfaceCode);
+      assert.equal(returning.window.document.documentElement.lang,chosen);
+      assert.equal(new URL(returning.window.location.href).searchParams.get('lang'),chosen);
+      returning.window.close();
+    }
+    win.close();
+  }
+});
+
+test('el botón cambia el idioma sin interrumpir el acceso si el almacenamiento está bloqueado',()=>{
+  const dom=page('interactivos/index.html','https://www.ainimation.studio/interactivos/?lang=es',{blocked:true}),win=dom.window;
+  win.eval(interfaceCode);win.document.getElementById('entryLanguageToggle').click();
+  assert.equal(win.document.documentElement.lang,'en');
+  win.document.getElementById('entryLogin').click();
+  assert.equal(win.document.getElementById('loginDialog').open,true);
+  assert.equal(win.document.querySelector('#loginDialog h2').textContent,'Your AINimation account');
+  win.close();
 });

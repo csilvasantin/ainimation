@@ -2,8 +2,11 @@
 (function (win, doc) {
   'use strict';
   const keys = ['ain_lang', 'ainimation:ui:language', 'ain-lang'];
+  const choiceKey = 'ainimation:language-choice';
   const valid = value => value === 'es' || value === 'en';
   function detect() {
+    // An explicit choice survives old bookmarks and links with another lang.
+    try { const chosen = win.localStorage.getItem(choiceKey); if (valid(chosen)) return chosen; } catch {}
     const requested = new URLSearchParams(win.location.search).get('lang');
     if (valid(requested)) return requested;
     for (const key of keys) {
@@ -41,6 +44,7 @@
   }
   win.AINLanguage = {read: () => current, remember, links, set: language => {
     if (!valid(language)) return;
+    try { win.localStorage.setItem(choiceKey, language); } catch {}
     if (typeof win.AINSetLanguage === 'function') win.AINSetLanguage(language);
     else remember(language);
   }};
