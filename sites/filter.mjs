@@ -15,11 +15,15 @@ export function createComponentFilter({document=globalThis.document,onChange,get
   const search=document.getElementById('filter'),type=document.getElementById('component-type'),visibility=document.getElementById('component-visibility'),animation=document.getElementById('component-animation'),provenance=document.getElementById('component-provenance'),status=document.getElementById('component-results');
   const description=document.getElementById('component-description'),format=document.getElementById('component-format'),resetButton=document.getElementById('reset-component-filters');let total=0;
   const selectors=document.getElementById('component-selectors'),toggleButton=document.getElementById('toggle-component-selectors');
-  function setSelectorsExpanded(expanded){
-    selectors.hidden=!expanded;const label=(expanded?'Ocultar':'Mostrar')+' selectores de filtro';toggleButton.setAttribute('aria-expanded',String(expanded));toggleButton.setAttribute('aria-label',label);toggleButton.title=label;
+  const selectorControls=[type,visibility,animation,provenance,description,format],activeSelectorCount=()=>selectorControls.filter(control=>control.value!=='all').length;
+  function syncToggleHelp(){
+    const count=activeSelectorCount(),label=(selectors.hidden?'Mostrar':'Ocultar')+' selectores de filtro · '+count+' '+(count===1?'selector activo':'selectores activos');toggleButton.setAttribute('aria-label',label);toggleButton.title=label;
   }
-  const hasFilters=()=>search.value!==''||type.value!=='all'||visibility.value!=='all'||animation.value!=='all'||provenance.value!=='all'||description.value!=='all'||format.value!=='all';
-  function syncAvailability(){resetButton.disabled=isLocked()||!hasFilters();toggleButton.disabled=isLocked();}
+  function setSelectorsExpanded(expanded){
+    selectors.hidden=!expanded;toggleButton.setAttribute('aria-expanded',String(expanded));syncToggleHelp();
+  }
+  const hasFilters=()=>search.value!==''||activeSelectorCount()>0;
+  function syncAvailability(){resetButton.disabled=isLocked()||!hasFilters();toggleButton.disabled=isLocked();syncToggleHelp();}
   function reset(){search.value='';type.value='all';visibility.value='all';animation.value='all';provenance.value='all';description.value='all';format.value='all';syncAvailability();}
   type.replaceChildren(...Object.entries({all:'Todos',...COMPONENT_LABELS}).map(([value,label])=>{
     const option=document.createElement('option');option.value=value;option.textContent=label;return option;
