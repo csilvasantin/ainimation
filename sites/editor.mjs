@@ -9,13 +9,15 @@ import {createFileDrop,previewMessageSource,mediaDropReplacement} from './drop.m
 import {createPreviewSound} from './sound.mjs?v=20261104-sound-1';
 import {createImagePaste} from './paste.mjs?v=20261104-paste-1';
 import {COMPONENT_LABELS,createComponentFilter,createComponentProvenance} from './filter.mjs?v=20261105-provenance-filter-1';
+import {localFileTooltip,localMediaName} from './file-tooltip.mjs?v=20261105-file-tooltip-1';
 import {createActiveSitePreference} from './active-site.mjs?v=20261105-active-1';
 import {updateSavedSiteOption,refreshLibraryTitle,orderSavedSiteOptions} from './library-label.mjs?v=20261105-animation-filter-1';
 const $=id=>document.getElementById(id),library=new Map();
 const quad=createQuadraticUI();
 let session=null,recordID='',selected='',channel='',comparing=false,mobile=false,importing=false,persistTimer;
 let mediaLibrary=createMediaLibrary(),mediaBusy=false,selectScroll=false;
-const labels=COMPONENT_LABELS,componentFilter=createComponentFilter({onChange:paintComponents,getMediaName:ref=>mediaLibrary.records(new Set([ref]))[0].name,isLocked:()=>mediaBusy||!session});
+const mediaName=ref=>localMediaName(mediaLibrary,ref);
+const labels=COMPONENT_LABELS,componentFilter=createComponentFilter({onChange:paintComponents,getMediaName:mediaName,isLocked:()=>mediaBusy||!session});
 const motionLabels={none:'Sin animación',fade:'Aparecer',rise:'Entrada desde abajo',zoom:'Acercamiento suave',float:'Flotar en bucle'};
 const provenanceLabels={imported:'Importado',added:'Añadido'};
 const say=message=>{$('edit-status').textContent=message;$('workspace-status').textContent=message;};
@@ -82,6 +84,7 @@ function paintComponents(){
     const b=document.createElement('button'),strong=document.createElement('strong'),small=document.createElement('span');b.type='button';b.disabled=mediaBusy;b.dataset.item=i.id;
     const origin=provenanceLabels[provenance(i)];
     strong.textContent=i.label;small.textContent=labels[i.type]+(origin?' · '+origin:'')+(hidden(i)?' · Oculto':'')+(i.animation==='none'?'':' · '+motionLabels[i.animation]);b.append(strong,small);b.setAttribute('aria-pressed',String(i.id===selected));
+    const title=localFileTooltip(i,small.textContent,mediaName);if(title)b.title=title;
     b.onclick=()=>{selected=i.id;paintComponents();inspector();highlight(true);quad.show('advanced');};return b;
   }));
   locateAvailability();
