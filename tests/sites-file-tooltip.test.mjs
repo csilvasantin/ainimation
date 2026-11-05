@@ -9,6 +9,21 @@ function asset(id,name,type,mime){
   const blob=new Blob(['x'],{type:mime});for(const method of ['arrayBuffer','stream','slice'])Object.defineProperty(blob,method,{get(){throw Error('La ayuda no puede leer bytes');}});
   return {id,name,type,mime,size:blob.size,blob};
 }
+test('la ayuda muestra tiempos numéricos válidos de todos los presets y tipos, con cero, décimas y límites, sin cambiar datos o atributos accesibles',()=>{
+  for(const type of ['text','image','video','graphic','background'])for(const animation of ['fade','rise','zoom','float'])for(const [duration,delay,line]of [[1.2,0,'Duración: 1,2 s · Retraso: 0 s'],[.2,10,'Duración: 0,2 s · Retraso: 10 s'],[10,.5,'Duración: 10 s · Retraso: 0,5 s']]){
+    const value={...item(type,'https://example.org/media'),animation,duration,delay,hidden:true},before=JSON.stringify(value),dom=new JSDOM('<button aria-pressed="true"><strong>Introducción</strong><span>Detalle literal &lt;img src=x&gt;</span></button>'),button=dom.window.document.querySelector('button'),visible=button.textContent;
+    button.title=componentTooltip(value,'Detalle literal <img src=x>',()=>{throw Error('No consultar archivos remotos');});assert.ok(button.title.startsWith('Introducción\nDetalle literal <img src=x>'));assert.ok(button.title.endsWith('\n'+line));if(type==='image')assert.ok(button.title.includes('\nDescripción de la imagen: Foto del pingüino\n'));
+    assert.equal(button.textContent,visible);assert.equal(button.getAttribute('aria-label'),null);assert.equal(button.getAttribute('aria-pressed'),'true');assert.equal(button.querySelectorAll('img,script').length,0);assert.equal(JSON.stringify(value),before);
+  }
+  const precise={...item('text',''),animation:'fade',duration:.20000000000000004,delay:.30000000000000004};assert.ok(componentTooltip(precise,'Texto',()=> '').endsWith('Duración: 0,20000000000000004 s · Retraso: 0,30000000000000004 s'));
+});
+test('animaciones desconocidas o tiempos inválidos conservan la ayuda anterior sin coerción, valores inventados o consultas de bytes',()=>{
+  const getName=()=> 'captura.png',base=item(),beforeTitle=componentTooltip(base,'Imagen',getName),object={toString(){throw Error('No convertir tiempos');},valueOf(){throw Error('No convertir tiempos');}};
+  for(const animation of ['none','FADE','otro',undefined,null,object])assert.equal(componentTooltip({...base,animation,duration:1.2,delay:0},'Imagen',getName),beforeTitle);
+  for(const duration of [undefined,null,'1.2',NaN,Infinity,-1,.199,10.1,true,object])assert.equal(componentTooltip({...base,animation:'fade',duration,delay:0},'Imagen',getName),beforeTitle);
+  for(const delay of [undefined,null,'0',NaN,Infinity,-.1,10.1,true,object])assert.equal(componentTooltip({...base,animation:'fade',duration:1.2,delay},'Imagen',getName),beforeTitle);
+  const library=createMediaLibrary([asset(ref('a'),'Compartida.png','image','image/png')]),first={...base,animation:'rise',duration:1.2,delay:0},copy={...first,id:'ain-2'},before=JSON.stringify([first,copy]);for(const value of [first,copy])assert.equal(componentTooltip(value,'Imagen · Añadido · Oculto',id=>localMediaName(library,id)),'Introducción\nImagen · Añadido · Oculto\nArchivo local: Compartida.png\nDescripción de la imagen: Foto del pingüino\nDuración: 1,2 s · Retraso: 0 s');assert.equal(JSON.stringify([first,copy]),before);assert.equal(library.size,1);
+});
 test('el criterio compartido de descripción reconoce texto Unicode y vacío sin convertir objetos ni cambiar alt',()=>{
   for(const alt of ['Foto','  Descripcio\u0301n del AN\u0303O · pingüino  ']){const photo={...item(),alt},before=JSON.stringify(photo);assert.equal(hasImageDescription(photo),true);assert.ok(componentTooltip(photo,'Imagen',()=> 'captura.png').endsWith('Descripción de la imagen: '+alt));assert.equal(JSON.stringify(photo),before);}
   for(const alt of [undefined,null,0,false,'',' \t\n\u00a0 ',{toString(){throw Error('No convertir alt');}}])assert.equal(hasImageDescription({...item(),alt}),false);
