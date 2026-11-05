@@ -27,7 +27,7 @@ export function createComponentFilter({document=globalThis.document,onChange,get
   });
   syncAvailability();
   return {
-    apply(items,isHidden,getProvenance=()=>''){
+    apply(items,isHidden,getProvenance=()=>'',selected=''){
       total=items.length;syncAvailability();
       const query=searchKey(search.value.trim()),kind=type.value,state=visibility.value,motion=animation.value,origin=provenance.value;
       const words=query?query.split(/\s+/u):[];
@@ -39,8 +39,9 @@ export function createComponentFilter({document=globalThis.document,onChange,get
         const content=searchKey(item.label+' '+item.value+' '+COMPONENT_LABELS[item.type]+(hidden?' oculto':'')+(item.type==='image'?' '+(item.alt??''):'')+' '+fileName);
         return words.every(word=>content.includes(word));
       });
-      status.textContent=matches.length?matches.length+' de '+items.length+' componentes':'No hay coincidencias. Prueba otros filtros o búsqueda.';
-      status.hidden=kind==='all'&&state==='all'&&motion==='all'&&origin==='all'&&!query&&matches.length>0;
+      const selectionOutside=items.some(item=>item.id===selected)&&!matches.some(item=>item.id===selected);
+      status.textContent=(matches.length?matches.length+' de '+items.length+' componentes':'No hay coincidencias. Prueba otros filtros o búsqueda.')+(selectionOutside?' La selección actual no aparece con estos filtros.':'');
+      status.hidden=kind==='all'&&state==='all'&&motion==='all'&&origin==='all'&&!query&&matches.length>0&&!selectionOutside;
       return matches;
     },
     reset,syncAvailability,
