@@ -8,7 +8,7 @@ import {parseExpertCommand,EXPERT_HELP} from './expert.mjs';
 import {createFileDrop,previewMessageSource,mediaDropReplacement} from './drop.mjs?v=20261104-replace-1';
 import {createPreviewSound} from './sound.mjs?v=20261104-sound-1';
 import {createImagePaste} from './paste.mjs?v=20261104-paste-1';
-import {COMPONENT_LABELS,createComponentFilter} from './filter.mjs?v=20261105-visibility-filter-1';
+import {COMPONENT_LABELS,createComponentFilter} from './filter.mjs?v=20261105-search-1';
 const $=id=>document.getElementById(id),library=new Map();
 const quad=createQuadraticUI();
 let session=null,recordID='',selected='',channel='',comparing=false,mobile=false,importing=false,persistTimer;

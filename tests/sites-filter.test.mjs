@@ -29,6 +29,19 @@ test('tipo y búsqueda se combinan con nombres, referencias y el estado oculto a
   search.value='shared.jpg';assert.deepEqual(filter.apply(media,isHidden).map(i=>i.id),['ain-5']);
   search.value='oculto';assert.equal(filter.apply(media,()=>false).length,0);
 });
+test('buscar normaliza vocales españolas, mayúsculas y Unicode en consulta y contenido sin alterar los datos',()=>{
+  const {filter,search,type,visibility}=setup(),media=[item(0,'image','Introducción · pingüino','https://media.org/ÁREA.jpg'),item(1,'image','Introduccio\u0301n · PINGU\u0308INO','https://media.org/clip.jpg'),{...item(2,'video','Clip de cabecera','https://media.org/ÚLTIMO.mp4'),hidden:true}],before=JSON.stringify(media),hidden=i=>i.hidden===true;
+  for(const query of ['INTRODUCCION','introducción','introduccio\u0301n','pinguino','PINGÜINO','PINGU\u0308INO']){search.value=query;assert.deepEqual(filter.apply(media,hidden).map(i=>i.id),['ain-0','ain-1'],query);assert.equal(search.value,query);}
+  for(const query of ['video','VÍDEO','VI\u0301DEO']){search.value=query;assert.deepEqual(filter.apply(media,hidden).map(i=>i.id),['ain-2']);}
+  search.value='area.jpg';assert.deepEqual(filter.apply(media,hidden).map(i=>i.id),['ain-0']);search.value='ultimo.mp4';assert.deepEqual(filter.apply(media,hidden).map(i=>i.id),['ain-2']);
+  visibility.value='hidden';type.value='video';search.value='VIDEO';assert.deepEqual(filter.apply(media,hidden).map(i=>i.id),['ain-2']);visibility.value='shown';assert.deepEqual(filter.apply(media,hidden),[]);visibility.value='hidden';search.value='OCULTO';assert.deepEqual(filter.apply(media,hidden).map(i=>i.id),['ain-2']);
+  assert.equal(JSON.stringify(media),before);filter.reset();assert.equal(search.value,'');assert.equal(type.value,'all');assert.equal(visibility.value,'all');
+});
+test('ñ sigue siendo distinta de n en nombres y consultas compuestos o descompuestos',()=>{
+  const {filter,search}=setup(),media=[item(0,'image','AÑO'),item(1,'image','ANO'),item(2,'image','AN\u0303O')],before=JSON.stringify(media);
+  for(const query of ['año','AÑO','an\u0303o']){search.value=query;assert.deepEqual(filter.apply(media,()=>false).map(i=>i.id),['ain-0','ain-2']);}
+  search.value='ano';assert.deepEqual(filter.apply(media,()=>false).map(i=>i.id),['ain-1']);assert.equal(JSON.stringify(media),before);
+});
 test('los cambios se anuncian sin mover el foco y restablecer limpia todos los filtros sin otra acción',()=>{
   let changes=0;const {dom,filter,search,type,visibility,status}=setup(()=>changes++);
   assert.equal(status.getAttribute('role'),'status');assert.equal(status.getAttribute('aria-live'),'polite');
