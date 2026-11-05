@@ -16,3 +16,35 @@ html[data-ain-meta="studio"] .badge.live{background:color-mix(in srgb,var(--ain-
 html[data-ain-meta="studio"] :is(.hero h1,.intro h1){font-family:var(--ain-font);font-weight:800;letter-spacing:-.04em}
 html[data-ain-meta="studio"] :is(.toolbar button,.toolbar select,.toolbar input,.ain-quad-panel input,.ain-quad-panel select,.ain-quad-panel textarea){border-radius:var(--ain-radius)}
 html[data-ain-meta="studio"] :is(.cta,button,a,input,select,textarea):focus-visible{outline:2px solid var(--ain-accent);outline-offset:3px}
+
+/* Matrix home: the same palette as the Interactivos entry, scoped to this page. */
+:root[data-ain-meta="matrix"]{color-scheme:dark;--ain-bg:#020805;--ain-surface:#041109;--ain-ink:#d1ffda;--ain-muted:#83bc90;--ain-line:#176b32;--ain-accent:#00ff41;--ain-accent-ink:#001a06;--ain-header-bg:#020805ed;--paper:var(--ain-bg);--panel:var(--ain-surface);--muted:var(--ain-muted);--line:var(--ain-line);--coral:var(--ain-accent);--cyan:#00c853;--violet:var(--ain-muted);--gold:#b7f8a7;--shadow:0 0 24px #00ff4108}
+html[data-ain-meta="matrix"] .home-page{background-color:var(--ain-bg);background-image:linear-gradient(90deg,#00ff4105 1px,transparent 1px),linear-gradient(#00ff4104 1px,transparent 1px);background-size:32px 32px;color:var(--ain-ink)}
+html[data-ain-meta="matrix"] .home-hero{background:transparent}
+html[data-ain-meta="matrix"] .brand{color:var(--ain-accent)}
+html[data-ain-meta="matrix"] .brand-mark{background:var(--ain-accent);color:var(--ain-accent-ink)}
+html[data-ain-meta="matrix"] .nav-links{color:var(--ain-muted)}
+html[data-ain-meta="matrix"] .nav-links a:hover{color:var(--ain-accent)}
+html[data-ain-meta="matrix"] .nav-lang{color:var(--ain-accent);background:transparent;border-color:var(--ain-line);border-radius:0;opacity:1}
+html[data-ain-meta="matrix"] :is(.home-copy h1,h2,h3,.section-kicker,.home-block span){color:var(--ain-accent)}
+html[data-ain-meta="matrix"] :is(.home-copy .hero-copy,.section-heading p,.process-layout>div>p,.home-block p,.home-next p:not(.section-kicker),.engine-showcase figcaption){color:var(--ain-muted)}
+html[data-ain-meta="matrix"] :is(.home-blocks,.home-page #work,.process-section,#engine,.home-next,.contact-section,.site-footer){background:var(--ain-surface);color:var(--ain-ink);border-color:var(--ain-line)}
+html[data-ain-meta="matrix"] :is(.home-block,.work-card,.steps li){background:#020c06;color:var(--ain-ink);border-color:var(--ain-line)}
+html[data-ain-meta="matrix"] #engine .work-card h3{color:var(--ain-accent)}
+html[data-ain-meta="matrix"] #engine .work-card p{color:var(--ain-muted)}
+html[data-ain-meta="matrix"] .home-block:hover{border-color:var(--ain-accent)}
+html[data-ain-meta="matrix"] .home-statement{background:var(--ain-accent);color:var(--ain-accent-ink)}
+html[data-ain-meta="matrix"] .button{border-color:var(--ain-line)}
+html[data-ain-meta="matrix"] .home-page button{background:transparent;color:var(--ain-accent);border:1px solid var(--ain-line);font:inherit}
+html[data-ain-meta="matrix"] .button.primary,html[data-ain-meta="matrix"] .ain-quad-command button{background:var(--ain-accent);border-color:var(--ain-accent);color:var(--ain-accent-ink)}
+html[data-ain-meta="matrix"] .button.secondary{color:var(--ain-accent);background:transparent}
+html[data-ain-meta="matrix"] .hero-digital-twin{filter:drop-shadow(0 22px 60px #00ff4120)}
+html[data-ain-meta="matrix"] .ain-quad-control{color:var(--ain-muted);border-color:var(--ain-line)}
+html[data-ain-meta="matrix"] .ain-quad-control[aria-expanded=true]{color:var(--ain-accent);border-color:var(--ain-accent)}
+html[data-ain-meta="matrix"] .ain-panel-resize::after{background:var(--ain-accent)}
+html[data-ain-meta="matrix"] .ain-panel-resize:hover{outline-color:var(--ain-accent)}
+html[data-ain-meta="matrix"] .ain-quad-panel{border-color:var(--ain-line)!important}
+html[data-ain-meta="matrix"] .ain-quad-panel label{color:var(--ain-ink)}
+html[data-ain-meta="matrix"] .ain-quad-panel :is(input,select,textarea){background:#010904;color:var(--ain-ink);border-color:var(--ain-line)}
+html[data-ain-meta="matrix"] .ain-quad-command input::placeholder{color:var(--ain-muted)}
+html[data-ain-meta="matrix"] :is(a,button,input,select,textarea,[role=separator]):focus-visible{outline-color:var(--ain-accent)}

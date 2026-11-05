@@ -13,6 +13,7 @@
     "Engine": "Motor",
     "Contact": "Contacto",
     "Presentations": "Presentaciones",
+    "Interactives": "Interactivos",
     "Capsules": "Cápsulas",
     "Choose an existing capsule to edit its text, media and timing.": "Elige una cápsula existente para editar sus textos, medios y tiempos.",
     "Capsule link or ID": "Enlace o ID de la cápsula",

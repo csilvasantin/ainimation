@@ -58,7 +58,7 @@ export function mountQuadraticHeader(header, {doc=header.ownerDocument, win=doc.
   }
   if(!panels.options) {
     const nav=doc.createElement('nav');nav.className='ain-quad-links';nav.setAttribute('aria-label',t('Secciones','Sections'));
-    for(const [key,label,en] of [['xperiencias','Xperiencias','Xperiencias'],['interactivos','Interactivos','Interactivos'],['presentaciones','Presentaciones','Presentations'],['capsulas','Cápsulas','Capsules'],['login','Login','Login']]) {
+    for(const [key,label,en] of [['xperiencias','Xperiencias','Xperiencias'],['interactivos','Interactivos','Interactives'],['presentaciones','Presentaciones','Presentations'],['capsulas','Cápsulas','Capsules'],['login','Login','Login']]) {
       const a=create('a',label,en);a.href=ROUTES[key];a.dataset.languageLink='';nav.append(a);
     }
     layers.options.append(nav);
