@@ -54,6 +54,19 @@ test('las palabras son literales y conservan la comparación Unicode, vocales y 
   for(const [query,ids]of [['pinguino introduccion año',['ain-0']],['AN\u0303O INTRODUCCIO\u0301N PINGU\u0308INO',['ain-0']],['introduccion pinguino ano',['ain-1']],['[demo] a+b',['ain-0']],['.* [demo]',['ain-0']],['(a|b)',[]],['OR a+b',[]]]){search.value=query;assert.deepEqual(filter.apply(media,()=>false).map(i=>i.id),ids,query);}
   assert.equal(JSON.stringify(media),before);
 });
+test('la descripción de imágenes se combina con nombre, referencia y filtros sin cambiar sus datos',()=>{
+  const {filter,search,type,visibility}=setup(),media=[{...item(0,'image','Portada principal','https://media.org/photo.jpg'),alt:'Foto compartida del pingüino del año',hidden:true},{...item(1,'image','Detalle','https://media.org/detail.jpg'),alt:'Descripcio\u0301n de AN\u0303O'}],before=JSON.stringify(media),hidden=i=>i.hidden===true;
+  for(const [query,ids]of [['compartida portada imagen',['ain-0']],['PINGUINO AÑO',['ain-0']],['descripcion año',['ain-1']],['DESCRIPCIO\u0301N AN\u0303O',['ain-1']],['descripcion ano',[]],['photo.jpg compartida',['ain-0']]]){search.value=query;assert.deepEqual(filter.apply(media,hidden).map(i=>i.id),ids,query);assert.equal(search.value,query);}
+  type.value='image';visibility.value='hidden';search.value='pinguino compartida oculto';assert.deepEqual(filter.apply(media,hidden).map(i=>i.id),['ain-0']);visibility.value='shown';assert.deepEqual(filter.apply(media,hidden),[]);
+  assert.equal(JSON.stringify(media),before);filter.reset();assert.deepEqual(filter.apply(media,hidden),media);
+});
+test('sólo se busca alt de imágenes como texto literal y no se deduce de él el estado oculto',()=>{
+  const {doc,filter,search,visibility}=setup(),media=[{...item(0,'image','Paisaje'),alt:'Oculto en una anotación <script>alert(1)</script> [demo] a+b'},...['text','video','graphic','background'].map((type,index)=>({...item(index+1,type,'Otro componente'),alt:'Descripción exclusiva'}))],before=JSON.stringify(media),scripts=doc.querySelectorAll('script').length;
+  search.value='exclusiva';assert.deepEqual(filter.apply(media,()=>false),[]);
+  for(const query of ['[demo] a+b','<script>alert(1)</script>','oculto anotacion']){search.value=query;assert.deepEqual(filter.apply(media,()=>false).map(i=>i.id),['ain-0']);}
+  visibility.value='hidden';assert.deepEqual(filter.apply(media,()=>false),[]);visibility.value='shown';assert.deepEqual(filter.apply(media,()=>false).map(i=>i.id),['ain-0']);
+  assert.equal(doc.querySelectorAll('script').length,scripts);assert.equal(JSON.stringify(media),before);
+});
 test('los cambios se anuncian sin mover el foco y restablecer limpia todos los filtros sin otra acción',()=>{
   let changes=0;const {dom,filter,search,type,visibility,status}=setup(()=>changes++);
   assert.equal(status.getAttribute('role'),'status');assert.equal(status.getAttribute('aria-live'),'polite');
