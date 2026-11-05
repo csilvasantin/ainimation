@@ -20,3 +20,5 @@
 .component-filters{display:grid;gap:10px}.component-filters>*{min-width:0}.component-filters select{width:100%;font-size:12px}.component-results{font-size:11px;line-height:1.5;color:var(--dim);margin:10px 0 0}
 
 .component-search{display:grid;grid-template-columns:minmax(0,1fr) 42px;gap:8px;align-items:center}.component-search #filter{min-width:0}.locate-selection-button{display:grid;place-items:center;width:42px;height:42px;padding:10px}.locate-selection-button svg{width:21px;height:21px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+
+#site-library{width:100%;min-width:0;text-overflow:ellipsis}
