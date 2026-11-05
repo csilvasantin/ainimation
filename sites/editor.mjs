@@ -9,6 +9,7 @@ import {createFileDrop,previewMessageSource,mediaDropReplacement} from './drop.m
 import {createPreviewSound} from './sound.mjs?v=20261104-sound-1';
 import {createImagePaste} from './paste.mjs?v=20261104-paste-1';
 import {COMPONENT_LABELS,createComponentFilter} from './filter.mjs?v=20261105-file-search-1';
+import {createActiveSitePreference} from './active-site.mjs?v=20261105-active-1';
 const $=id=>document.getElementById(id),library=new Map();
 const quad=createQuadraticUI();
 let session=null,recordID='',selected='',channel='',comparing=false,mobile=false,importing=false,persistTimer;
@@ -16,8 +17,9 @@ let mediaLibrary=createMediaLibrary(),mediaBusy=false,selectScroll=false;
 const labels=COMPONENT_LABELS,componentFilter=createComponentFilter({onChange:paintComponents,getMediaName:ref=>mediaLibrary.records(new Set([ref]))[0].name});
 const motionLabels={none:'Sin animación',fade:'Aparecer',rise:'Entrada desde abajo',zoom:'Acercamiento suave',float:'Flotar en bucle'};
 const say=message=>{$('edit-status').textContent=message;$('workspace-status').textContent=message;};
-let soundStorage;try{soundStorage=window.localStorage;}catch{}
-const sound=createPreviewSound({button:$('mute-videos'),storage:soundStorage,getChannel:()=>channel,getFrames:()=>({draft:$('draft-frame').contentWindow,...(comparing?{original:$('original-frame').contentWindow}:{})})});
+let viewStorage;try{viewStorage=window.localStorage;}catch{}
+const activeSitePreference=createActiveSitePreference(viewStorage);
+const sound=createPreviewSound({button:$('mute-videos'),storage:viewStorage,getChannel:()=>channel,getFrames:()=>({draft:$('draft-frame').contentWindow,...(comparing?{original:$('original-frame').contentWindow}:{})})});
 function dropFeedback(message){say(message);if(!session){$('import-status').textContent=message;quad.show('options');}}
 const replacement=context=>mediaDropReplacement(session?.draft,selected,context);
 const fileDrop=createFileDrop({document,overlay:$('media-drop-overlay'),onFiles:(files,context)=>loadLocalFiles(files,replacement(context)||{}),onError:dropFeedback,getMessage:context=>{
@@ -32,7 +34,7 @@ function addOption(id,project){let option=[...$('site-library').options].find(o=
 async function persist(){
   if(!session)return;clearTimeout(persistTimer);
   const record={id:recordID,original:session.original,draft:session.draft,assets:mediaLibrary.records(referencedMedia(session.original,session.draft)),updatedAt:Date.now()};
-  try{await saveSite(record);library.set(record.id,record);addOption(record.id,record.draft);if(record.id===recordID){$('saved-status').textContent='Copia guardada en este navegador · '+new Date().toLocaleTimeString('es');try{localStorage.setItem('ainimation-last-site',record.id);}catch{}}}
+  try{await saveSite(record);library.set(record.id,record);addOption(record.id,record.draft);if(record.id===recordID){$('saved-status').textContent='Copia guardada en este navegador · '+new Date().toLocaleTimeString('es');activeSitePreference.remember(record.id,library);}}
   catch{$('saved-status').textContent='No se pudo guardar en este navegador. Descarga el proyecto para conservarlo.';}
 }
 function remember(){ $('saved-status').textContent='Guardando copia…';clearTimeout(persistTimer);persistTimer=setTimeout(persist,250);}
@@ -137,7 +139,7 @@ $('import-form').onsubmit=async e=>{
 };
 $('site-library').onchange=async()=>{
   const value=$('site-library').value;
-  if(library.has(value)){try{lockMedia(true);if(session)await persist();await open(library.get(value));$('import-status').textContent='Copia recuperada del navegador. Puedes seguir editando.';}catch(e){$('import-status').textContent='No se ha abierto la copia: '+e.message;}finally{lockMedia(false);}}
+  if(library.has(value)){try{lockMedia(true);if(session)await persist();await activeSitePreference.openSaved(value,library,open);$('import-status').textContent='Copia recuperada del navegador. Puedes seguir editando.';}catch(e){$('site-library').value=recordID||'preset';$('import-status').textContent='No se ha abierto la copia: '+e.message;}finally{lockMedia(false);}}
   else{$('site-url').value=value==='preset'?'https://www.portaventuranext.com/':'';$('site-url').focus();$('import-status').textContent='Introduce o revisa la URL y pulsa Importar página.';if(session)await persist();}
 };
 $('site-pages').onchange=()=>{if(!$('site-pages').value)return;$('site-url').value=$('site-pages').value;$('import-status').textContent='Página seleccionada. Pulsa Importar página para crear otra copia.';$('import-button').focus();};
@@ -232,5 +234,5 @@ $('expert-command').onkeydown=event=>{if(!['ArrowUp','ArrowDown'].includes(event
 document.addEventListener('keydown',e=>{if(mediaBusy||!session||!(e.ctrlKey||e.metaKey)||e.altKey||e.target.closest('input,textarea,select'))return;if(e.key.toLowerCase()==='z'){e.preventDefault();(e.shiftKey?$('redo'):$('undo')).click();}});
 document.addEventListener('visibilitychange',()=>{if(document.hidden&&session)persist();});
 try{const records=await listSites();for(const r of records){try{validateSite(r.draft);validateSite(r.original);library.set(r.id,r);addOption(r.id,r.draft);}catch{}}
-  let last='';try{last=localStorage.getItem('ainimation-last-site');}catch{}if(library.has(last)){lockMedia(true);try{await open(library.get(last));$('saved-status').textContent='Copia recuperada de este navegador, con sus archivos locales.';}finally{lockMedia(false);}}
+  const last=activeSitePreference.read();if(library.has(last)){lockMedia(true);try{await open(library.get(last));$('saved-status').textContent='Copia recuperada de este navegador, con sus archivos locales.';}finally{lockMedia(false);}}
 }catch{$('import-status').textContent+=' El almacenamiento del navegador no está disponible; podrás descargar tu proyecto.';}
