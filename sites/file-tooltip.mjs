@@ -5,6 +5,13 @@ const secondsFormat=new Intl.NumberFormat('es',{useGrouping:false,maximumFractio
 const fileSizeFormat=new Intl.NumberFormat('es',{maximumFractionDigits:2}),bytesFormat=new Intl.NumberFormat('es',{maximumFractionDigits:0});
 const fileSizeUnits=['B','kB','MB','GB','TB','PB'];
 const fileFormats=new Map([['image/png',['image','PNG']],['image/jpeg',['image','JPEG']],['image/webp',['image','WebP']],['image/gif',['image','GIF']],['image/avif',['image','AVIF']],['video/mp4',['video','MP4']],['video/webm',['video','WebM']]]);
+export const MEDIA_FORMAT_LABELS=Object.freeze(Object.fromEntries([...fileFormats].map(([mime,[,label]])=>[mime,label])));
+export function componentMediaMime(item,getMediaMime=()=> ''){
+  if(!['image','video'].includes(item?.type)||!localReference(item.value))return '';
+  let mime;try{mime=getMediaMime(item.value);}catch{return '';}
+  const format=typeof mime==='string'?fileFormats.get(mime):undefined;
+  return format?.[0]===item.type?mime:'';
+}
 const validFileSize=size=>Number.isSafeInteger(size)&&size>=0;
 function fileSizeLabel(size){
   let value=size,unit=0;while(value>=1000&&unit<fileSizeUnits.length-1){value/=1000;unit++;}
@@ -42,9 +49,8 @@ export function componentTooltip(item,details,getMediaName,getMediaSize=()=>unde
   if(['image','video'].includes(item.type)&&localReference(item.value)){
     let size;try{size=getMediaSize(item.value);}catch{}
     if(validFileSize(size))title=(title||heading)+'\nTamaño del archivo: '+fileSizeLabel(size);
-    let mime;try{mime=getMediaMime(item.value);}catch{}
-    const format=typeof mime==='string'?fileFormats.get(mime):undefined;
-    if(format?.[0]===item.type)title=(title||heading)+'\nFormato del archivo: '+format[1];
+    const mime=componentMediaMime(item,getMediaMime);
+    if(mime)title=(title||heading)+'\nFormato del archivo: '+MEDIA_FORMAT_LABELS[mime];
   }
   return title;
 }
