@@ -1,6 +1,6 @@
 import {importSite} from './import.mjs';
-import {createSiteSession,validateSite,DEFAULT_MEDIA_WIDTH,MIN_MEDIA_WIDTH,MAX_MEDIA_WIDTH} from './model.mjs?v=20261105-names-1';
-import {buildDocument} from './preview.mjs?v=20261104-visibility-1';
+import {createSiteSession,validateSite,DEFAULT_MEDIA_WIDTH,MIN_MEDIA_WIDTH,MAX_MEDIA_WIDTH,DEFAULT_MEDIA_CORNER_RADIUS,MIN_MEDIA_CORNER_RADIUS,MAX_MEDIA_CORNER_RADIUS} from './model.mjs?v=20261105-corners-1';
+import {buildDocument} from './preview.mjs?v=20261105-corners-1';
 import {listSites,saveSite} from './storage.mjs';
 import {createMediaLibrary,verifyMediaRecords,prepareLocalFile,referencedMedia,localReference,exportMedia,importMedia,exportMediaURLs,IMAGE_ACCEPT,VIDEO_ACCEPT,FILE_ACCEPT,MAX_PACKAGE,MAX_LIBRARY} from './media.mjs';
 import {createQuadraticUI} from './quad.mjs';
@@ -105,8 +105,8 @@ function inspector(){
     const input=document.createElement(type==='select'?'select':type==='textarea'?'textarea':'input');input.id='field-'+key;input.name=key;input.disabled=mediaBusy;
     if(type==='select')for(const [value,text]of Object.entries(options)){const o=document.createElement('option');o.value=value;o.textContent=text;input.append(o);}
     else if(type==='textarea'){input.maxLength=20000;input.rows=5;}
-    else{input.type=type;if(type==='number'){if(key==='maxWidth'){input.min=MIN_MEDIA_WIDTH;input.max=MAX_MEDIA_WIDTH;input.step=1;input.required=true;}else{input.min=key==='duration'?.2:0;input.max=10;input.step=.1;}}if(type==='text'){input.maxLength=key==='label'?200:1000;input.required=key==='label';}}
-    input.value=key==='maxWidth'?(item.maxWidth??DEFAULT_MEDIA_WIDTH):key==='value'&&localReference(item.value)?'':item[key];
+    else{input.type=type;if(type==='number'){if(key==='maxWidth'){input.min=MIN_MEDIA_WIDTH;input.max=MAX_MEDIA_WIDTH;input.step=1;input.required=true;}else if(key==='cornerRadius'){input.min=MIN_MEDIA_CORNER_RADIUS;input.max=MAX_MEDIA_CORNER_RADIUS;input.step=1;input.required=true;}else{input.min=key==='duration'?.2:0;input.max=10;input.step=.1;}}if(type==='text'){input.maxLength=key==='label'?200:1000;input.required=key==='label';}}
+    input.value=key==='maxWidth'?(item.maxWidth??DEFAULT_MEDIA_WIDTH):key==='cornerRadius'?(item.cornerRadius??DEFAULT_MEDIA_CORNER_RADIUS):key==='value'&&localReference(item.value)?'':item[key];
     const apply=()=>{try{session.edit(item.id,{[key]:type==='number'?input.valueAsNumber:input.value});input.setCustomValidity('');if(key==='label')input.value=session.draft.items.find(i=>i.id===item.id).label;else preview();history();paintComponents();remember();say(key==='label'?'Nombre aplicado al medio añadido.':'Cambio aplicado a tu copia.');}
       catch(error){input.setCustomValidity(error.message);input.reportValidity();say(error.message);}};
     if(key!=='label'&&(type==='textarea'||type==='text'))input.oninput=apply;else input.onchange=apply;
@@ -123,6 +123,7 @@ function inspector(){
   }
   if(item.type==='image')field('alt','Descripción de la imagen','text');
   if(session.canSetMediaWidth(item.id))field('maxWidth','Ancho máximo · píxeles','number');
+  if(session.canSetMediaCornerRadius(item.id))field('cornerRadius','Redondeo de esquinas · píxeles','number');
   field('animation','Animación','select',motionLabels);field('duration','Duración · segundos','number');field('delay','Retraso · segundos','number');
 }
 function paint(){if(!session.draft.items.some(i=>i.id===selected))selected=session.draft.items[0]?.id||'';paintComponents();inspector();preview();history();}
