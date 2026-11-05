@@ -9,7 +9,7 @@ import {createFileDrop,previewMessageSource,mediaDropReplacement} from './drop.m
 import {createPreviewSound} from './sound.mjs?v=20261104-sound-1';
 import {createImagePaste} from './paste.mjs?v=20261104-paste-1';
 import {COMPONENT_LABELS,createComponentFilter,createComponentProvenance} from './filter.mjs?v=20261105-selection-status-1';
-import {componentTooltip,localMediaName} from './file-tooltip.mjs?v=20261105-image-description-tooltip-1';
+import {componentTooltip,localMediaName,hasImageDescription} from './file-tooltip.mjs?v=20261105-empty-description-1';
 import {createActiveSitePreference} from './active-site.mjs?v=20261105-active-1';
 import {updateSavedSiteOption,refreshLibraryTitle,orderSavedSiteOptions} from './library-label.mjs?v=20261105-animation-filter-1';
 const $=id=>document.getElementById(id),library=new Map();
@@ -83,7 +83,7 @@ function paintComponents(){
   $('components').replaceChildren(...componentFilter.apply(items,hidden,provenance,selected).map(i=>{
     const b=document.createElement('button'),strong=document.createElement('strong'),small=document.createElement('span');b.type='button';b.disabled=mediaBusy;b.dataset.item=i.id;
     const origin=provenanceLabels[provenance(i)];
-    strong.textContent=i.label;small.textContent=labels[i.type]+(origin?' · '+origin:'')+(hidden(i)?' · Oculto':'')+(i.animation==='none'?'':' · '+motionLabels[i.animation]);b.append(strong,small);b.setAttribute('aria-pressed',String(i.id===selected));
+    strong.textContent=i.label;small.textContent=labels[i.type]+(origin?' · '+origin:'')+(i.type==='image'&&!hasImageDescription(i)?' · Sin descripción':'')+(hidden(i)?' · Oculto':'')+(i.animation==='none'?'':' · '+motionLabels[i.animation]);b.append(strong,small);b.setAttribute('aria-pressed',String(i.id===selected));
     const title=componentTooltip(i,small.textContent,mediaName);if(title)b.title=title;
     b.onclick=()=>{selected=i.id;paintComponents();inspector();highlight(true);quad.show('advanced');};return b;
   }));

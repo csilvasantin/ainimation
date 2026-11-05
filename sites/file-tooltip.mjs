@@ -12,8 +12,10 @@ export function localFileTooltip(item,details,getMediaName){
   return item.label+'\n'+details+'\nArchivo local: '+name;
 }
 
+export const hasImageDescription=item=>item?.type==='image'&&typeof item.alt==='string'&&item.alt.trim().length>0;
+
 export function componentTooltip(item,details,getMediaName){
   const title=localFileTooltip(item,details,getMediaName);
-  if(item?.type!=='image'||typeof item.alt!=='string'||!item.alt.trim()||typeof item.label!=='string'||typeof details!=='string')return title;
+  if(!hasImageDescription(item)||typeof item.label!=='string'||typeof details!=='string')return title;
   return (title||item.label+'\n'+details)+'\nDescripción de la imagen: '+item.alt;
 }

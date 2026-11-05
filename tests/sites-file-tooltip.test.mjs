@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {JSDOM} from 'jsdom';
-import {localFileTooltip,localMediaName,componentTooltip} from '../sites/file-tooltip.mjs';
+import {localFileTooltip,localMediaName,componentTooltip,hasImageDescription} from '../sites/file-tooltip.mjs';
 import {createMediaLibrary} from '../sites/media.mjs';
 const ref=n=>'ain-local:'+n.repeat(64);
 const item=(type='image',value=ref('a'))=>({id:'ain-1',type,value,label:'Introducción',alt:'Foto del pingüino'});
@@ -9,6 +9,11 @@ function asset(id,name,type,mime){
   const blob=new Blob(['x'],{type:mime});for(const method of ['arrayBuffer','stream','slice'])Object.defineProperty(blob,method,{get(){throw Error('La ayuda no puede leer bytes');}});
   return {id,name,type,mime,size:blob.size,blob};
 }
+test('el criterio compartido de descripción reconoce texto Unicode y vacío sin convertir objetos ni cambiar alt',()=>{
+  for(const alt of ['Foto','  Descripcio\u0301n del AN\u0303O · pingüino  ']){const photo={...item(),alt},before=JSON.stringify(photo);assert.equal(hasImageDescription(photo),true);assert.ok(componentTooltip(photo,'Imagen',()=> 'captura.png').endsWith('Descripción de la imagen: '+alt));assert.equal(JSON.stringify(photo),before);}
+  for(const alt of [undefined,null,0,false,'',' \t\n\u00a0 ',{toString(){throw Error('No convertir alt');}}])assert.equal(hasImageDescription({...item(),alt}),false);
+  for(const type of ['video','graphic','background','text'])assert.equal(hasImageDescription({...item(type),alt:'Texto disponible'}),false);assert.equal(hasImageDescription(null),false);
+});
 test('usa sólo el descriptor referenciado y conserva nombres Unicode y archivos compartidos sin leer bytes',()=>{
   const records=[asset(ref('a'),'Captura · AN\u0303O.png','image','image/png'),asset(ref('b'),'Cabecera.mp4','video','video/mp4'),asset(ref('c'),'Otro archivo.png','image','image/png')],library=createMediaLibrary(records),calls=[],getName=id=>{calls.push(id);return localMediaName(library,id);},first=item(),copy={...first,id:'ain-2',label:'Duplicado'},video=item('video',ref('b')),before=JSON.stringify([first,copy,video]);
   assert.equal(localFileTooltip(first,'Imagen · Añadido · Oculto · Entrada desde abajo',getName),'Introducción\nImagen · Añadido · Oculto · Entrada desde abajo\nArchivo local: Captura · AN\u0303O.png');
