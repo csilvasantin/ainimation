@@ -51,7 +51,9 @@ export function mountQuadraticHeader(header, {doc=header.ownerDocument, win=doc.
     button.innerHTML='<svg viewBox="0 0 16 14" aria-hidden="true">'+ICONS[name]+'</svg>';
     button.setAttribute('aria-controls',layer.id);button.setAttribute('aria-expanded','false');controls[name]=button;
     button.onclick=()=>set(name,layer.hidden);
-    resizers.push(attachPanelResize(layer,{edge:({options:'right',advanced:'left',expert:'top'})[name],name,scope:resizeScope,win,getTop:()=>Math.max(0,header.getBoundingClientRect().bottom)}));
+    // The compact layout starts with its new CSS sizes, then remembers each
+    // subsequent adjustment independently from the former large-panel layout.
+    resizers.push(attachPanelResize(layer,{edge:({options:'right',advanced:'left',expert:'top'})[name],name,scope:resizeScope+'-compact',minSize:name==='expert'?56:160,win,getTop:()=>Math.max(0,header.getBoundingClientRect().bottom)}));
     if(!buttons[name]) { if(name==='options')header.prepend(button);else tools.append(button); }
   }
   if(!panels.options) {
@@ -92,6 +94,21 @@ export function mountQuadraticHeader(header, {doc=header.ownerDocument, win=doc.
     heading.insertBefore(form,heading.querySelector('[data-ain-quad-close]'));
     layers.expert.append(log);
   }
+  // Keep the real Interactivos command form and its listeners in the same
+  // compact first row; export and reference controls live in Advanced.
+  const nativeCommand=layers.expert.querySelector('#expertCommandForm');
+  if(nativeCommand){
+    const oldSection=nativeCommand.closest('.expert-commands'),heading=layers.expert.querySelector('.ain-quad-panel-heading');
+    layers.expert.classList.add('ain-quad-expert-cli');nativeCommand.classList.add('ain-quad-command');
+    const row=nativeCommand.querySelector('.command-controls');if(row)row.replaceWith(...row.childNodes);
+    const label=nativeCommand.querySelector('label'),labelText=doc.createElement('span');labelText.className='ain-quad-command-label';
+    for(const node of Array.from(label.childNodes))if(node.nodeType===3)labelText.append(node);
+    label.prepend(labelText);
+    const help=nativeCommand.querySelector('#expertCommandHelp');if(help)help.hidden=true;
+    const status=nativeCommand.querySelector('#expertCommandStatus');if(status){status.classList.add('ain-quad-log');layers.expert.append(status);}
+    heading.insertBefore(nativeCommand,heading.querySelector('[data-ain-quad-close]'));
+    oldSection?.remove();
+  }
   function translate(){
     for(const [name,button] of Object.entries(controls)){const label=t(...LABELS[name]);button.title=label;button.setAttribute('aria-label',label);layers[name].querySelector('[data-ain-quad-close]').setAttribute('aria-label',t('Cerrar ','Close ')+label);}
     for(const node of [...header.querySelectorAll('[data-shell-es]'),...Object.values(layers).flatMap(layer=>Array.from(layer.querySelectorAll('[data-shell-es]')))]) {
@@ -119,7 +136,7 @@ export function mountSiteShell(doc=document,win=window) {
       // Keep the native toggles and real controls in Sites and Produce.
       for(const [name,rail] of [['options','left'],['advanced','right'],['expert','bottom']]){
         const panel=doc.getElementById(name+'-panel')||doc.querySelector('.rail-'+rail);
-        if(panel){panel.id||='produce-'+rail;attachPanelResize(panel,{edge:({options:'right',advanced:'left',expert:'top'})[name],name,scope:'native',win,getTop:()=>Math.max(0,header.getBoundingClientRect().bottom)});}
+        if(panel){panel.id||='produce-'+rail;if(name!=='expert')panel.classList.add('ain-compact-side');attachPanelResize(panel,{edge:({options:'right',advanced:'left',expert:'top'})[name],name,scope:name==='expert'?'native':'native-compact',minSize:name==='expert'?undefined:160,win,getTop:()=>Math.max(0,header.getBoundingClientRect().bottom)});}
       }
       continue;
     }
@@ -131,7 +148,7 @@ export function mountSiteShell(doc=document,win=window) {
     if(page==='interactivos') {
       const advanced=doc.createElement('div'),expert=doc.createElement('div');
       for(const node of doc.querySelectorAll('[data-level="advanced"]')){node.removeAttribute('data-level');advanced.append(node);}
-      for(const node of doc.querySelectorAll('[data-level="expert"]')){node.removeAttribute('data-level');expert.append(node);}
+      for(const node of doc.querySelectorAll('[data-level="expert"]')){node.removeAttribute('data-level');(node.id==='html'||node.classList.contains('reference')?advanced:expert).append(node);}
       panels.advanced=advanced;panels.expert=expert;
     }
     mountQuadraticHeader(header,{doc,win,panels});

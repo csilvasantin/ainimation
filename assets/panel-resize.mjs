@@ -2,7 +2,7 @@ const KEY = Symbol.for('ainimation.panelResize');
 const LABELS = {options:['Opciones','Options'],advanced:['Avanzado','Advanced'],expert:['Experto','Expert']};
 
 // Resize only the overlay. The stage, projects and window geometry are untouched.
-export function attachPanelResize(panel, {edge, name, scope='page', getTop=()=>0, win=panel.ownerDocument.defaultView}={}) {
+export function attachPanelResize(panel, {edge, name, scope='page', minSize, getTop=()=>0, win=panel.ownerDocument.defaultView}={}) {
   if(panel[KEY])return panel[KEY];
   const doc=panel.ownerDocument,vertical=edge!=='top',dimension=vertical?'width':'height';
   const sign=edge==='right'?1:-1,handle=doc.createElement('div');
@@ -23,7 +23,8 @@ export function attachPanelResize(panel, {edge, name, scope='page', getTop=()=>0
   panel.append(handle);
   function bounds(){
     const max=Math.max(0,Math.floor(vertical?win.innerWidth-16:win.innerHeight-Math.max(0,getTop())-8));
-    return {min:Math.min(vertical?220:160,max),max};
+    const minimum=Number.isFinite(minSize)&&minSize>0?minSize:vertical?220:160;
+    return {min:Math.min(minimum,max),max};
   }
   function clamp(value){const {min,max}=bounds();return Math.round(Math.max(min,Math.min(max,value)));}
   function current(){return panel.getBoundingClientRect()[dimension]||selected||(vertical?360:380);}
