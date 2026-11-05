@@ -4,6 +4,7 @@ import {hasConfiguredAnimation} from './animation-state.mjs?v=20261105-animation
 const secondsFormat=new Intl.NumberFormat('es',{useGrouping:false,maximumFractionDigits:20});
 const fileSizeFormat=new Intl.NumberFormat('es',{maximumFractionDigits:2}),bytesFormat=new Intl.NumberFormat('es',{maximumFractionDigits:0});
 const fileSizeUnits=['B','kB','MB','GB','TB','PB'];
+const fileFormats=new Map([['image/png',['image','PNG']],['image/jpeg',['image','JPEG']],['image/webp',['image','WebP']],['image/gif',['image','GIF']],['image/avif',['image','AVIF']],['video/mp4',['video','MP4']],['video/webm',['video','WebM']]]);
 const validFileSize=size=>Number.isSafeInteger(size)&&size>=0;
 function fileSizeLabel(size){
   let value=size,unit=0;while(value>=1000&&unit<fileSizeUnits.length-1){value/=1000;unit++;}
@@ -19,6 +20,7 @@ export function localMediaName(library,ref){
   const name=localMediaProperty(library,ref,'name');return typeof name==='string'?name:'';
 }
 export function localMediaSize(library,ref){const size=localMediaProperty(library,ref,'size');return validFileSize(size)?size:undefined;}
+export function localMediaMime(library,ref){const mime=localMediaProperty(library,ref,'mime');return typeof mime==='string'&&fileFormats.has(mime)?mime:'';}
 
 export function localFileTooltip(item,details,getMediaName){
   if(!['image','video'].includes(item?.type)||!localReference(item.value)||typeof item.label!=='string'||typeof details!=='string')return '';
@@ -29,7 +31,7 @@ export function localFileTooltip(item,details,getMediaName){
 
 export const hasImageDescription=item=>item?.type==='image'&&typeof item.alt==='string'&&item.alt.trim().length>0;
 
-export function componentTooltip(item,details,getMediaName,getMediaSize=()=>undefined){
+export function componentTooltip(item,details,getMediaName,getMediaSize=()=>undefined,getMediaMime=()=> ''){
   let title=localFileTooltip(item,details,getMediaName);
   if(typeof item?.label!=='string'||typeof details!=='string')return title;
   const heading=item.label+'\n'+details;
@@ -40,6 +42,9 @@ export function componentTooltip(item,details,getMediaName,getMediaSize=()=>unde
   if(['image','video'].includes(item.type)&&localReference(item.value)){
     let size;try{size=getMediaSize(item.value);}catch{}
     if(validFileSize(size))title=(title||heading)+'\nTamaño del archivo: '+fileSizeLabel(size);
+    let mime;try{mime=getMediaMime(item.value);}catch{}
+    const format=typeof mime==='string'?fileFormats.get(mime):undefined;
+    if(format?.[0]===item.type)title=(title||heading)+'\nFormato del archivo: '+format[1];
   }
   return title;
 }

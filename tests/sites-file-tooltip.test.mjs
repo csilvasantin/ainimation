@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {JSDOM} from 'jsdom';
-import {localFileTooltip,localMediaName,localMediaSize,componentTooltip,hasImageDescription} from '../sites/file-tooltip.mjs';
+import {localFileTooltip,localMediaName,localMediaSize,localMediaMime,componentTooltip,hasImageDescription} from '../sites/file-tooltip.mjs';
 import {createMediaLibrary} from '../sites/media.mjs';
 const ref=n=>'ain-local:'+n.repeat(64);
 const item=(type='image',value=ref('a'))=>({id:'ain-1',type,value,label:'Introducción',alt:'Foto del pingüino'});
@@ -9,6 +9,25 @@ function asset(id,name,type,mime){
   const blob=new Blob(['x'],{type:mime});for(const method of ['arrayBuffer','stream','slice'])Object.defineProperty(blob,method,{get(){throw Error('La ayuda no puede leer bytes');}});
   return {id,name,type,mime,size:blob.size,blob};
 }
+test('el formato usa sólo MIME textual admitido del descriptor propio cargado, sin acceder a blob o convertir objetos',()=>{
+  for(const [mime,type]of [['image/png','image'],['image/jpeg','image'],['image/webp','image'],['image/gif','image'],['image/avif','image'],['video/mp4','video'],['video/webm','video']]){
+    const record=asset(ref('a'),'Nombre sin extensión',type,mime),library=createMediaLibrary([record]),calls=[],read={records(ids){calls.push([...ids]);return library.records(ids);}};Object.defineProperty(record,'blob',{get(){throw Error('No consultar blob.type o bytes');}});assert.equal(localMediaMime(read,ref('a')),mime);assert.deepEqual(calls,[[ref('a')]]);assert.equal(localMediaMime(read,ref('b')),'');
+  }
+  for(const mime of [undefined,null,'','IMAGE/PNG','image/svg+xml','text/html','__proto__',0,{toString(){throw Error('No convertir MIME');}}])assert.equal(localMediaMime({records:()=>[{id:ref('a'),mime}]},ref('a')),'');
+  assert.equal(localMediaMime({records:()=>[{id:ref('b'),mime:'image/png'}]},ref('a')),'');assert.equal(localMediaMime({records(){throw Error('No consultar remotos');}},'https://example.org/a.png'),'');
+});
+test('la ayuda muestra los siete formatos coherentes con el componente, conserva toda la información y no infiere de extensiones o texto',()=>{
+  for(const [mime,type,label]of [['image/png','image','PNG'],['image/jpeg','image','JPEG'],['image/webp','image','WebP'],['image/gif','image','GIF'],['image/avif','image','AVIF'],['video/mp4','video','MP4'],['video/webm','video','WebM']]){
+    const media={...item(type),label:'JPEG MP4 <img src=x>',animation:'rise',duration:1.2,delay:0,hidden:true},before=JSON.stringify(media),prior=componentTooltip(media,'Detalle literal',()=> 'extension-equivocada.txt',()=>1234),calls=[],dom=new JSDOM('<button aria-pressed="true"><strong>Nombre</strong><span>Detalle</span></button>'),button=dom.window.document.querySelector('button'),visible=button.textContent;button.title=componentTooltip(media,'Detalle literal',()=> 'extension-equivocada.txt',()=>1234,id=>{calls.push(id);return mime;});
+    assert.equal(button.title,prior+'\nFormato del archivo: '+label);assert.deepEqual(calls,[ref('a')]);assert.equal(button.textContent,visible);assert.equal(button.getAttribute('aria-label'),null);assert.equal(button.getAttribute('aria-pressed'),'true');assert.equal(button.querySelectorAll('img,script').length,0);assert.equal(JSON.stringify(media),before);
+  }
+});
+test('MIME ausente, inválido, incoherente, remoto o de otros componentes mantiene la ayuda anterior y referencias compartidas',()=>{
+  const media={...item(),animation:'zoom',duration:1.3,delay:.1},before=componentTooltip(media,'Imagen',()=> 'captura.png',()=>72168);for(const mime of [undefined,null,'','image/PNG','video/mp4','text/html','image/svg+xml',false,{toString(){throw Error('No convertir MIME');}}])assert.equal(componentTooltip(media,'Imagen',()=> 'captura.png',()=>72168,()=>mime),before);
+  assert.equal(componentTooltip(media,'Imagen',()=> 'captura.png',()=>72168,()=>{throw Error('Descriptor ausente');}),before);
+  let calls=0;for(const other of [item('image','https://example.org/photo.png'),item('video','ain-local:invalida'),item('text'),item('graphic'),item('background')])assert.equal(componentTooltip(other,'Detalle',()=> 'archivo',()=>1,()=>{calls++;return 'image/png';}),componentTooltip(other,'Detalle',()=> 'archivo',()=>1));assert.equal(calls,0);
+  const library=createMediaLibrary([asset(ref('a'),'Compartida.png','image','image/png')]),copy={...media,id:'ain-2',label:'Duplicado'},state=JSON.stringify([media,copy]);for(const value of [media,copy])assert.ok(componentTooltip(value,'Imagen',id=>localMediaName(library,id),id=>localMediaSize(library,id),id=>localMediaMime(library,id)).endsWith('\nFormato del archivo: PNG'));assert.equal(JSON.stringify([media,copy]),state);assert.equal(library.size,1);
+});
 test('el tamaño procede sólo del descriptor propio cargado, sin tocar blob, bytes ni otras referencias',()=>{
   const records=[asset(ref('a'),'Compartida.png','image','image/png'),asset(ref('b'),'Otro.mp4','video','video/mp4')],library=createMediaLibrary(records),calls=[],read={records(ids){calls.push([...ids]);return library.records(ids);}};for(const record of records)Object.defineProperty(record,'blob',{get(){throw Error('No leer blob ni su tamaño');}});
   assert.equal(localMediaSize(read,ref('a')),1);assert.equal(localMediaName(read,ref('a')),'Compartida.png');assert.deepEqual(calls,[[ref('a')],[ref('a')]]);assert.equal(localMediaSize(read,ref('c')),undefined);assert.equal(library.size,2);
