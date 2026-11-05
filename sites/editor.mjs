@@ -8,14 +8,14 @@ import {parseExpertCommand,EXPERT_HELP} from './expert.mjs';
 import {createFileDrop,previewMessageSource,mediaDropReplacement} from './drop.mjs?v=20261104-replace-1';
 import {createPreviewSound} from './sound.mjs?v=20261104-sound-1';
 import {createImagePaste} from './paste.mjs?v=20261104-paste-1';
-import {COMPONENT_LABELS,createComponentFilter} from './filter.mjs?v=20261105-animation-filter-1';
+import {COMPONENT_LABELS,createComponentFilter} from './filter.mjs?v=20261105-reset-filters-1';
 import {createActiveSitePreference} from './active-site.mjs?v=20261105-active-1';
 import {updateSavedSiteOption,refreshLibraryTitle,orderSavedSiteOptions} from './library-label.mjs?v=20261105-animation-filter-1';
 const $=id=>document.getElementById(id),library=new Map();
 const quad=createQuadraticUI();
 let session=null,recordID='',selected='',channel='',comparing=false,mobile=false,importing=false,persistTimer;
 let mediaLibrary=createMediaLibrary(),mediaBusy=false,selectScroll=false;
-const labels=COMPONENT_LABELS,componentFilter=createComponentFilter({onChange:paintComponents,getMediaName:ref=>mediaLibrary.records(new Set([ref]))[0].name});
+const labels=COMPONENT_LABELS,componentFilter=createComponentFilter({onChange:paintComponents,getMediaName:ref=>mediaLibrary.records(new Set([ref]))[0].name,isLocked:()=>mediaBusy||!session});
 const motionLabels={none:'Sin animación',fade:'Aparecer',rise:'Entrada desde abajo',zoom:'Acercamiento suave',float:'Flotar en bucle'};
 const say=message=>{$('edit-status').textContent=message;$('workspace-status').textContent=message;};
 let viewStorage;try{viewStorage=window.localStorage;}catch{}
@@ -72,7 +72,7 @@ function movement(){
   }
 }
 function locateAvailability(){$('locate-selection').disabled=mediaBusy||!session?.draft.items.some(i=>i.id===selected);}
-function lockMedia(value){mediaBusy=value;document.querySelectorAll('button,input,select,textarea').forEach(el=>{if(el.id!=='mute-videos')el.disabled=value;});history();movement();locateAvailability();}
+function lockMedia(value){mediaBusy=value;document.querySelectorAll('button,input,select,textarea').forEach(el=>{if(el.id!=='mute-videos')el.disabled=value;});history();movement();locateAvailability();componentFilter.syncAvailability();}
 function paintComponents(){
   const items=session.draft.items;
   const hidden=item=>session.canSetMediaVisibility(item.id)&&item.hidden===true;
