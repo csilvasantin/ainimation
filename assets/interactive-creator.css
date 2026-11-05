@@ -54,3 +54,6 @@
 
 /* Account dialog: close in the corner, Access beside the stable Google host. */
 #loginDialog{position:fixed;width:min(460px,calc(100vw - 32px));max-height:calc(100svh - 32px);overflow:auto}#loginDialog h2{margin:8px 0 14px;padding-right:32px;font-size:20px}#loginDialog #closeLogin{position:absolute;top:10px;right:10px;display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;min-height:32px;padding:0;font-size:22px;line-height:1;background:transparent}#loginDialog .login-access-row{display:flex;align-items:flex-start;justify-content:flex-end;flex-wrap:wrap;gap:12px;margin:18px 0 0}#loginTarget{flex:1 1 240px;min-width:0;margin:0}#loginDialog #backToEntry{flex:0 0 auto;min-height:40px;margin:0;white-space:nowrap}
+
+/* Entry offers only the opposite language; editing keeps its panel controls. */
+body[data-stage=entry] .ain-quad-tools{display:none!important}body[data-stage=workspace] .entry-language-toggle{display:none!important}.entry-language-toggle{flex:0 0 auto;height:40px;min-height:40px;min-width:52px;padding:6px 10px;font-size:13px}.entry-screen{max-width:840px}.entry-grid{grid-template-columns:minmax(0,1fr)}

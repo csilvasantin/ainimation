@@ -251,7 +251,8 @@
     }
     var btn = document.getElementById("langToggle");
     if (btn) btn.addEventListener("click", function () {
-      apply(document.documentElement.lang === "es" ? "en" : "es");
+      var next=document.documentElement.lang === "es" ? "en" : "es";
+      if(window.AINLanguage)window.AINLanguage.set(next);else apply(next);
     });
   }
 
