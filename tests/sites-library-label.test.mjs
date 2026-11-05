@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {execFileSync} from 'node:child_process';
 import {JSDOM} from 'jsdom';
-import {savedSiteLabel,updateSavedSiteOption,refreshLibraryTitle} from '../sites/library-label.mjs';
+import {savedSiteLabel,updateSavedSiteOption,refreshLibraryTitle,orderSavedSiteOptions} from '../sites/library-label.mjs';
 const record=(id,updatedAt,importedAt)=>({id,updatedAt,draft:{title:'PortAventura NeXT',importedAt}});
 test('la fecha guardada se muestra con año y segundos en la zona local, incluso al cambiar de día',()=>{
   const url=new URL('../sites/library-label.mjs',import.meta.url).href;
@@ -29,4 +29,30 @@ test('actualizar etiquetas conserva IDs, orden, selección y las opciones para i
 test('los títulos son texto literal y el nombre completo con fecha queda disponible en la opción y tooltip',()=>{
   const dom=new JSDOM('<select></select>'),select=dom.window.document.querySelector('select'),r=Object.freeze({id:'A',updatedAt:1790000000000,draft:Object.freeze({title:'Vídeo <img src=x onerror=alert(1)> · título largo',importedAt:'2026-01-01'})});
   const before=JSON.stringify(r),option=updateSavedSiteOption(select,r);assert.equal(option.childElementCount,0);assert.equal(option.textContent,savedSiteLabel(r));assert.equal(option.title,option.textContent);assert.equal(select.title,option.textContent);assert.equal(JSON.stringify(r),before);
+});
+function libraryUI(records){
+  const dom=new JSDOM('<label for="sites">Seleccionar site</label><select id="sites"><option value="preset">PortAventura NeXT · empezar aquí</option><option value="new">Otra URL…</option></select>'),select=dom.window.document.querySelector('select');
+  for(const r of records)updateSavedSiteOption(select,r);return {dom,select};
+}
+test('las copias se ordenan por guardado válido, con importación alternativa y sin fecha al final, sin cambiar los registros',()=>{
+  const records=[record('sin-fecha',null,'inválida'),record('anterior',100,900),record('epoca',0,950),record('reciente','2026-11-05T10:00:00Z',10),record('antes-de-epoca',-100),record('importada','inválida',500)];
+  for(const r of records){Object.freeze(r.draft);Object.freeze(r);}Object.freeze(records);
+  const {select}=libraryUI(records),saved=new Map(records.map(r=>[r.id,r])),before=JSON.stringify([...saved]);select.value='anterior';orderSavedSiteOptions(select,saved.values());
+  assert.deepEqual([...select.options].map(o=>o.value),['preset','new','reciente','importada','anterior','epoca','antes-de-epoca','sin-fecha']);
+  assert.equal(select.value,'anterior');assert.equal(JSON.stringify([...saved]),before);assert.deepEqual([...saved.values()],records);assert.equal(select.title,select.selectedOptions[0].textContent);
+});
+test('los empates mantienen el orden visible y reordenar conserva nodos, selección, foco y opciones de importación',()=>{
+  const a=record('A',200),b=record('B',200),c=record('C',300),missing=record('sin-fecha'),otherMissing=record('otra-sin-fecha','inválida');
+  const {dom,select}=libraryUI([a,b,c,missing,otherMissing]),nodes=new Map([...select.options].map(o=>[o.value,o]));select.value='B';select.focus();let changes=0;select.addEventListener('change',()=>changes++);
+  orderSavedSiteOptions(select,[b,a,otherMissing,c,missing]);assert.deepEqual([...select.options].map(o=>o.value),['preset','new','C','A','B','sin-fecha','otra-sin-fecha']);
+  assert.equal(select.selectedOptions[0],nodes.get('B'));assert.equal(dom.window.document.activeElement,select);assert.equal(changes,0);for(const option of select.options)assert.equal(option,nodes.get(option.value));
+  select.value='new';orderSavedSiteOptions(select,[a,b,c,missing,otherMissing]);assert.equal(select.value,'new');assert.equal(select.title,'Otra URL…');
+  select.selectedIndex=-1;orderSavedSiteOptions(select,[record('A',400),b,c,missing,otherMissing]);assert.equal(select.selectedIndex,-1);assert.equal(select.title,'');assert.equal(changes,0);
+});
+test('tras actualizar una etiqueta la copia recién guardada sube sin cambiar la copia abierta ni duplicar opciones o archivos',()=>{
+  const a=record('A',300),b=record('B',200),asset=Object.freeze({id:'local',name:'compartido.png'});a.assets=b.assets=Object.freeze([asset]);
+  const saved=new Map([['A',a],['B',b]]),{select}=libraryUI(saved.values()),nodes=new Map([...select.options].map(o=>[o.value,o]));select.value='A';orderSavedSiteOptions(select,saved.values());
+  const updated={...b,updatedAt:400};saved.set('B',updated);updateSavedSiteOption(select,updated);const before=JSON.stringify([...saved]);orderSavedSiteOptions(select,saved.values());
+  assert.deepEqual([...select.options].map(o=>o.value),['preset','new','B','A']);assert.equal(select.value,'A');assert.equal(select.title,savedSiteLabel(a));assert.equal(nodes.get('B').title,savedSiteLabel(updated));assert.equal(select.options.length,4);
+  for(const option of select.options)assert.equal(option,nodes.get(option.value));assert.equal(JSON.stringify([...saved]),before);assert.deepEqual([...saved.keys()],['A','B']);assert.equal(saved.get('A').assets,saved.get('B').assets);assert.equal(saved.get('B').assets[0],asset);
 });

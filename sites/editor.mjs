@@ -10,7 +10,7 @@ import {createPreviewSound} from './sound.mjs?v=20261104-sound-1';
 import {createImagePaste} from './paste.mjs?v=20261104-paste-1';
 import {COMPONENT_LABELS,createComponentFilter} from './filter.mjs?v=20261105-file-search-1';
 import {createActiveSitePreference} from './active-site.mjs?v=20261105-active-1';
-import {updateSavedSiteOption,refreshLibraryTitle} from './library-label.mjs?v=20261105-library-date-1';
+import {updateSavedSiteOption,refreshLibraryTitle,orderSavedSiteOptions} from './library-label.mjs?v=20261105-library-order-1';
 const $=id=>document.getElementById(id),library=new Map();
 const quad=createQuadraticUI();
 let session=null,recordID='',selected='',channel='',comparing=false,mobile=false,importing=false,persistTimer;
@@ -31,7 +31,7 @@ createImagePaste({document,onFiles:files=>loadLocalFiles(files,{expected:'image'
 $('start-import').onclick=()=>quad.show('options',true);
 function download(blob,name){const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}
 function filename(){return new URL(session.draft.url).hostname.replaceAll('.','-');}
-function addOption(record){updateSavedSiteOption($('site-library'),record);}
+function addOption(record){updateSavedSiteOption($('site-library'),record);orderSavedSiteOptions($('site-library'),library.values());}
 async function persist(){
   if(!session)return;clearTimeout(persistTimer);
   const record={id:recordID,original:session.original,draft:session.draft,assets:mediaLibrary.records(referencedMedia(session.original,session.draft)),updatedAt:Date.now()};
