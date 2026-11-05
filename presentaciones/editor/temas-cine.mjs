@@ -3,8 +3,8 @@
 // libre de Google Fonts, grano, viñeta, gradación, barras y motion). Nombres por estilo, nunca de
 // películas; sin logos, fotogramas ni fuentes con licencia. Sonido opcional, apagado por defecto,
 // siempre sintetizado con WebAudio y solo tras un clic del usuario (nunca autoplay).
-// Fase 1 · /modo (Elon y Jobs, 02-11-2026): en producción solo universal.jurassic («uno perfecto vale más que nueve
-// correctos»); el resto de estudios y producciones espera en preview la revisión de Jobs, uno a uno.
+// Fase 1 · /modo (Elon y Jobs, 02-11-2026): las producciones entran de una en una, cuando Jobs las aprueba («uno perfecto
+// vale más que nueve correctos»): universal.jurassic y universal.minions. El resto espera en preview.
 // ESTUDIOS y resolverEstudio llevan el comando /modo <estudio> [producción] al tema.
 // Este fichero es idéntico en admira-next-web (pruebas/ainimation-presentaciones/refinement/) y
 // en ainimation (presentaciones/editor/); los JSON de marcablanca/temas/ son su espejo.
@@ -47,7 +47,13 @@ export const TEMAS=Object.freeze({
     tipografia:{titulos:"'Oswald', 'Bebas Neue', Impact, sans-serif",texto:"'Inter', system-ui, sans-serif",google:'https://fonts.googleapis.com/css2?family=Oswald:wght@600;700&family=Inter:wght@400;600&display=swap',transformTitulos:'uppercase',trackingTitulos:'0.06em'},
     aspecto:'2.39:1',grano:0.35,vineta:0.6,gradacion:{saturacion:0.85,contraste:1.15,tinte:'#4a7a2a',tinteFuerza:0.1},
     motion:{entrada:'temblor',duracionMs:900},titulo:{sombra:'0 3px 0 #000, 0 0 22px #f2a90055'},
-    sonido:{tipo:'sintetico',descripcion:'Retumbo grave y lejano, como pasos enormes.',base:41.2,ruido:0.06}}
+    sonido:{tipo:'sintetico',descripcion:'Retumbo grave y lejano, como pasos enormes.',base:41.2,ruido:0.06}},
+  'amarillo-travieso':{id:'amarillo-travieso',nombre:'Amarillo travieso',referenciaInterna:'Ambientación inspirada en Minions (uso interno).',descripcion:'Amarillo de plátano y azul vaquero, letras redondas y gordas, todo rebota.',
+    modo:'claro',colores:{fondo:'#fff7cc',fondoAlt:'#ffefa3',superficie:'#fffbe6',texto:'#1d2d50',textoSuave:'#3d4f7a',borde:'#e6c200',brillo:'#2f6db5',brillo2:'#f5c400'},
+    tipografia:{titulos:"'Fredoka', 'Baloo 2', system-ui, sans-serif",texto:"'Nunito', system-ui, sans-serif",google:'https://fonts.googleapis.com/css2?family=Fredoka:wght@600;700&family=Nunito:wght@400;700&display=swap',transformTitulos:'none',trackingTitulos:'0'},
+    aspecto:'16:9',grano:0,vineta:0.1,gradacion:{saturacion:1.2,contraste:1.02,tinte:'#f5c400',tinteFuerza:0.06},
+    motion:{entrada:'rebote',duracionMs:700},titulo:{alineacion:'center'},
+    sonido:{tipo:'sintetico',descripcion:'Silbido alegre y saltarín, sintetizado.',base:659.3,ruido:0}}
 });
 export const TEMA_IDS=Object.freeze(Object.keys(TEMAS));
 export const TEMA_OPCIONES=Object.freeze([NONE,...TEMA_IDS]);
@@ -56,7 +62,7 @@ export const temaDe=id=>TEMAS[id]||null;
 // /modo <estudio> [producción] (Elon, 02-11-2026): el comando es lo ÚNICO que usa los nombres reales; lo visible es el
 // nombre de estilo del tema. El estudio pone el acento y la producción (o la base del estudio) la atmósfera.
 // marcablanca/temas/estudios.json es su espejo y marcablanca.js resuelve igual (test/temas-cine.test.mjs).
-export const ESTUDIOS=Object.freeze({universal:{acento:'#1f5fb8',acentoTexto:'#ffffff',base:null,alias:['universalstudios'],producciones:{jurassic:{tema:'aventura-jurasica',alias:['jurassicworld','jurassicpark','jurasic','dinosaurios','dinos']}}}});
+export const ESTUDIOS=Object.freeze({universal:{acento:'#1f5fb8',acentoTexto:'#ffffff',base:null,alias:['universalstudios'],producciones:{jurassic:{tema:'aventura-jurasica',alias:['jurassicworld','jurassicpark','jurasic','dinosaurios','dinos']},minions:{tema:'amarillo-travieso',alias:['minion','gru','despicableme']}}}});
 const claveModo=s=>String(s||'').toLowerCase().normalize('NFD').replace(/[^a-z0-9]/g,'');
 function distancia(a,b){let p=[...Array(b.length+1).keys()];for(let i=1;i<=a.length;i++){const c=[i];for(let j=1;j<=b.length;j++)c[j]=Math.min(p[j]+1,c[j-1]+1,p[j-1]+(a[i-1]===b[j-1]?0:1));p=c;}return p[b.length];}
 // [id, nombres] → id: exacto, prefijo (2+ letras) o hasta 2 erratas («neftlix», «jurrasic»).
@@ -124,7 +130,7 @@ export function pintarCineCanvas(ctx,id,w=1280,h=720,rand=Math.random){
   return true;
 }
 // Sonido: solo sintetizado, solo tras gesto del usuario. Devuelve una función para pararlo.
-const ONDA={'ochenta-mundo-del-reves':'sawtooth','regencia-romantica':'triangle'};
+const ONDA={'ochenta-mundo-del-reves':'sawtooth','regencia-romantica':'triangle','amarillo-travieso':'triangle'};
 export function sonarTema(id,AudioCtx=globalThis.AudioContext||globalThis.webkitAudioContext){
   const t=temaDe(id);if(!t||!t.sonido||t.sonido.tipo!=='sintetico'||!AudioCtx)return ()=>{};
   const ac=new AudioCtx(),out=ac.createGain();out.gain.value=0.0001;out.connect(ac.destination);

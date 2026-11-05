@@ -1,19 +1,19 @@
 {
-  "version": "v.02.11.2026.r1.19:42",
+  "version": "v.02.11.2026.r2.20:19",
   "deployer": "MorfeoMacMini",
   "machine": "MacMini",
   "signature": "MorfeoMacMini · MacMini",
-  "git": "466383d0263a207e3a79b82425e607d0ca29adb4",
-  "gitShort": "466383d",
-  "gitFull": "466383d0263a207e3a79b82425e607d0ca29adb4",
+  "git": "5e8706e2dc852e9ceeae0ec4c99fed4435a2774a",
+  "gitShort": "5e8706e",
+  "gitFull": "5e8706e2dc852e9ceeae0ec4c99fed4435a2774a",
   "dirty": false,
   "returnTag": "rollback-pre-modo-estudios-20261102",
-  "previousVersion": "v.15.10.2026.r1.20:44",
-  "note": "Presentaciones: tema de cine «Aventura jurásica» para /modo universal jurassic, con el mismo módulo que admiranext.com.",
+  "previousVersion": "v.02.11.2026.r1.19:42",
+  "note": "Presentaciones: tema de cine «Amarillo travieso» para /modo universal minions, con el mismo módulo que admiranext.com.",
   "novedades": [
-    "El editor de Presentaciones ofrece el tema de cine Aventura jurásica: selva, ámbar y rojo de alerta, titular robusto y grano de película de aventuras",
-    "Es el primer tema de /modo: evoca la atmósfera sin nombrar estudios ni películas, y el sonido sigue sonando solo tras un clic"
+    "El editor de Presentaciones ofrece el tema de cine Amarillo travieso: amarillo de plátano y azul vaquero, letras redondas y una entrada que rebota",
+    "Evoca la atmósfera sin nombrar estudios ni películas, y su sonido solo suena tras un clic"
   ],
-  "sourceGit": "466383d0263a207e3a79b82425e607d0ca29adb4",
-  "preparedAt": "2026-11-02T19:42:08+01:00"
+  "sourceGit": "5e8706e2dc852e9ceeae0ec4c99fed4435a2774a",
+  "preparedAt": "2026-11-02T20:19:51+01:00"
 }
