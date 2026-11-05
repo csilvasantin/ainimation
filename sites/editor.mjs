@@ -9,7 +9,7 @@ import {createFileDrop,previewMessageSource,mediaDropReplacement} from './drop.m
 import {createPreviewSound} from './sound.mjs?v=20261104-sound-1';
 import {createImagePaste} from './paste.mjs?v=20261104-paste-1';
 import {COMPONENT_LABELS,createComponentFilter,createComponentProvenance} from './filter.mjs?v=20261105-active-selectors-1';
-import {componentTooltip,localMediaName,localMediaSize,localMediaMime,hasImageDescription} from './file-tooltip.mjs?v=20261105-format-filter-1';
+import {componentTooltip,localMediaName,localMediaSize,localMediaMime,hasImageDescription,createLocalMediaUsage} from './file-tooltip.mjs?v=20261105-file-usage-1';
 import {createActiveSitePreference} from './active-site.mjs?v=20261105-active-1';
 import {updateSavedSiteOption,refreshLibraryTitle,orderSavedSiteOptions} from './library-label.mjs?v=20261105-library-description-count-1';
 const $=id=>document.getElementById(id),library=new Map();
@@ -77,14 +77,14 @@ function movement(){
 function locateAvailability(){$('locate-selection').disabled=mediaBusy||!session?.draft.items.some(i=>i.id===selected);}
 function lockMedia(value){mediaBusy=value;document.querySelectorAll('button,input,select,textarea').forEach(el=>{if(el.id!=='mute-videos')el.disabled=value;});history();movement();locateAvailability();componentFilter.syncAvailability();}
 function paintComponents(){
-  const items=session.draft.items,provenance=createComponentProvenance(session);
+  const items=session.draft.items,provenance=createComponentProvenance(session),mediaUsage=createLocalMediaUsage(mediaLibrary,items);
   const hidden=item=>session.canSetMediaVisibility(item.id)&&item.hidden===true;
   $('component-count').textContent='· '+items.length;
   $('components').replaceChildren(...componentFilter.apply(items,hidden,provenance,selected).map(i=>{
     const b=document.createElement('button'),strong=document.createElement('strong'),small=document.createElement('span');b.type='button';b.disabled=mediaBusy;b.dataset.item=i.id;
     const origin=provenanceLabels[provenance(i)];
     strong.textContent=i.label;small.textContent=labels[i.type]+(origin?' · '+origin:'')+(i.type==='image'&&!hasImageDescription(i)?' · Sin descripción':'')+(hidden(i)?' · Oculto':'')+(i.animation==='none'?'':' · '+motionLabels[i.animation]);b.append(strong,small);b.setAttribute('aria-pressed',String(i.id===selected));
-    const title=componentTooltip(i,small.textContent,mediaName,mediaSize,mediaMime);if(title)b.title=title;
+    const title=componentTooltip(i,small.textContent,mediaName,mediaSize,mediaMime,mediaUsage);if(title)b.title=title;
     b.onclick=()=>{selected=i.id;paintComponents();inspector();highlight(true);quad.show('advanced');};return b;
   }));
   locateAvailability();

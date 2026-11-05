@@ -29,6 +29,14 @@ export function localMediaName(library,ref){
 export function localMediaSize(library,ref){const size=localMediaProperty(library,ref,'size');return validFileSize(size)?size:undefined;}
 export function localMediaMime(library,ref){const mime=localMediaProperty(library,ref,'mime');return typeof mime==='string'&&fileFormats.has(mime)?mime:'';}
 
+export function createLocalMediaUsage(library,items){
+  const counts=new Map();
+  if(Array.isArray(items))for(const item of items){
+    if(['image','video'].includes(item?.type)&&localReference(item.value))counts.set(item.value,(counts.get(item.value)||0)+1);
+  }
+  return ref=>{const count=counts.get(ref);return count!==undefined&&localMediaProperty(library,ref,'id')===ref?count:undefined;};
+}
+
 export function localFileTooltip(item,details,getMediaName){
   if(!['image','video'].includes(item?.type)||!localReference(item.value)||typeof item.label!=='string'||typeof details!=='string')return '';
   let name;try{name=getMediaName(item.value);}catch{return '';}
@@ -38,7 +46,7 @@ export function localFileTooltip(item,details,getMediaName){
 
 export const hasImageDescription=item=>item?.type==='image'&&typeof item.alt==='string'&&item.alt.trim().length>0;
 
-export function componentTooltip(item,details,getMediaName,getMediaSize=()=>undefined,getMediaMime=()=> ''){
+export function componentTooltip(item,details,getMediaName,getMediaSize=()=>undefined,getMediaMime=()=> '',getMediaUsage=()=>undefined){
   let title=localFileTooltip(item,details,getMediaName);
   if(typeof item?.label!=='string'||typeof details!=='string')return title;
   const heading=item.label+'\n'+details;
@@ -51,6 +59,8 @@ export function componentTooltip(item,details,getMediaName,getMediaSize=()=>unde
     if(validFileSize(size))title=(title||heading)+'\nTamaño del archivo: '+fileSizeLabel(size);
     const mime=componentMediaMime(item,getMediaMime);
     if(mime)title=(title||heading)+'\nFormato del archivo: '+MEDIA_FORMAT_LABELS[mime];
+    let usage;try{usage=getMediaUsage(item.value);}catch{}
+    if(Number.isSafeInteger(usage)&&usage>0)title=(title||heading)+'\nUso del archivo: '+usage+' '+(usage===1?'componente':'componentes');
   }
   return title;
 }

@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {JSDOM} from 'jsdom';
-import {localFileTooltip,localMediaName,localMediaSize,localMediaMime,componentTooltip,hasImageDescription} from '../sites/file-tooltip.mjs';
+import {localFileTooltip,localMediaName,localMediaSize,localMediaMime,componentTooltip,hasImageDescription,createLocalMediaUsage} from '../sites/file-tooltip.mjs';
 import {createMediaLibrary} from '../sites/media.mjs';
 const ref=n=>'ain-local:'+n.repeat(64);
 const item=(type='image',value=ref('a'))=>({id:'ain-1',type,value,label:'Introducción',alt:'Foto del pingüino'});
@@ -9,6 +9,25 @@ function asset(id,name,type,mime){
   const blob=new Blob(['x'],{type:mime});for(const method of ['arrayBuffer','stream','slice'])Object.defineProperty(blob,method,{get(){throw Error('La ayuda no puede leer bytes');}});
   return {id,name,type,mime,size:blob.size,blob};
 }
+test('el uso cuenta instancias image/video por referencia exacta en toda la copia, con ocultos y duplicados, consultando sólo el descriptor propio',()=>{
+  const first=item(),copy={...first,id:'ain-2',hidden:true},sameRefVideo={...item('video'),id:'ain-3'},other=item('video',ref('b')),sameName=item('image',ref('c')),items=[first,copy,sameRefVideo,other,sameName,item('graphic'),item('background'),item('text'),item('image','https://example.org/a.png'),item('video','ain-local:invalida'),null],before=JSON.stringify(items),calls=[],records=new Map(['a','b','c'].map(n=>[ref(n),{id:ref(n)}]));
+  for(const record of records.values())for(const key of ['blob','name','mime','size'])Object.defineProperty(record,key,{get(){throw Error('El uso sólo requiere el ID del descriptor propio');}});
+  const library={records(ids){calls.push([...ids]);return [...ids].map(id=>records.get(id));}},usage=createLocalMediaUsage(library,items);assert.deepEqual(calls,[]);assert.equal(usage(ref('a')),3);assert.equal(usage(ref('b')),1);assert.equal(usage(ref('c')),1);assert.equal(usage(ref('d')),undefined);assert.equal(usage('https://example.org/a.png'),undefined);assert.equal(usage('ain-local:invalida'),undefined);assert.deepEqual(calls,[[ref('a')],[ref('b')],[ref('c')]]);assert.equal(JSON.stringify(items),before);
+  const revised=createLocalMediaUsage(library,items.filter(i=>i!==copy&&i!==sameRefVideo));assert.equal(revised(ref('a')),1);assert.equal(usage(ref('a')),3);
+});
+test('sin array, descriptor propio o referencia válida no se inventa uso ni se convierten objetos',()=>{
+  const noRead={records(){throw Error('No consultar descriptores');}};for(const items of [undefined,null,{},'items',[],[item('graphic')],[item('image','https://example.org/a.png')]])assert.equal(createLocalMediaUsage(noRead,items)(ref('a')),undefined);
+  for(const library of [{records:()=>[]},{records:()=>[{id:ref('b')}]},noRead])assert.equal(createLocalMediaUsage(library,[item()])(ref('a')),undefined);
+  const object={toString(){throw Error('No convertir referencias');}};assert.equal(createLocalMediaUsage(noRead,[item('image',object)])(object),undefined);
+});
+test('la ayuda añade uso singular/plural conservando metadatos, texto visible, atributos y datos; otros tipos o usos inválidos mantienen la ayuda',()=>{
+  for(const type of ['image','video'])for(const count of [1,5]){
+    const media={...item(type),animation:'rise',duration:1.2,delay:0,hidden:true},before=JSON.stringify(media),prior=componentTooltip(media,'Detalle <img src=x>',()=> 'Archivo AN\u0303O',()=>1234,()=>type==='image'?'image/jpeg':'video/mp4'),dom=new JSDOM('<button aria-pressed="true"><strong>Nombre completo</strong><span>Detalle literal</span></button>'),button=dom.window.document.querySelector('button'),visible=button.textContent,calls=[];
+    button.title=componentTooltip(media,'Detalle <img src=x>',()=> 'Archivo AN\u0303O',()=>1234,()=>type==='image'?'image/jpeg':'video/mp4',id=>{calls.push(id);return count;});assert.equal(button.title,prior+'\nUso del archivo: '+count+' '+(count===1?'componente':'componentes'));assert.deepEqual(calls,[ref('a')]);assert.equal(button.textContent,visible);assert.equal(button.getAttribute('aria-label'),null);assert.equal(button.getAttribute('aria-pressed'),'true');assert.equal(button.querySelectorAll('img,script').length,0);assert.equal(JSON.stringify(media),before);
+  }
+  const media=item(),prior=componentTooltip(media,'Imagen',()=> 'captura.png');for(const usage of [undefined,null,0,-1,1.5,Infinity,NaN,'5',true,Number.MAX_SAFE_INTEGER+1,{toString(){throw Error('No convertir uso');}}])assert.equal(componentTooltip(media,'Imagen',()=> 'captura.png',undefined,undefined,()=>usage),prior);assert.equal(componentTooltip(media,'Imagen',()=> 'captura.png',undefined,undefined,()=>{throw Error('Descriptor ausente');}),prior);
+  let calls=0;for(const value of [item('text'),item('graphic'),item('background'),item('image','https://example.org/a.png'),item('video','ain-local:invalida')])assert.equal(componentTooltip(value,'Detalle',()=> 'archivo',undefined,undefined,()=>{calls++;return 5;}),componentTooltip(value,'Detalle',()=> 'archivo'));assert.equal(calls,0);
+});
 test('el formato usa sólo MIME textual admitido del descriptor propio cargado, sin acceder a blob o convertir objetos',()=>{
   for(const [mime,type]of [['image/png','image'],['image/jpeg','image'],['image/webp','image'],['image/gif','image'],['image/avif','image'],['video/mp4','video'],['video/webm','video']]){
     const record=asset(ref('a'),'Nombre sin extensión',type,mime),library=createMediaLibrary([record]),calls=[],read={records(ids){calls.push([...ids]);return library.records(ids);}};Object.defineProperty(record,'blob',{get(){throw Error('No consultar blob.type o bytes');}});assert.equal(localMediaMime(read,ref('a')),mime);assert.deepEqual(calls,[[ref('a')]]);assert.equal(localMediaMime(read,ref('b')),'');
