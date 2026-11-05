@@ -37,6 +37,12 @@ export function createLocalMediaUsage(library,items){
   return ref=>{const count=counts.get(ref);return count!==undefined&&localMediaProperty(library,ref,'id')===ref?count:undefined;};
 }
 
+export function componentMediaUsage(item,getMediaUsage=()=>undefined){
+  if(!['image','video'].includes(item?.type)||!localReference(item.value))return;
+  let usage;try{usage=getMediaUsage(item.value);}catch{}
+  return Number.isSafeInteger(usage)&&usage>0?usage:undefined;
+}
+
 export function localFileTooltip(item,details,getMediaName){
   if(!['image','video'].includes(item?.type)||!localReference(item.value)||typeof item.label!=='string'||typeof details!=='string')return '';
   let name;try{name=getMediaName(item.value);}catch{return '';}
@@ -59,8 +65,8 @@ export function componentTooltip(item,details,getMediaName,getMediaSize=()=>unde
     if(validFileSize(size))title=(title||heading)+'\nTamaño del archivo: '+fileSizeLabel(size);
     const mime=componentMediaMime(item,getMediaMime);
     if(mime)title=(title||heading)+'\nFormato del archivo: '+MEDIA_FORMAT_LABELS[mime];
-    let usage;try{usage=getMediaUsage(item.value);}catch{}
-    if(Number.isSafeInteger(usage)&&usage>0)title=(title||heading)+'\nUso del archivo: '+usage+' '+(usage===1?'componente':'componentes');
+    const usage=componentMediaUsage(item,getMediaUsage);
+    if(usage!==undefined)title=(title||heading)+'\nUso del archivo: '+usage+' '+(usage===1?'componente':'componentes');
   }
   return title;
 }
