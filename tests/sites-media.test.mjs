@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {JSDOM} from 'jsdom';
 import {prepareLocalFile,createMediaLibrary,verifyMediaRecords,sniffMedia,importMedia,exportMedia,exportMediaURLs,referencedMedia,MAX_IMAGE,MAX_VIDEO,MAX_LIBRARY} from '../sites/media.mjs';
-import {createSiteSession,validateSite,DEFAULT_MEDIA_WIDTH,MIN_MEDIA_WIDTH,MAX_MEDIA_WIDTH} from '../sites/model.mjs';
+import {createSiteSession,validateSite,DEFAULT_MEDIA_WIDTH,MIN_MEDIA_WIDTH,MAX_MEDIA_WIDTH,DEFAULT_MEDIA_CORNER_RADIUS,MIN_MEDIA_CORNER_RADIUS,MAX_MEDIA_CORNER_RADIUS} from '../sites/model.mjs';
 import {mediaDropReplacement} from '../sites/drop.mjs';
 const dom=new JSDOM('<!doctype html>');globalThis.window=dom.window;globalThis.DOMParser=dom.window.DOMParser;
 globalThis.FileReader=class {readAsDataURL(blob){blob.arrayBuffer().then(bytes=>{this.result='data:'+blob.type+';base64,'+Buffer.from(bytes).toString('base64');this.onload();}).catch(()=>this.onerror());}};
@@ -14,6 +14,28 @@ const file=(bytes,name='prueba.png',type='application/octet-stream')=>new File([
 async function image(){return prepareLocalFile(file(png),{inspect:skip});}
 async function video(){return prepareLocalFile(file(mp4,'prueba.mp4'),{inspect:skip});}
 function project(){return {format:'ainimation-imported-site',version:1,title:'PortAventura · prueba',url:'https://www.portaventuranext.com/',html:'<!doctype html><html><head><title>PortAventura</title></head><body><h1><span data-ain-id="ain-0">PortAventura</span></h1></body></html>',warnings:[],links:[],items:[{id:'ain-0',type:'text',value:'PortAventura',label:'PortAventura',alt:'',animation:'none',duration:1.2,delay:0}]};}
+test('el redondeo de imagen y vídeo añadido es un paso reversible y cero se normaliza sin modificar el HTML anterior',()=>{
+  assert.equal(DEFAULT_MEDIA_CORNER_RADIUS,0);assert.equal(MIN_MEDIA_CORNER_RADIUS,0);assert.equal(MAX_MEDIA_CORNER_RADIUS,240);
+  for(const type of ['image','video']){
+    const s=createSiteSession(project()),id=s.addMedia(type,'https://media.org/'+(type==='image'?'cover.jpg':'clip.mp4')),before=s.draft,html=buildDocument(before);assert.equal(s.canSetMediaCornerRadius(id),true);s.edit(id,{cornerRadius:0});assert.deepEqual(s.draft,before);assert.equal(buildDocument(s.draft),html);s.undo();assert.deepEqual(s.draft,s.original);s.redo();s.edit(id,{cornerRadius:32});const after=s.draft;assert.deepEqual(after.items.find(i=>i.id===id),{...before.items.find(i=>i.id===id),cornerRadius:32});s.undo();assert.deepEqual(s.draft,before);s.redo();assert.deepEqual(s.draft,after);s.edit(id,{cornerRadius:0});assert.deepEqual(s.draft,before);assert.equal(buildDocument(s.draft),html);s.undo();assert.deepEqual(s.draft,after);
+    const raw=structuredClone(before);raw.items.find(i=>i.id===id).cornerRadius=0;assert.equal(Object.hasOwn(validateSite(raw).items.find(i=>i.id===id),'cornerRadius'),false);assert.equal(raw.items.find(i=>i.id===id).cornerRadius,0);
+  }
+});
+test('redondeo valida enteros y límites sin coerción, parches parciales o historial de valores rechazados',()=>{
+  const s=createSiteSession(project()),id=s.addMedia('image','https://media.org/cover.jpg');for(const cornerRadius of [1,MAX_MEDIA_CORNER_RADIUS]){s.edit(id,{cornerRadius});assert.equal(s.draft.items.find(i=>i.id===id).cornerRadius,cornerRadius);}const before=s.draft;
+  for(const cornerRadius of [-1,MAX_MEDIA_CORNER_RADIUS+1,.5,NaN,Infinity,-Infinity,'32','32px;position:fixed',null,undefined,false,{valueOf(){throw Error('No convertir objetos');}}]){assert.throws(()=>s.edit(id,{animation:'float',cornerRadius}),/redondeo/);assert.deepEqual(s.draft,before);const bad=structuredClone(before);bad.items.find(i=>i.id===id).cornerRadius=cornerRadius;assert.throws(()=>validateSite(bad),/redondeo/);}
+  s.undo();assert.equal(s.draft.items.find(i=>i.id===id).cornerRadius,1);
+});
+test('el redondeo no se edita ni se aplica a originales aunque lleven inserted, ni a otros tipos o flags falsos',()=>{
+  const p=project();p.html=p.html.replace('</body>','<img data-ain-id="ain-1" style="width:123px;border-radius:17px"></body>');p.items.push({...p.items[0],id:'ain-1',type:'image',value:'https://media.org/original.jpg',inserted:true,cornerRadius:120});const draft=structuredClone(p);draft.items.push({...p.items[1],id:'ain-2',inserted:'true',cornerRadius:undefined},{...p.items[0],id:'ain-3',inserted:true},{...p.items[1],id:'ain-4',type:'background',cornerRadius:undefined});delete draft.items[2].cornerRadius;delete draft.items[4].cornerRadius;const s=createSiteSession(p,draft),before=s.draft;
+  for(const id of ['ain-0','ain-1','ain-2','ain-3','ain-4','ain-999']){assert.equal(s.canSetMediaCornerRadius(id),false);assert.throws(()=>s.edit(id,{cornerRadius:32}),/no editable|desconocido/);}assert.deepEqual(s.draft,before);assert.deepEqual(s.original,p);const doc=new DOMParser().parseFromString(buildDocument(s.original),'text/html');assert.equal(doc.querySelector('img').style.borderRadius,'17px');assert.equal(doc.querySelector('img').style.width,'123px');
+  for(const id of ['ain-0','ain-2','ain-3','ain-4']){const bad=structuredClone(draft);bad.items.find(i=>i.id===id).cornerRadius=32;assert.throws(()=>validateSite(bad),/redondeo/);}
+});
+test('redondeo persiste al duplicar y reabrir, comparte archivos y exporta sólo el estilo del medio añadido sin wrappers o autoplay',async()=>{
+  const a=await image(),v=await video(),lib=createMediaLibrary([a,v]),s=createSiteSession(project()),[photo,clip]=s.addMediaBatch([{type:'image',value:a.id},{type:'video',value:v.id}]);s.edit(photo,{maxWidth:320,hidden:true,alt:'Descripción accesible',animation:'rise',duration:1.8,delay:.2});s.edit(clip,{maxWidth:480,animation:'zoom',duration:1.4,delay:.3});const before=s.draft;s.edit(photo,{cornerRadius:24});s.edit(clip,{cornerRadius:240});for(const old of before.items){const now=s.draft.items.find(i=>i.id===old.id),{cornerRadius,...rest}=now;assert.deepEqual(rest,old);}
+  const copy=s.duplicateMedia(photo);assert.equal(s.draft.items.find(i=>i.id===copy).cornerRadius,24);const entries=await exportMedia(lib,referencedMedia(s.original,s.draft));assert.equal(entries.length,2);assert.equal(lib.size,a.size+v.size);const reopened=await importMedia(JSON.parse(JSON.stringify(entries)),{inspect:skip}),restored=createSiteSession(s.original,JSON.parse(JSON.stringify(s.draft)));assert.deepEqual(restored.draft,s.draft);const doc=new DOMParser().parseFromString(buildDocument(restored.draft,{media:await exportMediaURLs(reopened,restored.draft)}),'text/html');
+  for(const [id,radius,width]of [[photo,24,320],[copy,24,320],[clip,240,480]]){const el=doc.querySelector('[data-ain-id="'+id+'"]');assert.equal(el.style.borderRadius,radius+'px');assert.equal(el.style.width,'min(100%, '+width+'px)');assert.equal(el.style.height,'auto');assert.equal(el.parentElement.id,'ain-added-media');}assert.equal(doc.querySelector('#ain-added-media').children.length,3);assert.equal(doc.querySelector('[data-ain-id="'+photo+'"]').hidden,true);assert.equal(doc.querySelector('video').controls,true);assert.equal(doc.querySelector('video').autoplay,false);assert.equal(doc.querySelectorAll('script').length,0);assert.deepEqual(s.original,project());
+});
 test('reconoce archivos por sus bytes, sin confiar en extensión o MIME',async()=>{
   assert.equal(sniffMedia(png),'image/png');assert.equal(sniffMedia(mp4),'video/mp4');
   const a=await prepareLocalFile(file(png,'falsa.html','text/html'),{inspect:skip});assert.equal(a.mime,'image/png');assert.match(a.id,/^ain-local:[a-f0-9]{64}$/);

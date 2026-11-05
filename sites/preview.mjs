@@ -1,5 +1,5 @@
 import {cleanDocument,cssURLs} from './import.mjs';
-import {validateSite,DEFAULT_MEDIA_WIDTH} from './model.mjs?v=20261104-visibility-1';
+import {validateSite,DEFAULT_MEDIA_WIDTH,DEFAULT_MEDIA_CORNER_RADIUS} from './model.mjs?v=20261105-corners-1';
 import {localReference} from './media.mjs';
 import {fileDropBridge} from './drop.mjs?v=20261104-replace-1';
 import {previewSoundBridge} from './sound.mjs?v=20261104-sound-1';
@@ -35,6 +35,7 @@ export function buildDocument(input,{channel='',interactive=false,dropChannel=''
     if(!el&&item.inserted===true&&['image','video'].includes(item.type)){
       let area=doc.getElementById('ain-added-media');if(!area){area=doc.createElement('section');area.id='ain-added-media';area.style.cssText='position:relative;inset:auto;padding:48px 6vw;background:#071b14;display:flex;gap:24px;flex-wrap:wrap';doc.body.append(area);}
       el=doc.createElement(item.type==='image'?'img':'video');el.setAttribute('data-ain-id',item.id);el.style.cssText='display:block;position:relative;inset:auto;width:min(100%,'+(item.maxWidth??DEFAULT_MEDIA_WIDTH)+'px);height:auto;object-fit:contain';area.append(el);
+      if(item.cornerRadius>DEFAULT_MEDIA_CORNER_RADIUS)el.style.borderRadius=item.cornerRadius+'px';
       if(item.hidden===true){el.hidden=true;el.style.setProperty('display','none','important');}
     }
     if(!el)throw Error('Falta un componente en la copia.');

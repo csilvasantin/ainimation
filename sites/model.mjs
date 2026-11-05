@@ -1,7 +1,9 @@
 import {localReference} from './media.mjs';
 export const ANIMATIONS=['none','fade','rise','zoom','float'];
 export const DEFAULT_MEDIA_WIDTH=640,MIN_MEDIA_WIDTH=80,MAX_MEDIA_WIDTH=3840;
+export const DEFAULT_MEDIA_CORNER_RADIUS=0,MIN_MEDIA_CORNER_RADIUS=0,MAX_MEDIA_CORNER_RADIUS=240;
 const validMediaWidth=value=>Number.isInteger(value)&&value>=MIN_MEDIA_WIDTH&&value<=MAX_MEDIA_WIDTH;
+const validMediaCornerRadius=value=>Number.isInteger(value)&&value>=MIN_MEDIA_CORNER_RADIUS&&value<=MAX_MEDIA_CORNER_RADIUS;
 export function normalizeURL(value){
   const u=new URL(/^[a-z]+:/i.test(value.trim())?value.trim():'https://'+value.trim());
   if(u.protocol!=='https:'||u.username||u.password)throw Error('Introduce una URL HTTPS.');
@@ -25,10 +27,11 @@ export function validateSite(p){
        !Number.isFinite(item.delay)||item.delay<0||item.delay>10||typeof item.alt!=='string'||item.alt.length>1000)throw Error('El site contiene un componente incompatible.');
     if(['image','video','background'].includes(item.type)&&item.value)mediaReference(item.value);
     if(Object.hasOwn(item,'maxWidth')&&(item.inserted!==true||!['image','video'].includes(item.type)||!validMediaWidth(item.maxWidth)))throw Error('El ancho de un medio añadido debe ser un entero entre 80 y 3840 píxeles.');
+    if(Object.hasOwn(item,'cornerRadius')&&(item.inserted!==true||!['image','video'].includes(item.type)||!validMediaCornerRadius(item.cornerRadius)))throw Error('El redondeo de un medio añadido debe ser un entero entre 0 y 240 píxeles.');
     if(Object.hasOwn(item,'hidden')&&(item.inserted!==true||!['image','video'].includes(item.type)||typeof item.hidden!=='boolean'))throw Error('El estado oculto de un medio añadido debe ser verdadero o falso.');
     ids.add(item.id);
   }
-  return structuredClone(p);
+  const normalized=structuredClone(p);for(const item of normalized.items)if(item.cornerRadius===DEFAULT_MEDIA_CORNER_RADIUS)delete item.cornerRadius;return normalized;
 }
 export function createSiteSession(input,saved){
   const original=validateSite(input);let states=[original],cursor=0;
@@ -42,14 +45,15 @@ export function createSiteSession(input,saved){
     return -1;
   };
   return {get draft(){return read();},get original(){return structuredClone(original);},get canUndo(){return cursor>0;},get canRedo(){return cursor<states.length-1;},
-    canRemoveMedia:addedMedia,canDuplicateMedia:addedMedia,canSetMediaWidth:addedMedia,canSetMediaVisibility:addedMedia,canRenameMedia:addedMedia,
+    canRemoveMedia:addedMedia,canDuplicateMedia:addedMedia,canSetMediaWidth:addedMedia,canSetMediaCornerRadius:addedMedia,canSetMediaVisibility:addedMedia,canRenameMedia:addedMedia,
     canMoveMedia:(id,direction)=>mediaNeighbor(id,direction)>=0,
     edit(id,patch){const p=read(),item=p.items.find(i=>i.id===id);if(!item)throw Error('Componente desconocido.');
-      const keys=['value','animation','duration','delay','alt',...(addedMedia(id)?['maxWidth','hidden','label']:[])];if(Object.keys(patch).some(k=>!keys.includes(k)))throw Error('Propiedad no editable.');
+      const keys=['value','animation','duration','delay','alt',...(addedMedia(id)?['maxWidth','cornerRadius','hidden','label']:[])];if(Object.keys(patch).some(k=>!keys.includes(k)))throw Error('Propiedad no editable.');
       if(Object.hasOwn(patch,'label')&&(typeof patch.label!=='string'||!patch.label.trim()||patch.label.trim().length>200))throw Error('Escribe un nombre de 1 a 200 caracteres.');
       if(Object.hasOwn(patch,'maxWidth')&&!validMediaWidth(patch.maxWidth))throw Error('Introduce un ancho entero entre 80 y 3840 píxeles.');
+      if(Object.hasOwn(patch,'cornerRadius')&&!validMediaCornerRadius(patch.cornerRadius))throw Error('Introduce un redondeo entero entre 0 y 240 píxeles.');
       if(Object.hasOwn(patch,'hidden')&&typeof patch.hidden!=='boolean')throw Error('El estado oculto debe ser verdadero o falso.');
-      Object.assign(item,patch);if(Object.hasOwn(patch,'label'))item.label=item.label.trim();if(Object.hasOwn(patch,'maxWidth')&&patch.maxWidth===DEFAULT_MEDIA_WIDTH)delete item.maxWidth;if(Object.hasOwn(patch,'hidden')&&patch.hidden===false)delete item.hidden;validateSite(p);if(JSON.stringify(p)===JSON.stringify(states[cursor]))return;
+      Object.assign(item,patch);if(Object.hasOwn(patch,'label'))item.label=item.label.trim();if(Object.hasOwn(patch,'maxWidth')&&patch.maxWidth===DEFAULT_MEDIA_WIDTH)delete item.maxWidth;if(Object.hasOwn(patch,'cornerRadius')&&patch.cornerRadius===DEFAULT_MEDIA_CORNER_RADIUS)delete item.cornerRadius;if(Object.hasOwn(patch,'hidden')&&patch.hidden===false)delete item.hidden;validateSite(p);if(JSON.stringify(p)===JSON.stringify(states[cursor]))return;
       states=states.slice(0,cursor+1);states.push(p);if(states.length>100)states.shift();cursor=states.length-1;},
     addMedia(type,value){return this.addMediaBatch([{type,value}])[0];},
     addMediaBatch(media){if(!Array.isArray(media)||!media.length||media.length>10)throw Error('Selecciona de uno a diez archivos.');const p=read();if(p.items.length+media.length>500)throw Error('Límite de componentes alcanzado.');
