@@ -4,6 +4,20 @@ import {execFileSync} from 'node:child_process';
 import {JSDOM} from 'jsdom';
 import {savedSiteLabel,savedSiteTooltip,updateSavedSiteOption,refreshLibraryTitle,orderSavedSiteOptions} from '../sites/library-label.mjs';
 const record=(id,updatedAt,importedAt)=>({id,updatedAt,draft:{title:'PortAventura NeXT',importedAt}});
+test('la ayuda cuenta sólo imágenes sin descripción textual, incluidas ocultas y referencias compartidas, sin leer archivos o convertir alt',()=>{
+  const shared='ain-local:'+'a'.repeat(64),described=['Foto del pingüino','  Introduccio\u0301n  ','<img src=x> literal'].map(alt=>({type:'image',alt,value:'https://media.org/photo.jpg'})),undescribed=['',' \t\n\u00a0 ',undefined,null,42,false,{toString(){throw Error('No convertir alt');}}].map(alt=>({type:'image',alt,value:shared,hidden:true})),other=['video','graphic','background','text','IMAGE'].map(type=>({type,alt:'',value:shared}));
+  for(const [items,count]of [[[],0],[described,0],[[undescribed[0]],1],[[...described,...undescribed,...other,null],7]]){
+    for(const item of items)if(item)Object.freeze(item);Object.freeze(items);const r={id:'A',draft:{title:'Copia',url:'https://example.org/',items}};Object.defineProperty(r,'assets',{get(){throw Error('No leer archivos');}});Object.defineProperty(r.draft,'html',{get(){throw Error('No leer HTML');}});Object.freeze(r.draft);Object.freeze(r);const before=JSON.stringify(r);
+    assert.ok(savedSiteTooltip(r).includes('\n'+count+' '+(count===1?'imagen':'imágenes')+' sin descripción\n'));assert.equal(JSON.stringify(r),before);assert.equal(r.draft.items,items);
+  }
+  for(const items of [undefined,null,'7',7,{length:7},new Set([1])]){const r={id:'A',draft:{title:'Copia',items}};assert.equal(savedSiteTooltip(r),savedSiteLabel(r));}
+});
+test('el recuento de imágenes sin descripción se sincroniza al guardar, seleccionar y ordenar conservando etiquetas, nodos, foco y datos',()=>{
+  const image=Object.freeze({type:'image',alt:'',value:'https://media.org/shared',hidden:true}),a={...record('A',300),draft:{title:'Copia A',url:'https://example.org/a',items:[image]}},b={...record('B',200),draft:{title:'Copia B',url:'https://example.org/b',items:[{...image,alt:'Descripción del AN\u0303O'}]}};
+  const {dom,select}=libraryUI([a,b]),nodes=[...select.options],before=JSON.stringify([a,b]);select.value='A';select.focus();refreshLibraryTitle(select);assert.ok(select.title.includes('\n1 imagen sin descripción\n'));
+  const updated={...a,draft:{...a.draft,items:[image,image,{...image,alt:'Foto del pingüino'}]}};updateSavedSiteOption(select,updated);orderSavedSiteOptions(select,[updated,b]);assert.ok(select.title.includes('\n2 imágenes sin descripción\n'));assert.equal(select.value,'A');assert.equal(select.selectedOptions[0],nodes[2]);assert.equal(nodes[2].textContent,savedSiteLabel(a));assert.equal(dom.window.document.activeElement,select);
+  select.value='B';refreshLibraryTitle(select);assert.ok(select.title.includes('\n0 imágenes sin descripción\n'));assert.equal(JSON.stringify([a,b]),before);assert.equal(updated.draft.items[0],image);assert.equal(updated.draft.items[1],image);
+});
 test('la fecha guardada se muestra con año y segundos en la zona local, incluso al cambiar de día',()=>{
   const url=new URL('../sites/library-label.mjs',import.meta.url).href;
   const code=`import {savedSiteLabel} from ${JSON.stringify(url)};console.log(savedSiteLabel({updatedAt:Date.parse('2026-11-04T23:30:15Z'),draft:{title:'PortAventura',importedAt:'2026-10-01T10:00:00Z'}}));`;
@@ -73,8 +87,8 @@ test('el tooltip de la selección conserva su URL al actualizar y ordenar copias
 test('la ayuda cuenta todos los componentes cargados, incluidos ocultos, con singular y plural y sin cambiar los registros',()=>{
   for(const [count,text]of [[0,'0 componentes'],[1,'1 componente'],[29,'29 componentes']]){
     const items=Object.freeze(Array.from({length:count},(_,index)=>Object.freeze({id:'ain-'+index,hidden:index%2===0}))),r=Object.freeze({id:'A',updatedAt:1790000000000,draft:Object.freeze({title:'Portada',url:'https://example.org/',items})}),before=JSON.stringify(r);
-    assert.equal(savedSiteTooltip(r),savedSiteLabel(r)+'\nhttps://example.org/\n'+text+'\n0 imágenes · 0 vídeos\n0 componentes con animación configurada');assert.equal(JSON.stringify(r),before);assert.equal(r.draft.items,items);
-    const withoutURL={...r,draft:{...r.draft,url:'no válida'}};assert.equal(savedSiteTooltip(withoutURL),savedSiteLabel(withoutURL)+'\n'+text+'\n0 imágenes · 0 vídeos\n0 componentes con animación configurada');
+    assert.equal(savedSiteTooltip(r),savedSiteLabel(r)+'\nhttps://example.org/\n'+text+'\n0 imágenes · 0 vídeos\n0 imágenes sin descripción\n0 componentes con animación configurada');assert.equal(JSON.stringify(r),before);assert.equal(r.draft.items,items);
+    const withoutURL={...r,draft:{...r.draft,url:'no válida'}};assert.equal(savedSiteTooltip(withoutURL),savedSiteLabel(withoutURL)+'\n'+text+'\n0 imágenes · 0 vídeos\n0 imágenes sin descripción\n0 componentes con animación configurada');
   }
   for(const items of [undefined,null,'29',29,{length:29},new Set([1,2])]){
     const r={...record('A',1790000000000),draft:{title:'Portada',url:'https://example.org/',items}};assert.equal(savedSiteTooltip(r),savedSiteLabel(r)+'\nhttps://example.org/');
