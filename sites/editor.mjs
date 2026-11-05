@@ -8,7 +8,7 @@ import {parseExpertCommand,EXPERT_HELP} from './expert.mjs';
 import {createFileDrop,previewMessageSource,mediaDropReplacement} from './drop.mjs?v=20261104-replace-1';
 import {createPreviewSound} from './sound.mjs?v=20261104-sound-1';
 import {createImagePaste} from './paste.mjs?v=20261104-paste-1';
-import {COMPONENT_LABELS,createComponentFilter,createComponentProvenance} from './filter.mjs?v=20261105-usage-filter-1';
+import {COMPONENT_LABELS,createComponentFilter,createComponentProvenance} from './filter.mjs?v=20261105-name-order-1';
 import {componentTooltip,localMediaName,localMediaSize,localMediaMime,hasImageDescription,createLocalMediaUsage} from './file-tooltip.mjs?v=20261105-usage-filter-1';
 import {createActiveSitePreference} from './active-site.mjs?v=20261105-active-1';
 import {updateSavedSiteOption,refreshLibraryTitle,orderSavedSiteOptions} from './library-label.mjs?v=20261105-library-description-count-1';
@@ -129,7 +129,7 @@ function paint(){if(!session.draft.items.some(i=>i.id===selected))selected=sessi
 async function open(record,prepared){
   const next=createSiteSession(record.original,record.draft),nextLibrary=prepared||await verifyMediaRecords(record.assets||[]);
   try{buildDocument(next.draft,{interactive:true,media:nextLibrary.previewMedia(next.draft)});buildDocument(next.original,{interactive:true,media:nextLibrary.previewMedia(next.original)});}catch(e){nextLibrary.dispose();throw e;}
-  mediaLibrary.dispose();mediaLibrary=nextLibrary;session=next;recordID=record.id;selected=session.draft.items[0]?.id||'';componentFilter.reset();componentFilter.expandSelectors();
+  mediaLibrary.dispose();mediaLibrary=nextLibrary;session=next;recordID=record.id;selected=session.draft.items[0]?.id||'';componentFilter.reset();componentFilter.resetOrder();componentFilter.expandSelectors();
   $('workspace').hidden=false;$('project-options').hidden=false;$('empty').hidden=true;$('site-title').textContent=session.draft.title;
   $('site-url').value=session.draft.url;$('source-url').href=session.draft.url;$('source-url').textContent=new URL(session.draft.url).hostname+' ↗';
   $('warnings').replaceChildren(...(session.draft.warnings||[]).map(w=>{const p=document.createElement('p');p.textContent=w;return p;}));
