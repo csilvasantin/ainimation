@@ -19,6 +19,7 @@ export function mountQuadraticHeader(header, {doc=header.ownerDocument, win=doc.
   const labelled = (node,es,en) => { node.dataset.shellEs=es; node.dataset.shellEn=en; node.textContent=t(es,en); return node; };
   const create = (tag,es,en) => labelled(doc.createElement(tag),es,en);
   const order=[], controls={}, layers={}, resizers=[];
+  const resizeScope=header.dataset.ainShell||(header.closest('dialog,#capsulaEditor')?'capsule-editor':'shell');
   header.classList.add('ain-quad-header');
   let tools=header.querySelector('.ain-quad-tools');
   if (!tools) { tools=doc.createElement('div'); tools.className='ain-quad-tools'; header.append(tools); }
@@ -50,7 +51,7 @@ export function mountQuadraticHeader(header, {doc=header.ownerDocument, win=doc.
     button.innerHTML='<svg viewBox="0 0 16 14" aria-hidden="true">'+ICONS[name]+'</svg>';
     button.setAttribute('aria-controls',layer.id);button.setAttribute('aria-expanded','false');controls[name]=button;
     button.onclick=()=>set(name,layer.hidden);
-    resizers.push(attachPanelResize(layer,{edge:({options:'right',advanced:'left',expert:'top'})[name],name,win,getTop:()=>Math.max(0,header.getBoundingClientRect().bottom)}));
+    resizers.push(attachPanelResize(layer,{edge:({options:'right',advanced:'left',expert:'top'})[name],name,scope:resizeScope,win,getTop:()=>Math.max(0,header.getBoundingClientRect().bottom)}));
     if(!buttons[name]) { if(name==='options')header.prepend(button);else tools.append(button); }
   }
   if(!panels.options) {
@@ -111,7 +112,7 @@ export function mountSiteShell(doc=document,win=window) {
       // Keep the native toggles and real controls in Sites and Produce.
       for(const [name,rail] of [['options','left'],['advanced','right'],['expert','bottom']]){
         const panel=doc.getElementById(name+'-panel')||doc.querySelector('.rail-'+rail);
-        if(panel){panel.id||='produce-'+rail;attachPanelResize(panel,{edge:({options:'right',advanced:'left',expert:'top'})[name],name,win,getTop:()=>Math.max(0,header.getBoundingClientRect().bottom)});}
+        if(panel){panel.id||='produce-'+rail;attachPanelResize(panel,{edge:({options:'right',advanced:'left',expert:'top'})[name],name,scope:'native',win,getTop:()=>Math.max(0,header.getBoundingClientRect().bottom)});}
       }
       continue;
     }
