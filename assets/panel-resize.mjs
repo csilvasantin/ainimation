@@ -2,12 +2,19 @@ const KEY = Symbol.for('ainimation.panelResize');
 const LABELS = {options:['Opciones','Options'],advanced:['Avanzado','Advanced'],expert:['Experto','Expert']};
 
 // Resize only the overlay. The stage, projects and window geometry are untouched.
-export function attachPanelResize(panel, {edge, name, getTop=()=>0, win=panel.ownerDocument.defaultView}={}) {
+export function attachPanelResize(panel, {edge, name, scope='page', getTop=()=>0, win=panel.ownerDocument.defaultView}={}) {
   if(panel[KEY])return panel[KEY];
   const doc=panel.ownerDocument,vertical=edge!=='top',dimension=vertical?'width':'height';
   const sign=edge==='right'?1:-1,handle=doc.createElement('div');
   const original={value:panel.style.getPropertyValue(dimension),priority:panel.style.getPropertyPriority(dimension)};
-  let selected=null,drag=null,stopped=false;
+  const path=win.location.pathname.replace(/\/index\.html$/,'/');
+  const storageKey='ainimation:panel-size:v1:'+encodeURIComponent(path)+':'+encodeURIComponent(scope)+':'+name+':'+dimension;
+  function readSize(){
+    try{const saved=JSON.parse(win.localStorage.getItem(storageKey)||'null');return saved?.version===1&&Number.isInteger(saved.size)&&saved.size>0&&saved.size<=32768?saved.size:null;}catch{return null;}
+  }
+  function saveSize(){try{if(selected>0)win.localStorage.setItem(storageKey,JSON.stringify({version:1,size:selected}));}catch{}}
+  function clearSize(){try{win.localStorage.removeItem(storageKey);}catch{}}
+  let selected=readSize(),drag=null,stopped=false;
   handle.className='ain-panel-resize ain-panel-resize-'+edge;
   handle.tabIndex=0;handle.setAttribute('role','separator');
   handle.setAttribute('aria-orientation',vertical?'vertical':'horizontal');
@@ -27,7 +34,7 @@ export function attachPanelResize(panel, {edge, name, getTop=()=>0, win=panel.ow
   }
   function sync(){
     if(stopped)return;
-    if(selected!==null){selected=clamp(selected);panel.style.setProperty(dimension,selected+'px','important');}
+    if(selected!==null)panel.style.setProperty(dimension,clamp(selected)+'px','important');
     const rect=panel.getBoundingClientRect(),{min,max}=bounds();
     handle.setAttribute('aria-valuemin',String(min));handle.setAttribute('aria-valuemax',String(max));
     const size=clamp(current());handle.setAttribute('aria-valuenow',String(size));handle.setAttribute('aria-valuetext',size+' px');
@@ -36,29 +43,31 @@ export function attachPanelResize(panel, {edge, name, getTop=()=>0, win=panel.ow
       left:(edge==='right'?rect.right-6:rect.left-6)+'px',top:rect.top+'px',width:'12px',height:rect.height+'px'
     }:{left:rect.left+'px',top:(rect.top-6)+'px',width:rect.width+'px',height:'12px'});
   }
-  function apply(value){selected=clamp(value);panel.style.setProperty(dimension,selected+'px','important');sync();}
-  function finish(){
+  function apply(value,persist=true){selected=clamp(value);panel.style.setProperty(dimension,selected+'px','important');sync();if(persist)saveSize();}
+  function finish(persist=true){
     if(!drag)return;
-    const id=drag.id;drag=null;
+    const {id,changed}=drag;drag=null;
     try{if(handle.hasPointerCapture?.(id))handle.releasePointerCapture(id);}catch{}
     handle.classList.remove('is-resizing');doc.documentElement.classList.remove('ain-panel-resizing');
+    if(persist!==false&&changed)saveSize();
   }
   function down(event){
     if(event.button!==0||drag)return;
     event.preventDefault();handle.focus({preventScroll:true});
-    drag={id:event.pointerId,position:vertical?event.clientX:event.clientY,size:current()};
+    drag={id:event.pointerId,position:vertical?event.clientX:event.clientY,size:current(),changed:false};
     try{handle.setPointerCapture(event.pointerId);}catch{}
     handle.classList.add('is-resizing');doc.documentElement.classList.add('ain-panel-resizing');
   }
   function move(event){
     if(!drag||event.pointerId!==drag.id)return;
-    event.preventDefault();apply(drag.size+sign*((vertical?event.clientX:event.clientY)-drag.position));
+    event.preventDefault();drag.changed=true;apply(drag.size+sign*((vertical?event.clientX:event.clientY)-drag.position),false);
   }
   function up(event){if(drag&&event.pointerId===drag.id)finish();}
   function reset(event){
     if(stopped)return;
-    event.preventDefault();event.stopPropagation();finish();
+    event.preventDefault();event.stopPropagation();finish(false);
     selected=null;
+    clearSize();
     // Remove our override: each surface keeps its responsive CSS default.
     panel.style.setProperty(dimension,original.value,original.priority);
     sync();

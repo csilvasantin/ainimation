@@ -3183,13 +3183,14 @@ body.is-cast-pointer-dragging .director-cast-window {
 }
 
 .home-page {
-  background: #0f1115;
-  color: #f8f7f2;
+  background: var(--ain-bg, #0f1115);
+  color: var(--ain-ink, #f8f7f2);
+  --lime: var(--ain-accent, #c8ff5f);
 }
 
 .home-page .site-header {
-  background: rgba(15, 17, 21, 0.84);
-  border-bottom-color: rgba(248, 247, 242, 0.14);
+  background: var(--ain-header-bg, rgba(15, 17, 21, 0.84));
+  border-bottom-color: var(--ain-line, rgba(248, 247, 242, 0.14));
 }
 
 .home-page .brand,

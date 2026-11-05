@@ -13,9 +13,15 @@ original de esa superficie, adaptado al viewport actual. No cierran el panel ni
 modifican su contenido. La ayuda del borde explica ambos gestos.
 
 Los paneles siguen superpuestos: redimensionar no modifica la posición ni el
-tamaño del lienzo, los datos del proyecto o la ventana. Cada panel conserva su
-tamaño al cerrarlo y volverlo a abrir en la misma página; no se guarda en el
-almacenamiento ni se restauran paneles abiertos en una carga nueva.
+tamaño del lienzo, los datos del proyecto o la ventana. El navegador guarda sólo
+la medida de cada panel, por sección y contexto (incluido el editor de cápsulas).
+Al volver a entrar se recuperan las medidas, pero los paneles siempre empiezan
+cerrados. El idioma, las consultas de la URL y los IDs de proyectos no cambian
+esta preferencia. Las rutas con `index.html` comparten preferencia con su carpeta.
+Las medidas se adaptan al espacio disponible sin sobrescribir el tamaño preferido
+cuando la ventana es más pequeña. Doble clic o Intro borran esa medida guardada.
+Si el almacenamiento está bloqueado o lleno, el ajuste funciona en la página
+actual sin interrumpir el editor ni tocar sus datos.
 
 El mismo comportamiento se instala en el shell compartido (incluidas las
 cápsulas) y en los paneles propios de Sites y Produce, conservando sus toggles y
