@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {JSDOM} from 'jsdom';
-import {localFileTooltip,localMediaName,componentTooltip,hasImageDescription} from '../sites/file-tooltip.mjs';
+import {localFileTooltip,localMediaName,localMediaSize,componentTooltip,hasImageDescription} from '../sites/file-tooltip.mjs';
 import {createMediaLibrary} from '../sites/media.mjs';
 const ref=n=>'ain-local:'+n.repeat(64);
 const item=(type='image',value=ref('a'))=>({id:'ain-1',type,value,label:'Introducción',alt:'Foto del pingüino'});
@@ -9,6 +9,25 @@ function asset(id,name,type,mime){
   const blob=new Blob(['x'],{type:mime});for(const method of ['arrayBuffer','stream','slice'])Object.defineProperty(blob,method,{get(){throw Error('La ayuda no puede leer bytes');}});
   return {id,name,type,mime,size:blob.size,blob};
 }
+test('el tamaño procede sólo del descriptor propio cargado, sin tocar blob, bytes ni otras referencias',()=>{
+  const records=[asset(ref('a'),'Compartida.png','image','image/png'),asset(ref('b'),'Otro.mp4','video','video/mp4')],library=createMediaLibrary(records),calls=[],read={records(ids){calls.push([...ids]);return library.records(ids);}};for(const record of records)Object.defineProperty(record,'blob',{get(){throw Error('No leer blob ni su tamaño');}});
+  assert.equal(localMediaSize(read,ref('a')),1);assert.equal(localMediaName(read,ref('a')),'Compartida.png');assert.deepEqual(calls,[[ref('a')],[ref('a')]]);assert.equal(localMediaSize(read,ref('c')),undefined);assert.equal(library.size,2);
+  const wrong={records:()=>[{id:ref('b'),name:'No corresponde',size:2000}]};assert.equal(localMediaSize(wrong,ref('a')),undefined);assert.equal(localMediaName(wrong,ref('a')),'');
+  for(const size of [undefined,null,'12',NaN,Infinity,-1,1.5,Number.MAX_SAFE_INTEGER+1,{valueOf(){throw Error('No convertir tamaño');}}])assert.equal(localMediaSize({records:()=>[{id:ref('a'),size}]},ref('a')),undefined);
+  for(const value of [0,999,1000,Number.MAX_SAFE_INTEGER])assert.equal(localMediaSize({records:()=>[{id:ref('a'),size:value}]},ref('a')),value);
+});
+test('la ayuda conserva los detalles y añade tamaño legible y bytes exactos, con cero y límites de unidades, sin modificar datos o DOM',()=>{
+  for(const [size,line]of [[0,'0 B'],[1,'1 B'],[999,'999 B'],[1000,'1 kB (1000 B)'],[1234,'1,23 kB (1234 B)'],[999999,'1 MB (999.999 B)'],[1000000,'1 MB (1.000.000 B)'],[2205463,'2,21 MB (2.205.463 B)'],[1000000000,'1 GB (1.000.000.000 B)']])for(const type of ['image','video']){
+    const media={...item(type),animation:'rise',duration:1.2,delay:0,hidden:true},before=JSON.stringify(media),prior=componentTooltip(media,'Detalle <img src=x>',()=> 'captura.png'),dom=new JSDOM('<button aria-pressed="true"><strong>Introducción</strong><span>Detalle</span></button>'),button=dom.window.document.querySelector('button'),visible=button.textContent,calls=[];button.title=componentTooltip(media,'Detalle <img src=x>',()=> 'captura.png',id=>{calls.push(id);return size;});
+    assert.equal(button.title,prior+'\nTamaño del archivo: '+line);assert.deepEqual(calls,[ref('a')]);assert.equal(button.textContent,visible);assert.equal(button.getAttribute('aria-label'),null);assert.equal(button.getAttribute('aria-pressed'),'true');assert.equal(button.querySelectorAll('img,script').length,0);assert.equal(JSON.stringify(media),before);
+  }
+  const largest=componentTooltip(item(),'Imagen',()=> 'captura.png',()=>Number.MAX_SAFE_INTEGER);assert.ok(largest.endsWith('Tamaño del archivo: 9,01 PB (9.007.199.254.740.991 B)'));
+});
+test('referencias remotas, otros tipos, tamaños inválidos o descriptor ausente conservan la ayuda previa sin consultas adicionales',()=>{
+  let calls=0;const getSize=()=>{calls++;throw Error('No consultar tamaños');};for(const media of [item('image','https://example.org/a.png'),item('video','ain-local:invalida'),item('text'),item('graphic'),item('background')])assert.equal(componentTooltip(media,'Detalle',()=> 'captura.png',getSize),componentTooltip(media,'Detalle',()=> 'captura.png'));assert.equal(calls,0);
+  const media={...item(),animation:'zoom',duration:1.3,delay:.1},before=componentTooltip(media,'Imagen',()=> 'captura.png');assert.equal(componentTooltip(media,'Imagen',()=> 'captura.png',getSize),before);
+  for(const size of [undefined,null,'12',NaN,Infinity,-1,1.5,Number.MAX_SAFE_INTEGER+1,{toString(){throw Error('No convertir');}}])assert.equal(componentTooltip(media,'Imagen',()=> 'captura.png',()=>size),before);
+});
 test('la ayuda muestra tiempos numéricos válidos de todos los presets y tipos, con cero, décimas y límites, sin cambiar datos o atributos accesibles',()=>{
   for(const type of ['text','image','video','graphic','background'])for(const animation of ['fade','rise','zoom','float'])for(const [duration,delay,line]of [[1.2,0,'Duración: 1,2 s · Retraso: 0 s'],[.2,10,'Duración: 0,2 s · Retraso: 10 s'],[10,.5,'Duración: 10 s · Retraso: 0,5 s']]){
     const value={...item(type,'https://example.org/media'),animation,duration,delay,hidden:true},before=JSON.stringify(value),dom=new JSDOM('<button aria-pressed="true"><strong>Introducción</strong><span>Detalle literal &lt;img src=x&gt;</span></button>'),button=dom.window.document.querySelector('button'),visible=button.textContent;
