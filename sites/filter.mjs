@@ -14,8 +14,12 @@ export function createComponentProvenance(session){
 export function createComponentFilter({document=globalThis.document,onChange,getMediaName=()=>'',getMediaMime=()=>'',isLocked=()=>false}){
   const search=document.getElementById('filter'),type=document.getElementById('component-type'),visibility=document.getElementById('component-visibility'),animation=document.getElementById('component-animation'),provenance=document.getElementById('component-provenance'),status=document.getElementById('component-results');
   const description=document.getElementById('component-description'),format=document.getElementById('component-format'),resetButton=document.getElementById('reset-component-filters');let total=0;
+  const selectors=document.getElementById('component-selectors'),toggleButton=document.getElementById('toggle-component-selectors');
+  function setSelectorsExpanded(expanded){
+    selectors.hidden=!expanded;const label=(expanded?'Ocultar':'Mostrar')+' selectores de filtro';toggleButton.setAttribute('aria-expanded',String(expanded));toggleButton.setAttribute('aria-label',label);toggleButton.title=label;
+  }
   const hasFilters=()=>search.value!==''||type.value!=='all'||visibility.value!=='all'||animation.value!=='all'||provenance.value!=='all'||description.value!=='all'||format.value!=='all';
-  function syncAvailability(){resetButton.disabled=isLocked()||!hasFilters();}
+  function syncAvailability(){resetButton.disabled=isLocked()||!hasFilters();toggleButton.disabled=isLocked();}
   function reset(){search.value='';type.value='all';visibility.value='all';animation.value='all';provenance.value='all';description.value='all';format.value='all';syncAvailability();}
   type.replaceChildren(...Object.entries({all:'Todos',...COMPONENT_LABELS}).map(([value,label])=>{
     const option=document.createElement('option');option.value=value;option.textContent=label;return option;
@@ -27,6 +31,8 @@ export function createComponentFilter({document=globalThis.document,onChange,get
     if(isLocked()||!hasFilters())return;
     reset();onChange();status.textContent='Filtros restablecidos. '+total+' '+(total===1?'componente.':'componentes.');status.hidden=false;
   });
+  toggleButton.addEventListener('click',()=>{if(!isLocked())setSelectorsExpanded(selectors.hidden);});
+  setSelectorsExpanded(true);
   syncAvailability();
   return {
     apply(items,isHidden,getProvenance=()=>'',selected=''){
@@ -48,7 +54,7 @@ export function createComponentFilter({document=globalThis.document,onChange,get
       status.hidden=kind==='all'&&state==='all'&&motion==='all'&&origin==='all'&&altState==='all'&&mime==='all'&&!query&&matches.length>0&&!selectionOutside;
       return matches;
     },
-    reset,syncAvailability,
+    reset,syncAvailability,expandSelectors:()=>setSelectorsExpanded(true),
     locate(id){
       const list=document.getElementById('components'),target=[...list.children].find(node=>node.dataset.item===id);
       if(!target)return false;

@@ -22,3 +22,5 @@
 .component-search{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:flex-end}.component-search #filter{flex:1 1 140px;min-width:0}.component-search-actions{display:flex;flex:none;gap:8px}.locate-selection-button,.reset-filters-button{display:grid;place-items:center;width:42px;height:42px;padding:10px}.locate-selection-button svg,.reset-filters-button svg{width:21px;height:21px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
 
 #site-library{width:100%;min-width:0;text-overflow:ellipsis}
+
+.components-heading{display:flex;align-items:center;justify-content:space-between;gap:8px;min-width:0;margin:20px 0 14px}.components-heading h3{margin:0;min-width:0}.component-selectors{display:grid;gap:10px;min-width:0}.component-selectors>*{min-width:0}.toggle-filters-button{display:grid;place-items:center;flex:none;width:38px;height:38px;padding:8px}.toggle-filters-button svg{width:21px;height:21px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}.toggle-filters-button[aria-expanded="false"] svg{transform:rotate(180deg)}
