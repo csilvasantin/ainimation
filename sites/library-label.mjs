@@ -8,11 +8,16 @@ export function savedSiteLabel(record){
   const project=record.draft,date=savedDate(record);
   return project.title+' · copia'+(date?' · '+dateFormat.format(date):'');
 }
-export function refreshLibraryTitle(select){select.title=select.selectedOptions[0]?.textContent||'';}
+export function savedSiteTooltip(record){
+  const label=savedSiteLabel(record),value=record.draft.url;
+  if(typeof value!=='string')return label;
+  try{const url=new URL(value);return url.protocol==='https:'&&!url.username&&!url.password?label+'\n'+value:label;}catch{return label;}
+}
+export function refreshLibraryTitle(select){const option=select.selectedOptions[0];select.title=option?.title||option?.textContent||'';}
 export function updateSavedSiteOption(select,record){
   let option=[...select.options].find(o=>o.value===record.id);
   if(!option){option=select.ownerDocument.createElement('option');option.value=record.id;select.append(option);}
-  option.textContent=savedSiteLabel(record);option.title=option.textContent;refreshLibraryTitle(select);return option;
+  option.textContent=savedSiteLabel(record);option.title=savedSiteTooltip(record);refreshLibraryTitle(select);return option;
 }
 export function orderSavedSiteOptions(select,records){
   const options=[...select.options],byID=new Map(options.map(option=>[option.value,option]));

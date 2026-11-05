@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {execFileSync} from 'node:child_process';
 import {JSDOM} from 'jsdom';
-import {savedSiteLabel,updateSavedSiteOption,refreshLibraryTitle,orderSavedSiteOptions} from '../sites/library-label.mjs';
+import {savedSiteLabel,savedSiteTooltip,updateSavedSiteOption,refreshLibraryTitle,orderSavedSiteOptions} from '../sites/library-label.mjs';
 const record=(id,updatedAt,importedAt)=>({id,updatedAt,draft:{title:'PortAventura NeXT',importedAt}});
 test('la fecha guardada se muestra con año y segundos en la zona local, incluso al cambiar de día',()=>{
   const url=new URL('../sites/library-label.mjs',import.meta.url).href;
@@ -55,4 +55,18 @@ test('tras actualizar una etiqueta la copia recién guardada sube sin cambiar la
   const updated={...b,updatedAt:400};saved.set('B',updated);updateSavedSiteOption(select,updated);const before=JSON.stringify([...saved]);orderSavedSiteOptions(select,saved.values());
   assert.deepEqual([...select.options].map(o=>o.value),['preset','new','B','A']);assert.equal(select.value,'A');assert.equal(select.title,savedSiteLabel(a));assert.equal(nodes.get('B').title,savedSiteLabel(updated));assert.equal(select.options.length,4);
   for(const option of select.options)assert.equal(option,nodes.get(option.value));assert.equal(JSON.stringify([...saved]),before);assert.deepEqual([...saved.keys()],['A','B']);assert.equal(saved.get('A').assets,saved.get('B').assets);assert.equal(saved.get('B').assets[0],asset);
+});
+test('el tooltip añade sólo una URL HTTPS válida como texto literal y conserva la etiqueta y los datos originales',()=>{
+  const url='HTTPS://Example.org/página?texto=<img src=x onerror=alert(1)>#capítulo',r=Object.freeze({id:'A',updatedAt:1790000000000,draft:Object.freeze({title:'Portada',url})}),before=JSON.stringify(r);
+  assert.equal(savedSiteTooltip(r),savedSiteLabel(r)+'\n'+url);assert.equal(JSON.stringify(r),before);
+  const {select}=libraryUI([r]),option=select.options[2];assert.equal(option.childElementCount,0);assert.equal(option.textContent,savedSiteLabel(r));assert.equal(option.title,savedSiteTooltip(r));
+  for(const value of [undefined,null,'','/ruta','no es una URL','https://exa mple.org/','http://example.org/','javascript:alert(1)','data:text/html,<b>hola</b>','file:///tmp/site.html','https://persona:clave@example.org/',{toString(){throw Error('No convertir objetos');}}]){
+    const invalid={...r,draft:{...r.draft,url:value}};assert.equal(savedSiteTooltip(invalid),savedSiteLabel(invalid));
+  }
+});
+test('el tooltip de la selección conserva su URL al actualizar y ordenar copias, sin cambios de nombre, valor o foco',()=>{
+  const a={...record('A',300),draft:{title:'Mismo título',url:'https://example.org/uno'}},b={...record('B',200),draft:{title:'Mismo título',url:'https://example.org/dos?x=1&y=2'}};
+  const {dom,select}=libraryUI([a,b]),before=JSON.stringify([a,b]),options=[...select.options];select.value='B';select.focus();refreshLibraryTitle(select);assert.equal(select.title,savedSiteTooltip(b));
+  const updated={...a,updatedAt:400};updateSavedSiteOption(select,updated);orderSavedSiteOptions(select,[updated,b]);assert.equal(select.value,'B');assert.equal(select.selectedOptions[0],options[3]);assert.equal(select.title,savedSiteTooltip(b));assert.equal(dom.window.document.activeElement,select);
+  select.value='A';refreshLibraryTitle(select);assert.equal(select.title,savedSiteTooltip(updated));select.value='new';refreshLibraryTitle(select);assert.equal(select.title,'Otra URL…');assert.equal(JSON.stringify([a,b]),before);
 });
