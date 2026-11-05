@@ -1,15 +1,6 @@
-/* AINimation Studio UI tokens. Authored presentations keep their own themes. */
-:root{--ain-bg:#0f1115;--ain-surface:#171a1f;--ain-ink:#f8f7f2;--ain-muted:rgba(248,247,242,.68);--ain-line:rgba(248,247,242,.14);--ain-accent:#c8ff5f;--ain-accent-ink:#0f1115;--ain-font:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;--ain-radius:0px;--ain-header-bg:rgba(15,17,21,.84)}
-:root[data-ain-meta="studio"]{color-scheme:dark;--bg:var(--ain-bg);--fg:var(--ain-ink);--ink:var(--ain-ink);--muted:var(--ain-muted);--dim:var(--ain-muted);--accent:var(--ain-accent);--lime:var(--ain-accent);--card:var(--ain-surface);--line:var(--ain-line);background:var(--ain-bg);color:var(--ain-ink);font-family:var(--ain-font)}
-html[data-ain-meta="studio"] body{background:var(--ain-bg);color:var(--ain-ink);font-family:var(--ain-font)}
-html[data-ain-meta="studio"] :is(.hub-header,.shell-header){background:var(--ain-header-bg);border-color:var(--ain-line);padding:14px clamp(18px,4vw,48px)}
-html[data-ain-meta="studio"] .brand{display:inline-flex;align-items:center;gap:10px;font-family:var(--ain-font);font-weight:800;letter-spacing:0;color:var(--ain-ink);font-size:16px;text-decoration:none}
-html[data-ain-meta="studio"] .brand .brand-mark{display:inline-grid;place-items:center;width:28px;height:28px;color:var(--ain-accent);font-size:15px;font-weight:900;flex-shrink:0}
-html[data-ain-meta="studio"] .brand .brand-title{color:var(--ain-ink)}
-html[data-ain-meta="studio"] .brand small{font:500 10px/1.3 var(--ain-font);color:var(--ain-muted);letter-spacing:.08em;margin:0}
-html[data-ain-meta="studio"] .nav-links{display:flex;align-items:center;gap:16px;min-width:0;font-size:12px;white-space:nowrap;color:var(--ain-muted)}
-html[data-ain-meta="studio"] .nav-links a{text-decoration:none;color:inherit}
-html[data-ain-meta="studio"] .nav-links a:hover{color:var(--ain-ink)}
+/* Shared Matrix UI. Authored presentations keep their own themes. */
+:root:is([data-ain-meta="studio"],[data-ain-meta="matrix"]){color-scheme:dark;--bg:var(--ain-bg);--fg:var(--ain-ink);--ink:var(--ain-ink);--muted:var(--ain-muted);--dim:var(--ain-muted);--accent:var(--ain-accent);--lime:var(--ain-accent);--card:var(--ain-surface);--line:var(--ain-line);background:var(--ain-bg);color:var(--ain-ink);font-family:var(--ain-font)}
+html:is([data-ain-meta="studio"],[data-ain-meta="matrix"]) body{background:var(--ain-bg);color:var(--ain-ink);font-family:var(--ain-font)}
 html[data-ain-meta="studio"] :is(.cta,.primary){background:var(--ain-accent);color:var(--ain-accent-ink);border:1px solid var(--ain-accent);border-radius:var(--ain-radius);min-height:44px}
 html[data-ain-meta="studio"] :is(.card,.component-panel,.inspector){background:var(--ain-surface);border-color:var(--ain-line);border-radius:var(--ain-radius)}
 html[data-ain-meta="studio"] .badge.live{background:color-mix(in srgb,var(--ain-accent) 12%,transparent);border-color:color-mix(in srgb,var(--ain-accent) 40%,transparent);color:var(--ain-accent)}
@@ -17,15 +8,10 @@ html[data-ain-meta="studio"] :is(.hero h1,.intro h1){font-family:var(--ain-font)
 html[data-ain-meta="studio"] :is(.toolbar button,.toolbar select,.toolbar input,.ain-quad-panel input,.ain-quad-panel select,.ain-quad-panel textarea){border-radius:var(--ain-radius)}
 html[data-ain-meta="studio"] :is(.cta,button,a,input,select,textarea):focus-visible{outline:2px solid var(--ain-accent);outline-offset:3px}
 
-/* Matrix home: the same palette as the Interactivos entry, scoped to this page. */
-:root[data-ain-meta="matrix"]{color-scheme:dark;--ain-bg:#020805;--ain-surface:#041109;--ain-ink:#d1ffda;--ain-muted:#83bc90;--ain-line:#176b32;--ain-accent:#00ff41;--ain-accent-ink:#001a06;--ain-header-bg:#020805ed;--paper:var(--ain-bg);--panel:var(--ain-surface);--muted:var(--ain-muted);--line:var(--ain-line);--coral:var(--ain-accent);--cyan:#00c853;--violet:var(--ain-muted);--gold:#b7f8a7;--shadow:0 0 24px #00ff4108}
+/* Public surfaces share Matrix with Interactivos; authored canvases stay scoped. */
+:root[data-ain-meta="matrix"]{--paper:var(--ain-bg);--panel:var(--ain-surface);--muted:var(--ain-muted);--line:var(--ain-line);--coral:var(--ain-accent);--cyan:#00c853;--violet:var(--ain-muted);--gold:#b7f8a7;--shadow:0 0 24px #00ff4108}
 html[data-ain-meta="matrix"] .home-page{background-color:var(--ain-bg);background-image:linear-gradient(90deg,#00ff4105 1px,transparent 1px),linear-gradient(#00ff4104 1px,transparent 1px);background-size:32px 32px;color:var(--ain-ink)}
 html[data-ain-meta="matrix"] .home-hero{background:transparent}
-html[data-ain-meta="matrix"] .brand{color:var(--ain-accent)}
-html[data-ain-meta="matrix"] .brand-mark{background:var(--ain-accent);color:var(--ain-accent-ink)}
-html[data-ain-meta="matrix"] .nav-links{color:var(--ain-muted)}
-html[data-ain-meta="matrix"] .nav-links a:hover{color:var(--ain-accent)}
-html[data-ain-meta="matrix"] .nav-lang{color:var(--ain-accent);background:transparent;border-color:var(--ain-line);border-radius:0;opacity:1}
 html[data-ain-meta="matrix"] :is(.home-copy h1,h2,h3,.section-kicker,.home-block span){color:var(--ain-accent)}
 html[data-ain-meta="matrix"] :is(.home-copy .hero-copy,.section-heading p,.process-layout>div>p,.home-block p,.home-next p:not(.section-kicker),.engine-showcase figcaption){color:var(--ain-muted)}
 html[data-ain-meta="matrix"] :is(.home-blocks,.home-page #work,.process-section,#engine,.home-next,.contact-section,.site-footer){background:var(--ain-surface);color:var(--ain-ink);border-color:var(--ain-line)}
@@ -39,12 +25,12 @@ html[data-ain-meta="matrix"] .home-page button{background:transparent;color:var(
 html[data-ain-meta="matrix"] .button.primary,html[data-ain-meta="matrix"] .ain-quad-command button{background:var(--ain-accent);border-color:var(--ain-accent);color:var(--ain-accent-ink)}
 html[data-ain-meta="matrix"] .button.secondary{color:var(--ain-accent);background:transparent}
 html[data-ain-meta="matrix"] .hero-digital-twin{filter:drop-shadow(0 22px 60px #00ff4120)}
-html[data-ain-meta="matrix"] .ain-quad-control{color:var(--ain-muted);border-color:var(--ain-line)}
-html[data-ain-meta="matrix"] .ain-quad-control[aria-expanded=true]{color:var(--ain-accent);border-color:var(--ain-accent)}
-html[data-ain-meta="matrix"] .ain-panel-resize::after{background:var(--ain-accent)}
-html[data-ain-meta="matrix"] .ain-panel-resize:hover{outline-color:var(--ain-accent)}
-html[data-ain-meta="matrix"] .ain-quad-panel{border-color:var(--ain-line)!important}
-html[data-ain-meta="matrix"] .ain-quad-panel label{color:var(--ain-ink)}
-html[data-ain-meta="matrix"] .ain-quad-panel :is(input,select,textarea){background:#010904;color:var(--ain-ink);border-color:var(--ain-line)}
-html[data-ain-meta="matrix"] .ain-quad-command input::placeholder{color:var(--ain-muted)}
 html[data-ain-meta="matrix"] :is(a,button,input,select,textarea,[role=separator]):focus-visible{outline-color:var(--ain-accent)}
+html[data-ain-meta="matrix"] body{background-image:linear-gradient(90deg,#00ff4105 1px,transparent 1px),linear-gradient(#00ff4104 1px,transparent 1px);background-size:32px 32px}
+html[data-ain-meta="matrix"] :is(h1,.hero h1,.site-footer span:first-child){color:var(--ain-accent)}
+html[data-ain-meta="matrix"] :is(.cta,.primary){background:var(--ain-accent);color:var(--ain-accent-ink);border:1px solid var(--ain-accent);border-radius:0}
+html[data-ain-meta="matrix"] :is(.card,.xp-card){background:var(--ain-surface);border:1px solid var(--ain-line);border-radius:0}
+html[data-ain-meta="matrix"] .xp-meta li{border-color:var(--ain-line);border-radius:0;color:var(--ain-muted)}
+html[data-ain-meta="matrix"] .xp-actions .button{font-family:var(--ain-font)}
+html[data-ain-meta="matrix"] :is(.badge.live,.badge.soon){border-color:var(--ain-line);border-radius:0;color:var(--ain-muted);background:transparent}
+html[data-ain-meta="matrix"] .badge.live{color:var(--ain-accent);background:#062911}

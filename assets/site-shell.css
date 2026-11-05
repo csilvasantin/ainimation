@@ -1,3 +1,6 @@
+/* One Matrix palette for application chrome on every route, including editors.
+   Exported artwork and iframe documents do not load this stylesheet. */
+:root{color-scheme:dark;--ain-bg:#020805;--ain-surface:#041109;--ain-ink:#d1ffda;--ain-muted:#83bc90;--ain-line:#176b32;--ain-accent:#00ff41;--ain-accent-ink:#001a06;--ain-header-bg:#020805ed;--ain-font:'JetBrains Mono','IBM Plex Mono',ui-monospace,SFMono-Regular,Menlo,monospace;--ain-radius:0px}
 /* Panels overlay the page and start closed; only their dimensions persist. */
 .ain-quad-header{gap:12px!important;min-width:0;flex-wrap:wrap}
 .ain-quad-header>.brand{flex-shrink:0}
@@ -49,4 +52,26 @@ html.ain-panel-resizing iframe{pointer-events:none!important}
 .ain-quad-panel .reference{margin-top:20px}
 .ain-presentation-quad .editor-layout{grid-template-columns:minmax(0,1fr)}
 .ain-quad-header .badge{display:none}
+/* Page-specific styles must not change the public navigation's appearance. */
+html [data-ain-shell].ain-quad-header,html [data-ain-shell="native"]{display:flex;align-items:center;justify-content:space-between;box-sizing:border-box;padding:14px clamp(18px,3vw,40px);gap:12px;min-height:69px;background:var(--ain-header-bg);color:var(--ain-muted);border-bottom:1px solid var(--ain-line);font:14px/1.4 var(--ain-font)}
+html [data-ain-shell] .brand{display:inline-flex;align-items:center;gap:10px;flex-shrink:0;margin:0;color:var(--ain-accent);font:800 16px/1 var(--ain-font);letter-spacing:0;text-transform:uppercase;text-decoration:none;white-space:nowrap}
+html [data-ain-shell] .brand-title{color:inherit}
+html [data-ain-shell] :is(.brand-mark,.brand>b){display:inline-grid;place-items:center;flex:0 0 32px;box-sizing:border-box;width:32px;height:32px;padding:0;background:var(--ain-accent);color:var(--ain-accent-ink);border-radius:0;font:800 16px/1 var(--ain-font)}
+html [data-ain-shell] :is(.nav-links,nav[aria-label="Secciones"]){display:flex;align-items:center;gap:clamp(8px,1.2vw,16px);min-width:0;color:var(--ain-muted);font:14px/1.4 var(--ain-font);white-space:nowrap}
+html [data-ain-shell] nav a{color:var(--ain-muted);text-decoration:none}
+html [data-ain-shell] nav a:is(:hover,[aria-current="page"]){color:var(--ain-accent)}
+html [data-ain-shell].ain-quad-header :is(.nav-lang,.lang,.entry-language-toggle){display:inline-flex;align-items:center;justify-content:center;box-sizing:border-box;flex:0 0 auto;min-width:52px;height:40px;min-height:40px;margin:0;padding:0 10px;border:1px solid var(--ain-line);border-radius:0;background:transparent;color:var(--ain-accent);opacity:1;font:13px/1 var(--ain-font);cursor:pointer}
+html [data-ain-shell] .ain-quad-control{color:var(--ain-accent);border-color:var(--ain-line)}
+.ain-quad-control[aria-expanded=true]{color:var(--ain-accent);border-color:var(--ain-accent)}
+.ain-quad-control:focus-visible,.ain-quad-panel :focus-visible{outline-color:var(--ain-accent)}
+.ain-quad-panel{border-color:var(--ain-line)!important;font-family:var(--ain-font)}
+.ain-quad-panel-heading h2{font-family:var(--ain-font)}
+.ain-quad-panel-heading button{border-color:var(--ain-line)}
+.ain-quad-panel label{color:var(--ain-ink)}
+.ain-quad-panel :is(select,input:not([type=checkbox]):not([type=color]),textarea){background:#010904;color:var(--ain-ink);border-color:var(--ain-line)}
+.ain-panel-resize::after{background:var(--ain-accent)}
+.ain-panel-resize:is(:hover,:focus-visible,.is-resizing){outline-color:var(--ain-accent)}
+.ain-quad-command button{background:var(--ain-accent);color:var(--ain-accent-ink);border-color:var(--ain-accent)}
+.ain-quad-command input::placeholder{color:var(--ain-muted)}
+.ain-quad-expert-cli .ain-quad-log{border-color:var(--ain-line)}
 @media(max-width:640px){.ain-quad-header{padding:12px!important;gap:8px!important}.ain-quad-header>.brand{font-size:14px}.ain-quad-header .brand small{display:none}.ain-quad-header>.nav-links,.ain-quad-header>nav[aria-label="Secciones"]{order:3;flex-basis:100%;width:100%;justify-content:flex-start}.ain-quad-control{flex-basis:38px;width:38px;height:38px;min-height:38px}.ain-quad-expert-cli .ain-quad-panel-heading{gap:8px}.ain-quad-expert-cli .ain-quad-panel-heading h2{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}.ain-quad-command{gap:8px}.ain-quad-command button{padding:8px}}

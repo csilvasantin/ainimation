@@ -224,7 +224,7 @@
     });
     document.documentElement.lang = lang;
     var btn = document.getElementById("langToggle");
-    if (btn) { btn.textContent = lang === "es" ? "EN" : "ES"; btn.setAttribute("aria-pressed", lang === "es"); btn.setAttribute("aria-label",lang === "es" ? "Cambiar a inglés" : "Switch to Spanish"); }
+    if (btn) { btn.textContent = lang === "es" ? "ENG" : "ESP"; btn.setAttribute("aria-pressed", lang === "es"); btn.setAttribute("aria-label",lang === "es" ? "Cambiar a inglés" : "Switch to Spanish"); }
     if(window.AINLanguage)window.AINLanguage.remember(lang);
     else try { localStorage.setItem("ain_lang", lang); } catch (e) {}
   }
