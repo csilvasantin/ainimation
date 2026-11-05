@@ -51,14 +51,17 @@ const sessionTools=document.querySelector('.session-tools'),languageLabel=$('uiL
 $('entryLanguage').append(languageLabel);
 const accountButton=document.createElement('button');accountButton.id='accountButton';accountButton.textContent=language==='en'?'Account / Language':'Cuenta / Idioma';accountButton.onclick=()=>{$('accountLanguage').append(languageLabel);if($('googleLogin').hidden)$('loginExplanation').textContent=language==='en'?'Account connected. Your local projects are preserved.':'Cuenta conectada. Tus proyectos locales se conservan.';else $('loginExplanation').textContent=language==='en'?'Sign in with Google to sync your library.':'Inicia sesión con Google para sincronizar tu biblioteca.';$('loginDialog').showModal();window.dispatchEvent(new Event('interactive-account-open'));};
 sessionTools.append(accountButton);
+// The verified account already has its controls in the library. Keep the
+// header's account/language entry available only before verification.
+sessionTools.hidden=$('googleLogin').hidden;
 function stage(value){document.body.dataset.stage=value;if(value==='entry'){$('entryLanguage').append(languageLabel);mode='basic';apply();}try{sessionStorage.setItem('ainimation:ui:stage',value);}catch{}}
 $('entryLogin').onclick=()=>$('loginButton').click();
 $('enterPreview').onclick=()=>stage('workspace');
 $('backToEntry').onclick=()=>{$('loginDialog').close();stage('entry');};
-window.addEventListener('interactive-authenticated',()=>{$('loginDialog').close();stage('workspace');});
+window.addEventListener('interactive-authenticated',()=>{sessionTools.hidden=true;$('loginDialog').close();stage('workspace');});
 try{stage(sessionStorage.getItem('ainimation:ui:stage')==='workspace'?'workspace':'entry');}catch{stage('entry');}
 
-window.addEventListener('interactive-signed-out',()=>stage('entry'));
+window.addEventListener('interactive-signed-out',()=>{sessionTools.hidden=false;stage('entry');});
 window.addEventListener('interactive-demo-created',()=>stage('workspace'));
 
 // The home Login link opens the existing account dialog, including when a
