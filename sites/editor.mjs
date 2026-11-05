@@ -8,7 +8,7 @@ import {parseExpertCommand,EXPERT_HELP} from './expert.mjs';
 import {createFileDrop,previewMessageSource,mediaDropReplacement} from './drop.mjs?v=20261104-replace-1';
 import {createPreviewSound} from './sound.mjs?v=20261104-sound-1';
 import {createImagePaste} from './paste.mjs?v=20261104-paste-1';
-import {COMPONENT_LABELS,createComponentFilter} from './filter.mjs?v=20261105-animation-preset-filter-1';
+import {COMPONENT_LABELS,createComponentFilter,createComponentProvenance} from './filter.mjs?v=20261105-provenance-filter-1';
 import {createActiveSitePreference} from './active-site.mjs?v=20261105-active-1';
 import {updateSavedSiteOption,refreshLibraryTitle,orderSavedSiteOptions} from './library-label.mjs?v=20261105-animation-filter-1';
 const $=id=>document.getElementById(id),library=new Map();
@@ -77,7 +77,7 @@ function paintComponents(){
   const items=session.draft.items;
   const hidden=item=>session.canSetMediaVisibility(item.id)&&item.hidden===true;
   $('component-count').textContent='· '+items.length;
-  $('components').replaceChildren(...componentFilter.apply(items,hidden).map(i=>{
+  $('components').replaceChildren(...componentFilter.apply(items,hidden,createComponentProvenance(session)).map(i=>{
     const b=document.createElement('button'),strong=document.createElement('strong'),small=document.createElement('span');b.type='button';b.disabled=mediaBusy;b.dataset.item=i.id;
     strong.textContent=i.label;small.textContent=labels[i.type]+(hidden(i)?' · Oculto':'')+(i.animation==='none'?'':' · '+motionLabels[i.animation]);b.append(strong,small);b.setAttribute('aria-pressed',String(i.id===selected));
     b.onclick=()=>{selected=i.id;paintComponents();inspector();highlight(true);quad.show('advanced');};return b;
