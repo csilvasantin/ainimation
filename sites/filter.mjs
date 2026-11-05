@@ -1,8 +1,10 @@
+import {localReference} from './media.mjs';
+
 export const COMPONENT_LABELS=Object.freeze({text:'Texto',image:'Imagen',video:'Vídeo',graphic:'SVG',background:'Fondo'});
 const SEARCH_VOWELS={á:'a',é:'e',í:'i',ó:'o',ú:'u',ü:'u'};
 const searchKey=text=>text.normalize('NFC').toLocaleLowerCase('es').replace(/[áéíóúü]/g,letter=>SEARCH_VOWELS[letter]);
 
-export function createComponentFilter({document=globalThis.document,onChange}){
+export function createComponentFilter({document=globalThis.document,onChange,getMediaName=()=>''}){
   const search=document.getElementById('filter'),type=document.getElementById('component-type'),visibility=document.getElementById('component-visibility'),status=document.getElementById('component-results');
   type.replaceChildren(...Object.entries({all:'Todos',...COMPONENT_LABELS}).map(([value,label])=>{
     const option=document.createElement('option');option.value=value;option.textContent=label;return option;
@@ -15,7 +17,8 @@ export function createComponentFilter({document=globalThis.document,onChange}){
       const matches=items.filter(item=>{
         const hidden=isHidden(item),matchesType=kind==='all'||item.type===kind,matchesVisibility=state==='all'||(state==='hidden'?hidden:!hidden);
         if(!matchesType||!matchesVisibility)return false;
-        const content=searchKey(item.label+' '+item.value+' '+COMPONENT_LABELS[item.type]+(hidden?' oculto':'')+(item.type==='image'?' '+(item.alt??''):''));
+        const fileName=['image','video'].includes(item.type)&&localReference(item.value)?getMediaName(item.value)||'':'';
+        const content=searchKey(item.label+' '+item.value+' '+COMPONENT_LABELS[item.type]+(hidden?' oculto':'')+(item.type==='image'?' '+(item.alt??''):'')+' '+fileName);
         return words.every(word=>content.includes(word));
       });
       status.textContent=matches.length?matches.length+' de '+items.length+' componentes':'No hay coincidencias. Prueba otros filtros o búsqueda.';

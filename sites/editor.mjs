@@ -8,12 +8,12 @@ import {parseExpertCommand,EXPERT_HELP} from './expert.mjs';
 import {createFileDrop,previewMessageSource,mediaDropReplacement} from './drop.mjs?v=20261104-replace-1';
 import {createPreviewSound} from './sound.mjs?v=20261104-sound-1';
 import {createImagePaste} from './paste.mjs?v=20261104-paste-1';
-import {COMPONENT_LABELS,createComponentFilter} from './filter.mjs?v=20261105-alt-search-1';
+import {COMPONENT_LABELS,createComponentFilter} from './filter.mjs?v=20261105-file-search-1';
 const $=id=>document.getElementById(id),library=new Map();
 const quad=createQuadraticUI();
 let session=null,recordID='',selected='',channel='',comparing=false,mobile=false,importing=false,persistTimer;
 let mediaLibrary=createMediaLibrary(),mediaBusy=false,selectScroll=false;
-const labels=COMPONENT_LABELS,componentFilter=createComponentFilter({onChange:paintComponents});
+const labels=COMPONENT_LABELS,componentFilter=createComponentFilter({onChange:paintComponents,getMediaName:ref=>mediaLibrary.records(new Set([ref]))[0].name});
 const motionLabels={none:'Sin animación',fade:'Aparecer',rise:'Entrada desde abajo',zoom:'Acercamiento suave',float:'Flotar en bucle'};
 const say=message=>{$('edit-status').textContent=message;$('workspace-status').textContent=message;};
 let soundStorage;try{soundStorage=window.localStorage;}catch{}
