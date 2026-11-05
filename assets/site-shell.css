@@ -32,11 +32,16 @@ html.ain-panel-resizing iframe{pointer-events:none!important}
 .ain-quad-panel button{max-width:100%;white-space:normal}
 .ain-quad-panel p{font-size:14px;line-height:1.6;color:inherit}
 .ain-quad-log{white-space:pre-wrap;overflow-wrap:anywhere;font:13px/1.5 ui-monospace,monospace;max-height:150px;overflow:auto}
-.ain-quad-command{display:flex;align-items:end;gap:12px}
+.ain-quad-log:empty{display:none}
+.ain-quad-expert-cli .ain-quad-panel-heading{margin-bottom:12px}
+.ain-quad-command{display:flex;align-items:center;gap:12px;flex:1;min-width:0;margin:0}
 .ain-quad-command label{flex:1;min-width:0;margin:0}
+.ain-quad-command-label{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+.ain-quad-command input:not([type=checkbox]):not([type=color]){margin:0;font-family:ui-monospace,monospace}
+.ain-quad-command input::placeholder{color:#aeb3bd;opacity:1}
 .ain-quad-command button{min-height:42px;padding:8px 18px;color:#101217;background:#c8ff5f;border:1px solid #c8ff5f;cursor:pointer;font:inherit}
 .ain-quad-panel .expert-commands{border:0;padding:0;margin:0}
 .ain-quad-panel .reference{margin-top:20px}
 .ain-presentation-quad .editor-layout{grid-template-columns:minmax(0,1fr)}
 .ain-quad-header .badge{display:none}
-@media(max-width:640px){.ain-quad-header{padding:12px!important;gap:8px!important}.ain-quad-header>.brand{font-size:14px}.ain-quad-header .brand small{display:none}.ain-quad-header>.nav-links,.ain-quad-header>nav[aria-label="Secciones"]{order:3;flex-basis:100%;width:100%;justify-content:flex-start}.ain-quad-control{flex-basis:38px;width:38px;height:38px;min-height:38px}.ain-quad-command{flex-wrap:wrap}.ain-quad-command label{flex-basis:100%}}
+@media(max-width:640px){.ain-quad-header{padding:12px!important;gap:8px!important}.ain-quad-header>.brand{font-size:14px}.ain-quad-header .brand small{display:none}.ain-quad-header>.nav-links,.ain-quad-header>nav[aria-label="Secciones"]{order:3;flex-basis:100%;width:100%;justify-content:flex-start}.ain-quad-control{flex-basis:38px;width:38px;height:38px;min-height:38px}.ain-quad-expert-cli .ain-quad-panel-heading{gap:8px}.ain-quad-expert-cli .ain-quad-panel-heading h2{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}.ain-quad-command{gap:8px}.ain-quad-command button{padding:8px}}
