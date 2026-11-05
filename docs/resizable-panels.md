@@ -1,5 +1,13 @@
 # Paneles redimensionables
 
+El formato compacto de las cabeceras compartidas parte de laterales de 200 px y
+una barra Experto de 56 px con sólo la fila del CLI. Las respuestas aparecen
+encima de esa fila cuando hay una orden; no reservan una ventana vacía. En
+Interactivos se conserva el formulario real y la exportación y las referencias
+quedan en Avanzado. Los laterales pueden reducirse a 160 px y Experto a 56 px.
+Este formato usa preferencias de tamaño independientes de las del diseño anterior:
+la primera entrada adopta las medidas compactas y después conserva cada ajuste.
+
 Opciones se ensancha desde su borde derecho; Avanzado, desde el izquierdo;
 Experto cambia de altura desde el borde superior. El asa muestra una marca
 visible y admite ratón, lápiz, gestos táctiles y teclado. Sus nombres y ayudas
