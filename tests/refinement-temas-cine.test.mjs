@@ -1,21 +1,23 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
-import {TEMAS,TEMA_IDS,ESTUDIOS,resolverEstudio,contraste,pintarCineCanvas,sonarTema} from '../presentaciones/editor/temas-cine.mjs';
+import {JSDOM} from 'jsdom';
+import {TEMAS,TEMA_IDS,ESTUDIOS,CREDITO_FONDO,resolverEstudio,contraste,pintarCineCanvas,sonarTema,bucleDe,bucleValido,crearFondo,montarBucle,aplicarCine,variablesCine} from '../presentaciones/editor/temas-cine.mjs';
 import {generatorProject,nativeEdits,confirmSaved} from '../presentaciones/editor/generator.mjs';
 import {editField,changesBetween} from '../presentaciones/editor/project.mjs';
+import {renderPreview} from '../presentaciones/editor/preview.mjs';
 const read=f=>readFile(new URL('../'+f,import.meta.url),'utf8');
 // Ni la plataforma, ni los estudios de /modo, ni las series o películas de referencia (02-11-2026).
 const PROHIBIDO=/netflix|stranger\s*things|wednesday|merlina|al\s+este\s+del\s+ed[eé]n|east\s+of\s+eden|reina\s+del\s+flow|bridgerton|logo\s+oficial|universal|sony|playstation|skydance|jurassic|minions?\b|harry\s*potter|hogwarts|wizarding|regreso\s+al\s+futuro|back\s*(?:to|2)\s*the\s*future|nintendo|super\s*mario/i;
 const ideas=()=>({client:'sample-proposal',updatedAt:'r1',accent:'#00aa11',hero:{title:'Título'},objective:'O',skeleton:[{id:'a',title:'A',message:'m',align:'center'},{id:'b',title:'B'}],closing:{title:'C',action:'X'},translations:{}});
-test('6 temas, lista cerrada y AA',()=>{
+test('catálogo cerrado de temas y contraste AA',()=>{
   // /modo (02-11-2026): Aventura jurásica es la única producción publicada (Jobs); el resto espera en preview.
-  assert.deepEqual(TEMA_IDS,['ochenta-mundo-del-reves','academia-gotica','epica-familiar-1950','urbano-colombiano-neon','regencia-romantica','aventura-jurasica']);
+  assert.deepEqual(TEMA_IDS,['ochenta-mundo-del-reves','academia-gotica','epica-familiar-1950','urbano-colombiano-neon','regencia-romantica','aventura-jurasica','neon-lluvioso']);
   for(const t of Object.values(TEMAS)){assert.ok(contraste(t.colores.texto,t.colores.fondo)>=4.5);assert.ok(contraste(t.colores.textoSuave,t.colores.fondo)>=4.5);assert.ok(!('acento' in t.colores));}
 });
 test('ningún texto visible nombra la plataforma ni las series',async()=>{
   for(const t of Object.values(TEMAS))for(const s of [t.nombre,t.descripcion,t.sonido?.descripcion||''])assert.doesNotMatch(s,PROHIBIDO,t.id);
-  for(const f of ['presentaciones/editor/index.html','presentaciones/editor/editor.mjs','presentaciones/editor/preview.mjs','presentaciones/editor/cine.css'])assert.doesNotMatch(await read(f),PROHIBIDO,f);
+  for(const f of ['presentaciones/editor/index.html','presentaciones/editor/editor.mjs','presentaciones/editor/preview.mjs','presentaciones/editor/cine.css','presentaciones/temas/neon-lluvioso.html','presentaciones/temas/neon-lluvioso.md','presentaciones/temas/neon-lluvioso.json','presentaciones/editor/README.md'])assert.doesNotMatch(await read(f),PROHIBIDO,f);
 });
 test('el conector lee y envía tema aparte; textos, acento y alineación intactos',()=>{
   const p=generatorProject({...ideas(),tema:'academia-gotica'});assert.equal(p.document.components.style.tema,'academia-gotica');assert.equal(p.document.components.style.accent,'#00aa11');
@@ -32,7 +34,77 @@ test('la capa de canvas pinta y el sonido es sintético y solo bajo demanda',asy
   assert.equal(pintarCineCanvas(ctx,'ninguno'),false);assert.equal(pintarCineCanvas(ctx,'academia-gotica',1280,720,()=>.5),true);assert.ok(ops.includes('fillRect'));
   assert.equal(typeof sonarTema('academia-gotica',undefined),'function');
   const html=await read('presentaciones/editor/index.html');assert.match(html,/id="tema-sound"[^>]*aria-pressed="false"/);assert.doesNotMatch(html,/<audio|autoplay/i);
+  const vista=await read('presentaciones/temas/neon-lluvioso.html');assert.doesNotMatch(vista,/<audio|autoplay/i);assert.match(vista,/class="mb-cine-credito">ainimation\.studio</);
   const mod=await read('presentaciones/editor/temas-cine.mjs');assert.doesNotMatch(mod,/\.mp3|\.ogg|\.wav|new Audio\(/);
+});
+test('fase 2: Neón lluvioso enlaza acento de marca, bucle mudo y crédito visible',async()=>{
+  const t=TEMAS['neon-lluvioso'],b=bucleDe('neon-lluvioso'),brief=JSON.parse(await read('presentaciones/temas/neon-lluvioso.json'));
+  assert.equal(t.nombre,'Neón lluvioso');assert.equal(b.tipo,'css');assert.equal(b.animacion,'lluvia');assert.equal(b.mudo,true);
+  assert.equal(b.credito,CREDITO_FONDO);assert.equal(CREDITO_FONDO,'ainimation.studio');
+  assert.equal(brief.id,t.id);assert.equal(brief.nombre,t.nombre);assert.equal(brief.bucle.creditoVisible,CREDITO_FONDO);
+  assert.equal(brief.bucle.animacion,b.animacion);assert.equal(brief.bucle.mudo,true);assert.equal(brief.ganchos.campo,'style.tema');
+  assert.deepEqual(brief.ganchos.variables,['--mb-cine-bucle','--mb-cine-credito']);
+  assert.deepEqual(brief.ganchos.clases,['mb-cine-fondo','mb-cine-credito']);
+  assert.equal(brief.acentoMarca.muestra,'#22d3ee');assert.equal(contraste(brief.acentoMarca.texto,brief.acentoMarca.muestra)>=4.5,true);
+  assert.equal('acento' in t.colores,false);
+  assert.equal(variablesCine('neon-lluvioso')['--mb-cine-bucle'],'lluvia');
+  assert.equal(variablesCine('neon-lluvioso')['--mb-cine-credito'],'"ainimation.studio"');
+  assert.equal(variablesCine('aventura-jurasica')['--mb-cine-bucle'],undefined);
+  const publicados=Object.values(ESTUDIOS).flatMap(e=>Object.values(e.producciones).map(p=>p.tema));
+  assert.equal(publicados.includes('neon-lluvioso'),false);
+  assert.equal(bucleValido({tipo:'css',animacion:'lluvia',credito:'otro-estudio',mudo:true}),false);
+  assert.equal(bucleValido({tipo:'video',src:'https://cdn.example/bucle.mp4',credito:CREDITO_FONDO,mudo:true}),false);
+  assert.equal(bucleValido({tipo:'video',src:'/presentaciones/temas/neon-lluvioso/bucle.webm',credito:CREDITO_FONDO,mudo:true,sonido:true}),false);
+  assert.equal(bucleValido({tipo:'css',animacion:'lluvia',credito:CREDITO_FONDO,mudo:false}),false);
+  const videoOk={tipo:'video',src:brief.bucle.srcReservada,credito:CREDITO_FONDO,mudo:true};
+  assert.equal(bucleValido(videoOk),true);
+  const dom=new JSDOM('<!doctype html><div id="root"></div>',{url:'https://www.ainimation.studio/presentaciones/editor/'});
+  const doc=dom.window.document,video=crearFondo(doc,videoOk);
+  assert.equal(video.tagName,'VIDEO');assert.equal(video.muted,true);assert.equal(video.loop,true);assert.equal(video.volume,0);
+  assert.equal(video.hasAttribute('autoplay'),false);assert.equal(video.getAttribute('src'),brief.bucle.srcReservada);
+  assert.equal(crearFondo(doc,{tipo:'css',animacion:'lluvia',credito:'Sony',mudo:true}),null);
+  const root=doc.getElementById('root');
+  aplicarCine(root,'neon-lluvioso');
+  assert.equal(root.style.getPropertyValue('--mb-cine-credito'),'"ainimation.studio"');
+  const escena=doc.createElement('div');root.append(escena);
+  assert.equal(montarBucle(escena,'neon-lluvioso').animacion,'lluvia');
+  assert.equal(escena.querySelectorAll('.mb-cine-fondo').length,1);
+  assert.equal(escena.querySelector('.mb-cine-fondo').tagName,'DIV');
+  assert.equal(escena.querySelector('.mb-cine-fondo').dataset.mbCineAnim,'lluvia');
+  assert.equal(escena.querySelector('.mb-cine-credito').textContent,CREDITO_FONDO);
+  montarBucle(escena,'neon-lluvioso');
+  assert.equal(escena.querySelectorAll('.mb-cine-credito').length,1);
+  assert.equal(montarBucle(escena,'aventura-jurasica'),null);
+  assert.equal(escena.querySelector('.mb-cine-fondo'),null);
+  aplicarCine(root,'academia-gotica');
+  assert.equal(root.style.getPropertyValue('--mb-cine-bucle'),'');
+  assert.equal(root.style.getPropertyValue('--mb-cine-credito'),'');
+  const project=generatorProject({...ideas(),tema:'neon-lluvioso',accent:'#22d3ee'});
+  renderPreview(root,project,{selected:'cover',interactive:true});
+  const scene=root.querySelector('.mb-cine-escena');
+  assert.equal(root.dataset.mbTema,'neon-lluvioso');
+  assert.equal(scene.querySelector('.mb-cine-credito').textContent,'ainimation.studio');
+  assert.equal(scene.querySelector('video, audio'),null);
+  assert.match(scene.style.borderLeft,/22d3ee|34,\s*211,\s*238/);
+  assert.equal(root.querySelectorAll('.mb-cine-credito').length,1);
+  const plano=generatorProject({...ideas(),tema:'aventura-jurasica',accent:'#22d3ee'});
+  renderPreview(root,plano,{selected:'cover',interactive:false});
+  assert.equal(root.querySelector('.mb-cine-credito'),null);
+  assert.equal(root.querySelector('.mb-cine-fondo'),null);
+  const q=generatorProject(ideas());
+  assert.deepEqual(nativeEdits(q,changesBetween(q,editField(q,'style-tema','neon-lluvioso'))).layout,{tema:'neon-lluvioso'});
+  const painted=[];
+  const ctx=new Proxy({},{get:(_,k)=>k==='createRadialGradient'?()=>({addColorStop(){}}):(...args)=>{if(k==='fillText')painted.push(args[0]);if(k==='measureText')return {width:120};},set:()=>true});
+  assert.equal(pintarCineCanvas(ctx,'neon-lluvioso',1280,720,()=>.4),true);
+  assert.equal(painted.includes(CREDITO_FONDO),true);
+  const quiet=[];
+  pintarCineCanvas(new Proxy({},{get:(_,k)=>k==='createRadialGradient'?()=>({addColorStop(){}}):(...args)=>{quiet.push(k);if(k==='measureText')return {width:10};},set:()=>true}),'academia-gotica',320,180,()=>.2);
+  assert.equal(quiet.includes('fillText'),false);
+  const css=await read('presentaciones/editor/cine.css');
+  assert.match(css,/mb-cine-lluvia/);assert.match(css,/\.mb-cine-credito/);
+  assert.match(css,/prefers-reduced-motion:reduce[\s\S]*\.mb-cine-fondo/);
+  assert.equal(typeof sonarTema('neon-lluvioso',undefined),'function');
+  assert.doesNotMatch(montarBucle.toString()+crearFondo.toString(),/sonarTema|AudioContext|new Audio|\.mp3/);
 });
 test('/modo (02-11-2026): universal jurassic lleva a «Aventura jurásica» del editor; el comando es lo único con nombres reales',()=>{
   assert.deepEqual(Object.keys(ESTUDIOS),['universal']);assert.deepEqual(Object.keys(ESTUDIOS.universal.producciones),['jurassic']);

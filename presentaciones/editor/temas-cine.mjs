@@ -3,12 +3,16 @@
 // libre de Google Fonts, grano, viñeta, gradación, barras y motion). Nombres por estilo, nunca de
 // películas; sin logos, fotogramas ni fuentes con licencia. Sonido opcional, apagado por defecto,
 // siempre sintetizado con WebAudio y solo tras un clic del usuario (nunca autoplay).
+// Fase 2 (06-11-2026): «Neón lluvioso» suma un fondo en bucle, mudo, con crédito visible fijo
+// (CREDITO_FONDO). No entra en /modo. Brief: presentaciones/temas/neon-lluvioso.md
 // Fase 1 · /modo (Elon y Jobs, 02-11-2026): en producción solo universal.jurassic («uno perfecto vale más que nueve
 // correctos»); el resto de estudios y producciones espera en preview la revisión de Jobs, uno a uno.
 // ESTUDIOS y resolverEstudio llevan el comando /modo <estudio> [producción] al tema.
 // Este fichero es idéntico en admira-next-web (pruebas/ainimation-presentaciones/refinement/) y
 // en ainimation (presentaciones/editor/); los JSON de marcablanca/temas/ son su espejo.
 export const NONE='ninguno';
+// Crédito visible del fondo en bucle. No se lee del tema: así no puede colarse un nombre de estudio.
+export const CREDITO_FONDO='ainimation.studio';
 // `referenciaInterna` es solo para el equipo (nunca se pinta): los textos visibles usan el nombre de estilo.
 // Usar públicamente las marcas o títulos de referencia requeriría licencia.
 export const TEMAS=Object.freeze({
@@ -47,7 +51,14 @@ export const TEMAS=Object.freeze({
     tipografia:{titulos:"'Oswald', 'Bebas Neue', Impact, sans-serif",texto:"'Inter', system-ui, sans-serif",google:'https://fonts.googleapis.com/css2?family=Oswald:wght@600;700&family=Inter:wght@400;600&display=swap',transformTitulos:'uppercase',trackingTitulos:'0.06em'},
     aspecto:'2.39:1',grano:0.35,vineta:0.6,gradacion:{saturacion:0.85,contraste:1.15,tinte:'#4a7a2a',tinteFuerza:0.1},
     motion:{entrada:'temblor',duracionMs:900},titulo:{sombra:'0 3px 0 #000, 0 0 22px #f2a90055'},
-    sonido:{tipo:'sintetico',descripcion:'Retumbo grave y lejano, como pasos enormes.',base:41.2,ruido:0.06}}
+    sonido:{tipo:'sintetico',descripcion:'Retumbo grave y lejano, como pasos enormes.',base:41.2,ruido:0.06}},
+  'neon-lluvioso':{id:'neon-lluvioso',nombre:'Neón lluvioso',referenciaInterna:'Atmósfera de noche urbana con lluvia y neón (uso interno).',descripcion:'Noche lluviosa: asfalto mojado, neón cian y magenta, vapor bajo y grano fino. El acento lo pone la marca.',
+    modo:'oscuro',colores:{fondo:'#070910',fondoAlt:'#10141c',superficie:'#171d28',texto:'#f4f7fb',textoSuave:'#c5d0e0',borde:'#2a3548',brillo:'#3ee0ff',brillo2:'#ff4fa3'},
+    tipografia:{titulos:"'Syne', 'Oswald', sans-serif",texto:"'Inter', system-ui, sans-serif",google:'https://fonts.googleapis.com/css2?family=Syne:wght@600;700&family=Inter:wght@400;600&display=swap',transformTitulos:'uppercase',trackingTitulos:'0.14em'},
+    aspecto:'16:9',grano:0.22,vineta:0.5,gradacion:{saturacion:1.12,contraste:1.08,tinte:'#145066',tinteFuerza:0.1},
+    motion:{entrada:'fundido-lento',duracionMs:1000},titulo:{sombra:'0 0 18px #3ee0ff88, 0 0 2px #ff4fa366'},
+    sonido:{tipo:'sintetico',descripcion:'Gotas y un zumbido grave, sintetizados.',base:174.6,ruido:0.12},
+    bucle:{tipo:'css',animacion:'lluvia',credito:CREDITO_FONDO,mudo:true}}
 });
 export const TEMA_IDS=Object.freeze(Object.keys(TEMAS));
 export const TEMA_OPCIONES=Object.freeze([NONE,...TEMA_IDS]);
@@ -92,11 +103,48 @@ export function resolverEstudio(texto,E=ESTUDIOS){
 // Contraste WCAG.
 const lum=hex=>{const c=[1,3,5].map(i=>parseInt(hex.slice(i,i+2),16)/255).map(v=>v<=.03928?v/12.92:((v+.055)/1.055)**2.4);return .2126*c[0]+.7152*c[1]+.0722*c[2];};
 export const contraste=(a,b)=>{const [x,y]=[lum(a),lum(b)].sort((p,q)=>q-p);return (x+.05)/(y+.05);};
+// Fondo en bucle (fase 2). Solo animación CSS catalogada o un vídeo mudo del propio sitio.
+// El crédito pintado es siempre CREDITO_FONDO; un texto distinto no llega a la vista.
+const CLAVES_CSS=['tipo','animacion','credito','mudo'];
+const CLAVES_VIDEO=['tipo','src','credito','mudo'];
+const SRC_BUCLE=/^\/presentaciones\/temas\/[a-z0-9-]{1,64}\/bucle\.(webm|mp4)$/;
+function mismasClaves(b,claves){const keys=Object.keys(b);return keys.length===claves.length&&claves.every(k=>Object.hasOwn(b,k));}
+export function bucleValido(b){
+  if(!b||typeof b!=='object'||Array.isArray(b)||b.credito!==CREDITO_FONDO||b.mudo!==true)return false;
+  if(b.tipo==='css')return mismasClaves(b,CLAVES_CSS)&&b.animacion==='lluvia';
+  if(b.tipo==='video')return mismasClaves(b,CLAVES_VIDEO)&&SRC_BUCLE.test(b.src);
+  return false;
+}
+export function bucleDe(id){const t=temaDe(id);return bucleValido(t?.bucle)?t.bucle:null;}
+export function crearFondo(doc,descriptor){
+  if(!doc||!bucleValido(descriptor))return null;
+  const fondo=doc.createElement(descriptor.tipo==='video'?'video':'div');
+  fondo.className='mb-cine-fondo';
+  fondo.dataset.mbCineAnim=descriptor.tipo==='css'?descriptor.animacion:'video';
+  fondo.setAttribute('aria-hidden','true');
+  if(descriptor.tipo==='video'){
+    fondo.muted=true;fondo.defaultMuted=true;fondo.loop=true;fondo.playsInline=true;fondo.volume=0;
+    fondo.setAttribute('muted','');fondo.setAttribute('loop','');fondo.setAttribute('playsinline','');
+    fondo.preload='metadata';fondo.setAttribute('src',descriptor.src);
+  }
+  return fondo;
+}
+// Quita un bucle anterior y, si el tema tiene uno válido, pinta fondo + crédito visible.
+export function montarBucle(el,id){
+  if(!el)return null;
+  for(const node of [...el.querySelectorAll(':scope > .mb-cine-fondo, :scope > .mb-cine-credito')])node.remove();
+  const b=bucleDe(id);if(!b)return null;
+  const fondo=crearFondo(el.ownerDocument,b);if(!fondo)return null;
+  const credito=el.ownerDocument.createElement('span');
+  credito.className='mb-cine-credito';credito.textContent=CREDITO_FONDO;
+  el.prepend(fondo);el.append(credito);return b;
+}
 // Variables CSS de la capa. El acento NO se toca: lo pone la marca.
 export function variablesCine(id){
   const t=temaDe(id);if(!t)return {};
   const v={'--mb-cine-grano':String(t.grano),'--mb-cine-vineta':String(t.vineta),'--mb-cine-saturacion':String(t.gradacion.saturacion),'--mb-cine-contraste':String(t.gradacion.contraste),'--mb-cine-tinte':t.gradacion.tinte,'--mb-cine-tinte-fuerza':String(t.gradacion.tinteFuerza),'--mb-cine-aspecto':t.aspecto.replace(':',' / '),'--mb-cine-duracion':t.motion.duracionMs+'ms','--mb-cine-sombra-titulo':t.titulo.sombra||'none','--mb-fuente-titulos':t.tipografia.titulos,'--mb-fuente-texto':t.tipografia.texto,'--mb-transform-titulos':t.tipografia.transformTitulos,'--mb-tracking-titulos':t.tipografia.trackingTitulos};
   for(const [k,val] of Object.entries(t.colores))v['--mb-'+k.replace(/[A-Z]/g,m=>'-'+m.toLowerCase())]=val;
+  const b=bucleDe(id);if(b){v['--mb-cine-bucle']=b.tipo==='css'?b.animacion:'video';v['--mb-cine-credito']='"'+CREDITO_FONDO+'"';}
   return v;
 }
 export function aplicarCine(el,id){
@@ -121,6 +169,13 @@ export function pintarCineCanvas(ctx,id,w=1280,h=720,rand=Math.random){
   if(t.grano>0){ctx.save();const n=Math.round(w*h/180*t.grano);for(let i=0;i<n;i++){const v=rand()>.5?255:0;ctx.fillStyle='rgba('+v+','+v+','+v+','+(.05+rand()*.08)+')';ctx.fillRect(rand()*w,rand()*h,1.2,1.2);}ctx.restore();}
   const [a,b]=t.aspecto.split(':').map(Number),ratio=a/b;
   if(ratio>w/h){const bar=(h-w/ratio)/2;ctx.fillStyle='#000';ctx.fillRect(0,0,w,bar);ctx.fillRect(0,h-bar,w,bar);}
+  if(bucleDe(id)){
+    const label=CREDITO_FONDO;
+    ctx.save?.();ctx.font='600 14px sans-serif';
+    const textW=ctx.measureText?.(label)?.width||label.length*7.2,boxW=textW+16,boxH=22,x=w-boxW-16,y=h-boxH-14;
+    ctx.fillStyle='rgba(7,9,16,.72)';ctx.fillRect(x,y,boxW,boxH);ctx.fillStyle='#f4f7fb';ctx.textBaseline='middle';
+    ctx.fillText?.(label,x+8,y+boxH/2);ctx.restore?.();
+  }
   return true;
 }
 // Sonido: solo sintetizado, solo tras gesto del usuario. Devuelve una función para pararlo.
