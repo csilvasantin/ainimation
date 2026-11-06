@@ -31,6 +31,15 @@ Escritorio/Móvil sólo modifica el canvas interno. El preview usa DOM/textConte
 sin ejecutar HTML importado. La siguiente conexión para sites necesita su fuente
 editable y una confirmación de guardado del adaptador correspondiente.
 
+## Bucle de tema (fase 2)
+
+El primer fondo en bucle es **Neón lluvioso** (`neon-lluvioso`). La marca sigue
+fijando el acento; el tema añade la atmósfera y una lluvia en bucle, muda, con
+el crédito visible `ainimation.studio`. El brief y el contrato que debe leer
+Presentaciones están en `presentaciones/temas/neon-lluvioso.md`. La vista previa
+es `/presentaciones/temas/neon-lluvioso.html`. Este tema no entra en `/modo`.
+El sonido del tema sigue en el botón y solo suena después de un clic.
+
 ## Miniaturas de todas las propuestas
 
 Cada proyecto del inspector incluye una miniatura 16:9. El catálogo privado del

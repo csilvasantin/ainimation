@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Neón lluvioso · bucle</title>
+<link rel="stylesheet" href="../editor/cine.css">
+<style>
+  html,body{margin:0;min-height:100%;background:#070910;color:#f4f7fb}
+  .stage{min-height:100vh}
+  .stage .mb-cine-escena{aspect-ratio:auto;min-height:100vh;width:100%;display:grid;align-content:center;box-shadow:inset 8px 0 0 var(--mb-acento,#22d3ee)}
+  .mb-cine-entrada{position:relative;z-index:3;padding:12vh 10vw;max-width:46rem}
+  .mb-cine-entrada p{font:400 1.05rem/1.5 Inter,system-ui,sans-serif;max-width:36rem}
+  h1{margin:0 0 .4em;font-size:clamp(42px,7vw,88px)}
+</style>
+</head>
+<body>
+<div id="stage" class="stage" data-mb-tema="neon-lluvioso" style="--mb-fondo:#070910;--mb-fondo-alt:#10141c;--mb-texto:#f4f7fb;--mb-brillo:#3ee0ff;--mb-brillo2:#ff4fa3;--mb-acento:#22d3ee;--mb-cine-bucle:lluvia;--mb-cine-credito:&quot;ainimation.studio&quot;">
+  <div id="escena" class="mb-cine-escena">
+    <div class="mb-cine-fondo" data-mb-cine-anim="lluvia" aria-hidden="true"></div>
+    <div class="mb-cine-entrada">
+      <h1 class="mb-cine-titulo">Neón lluvioso</h1>
+      <p>Noche de lluvia y neón. El acento lo pone la marca.</p>
+    </div>
+    <span class="mb-cine-credito">ainimation.studio</span>
+  </div>
+</div>
+<script type="module">
+import {aplicarCine,montarBucle} from '../editor/temas-cine.mjs';
+const stage=document.getElementById('stage'),escena=document.getElementById('escena');
+aplicarCine(stage,'neon-lluvioso');
+stage.style.setProperty('--mb-acento','#22d3ee');
+stage.style.setProperty('--mb-acento-texto','#041016');
+montarBucle(escena,'neon-lluvioso');
+</script>
+</body>
+</html>

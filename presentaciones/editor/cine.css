@@ -1,5 +1,6 @@
 /* marcablanca-cine.css · capa de temas cinematográficos (fase 1, solo /pruebas).
-   Se activa con [data-mb-tema]. Grano, viñeta y barras con ::before/::after; sin imágenes externas.
+   Se activa con [data-mb-tema]. Grano, viñeta y barras con ::before/::after.
+   Fase 2: .mb-cine-fondo (bucle mudo) y .mb-cine-credito (crédito visible).
    La marca conserva --mb-acento; el tema solo cambia atmósfera. */
 [data-mb-tema]{position:relative;isolation:isolate;background:var(--mb-fondo);color:var(--mb-texto);font-family:var(--mb-fuente-texto,inherit)}
 [data-mb-tema] h1,[data-mb-tema] h2,[data-mb-tema] .mb-cine-titulo{font-family:var(--mb-fuente-titulos,inherit);text-transform:var(--mb-transform-titulos,none);letter-spacing:var(--mb-tracking-titulos,normal);text-shadow:var(--mb-cine-sombra-titulo,none)}
@@ -19,6 +20,24 @@
 @keyframes mb-cine-entrada{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
 @keyframes mb-cine-neon{0%,20%,40%{opacity:0}10%,30%,100%{opacity:1}}
 @keyframes mb-cine-iris{from{clip-path:circle(0% at 50% 50%)}to{clip-path:circle(75% at 50% 50%)}}
-@media (prefers-reduced-motion:reduce){[data-mb-tema] .mb-cine-escena::before,[data-mb-tema] .mb-cine-entrada{animation:none!important}}
+/* Fase 2 · fondo en bucle. Más específico que .mb-cine-escena>* para quedarse detrás del texto. */
+[data-mb-tema] .mb-cine-escena>.mb-cine-fondo{position:absolute;inset:0;z-index:0;overflow:hidden;pointer-events:none;border:0;background:
+  radial-gradient(ellipse at 16% 88%,rgba(255,79,163,.45),transparent 46%),
+  radial-gradient(ellipse at 84% 12%,rgba(62,224,255,.4),transparent 42%),
+  linear-gradient(180deg,var(--mb-fondo,#070910),var(--mb-fondo-alt,#10141c))}
+[data-mb-tema] .mb-cine-escena>video.mb-cine-fondo{width:100%;height:100%;object-fit:cover}
+[data-mb-tema] .mb-cine-escena>.mb-cine-fondo[data-mb-cine-anim="lluvia"]::before,
+[data-mb-tema] .mb-cine-escena>.mb-cine-fondo[data-mb-cine-anim="lluvia"]::after{content:"";position:absolute;inset:-40% -20%;pointer-events:none;
+  background-image:repeating-linear-gradient(105deg,transparent 0 12px,rgba(210,242,255,.72) 12px 14px,transparent 14px 26px);
+  animation:mb-cine-lluvia 1.15s linear infinite}
+[data-mb-tema] .mb-cine-escena>.mb-cine-fondo[data-mb-cine-anim="lluvia"]::after{
+  background-image:repeating-linear-gradient(97deg,transparent 0 20px,rgba(255,255,255,.4) 20px 22px,transparent 22px 38px);
+  animation-duration:1.75s;animation-direction:reverse;opacity:.8}
+@keyframes mb-cine-lluvia{from{transform:translate3d(0,-8%,0)}to{transform:translate3d(-3%,8%,0)}}
+[data-mb-tema] .mb-cine-escena:has(>.mb-cine-fondo)::before{opacity:.28}
+[data-mb-tema] .mb-cine-escena>.mb-cine-credito{position:absolute;right:.6rem;bottom:.45rem;z-index:4;margin:0;pointer-events:none;
+  font:600 11px/1.2 system-ui,sans-serif;letter-spacing:.04em;color:var(--mb-texto,#f4f7fb);
+  background:rgba(7,9,16,.78);padding:.3em .6em;border-radius:999px}
+@media (prefers-reduced-motion:reduce){[data-mb-tema] .mb-cine-escena::before,[data-mb-tema] .mb-cine-entrada,[data-mb-tema] .mb-cine-fondo,[data-mb-tema] .mb-cine-fondo::before,[data-mb-tema] .mb-cine-fondo::after{animation:none!important}}
 .mb-cine-sonido{font:inherit;border:1px solid var(--mb-borde,#888);background:transparent;color:inherit;border-radius:999px;padding:.35em .9em;cursor:pointer}
 .mb-cine-sonido[aria-pressed="true"]{background:var(--mb-acento,#ffb000);color:var(--mb-acento-texto,#000)}

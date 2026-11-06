@@ -1,0 +1,28 @@
+{
+  "schema": "ainimation.tema-bucle.v1",
+  "id": "neon-lluvioso",
+  "nombre": "Neón lluvioso",
+  "fase": 2,
+  "acentoMarca": {
+    "nota": "Lo fija la marca de la presentación. La muestra solo sirve para previsualizar el bucle.",
+    "muestra": "#22d3ee",
+    "texto": "#041016"
+  },
+  "atmosfera": "Noche urbana, lluvia continua, asfalto que refleja neón cian y magenta, vapor bajo y grano fino. Sin personajes y sin rótulos legibles.",
+  "bucle": {
+    "tipo": "css",
+    "animacion": "lluvia",
+    "clase": "mb-cine-fondo",
+    "creditoVisible": "ainimation.studio",
+    "mudo": true,
+    "srcReservada": "/presentaciones/temas/neon-lluvioso/bucle.webm"
+  },
+  "ganchos": {
+    "campo": "style.tema",
+    "valor": "neon-lluvioso",
+    "css": "presentaciones/editor/cine.css",
+    "variables": ["--mb-cine-bucle", "--mb-cine-credito"],
+    "clases": ["mb-cine-fondo", "mb-cine-credito"],
+    "montar": "montarBucle(escena, id)"
+  }
+}
