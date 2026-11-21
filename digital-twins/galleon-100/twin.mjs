@@ -78,11 +78,16 @@ lettering('C O R S A I R', 0, 1.93, 23, -Math.PI / 2);
 const palette = ['#d36aff', '#8b83ff', '#48a6ff', '#46c7ef', '#61e6a8'].map(value => new THREE.Color(value));
 const rgb = palette.map(() => new THREE.MeshStandardMaterial({ roughness: .6 }));
 const pitch = .233, left = -2.72;
+const targets = [];
 function key(label, unit, z, units = 1, rowSpan = .224) {
   const width = units * pitch - .018;
   const x = left + (unit + units / 2) * pitch;
   box(width + .015, .035, rowSpan + .009, rgb[Math.min(4, Math.floor(unit / 3.3))], x, .144, z, .01);
-  box(width, .105, rowSpan, keycap, x, .194, z, .026);
+  const cap = box(width, .105, rowSpan, keycap, x, .194, z, .026);
+  if (unit >= 15.6 && ["←","→","↑","↓"].includes(label)) {
+    cap.userData.control = {action:{"←":"prev","→":"next","↑":"first","↓":"last"}[label]};
+    targets.push(cap);
+  }
   if (label) lettering(label, x, z - .011, label.length > 3 ? 15 : 21);
 }
 function row(z, keys, start = 0) {
@@ -111,7 +116,7 @@ row(.6, ['←', '↓', '→'], 15.6);
 
 const dialMaterial = new THREE.MeshStandardMaterial({ color: '#2b2b34', roughness: .7, metalness: .35 });
 const dialRings = [];
-const targets = [];
+
 let panel = null;
 let selection = null;
 function selecting(id) {
