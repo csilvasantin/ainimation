@@ -110,10 +110,12 @@ key('↑', 16.6, .343);
 row(.6, ['←', '↓', '→'], 15.6);
 
 const dialMaterial = new THREE.MeshStandardMaterial({ color: '#2b2b34', roughness: .7, metalness: .35 });
-const dialRing = new THREE.MeshBasicMaterial();
+const dialRings = [];
 for (const x of [2.085, 2.56]) {
   const dial = new THREE.Mesh(new THREE.CylinderGeometry(.103, .106, .096, 36), dialMaterial);
   dial.position.set(x, .225, -.744);
+  const dialRing = new THREE.MeshBasicMaterial();
+  dialRings.push(dialRing);
   const ring = new THREE.Mesh(new THREE.TorusGeometry(.115, .009, 8, 40), dialRing);
   ring.rotation.x = -Math.PI / 2;
   ring.position.set(x, .167, -.744);
@@ -148,7 +150,7 @@ function applyLighting() {
     material.emissive.copy(hue);
     material.emissiveIntensity = power * .8;
   });
-  dialRing.color.copy(unlit).lerp(mode === 'solid' ? custom : palette[1], power);
+  for (const ring of dialRings) ring.color.copy(unlit).lerp(mode === 'solid' ? custom : palette[1], power);
   rgbLevel.value = brightness + ' %';
   rgbSwatch.hidden = mode !== 'solid';
 }
@@ -218,6 +220,10 @@ async function pollPhysical() {
     const presence = (screens?.screens || []).find(entry => entry?.screen === 'corsair-galleon-100') || null;
     const age = presence ? Number(presence.age_seconds) : (Number(now?.lastSeen) ? Math.round((Date.now() - Number(now.lastSeen)) / 1000) : null);
     const output = now?.health?.output;
+    if (output === 'usb' && age !== null && age <= 45) {
+      dialRings[0].color.set(now.device?.audio?.muted ? '#e21e22' : '#28ad53');
+      dialRings[1].color.set(now.health?.paused ? '#d88e21' : '#2584f5');
+    }
     if (!physical) return;
     physical.textContent = age === null || !Number.isFinite(age) ? 'Teclado físico: sin latido todavía'
       : age > 45 ? 'Teclado físico: sin señal desde hace ' + (age < 3600 ? age + ' s' : Math.round(age / 3600) + ' h')
@@ -257,6 +263,10 @@ window.addEventListener('message', event => {
     lastFrame = Date.now();
     if (fromDirector) { status.textContent = 'Vista previa local de Admira Director'; return; }
     const air = event.data.onAir && typeof event.data.onAir === 'object' ? event.data.onAir : null;
+    if (air?.source === 'usb-capture') {
+      status.textContent = playing ? 'Captura del Corsair físico · LCD y 12 teclas · actualización aproximada cada 9 s' : 'Esperando una captura reciente del Corsair físico';
+      return;
+    }
     const piece = air?.title ? ' · ' + String(air.title).slice(0, 80) + (air.total > 1 ? ' (' + (air.index + 1) + '/' + air.total + ')' : '') : '';
     const source = air?.source === 'twin' ? 'Playlist de prueba' : air?.source === 'playout' ? 'Playout de la flota' : 'Señal real del teclado';
     const message = ready?.landscape && ready?.portrait ? source + ' · en la pantalla superior y en las 12 teclas' + piece
