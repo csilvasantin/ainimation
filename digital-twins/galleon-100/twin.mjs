@@ -220,9 +220,9 @@ async function pollPhysical() {
     const presence = (screens?.screens || []).find(entry => entry?.screen === 'corsair-galleon-100') || null;
     const age = presence ? Number(presence.age_seconds) : (Number(now?.lastSeen) ? Math.round((Date.now() - Number(now.lastSeen)) / 1000) : null);
     const output = now?.health?.output;
-    if (output === 'usb' && age !== null && age <= 45) {
-      dialRings[0].color.set(now.device?.audio?.muted ? '#e21e22' : '#28ad53');
-      dialRings[1].color.set(now.health?.paused ? '#d88e21' : '#2584f5');
+    if ((output === 'usb' || now?.producer === 'galleon-usb-corsair-galleon-100') && !now.standby && age !== null && age <= 45) {
+      dialRings[0].color.set((now.item?.playback?.muted ?? now.device?.audio?.muted) ? '#e21e22' : '#28ad53');
+      dialRings[1].color.set((now.item?.playback?.paused ?? now.health?.paused) ? '#d88e21' : '#2584f5');
     }
     if (!physical) return;
     physical.textContent = age === null || !Number.isFinite(age) ? 'Teclado físico: sin latido todavía'
@@ -263,12 +263,9 @@ window.addEventListener('message', event => {
     lastFrame = Date.now();
     if (fromDirector) { status.textContent = 'Vista previa local de Admira Director'; return; }
     const air = event.data.onAir && typeof event.data.onAir === 'object' ? event.data.onAir : null;
-    if (air?.source === 'usb-capture') {
-      status.textContent = playing ? 'Captura del Corsair físico · LCD y 12 teclas · actualización aproximada cada 9 s' : 'Esperando una captura reciente del Corsair físico';
-      return;
-    }
+    if (air?.source === 'offline') { status.textContent = 'Esperando al teclado físico'; return; }
     const piece = air?.title ? ' · ' + String(air.title).slice(0, 80) + (air.total > 1 ? ' (' + (air.index + 1) + '/' + air.total + ')' : '') : '';
-    const source = air?.source === 'twin' ? 'Playlist de prueba' : air?.source === 'playout' ? 'Playout de la flota' : 'Señal real del teclado';
+    const source = air?.source === 'twin' ? 'Playlist de prueba' : air?.source === 'playout' ? 'Playout de la flota' : 'Reproducción según el teclado físico';
     const message = ready?.landscape && ready?.portrait ? source + ' · en la pantalla superior y en las 12 teclas' + piece
       : playing ? source + ' · cargando la otra orientación…' + piece : air?.source === 'twin' ? 'Cargando la playlist de prueba…' : 'Señal real del player · sin contenido en antena todavía';
     if (status.textContent !== message) status.textContent = message;
