@@ -111,6 +111,24 @@ row(.6, ['←', '↓', '→'], 15.6);
 
 const dialMaterial = new THREE.MeshStandardMaterial({ color: '#2b2b34', roughness: .7, metalness: .35 });
 const dialRings = [];
+const targets = [];
+let panel = null;
+let selection = null;
+function selecting(id) {
+  return id && selection?.id === id && performance.now() < selection.deadline;
+}
+function sendControl(action, key) {
+  if (directorMode || !panel || (action === 'key' && !panel.keys[key])) return;
+  if (action === 'key') {
+    const id = panel.keys[key];
+    if (selecting(id)) return;
+    selection = {id, deadline:performance.now()+41000, started:performance.now()};
+    status.textContent = 'Selección enviada · esperando al Corsair';
+    updatePointer();
+  }
+  feed.contentWindow?.postMessage({type:'admira:galleon:control', action, key, id:panel.keys[key]}, feedOrigin);
+}
+
 for (const x of [2.085, 2.56]) {
   const dial = new THREE.Mesh(new THREE.CylinderGeometry(.103, .106, .096, 36), dialMaterial);
   dial.position.set(x, .225, -.744);
@@ -120,6 +138,8 @@ for (const x of [2.085, 2.56]) {
   ring.rotation.x = -Math.PI / 2;
   ring.position.set(x, .167, -.744);
   deck.add(dial, ring);
+  dial.userData.control = ring.userData.control = {action:dialRings.length === 1 ? 'mute' : 'pause'};
+  targets.push(dial, ring);
 }
 
 const rgbOn = document.querySelector('#rgb-on');
@@ -183,7 +203,7 @@ for (const [y, min, max] of [[.249, -.85, .75], [.136, -.98, -.86], [.05, 1.69, 
 }
 
 function screen(width, depth, x, z, pixelWidth, pixelHeight) {
-  box(width + .07, .10, depth + .07, keycap, x, .17, z);
+  const base = box(width + .07, .10, depth + .07, keycap, x, .17, z);
   const pixels = document.createElement('canvas');
   pixels.width = pixelWidth;
   pixels.height = pixelHeight;
@@ -193,13 +213,71 @@ function screen(width, depth, x, z, pixelWidth, pixelHeight) {
   mesh.rotation.x = -Math.PI / 2;
   mesh.position.set(x, .225, z);
   deck.add(mesh);
-  return { pixels, texture, context: pixels.getContext('2d') };
+  return { mesh, base, pixels, texture, context: pixels.getContext('2d') };
 }
 
 const lcd = screen(.8, .418, 2.27, -.392, 720, 384);
 const keys = Array.from({ length: 12 }, (_, index) =>
   screen(.208, .208, 2.02 + (index % 3) * .25, -.047 + Math.floor(index / 3) * .245, 160, 160));
 
+keys.forEach(({mesh, base}, key) => {
+  mesh.userData.control = base.userData.control = {action:'key', key};
+  targets.push(mesh, base);
+});
+const ray = new THREE.Raycaster();
+const pad = document.querySelector('#portrait-output');
+function controlAt(surface, x, y) {
+  if (directorMode || !panel || performance.now() - frameReceived > 3000) return null;
+  const r = surface.getBoundingClientRect();
+  let control;
+  if (surface === pad) {
+    const scale = Math.min(r.width/pad.width, r.height/pad.height);
+    const px = (x-r.left-(r.width-pad.width*scale)/2)/scale;
+    const py = (y-r.top-(r.height-pad.height*scale)/2)/scale;
+    if (!(px>=0 && px<pad.width && py>=0 && py<pad.height && px%168<160 && py%168<160)) return null;
+    control = {action:'key', key:Math.floor(py/168)*3 + Math.floor(px/168)};
+  } else {
+    ray.setFromCamera({x:2*(x-r.left)/r.width-1,y:1-2*(y-r.top)/r.height},camera);
+    control = ray.intersectObjects(targets,false)[0]?.object.userData.control;
+  }
+  if (!control || (control.action === 'key' && !panel.keys?.[control.key])) return null;
+  return control;
+}
+let frameReceived = -Infinity;
+let pointer = null;
+function updatePointer() {
+  if (!pointer) return;
+  const {surface,x,y} = pointer;
+  const hit = controlAt(surface,x,y);
+  surface.style.cursor = hit ? (selecting(panel.keys[hit.key]) ? 'progress' : 'pointer') : '';
+}
+let press = null;
+for (const surface of [canvas,pad].filter(Boolean)) {
+  surface.addEventListener('pointermove', event => {
+    pointer = {surface,x:event.clientX,y:event.clientY};
+    updatePointer();
+  });
+  surface.addEventListener('pointerleave', () => {pointer = null;surface.style.cursor = '';});
+  surface.addEventListener('pointercancel', () => {press = null;});
+  surface.addEventListener('pointerdown', event => {
+    press = null;
+    if (!event.isPrimary || event.button !== 0) return;
+    const hit = controlAt(surface,event.clientX,event.clientY);
+    if (hit) press = {surface, hit, id:panel.keys[hit.key], pointerId:event.pointerId, x:event.clientX, y:event.clientY};
+  });
+  surface.addEventListener('pointerup', event => {
+    const down = press;
+    press = null;
+    if (!down || surface !== down.surface || event.pointerId !== down.pointerId ||
+        Math.hypot(event.clientX-down.x,event.clientY-down.y) > (event.pointerType === 'touch' ? 12 : 8)) return;
+    const hit = controlAt(surface,event.clientX,event.clientY);
+    if (hit && hit.action === down.hit.action && hit.key === down.hit.key && panel.keys[hit.key] === down.id)
+      sendControl(hit.action,hit.key);
+  });
+}
+for (const button of document.querySelectorAll('[data-control]')) {
+  button.onclick = () => sendControl(button.dataset.control);
+}
 for (const display of [lcd, ...keys]) {
   display.context.fillStyle = '#000';
   display.context.fillRect(0, 0, display.pixels.width, display.pixels.height);
@@ -262,10 +340,30 @@ window.addEventListener('message', event => {
     });
     lastFrame = Date.now();
     if (fromDirector) { status.textContent = 'Vista previa local de Admira Director'; return; }
+    panel = event.data.panel;
+    frameReceived = performance.now();
+    if (selection && (!selecting(selection.id) || (performance.now()-selection.started > 500 &&
+        (panel?.pendingId === null || /^(Reproduciendo en el Corsair físico|Inicia sesión|El mando rechazó|Sin respuesta|El teclado no ha confirmado)/.test(panel?.notice || ''))))) selection = null;
+    updatePointer();
+    const pendingKey = selection ? panel?.keys?.indexOf(selection.id) : -1;
+    if (pendingKey >= 0) {
+      const tile = keys[pendingKey];
+      tile.context.strokeStyle = '#ffca58';
+      tile.context.lineWidth = 8;
+      tile.context.strokeRect(4,4,152,152);
+      verticalOutput?.drawImage(tile.pixels, (pendingKey%3)*168, Math.floor(pendingKey/3)*168);
+    }
+    if (panel) {
+      dialRings[0].color.set(panel.muted ? '#e21e22' : '#28ad53');
+      dialRings[1].color.set(panel.paused ? '#d88e21' : '#2584f5');
+      for (const action of ['mute','pause']) document.querySelector('[data-control="'+action+'"]')?.setAttribute('aria-pressed', String(action === 'mute' ? panel.muted : panel.paused));
+    }
     const air = event.data.onAir && typeof event.data.onAir === 'object' ? event.data.onAir : null;
+    if (selection && !panel?.notice) { status.textContent = 'Esperando confirmación del Corsair'; return; }
+    if (panel?.notice) { status.textContent = panel.notice; return; }
     if (air?.source === 'offline') { status.textContent = 'Esperando al teclado físico'; return; }
     const piece = air?.title ? ' · ' + String(air.title).slice(0, 80) + (air.total > 1 ? ' (' + (air.index + 1) + '/' + air.total + ')' : '') : '';
-    const source = air?.source === 'twin' ? 'Playlist de prueba' : air?.source === 'playout' ? 'Playout de la flota' : 'Reproducción según el teclado físico';
+    const source = panel?.local ? (panel.paused ? 'Gemelo virtual en pausa' : 'Control del gemelo virtual') : air?.source === 'twin' ? 'Playlist de prueba' : air?.source === 'playout' ? 'Playout de la flota' : 'Reproducción según el teclado físico';
     const message = ready?.landscape && ready?.portrait ? source + ' · en la pantalla superior y en las 12 teclas' + piece
       : playing ? source + ' · cargando la otra orientación…' + piece : air?.source === 'twin' ? 'Cargando la playlist de prueba…' : 'Señal real del player · sin contenido en antena todavía';
     if (status.textContent !== message) status.textContent = message;
