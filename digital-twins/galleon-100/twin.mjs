@@ -132,11 +132,11 @@ function sendControl(action, key) {
 for (const x of [2.085, 2.56]) {
   const dial = new THREE.Mesh(new THREE.CylinderGeometry(.103, .106, .096, 36), dialMaterial);
   dial.position.set(x, .225, -.744);
-  const dialRing = new THREE.MeshBasicMaterial();
+  const dialRing = new THREE.MeshBasicMaterial({color:'#51545b', toneMapped:false});
   dialRings.push(dialRing);
-  const ring = new THREE.Mesh(new THREE.TorusGeometry(.115, .009, 8, 40), dialRing);
+  const ring = new THREE.Mesh(new THREE.TorusGeometry(.112, .018, 12, 48), dialRing);
   ring.rotation.x = -Math.PI / 2;
-  ring.position.set(x, .167, -.744);
+  ring.position.set(x, .245, -.744);
   deck.add(dial, ring);
   dial.userData.control = ring.userData.control = {action:dialRings.length === 1 ? 'mute' : 'pause'};
   targets.push(dial, ring);
@@ -170,7 +170,6 @@ function applyLighting() {
     material.emissive.copy(hue);
     material.emissiveIntensity = power * .8;
   });
-  for (const ring of dialRings) ring.color.copy(unlit).lerp(mode === 'solid' ? custom : palette[1], power);
   rgbLevel.value = brightness + ' %';
   rgbSwatch.hidden = mode !== 'solid';
 }
@@ -298,7 +297,7 @@ async function pollPhysical() {
     const presence = (screens?.screens || []).find(entry => entry?.screen === 'corsair-galleon-100') || null;
     const age = presence ? Number(presence.age_seconds) : (Number(now?.lastSeen) ? Math.round((Date.now() - Number(now.lastSeen)) / 1000) : null);
     const output = now?.health?.output;
-    if ((output === 'usb' || now?.producer === 'galleon-usb-corsair-galleon-100') && !now.standby && age !== null && age <= 45) {
+    if (!panel && (output === 'usb' || now?.producer === 'galleon-usb-corsair-galleon-100') && !now.standby && age !== null && age <= 45) {
       dialRings[0].color.set((now.item?.playback?.muted ?? now.device?.audio?.muted) ? '#e21e22' : '#28ad53');
       dialRings[1].color.set((now.item?.playback?.paused ?? now.health?.paused) ? '#d88e21' : '#2584f5');
     }
@@ -356,7 +355,14 @@ window.addEventListener('message', event => {
     if (panel) {
       dialRings[0].color.set(panel.muted ? '#e21e22' : '#28ad53');
       dialRings[1].color.set(panel.paused ? '#d88e21' : '#2584f5');
-      for (const action of ['mute','pause']) document.querySelector('[data-control="'+action+'"]')?.setAttribute('aria-pressed', String(action === 'mute' ? panel.muted : panel.paused));
+      for (const [action, active, color] of [['mute',panel.muted,panel.muted ? '#ff4149' : '#40dd7a'], ['pause',panel.paused,panel.paused ? '#ffbc44' : '#589aff']]) {
+        const button = document.querySelector('[data-control="'+action+'"]');
+        if (button) {
+          button.setAttribute('aria-pressed', String(active));
+          button.style.borderColor = color;
+          button.style.color = color;
+        }
+      }
     }
     const air = event.data.onAir && typeof event.data.onAir === 'object' ? event.data.onAir : null;
     if (selection && !panel?.notice) { status.textContent = 'Esperando confirmación del Corsair'; return; }
