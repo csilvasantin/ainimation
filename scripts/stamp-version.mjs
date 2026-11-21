@@ -45,7 +45,7 @@ try {
 try {
   if (readdirSync(join(root, "capsulas")).includes("index.html")) htmlFiles.push("capsulas/index.html");
 } catch {}
-for (const directory of ['presentaciones', 'presentaciones/editor', 'presentaciones/reproductor', 'sites']) {
+for (const directory of ['presentaciones', 'presentaciones/editor', 'presentaciones/reproductor', 'sites', 'digital-twins', 'digital-twins/help', 'digital-twins/galleon-100', 'digital-twins/stream-deck', 'digital-twins/admiranext01', 'digital-twins/admiranext05']) {
   try { if (readdirSync(join(root, directory)).includes('index.html')) htmlFiles.push(directory + '/index.html'); } catch {}
 }
 let changed = 0;
@@ -62,13 +62,17 @@ for (const file of htmlFiles) {
   // These shared entry modules used to load without a token. A cached i18n
   // dictionary otherwise leaves new navigation labels untranslated after deploy.
   after = after.replace(
-    /(\b(?:src|href)="\/?assets\/(?:i18n\.js|site-session\.mjs|capsule-launcher\.mjs|site-language\.js|site-shell\.(?:mjs|css)|meta-style\.css|update-notice\.(?:mjs|css)|capsula-editor\.js))(?:\?v=[^"]*)?"/g,
+    /(\b(?:src|href)="\/?assets\/(?:director-twin\.(?:mjs|css)|i18n\.js|site-session\.mjs|capsule-launcher\.mjs|site-language\.js|site-shell\.(?:mjs|css)|meta-style\.css|update-notice\.(?:mjs|css)|capsula-editor\.js))(?:\?v=[^"]*)?"/g,
     (_m, head) => `${head}?v=${version}"`,
   );
   if (file === "interactivos/index.html") after = after.replace(
     /(\b(?:href|src)="\.\.\/assets\/[^"?]+)(?:\?v=[^"]*)?/g,
     (_m, head) => `${head}?v=${version}`,
   );
+  if (file.startsWith('digital-twins/')) {
+    after = after.replace(/(\b(?:href|src)="\/digital-twins\/[^"?]+\.(?:mjs|js|css))(?:\?v=[^"]*)?"/g, (_m, head) => `${head}?v=${version}"`);
+    if (file === 'digital-twins/galleon-100/index.html') after = after.replace(/(\bsrc="\.\/twin\.mjs)(?:\?v=[^"]*)?"/g, (_m, head) => `${head}?v=${version}"`);
+  }
   if (file === 'index.html') after = stampPageRevision(after);
   if (after === before) continue;
   stale.push(file);

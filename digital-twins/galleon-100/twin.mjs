@@ -4,12 +4,20 @@ import { attachGalleonPlaylist } from './playlist.mjs';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
 
+const directorParams = new URLSearchParams(location.search);
+const directorMode = directorParams.get('director') === '1' && window.parent !== window;
+const directorSession = directorParams.get('session') || '';
 const canvas = document.querySelector('#keyboard');
 const status = document.querySelector('#status');
 const horizontalOutput = document.querySelector('#landscape-output')?.getContext('2d', { alpha: false });
 const verticalOutput = document.querySelector('#portrait-output')?.getContext('2d', { alpha: false });
 const feed = document.querySelector('#feed');
-const feedOrigin = new URL(feed.src).origin;
+const feedOrigin = new URL(feed.dataset.src).origin;
+if (!directorMode) {
+  feed.src = feed.dataset.src;
+  const importer = document.querySelector('#importer');
+  importer.src = importer.dataset.src;
+}
 const scene = new THREE.Scene();
 scene.background = new THREE.Color('#10182b');
 addObjectFloor(scene, -.128, .5);
@@ -196,7 +204,7 @@ for (const display of [lcd, ...keys]) {
   display.texture.needsUpdate = true;
 }
 
-const subscribe = attachGalleonPlaylist(feed, document.querySelector('#importer'), status);
+const subscribe = directorMode ? () => {} : attachGalleonPlaylist(feed, document.querySelector('#importer'), status);
 // Teclado físico: lo que late el adaptador USB del Mac Studio en /signage/now (nunca lo que diga el gemelo).
 const physical = document.querySelector('#physical');
 async function pollPhysical() {
@@ -217,13 +225,13 @@ async function pollPhysical() {
       : 'Teclado físico: en antena' + (presence?.version ? ' · ' + presence.version : '') + (now?.item?.title ? ' · ' + String(now.item.title).slice(0, 60) : '');
   } catch { if (physical) physical.textContent = 'Teclado físico: estado no disponible'; }
 }
-void pollPhysical();
-const physicalTimer = setInterval(pollPhysical, 15000);
+if (!directorMode) void pollPhysical();
+const physicalTimer = setInterval(() => { if (!directorMode) void pollPhysical(); }, 15000);
 window.addEventListener('pagehide', () => clearInterval(physicalTimer), { once: true });
 feed.addEventListener('load', subscribe);
 let lastFrame = 0;
 const statusTimer = setInterval(() => {
-  if (Date.now() - lastFrame > 3000) {
+  if (!directorMode && Date.now() - lastFrame > 3000) {
     status.textContent = 'Esperando la señal de Admira TV';
     subscribe();
   }
@@ -231,7 +239,8 @@ const statusTimer = setInterval(() => {
 window.addEventListener('pagehide', () => clearInterval(statusTimer), { once: true });
 
 window.addEventListener('message', event => {
-  if (event.origin !== feedOrigin || event.source !== feed.contentWindow || event.data?.type !== 'admira:galleon:frame') return;
+  const fromDirector = directorMode && event.origin === location.origin && event.source === window.parent && event.data?.session === directorSession && event.data?.type === 'ain:director:frame';
+  if (!fromDirector && (directorMode || event.origin !== feedOrigin || event.source !== feed.contentWindow || event.data?.type !== 'admira:galleon:frame')) return;
   const { landscape, portrait, playing, ready } = event.data;
   if (!(landscape instanceof ImageBitmap) || !(portrait instanceof ImageBitmap)) return;
   try {
@@ -246,6 +255,7 @@ window.addEventListener('message', event => {
       texture.needsUpdate = true;
     });
     lastFrame = Date.now();
+    if (fromDirector) { status.textContent = 'Vista previa local de Admira Director'; return; }
     const air = event.data.onAir && typeof event.data.onAir === 'object' ? event.data.onAir : null;
     const piece = air?.title ? ' · ' + String(air.title).slice(0, 80) + (air.total > 1 ? ' (' + (air.index + 1) + '/' + air.total + ')' : '') : '';
     const source = air?.source === 'twin' ? 'Playlist de prueba' : air?.source === 'playout' ? 'Playout de la flota' : 'Señal real del teclado';
@@ -255,6 +265,7 @@ window.addEventListener('message', event => {
   } finally {
     landscape.close();
     portrait.close();
+    if (fromDirector) requestDirectorFrame();
   }
 });
 
@@ -271,3 +282,15 @@ renderer.setAnimationLoop(() => {
   controls.update();
   renderer.render(scene, camera);
 });
+
+// Pull one frame at a time: no accumulating ImageBitmaps while the parent is busy.
+let directorTimer;
+function requestDirectorFrame() {
+  clearTimeout(directorTimer);
+  directorTimer = setTimeout(() => {
+    window.parent.postMessage({type:'ain:director:request',session:directorSession},location.origin);
+    directorTimer = setTimeout(requestDirectorFrame,1000);
+  },80);
+}
+if (directorMode && directorSession) requestDirectorFrame();
+window.addEventListener('pagehide',()=>clearTimeout(directorTimer),{once:true});

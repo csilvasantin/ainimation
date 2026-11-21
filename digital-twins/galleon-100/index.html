@@ -40,7 +40,8 @@
   <script defer src="/digital-twins/twin-nav.js"></script>
   <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}</script>
 <link rel="canonical" href="https://www.ainimation.studio/digital-twins/galleon-100/">
-</head>
+<script>if(new URLSearchParams(location.search).get('director')==='1')document.documentElement.classList.add('director-twin-embedded');</script>
+<style>.director-twin-embedded .galleon-lighting a,.director-twin-embedded .twin-navigation,.director-twin-embedded main>header,.director-twin-embedded #importer,.director-twin-embedded .galleon-controls{display:none!important}.director-twin-embedded main{padding-top:0!important}.director-twin-embedded .galleon-workspace{display:block;padding:8px}.director-twin-embedded #keyboard{height:48vh;min-height:230px}.director-twin-embedded .galleon-outputs canvas{height:140px}</style></head>
 <body>
   <main>
     <header><h1>Corsair Galleon 100 SD</h1><p id="status" role="status">Esperando la señal de Admira TV</p><p id="physical" role="status">Teclado físico: consultando…</p></header>
@@ -71,10 +72,10 @@
           <a href="https://corsair.com/web-hub/" target="_blank" rel="noopener noreferrer">Ajustar teclado físico en CORSAIR ↗</a>
         </fieldset>
       </section>
-      <iframe id="importer" src="https://admira.tv/mando?embed=galleon&amp;screen=corsair-galleon-100" title="Importador de contenido del Galleon"></iframe>
+      <iframe id="importer" data-src="https://admira.tv/mando?embed=galleon&amp;screen=corsair-galleon-100" title="Importador de contenido del Galleon"></iframe>
     </div>
   </main>
-  <iframe id="feed" allow="autoplay" src="https://admira.tv/galleon.html" tabindex="-1" title="Señal del player Galleon"></iframe>
+  <iframe id="feed" allow="autoplay" data-src="https://admira.tv/galleon.html" tabindex="-1" title="Señal del player Galleon"></iframe>
   <script type="module" src="./twin.mjs?v=20261113-live"></script>
 </body>
 </html>

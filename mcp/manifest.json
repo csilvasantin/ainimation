@@ -275,6 +275,7 @@
     "catalogue": "https://www.ainimation.studio/digital-twins/catalogue.json",
     "help": "https://www.ainimation.studio/digital-twins/help/",
     "es": "Gemelos de objetos: Galleon, Stream Deck, AdmiraNeXT01 y AdmiraNeXT05. Los PC son previsualizaciones locales; el control físico mantiene su API original.",
-    "en": "Object twins: Galleon, Stream Deck, AdmiraNeXT01 and AdmiraNeXT05. PC previews run locally; physical controls retain their original API."
+    "en": "Object twins: Galleon, Stream Deck, AdmiraNeXT01 and AdmiraNeXT05. PC previews run locally; physical controls retain their original API.",
+    "galleon_director": "https://www.ainimation.studio/studio.html?twin=galleon-100#workspace"
   }
 }

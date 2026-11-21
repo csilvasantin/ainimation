@@ -44,7 +44,7 @@
     <link rel="manifest" href="site.webmanifest" />
     <link rel="stylesheet" href="assets/styles.css?v=5699e17" />
     <link rel="stylesheet" href="assets/capsula-editor.css" />
-  <link rel="stylesheet" href="/assets/site-shell.css?v=5699e17"><script src="/assets/site-language.js?v=5699e17"></script></head>
+  <link rel="stylesheet" href="/assets/site-shell.css?v=5699e17"><script src="/assets/site-language.js?v=5699e17"></script><link rel="stylesheet" href="/assets/director-twin.css"></head>
   <body class="studio-page director-focus">
     <header class="site-header studio-site-header" aria-label="Primary">
       <a class="brand" href="index.html" aria-label="AInimation Studio home">
@@ -192,6 +192,7 @@
           </div>
 
           <div class="director-menubar" data-ain-shell="director" aria-label="Application menu">
+            <button class="menu-button" type="button" data-director-twin>Ver en objeto · Galleon</button>
             <span class="member-menu">
               <button class="menu-button" type="button" aria-expanded="false" data-member-menu>Archivo</button>
               <span class="member-menu-list" aria-label="Archivo">
@@ -410,6 +411,7 @@
                 <strong>Stage <em id="outputTitle" class="window-hidden-value">The Last Signal</em></strong>
                 <span class="stage-title-actions">
                   <span id="sceneCount">1920 × 1080</span>
+                  <button class="stage-clear-button" type="button" data-director-twin>Ver en Galleon</button>
                   <button class="stage-clear-button" type="button" data-clear-stage>Clear</button>
                 </span>
               </div>
@@ -640,5 +642,5 @@
   <script type="module" src="assets/interactive-director.mjs?v=5699e17"></script><script type="module" src="assets/capsule-editor-entry.mjs?v=5699e17"></script>
 <script type="module" src="assets/director-focus.mjs?v=5699e17"></script>
 <script src="assets/capsula-editor.js?v=5699e17" defer></script>
-<script type="module" src="/assets/site-shell.mjs?v=5699e17"></script></body>
+<script type="module" src="/assets/site-shell.mjs?v=5699e17"></script><script type="module" src="/assets/director-twin.mjs"></script></body>
 </html>

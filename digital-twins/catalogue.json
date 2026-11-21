@@ -7,7 +7,22 @@
       "id": "galleon-100",
       "name": "Corsair Galleon 100 SD",
       "url": "https://www.ainimation.studio/digital-twins/galleon-100/",
-      "mode": "playlist-and-live-feed"
+      "mode": "playlist-and-live-feed",
+      "authoring": "https://www.ainimation.studio/studio.html?twin=galleon-100#workspace",
+      "directorPreview": {
+        "transport": "same-origin ImageBitmap frames",
+        "surfaces": {
+          "lcd": [
+            720,
+            384
+          ],
+          "keys": [
+            480,
+            640
+          ]
+        },
+        "hardwareWrite": false
+      }
     },
     {
       "id": "stream-deck",

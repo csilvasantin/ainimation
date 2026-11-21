@@ -4431,6 +4431,18 @@ window.saveFilmPlan = saveFilmPlan;
 window.normalizeFilmPlan = normalizeFilmPlan;
 window.loadTimelineMarkers = loadTimelineMarkers;
 window.renderFilmPlan = renderFilmPlan;
+// Draw the same Stage composition used by video export, at its current Score frame.
+let directorTwinStageCanvas;
+window.drawDirectorTwinStage = () => {
+  const stage = document.querySelector('.stage-canvas');
+  if (!stage || !stage.getBoundingClientRect().width) throw new Error('El Stage no está visible.');
+  const canvas = directorTwinStageCanvas ||= document.createElement('canvas');
+  canvas.width = Math.min(960, stageWidthPixels);
+  canvas.height = Math.max(1, Math.round(canvas.width * stageHeightPixels / stageWidthPixels));
+  drawStageDomFrame(canvas.getContext('2d'), stage, canvas.width, canvas.height);
+  return canvas;
+};
+
 
 function renderStageRulers() {
   const xRuler = document.querySelector(".stage-ruler-x");
