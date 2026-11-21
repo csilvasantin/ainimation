@@ -36,3 +36,7 @@ Este sitio autora; el dato acaba en sus hermanos, y ahí sí hay contrato:
 ## Para personas
 
 [ainimation.studio/help](https://www.ainimation.studio/help/).
+
+Digital twins: https://www.ainimation.studio/digital-twins/
+Agent catalogue: https://www.ainimation.studio/digital-twins/catalogue.json
+Help ES/EN: https://www.ainimation.studio/digital-twins/help/

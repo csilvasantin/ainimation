@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <title>Corsair Galleon 100 SD · Gemelo 3D · AInimation Studio</title>
+  <style>
+    body { margin: 0; background: #070b15; color: #e5edf8; font: 14px/1.5 system-ui, sans-serif; }
+    main { padding-top: var(--xs-bar-h, 0px); padding-bottom: calc(60px + env(safe-area-inset-bottom)); }
+    main > header { padding: 16px 24px; }
+    h1 { margin: 0; font-size: 19px; }
+    #status, #physical { margin: 5px 0 0; color: #a5b8cc; }
+    #physical { font-size: 12px; color: #8fa6c2; }
+    .galleon-workspace { display: grid; grid-template-columns: minmax(0, 1fr) minmax(320px, 435px); gap: 20px; padding: 0 24px 24px; align-items: start; }
+    .galleon-scene { min-width: 0; background: #10182b; border: 1px solid #26344a; border-radius: 14px; overflow: hidden; }
+    #keyboard { display: block; width: 100%; height: min(38vh, 430px); min-height: 220px; touch-action: none; }
+    .galleon-controls { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; padding: 12px; border-top: 1px solid #26344a; }
+    .galleon-controls label { flex: 1; min-width: 145px; }
+    .galleon-controls select { display: block; width: 100%; margin-top: 4px; }
+    .galleon-controls :is(button,select) { color: inherit; background: #182439; border: 1px solid #435779; border-radius: 6px; padding: 6px 8px; font: inherit; }
+    .galleon-outputs { display: grid; grid-template-columns: minmax(0, 1.45fr) minmax(0, 1fr); gap: 10px; padding: 0 12px 12px; }
+    .galleon-outputs figure { margin: 0; padding: 8px; border: 1px solid #26344a; border-radius: 9px; background: #111b2d; }
+    .galleon-outputs figcaption { margin-bottom: 5px; color: #e5edf8; font-size: 11px; }
+    .galleon-outputs canvas { display: block; width: 100%; height: clamp(110px, 19vh, 170px); object-fit: contain; border-radius: 5px; background: #05080e; }
+    .galleon-lighting { display: flex; align-items: center; gap: 8px 14px; flex-wrap: wrap; margin: 0; padding: 9px 12px 13px; border: 0; border-top: 1px solid #26344a; }
+    .galleon-lighting [hidden] { display: none; }
+    .galleon-lighting legend { padding: 0 4px; margin-left: 8px; color: #a9bfdc; font-size: 12px; }
+    .galleon-lighting label { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; }
+    .galleon-lighting input { accent-color: #91bdff; }
+    .galleon-lighting input[type=range] { width: min(100px, 24vw); }
+    .galleon-lighting input[type=color] { width: 29px; height: 26px; padding: 2px; background: #182439; border: 1px solid #435779; border-radius: 4px; }
+    .galleon-lighting select { color: inherit; background: #182439; border: 1px solid #435779; border-radius: 5px; padding: 4px 6px; }
+    .galleon-lighting a { color: #b1d2ff; font-size: 11px; }
+    #importer { display: block; width: 100%; height: 610px; border: 1px solid #26344a; border-radius: 14px; background: #0a0c12; }
+    @media (max-width: 900px) { .galleon-workspace { grid-template-columns: 1fr; padding-inline: 14px; } #keyboard { height: min(37vh, 390px); } }
+    #feed { position: absolute; width: 1px; height: 1px; border: 0; opacity: 0; pointer-events: none; }
+  </style>
+  <link rel="stylesheet" href="/digital-twins/twin-nav.css">
+  <script defer src="/digital-twins/twin-nav.js"></script>
+  <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}</script>
+<link rel="canonical" href="https://www.ainimation.studio/digital-twins/galleon-100/">
+</head>
+<body>
+  <main>
+    <header><h1>Corsair Galleon 100 SD</h1><p id="status" role="status">Esperando la señal de Admira TV</p><p id="physical" role="status">Teclado físico: consultando…</p></header>
+    <div class="galleon-workspace">
+      <section class="galleon-scene" aria-label="Galleon 100 SD">
+        <canvas id="keyboard" aria-label="Gemelo 3D del teclado Corsair Galleon 100 SD"></canvas>
+        <div class="galleon-controls">
+          <label>Señal <select id="playlist"></select></label>
+          <button type="button" id="previous" aria-label="Pieza anterior">◀</button>
+          <button type="button" id="next" aria-label="Pieza siguiente">▶</button>
+        </div>
+        <div class="galleon-outputs" aria-label="Salidas del player">
+          <figure>
+            <figcaption>Pantalla superior · horizontal</figcaption>
+            <canvas id="landscape-output" width="720" height="384" aria-label="Emisión horizontal del Galleon"></canvas>
+          </figure>
+          <figure>
+            <figcaption>Mosaico vertical · 12 teclas</figcaption>
+            <canvas id="portrait-output" width="496" height="664" aria-label="Emisión vertical del Galleon dividida en 12 teclas"></canvas>
+          </figure>
+        </div>
+        <fieldset class="galleon-lighting">
+          <legend>Iluminación del gemelo 3D</legend>
+          <label><input id="rgb-on" type="checkbox" checked> RGB</label>
+          <label>Brillo <input id="rgb-brightness" type="range" min="0" max="100" value="75"><output id="rgb-level" for="rgb-brightness">75 %</output></label>
+          <label>Modo <select id="rgb-mode"><option value="gradient">Degradado</option><option value="solid">Color fijo</option></select></label>
+          <label id="rgb-swatch" hidden>Color <input id="rgb-color" type="color" value="#4ea7ff"></label>
+          <a href="https://corsair.com/web-hub/" target="_blank" rel="noopener noreferrer">Ajustar teclado físico en CORSAIR ↗</a>
+        </fieldset>
+      </section>
+      <iframe id="importer" src="https://admira.tv/mando?embed=galleon&amp;screen=corsair-galleon-100" title="Importador de contenido del Galleon"></iframe>
+    </div>
+  </main>
+  <iframe id="feed" allow="autoplay" src="https://admira.tv/galleon.html" tabindex="-1" title="Señal del player Galleon"></iframe>
+  <script type="module" src="./twin.mjs?v=20261113-live"></script>
+</body>
+</html>

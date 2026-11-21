@@ -7,8 +7,8 @@ import {mountSessionNavigation} from '../assets/site-session.mjs';
 const source=name=>readFileSync(new URL('../'+name,import.meta.url),'utf8');
 const pages=['index.html','interactivos/index.html','presentaciones/index.html','presentaciones/editor/index.html','presentaciones/reproductor/index.html','sites/index.html','capsulas/index.html','studio.html','studio-live.html','xperiencias/index.html','404.html'];
 
-test('la navegación pública y Opciones conservan sólo las cinco secciones acordadas, también con sesión',()=>{
-  const expected=['/xperiencias/','/interactivos/','/presentaciones/','/capsulas/','/interactivos/?login=1'];
+test('la navegación pública y Opciones conservan Director, Digital twins y las secciones existentes, también con sesión',()=>{
+  const expected=['/studio.html','/digital-twins/','/xperiencias/','/interactivos/','/presentaciones/','/capsulas/','/interactivos/?login=1'];
   const routes=nav=>Array.from(nav.querySelectorAll('a')).map(a=>new URL(a.href).pathname+new URL(a.href).search.replace(/([?&])lang=(es|en)(&|$)/,(_m,start,_lang,end)=>end?start:''));
   for(const file of ['index.html','xperiencias/index.html','interactivos/index.html','studio.html','studio-live.html','404.html'])for(const signedIn of [false,true]){
     const dom=new JSDOM(source(file),{url:'https://www.ainimation.studio/'+file}),doc=dom.window.document;
@@ -22,7 +22,7 @@ test('la navegación pública y Opciones conservan sólo las cinco secciones aco
     const dom=new JSDOM(source('index.html'),{url:'https://www.ainimation.studio/'}),doc=dom.window.document;doc.documentElement.lang=lang;
     const ui=mountQuadraticHeader(doc.querySelector('header'));
     assert.deepEqual(routes(ui.panels.options.querySelector('nav')),expected);
-    assert.deepEqual(Array.from(ui.panels.options.querySelectorAll('nav a')).map(a=>a.textContent),lang==='es'?['Xperiencias','Interactivos','Presentaciones','Cápsulas','Login']:['Xperiencias','Interactives','Presentations','Capsules','Login']);
+    assert.deepEqual(Array.from(ui.panels.options.querySelectorAll('nav a')).map(a=>a.textContent),lang==='es'?['Admira Director','Digital twins','Xperiencias','Interactivos','Presentaciones','Cápsulas','Login']:[ 'Admira Director','Digital twins','Xperiencias','Interactives','Presentations','Capsules','Login']);
     ui.destroy();dom.window.close();
   }
 });

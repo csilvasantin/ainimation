@@ -1,0 +1,37 @@
+{
+  "name": "AInimation Digital Twins",
+  "authoring": "https://www.ainimation.studio/studio.html",
+  "help": "https://www.ainimation.studio/digital-twins/help/",
+  "objects": [
+    {
+      "id": "galleon-100",
+      "name": "Corsair Galleon 100 SD",
+      "url": "https://www.ainimation.studio/digital-twins/galleon-100/",
+      "mode": "playlist-and-live-feed"
+    },
+    {
+      "id": "stream-deck",
+      "name": "Stream Deck XL",
+      "url": "https://www.ainimation.studio/digital-twins/stream-deck/",
+      "mode": "live-with-image-fallback"
+    },
+    {
+      "id": "admiranext01",
+      "name": "AdmiraNeXT01",
+      "url": "https://www.ainimation.studio/digital-twins/admiranext01/",
+      "mode": "local-simulation"
+    },
+    {
+      "id": "admiranext05",
+      "name": "AdmiraNeXT05",
+      "url": "https://www.ainimation.studio/digital-twins/admiranext05/",
+      "mode": "local-simulation"
+    },
+    {
+      "id": "taza",
+      "name": "PlayerTaza",
+      "url": "https://www.ainimation.studio/taza/",
+      "mode": "existing-player"
+    }
+  ]
+}

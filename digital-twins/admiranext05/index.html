@@ -1,0 +1,762 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta name="robots" content="noindex,nofollow">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Supercomputer AdmiraNeXT05 · gemelo digital · AInimation Studio</title>
+<meta name="description" content="Gemelo digital de la Supercomputer: los 7 ventiladores con pantalla de AdmiraNeXT05, sus contenidos de admira.tv y su iluminación, en vivo.">
+<link rel="canonical" href="https://www.ainimation.studio/digital-twins/admiranext05/">
+<link rel="icon" href="/assets/favicon.svg">
+<meta name="theme-color" content="#04060d">
+<style>
+:root{--bg:#04060d;--panel:rgba(8,12,24,.92);--ink:#eef4ff;--mut:#8a98b3;--ice:#8fd6ff;--gold:#ffce3a;--green:#3df08a;--red:#ff5470;--line:rgba(143,214,255,.18);--line2:rgba(143,214,255,.34)}
+*{box-sizing:border-box}html,body{margin:0;height:100%;overflow:hidden}
+body{background:radial-gradient(ellipse at 50% 0,#14234a,#04060d 62%);color:var(--ink);font:13px/1.45 system-ui,-apple-system,"Segoe UI",sans-serif}
+button,input,select{font:inherit;color:inherit}
+#c{position:fixed;left:0;top:var(--xs-bar-h,0px);width:100%;height:calc(100% - var(--xs-bar-h,0px));display:block;touch-action:none}
+.hud{position:fixed;z-index:5}
+.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+.top{top:var(--xs-bar-h,0px);left:0;right:0;display:flex;align-items:center;gap:12px;padding:14px 18px;background:linear-gradient(180deg,rgba(4,6,13,.95),transparent);pointer-events:none}
+.top>*{pointer-events:auto}
+.brand b{font:800 18px/1 system-ui,sans-serif;letter-spacing:.01em}.brand b span{color:var(--ice)}.brand small{display:block;color:var(--mut);font-size:10px;margin-top:3px;letter-spacing:.06em}
+.spacer{flex:1}
+.estado{display:flex;align-items:center;gap:7px;border:1px solid var(--line);background:var(--panel);border-radius:999px;padding:6px 12px;font-size:11px;white-space:nowrap}
+.estado i{width:8px;height:8px;border-radius:50%;background:var(--mut)}
+.estado.on i{background:var(--green);box-shadow:0 0 10px var(--green);animation:pulso 1.6s infinite}.estado.off i{background:var(--red)}
+@keyframes pulso{50%{opacity:.35}}
+.panel{background:var(--panel);backdrop-filter:blur(14px);border:1px solid var(--line);border-radius:14px;padding:14px;max-height:calc(100% - var(--xs-bar-h,0px) - 150px);overflow:auto}
+.izq{top:calc(70px + var(--xs-bar-h,0px));left:16px;width:318px}
+.der{top:calc(70px + var(--xs-bar-h,0px));right:16px;width:300px}
+.panel h2{margin:0 0 10px;font:700 10px/1 ui-monospace,Menlo,monospace;letter-spacing:.14em;color:var(--mut)}
+.panel h2 em{font-style:normal;color:var(--ice)}
+.modos{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.modo,.efecto{border:1px solid var(--line);background:rgba(143,214,255,.03);border-radius:10px;padding:8px 9px;text-align:left;cursor:pointer}
+.modo b{display:block;font-size:13px}.modo small{color:var(--mut);font-size:10px}.modo.ancho{grid-column:1/-1}
+.modo:hover,.efecto:hover{border-color:var(--line2)}
+.modo.on,.efecto.on{border-color:var(--ice);background:rgba(143,214,255,.11);box-shadow:inset 0 0 0 1px rgba(143,214,255,.25)}
+.desc{color:var(--mut);font-size:11.5px;margin:10px 0 2px}
+.campo{display:grid;gap:5px;margin-top:10px}
+.campo label,.fila label{font-size:10px;color:var(--mut);letter-spacing:.08em;text-transform:uppercase}
+select,input[type=number]{width:100%;background:#0a1122;border:1px solid var(--line);border-radius:8px;padding:7px 8px}
+select:focus,input:focus{outline:1px solid var(--ice)}
+.fila{display:grid;grid-template-columns:72px 1fr;gap:8px;align-items:center;margin-top:6px}
+.fila.f3{grid-template-columns:72px 1fr 34px}
+input[type=range]{width:100%;accent-color:var(--ice)}
+.val{font:11px ui-monospace,Menlo,monospace;color:var(--ice);text-align:right}
+.efectos{display:grid;grid-template-columns:repeat(4,1fr);gap:5px}
+.efecto{padding:7px 4px;text-align:center;font-size:11px}
+.color{display:flex;gap:8px;align-items:center}
+.color input[type=color]{width:40px;height:30px;border:1px solid var(--line);border-radius:8px;background:none;padding:0;cursor:pointer}
+.swatches{display:flex;gap:5px;flex-wrap:wrap}.swatches button{width:22px;height:22px;border-radius:50%;border:1px solid rgba(255,255,255,.25);cursor:pointer}
+.check{display:flex;gap:8px;align-items:center;margin-top:10px;font-size:12px;color:var(--ink)}
+.destinos{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-bottom:8px}
+.destino{border:1px solid var(--line);background:rgba(143,214,255,.03);border-radius:10px;padding:6px 8px;text-align:left;cursor:pointer}
+.destino b{display:block;font-size:12px}.destino small{color:var(--mut);font-size:9.5px}
+.destino.on{border-color:var(--ice);background:rgba(143,214,255,.11)}.destino.sin small{color:var(--gold)}
+.mini{margin-top:6px;border:1px solid var(--line);background:none;border-radius:8px;padding:5px 9px;font-size:11px;cursor:pointer}
+.bloqueado{opacity:.4;pointer-events:none}
+.pieza{display:flex;align-items:center;gap:8px;width:100%;min-height:44px;background:#0a1122;border:1px solid var(--line);border-radius:8px;padding:4px 8px 4px 4px;cursor:pointer;text-align:left}
+.pieza:hover{border-color:var(--line2)}
+.pieza img,.pieza i{width:36px;height:36px;border-radius:6px;object-fit:cover;background:#000;flex:0 0 auto}
+.pieza span{flex:1;min-width:0;font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pieza::after{content:'▾';color:var(--mut);font-size:11px}
+.pop{position:fixed;z-index:30;width:360px;max-height:62vh;display:none;flex-direction:column;background:rgba(6,10,22,.98);border:1px solid var(--line2);border-radius:12px;box-shadow:0 14px 44px rgba(0,0,0,.6)}
+.pop.open{display:flex}
+.pop input{margin:8px 8px 4px;background:#0a1122;border:1px solid var(--line);border-radius:8px;padding:8px}
+.pop .nota{padding:0 10px 6px;color:var(--mut);font-size:10.5px}
+.lista{overflow:auto;padding:0 6px 6px}
+.opcion{display:flex;gap:9px;align-items:center;width:100%;padding:5px;border:0;border-radius:8px;background:none;text-align:left;cursor:pointer}
+.opcion:hover,.opcion.on{background:rgba(143,214,255,.11)}
+.opcion img,.opcion i{width:64px;height:64px;border-radius:7px;object-fit:cover;background:#000;flex:0 0 auto}
+.opcion b{display:block;font-size:12px;line-height:1.3;max-height:2.6em;overflow:hidden}.opcion small{display:block;color:var(--mut);font-size:10px;margin-top:2px}
+.panel [hidden]{display:none!important}
+.relevo{display:grid;grid-template-columns:1fr auto;gap:6px;align-items:center}
+.pasos{display:flex;align-items:center;gap:4px;border:1px solid var(--line);border-radius:10px;padding:3px;cursor:pointer}
+.pasos.on{border-color:var(--ice);background:rgba(143,214,255,.11);box-shadow:inset 0 0 0 1px rgba(143,214,255,.25)}
+.pasos button{width:28px;height:28px;border:0;border-radius:7px;background:rgba(143,214,255,.08);cursor:pointer;font-size:16px;line-height:1}
+.pasos button:hover{background:rgba(143,214,255,.2)}
+.panel .pasos input{width:56px;text-align:center;padding:5px 2px;-moz-appearance:textfield}
+.pasos input::-webkit-inner-spin-button,.pasos input::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
+.pasos small{color:var(--mut);font-size:11px;padding-right:4px}
+.aplicar{margin-top:12px;width:100%;border:0;border-radius:10px;padding:10px;background:linear-gradient(90deg,#2b6cff,#8fd6ff);color:#04101f;font-weight:800;cursor:pointer}
+.aplicar:disabled{opacity:.45;cursor:default}
+.pendiente{margin-top:8px;font-size:11px;color:var(--gold);min-height:15px}
+.tira{left:0;right:0;bottom:0;display:flex;justify-content:center;gap:10px;padding:10px 12px 14px;background:linear-gradient(0deg,rgba(4,6,13,.95),transparent);overflow-x:auto}
+.vent{flex:0 0 auto;width:96px;text-align:center;cursor:pointer;border:0;background:none;padding:0}
+.vent .disco{position:relative;width:84px;height:84px;margin:0 auto;border-radius:50%;padding:4px;background:conic-gradient(var(--anillo,#334) 0 100%)}
+.vent img{width:100%;height:100%;border-radius:50%;object-fit:cover;background:#000;display:block}
+.vent b{display:block;font-size:11px;margin-top:5px}.vent small{display:block;color:var(--mut);font:9.5px ui-monospace,Menlo,monospace}
+.vent.sel .disco{outline:2px solid var(--ice);outline-offset:3px}
+.detalle{top:var(--xs-bar-h,0px);right:0;width:330px;height:calc(100% - var(--xs-bar-h,0px));z-index:8;padding:18px;background:rgba(6,10,22,.97);backdrop-filter:blur(16px);border-left:1px solid var(--line);transform:translateX(102%);transition:transform .22s;display:flex;flex-direction:column;gap:12px;overflow:auto}
+.detalle.open{transform:none}
+.cerrar{align-self:flex-end;border:0;background:none;color:var(--mut);cursor:pointer;font-size:18px}
+.detalle img{width:220px;height:220px;border-radius:50%;object-fit:cover;align-self:center;background:#000;border:4px solid var(--anillo,#334)}
+.detalle h3{margin:0;font:800 22px/1.1 system-ui,sans-serif}
+.kv{display:flex;justify-content:space-between;gap:10px;padding:7px 0;border-bottom:1px solid var(--line);font-size:11px;color:var(--mut)}.kv b{color:var(--ink);text-align:right}
+.toast{left:50%;bottom:150px;transform:translateX(-50%);background:var(--panel);border:1px solid var(--line2);border-radius:10px;padding:9px 14px;font-size:12px;opacity:0;transition:opacity .2s;pointer-events:none;z-index:9}
+.toast.show{opacity:1}.toast.error{border-color:var(--red);color:#ffc2cc}
+.carga{position:fixed;inset:0;z-index:20;display:grid;place-items:center;background:var(--bg);color:var(--ice);font:11px ui-monospace,Menlo,monospace;letter-spacing:.14em}.carga.hide{display:none}
+@media(max-width:900px){
+  #c{height:44vh}
+  .izq,.der{position:fixed;left:8px;right:8px;width:auto;top:auto;max-height:none;border-radius:12px}
+  .izq{bottom:calc(126px + 23vh);height:20vh}.der{bottom:120px;height:22vh}
+  .brand small{display:none}.tira{justify-content:flex-start}
+  .vent{width:78px}.vent .disco{width:68px;height:68px}
+  .pop{left:8px!important;right:8px;width:auto}
+}
+</style>
+<script>window.XPACE_SHELL={section:{es:'Supercomputer · gemelo digital',en:'Supercomputer · digital twin'},options:[{href:'https://admira.tv/',es:'admira.tv',en:'admira.tv'},{href:'/admira-xp/',es:'Gemelo Admira XP',en:'Admira XP twin'}]};</script>
+<link rel="stylesheet" href="/digital-twins/twin-nav.css">
+<script defer src="/digital-twins/twin-nav.js"></script>
+</head>
+<body>
+<canvas id="c" aria-label="Gemelo 3D de la Supercomputer con sus 7 ventiladores de contenido"></canvas>
+<div class="carga" id="carga">ENCENDIENDO LA SUPERCOMPUTER…</div>
+
+<header class="hud top">
+  <div class="brand"><b>AdmiraNeXT05</b><small>LA STORE DE AdmiraNeXT05 · 7 VENTILADORES · ADMIRA.TV</small></div>
+  <span class="spacer"></span>
+  <span class="estado" id="estado"><i></i><span id="estadoTxt">Conectando…</span></span>
+</header>
+
+<section class="hud panel izq" aria-label="Pantallas">
+  <h2>PANTALLAS · <em>SCREENS</em></h2>
+  <div class="modos" id="modos">
+    <button class="modo" data-modo="independiente"><b>Independiente</b><small>Independent</small></button>
+    <button class="modo" data-modo="repetir"><b>Repetir</b><small>Repeat</small></button>
+    <button class="modo" data-modo="extender"><b>Extender</b><small>Extend · Adaptar · Adapt</small></button>
+    <button class="modo" data-modo="sincro"><b>Sincro</b><small>Sync</small></button>
+    <button class="modo" data-modo="secuencia"><b>Secuencia</b><small>Sequence · entero, de uno en uno</small></button>
+    <button class="modo" data-modo="identificar"><b>Identificar</b><small>Identify · su número</small></button>
+  </div>
+  <p class="desc" id="desc"></p>
+  <div id="opciones"></div>
+  <div class="campo" id="audio"><label>Audio · sound — un solo ventilador suena</label>
+    <div class="fila"><label>Suena</label><select id="audioVent"></select></div>
+    <div class="fila"><label>Salida</label><select id="audioSalida"></select></div>
+    <div class="fila f3"><label>Volumen</label><input type="range" id="audioVol" min="0" max="100" step="5" value="100"><span class="val" id="audioVolV">100</span></div>
+    <p class="desc" id="audioDesc" style="margin:2px 0 0"></p>
+  </div>
+  <button class="aplicar" id="aplicarEscena">Aplicar al gemelo</button>
+  <div class="pendiente" id="pendEscena"></div>
+</section>
+
+<section class="hud panel der" aria-label="Iluminación">
+  <h2>ILUMINACIÓN · <em>LIGHTING</em></h2>
+  <div class="destinos" id="destinos"></div>
+  <p class="desc" id="destinoDesc" style="margin-top:0"></p>
+  <button class="mini" id="seguirGeneral" hidden>Seguir la luz general · follow main light</button>
+  <div id="controlesLuz">
+  <div class="efectos" id="efectos"></div>
+  <div class="campo"><label>Color</label>
+    <div class="color"><input type="color" id="color" value="#00d26a"><div class="swatches" id="swatches"></div></div>
+  </div>
+  <div class="fila f3"><label>Brillo</label><input type="range" id="brillo" min="0" max="4" step="1" value="4"><span class="val" id="brilloV">4</span></div>
+  <div class="fila f3"><label>Velocidad</label><input type="range" id="velocidad" min="0" max="4" step="1" value="2"><span class="val" id="velocidadV">2</span></div>
+  </div>
+  <label class="check" id="sigueFila"><input type="checkbox" id="sigue"> La luz sigue al vídeo en sincro · <span style="color:var(--mut)">light follows video</span></label>
+  <button class="aplicar" id="aplicarLuz">Aplicar iluminación</button>
+  <div class="pendiente" id="pendLuz"></div>
+</section>
+
+<nav class="hud tira" id="tira" aria-label="Ventiladores"></nav>
+
+<aside class="hud detalle" id="detalle" aria-label="Ventilador">
+  <button class="cerrar" id="cerrar" aria-label="Cerrar">✕</button>
+  <img id="dImg" alt="">
+  <h3 id="dTit">Ventilador</h3>
+  <div id="dKv"></div>
+  <div class="campo"><label>Color propio de este ventilador</label>
+    <div class="color"><input type="color" id="dColor" value="#ffffff"><button class="efecto" id="dColorOn">Usar</button><button class="efecto" id="dColorOff">Quitar</button></div>
+  </div>
+</aside>
+<div class="hud toast" id="toast"></div>
+<div class="pop" id="piezasPop" role="dialog" aria-label="Elegir pieza del Stock">
+  <input id="piezasBuscar" type="search" placeholder="Buscar por título, #número o tag · search" autocomplete="off">
+  <div class="nota" id="piezasNota"></div>
+  <div class="lista" id="piezasLista" role="listbox"></div>
+</div>
+
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}</script>
+<script type="module">
+import * as THREE from "three";
+import {OrbitControls} from "three/addons/controls/OrbitControls.js";
+
+const API='/supercomputer/pc-cocina/api';
+const STOCK='https://api.admira.store/stock/list?limit=300';   // respaldo: solo las 200 más recientes
+// Índice completo del Stock (el mismo que usa functions/admira-xp/media-catalog.js): todas las piezas con sus tags y
+// su portada, ~370 KB comprimido. Se carga una vez al abrir el gemelo.
+const STOCK_INDICE='https://stock.admira.store/stock/index.json';
+const $=id=>document.getElementById(id);
+
+// ── Modos y efectos (mismos nombres que el puente: admira-tv/tools/player-ventiladores/escena.mjs) ──
+const MODOS={
+  independiente:'Cada ventilador es un player de admira.tv con su propia pieza.',
+  repetir:'La misma pieza en los 7 a la vez, en sincronía exacta.',
+  extender:'Una pieza estirada sobre los 7 como un mural: cada ventilador muestra su tesela.',
+  sincro:'La pieza pasa de un ventilador al siguiente sin perder el hilo. Con varias piezas, desfilan en carrusel.',
+  secuencia:'El vídeo se reproduce entero en el 1, luego entero en el 2… hasta el 7, y vuelta a empezar. La luz acompaña al vídeo: solo brilla el ventilador que lo tiene.',
+  identificar:'Cada pantalla enseña su número, su puerto y su posición, para ubicar los ventiladores en la caja.'
+};
+const EFECTOS=[['apagado','Apagado'],['fijo','Fijo'],['arcoiris','Arcoíris'],['respirar','Respirar'],['ciclo','Ciclo'],['meteoro','Meteoro'],['ola','Ola'],['carrera','Carrera']];
+const SWATCHES=['#00d26a','#8fd6ff','#2b6cff','#ffce3a','#ff6a3d','#ff2d78','#b26bff','#ffffff'];
+
+// Disposición física de AdmiraNeXT05 (Carlos, foto y capturas anotadas del 6-nov-2026), vista por el cristal grande
+// (+x). La pared de la placa es −x; la izquierda (+z) es la trasera de la caja y la derecha (−z) la delantera.
+// Los 7 ventiladores tienen pantalla y vídeo; el número es el del puente: 1 = único del puerto 0; 2-3-4 = puerto 1;
+// 5-6-7 = puerto 2, con la numeración lógica de su config.json («numeracion»: {"2:0": 7, "2:2": 5}) para que la
+// secuencia suba desde el suelo: la cadena del puerto 2 va de arriba abajo.
+//  · 1: solo, en la pared trasera (izquierda), arriba, de lado y mirando hacia dentro.
+//  · 2-3-4: en el suelo, horizontales, caras arriba, de izquierda a derecha.
+//  · 5-6-7: en la pared de la placa, en columna justo a su derecha (junto al peine de 24 pines), de ABAJO ARRIBA
+//    (el 5 junto al 4 del suelo, el 7 arriba) y mirando de frente.
+// Confirmado el 6-nov-2026 con Identificar: el 1 por su vídeo y el suelo 2-3-4 (izq->der) por Carlos; la columna,
+// con la webcam de AdmiraNeXT05 (por la tarde, tras la numeración lógica, el de abajo enseña el 5). Si cambia el
+// cableado, se tocan esta tabla y «numeracion».
+const VENTILADORES=[1,2,3,4,5,6,7];
+const DISPOSICION={
+  1:{p:[-0.95,3.75,3.14],n:[0,0,-1]},
+  2:{p:[0.45,0.18,1.75],n:[0,1,0]},3:{p:[0.45,0.18,0.2],n:[0,1,0]},4:{p:[0.45,0.18,-1.35],n:[0,1,0]},
+  5:{p:[-1.9,1.3,-2.4],n:[1,0,0]},6:{p:[-1.9,2.75,-2.4],n:[1,0,0]},7:{p:[-1.9,4.2,-2.4],n:[1,0,0]}
+};
+
+let estado=null, escena={modo:'independiente',ids:{},piezas:[],paso:4,ajuste:'cubrir',columnas:7}, luz={efecto:'fijo',color:'#00d26a',brillo:4,velocidad:2,sigueVideo:false,ventiladores:{},dispositivos:{}};
+// ── Modo «solo gemelo» (simulación): el gemelo funciona sin el PC real (Carlos, 4-nov-2026) ──
+const SIM_KEY='admira.supercomputer.sim';
+const SIM=true; let simInforme=null;
+function simAplicar(parte,valor){
+  simInforme={...(simInforme||{}),[parte]:parte==='escena'?{...valor,epoch:valor.epoch||Date.now()}:JSON.parse(JSON.stringify(valor))};
+  estado={...(estado||{}),informe:{...(estado?.informe||{}),...simInforme}};
+}
+function simPieza(n){
+  const e=(SIM&&simInforme?.escena)||escena||{};const p=e.piezas||[];
+  if(e.modo==='independiente')return (e.ids?.[n]||e.ids?.[String(n)]||[])[0]||null;
+  if(e.modo==='repetir'||e.modo==='extender')return p[0]||null;
+  if(e.modo==='sincro'){
+    const order=e.orden||[1,2,3,4,5,6,7],pos=order.indexOf(n),step=Math.floor(Math.max(0,Date.now()-(e.epoch||Date.now()))/1000/(e.paso||4));
+    const i=((pos-step)%order.length+order.length)%order.length;return p[i]||null;
+  }
+  if(e.modo==='secuencia')return turnoSecuencia(e)===n?p[0]||null:null;
+  return null;
+}
+function simTitulo(n){
+  const e=(SIM&&simInforme?.escena)||escena||{};const id=simPieza(n);const it=id?stock.find(s=>s.id===id):null;
+  const k=n+'|'+(e.modo||'')+'|'+(id||'')+'|'+(it?.title||'');
+  simTitulo.c=simTitulo.c||{};if(simTitulo.c[k])return simTitulo.c[k];
+  const cv=document.createElement('canvas');cv.width=cv.height=256;const g=cv.getContext('2d');
+  let h=n*51;if(id){h=0;for(const ch of String(id))h=(h*31+ch.charCodeAt(0))>>>0;}
+  const gr=g.createRadialGradient(128,128,10,128,128,128);gr.addColorStop(0,'hsl('+h%360+',80%,45%)');gr.addColorStop(1,'#05070d');
+  g.fillStyle=gr;g.fillRect(0,0,256,256);g.fillStyle='#fff';g.textAlign='center';g.textBaseline='middle';
+  if(id){
+    g.font='bold 64px system-ui,sans-serif';g.fillText(it?.num!=null?'#'+it.num:'▶',128,92);
+    const t=String(it?.title||id);g.font='600 22px system-ui,sans-serif';
+    const w=t.split(/\s+/);let l='',ls=[];for(const x of w){if(g.measureText(l+' '+x).width>210&&l){ls.push(l);l=x;}else l=l?l+' '+x:x;}ls.push(l);
+    ls.slice(0,3).forEach((x,i)=>g.fillText(x.slice(0,22),128,146+i*26));
+    g.font='600 15px system-ui,sans-serif';g.fillStyle='rgba(255,255,255,.75)';g.fillText('SIM · '+(e.modo||'')+' · V'+n,128,232);
+  }else{
+    g.font='bold 120px system-ui,sans-serif';g.fillText(String(n),128,120);
+    g.font='600 20px system-ui,sans-serif';g.fillStyle='rgba(255,255,255,.75)';g.fillText(e.modo==='identificar'?'SIM · identificar':'SIM · sin pieza',128,200);
+  }
+  return simTitulo.c[k]=cv;
+}
+// Pseudostreaming del gemelo (solo SIM, nunca fotogramas del PC): la pieza real (stock.url / stock.thumbnail de
+// api.admira.store/stock/list) se descarga UNA vez a Cache API 'admira-sc-sim-v1' (clave = url); después se reproduce desde caché.
+const SIM_CACHE='admira-sc-sim-v1',simMedia={},simCv={};
+function simCargar(it){
+  if(!it||simMedia[it.id])return simMedia[it.id];
+  const m=simMedia[it.id]={st:'idle',p:0,img:null,vid:null,t:0};
+  if(it.thumbnail||it.thumb){const im=new Image();im.crossOrigin='anonymous';im.onload=()=>{m.img=im;};im.src=it.thumbnail||it.thumb;}
+  if(!it.url){m.st=(it.thumbnail||it.thumb)?'ok':'err';return m;}
+  (async()=>{
+    try{
+      const c=self.caches?await caches.open(SIM_CACHE):null;let r=c&&await c.match(it.url),blob;
+      if(r){blob=await r.blob();m.st='ok';m.t=Date.now();}
+      else{
+        m.st='dl';r=await fetch(it.url);if(!r.ok)throw new Error(r.status);
+        const tot=+r.headers.get('content-length')||it.size||0,rd=r.body.getReader(),parts=[];let got=0;
+        for(;;){const {done,value}=await rd.read();if(done)break;parts.push(value);got+=value.length;m.p=tot?Math.min(1,got/tot):0;}
+        blob=new Blob(parts,{type:it.mime||r.headers.get('content-type')||''});
+        if(c)try{await c.put(it.url,new Response(blob,{headers:{'Content-Type':blob.type}}));}catch(e){}
+        m.st='ok';m.t=Date.now();
+      }
+      const u=URL.createObjectURL(blob);
+      if(it.type==='video'){const v=document.createElement('video');v.muted=true;v.loop=true;v.playsInline=true;v.src=u;v.oncanplay=()=>{m.vid=v;v.play().catch(()=>{});};v.load();}
+      else{const im=new Image();im.onload=()=>{m.img=im;};im.src=u;}
+    }catch(e){m.st=m.img?'ok':'err';}
+  })();
+  return m;
+}
+function simDibujar(n){
+  const cv=simCv[n]=simCv[n]||Object.assign(document.createElement('canvas'),{width:256,height:256}),g=cv.getContext('2d');
+  const id=simPieza(n),it=id?stock.find(s=>s.id===id):null,m=it?simCargar(it):null;
+  const src=m&&((m.vid&&m.vid.readyState>=2)?m.vid:m.img);
+  if(!src){g.drawImage(simTitulo(n),0,0);}
+  else{const w=src.videoWidth||src.naturalWidth,h=src.videoHeight||src.naturalHeight,k=Math.max(256/w,256/h);g.fillStyle='#000';g.fillRect(0,0,256,256);try{g.drawImage(src,(256-w*k)/2,(256-h*k)/2,w*k,h*k);}catch(e){}
+    g.font='600 13px system-ui,sans-serif';g.textAlign='center';g.fillStyle='rgba(0,0,0,.55)';g.fillRect(70,6,116,20);g.fillStyle='#ffd34d';g.fillText('GEMELO · SIM · V'+n,128,17);}
+  if(m&&m.st==='dl'){g.fillStyle='rgba(0,0,0,.6)';g.fillRect(28,206,200,28);g.fillStyle='#333';g.fillRect(34,222,188,7);g.fillStyle='#3df2ff';g.fillRect(34,222,188*m.p,7);g.fillStyle='#fff';g.font='600 12px system-ui,sans-serif';g.textAlign='center';g.fillText('Descargando '+Math.round(m.p*100)+'% · solo la 1ª vez',128,215);}
+  else if(m&&m.st==='ok'&&Date.now()-m.t<4000){g.fillStyle='rgba(0,0,0,.6)';g.fillRect(78,212,100,22);g.fillStyle='#7dff9a';g.font='600 13px system-ui,sans-serif';g.textAlign='center';g.fillText('✓ en caché',128,227);}
+  return cv;
+}
+function simPlaceholder(n){return simDibujar(n);}
+let simTick=0;setInterval(()=>{
+  try{if(!SIM||!vents)return;}catch(e){return;}simTick++;
+  for(let n=1;n<=7;n++){const v=vents[n];if(!v)continue;simDibujar(n);if(v.tex&&v.tex.image===simCv[n])v.tex.needsUpdate=true;
+    if(simTick%5===0){try{const im=document.querySelector(`img[data-mini="${n}"]`);if(im)im.src=simCv[n].toDataURL('image/jpeg',.7);if(seleccionado===n)$('dImg').src=im?im.src:simCv[n].toDataURL();}catch(e){}}}
+},100);
+let stock=[], pintadaEscena='', editandoEscena=false, editandoLuz=false, seleccionado=null, soloLectura=false, desfasePC=0;
+
+// ── Utilidades ──
+const hex=c=>Array.isArray(c)?'#'+c.map(v=>Number(v).toString(16).padStart(2,'0')).join(''):(c||'#ffffff');
+function toast(t,error){const el=$('toast');el.textContent=t;el.className='hud toast show'+(error?' error':'');clearTimeout(toast.t);toast.t=setTimeout(()=>el.className='hud toast',2600);}
+async function api(ruta,cuerpo){
+  if(cuerpo){simAplicar(ruta,cuerpo);return {ok:true};}
+  return {ok:true,enLinea:false,ahora:Date.now(),informe:simInforme||{},deseado:simInforme||{}};
+}
+
+function piezaTxt(id){const s=stock.find(x=>x.id===id);return s?('#'+s.num+' · '+s.title):id;}
+const esc=t=>String(t??'').replace(/[<&"]/g,c=>({'<':'&lt;','&':'&amp;','"':'&quot;'}[c]));
+// Tag elegido encima de las piezas (preferencia de quien mira: se recuerda en este navegador).
+let tagFiltro=(()=>{try{return localStorage.getItem('admira.supercomputer.pccocina.tag')||'';}catch{return '';}})();
+let tagsOrdenados=[];
+function filaTag(){
+  if(!stock.length)return '';
+  const opciones=tagsOrdenados.map(([t,n])=>`<option value="${esc(t)}"${t===tagFiltro?' selected':''}>${esc(t)} (${n})</option>`).join('');
+  return `<div class="fila"><label>Tag</label><select id="tagFiltro" aria-label="Filtrar las piezas por tag"><option value="">Todos · all (${stock.length})</option>${opciones}</select></div>`;
+}
+// Botón de pieza: su portada y su título; al pulsarlo se abre la lista con portadas.
+function botonPieza(tipo,clave,sel,vacio){
+  const p=stock.find(x=>x.id===sel);
+  const img=p?.thumb?`<img src="${esc(p.thumb)}" alt="" loading="lazy">`:'<i></i>';
+  return `<button type="button" class="pieza" data-${tipo}="${clave}" data-id="${esc(sel||'')}" data-vacio="${esc(vacio)}">${img}<span>${sel?esc(piezaTxt(sel)):esc(vacio)}</span></button>`;
+}
+let popBoton=null;
+const pasaTag=p=>!tagFiltro||p.tags.includes(tagFiltro);
+function pintarLista(){
+  const q=$('piezasBuscar').value.trim().toLowerCase(),actual=popBoton?.dataset.id||'';
+  const casa=p=>!q||('#'+p.num).includes(q)||String(p.title).toLowerCase().includes(q)||p.tags.some(t=>t.toLowerCase().includes(q));
+  const todas=stock.filter(p=>pasaTag(p)&&casa(p)),MAX=250,vistas=todas.slice(0,MAX);
+  $('piezasNota').textContent=(tagFiltro?'Tag «'+tagFiltro+'» · ':'')+todas.length+' piezas'+(todas.length>MAX?' · se ven '+MAX+': afina la búsqueda':'');
+  const fila=p=>`<button type="button" class="opcion${p.id===actual?' on':''}" data-elige="${esc(p.id)}" role="option">${p.thumb?`<img src="${esc(p.thumb)}" alt="" loading="lazy">`:'<i></i>'}<span><b>#${p.num??''} · ${esc(p.title)}</b><small>${p.type==='image'?'Imagen':'Vídeo'}${p.tags.length?' · '+esc(p.tags.slice(0,4).join(' · ')):''}</small></span></button>`;
+  $('piezasLista').innerHTML=`<button type="button" class="opcion" data-elige=""><i></i><span><b>${esc(popBoton?.dataset.vacio||'— ninguna —')}</b></span></button>`+vistas.map(fila).join('');
+}
+function abrirPiezas(b){
+  popBoton=b;const pop=$('piezasPop'),r=b.getBoundingClientRect();
+  pop.classList.add('open');$('piezasBuscar').value='';pintarLista();
+  const alto=Math.min(pop.offsetHeight,innerHeight*.62),arriba=r.bottom+6+alto>innerHeight;
+  pop.style.left=Math.max(8,Math.min(r.left,innerWidth-pop.offsetWidth-8))+'px';
+  pop.style.top=(arriba?Math.max(8,r.top-6-alto):r.bottom+6)+'px';
+  $('piezasBuscar').focus();
+}
+function cerrarPiezas(){$('piezasPop').classList.remove('open');popBoton=null;}
+function elegirPieza(b,id){
+  if(b.dataset.ind){escena.ids[b.dataset.ind]=id?[id]:[];}
+  else{const i=+b.dataset.pieza,p=escena.piezas.slice();p[i]=id;escena.piezas=p.filter(Boolean);}
+  editandoEscena=true;pintarModos();
+}
+$('piezasBuscar').oninput=pintarLista;
+$('piezasLista').onclick=e=>{const o=e.target.closest('[data-elige]');if(!o||!popBoton)return;const b=popBoton;cerrarPiezas();elegirPieza(b,o.dataset.elige);};
+document.addEventListener('keydown',e=>{if(e.key==='Escape')cerrarPiezas();});
+document.addEventListener('pointerdown',e=>{if(popBoton&&!e.target.closest('#piezasPop,.pieza'))cerrarPiezas();});
+
+// ── Panel de pantallas ──
+function pintarModos(){
+  document.querySelectorAll('.modo').forEach(b=>b.classList.toggle('on',b.dataset.modo===escena.modo));
+  $('desc').textContent=MODOS[escena.modo]||'';
+  const o=$('opciones');
+  if(escena.modo==='independiente'){
+    o.innerHTML=filaTag()+VENTILADORES.map(n=>`<div class="fila"><label>Vent. ${n}</label>${botonPieza('ind',n,(escena.ids[n]||[])[0],'Playlist del canal')}</div>`).join('');
+  }else if(escena.modo==='repetir'){
+    o.innerHTML=filaTag()+`<div class="campo"><label>Pieza en los 7</label>${botonPieza('pieza',0,escena.piezas[0],'— elige pieza —')}</div>`;
+  }else if(escena.modo==='extender'){
+    o.innerHTML=filaTag()+`<div class="campo"><label>Pieza del mural</label>${botonPieza('pieza',0,escena.piezas[0],'— elige pieza —')}</div>
+      <div class="fila"><label>Ajuste</label><select id="ajuste"><option value="cubrir">Cubrir · cover</option><option value="estirar">Estirar · stretch</option><option value="contener">Contener · contain</option></select></div>
+      <div class="fila f3"><label>Columnas</label><input type="range" id="columnas" min="1" max="7" value="${escena.columnas||7}"><span class="val" id="columnasV">${escena.columnas||7}</span></div>`;
+    $('ajuste').value=escena.ajuste||'cubrir';
+    $('columnas').oninput=e=>{$('columnasV').textContent=e.target.value;escena.columnas=+e.target.value;editandoEscena=true;};
+    $('ajuste').onchange=e=>{escena.ajuste=e.target.value;editandoEscena=true;};
+  }else if(escena.modo==='identificar'){
+    o.innerHTML='';
+  }else if(escena.modo==='secuencia'){
+    // Cambio de ventilador: al acabar la pieza (cada=0, por defecto) o cada x segundos (escena.cada del puente).
+    const cada=Number(escena.cada)>0?Number(escena.cada):0;
+    o.innerHTML=filaTag()+`<div class="campo"><label>Vídeo · entero en cada ventilador, del 1 al 7</label>${botonPieza('pieza',0,escena.piezas[0],'— elige pieza —')}</div>`+
+      `<div class="campo"><label>Cambio de ventilador · switch</label><div class="relevo">
+        <button type="button" class="efecto${cada?'':' on'}" id="cadaFin">Al acabar · on end</button>
+        <div class="pasos${cada?' on':''}" id="cadaPasos" title="Segundos en cada ventilador">
+          <button type="button" data-paso="-1" aria-label="Un segundo menos">‹</button>
+          <input id="cadaS" type="number" min="1" max="3600" step="1" inputmode="numeric" value="${cada||ultimoCada}" aria-label="Segundos en cada ventilador">
+          <button type="button" data-paso="1" aria-label="Un segundo más">›</button><small>s</small>
+        </div></div></div><p class="desc" id="cadaDesc"></p>`;
+    pintarCada();
+    $('cadaFin').onclick=()=>{escena.cada=0;editandoEscena=true;pintarCada();};
+    $('cadaPasos').onclick=e=>{const b=e.target.closest('[data-paso]');if(b)ponerCada((Number(escena.cada)>0?Number(escena.cada):ultimoCada)+Number(b.dataset.paso));else if(e.target.id!=='cadaS'&&!(escena.cada>0))ponerCada(ultimoCada);};
+    $('cadaS').onfocus=()=>{if(!(escena.cada>0))ponerCada(+$('cadaS').value||ultimoCada,false);};
+    $('cadaS').oninput=()=>{const v=parseInt($('cadaS').value,10);if(v>0)ponerCada(v,false);};
+    $('cadaS').onchange=()=>ponerCada(parseInt($('cadaS').value,10)||ultimoCada);
+  }else{
+    const n=Math.max(1,escena.piezas.length);
+    o.innerHTML=filaTag()+Array.from({length:Math.min(7,n+1)},(_,i)=>`<div class="fila"><label>${i?'Pieza '+(i+1):'Pieza'}</label>${botonPieza('pieza',i,escena.piezas[i],i?'— otra pieza (opcional) —':'— elige pieza —')}</div>`).join('')+
+      `<div class="fila f3"><label>Paso</label><input type="range" id="paso" min="1" max="30" value="${escena.paso||4}"><span class="val" id="pasoV">${escena.paso||4} s</span></div>`;
+    $('paso').oninput=e=>{$('pasoV').textContent=e.target.value+' s';escena.paso=+e.target.value;editandoEscena=true;};
+  }
+  pintarAudio();
+  o.querySelectorAll('.pieza').forEach(b=>b.onclick=()=>popBoton===b?cerrarPiezas():abrirPiezas(b));
+  const tf=$('tagFiltro');if(tf)tf.onchange=()=>{tagFiltro=tf.value;try{localStorage.setItem('admira.supercomputer.pccocina.tag',tagFiltro);}catch{}};
+  pintadaEscena=JSON.stringify(escena);
+}
+document.querySelectorAll('.modo').forEach(b=>b.onclick=()=>{escena.modo=b.dataset.modo;editandoEscena=true;pintarModos();});
+
+// ── Secuencia: segundos en cada ventilador ──
+let ultimoCada=10;   // lo que enseña «‹ x › s» mientras está en «Al acabar»; 10 por defecto
+function ponerCada(v,repintar=true){
+  v=Math.max(1,Math.min(3600,Math.round(Number(v)||ultimoCada)));
+  escena.cada=v;ultimoCada=v;editandoEscena=true;
+  if(repintar&&$('cadaS'))$('cadaS').value=v;
+  pintarCada();
+}
+function pintarCada(){
+  if(!$('cadaDesc'))return;
+  const cada=Number(escena.cada)>0?Number(escena.cada):0;
+  $('cadaFin').classList.toggle('on',!cada);$('cadaPasos').classList.toggle('on',!!cada);
+  const inf=estado?.informe?.escena,d=inf?.modo==='secuencia'&&inf.piezas?.[0]===escena.piezas[0]?Number(inf.duracion)||0:0;
+  const pieza=stock.find(x=>x.id===escena.piezas[0]);
+  $('cadaDesc').textContent=cada?`${cada} s en cada ventilador, desde el principio de la pieza · una vuelta a los 7 tarda ${cada*7} s.`
+    :d?`Pasa al siguiente al acabar: dura ${d.toFixed(1)} s · una vuelta a los 7 tarda ${Math.round(d*7)} s.`
+    :pieza?.type==='image'?'Una imagen no se acaba: 10 s en cada ventilador (o los que pongas).':'Pasa al siguiente al acabar la pieza.';
+}
+
+// ── Audio (escena.audio del puente: escena.mjs · normalizarAudio) ──
+// Como mucho suena un ventilador (su Chrome es el único sin silenciar). La salida es el nombre del dispositivo de
+// Windows que informa el puente; vacía = la predeterminada del PC.
+const audioDe=e=>({ventilador:0,salida:'',volumen:1,...(e?.audio||{})});
+function pintarAudio(){
+  const a=audioDe(escena),inf=estado?.informe?.audio,repetir=escena.modo==='repetir',identificar=escena.modo==='identificar';
+  $('audioVent').innerHTML=`<option value="0">Sin sonido · mute</option>`+(repetir?`<option value="1">Con sonido · sound on</option>`
+    :VENTILADORES.map(n=>`<option value="${n}">Ventilador ${n}</option>`).join(''));
+  $('audioVent').value=String(repetir&&a.ventilador>0?1:a.ventilador);
+  const salidas=[...new Set([...(inf?.salidas||[]),a.salida].filter(Boolean))];
+  $('audioSalida').innerHTML=`<option value="">Predeterminada del PC · default</option>`+salidas.map(s=>`<option>${s.replace(/[<&]/g,'')}</option>`).join('');
+  $('audioSalida').value=a.salida;
+  $('audioVol').value=Math.round(a.volumen*100);$('audioVolV').textContent=Math.round(a.volumen*100);
+  $('audio').classList.toggle('bloqueado',identificar);
+  pintarSuena();
+}
+function pintarSuena(){
+  const inf=estado?.informe?.audio,identificar=escena.modo==='identificar';
+  const suena=inf?.suena||[];
+  $('audioDesc').textContent=identificar?'Identificar no tiene vídeo.':!inf?'':
+    (suena.length?'Ahora suena: '+suena.map(s=>s.replace(/^.*?(\d+)$/,'ventilador $1').replace('supercomputer-pc-cocina-ventiladores','los 7')).join(', ')+(inf.salida?' · '+inf.salida:' · salida predeterminada'):'Ahora no suena ningún ventilador.');
+}
+$('audioVent').onchange=e=>{escena.audio={...audioDe(escena),ventilador:+e.target.value};editandoEscena=true;};
+$('audioSalida').onchange=e=>{escena.audio={...audioDe(escena),salida:e.target.value};editandoEscena=true;};
+$('audioVol').oninput=e=>{$('audioVolV').textContent=e.target.value;escena.audio={...audioDe(escena),volumen:+e.target.value/100};editandoEscena=true;};
+$('aplicarEscena').onclick=async()=>{
+  const e={modo:escena.modo};
+  if(escena.modo==='independiente')e.ids=escena.ids;
+  else e.piezas=escena.piezas;
+  if(escena.modo==='extender'){e.ajuste=escena.ajuste;e.columnas=escena.columnas;}
+  if(escena.modo==='sincro')e.paso=escena.paso;
+  if(escena.modo==='secuencia'){e.piezas=escena.piezas.slice(0,1);e.cada=Number(escena.cada)>0?Number(escena.cada):0;}   // un solo vídeo; su duración la mide el puente
+  e.audio=audioDe(escena);
+  if(escena.modo==='identificar')delete e.piezas;
+  else if(escena.modo!=='independiente'&&!e.piezas.length){toast('Elige al menos una pieza',true);return;}
+  try{$('aplicarEscena').disabled=true;await api('escena',e);actualizarTexturas();editandoEscena=false;toast('Aplicado en gemelo (sim)');refrescar();}
+  catch(err){toast(soloLectura?'Tu acceso es de solo lectura':'No se pudo enviar: '+err.message,true);}
+  finally{$('aplicarEscena').disabled=false;}
+};
+
+// ── Panel de iluminación ──
+// Destino de los controles: la luz general (ventiladores y todo lo que no tenga luz propia) o una de las otras luces de
+// la caja, que el puente controla por el Strimer Plus (los dos cables), por la AIO Galahad II Trinity (los ventiladores de
+// arriba, los del radiador sin pantalla, y la bomba) o, cuando tenga driver, por SMBus (la memoria).
+// Mismo contrato que el puente: luz.dispositivos.{grafica,placa,superiores,bomba,memoria} (escena.mjs · normalizarLuz).
+const DISPOSITIVOS={
+  grafica:{t:'Cable gráfica',s:'Strimer · GPU cable'},
+  placa:{t:'Cable 24 pines',s:'Strimer · 24-pin cable'},
+  superiores:{t:'Ventiladores arriba',s:'Galahad · radiador · top fans'},
+  bomba:{t:'Bomba',s:'Galahad · AIO pump'},
+  memoria:{t:'Memoria',s:'RAM · 2 × DDR5'}
+};
+let destino='general';
+const infoDisp=k=>estado?.informe?.dispositivos?.[k]||null;
+const sinControl=k=>k!=='general'&&infoDisp(k)?.conectado===false;
+// Puente que no informa de esta luz (anterior a ella): sigue en su arcoíris de fábrica.
+const sinInforme=k=>{const d=estado?.informe?.dispositivos;return !d||!d[k];};
+function pintarDestinos(){
+  $('destinos').innerHTML=[['general',{t:'General',s:'Ventiladores y el resto · all'}],...Object.entries(DISPOSITIVOS)].map(([k,d])=>{
+    const propia=k!=='general'&&luz.dispositivos?.[k];
+    const sub=sinControl(k)?'sin control · no control':(propia?'luz propia · own':d.s);
+    return `<button class="destino${k===destino?' on':''}${sinControl(k)?' sin':''}" data-destino="${k}"><b>${d.t}</b><small>${sub}</small></button>`;
+  }).join('');
+  const info=infoDisp(destino),propia=destino!=='general'&&luz.dispositivos?.[destino];
+  const rpm=info?.rpm?' · '+info.rpm+' rpm':'';
+  $('destinoDesc').textContent=destino==='general'?'Los ventiladores con pantalla y las luces sin luz propia (cables, ventiladores de arriba, bomba y memoria).'
+    :sinControl(destino)?(info.motivo||'El puente no controla esta luz.')
+    :(propia?'Luz propia: no sigue a la general.':'Sigue la luz general. Cambia algo para darle luz propia.')+rpm;
+  $('seguirGeneral').hidden=!propia;
+  $('controlesLuz').classList.toggle('bloqueado',sinControl(destino));
+  $('sigueFila').hidden=destino!=='general';
+}
+$('destinos').onclick=e=>{const b=e.target.closest('.destino');if(!b)return;destino=b.dataset.destino;pintarLuz();};
+$('seguirGeneral').onclick=()=>{const d={...luz.dispositivos};delete d[destino];luz.dispositivos=d;editandoLuz=true;pintarLuz();};
+// Lo que enseñan los controles: la luz propia del destino o, si no tiene, la general.
+const vista=()=>destino!=='general'&&luz.dispositivos?.[destino]||luz;
+// Cambiar algo con un dispositivo elegido le da luz propia (copia de la general la primera vez).
+function editar(f){
+  if(destino==='general')f(luz);
+  else{const d={...luz.dispositivos};d[destino]={...(d[destino]||{efecto:luz.efecto,color:hex(luz.color),brillo:luz.brillo,velocidad:luz.velocidad})};f(d[destino]);luz.dispositivos=d;}
+  editandoLuz=true;pintarLuz();
+}
+$('efectos').innerHTML=EFECTOS.map(([k,t])=>`<button class="efecto" data-efecto="${k}">${t}</button>`).join('');
+$('swatches').innerHTML=SWATCHES.map(c=>`<button style="background:${c}" data-c="${c}" aria-label="${c}"></button>`).join('');
+function pintarLuz(){
+  const v=vista();
+  document.querySelectorAll('.efecto[data-efecto]').forEach(b=>b.classList.toggle('on',b.dataset.efecto===v.efecto));
+  $('color').value=hex((v.colores&&v.colores[0])||v.color);$('brillo').value=v.brillo;$('brilloV').textContent=v.brillo;
+  $('velocidad').value=v.velocidad;$('velocidadV').textContent=v.velocidad;$('sigue').checked=!!luz.sigueVideo;
+  pintarDestinos();
+}
+document.querySelectorAll('.efecto[data-efecto]').forEach(b=>b.onclick=()=>editar(o=>{o.efecto=b.dataset.efecto;}));
+$('swatches').onclick=e=>{const c=e.target.dataset.c;if(!c)return;editar(o=>{o.color=c;delete o.colores;if(o.efecto==='apagado')o.efecto='fijo';});};
+$('color').oninput=e=>editar(o=>{o.color=e.target.value;delete o.colores;});
+$('brillo').oninput=e=>editar(o=>{o.brillo=+e.target.value;});
+$('velocidad').oninput=e=>editar(o=>{o.velocidad=+e.target.value;});
+$('sigue').onchange=e=>{luz.sigueVideo=e.target.checked;editandoLuz=true;};
+const luzPlana=v=>({efecto:v.efecto,color:hex((v.colores&&v.colores[0])||v.color),brillo:v.brillo,velocidad:v.velocidad});
+async function enviarLuz(){
+  const ventiladores=Object.fromEntries(Object.entries(luz.ventiladores||{}).map(([n,v])=>[n,luzPlana(v)]));
+  const dispositivos=Object.fromEntries(Object.entries(luz.dispositivos||{}).map(([k,v])=>[k,luzPlana(v)]));
+  await api('luz',{efecto:luz.efecto,color:hex(luz.color),brillo:luz.brillo,velocidad:luz.velocidad,sigueVideo:luz.sigueVideo,ventiladores,dispositivos});
+}
+$('aplicarLuz').onclick=async()=>{
+  try{$('aplicarLuz').disabled=true;await enviarLuz();editandoLuz=false;toast('Iluminación aplicada al gemelo');refrescar();}
+  catch(err){toast(soloLectura?'Tu acceso es de solo lectura':'No se pudo enviar: '+err.message,true);}
+  finally{$('aplicarLuz').disabled=false;}
+};
+
+// ── Tira de ventiladores y detalle ──
+$('tira').innerHTML=VENTILADORES.map(n=>`<button class="vent" data-n="${n}"><div class="disco"><img alt="Ventilador ${n}" data-mini="${n}"></div><b>Ventilador ${n}</b><small data-meta="${n}">—</small></button>`).join('');
+$('tira').onclick=e=>{const b=e.target.closest('.vent');if(b)abrir(+b.dataset.n);};
+$('cerrar').onclick=()=>{$('detalle').classList.remove('open');seleccionado=null;marcarSel();};
+function marcarSel(){document.querySelectorAll('.vent').forEach(v=>v.classList.toggle('sel',+v.dataset.n===seleccionado));}
+function abrir(n){seleccionado=n;marcarSel();$('detalle').classList.add('open');pintarDetalle();}
+function pintarDetalle(){
+  if(!seleccionado)return;
+  const n=seleccionado,f=(estado?.informe?.fans||[]).find(x=>x.n===n)||{},e=estado?.informe?.escena;
+  $('dTit').textContent='Ventilador '+n;
+  $('dImg').src=simPlaceholder(n).toDataURL();
+  const pieza=e?(e.modo==='independiente'?(e.ids?.[n]||[])[0]:e.piezas?.[0]):null;
+  const filas=[['Puerto · posición',f.port!=null?`${f.port} · ${f.index}`:'—'],['RPM',f.rpm??'—'],['Fotogramas/s',f.fps??'—'],['Enviados',f.sent??'—'],['Errores USB',f.errors??'—'],['Modo',e?.modo||'—'],['Pieza',pieza?piezaTxt(pieza):'Playlist del canal']];
+  $('dKv').innerHTML=filas.map(([k,v])=>`<div class="kv"><span>${k}</span><b>${String(v).replace(/[<&]/g,'')}</b></div>`).join('');
+  const propia=luz.ventiladores?.[n];
+  $('dColor').value=hex((propia?.colores&&propia.colores[0])||propia?.color||luz.color);
+}
+$('dColorOn').onclick=async()=>{if(!seleccionado)return;luz.ventiladores={...luz.ventiladores,[seleccionado]:{efecto:'fijo',color:$('dColor').value,brillo:luz.brillo,velocidad:luz.velocidad}};try{await enviarLuz();toast('Color del gemelo '+seleccionado+' aplicado');}catch(err){toast('No se pudo enviar: '+err.message,true);}};
+$('dColorOff').onclick=async()=>{if(!seleccionado)return;const v={...luz.ventiladores};delete v[seleccionado];luz.ventiladores=v;try{await enviarLuz();toast('Ventilador '+seleccionado+' vuelve a la luz general');}catch(err){toast('No se pudo enviar: '+err.message,true);}};
+
+// ── Escena 3D ──
+const canvas=$('c'),renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:true});
+renderer.setPixelRatio(Math.min(devicePixelRatio,2));renderer.outputColorSpace=THREE.SRGBColorSpace;
+const scene=new THREE.Scene();
+// Cámara como en la foto de AdmiraNeXT05: delante del cristal grande, algo a la derecha y por encima, para ver de cara la
+// placa con la columna 5-6-7, el ventilador 1 de la pared trasera (izquierda) y los 2-3-4 del suelo.
+const camera=new THREE.PerspectiveCamera(34,1,.1,200);camera.position.set(14.5,7.4,-3);
+const controls=new OrbitControls(camera,canvas);controls.target.set(0,2.5,0);controls.enableDamping=true;controls.minDistance=7;controls.maxDistance=28;controls.maxPolarAngle=Math.PI*.49;
+scene.add(new THREE.HemisphereLight(0x9fc6ff,0x0a0f1e,.9));
+const sol=new THREE.DirectionalLight(0xffffff,1.1);sol.position.set(6,12,8);scene.add(sol);
+// Suelo de la store
+const suelo=new THREE.Mesh(new THREE.CircleGeometry(12,64),new THREE.MeshStandardMaterial({color:0x070c18,roughness:.85,metalness:.2}));suelo.rotation.x=-Math.PI/2;scene.add(suelo);
+const rejilla=new THREE.GridHelper(24,24,0x1d3a6b,0x0e1a33);rejilla.position.y=.002;scene.add(rejilla);
+// Caja: cristal templado y perfiles de aluminio oscuro
+const caja=new THREE.Group();scene.add(caja);
+const W=4.2,H=5.4,D=6.6;   // fondo (x), alto (y), ancho delante-detrás (z): más ancha que alta, como AdmiraNeXT05
+const cristal=new THREE.Mesh(new THREE.BoxGeometry(W,H,D),new THREE.MeshPhysicalMaterial({color:0x9fc6ff,transparent:true,opacity:.08,roughness:.05,metalness:0,side:THREE.DoubleSide,depthWrite:false}));cristal.position.y=H/2;caja.add(cristal);
+const aristas=new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(W,H,D)),new THREE.LineBasicMaterial({color:0x5f86c4,transparent:true,opacity:.55}));aristas.position.y=H/2;caja.add(aristas);
+// Interior según la foto de AdmiraNeXT05 (6-nov-2026): en la pared del fondo, de izquierda a derecha, los conectores de
+// corriente (pasacables), la placa y la columna 5-6-7; gráfica horizontal delante de la placa; bomba del AIO, RAM y
+// los dos peines de cables RGB (24 pines en el borde derecho de la placa y PCIe de la gráfica).
+const metal=(c,o={})=>new THREE.MeshStandardMaterial({color:c,roughness:.5,metalness:.6,...o});
+const PZ=0.15,PW=3.2,PY=3.0,PH=3.9;   // placa: centro y tamaño en z (ancho) e y (alto)
+const placa=new THREE.Mesh(new THREE.BoxGeometry(.12,PH,PW),metal(0x0b1222,{transparent:true,opacity:.75}));placa.position.set(-W/2+.15,PY,PZ);caja.add(placa);
+const panel=new THREE.Mesh(new THREE.BoxGeometry(.1,4.2,1.3),metal(0x090e1a));panel.position.set(-W/2+.12,2.7,2.55);caja.add(panel);
+for(const [y,z] of [[3.6,2.27],[3.6,2.83],[2.7,2.27],[2.7,2.83],[1.8,2.27],[1.8,2.83]]){
+  const pasacables=new THREE.Mesh(new THREE.BoxGeometry(.06,.55,.42),metal(0x02040a,{roughness:.9}));pasacables.position.set(-W/2+.2,y,z);caja.add(pasacables);
+}
+const arcoiris=(()=>{const c=document.createElement('canvas');c.width=256;c.height=64;const g=c.getContext('2d');
+  for(let i=0;i<256;i++){g.fillStyle=`hsl(${Math.round(i*1.4)},100%,58%)`;g.fillRect(i,0,1,64);}
+  g.fillStyle='rgba(0,0,0,.55)';for(let y=0;y<64;y+=8)g.fillRect(0,y+5,256,3);
+  const t=new THREE.CanvasTexture(c);t.colorSpace=THREE.SRGBColorSpace;return t;})();
+// Otras luces (6-nov-2026): cada una con su material, que imita la luz que le manda el puente (luz propia o la
+// general). La memoria, mientras el puente no la controle, enseña su arcoíris de fábrica.
+const disp={};
+function luzRgb(k,w,h,d){return luzMalla(k,new THREE.BoxGeometry(w,h,d));}
+function luzMalla(k,geo,extra={}){
+  const tex=arcoiris.clone();tex.wrapS=THREE.RepeatWrapping;tex.needsUpdate=true;
+  const mat=new THREE.MeshBasicMaterial({map:tex,...extra});
+  const m=new THREE.Mesh(geo,mat);m.userData.disp=k;
+  (disp[k]=disp[k]||{mallas:[],mats:[],tex:[]}).mallas.push(m);disp[k].mats.push(mat);disp[k].tex.push(tex);
+  return m;
+}
+const gpu=new THREE.Mesh(new THREE.BoxGeometry(1.7,.42,3.3),metal(0x141a2a,{roughness:.4,metalness:.7}));gpu.position.set(-W/2+1.06,1.85,PZ+.2);caja.add(gpu);
+const aio=new THREE.Mesh(new THREE.CylinderGeometry(.48,.48,.3,40),metal(0x1a2236,{roughness:.3,metalness:.8}));aio.rotation.z=Math.PI/2;aio.position.set(-1.8,3.75,PZ+.9);caja.add(aio);
+const espejo=luzMalla('bomba',new THREE.RingGeometry(.16,.42,48),{side:THREE.DoubleSide});espejo.rotation.y=Math.PI/2;espejo.position.set(-1.64,3.75,PZ+.9);caja.add(espejo);
+for(const z of [PZ+.1,PZ-.1]){const ram=luzRgb('memoria',.32,1.25,.09);ram.position.set(-1.88,3.8,z);caja.add(ram);}
+const peine24=luzRgb('placa',.9,1.3,.16);peine24.position.set(-1.5,3.35,PZ-1.45);caja.add(peine24);
+const peinePcie=luzRgb('grafica',.7,.42,2.1);peinePcie.position.set(-.55,1.42,PZ+.75);caja.add(peinePcie);
+// Color de cada luz en el instante t: misma imitación que los anillos (para el gemelo, no es medida).
+function pintarLuces(t){
+  const inf=estado?.informe,l=inf?.luz||(estado?luz:null);
+  for(const [k,d] of Object.entries(disp)){
+    const fabrica=!l||sinControl(k)||(inf&&sinInforme(k));   // sin luz, sin control o puente que no la conoce: arcoíris de fábrica
+    const p=fabrica?{efecto:'arcoiris',brillo:3,velocidad:2}:(l.dispositivos?.[k]||l);
+    const brillo=Math.max(.12,(p.brillo??4)/4),vel=.25+(p.velocidad??2)*.25;
+    const arco=['arcoiris','ciclo'].includes(p.efecto);
+    d.mats.forEach((m,i)=>{
+      if(!!m.map!==arco){m.map=arco?d.tex[i]:null;m.needsUpdate=true;}
+      if(arco){d.tex[i].offset.x=(t*.12*vel)%1;m.color.setScalar(brillo);return;}
+      if(p.efecto==='apagado'){m.color.set(0x0b0f18);return;}
+      const c=new THREE.Color(hex((p.colores&&p.colores[0])||p.color));
+      if(p.efecto==='respirar')c.multiplyScalar(.2+.8*(.5+.5*Math.sin(t*2*vel)));
+      else if(['meteoro','carrera','ola','pista'].includes(p.efecto))c.multiplyScalar(.25+.75*(.5+.5*Math.sin(t*3*vel+i)));
+      m.color.copy(c.multiplyScalar(brillo));
+    });
+  }
+}
+// Radiador del AIO en el techo, con sus tres ventiladores sin pantalla: su luz es la de la Galahad («superiores»).
+const radiador=new THREE.Mesh(new THREE.BoxGeometry(1.5,.22,4.4),new THREE.MeshStandardMaterial({color:0x0d1322,roughness:.5,metalness:.6}));radiador.position.set(-.2,H-.3,-.2);caja.add(radiador);
+for(const z of [-1.65,-.2,1.25]){const r=luzMalla('superiores',new THREE.TorusGeometry(.6,.045,8,48));r.rotation.x=Math.PI/2;r.position.set(-.2,H-.43,z);caja.add(r);}
+// Ventiladores
+const loader=new THREE.TextureLoader();loader.setCrossOrigin('use-credentials');
+const vents={};
+function crearVentilador(n){
+  const g=new THREE.Group(),d=DISPOSICION[n];
+  const marco=new THREE.Mesh(new THREE.BoxGeometry(1.42,1.42,.24),new THREE.MeshStandardMaterial({color:0x0c111d,roughness:.5,metalness:.6}));g.add(marco);
+  const hueco=new THREE.Mesh(new THREE.CylinderGeometry(.66,.66,.26,48,1,true),new THREE.MeshStandardMaterial({color:0x05070d,side:THREE.DoubleSide}));hueco.rotation.x=Math.PI/2;g.add(hueco);
+  const aspas=new THREE.Group();
+  for(let i=0;i<9;i++){const a=new THREE.Mesh(new THREE.BoxGeometry(.5,.12,.02),new THREE.MeshStandardMaterial({color:0x1b2235,transparent:true,opacity:.75}));a.position.x=.38;const p=new THREE.Group();p.rotation.z=i*Math.PI*2/9;a.rotation.x=.5;p.add(a);aspas.add(p);}
+  aspas.position.z=.04;g.add(aspas);
+  const lcdMat=new THREE.MeshBasicMaterial({color:0x111111});
+  const lcd=new THREE.Mesh(new THREE.CircleGeometry(.36,48),lcdMat);lcd.position.z=.14;g.add(lcd);
+  const anilloMat=new THREE.MeshBasicMaterial({color:0x223344});
+  const anillo=new THREE.Mesh(new THREE.TorusGeometry(.66,.035,12,72),anilloMat);anillo.position.z=.13;g.add(anillo);
+  const halo=new THREE.Mesh(new THREE.RingGeometry(.69,.86,72),new THREE.MeshBasicMaterial({color:0x223344,transparent:true,opacity:.28,blending:THREE.AdditiveBlending,depthWrite:false}));halo.position.z=.135;g.add(halo);
+  g.position.set(...d.p);g.lookAt(new THREE.Vector3(...d.p).add(new THREE.Vector3(...d.n)));
+  g.userData.n=n;caja.add(g);
+  vents[n]={g,aspas,lcd,lcdMat,anilloMat,halo,tex:null};
+}
+for(const n of VENTILADORES)crearVentilador(n);
+function actualizarTexturas(){
+  for(let n=1;n<=7;n++){
+    const v=vents[n];
+    if(SIM){const tex=new THREE.CanvasTexture(simPlaceholder(n));tex.colorSpace=THREE.SRGBColorSpace;v.tex?.dispose();v.tex=tex;v.lcdMat.map=tex;v.lcdMat.color.set(0xffffff);v.lcdMat.needsUpdate=true;const im=document.querySelector(`img[data-mini="${n}"]`);if(im){im.onerror=null;im.src=simPlaceholder(n).toDataURL();}continue;}
+    loader.load(API+'/miniatura/'+n+'.jpg?t='+Date.now(),tex=>{tex.colorSpace=THREE.SRGBColorSpace;v.tex?.dispose();v.tex=tex;v.lcdMat.map=tex;v.lcdMat.color.set(0xffffff);v.lcdMat.needsUpdate=true;},undefined,()=>{if(!SIM)return;const tex=new THREE.CanvasTexture(simPlaceholder(n));tex.colorSpace=THREE.SRGBColorSpace;v.tex?.dispose();v.tex=tex;v.lcdMat.map=tex;v.lcdMat.color.set(0xffffff);v.lcdMat.needsUpdate=true;});
+    const img=document.querySelector(`img[data-mini="${n}"]`);if(img){img.onerror=()=>{if(SIM){img.onerror=null;img.src=simPlaceholder(n).toDataURL();}};img.src=API+'/miniatura/'+n+'.jpg?t='+Date.now();}
+  }
+  if(seleccionado)$('dImg').src=SIM?simPlaceholder(seleccionado).toDataURL():API+'/miniatura/'+seleccionado+'.jpg?t='+Date.now();
+}
+// Clic en un ventilador 3D → detalle
+const ray=new THREE.Raycaster(),ptr=new THREE.Vector2();
+canvas.addEventListener('click',e=>{const r=canvas.getBoundingClientRect();ptr.set((e.clientX-r.left)/r.width*2-1,-(e.clientY-r.top)/r.height*2+1);ray.setFromCamera(ptr,camera);
+  const luces=Object.values(disp).flatMap(d=>d.mallas);
+  const hit=ray.intersectObjects([...Object.values(vents).map(v=>v.g),...luces],true)[0];if(!hit)return;
+  if(hit.object.userData.disp){destino=hit.object.userData.disp;pintarLuz();toast(DISPOSITIVOS[destino].t+': elige su luz en Iluminación');return;}
+  let o=hit.object;while(o&&!o.userData.n)o=o.parent;if(o)abrir(o.userData.n);});
+
+// Color que muestra cada anillo, imitando el efecto del controlador (para el gemelo, no es medida).
+// En secuencia la luz acompaña siempre al vídeo, como en el puente: solo el activo, y en fijo si la general
+// está apagada o es «respirar» (efecto de grupo).
+function colorAnillo(n,t){
+  const inf=estado?.informe,l=(inf?.luz)||luz,e=inf?.escena,secuencia=e?.modo==='secuencia';
+  let propia=l?.ventiladores?.[n]||l;
+  if(secuencia&&propia&&['apagado','respirar'].includes(propia.efecto))propia={...propia,efecto:'fijo'};
+  if(!l||propia.efecto==='apagado')return new THREE.Color(0x0b0f18);
+  const brillo=(propia.brillo||4)/4,vel=.25+(propia.velocidad??2)*.25,base=new THREE.Color(hex((propia.colores&&propia.colores[0])||propia.color));
+  let c=base.clone();
+  if(l.sigueVideo&&e?.modo==='sincro'&&!activoSincro(e,n))return new THREE.Color(0x0b0f18);
+  if(secuencia&&turnoSecuencia(e)!==n)return new THREE.Color(0x0b0f18);
+  switch(propia.efecto){
+    case 'arcoiris':c.setHSL((t*.12*vel+n*.14)%1,1,.55);break;
+    case 'ciclo':c.setHSL((t*.1*vel)%1,1,.55);break;
+    case 'respirar':c.multiplyScalar(.2+.8*(.5+.5*Math.sin(t*2*vel)));break;
+    case 'meteoro':case 'carrera':case 'ola':{const fase=(t*vel*1.4-n*.45)%7;c.multiplyScalar(.15+.85*Math.max(0,1-Math.abs(((fase%7)+7)%7-3.5)/1.6));break;}
+  }
+  return c.multiplyScalar(Math.max(.08,brillo));
+}
+function activoSincro(e,n){
+  const orden=e.orden||VENTILADORES,pos=orden.indexOf(n);if(pos<0)return false;
+  const paso=Math.floor(Math.max(0,(Date.now()+desfasePC-(e.epoch||0))/1000)/(e.paso||4)),N=orden.length;
+  return ((((pos-paso)%N)+N)%N)<(e.piezas||[]).length;
+}
+// Secuencia (mismo cálculo que escena.mjs · turnoSecuencia del puente): la pieza en cada ventilador, en orden, `cada`
+// segundos si se pidió; si no, lo que dura (`duracion`, la mide el puente) y 10 s si no se sabe (una imagen).
+function turnoSecuencia(e){
+  const orden=e.orden||VENTILADORES,d=e.cada>0?e.cada:(e.duracion>0?e.duracion:10);
+  const vuelta=Math.floor(Math.max(0,(Date.now()+desfasePC-(e.epoch||0))/1000)/d);
+  return orden[vuelta%orden.length];
+}
+
+function tamano(){const w=canvas.clientWidth,h=canvas.clientHeight;renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix();}
+addEventListener('resize',tamano);tamano();
+const reloj=new THREE.Clock();
+function bucle(){
+  requestAnimationFrame(bucle);
+  const t=reloj.getElapsedTime();
+  for(const n of VENTILADORES){
+    const v=vents[n],f=(estado?.informe?.fans||[]).find(x=>x.n===n),rpm=f?.rpm||600;
+    v.aspas.rotation.z-=rpm/600*.06;
+    const c=colorAnillo(n,t);v.anilloMat.color.copy(c);v.halo.material.color.copy(c);
+    const el=document.querySelector(`.vent[data-n="${n}"] .disco`);if(el)el.style.setProperty('--anillo','#'+c.getHexString());
+  }
+  if(seleccionado)$('dImg').style.borderColor='#'+colorAnillo(seleccionado,t).getHexString();
+  pintarLuces(t);
+  controls.update();renderer.render(scene,camera);
+}
+bucle();
+
+// ── Estado en vivo ──
+simAplicar('luz',luz);simAplicar('escena',escena);
+async function refrescar(){
+  try{
+    estado=await api('estado');
+    const on=estado.enLinea,visto=estado.visto?Math.round((estado.ahora-estado.visto)/1000):null;
+    $('estado').className='estado sim';
+    $('estadoTxt').textContent=on?'Vista previa local':(visto==null?'Vista previa local':'Vista previa local · simulación');
+    const d=estado.deseado||{},inf=estado.informe||{};
+    // Hora de AdmiraNeXT05 vista desde aquí: su reloj no tiene por qué coincidir con el del navegador.
+    if(inf.at&&estado.visto)desfasePC=(inf.at-estado.visto)-(Date.now()-estado.ahora);
+    // Los controles enseñan lo más reciente: lo pedido aquí o lo que la máquina ya aplicó (también
+    // puede cambiar en local, desde config.json o su API).
+    const vigente=(Number(inf.revision)||0)>=(Number(d.revision)||0)?inf:d;
+    if(!editandoEscena&&!popBoton&&(vigente.escena||d.escena)){const e=vigente.escena||d.escena;escena={...escena,...e,ids:{...(e.ids||{})},piezas:[...(e.piezas||[])]};if(JSON.stringify(escena)!==pintadaEscena)pintarModos();}
+    pintarSuena();
+    if(!editandoLuz&&(vigente.luz||d.luz)){const l=vigente.luz||d.luz;luz={...luz,...l,color:hex((l.colores&&l.colores[0])||l.color),ventiladores:l.ventiladores||{},dispositivos:l.dispositivos||{}};pintarLuz();}
+    else pintarDestinos();
+    const aplicando=d.revision&&inf.revision!==undefined&&d.revision>inf.revision;
+    $('pendEscena').textContent=aplicando?'Aplicando en AdmiraNeXT05…':(d.por?'Último cambio: '+d.por:'');
+    $('pendLuz').textContent=aplicando?'Aplicando en AdmiraNeXT05…':'';
+    for(const f of inf.fans||[]){const m=document.querySelector(`[data-meta="${f.n}"]`);if(m)m.textContent=`${f.rpm??'—'} rpm · ${f.fps??0} fps`;}
+    pintarDetalle();
+  }catch(err){
+    if(err.message!=='login'){$('estado').className='estado off';
+      $('estadoTxt').textContent=err.message==='not_configured'?'Nube sin configurar (falta SUPERCOMPUTER_PC_COCINA_PROXY_KEY)':'Sin conexión con la nube';}
+  }finally{$('carga').classList.add('hide');}
+}
+async function cargarStock(){
+  const segura=u=>/^https:\/\/(stock|api)\.admira\.store\//.test(String(u||''))?String(u):'';
+  const vale=x=>x&&x.id&&!x.oculto&&['video','image'].includes(x.type);
+  const pieza=x=>({url:segura(x.url)||('https://api.admira.store/stock/asset/'+encodeURIComponent(x.id)),id:x.id,num:x.num,title:x.title||x.id,type:x.type,tags:(Array.isArray(x.tags)?x.tags:[]).filter(t=>typeof t==='string'&&t),
+    thumb:segura(x.thumbnail)||segura(x.poster)||(x.type==='image'?segura(x.url):'')});
+  try{const d=await fetch(STOCK_INDICE).then(r=>{if(!r.ok)throw new Error('indice');return r.json();});
+    stock=(d.items||[]).filter(vale).map(pieza).sort((a,b)=>(b.num||0)-(a.num||0));}
+  catch{try{const d=await fetch(STOCK).then(r=>r.json());stock=(d.items||[]).filter(vale).map(pieza);}catch{stock=[];}}
+  const cuenta={};for(const p of stock)for(const t of p.tags)cuenta[t]=(cuenta[t]||0)+1;
+  tagsOrdenados=Object.entries(cuenta).sort((a,b)=>b[1]-a[1]||a[0].localeCompare(b[0],'es'));
+  if(tagFiltro&&!cuenta[tagFiltro])tagFiltro='';
+  pintarModos();
+}
+pintarModos();pintarLuz();cargarStock();refrescar();
+setInterval(refrescar,2500);setInterval(actualizarTexturas,3000);actualizarTexturas();
+</script>
+</body>
+</html>
