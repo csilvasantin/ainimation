@@ -192,3 +192,9 @@ test('registro: campos opcionales del alta y foto con las horas de cada fase', a
   const p = { id: 'p1', numero: 'A001', creadoAt: 1000, total: 0, moneda: 'EUR', prep: 60 };
   assert.equal(fotoRegistro(p, 's').t_recibido, null, 'sin pagar no hay fases');
 });
+test('customer request: received for 60 seconds, preparing for 60 seconds, then ready',()=>{
+ const c=crearCola(),t=1000000;c.crear({id:'minute-carlos',nombre:'Carlos'},t);c.pagar('minute-carlos','qr',t);
+ for(const [ms,state] of [[0,'recibido'],[59999,'recibido'],[60000,'preparando'],[119999,'preparando'],[120000,'listo']]){
+  const p=c.uno('minute-carlos',t+ms);assert.equal(p.estado,state);assert.equal(p.nombre,'Carlos');
+ }
+});

@@ -307,7 +307,7 @@ export function crearServidor(env = {}, deps = {}, identidad = null) {
   const STO = z.string().regex(/^[a-z0-9-]{2,80}$/).default('starbucks-paseo-de-gracia');
   server.registerTool('cola_estado', {
     title: 'Estado de la cola de pedidos',
-    description: 'Pedidos de una tienda en tres fases —«Recibido» (30 s), «En preparación» (1 min) y «Preparado» (listo; recogido solo a los 2 min)— cada uno con estado y fase (ES/EN), (gestor de colas del quiosco; pago siempre SIMULADO), cada uno con su «nombre» si lo dio en el quiosco, y las URL de la pantalla pública, el iPad de Admirito y la taza. Con «pedido» (A001 o id) devuelve solo ese. Con clave de flota o de barra (o la cola abierta) cada pedido trae sus «lineas» [{name, qty, options, optionsText}] y el nombre completo; sin ella, solo número y nombre de pila.',
+    description: 'Pedidos de una tienda en tres fases —«Recibido» (60 s), «En preparación» (1 min) y «Preparado» (listo; recogido solo a los 2 min)— cada uno con estado y fase (ES/EN), (gestor de colas del quiosco; pago siempre SIMULADO), cada uno con su «nombre» si lo dio en el quiosco, y las URL de la pantalla pública, el iPad de Admirito y la taza. Con «pedido» (A001 o id) devuelve solo ese. Con clave de flota o de barra (o la cola abierta) cada pedido trae sus «lineas» [{name, qty, options, optionsText}] y el nombre completo; sin ella, solo número y nombre de pila.',
     inputSchema: { store: STO, pedido: z.string().max(64).optional(), clave: CLAVE },
     annotations: { readOnlyHint: true, openWorldHint: true },
   }, seguro(async ({ store = 'starbucks-paseo-de-gracia', pedido, clave }) => {
