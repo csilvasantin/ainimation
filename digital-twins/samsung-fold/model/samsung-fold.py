@@ -93,9 +93,9 @@ for i, dy in enumerate((0.0, -1.3, -2.6)):
 cylinder('Flash', 0.18, 0.05, (cx + 0.95, cy - 0.6, -0.12), material('Flash', (0.95, 0.92, 0.8), roughness=0.3, emission=(0.4, 0.38, 0.3)), vertices=20)
 
 # ── Botones en el canto derecho (+X): lateral (con huella) y volumen ──
-rounded_box('SideButton', (0.14, 1.3, 0.26), (HW + 0.12 + HW / 2 + 0.03, 4.4, T / 2), dark, bevel=0.06, segments=5)
-rounded_box('VolumeUp', (0.14, 0.9, 0.26), (HW + 0.12 + HW / 2 + 0.03, 6.3, T / 2), dark, bevel=0.06, segments=5)
-rounded_box('VolumeDown', (0.14, 0.9, 0.26), (HW + 0.12 + HW / 2 + 0.03, 5.3, T / 2), dark, bevel=0.06, segments=5)
+rounded_box('SideButton', (0.14, 1.3, 0.26), (HW + 0.12 + 0.07, 4.4, T / 2), dark, bevel=0.06, segments=5)
+rounded_box('VolumeUp', (0.14, 0.9, 0.26), (HW + 0.12 + 0.07, 6.3, T / 2), dark, bevel=0.06, segments=5)
+rounded_box('VolumeDown', (0.14, 0.9, 0.26), (HW + 0.12 + 0.07, 5.3, T / 2), dark, bevel=0.06, segments=5)
 
 # ── Canto inferior de la mitad derecha: altavoz, USB-C y cable al Mac Studio ──
 px = HW / 2 + 0.12
