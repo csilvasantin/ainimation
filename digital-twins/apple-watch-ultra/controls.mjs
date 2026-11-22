@@ -17,6 +17,14 @@ export function wheelAction(deltaY) {
   return deltaY > 0 ? 'next' : 'prev';
 }
 
+/** Deslizar sobre la esfera del modelo: a la derecha siguiente, a la izquierda anterior (Carlos, 22-nov-2026); en vertical,
+ *  arriba siguiente y abajo anterior. Mínimos se ignoran. Igual que en el reloj físico. */
+export function swipeAction(deltaX, deltaY) {
+  const x = Number(deltaX) || 0, y = Number(deltaY) || 0;
+  if (Math.max(Math.abs(x), Math.abs(y)) < 4) return null;
+  return Math.abs(x) > Math.abs(y) ? (x > 0 ? 'next' : 'prev') : (y < 0 ? 'next' : 'prev');
+}
+
 /** Nodo del modelo que se ilumina con cada orden. */
 export function nodeForAction(action) {
   return { toggle: 'DigitalCrown', next: 'ActionButton', prev: 'SideButton' }[action] || null;
