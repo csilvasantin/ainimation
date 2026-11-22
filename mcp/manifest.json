@@ -274,8 +274,9 @@
   "digital_twins": {
     "catalogue": "https://www.ainimation.studio/digital-twins/catalogue.json",
     "help": "https://www.ainimation.studio/digital-twins/help/",
-    "es": "Gemelos de objetos: Galleon, Stream Deck, AdmiraNeXT01 y AdmiraNeXT05. Los PC son previsualizaciones locales; el control físico mantiene su API original.",
-    "en": "Object twins: Galleon, Stream Deck, AdmiraNeXT01 and AdmiraNeXT05. PC previews run locally; physical controls retain their original API.",
+    "es": "Gemelos de objetos: Galleon, Apple Watch Ultra, Stream Deck, AdmiraNeXT01 y AdmiraNeXT05. Los PC son previsualizaciones locales; el control físico mantiene su API original.",
+    "en": "Object twins: Galleon, Apple Watch Ultra, Stream Deck, AdmiraNeXT01 and AdmiraNeXT05. PC previews run locally; physical controls retain their original API.",
+    "apple_watch_ultra": "https://www.ainimation.studio/digital-twins/apple-watch-ultra/",
     "galleon_director": "https://www.ainimation.studio/studio.html?twin=galleon-100#workspace"
   }
 }

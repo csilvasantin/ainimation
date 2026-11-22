@@ -25,6 +25,20 @@
       }
     },
     {
+      "id": "apple-watch-ultra",
+      "name": "Apple Watch Ultra",
+      "url": "https://www.ainimation.studio/digital-twins/apple-watch-ultra/",
+      "mode": "playlist-and-live-feed",
+      "screen": {
+        "width": 410,
+        "height": 502
+      },
+      "player": "https://admira.tv/apple-watch.html",
+      "state": "https://admira.tv/api/apple-watch-state",
+      "physical": "watchOS app · admira-tv/tools/apple-watch-player",
+      "model": "digital-twins/apple-watch-ultra/apple-watch-ultra.glb (Blender 5.2, model/apple-watch-ultra.py)"
+    },
+    {
       "id": "stream-deck",
       "name": "Stream Deck XL",
       "url": "https://www.ainimation.studio/digital-twins/stream-deck/",
