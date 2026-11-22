@@ -79,6 +79,35 @@ const palette = ['#d36aff', '#8b83ff', '#48a6ff', '#46c7ef', '#61e6a8'].map(valu
 const rgb = palette.map(() => new THREE.MeshStandardMaterial({ roughness: .6 }));
 const pitch = .233, left = -2.72;
 const targets = [];
+const arrows = new Map();
+const arrowColors = {idle:'#de273c', pending:'#ffcd22', confirmed:'#22da65'};
+let activeArrow = null;
+
+function lightArrow(action, phase) {
+  arrows.get(action).color.set(arrowColors[phase]);
+}
+function resetArrow() {
+  if (!activeArrow) return;
+  clearTimeout(activeArrow.timer);
+  lightArrow(activeArrow.action,'idle');
+  activeArrow = null;
+}
+function startArrow(action) {
+  resetArrow();
+  const requestId = crypto.randomUUID();
+  lightArrow(action,'pending');
+  activeArrow = {action, requestId, timer:setTimeout(resetArrow,42000)};
+  return requestId;
+}
+window.addEventListener('message', event => {
+  if (directorMode || event.origin !== feedOrigin || event.source !== feed.contentWindow ||
+      event.data?.type !== 'admira:galleon:navigation-result' ||
+      !activeArrow || activeArrow.requestId !== event.data.requestId) return;
+  if (event.data.confirmed !== true) { resetArrow(); return; }
+  lightArrow(activeArrow.action,'confirmed');
+  clearTimeout(activeArrow.timer);
+  activeArrow.timer = setTimeout(resetArrow,1500);
+});
 function key(label, unit, z, units = 1, rowSpan = .224) {
   const width = units * pitch - .018;
   const x = left + (unit + units / 2) * pitch;
@@ -86,6 +115,8 @@ function key(label, unit, z, units = 1, rowSpan = .224) {
   const cap = box(width, .105, rowSpan, keycap, x, .194, z, .026);
   if (unit >= 15.6 && ["←","→","↑","↓"].includes(label)) {
     cap.userData.control = {action:{"←":"prev","→":"next","↑":"first","↓":"last"}[label]};
+    cap.material = new THREE.MeshBasicMaterial({color:arrowColors.idle,toneMapped:false});
+    arrows.set(cap.userData.control.action,cap.material);
     targets.push(cap);
   }
   if (label) lettering(label, x, z - .011, label.length > 3 ? 15 : 21);
@@ -131,7 +162,8 @@ function sendControl(action, key) {
     status.textContent = 'Selección enviada · esperando al Corsair';
     updatePointer();
   }
-  feed.contentWindow?.postMessage({type:'admira:galleon:control', action, key, id:panel.keys[key]}, feedOrigin);
+  const requestId = arrows.has(action) ? startArrow(action) : undefined;
+  feed.contentWindow?.postMessage({type:'admira:galleon:control', action, requestId, key, id:panel.keys[key]}, feedOrigin);
 }
 
 for (const x of [2.085, 2.56]) {
