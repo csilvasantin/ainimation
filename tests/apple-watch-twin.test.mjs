@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import { controlFor, nodeForAction, physicalSummary, statusText, wheelAction, PHASE_COLORS } from '../digital-twins/apple-watch-ultra/controls.mjs';
+import { controlFor, nodeForAction, physicalSummary, statusText, swipeAction, wheelAction, PHASE_COLORS } from '../digital-twins/apple-watch-ultra/controls.mjs';
 
 const read = file => fs.readFileSync(new URL(file, import.meta.url), 'utf8');
 
@@ -13,6 +13,9 @@ test('corona y pantalla pausan, el botón de Acción avanza y el lateral retroce
   assert.equal(wheelAction(40), 'next');
   assert.equal(wheelAction(-40), 'prev');
   assert.equal(wheelAction(1), null);
+  assert.equal(swipeAction(60, 5), 'next', 'deslizar a la derecha sobre la esfera = siguiente');
+  assert.equal(swipeAction(-60, 5), 'prev', 'a la izquierda = anterior');
+  assert.equal(swipeAction(2, 2), null);
   assert.equal(nodeForAction('toggle'), 'DigitalCrown');
   assert.equal(PHASE_COLORS.confirmed, '#22da65');
 });

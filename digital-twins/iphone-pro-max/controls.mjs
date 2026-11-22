@@ -13,11 +13,12 @@ export function controlFor(name) {
   return null;
 }
 
-/** Deslizar sobre la pantalla del modelo (o rueda): hacia abajo/izquierda siguiente, hacia arriba/derecha anterior; mínimos se ignoran. */
+/** Deslizar sobre la pantalla del modelo: a la derecha siguiente, a la izquierda anterior (Carlos, 22-nov-2026); en vertical,
+ *  arriba siguiente y abajo anterior (también la rueda). Mínimos se ignoran. Igual que en el aparato físico. */
 export function swipeAction(deltaX, deltaY) {
   const x = Number(deltaX) || 0, y = Number(deltaY) || 0;
   if (Math.max(Math.abs(x), Math.abs(y)) < 4) return null;
-  return Math.abs(x) > Math.abs(y) ? (x < 0 ? 'next' : 'prev') : (y > 0 ? 'next' : 'prev');
+  return Math.abs(x) > Math.abs(y) ? (x > 0 ? 'next' : 'prev') : (y < 0 ? 'next' : 'prev');
 }
 
 /** Nodo del modelo que se ilumina con cada orden. */

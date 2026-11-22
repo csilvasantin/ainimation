@@ -2,12 +2,13 @@
 // Modelo GLB procedural (model/apple-watch-ultra.py, Blender 5.2) con correa Ocean azul y puck USB-C; la esfera es un
 // lienzo 410 × 502 que pinta los fotogramas del player de admira.tv (/apple-watch.html, mismo patrón que el Galleon).
 // Órdenes: clic en corona/pantalla = pausa, rueda sobre la corona = anterior/siguiente, botón de Acción = siguiente,
-// botón lateral = anterior. Cada orden ilumina su pieza: ámbar enviada, verde confirmada por el reloj físico, rojo fallida.
+// botón lateral = anterior, deslizar sobre la esfera a la derecha = siguiente y a la izquierda = anterior (como en el
+// reloj físico). Cada orden ilumina su pieza: ámbar enviada, verde confirmada por el reloj físico, rojo fallida.
 import * as THREE from 'three';
 import { addObjectFloor } from '../floor-grid.mjs?v=1';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
-import { controlFor, nodeForAction, physicalSummary, statusText, wheelAction, PHASE_COLORS } from './controls.mjs';
+import { controlFor, nodeForAction, physicalSummary, statusText, swipeAction, wheelAction, PHASE_COLORS } from './controls.mjs';
 
 const params = new URLSearchParams(location.search);
 const local = ['127.0.0.1', 'localhost'].includes(location.hostname);
@@ -119,11 +120,20 @@ canvas.addEventListener('pointerdown', event => {
   if (!event.isPrimary || event.button !== 0) return;
   const hit = hitAt(event.clientX, event.clientY);
   if (hit) press = { hit, pointerId: event.pointerId, x: event.clientX, y: event.clientY };
+  if (hit && /^(Screen|Crystal)$/.test(hit.name)) controls.enabled = false; // un deslizamiento sobre la esfera navega, no gira el modelo
 });
+canvas.addEventListener('pointercancel', () => { press = null; controls.enabled = true; });
 canvas.addEventListener('pointerup', event => {
   const down = press;
   press = null;
-  if (!down || event.pointerId !== down.pointerId || Math.hypot(event.clientX - down.x, event.clientY - down.y) > (event.pointerType === 'touch' ? 12 : 8)) return;
+  controls.enabled = true;
+  if (!down || event.pointerId !== down.pointerId) return;
+  const dx = event.clientX - down.x, dy = event.clientY - down.y;
+  if (Math.hypot(dx, dy) > (event.pointerType === 'touch' ? 12 : 8)) {
+    // Deslizar sobre la esfera: derecha = siguiente, izquierda = anterior, como en el reloj físico.
+    if (/^(Screen|Crystal)$/.test(down.hit.name) && Math.hypot(dx, dy) > 40) { const action = swipeAction(dx, dy); if (action) sendControl(action); }
+    return;
+  }
   const hit = hitAt(event.clientX, event.clientY);
   if (hit && hit.action === down.hit.action) sendControl(hit.action);
 });

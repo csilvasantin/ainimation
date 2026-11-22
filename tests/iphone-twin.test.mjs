@@ -11,10 +11,10 @@ test('pantalla, Acción y lateral pausan; volumen + retrocede; volumen − y Con
   assert.equal(controlFor('VolumeDown'), 'next');
   assert.equal(controlFor('CameraControl'), 'next');
   assert.equal(controlFor('Lens1'), null);
-  assert.equal(swipeAction(0, 40), 'next');
-  assert.equal(swipeAction(0, -40), 'prev');
-  assert.equal(swipeAction(-60, 10), 'next');
-  assert.equal(swipeAction(60, 10), 'prev');
+  assert.equal(swipeAction(60, 10), 'next', 'a la derecha, siguiente');
+  assert.equal(swipeAction(-60, 10), 'prev', 'a la izquierda, anterior');
+  assert.equal(swipeAction(0, -40), 'next');
+  assert.equal(swipeAction(0, 40), 'prev');
   assert.equal(swipeAction(1, 1), null);
   assert.equal(nodeForAction('toggle'), 'ActionButton');
   assert.equal(PHASE_COLORS.confirmed, '#22da65');

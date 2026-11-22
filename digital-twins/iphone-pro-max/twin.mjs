@@ -2,7 +2,7 @@
 // Modelo GLB procedural (model/iphone-pro-max.py, Blender 5.2) tumbado con cable USB-C; la pantalla es un lienzo
 // 440 × 956 que pinta los fotogramas del player de admira.tv (/iphone.html, mismo patrón que el reloj y el Galleon).
 // Órdenes: clic en pantalla, botón de Acción o botón lateral = pausa; volumen + = anterior; volumen − y Control de
-// cámara = siguiente; deslizar sobre la pantalla = anterior/siguiente. Cada orden ilumina su pieza: ámbar enviada,
+// cámara = siguiente; deslizar sobre la pantalla a la derecha = siguiente, a la izquierda = anterior (como en el iPhone físico). Cada orden ilumina su pieza: ámbar enviada,
 // verde confirmada por el iPhone físico, rojo fallida. El físico y el virtual emiten la misma playlist anclada al
 // reloj del servidor, así que van casi al fotograma; lo que se cruza son órdenes y telemetría, nunca fotogramas.
 import * as THREE from 'three';
@@ -116,10 +116,13 @@ canvas.addEventListener('pointerdown', event => {
   if (!event.isPrimary || event.button !== 0) return;
   const hit = hitAt(event.clientX, event.clientY);
   if (hit) press = { hit, pointerId: event.pointerId, x: event.clientX, y: event.clientY };
+  if (hit && /^(Screen|Crystal)$/.test(hit.name)) controls.enabled = false; // un deslizamiento sobre la pantalla navega, no gira el modelo
 });
+canvas.addEventListener('pointercancel', () => { press = null; controls.enabled = true; });
 canvas.addEventListener('pointerup', event => {
   const down = press;
   press = null;
+  controls.enabled = true;
   if (!down || event.pointerId !== down.pointerId) return;
   const dx = event.clientX - down.x, dy = event.clientY - down.y;
   const slack = event.pointerType === 'touch' ? 12 : 8;
@@ -135,7 +138,7 @@ canvas.addEventListener('wheel', event => {
   const hit = hitAt(event.clientX, event.clientY);
   if (!hit || !/^(Screen|Crystal)$/.test(hit.name)) return;
   event.preventDefault();
-  const action = swipeAction(0, event.deltaY);
+  const action = swipeAction(0, -event.deltaY); // rueda hacia abajo = siguiente
   if (action && !(lit && Date.now() - lit.since < 400)) sendControl(action);
 }, { passive: false });
 
