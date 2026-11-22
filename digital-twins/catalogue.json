@@ -39,6 +39,20 @@
       "model": "digital-twins/apple-watch-ultra/apple-watch-ultra.glb (Blender 5.2, model/apple-watch-ultra.py)"
     },
     {
+      "id": "iphone-pro-max",
+      "name": "iPhone Pro Max",
+      "url": "https://www.ainimation.studio/digital-twins/iphone-pro-max/",
+      "mode": "playlist-and-live-feed",
+      "screen": {
+        "width": 440,
+        "height": 956
+      },
+      "player": "https://admira.tv/iphone.html",
+      "state": "https://admira.tv/api/device-state?screen=iphone-pro-max",
+      "physical": "iOS app · admira-tv/tools/apple-watch-player (target AdmiraPhonePlayer)",
+      "model": "digital-twins/iphone-pro-max/iphone-pro-max.glb (Blender 5.2, model/iphone-pro-max.py)"
+    },
+    {
       "id": "stream-deck",
       "name": "Stream Deck XL",
       "url": "https://www.ainimation.studio/digital-twins/stream-deck/",
