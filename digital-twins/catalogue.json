@@ -67,6 +67,20 @@
       "model": "digital-twins/samsung-fold/samsung-fold.glb (Blender 5.2, model/samsung-fold.py)"
     },
     {
+      "id": "trio",
+      "name": "Trío · reloj + iPhone + Fold",
+      "url": "https://www.ainimation.studio/digital-twins/trio/",
+      "mode": "wall",
+      "devices": [
+        "apple-watch-ultra",
+        "iphone-pro-max",
+        "samsung-fold"
+      ],
+      "wall": "https://admira.tv/api/wall?group=trio",
+      "player": "https://admira.tv/mando?embed=galleon&screen=trio",
+      "physical": "los tres aparatos físicos leen /api/wall: sync = misma playlist al fotograma; extended = una composición repartida entre las tres pantallas (mm reales)"
+    },
+    {
       "id": "stream-deck",
       "name": "Stream Deck XL",
       "url": "https://www.ainimation.studio/digital-twins/stream-deck/",
