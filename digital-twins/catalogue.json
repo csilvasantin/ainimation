@@ -53,6 +53,20 @@
       "model": "digital-twins/iphone-pro-max/iphone-pro-max.glb (Blender 5.2, model/iphone-pro-max.py)"
     },
     {
+      "id": "samsung-fold",
+      "name": "Samsung Galaxy Fold",
+      "url": "https://www.ainimation.studio/digital-twins/samsung-fold/",
+      "mode": "playlist-and-live-feed",
+      "screen": {
+        "width": 1080,
+        "height": 960
+      },
+      "player": "https://admira.tv/fold.html",
+      "state": "https://admira.tv/api/device-state?screen=samsung-fold",
+      "physical": "web app instalada en el Fold · https://admira.tv/fold.html?device=1 (pseudostreaming y sin internet por service worker)",
+      "model": "digital-twins/samsung-fold/samsung-fold.glb (Blender 5.2, model/samsung-fold.py)"
+    },
+    {
       "id": "stream-deck",
       "name": "Stream Deck XL",
       "url": "https://www.ainimation.studio/digital-twins/stream-deck/",

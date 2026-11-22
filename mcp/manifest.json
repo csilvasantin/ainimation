@@ -274,10 +274,11 @@
   "digital_twins": {
     "catalogue": "https://www.ainimation.studio/digital-twins/catalogue.json",
     "help": "https://www.ainimation.studio/digital-twins/help/",
-    "es": "Gemelos de objetos: Galleon, Apple Watch Ultra, iPhone Pro Max, Stream Deck, AdmiraNeXT01 y AdmiraNeXT05. Los PC son previsualizaciones locales; el control físico mantiene su API original.",
-    "en": "Object twins: Galleon, Apple Watch Ultra, iPhone Pro Max, Stream Deck, AdmiraNeXT01 and AdmiraNeXT05. PC previews run locally; physical controls retain their original API.",
+    "es": "Gemelos de objetos: Galleon, Apple Watch Ultra, iPhone Pro Max, Samsung Galaxy Fold, Stream Deck, AdmiraNeXT01 y AdmiraNeXT05. Los PC son previsualizaciones locales; el control físico mantiene su API original.",
+    "en": "Object twins: Galleon, Apple Watch Ultra, iPhone Pro Max, Samsung Galaxy Fold, Stream Deck, AdmiraNeXT01 and AdmiraNeXT05. PC previews run locally; physical controls retain their original API.",
     "apple_watch_ultra": "https://www.ainimation.studio/digital-twins/apple-watch-ultra/",
     "iphone_pro_max": "https://www.ainimation.studio/digital-twins/iphone-pro-max/",
+    "samsung_fold": "https://www.ainimation.studio/digital-twins/samsung-fold/",
     "galleon_director": "https://www.ainimation.studio/studio.html?twin=galleon-100#workspace"
   }
 }
