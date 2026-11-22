@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <title>Samsung Galaxy Fold · Gemelo 3D · AInimation Studio</title>
+  <style>
+    body { margin: 0; background: #070b15; color: #e5edf8; font: 14px/1.5 system-ui, sans-serif; }
+    main { padding-top: var(--xs-bar-h, 0px); padding-bottom: calc(60px + env(safe-area-inset-bottom)); }
+    main > header { padding: 16px 24px; }
+    h1 { margin: 0; font-size: 19px; }
+    #status, #physical { margin: 5px 0 0; color: #a5b8cc; }
+    #physical { font-size: 12px; color: #8fa6c2; }
+    .phone-workspace { display: grid; grid-template-columns: minmax(0, 1fr) minmax(320px, 435px); gap: 20px; padding: 0 24px 24px; align-items: start; }
+    .phone-scene { min-width: 0; background: #10182b; border: 1px solid #26344a; border-radius: 14px; overflow: hidden; }
+    #fold { display: block; width: 100%; height: min(52vh, 560px); min-height: 260px; touch-action: none; }
+    .phone-controls { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; padding: 12px; border-top: 1px solid #26344a; }
+    .phone-controls button { color: inherit; background: #182439; border: 1px solid #435779; border-radius: 6px; padding: 6px 12px; font: inherit; cursor: pointer; }
+    .phone-controls button[aria-pressed="true"] { border-color: #ffbc44; color: #ffbc44; }
+    .phone-controls small { color: #8fa6c2; }
+    .phone-outputs { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.6fr); gap: 10px; padding: 0 12px 12px; }
+    .phone-outputs figure { margin: 0; padding: 8px; border: 1px solid #26344a; border-radius: 9px; background: #111b2d; }
+    .phone-outputs figcaption { margin-bottom: 5px; color: #e5edf8; font-size: 11px; }
+    .phone-outputs canvas { display: block; width: 100%; height: clamp(180px, 30vh, 300px); object-fit: contain; border-radius: 5px; background: #05080e; }
+    .phone-outputs p { margin: 0; font-size: 12px; color: #a5b8cc; }
+    .phone-outputs p + p { margin-top: 6px; }
+    .phone-outputs a { color: #b1d2ff; }
+    #importer { display: block; width: 100%; height: 610px; border: 1px solid #26344a; border-radius: 14px; background: #0a0c12; }
+    @media (max-width: 900px) { .phone-workspace { grid-template-columns: 1fr; padding-inline: 14px; } #fold { height: min(46vh, 420px); } }
+    #feed { position: absolute; width: 1px; height: 1px; border: 0; opacity: 0; pointer-events: none; }
+  </style>
+  <link rel="stylesheet" href="/digital-twins/twin-nav.css?v=692590f">
+  <script defer src="/digital-twins/twin-nav.js?v=692590f"></script>
+  <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}</script>
+  <link rel="canonical" href="https://www.ainimation.studio/digital-twins/samsung-fold/">
+</head>
+<body>
+  <main>
+    <header><h1>Samsung Galaxy Fold</h1><p id="status" role="status">Esperando la señal de Admira TV</p><p id="physical" role="status">Fold físico: consultando…</p></header>
+    <div class="phone-workspace">
+      <section class="phone-scene" aria-label="Samsung Galaxy Fold">
+        <canvas id="fold" aria-label="Gemelo 3D del Samsung Galaxy Fold abierto con cable USB-C"></canvas>
+        <div class="phone-controls">
+          <button type="button" data-control="prev" aria-label="Pieza anterior (volumen +)">◀ Anterior</button>
+          <button type="button" data-control="toggle" aria-pressed="false" aria-label="Pausar o reanudar (pantalla o botón lateral)">⏯ Pausa</button>
+          <button type="button" data-control="next" aria-label="Pieza siguiente (volumen −)">Siguiente ▶</button>
+          <small>En el modelo: pantalla o botón lateral = pausa · volumen + = anterior · volumen − = siguiente · deslizar sobre la pantalla: derecha = siguiente, izquierda = anterior.</small>
+        </div>
+        <div class="phone-outputs" aria-label="Salida del player">
+          <figure>
+            <figcaption>Pantalla interior · 1080 × 960</figcaption>
+            <canvas id="face-output" width="1080" height="960" aria-label="Emisión en la pantalla interior del Samsung Galaxy Fold"></canvas>
+          </figure>
+          <figure>
+            <figcaption>Cómo se cruzan el Fold real y el virtual</figcaption>
+            <p>Los dos emiten la misma playlist de la pantalla <code>samsung-fold</code> anclada al reloj del servidor de admira.tv, así que van casi al fotograma. Lo que mandes aquí (pausa, anterior, siguiente) se aplica en el virtual al instante y viaja al Fold físico por <code>/api/device-state</code>; el botón se ilumina en ámbar hasta que el Fold devuelve su eco y en verde al confirmarlo.</p>
+            <p>Lo que hagas en el Fold físico (toque = pausa, deslizar = anterior/siguiente) llega como telemetría y el virtual lo sigue. El Fold late en la flota como un player más: <a href="https://admira.tv/players.html" target="_blank" rel="noopener noreferrer">admira.tv/players ↗</a>.</p>
+            <p>Player del Fold físico: la web app <a href="https://admira.tv/fold.html?device=1" target="_blank" rel="noopener noreferrer">admira.tv/fold.html?device=1 ↗</a> instalada en el teléfono: baja las piezas al disco (pseudostreaming) y emite sin internet.</p>
+          </figure>
+        </div>
+      </section>
+      <iframe id="importer" data-src="https://admira.tv/mando?embed=galleon&amp;screen=samsung-fold" title="Playlist del Samsung Galaxy Fold en Admira TV"></iframe>
+    </div>
+  </main>
+  <iframe id="feed" allow="autoplay" data-src="https://admira.tv/fold.html" tabindex="-1" title="Señal del player del Samsung Galaxy Fold"></iframe>
+  <script type="module" src="./twin.mjs?v=692590f"></script>
+</body>
+</html>
