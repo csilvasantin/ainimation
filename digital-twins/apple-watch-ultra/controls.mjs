@@ -41,6 +41,6 @@ export function statusText(frame) {
   const air = frame.onAir && typeof frame.onAir === 'object' ? frame.onAir : null;
   const piece = air?.title ? ' · ' + String(air.title).slice(0, 80) + (air.total > 1 ? ' (' + (air.index + 1) + '/' + air.total + ')' : '') : '';
   const source = air?.source === 'playout' ? 'Playout de la flota' : air?.source === 'playlist' ? 'Playlist del reloj' : air?.source === 'off' ? 'Pantalla apagada por el playout' : 'Señal real del player';
-  if (!frame.playing) return air?.source === 'playlist' && !air.id ? 'Playlist del reloj vacía · importa piezas en el mando o etiquétalas apple-watch-ultra en el Stock' : source + ' · cargando…';
+  if (!frame.playing) return air?.source === 'playlist' && !air.id ? 'Playlist del reloj vacía · importa piezas en el mando o etiquétalas #applewatch en el Stock' : source + ' · cargando…';
   return source + (frame.paused ? ' · en pausa' : '') + piece;
 }
