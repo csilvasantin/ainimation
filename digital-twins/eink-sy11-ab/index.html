@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <title>SY11-ab · tinta electrónica · Gemelo 3D · AInimation Studio</title>
+  <style>
+    body { margin: 0; background: #070b15; color: #e5edf8; font: 14px/1.5 system-ui, sans-serif; }
+    main { padding-top: var(--xs-bar-h, 0px); padding-bottom: calc(40px + env(safe-area-inset-bottom)); }
+    main > header { padding: 16px 24px; }
+    h1 { margin: 0; font-size: 19px; }
+    #status, #physical { margin: 5px 0 0; color: #a5b8cc; }
+    #physical { font-size: 12px; color: #8fa6c2; }
+    .eink-workspace { display: grid; grid-template-columns: minmax(0, 1fr) minmax(280px, 400px); gap: 20px; padding: 0 24px 24px; align-items: start; }
+    .eink-scene { min-width: 0; background: #10182b; border: 1px solid #26344a; border-radius: 14px; overflow: hidden; }
+    #eink { display: block; width: 100%; height: min(58vh, 620px); min-height: 280px; touch-action: none; }
+    .eink-outputs { display: grid; gap: 10px; padding: 12px; }
+    .eink-outputs figure { margin: 0; padding: 8px; border: 1px solid #26344a; border-radius: 9px; background: #111b2d; }
+    .eink-outputs figcaption { margin-bottom: 5px; color: #e5edf8; font-size: 11px; }
+    .eink-outputs canvas { display: block; width: 100%; height: clamp(200px, 32vh, 340px); object-fit: contain; border-radius: 5px; background: #f3eee6; }
+    .eink-outputs p { margin: 0; font-size: 12px; color: #a5b8cc; }
+    .eink-outputs p + p { margin-top: 6px; }
+    .eink-outputs a { color: #b1d2ff; }
+    .note { font-size: 12px; color: #8fa6c2; padding: 0 12px 12px; }
+    @media (max-width: 900px) { .eink-workspace { grid-template-columns: 1fr; padding-inline: 14px; } #eink { height: min(50vh, 460px); } }
+  </style>
+  <link rel="stylesheet" href="/digital-twins/twin-nav.css?v=692590f">
+  <script defer src="/digital-twins/twin-nav.js?v=692590f"></script>
+  <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}</script>
+  <link rel="canonical" href="https://www.ainimation.studio/digital-twins/eink-sy11-ab/">
+</head>
+<body>
+  <main>
+    <header>
+      <h1>SY11-ab · tinta electrónica</h1>
+      <p id="status" role="status">Esperando el previo de la pantalla física</p>
+      <p id="physical" role="status">SY11-ab física: consultando…</p>
+    </header>
+    <div class="eink-workspace">
+      <section class="eink-scene" aria-label="SY11-ab">
+        <canvas id="eink" aria-label="Gemelo 3D de la pantalla de tinta electrónica SY11-ab"></canvas>
+        <p class="note">Modelo procedural en Blender 5.2 (medidas aproximadas: no hay ficha mecánica oficial). La resolución 480×800 y la paleta negro-blanco-rojo-amarillo salen del firmware SY11-014. El gemelo pinta en la malla <code>Screen</code> el mismo póster que late la pantalla física en <code>/signage/now</code>.</p>
+      </section>
+      <div class="eink-outputs" aria-label="Previo en antena">
+        <figure>
+          <figcaption>Pantalla · 480 × 800 BWRY</figcaption>
+          <canvas id="face-output" width="480" height="800" aria-label="Previo que muestra la tinta electrónica"></canvas>
+        </figure>
+        <figure>
+          <figcaption>Cómo se actualiza</figcaption>
+          <p>El puente del MacStudio (<code>tv.admira.eink.player</code>, r13) sigue el espejo <code>iphone-galleon</code> en modo <code>sync</code>: cuando cambia el elemento en antena de la playlist del iPhone Pro Max (reloj del servidor de admira.tv), envía a la SY11 el previo de esa pieza. La tinta es lenta: solo se repinta al cambiar de elemento, no en cada segundo del vídeo.</p>
+          <p>Este gemelo lee el latido de la pantalla física <code>eink-sy11-ab</code>, así que muestra el mismo previo que la real. Players: <a href="https://admira.tv/players.html" target="_blank" rel="noopener noreferrer">admira.tv/players ↗</a>.</p>
+        </figure>
+      </div>
+    </div>
+  </main>
+  <script type="module" src="./twin.mjs?v=692590f"></script>
+</body>
+</html>

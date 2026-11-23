@@ -45,7 +45,7 @@ try {
 try {
   if (readdirSync(join(root, "capsulas")).includes("index.html")) htmlFiles.push("capsulas/index.html");
 } catch {}
-for (const directory of ['presentaciones', 'presentaciones/editor', 'presentaciones/reproductor', 'sites', 'digital-twins', 'digital-twins/help', 'digital-twins/galleon-100', 'digital-twins/apple-watch-ultra', 'digital-twins/iphone-pro-max', 'digital-twins/samsung-fold', 'digital-twins/trio', 'digital-twins/stream-deck', 'digital-twins/admiranext01', 'digital-twins/admiranext05']) {
+for (const directory of ['presentaciones', 'presentaciones/editor', 'presentaciones/reproductor', 'sites', 'digital-twins', 'digital-twins/help', 'digital-twins/galleon-100', 'digital-twins/apple-watch-ultra', 'digital-twins/iphone-pro-max', 'digital-twins/eink-sy11-ab', 'digital-twins/samsung-fold', 'digital-twins/trio', 'digital-twins/stream-deck', 'digital-twins/admiranext01', 'digital-twins/admiranext05']) {
   try { if (readdirSync(join(root, directory)).includes('index.html')) htmlFiles.push(directory + '/index.html'); } catch {}
 }
 let changed = 0;
@@ -71,7 +71,7 @@ for (const file of htmlFiles) {
   );
   if (file.startsWith('digital-twins/')) {
     after = after.replace(/(\b(?:href|src)="\/digital-twins\/[^"?]+\.(?:mjs|js|css))(?:\?v=[^"]*)?"/g, (_m, head) => `${head}?v=${version}"`);
-    if (file === 'digital-twins/galleon-100/index.html' || file === 'digital-twins/apple-watch-ultra/index.html' || file === 'digital-twins/iphone-pro-max/index.html' || file === 'digital-twins/samsung-fold/index.html' || file === 'digital-twins/trio/index.html') after = after.replace(/(\bsrc="\.\/twin\.mjs)(?:\?v=[^"]*)?"/g, (_m, head) => `${head}?v=${version}"`);
+    if (file === 'digital-twins/galleon-100/index.html' || file === 'digital-twins/apple-watch-ultra/index.html' || file === 'digital-twins/iphone-pro-max/index.html' || file === 'digital-twins/eink-sy11-ab/index.html' || file === 'digital-twins/samsung-fold/index.html' || file === 'digital-twins/trio/index.html') after = after.replace(/(\bsrc="\.\/twin\.mjs)(?:\?v=[^"]*)?"/g, (_m, head) => `${head}?v=${version}"`);
   }
   if (file === 'index.html') after = stampPageRevision(after);
   if (after === before) continue;
