@@ -53,6 +53,20 @@
       "model": "digital-twins/iphone-pro-max/iphone-pro-max.glb (Blender 5.2, model/iphone-pro-max.py)"
     },
     {
+      "id": "eink-sy11-ab",
+      "name": "SY11-ab · tinta electrónica",
+      "url": "https://www.ainimation.studio/digital-twins/eink-sy11-ab/",
+      "mode": "playlist-and-live-feed",
+      "screen": {
+        "width": 480,
+        "height": 800
+      },
+      "player": "https://admira.tv/eink/",
+      "state": "https://api.admira.store/signage/now?screen=eink-sy11-ab",
+      "physical": "puente MacStudio · tv.admira.eink.player (admira-tv/tools/eink-bridge), firmware SY11-014, BLE",
+      "model": "digital-twins/eink-sy11-ab/sy11-ab.glb (Blender 5.2, model/sy11-ab.py). Medidas del cuerpo aproximadas; la resolución 480×800 sale del firmware."
+    },
+    {
       "id": "samsung-fold",
       "name": "Samsung Galaxy Fold",
       "url": "https://www.ainimation.studio/digital-twins/samsung-fold/",
