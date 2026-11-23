@@ -1,5 +1,8 @@
 // Gemelo 3D de la SY11-ab (Woz, 23-nov-2026, t1378u).
-// Modelo GLB procedural (model/sy11-ab.py, Blender 5.2) de pie, cable USB-C a la izquierda, tres LED abajo.
+// Modelo GLB procedural (model/sy11-ab.py, Blender 5.2). En Blender el cuerpo se construyó con la altura en Y
+// y la pantalla en +Z, o sea tumbado boca arriba en el Z-up de Blender; el export glTF lo dejaba igual en el
+// visor (pantalla al cielo, mucho vacío arriba). Aquí se pone de pie, USB-C a la izquierda, LED abajo, y se
+// inclina ~12° hacia atrás como en el soporte de la foto de Carlos (23-nov-2026).
 // La malla «Screen» (480 × 800) pinta el mismo previo que late la pantalla física en
 // https://api.admira.store/signage/now?screen=eink-sy11-ab (CORS abierto a ainimation.studio).
 import * as THREE from 'three';
@@ -18,12 +21,12 @@ const scene = new THREE.Scene();
 scene.background = new THREE.Color('#10182b');
 addObjectFloor(scene, -.02, .45);
 const camera = new THREE.PerspectiveCamera(32, 1, 0.1, 80);
-camera.position.set(6.5, 7.2, 16);
+camera.position.set(4.8, 6.4, 16);
 const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 const controls = new OrbitControls(camera, canvas);
-controls.target.set(0, 5.1, 0.4);
+controls.target.set(0, 5.0, 0.2);
 controls.enableDamping = true;
 controls.minDistance = 6;
 controls.maxDistance = 32;
@@ -53,6 +56,8 @@ new GLTFLoader().load('./sy11-ab.glb', gltf => {
     if (!object.isMesh) return;
     if (object.name === 'Screen') object.material = new THREE.MeshBasicMaterial({ map: faceTexture, toneMapped: false });
   });
+  // +90° en X: altura otra vez en +Y y pantalla hacia +Z (hacia la cámara). −12°: se recuesta en su soporte.
+  model.rotation.x = Math.PI / 2 - 12 * Math.PI / 180;
   scene.add(model);
 }, undefined, error => { if (status) status.textContent = 'No se pudo cargar el modelo 3D de la SY11-ab: ' + (error?.message || error); });
 

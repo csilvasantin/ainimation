@@ -36,3 +36,10 @@ test('el gemelo está catalogado, enlazado desde la portada y sellado como los d
   assert.ok(fs.existsSync(new URL('../digital-twins/eink-sy11-ab/sy11-ab.glb', import.meta.url)));
   assert.match(read('../digital-twins/help/index.html'), /eink-sy11-ab/);
 });
+
+test('el visor pone el panel de pie, recostado 12°, con la textura en vivo en Screen', () => {
+  const twin = read('../digital-twins/eink-sy11-ab/twin.mjs');
+  assert.match(twin, /if \(object\.name === 'Screen'\) object\.material = new THREE\.MeshBasicMaterial\(\{ map: faceTexture/);
+  assert.match(twin, /model\.rotation\.x = Math\.PI \/ 2 - 12 \* Math\.PI \/ 180/);
+  assert.match(twin, /NOW_URL/);
+});
