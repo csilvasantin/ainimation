@@ -81,6 +81,19 @@
       "model": "digital-twins/samsung-fold/samsung-fold.glb (Blender 5.2, model/samsung-fold.py)"
     },
     {
+      "id": "iphone-duo",
+      "name": "iPhone Duo · ThinkPad X1",
+      "url": "https://www.ainimation.studio/digital-twins/iphone-duo/",
+      "mode": "playlist-and-keyboard",
+      "screen": {
+        "width": 2007,
+        "height": 2853
+      },
+      "player": "https://admira.tv/canal?screen=iphone-duo&fit=contain",
+      "physical": "iPhone Duo plegado · app WindowsiOS «Windows 11» (tapa = monitor ThinkPad con admira.tv, base = teclado)",
+      "keys": "1–9/0, N/P, i, M, Q, Esc, TV·WIN, flechas ±10 s / última / primera, Fn"
+    },
+    {
       "id": "trio",
       "name": "Trío · reloj + iPhone + Fold",
       "url": "https://www.ainimation.studio/digital-twins/trio/",
