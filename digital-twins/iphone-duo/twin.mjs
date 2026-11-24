@@ -2,7 +2,7 @@
 // Mismo comportamiento que LaptopDeckView/AdmiraLidPlayerView del Duo real:
 // 1–9/0, N/P, i, M, Q, Esc, TV·WIN, flechas, barra ⏯ y Fn, con los mismos pitidos de 8 bits.
 // Modelo 3D (three.js, deck3d.mjs): clamshell ThinkPad orbitable con bisagra; la pantalla es el player real (CSS3D).
-import { crearEscena } from './deck3d.mjs?v=duo3d-1';
+import { crearEscena } from './deck3d.mjs?v=duo3d-2';
 const CANAL = 'https://admira.tv';
 const SCREEN = 'iphone-duo';
 const MACHINE = 'gemelo-iphone-duo-ainimation';
@@ -229,19 +229,32 @@ function tecla(k, ch) {
 
 
 // ── Modelo 3D: teclas pulsables, TV·WIN en la barbilla y bisagra ────────────────────────────────────
-escena = crearEscena({
-  host: $('escena'), panel: $('panel'),
-  alPulsar: (k, ch) => tecla(k, ch),
-  alTvWin: () => tvwin(),
-});
+// Si el navegador no puede con WebGL (o pierde el contexto), vista plana: el mismo player y las mismas teclas.
+function vistaPlana(motivo) {
+  const host = $('escena'), panel = $('panel');
+  host.classList.add('sin-3d');
+  if (panel.parentElement !== host) { panel.style.transform = ''; host.append(panel); }
+  const aviso = $('aviso3d'); if (aviso) { aviso.hidden = false; aviso.textContent = 'Vista plana · tu navegador no ha podido pintar el 3D (' + motivo + '). Las teclas funcionan igual con tu teclado.'; }
+  window.__duoLog?.push('vista plana: ' + motivo);
+}
+try {
+  escena = crearEscena({
+    host: $('escena'), panel: $('panel'),
+    alPulsar: (k, ch) => tecla(k, ch),
+    alTvWin: () => tvwin(),
+    alPerderContexto: () => vistaPlana('contexto WebGL perdido'),
+  });
+} catch (err) {
+  escena = null; vistaPlana(String(err && err.message || err).slice(0, 80));
+}
 function tvwin() {
   if (!st.gesto) st.gesto = true;
   cerrarFicha(); st.detenido = false; st.on = !st.on; pintar(); estadoPronto();
 }
 $('tvwinBtn')?.addEventListener('click', tvwin);
 const bisagra = $('bisagra');
-bisagra?.addEventListener('input', () => { escena.bisagra(Number(bisagra.value)); $('bisagraVal').textContent = bisagra.value + '°'; });
-$('vista')?.addEventListener('click', () => escena.encuadrar());
+bisagra?.addEventListener('input', () => { escena?.bisagra(Number(bisagra.value)); $('bisagraVal').textContent = bisagra.value + '°'; });
+$('vista')?.addEventListener('click', () => escena?.encuadrar());
 
 // Teclado físico: mismo mapa (Fn no existe en un teclado normal: se usa la tecla Fn del modelo).
 const CODES = { ArrowLeft: 'left', ArrowRight: 'right', ArrowUp: 'up', ArrowDown: 'down', Escape: 'escape', Backspace: 'backspace', Enter: 'enter', Tab: 'tab', Space: 'space', CapsLock: 'caps' };
@@ -254,7 +267,7 @@ window.addEventListener('keydown', (e) => {
   if (!k && e.key.length === 1) k = e.key.toLowerCase();
   if (!k) return;
   e.preventDefault();
-  escena.hundir(k);
+  escena?.hundir(k);
   tecla(k, e.key.length === 1 ? e.key : null);
 });
 
