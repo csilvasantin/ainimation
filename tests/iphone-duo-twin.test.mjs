@@ -52,3 +52,9 @@ test('iconos multimedia clásicos sólo en las teclas: M 🔊/🔇 según el est
   assert.match(deck, /n: 'siguiente', p: 'anterior', space: 'playpausa'/);
   assert.match(deck, /if \(!s \|\| !s\.on\) return null;/);
 });
+
+test('si WebGL no arranca o pierde el contexto, vista plana con el player (nunca un recuadro gris)', () => {
+  assert.match(deck, /webglcontextlost/);
+  assert.match(js, /alPerderContexto: \(\) => vistaPlana\(/);
+  assert.match(js, /catch \(err\) \{\s*escena = null; vistaPlana\(/);
+});

@@ -73,11 +73,14 @@ const rotulo = (texto, px, color = '#ffffffb8') => textura(512, 128, (c, w, h) =
   c.font = `700 ${px}px "Helvetica Neue", Arial, sans-serif`; c.fillStyle = color; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText(texto, w / 2, h / 2);
 });
 
-export function crearEscena({ host, panel, alPulsar, alTvWin }) {
+export function crearEscena({ host, panel, alPulsar, alTvWin, alPerderContexto }) {
   const canvas = host.querySelector('canvas');
-  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: 'high-performance' });
+  // 24-nov-2026 (22:19, «no se ve nada» en el Chrome del Mac de Carlos): el contexto WebGL se perdía y Chrome pintaba el
+  // lienzo en gris claro. Ahora: GPU por defecto (no «high-performance», que en Mac puede cambiar de GPU y perder el
+  // contexto), resolución contenida y, si WebGL no arranca o se pierde, vista plana con el player (ver vistaPlana()).
+  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: 'default', failIfMajorPerformanceCaveat: false });
   const movil = matchMedia('(pointer: coarse)').matches;
-  renderer.setPixelRatio(Math.min(devicePixelRatio, movil ? 1.6 : 2));
+  renderer.setPixelRatio(Math.min(devicePixelRatio, movil ? 1.5 : 1.5));
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   const css = new CSS3DRenderer(); css.domElement.className = 'css3d'; host.append(css.domElement);
@@ -224,7 +227,11 @@ export function crearEscena({ host, panel, alPulsar, alTvWin }) {
 
   // Con la pantalla de espaldas a la cámara se oculta el player (CSS3D no sabe de oclusión).
   const n = new THREE.Vector3(), p = new THREE.Vector3(), q = new THREE.Quaternion();
+  let perdido = false;
+  canvas.addEventListener('webglcontextlost', (e) => { e.preventDefault(); perdido = true; alPerderContexto?.(); });
+  canvas.addEventListener('webglcontextrestored', () => { perdido = false; host.classList.remove('sin-3d'); });
   renderer.setAnimationLoop(() => {
+    if (perdido) return;
     controls.update();
     tapa.getWorldQuaternion(q); n.set(0, 0, 1).applyQuaternion(q); pantalla.getWorldPosition(p);
     pantalla.visible = n.dot(p.sub(camera.position).negate()) > 0;
