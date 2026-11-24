@@ -84,14 +84,14 @@
       "id": "iphone-duo",
       "name": "iPhone Duo · ThinkPad X1",
       "url": "https://www.ainimation.studio/digital-twins/iphone-duo/",
-      "mode": "playlist-and-keyboard",
+      "mode": "3d-playlist-and-keyboard",
       "screen": {
-        "width": 2007,
-        "height": 2853
+        "width": 1280,
+        "height": 800
       },
       "player": "https://admira.tv/canal?screen=iphone-duo&fit=contain",
       "physical": "iPhone Duo plegado · app WindowsiOS «Windows 11» (tapa = monitor ThinkPad con admira.tv, base = teclado)",
-      "keys": "1–9/0, N/P, i, M, Q, Esc, TV·WIN, flechas ±10 s / última / primera, Fn"
+      "keys": "1–9/0, N ⏭ / P ⏮, Espacio ⏯, i, M 🔊/🔇, Q, Esc, TV·WIN, flechas ±10 s / última / primera, Fn"
     },
     {
       "id": "trio",
