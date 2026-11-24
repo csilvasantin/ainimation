@@ -91,7 +91,22 @@
       },
       "player": "https://admira.tv/canal?screen=iphone-duo&fit=contain",
       "physical": "iPhone Duo plegado · app WindowsiOS «Windows 11» (tapa = monitor ThinkPad con admira.tv, base = teclado)",
-      "keys": "1–9/0, N ⏭ / P ⏮, Espacio ⏯, i, M 🔊/🔇, Q, Esc, TV·WIN, flechas ±10 s / última / primera, Fn"
+      "keys": "1–9/0, N ⏭ / P ⏮, Espacio ⏯, i, M 🔊/🔇, Q, Esc, TV·WIN, flechas ±10 s / última / primera, Fn",
+      "related": "https://www.ainimation.studio/digital-twins/iphone-duo-fisico/"
+    },
+    {
+      "id": "iphone-duo-fisico",
+      "name": "iPhone Duo",
+      "url": "https://www.ainimation.studio/digital-twins/iphone-duo-fisico/",
+      "mode": "3d-playlist-and-keyboard",
+      "screen": {
+        "width": 1280,
+        "height": 800
+      },
+      "player": "https://admira.tv/canal?screen=iphone-duo&fit=contain",
+      "physical": "iPhone Duo físico · plegable de dos pantallas (exterior pequeña, interior grande) abierto como mini portátil: mitad de arriba = app WindowsiOS «Windows 11» con el monitor Lenovo y admira.tv; mitad de abajo = teclado táctil (LaptopDeckView)",
+      "keys": "1–9/0, N ⏭ / P ⏮, Espacio ⏯, i, M 🔊/🔇, Q, Esc, TV·WIN, flechas ±10 s / última / primera, Fn",
+      "related": "https://www.ainimation.studio/digital-twins/iphone-duo/"
     },
     {
       "id": "trio",

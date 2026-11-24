@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="noindex,nofollow">
+  <meta name="theme-color" content="#0b1020">
+  <title>iPhone Duo · Gemelo 3D · AInimation Studio</title>
+  <link rel="canonical" href="https://www.ainimation.studio/digital-twins/iphone-duo-fisico/">
+  <link rel="stylesheet" href="/digital-twins/twin-nav.css?v=692590f">
+  <link rel="stylesheet" href="/digital-twins/iphone-duo-fisico/twin.css?v=692590f">
+  <script defer src="/digital-twins/twin-nav.js?v=692590f"></script>
+  <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}</script>
+</head>
+<body>
+  <main class="duo-page">
+    <section class="duo-scene" aria-label="Gemelo 3D del iPhone Duo físico: plegable de dos pantallas abierto como mini portátil">
+      <div class="escena" id="escena">
+        <canvas id="duo3d" aria-label="Modelo 3D del iPhone Duo: arrastra para girarlo, pulsa las teclas para usarlo"></canvas>
+      </div>
+      <p class="aviso3d" id="aviso3d" hidden></p>
+      <div class="duo-controls">
+        <button type="button" id="tvwinBtn" aria-label="Mostrar Windows o admira.tv">TV · WIN</button>
+        <button type="button" id="vista">Vista frontal</button>
+        <label class="bis">Bisagra <input type="range" id="bisagra" min="70" max="150" step="1" value="112" aria-label="Ángulo de la bisagra"> <output id="bisagraVal">112°</output></label>
+        <small>Arrastra para girar · rueda o pellizco para acercar · toca las teclas del cristal o usa las de tu teclado.</small>
+      </div>
+    </section>
+    <aside class="duo-help">
+      <h1>iPhone Duo</h1>
+      <p class="sub">Gemelo digital 3D del iPhone Duo físico: el plegable de dos pantallas abierto como un mini portátil. Arriba, la app «Windows 11» con el monitor Lenovo y el player; abajo, el teclado táctil. Misma playlist <code>#iphoneDuo</code> de admira.tv, mismo teclado y mismos pitidos de 8 bits. La pantalla es el player real, en directo.</p>
+      <p class="now" id="now" role="status">Conectando con admira.tv…</p>
+      <dl class="mapa">
+        <dt>1–9</dt><dd>pieza de la tecla (<code>campaign:teclaN</code> o la N-ésima)</dd>
+        <dt>0</dt><dd>vuelve a la programación</dd>
+        <dt>N ⏭ / P ⏮</dt><dd>siguiente / anterior</dd>
+        <dt>Espacio ⏯</dt><dd>pausa / reanuda la pieza</dd>
+        <dt>→ / ←</dt><dd>+10 s / −10 s</dd>
+        <dt>↑ / ↓</dt><dd>última / primera pieza</dd>
+        <dt>i</dt><dd>ficha de la pieza y la playlist (cualquier tecla la cierra)</dd>
+        <dt>M 🔊/🔇</dt><dd>silencio / sonido (se recuerda)</dd>
+        <dt>Q</dt><dd>para el player · otra Q lo arranca</dd>
+        <dt>Esc</dt><dd>oculta el player (Windows)</dd>
+        <dt>TV · WIN</dt><dd>alterna player y Windows (también en la barbilla del monitor)</dd>
+        <dt>Fn</dt><dd>las teclas van a Windows</dd>
+      </dl>
+      <p class="otro-gemelo"><a href="/digital-twins/iphone-duo/">Ver también el gemelo ThinkPad X1 →</a></p>
+      <p class="nota">Pantalla <code>iphone-duo</code> · <a href="https://admira.tv/canal?screen=iphone-duo" target="_blank" rel="noopener noreferrer">player en admira.tv ↗</a></p>
+    </aside>
+  </main>
+  <!-- Pantalla del monitor: se coloca en 3D sobre el cristal de la tapa (CSS3D) -->
+  <div class="panel" id="panel">
+    <iframe id="canal" title="Player de admira.tv · pantalla iphone-duo" allow="autoplay; fullscreen" referrerpolicy="strict-origin-when-cross-origin" tabindex="-1"></iframe>
+    <div class="win" id="win" hidden aria-label="Escritorio de Windows 11 (simulado)">
+      <div class="win-note" id="winNote"><header>Bloc de notas</header><pre id="winText"></pre></div>
+      <div class="win-bar"><span class="win-start" aria-hidden="true">⊞</span><span class="win-search">Buscar</span><span class="win-clock" id="winClock"></span></div>
+    </div>
+    <div class="ficha" id="ficha" hidden aria-live="polite"></div>
+  </div>
+  <script type="module" src="./twin.mjs?v=692590f"></script>
+</body>
+</html>

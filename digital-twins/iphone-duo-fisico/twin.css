@@ -1,0 +1,63 @@
+/* Gemelo 3D del iPhone Duo plegado (app WindowsiOS · ThinkPad X1). Escena three.js + pantalla real en CSS3D. */
+:root { color-scheme: dark; }
+html, body { margin: 0; background: #070b15; color: #e8edf5; font: 14px/1.45 system-ui, -apple-system, "Segoe UI", sans-serif; }
+.duo-page { min-height: 100svh; box-sizing: border-box; padding: calc(var(--xs-bar-h, 48px) + 12px) 14px calc(16px + env(safe-area-inset-bottom)); display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; align-items: start; }
+@media (min-width: 1000px) { .duo-page { grid-template-columns: minmax(0, 1fr) minmax(280px, 360px); padding-inline: 24px; } }
+.duo-scene { min-width: 0; background: #10182b; border: 1px solid #26344a; border-radius: 14px; overflow: hidden; }
+.escena { position: relative; height: clamp(320px, calc(100svh - var(--xs-bar-h, 48px) - 120px), 820px); touch-action: none; user-select: none; -webkit-user-select: none; -webkit-tap-highlight-color: transparent; }
+@media (max-width: 999px) { .escena { height: clamp(300px, 62svh, 640px); } }
+.escena { background: #0b1020; }
+.escena canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; }
+.escena .css3d { position: absolute !important; inset: 0; pointer-events: none; overflow: hidden; }
+.escena .css3d * { pointer-events: none !important; }
+.duo-controls { display: flex; gap: 8px 12px; align-items: center; flex-wrap: wrap; padding: 10px 12px; border-top: 1px solid #26344a; }
+.duo-controls button { color: inherit; background: #182439; border: 1px solid #435779; border-radius: 6px; padding: 6px 12px; font: inherit; cursor: pointer; }
+.duo-controls .bis { display: flex; align-items: center; gap: 6px; color: #a5b8cc; }
+.duo-controls input[type=range] { width: 130px; accent-color: #e2231a; }
+.duo-controls small { color: #8fa6c2; flex-basis: 100%; }
+/* Pantalla del monitor (1280 px de ancho, la escala la pone CSS3D) */
+.panel { position: relative; background: #000; overflow: hidden; container-type: inline-size; border-radius: 4px; }
+.panel iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; background: #000; }
+.win { position: absolute; inset: 0; background: radial-gradient(120% 90% at 30% 110%, #0a5bd8 0%, #0a2a6c 38%, #071434 70%, #050a1c 100%); }
+.win-note { position: absolute; left: 8%; top: 9%; width: 56%; height: 58%; background: #1f1f23ee; border: 1px solid #ffffff22; border-radius: 1cqw; display: flex; flex-direction: column; overflow: hidden; }
+.win-note header { font: 1.6cqw/1 "Segoe UI", system-ui; padding: 1cqw 1.4cqw; background: #2b2b30; color: #ddd; }
+.win-note pre { flex: 1; margin: 0; padding: 1.2cqw 1.4cqw; font: 1.8cqw/1.35 Consolas, ui-monospace, monospace; color: #f2f2f2; white-space: pre-wrap; word-break: break-all; overflow: hidden; }
+.win-bar { position: absolute; left: 0; right: 0; bottom: 0; height: 5.2cqw; background: #1c1f2bdd; display: flex; align-items: center; justify-content: center; gap: 2cqw; font: 1.6cqw/1 "Segoe UI", system-ui; color: #e8e8e8; }
+.win-start { font-size: 2.6cqw; color: #4cc2ff; }
+.win-search { background: #ffffff18; border-radius: 3cqw; padding: .8cqw 6cqw .8cqw 2cqw; color: #ffffffa0; }
+.win-clock { position: absolute; right: 2cqw; font-size: 1.4cqw; }
+/* Ficha de la tecla i: verde fósforo sobre negro, como en la app */
+.ficha { position: absolute; inset: 0; background: #000000db; color: #fff; font: 1.55cqw/1.35 ui-monospace, Menlo, Consolas, monospace; padding: 2.2cqw; display: grid; grid-template-columns: minmax(0, 1fr) 40%; gap: 2.2cqw; box-sizing: border-box; }
+.ficha[hidden], .win[hidden] { display: none; }
+.ficha .g { color: #5cff73; font-weight: 700; }
+.ficha h3 { margin: .4cqw 0 .8cqw; font: 700 1.95cqw/1.25 ui-monospace, Menlo, monospace; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+.ficha .row { display: grid; grid-template-columns: 11cqw minmax(0, 1fr); gap: .8cqw; margin: .25cqw 0; }
+.ficha .row span:first-child { color: #5cff73bf; }
+.ficha .row span:last-child { overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+.ficha .tags { color: #ffd84d; margin-top: .6cqw; display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; }
+.ficha ol { list-style: none; margin: .6cqw 0 0; padding: 0; }
+.ficha li { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding: .1cqw .4cqw; color: #ffffffd9; }
+.ficha li.on { background: #5cff73; color: #000; }
+.ficha .more { color: #ffffff80; }
+.ficha .hint { position: absolute; right: 1.6cqw; bottom: 1.2cqw; font-size: 1.25cqw; color: #ffffff66; }
+/* Ayuda */
+.duo-help { color: #c8d3e3; }
+.duo-help h1 { margin: 0 0 6px; font-size: 20px; color: #fff; }
+.duo-help .sub { margin: 0 0 10px; color: #a9b7cb; }
+.duo-help .now { margin: 0 0 12px; padding: 8px 10px; border: 1px solid #263246; border-radius: 8px; background: #0d1422; color: #d6e4f7; font: 12px/1.4 ui-monospace, Menlo, monospace; min-height: 2.8em; }
+.duo-help .mapa { display: grid; grid-template-columns: auto 1fr; gap: 4px 12px; margin: 0 0 12px; font-size: 13px; }
+.duo-help dt { font: 700 12px/1.6 ui-monospace, Menlo, monospace; color: #5cff73; white-space: nowrap; }
+.duo-help dd { margin: 0; }
+.duo-help code { color: #ffd84d; }
+.duo-help a { color: #9fc8ff; }
+.duo-help .nota { font-size: 12px; color: #8e9db3; }
+/* Vista plana (sin WebGL o contexto perdido): el player a todo el recuadro, sin lienzo gris */
+.escena.sin-3d canvas, .escena.sin-3d .css3d { display: none; }
+.escena.sin-3d .panel { position: absolute !important; inset: 0; width: auto !important; height: auto !important; transform: none !important; border-radius: 0; }
+.escena.sin-3d .panel iframe { pointer-events: none; }
+.aviso3d { margin: 0; padding: 8px 12px; color: #ffd84d; font-size: 12px; border-top: 1px solid #26344a; }
+
+/* Enlace visible al otro gemelo del iPhone Duo (ThinkPad X1 ↔ teléfono físico) */
+.otro-gemelo { margin: 14px 0 6px; }
+.otro-gemelo a { display: inline-block; padding: 8px 12px; border-radius: 10px; background: #1b2747; color: #cfe0ff; text-decoration: none; font-weight: 600; border: 1px solid #ffffff22; }
+.otro-gemelo a:hover, .otro-gemelo a:focus-visible { background: #263764; color: #fff; }

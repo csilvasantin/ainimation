@@ -2,7 +2,7 @@
 // Mismo comportamiento que LaptopDeckView/AdmiraLidPlayerView del Duo real:
 // 1–9/0, N/P, i, M, Q, Esc, TV·WIN, flechas, barra ⏯ y Fn, con los mismos pitidos de 8 bits.
 // Modelo 3D (three.js, deck3d.mjs): clamshell ThinkPad orbitable con bisagra; la pantalla es el player real (CSS3D).
-import { crearEscena } from './deck3d.mjs?v=duo3d-2';
+import { crearEscena } from './deck3d.mjs?v=duo3d-3';
 const CANAL = 'https://admira.tv';
 const SCREEN = 'iphone-duo';
 const MACHINE = 'gemelo-iphone-duo-ainimation';
