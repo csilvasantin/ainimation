@@ -1,6 +1,8 @@
 // Gemelo digital del iPhone Duo plegado · app WindowsiOS (ThinkPad X1) · Carlos, 24-nov-2026.
 // Mismo comportamiento que LaptopDeckView/AdmiraLidPlayerView del Duo real:
-// 1–9/0, N/P, i, M, Q, Esc, TV·WIN, flechas y Fn, con los mismos pitidos de 8 bits.
+// 1–9/0, N/P, i, M, Q, Esc, TV·WIN, flechas, barra ⏯ y Fn, con los mismos pitidos de 8 bits.
+// Modelo 3D (three.js, deck3d.mjs): clamshell ThinkPad orbitable con bisagra; la pantalla es el player real (CSS3D).
+import { crearEscena } from './deck3d.mjs?v=duo3d-1';
 const CANAL = 'https://admira.tv';
 const SCREEN = 'iphone-duo';
 const MACHINE = 'gemelo-iphone-duo-ainimation';
@@ -8,6 +10,7 @@ const LS = { on: 'duo.twin.player', stop: 'duo.twin.detenido', mute: 'duo.twin.s
 const $ = (id) => document.getElementById(id);
 const frame = $('canal'), win = $('win'), ficha = $('ficha'), now = $('now');
 
+let escena = null;
 const st = {
   on: localStorage.getItem(LS.on) !== '0',
   detenido: localStorage.getItem(LS.stop) === '1',
@@ -31,6 +34,7 @@ const NOTAS = {
   quit: [[784, .05], [523, .05], [262, .10]], arranque: [[262, .045], [330, .045], [392, .045], [523, .09]],
   adelante: [[1175, .04], [1397, .04]], atras: [[587, .04], [494, .04]],
   ultima: [[523, .03], [784, .03], [1047, .06]], primera: [[1047, .03], [784, .03], [523, .06]],
+  pausa: [[440, .05], [0, .03], [440, .05]], reanuda: [[880, .05], [0, .03], [880, .05]],   // barra ⏯ (hz 0 = silencio)
 };
 let ac = null;
 function pitido(nombre) {
@@ -39,6 +43,7 @@ function pitido(nombre) {
     if (ac.state === 'suspended') ac.resume();
     let t = ac.currentTime + 0.01;
     for (const [hz, seg] of NOTAS[nombre] || []) {
+      if (hz <= 0) { t += seg; continue; }
       const o = ac.createOscillator(), g = ac.createGain();
       o.type = 'square'; o.frequency.value = hz;
       g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(0.16, t + 0.003);
@@ -75,8 +80,7 @@ function pintar() {
   if (st.on && (!frame.src || frame.src === 'about:blank')) frame.src = st.url;
   localStorage.setItem(LS.on, st.on ? '1' : '0');
   localStorage.setItem(LS.stop, st.detenido ? '1' : '0');
-  document.querySelector('[data-k="fn"]')?.classList.toggle('lit', st.fn);
-  document.querySelector('[data-k="caps"]')?.classList.toggle('lit', st.caps);
+  escena?.refrescar(st);                                                // Fn/Caps encendidas e iconos ⏭ ⏮ ⏯ 🔇 de las teclas
   $('winText').textContent = st.winText + '▌';
 }
 frame.addEventListener('load', () => {
@@ -84,6 +88,11 @@ frame.addEventListener('load', () => {
   setTimeout(() => { if (st.mute) canal('mute'); else if (st.gesto) canal('unmute'); estadoPronto(); }, 1500);
 });
 
+async function pausa() {
+  const r = await canal('togglepause');
+  if (!r.ok) return;
+  pitido(r.paused ? 'pausa' : 'reanuda'); st.pausado = !!r.paused; setTimeout(estado, 200);
+}
 function salir() { st.info = null; ficha.hidden = true; st.detenido = false; st.on = false; pintar(); }
 function quitar() {
   st.info = null; ficha.hidden = true; st.tecla = null; st.url = canalURL();
@@ -169,7 +178,7 @@ async function estado(texto) {
   if (!s.ok || !s.state) return false;
   const S = s.state, it = S.items[S.cur];
   listaBase = st.tecla ? listaBase : S.items.map(x => idLimpio(x.id));
-  now.textContent = `▶ ${S.cur + 1}/${S.n} · ${it ? it.title : '—'}${st.tecla ? ` · tecla ${st.tecla}` : ''}${S.muted || st.mute ? ' · 🔇' : ''}`;
+  now.textContent = `▶ ${S.cur + 1}/${S.n} · ${it ? it.title : '—'}${st.tecla ? ` · tecla ${st.tecla}` : ''}${S.muted || st.mute ? ' · 🔇' : ''}${S.paused ? ' · ⏸ en pausa' : ''}`;
   return true;
 }
 // Tras cargar o arrancar, el canal tarda unos segundos en contestar: reintenta cada segundo hasta 15 veces.
@@ -196,8 +205,9 @@ function tecla(k, ch) {
       case 'n': pitido('siguiente'); mover(1); return;
       case 'p': pitido('anterior'); mover(-1); return;
       case 'i': abrirFicha(); return;
-      case 'm': st.mute = !st.mute; localStorage.setItem(LS.mute, st.mute ? '1' : '0'); pitido(st.mute ? 'silencio' : 'sonido'); canal(st.mute ? 'mute' : 'unmute'); setTimeout(estado, 300); return;
+      case 'm': st.mute = !st.mute; localStorage.setItem(LS.mute, st.mute ? '1' : '0'); pitido(st.mute ? 'silencio' : 'sonido'); canal(st.mute ? 'mute' : 'unmute'); pintar(); setTimeout(estado, 300); return;
       case 'q': quitar(); return;
+      case 'space': pausa(); return;                                     // ⏯ pausa / reanuda la pieza (Fn+Espacio va a Windows)
       case 'escape': salir(); estado(); return;
       case 'right': pitido('adelante'); canal('seek 10'); return;
       case 'left': pitido('atras'); canal('seek -10'); return;
@@ -217,63 +227,23 @@ function tecla(k, ch) {
   }
 }
 
-// ── Dibujo del teclado ThinkPad (mismas filas que LaptopDeckView) ───────────────────────────────────
-const FN = [['escape', 'Esc'], ['start', '⊞'], ['search', '⌕'], ['explorer', '🗀'], ['edge', '◍'], ['ag', '✦'], ['paint', '✎'], ['task', '▭'], ['mouse', '◫'], ['rclick', '⟲'], ['split', '◧'], ['rotate', '⧉'], ['full', '⤢'], ['del', 'Del']];
-const ROWS = [
-  [['`', '~'], ['1', '!'], ['2', '@'], ['3', '#'], ['4', '$'], ['5', '%'], ['6', '^'], ['7', '&'], ['8', '*'], ['9', '('], ['0', ')'], ['-', '_'], ['=', '+'], ['backspace', '⌫', 1.65]],
-  [['tab', 'Tab', 1.48], ['q'], ['w'], ['e'], ['r'], ['t'], ['y'], ['u'], ['i'], ['o'], ['p'], ['[', '{'], [']', '}'], ['\\', '|', 1.17]],
-  [['caps', 'Caps', 1.75], ['a'], ['s'], ['d'], ['f', null, 1, 1], ['g'], ['h'], ['j', null, 1, 1], ['k'], ['l'], [';', ':'], ["'", '"'], ['enter', 'Enter', 1.9]],
-  [['lshift', 'Shift', 2.22], ['z'], ['x'], ['c'], ['v'], ['b'], ['n'], ['m'], [',', '<'], ['.', '>'], ['/', '?'], ['rshift', 'Shift', 2.42]],
-  [['fn', 'Fn', 1.1], ['lctrl', 'Ctrl', 1.25], ['win', '⊞', 1.2], ['lalt', 'Alt', 1.2], ['space', '', 4.45], ['ralt', 'Alt', 1.05], ['rctrl', 'Ctrl', 1.05], ['left', '‹', 1.05], ['updown', null, 1.05], ['right', '›', 1.05]],
-];
-const keysEl = $('keys');
-function boton(k, top, sub, w = 1, home = 0) {
-  const b = document.createElement('button');
-  b.type = 'button'; b.className = 'k' + (top && top.length > 2 ? ' wide' : '') + (home ? ' home' : ''); b.dataset.k = k;
-  b.style.setProperty('--w', w);
-  b.setAttribute('aria-label', k);
-  b.innerHTML = (sub ? `<small>${esc(sub)}</small>` : '') + esc(top ?? '');
-  return b;
-}
-{
-  const fr = document.createElement('div'); fr.className = 'krow fnrow';
-  for (const [k, l] of FN) fr.append(boton(k, l));
-  keysEl.append(fr);
-  for (const row of ROWS) {
-    const r = document.createElement('div'); r.className = 'krow';
-    for (const [k, l, w, home] of row) {
-      if (k === 'updown') {
-        const s = document.createElement('div'); s.className = 'updown';
-        s.append(boton('up', '⌃', null), boton('down', '⌄', null)); r.append(s); continue;
-      }
-      const single = k.length === 1;
-      const label = single && /[a-z]/.test(k) ? k.toUpperCase() : (l === undefined || l === null || single ? k : l);
-      const sub = single && l && !/[a-z]/.test(k) ? l : null;
-      r.append(boton(k, label, sub, w || 1, home));
-    }
-    keysEl.append(r);
-  }
-  const tp = document.createElement('i'); tp.className = 'trackpoint'; keysEl.parentElement.append(tp);
-  const colocar = () => {                                               // TrackPoint entre G, H y B
-    const g = keysEl.querySelector('[data-k="g"]'), h = keysEl.querySelector('[data-k="h"]'), deck = keysEl.parentElement.getBoundingClientRect();
-    if (!g || !h) return; const a = g.getBoundingClientRect(), c = h.getBoundingClientRect();
-    tp.style.left = ((a.right + c.left) / 2 - deck.left) + 'px'; tp.style.top = (a.bottom - deck.top + 1) + 'px';
-  };
-  new ResizeObserver(colocar).observe(keysEl); colocar();
-}
-keysEl.addEventListener('pointerdown', (e) => {
-  const b = e.target.closest('.k'); if (!b) return;
-  e.preventDefault(); b.classList.add('down'); setTimeout(() => b.classList.remove('down'), 120);
-  const k = b.dataset.k;
-  const ch = k.length === 1 ? k : null;
-  tecla(k === 'del' ? 'delete' : k, ch);
+
+// ── Modelo 3D: teclas pulsables, TV·WIN en la barbilla y bisagra ────────────────────────────────────
+escena = crearEscena({
+  host: $('escena'), panel: $('panel'),
+  alPulsar: (k, ch) => tecla(k, ch),
+  alTvWin: () => tvwin(),
 });
-$('tvwin').addEventListener('click', () => {
+function tvwin() {
   if (!st.gesto) st.gesto = true;
   cerrarFicha(); st.detenido = false; st.on = !st.on; pintar(); estadoPronto();
-});
+}
+$('tvwinBtn')?.addEventListener('click', tvwin);
+const bisagra = $('bisagra');
+bisagra?.addEventListener('input', () => { escena.bisagra(Number(bisagra.value)); $('bisagraVal').textContent = bisagra.value + '°'; });
+$('vista')?.addEventListener('click', () => escena.encuadrar());
 
-// Teclado físico: mismo mapa (Fn no existe en un teclado normal: se usa la tecla Fn del dibujo).
+// Teclado físico: mismo mapa (Fn no existe en un teclado normal: se usa la tecla Fn del modelo).
 const CODES = { ArrowLeft: 'left', ArrowRight: 'right', ArrowUp: 'up', ArrowDown: 'down', Escape: 'escape', Backspace: 'backspace', Enter: 'enter', Tab: 'tab', Space: 'space', CapsLock: 'caps' };
 window.addEventListener('keydown', (e) => {
   if (e.metaKey || e.ctrlKey || e.altKey) return;                        // atajos del navegador intactos
@@ -284,8 +254,7 @@ window.addEventListener('keydown', (e) => {
   if (!k && e.key.length === 1) k = e.key.toLowerCase();
   if (!k) return;
   e.preventDefault();
-  const b = keysEl.querySelector(`[data-k="${CSS.escape(k)}"]`);
-  if (b) { b.classList.add('down'); setTimeout(() => b.classList.remove('down'), 120); }
+  escena.hundir(k);
   tecla(k, e.key.length === 1 ? e.key : null);
 });
 
@@ -293,5 +262,5 @@ window.addEventListener('keydown', (e) => {
 const reloj = () => { $('winClock').textContent = new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }); };
 reloj(); setInterval(reloj, 30000);
 
-window.__duo = { st, tecla, canal };
+window.__duo = { st, tecla, canal, escena };
 pintar(); estadoPronto();
