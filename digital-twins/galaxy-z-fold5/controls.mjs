@@ -14,7 +14,8 @@ export function physicalView(state, now = Date.now()) {
   const seen = Number(state?.lastSeen);
   if (!Number.isFinite(seen) || seen <= 0) return { fresh: false, title: 'Sin observación reciente', detail: 'Conecta el observador externo del Fold5 para consultar su estado.', age: null, angle: null, playing: false };
   const age = Math.max(0, Math.round((now - seen) / 1000));
-  const fresh = age <= 60;
+  // The signage state store coalesces unchanged observations for up to 240 s.
+  const fresh = age <= 300;
   const status = String(state?.health?.status || '');
   const angle = status.startsWith('closed') ? 0 : status === 'half-opened' ? 90 : status === 'opened' ? 180 : null;
   const playing = fresh && !!state?.item && state?.device?.display?.playbackPaused !== true;
