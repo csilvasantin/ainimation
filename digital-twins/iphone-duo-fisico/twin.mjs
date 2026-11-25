@@ -4,6 +4,7 @@
 // 1–9/0, N/P, i, M, Q, Esc, TV·WIN, flechas, barra ⏯ y Fn, con los mismos pitidos de 8 bits.
 // Modelo 3D (three.js, phone3d.mjs): el teléfono de titanio con bisagra; arriba el monitor Lenovo de la app con el player real (CSS3D).
 import { crearEscena } from './phone3d.mjs?v=duof-1';
+import { crearSync } from '../iphone-duo/sync.mjs?v=tele-1';
 const CANAL = 'https://admira.tv';
 const SCREEN = 'iphone-duo';
 const MACHINE = 'gemelo-iphone-duo-fisico-ainimation';
@@ -202,29 +203,29 @@ setInterval(() => { if (!document.hidden) estado(); }, 5000);
 function tecla(k, ch) {
   if (!st.gesto) { st.gesto = true; if (st.on && !st.mute) canal('unmute'); }
   window.__duoLog?.push('tecla ' + k);
-  if (st.info) { cerrarFicha(); return; }                              // con la ficha abierta, cualquier tecla sólo la cierra
+  if (st.info) { cerrarFicha(); tx('infoclose'); return; }             // con la ficha abierta, cualquier tecla sólo la cierra
   if (k === 'fn') { st.fn = !st.fn; pintar(); return; }
   if (k === 'caps') { st.caps = !st.caps; pintar(); return; }
   const player = st.on && !st.fn;
-  if (!st.on && !st.fn && st.detenido && k === 'q') { arrancar(); return; }
+  if (!st.on && !st.fn && st.detenido && k === 'q') { tx('start'); arrancar(); return; }
   if (!st.on && !st.fn && !st.detenido) {
-    if (k === 'escape') { volver(); return; }
-    if (/^[0-9]$/.test(k)) { const n = Number(k); volver(); volverA(n); return; }
+    if (k === 'escape') { tx('tv'); volver(); return; }
+    if (/^[0-9]$/.test(k)) { const n = Number(k); tx('key', n); volver(); volverA(n); return; }
   }
   if (player) {
-    if (/^[0-9]$/.test(k)) { pulsar(Number(k)); return; }
+    if (/^[0-9]$/.test(k)) { tx('key', Number(k)); pulsar(Number(k)); return; }
     switch (k) {
-      case 'n': pitido('siguiente'); mover(1); return;
-      case 'p': pitido('anterior'); mover(-1); return;
-      case 'i': abrirFicha(); return;
-      case 'm': st.mute = !st.mute; localStorage.setItem(LS.mute, st.mute ? '1' : '0'); pitido(st.mute ? 'silencio' : 'sonido'); canal(st.mute ? 'mute' : 'unmute'); pintar(); setTimeout(estado, 300); return;
-      case 'q': quitar(); return;
-      case 'space': pausa(); return;                                     // ⏯ pausa / reanuda la pieza (Fn+Espacio va a Windows)
-      case 'escape': salir(); estado(); return;
-      case 'right': pitido('adelante'); canal('seek 10'); return;
-      case 'left': pitido('atras'); canal('seek -10'); return;
-      case 'up': pitido('ultima'); canal('last').then(() => setTimeout(estado, 900)); return;
-      case 'down': pitido('primera'); canal('first').then(() => setTimeout(estado, 900)); return;
+      case 'n': tx('next'); pitido('siguiente'); mover(1); return;
+      case 'p': tx('prev'); pitido('anterior'); mover(-1); return;
+      case 'i': tx('info'); abrirFicha(); return;
+      case 'm': tx(st.mute ? 'unmute' : 'mute'); st.mute = !st.mute; localStorage.setItem(LS.mute, st.mute ? '1' : '0'); pitido(st.mute ? 'silencio' : 'sonido'); canal(st.mute ? 'mute' : 'unmute'); pintar(); setTimeout(estado, 300); return;
+      case 'q': tx('stop'); quitar(); return;
+      case 'space': tx('togglepause'); pausa(); return;                                     // ⏯ pausa / reanuda la pieza (Fn+Espacio va a Windows)
+      case 'escape': tx('win'); salir(); estado(); return;
+      case 'right': tx('seek', 10); pitido('adelante'); canal('seek 10'); return;
+      case 'left': tx('seek', -10); pitido('atras'); canal('seek -10'); return;
+      case 'up': tx('last'); pitido('ultima'); canal('last').then(() => setTimeout(estado, 900)); return;
+      case 'down': tx('first'); pitido('primera'); canal('first').then(() => setTimeout(estado, 900)); return;
     }
     return;                                                              // el resto, con el player en la tapa, no hace nada
   }
@@ -261,7 +262,7 @@ try {
 }
 function tvwin() {
   if (!st.gesto) st.gesto = true;
-  cerrarFicha(); st.detenido = false; st.on = !st.on; pintar(); estadoPronto();
+  cerrarFicha(); st.detenido = false; st.on = !st.on; tx(st.on ? 'tv' : 'win'); pintar(); estadoPronto();
 }
 $('tvwinBtn')?.addEventListener('click', tvwin);
 const bisagra = $('bisagra');
@@ -287,5 +288,61 @@ window.addEventListener('keydown', (e) => {
 const reloj = () => { const d = new Date(); $('winClock').textContent = d.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }); $('winDate').textContent = d.toLocaleDateString('es-ES'); };
 reloj(); setInterval(reloj, 30000);
 
-window.__duo = { st, tecla, canal, escena };
+// ── Telemetría con el iPhone Duo físico (Carlos, 25-nov-2026 11:09: «son gemelos y actúan iguales») ─────────────────
+// Cada orden de este gemelo sale al canal /api/twin-sync; el Duo la aplica y publica su estado, y este gemelo se alinea
+// con él (el físico manda). Si el Duo no está en línea, los gemelos abiertos se siguen entre sí con las mismas órdenes.
+let ultimaLocal = 0;
+function tx(action, arg = null) { ultimaLocal = Date.now(); sync?.enviar(action, arg); }
+function aplicarOrden(ev) {                                            // orden de OTRO gemelo (sin Duo en línea)
+  window.__duoLog?.push('← ' + ev.action + (ev.arg != null ? ' ' + ev.arg : ''));
+  if (st.info && ev.action !== 'info') cerrarFicha();
+  switch (ev.action) {
+    case 'key': if (!st.on) { volver(); if (ev.arg > 0) volverA(ev.arg); else pulsar(0); } else pulsar(ev.arg); return;
+    case 'next': pitido('siguiente'); mover(1); return;
+    case 'prev': pitido('anterior'); mover(-1); return;
+    case 'togglepause': pausa(); return;
+    case 'pause': case 'resume': canal(ev.action); return;
+    case 'seek': canal('seek ' + ev.arg); return;
+    case 'first': case 'last': canal(ev.action).then(() => setTimeout(estado, 900)); return;
+    case 'mute': case 'unmute': st.mute = ev.action === 'mute'; localStorage.setItem(LS.mute, st.mute ? '1' : '0'); canal(ev.action); pintar(); return;
+    case 'stop': quitar(); return;
+    case 'start': arrancar(); return;
+    case 'win': if (st.on) { salir(); estado(); } return;
+    case 'tv': if (!st.on) volver(); return;
+    case 'info': if (st.on && !st.info) abrirFicha(); return;
+    case 'infoclose': cerrarFicha(); return;
+  }
+}
+let alineando = false;
+async function alinear(d) {                                            // el gemelo copia el estado del Duo físico
+  if (!d || !sync?.enLinea() || alineando || Date.now() - ultimaLocal < 1500) return;
+  alineando = true;
+  try {
+    if (d.stopped) { if (!st.detenido) quitar(); return; }
+    if (!d.on) { if (st.on) { salir(); estado(); } return; }
+    if (!st.on) { if (st.detenido) arrancar(); else volver(); return; }
+    if (d.muted !== st.mute) { st.mute = d.muted; localStorage.setItem(LS.mute, st.mute ? '1' : '0'); canal(st.mute ? 'mute' : 'unmute'); pintar(); }
+    if (d.info && !st.info) abrirFicha(); else if (!d.info && st.info) cerrarFicha();
+    if ((d.key || null) !== (st.tecla || null)) { pulsar(d.key || 0); return; }
+    const s = await canal('state'); if (!s.ok || !s.state) return;
+    const S = s.state;
+    if (!d.key && d.id) { const i = S.items.findIndex(x => idLimpio(x.id) === idLimpio(d.id)); if (i >= 0 && i !== S.cur) { await canal('goto ' + i); setTimeout(estado, 600); } }
+    if (d.paused !== !!S.paused) canal(d.paused ? 'pause' : 'resume');
+  } finally { alineando = false; }
+}
+function pintarDuo(d, enLinea) {
+  const el = $('duoFisico'); if (!el) return;
+  if (!d || !enLinea) { el.textContent = 'iPhone Duo físico: sin señal · los gemelos abiertos se siguen entre sí'; el.classList.remove('on'); return; }
+  const que = d.stopped ? 'parado con Q' : !d.on ? 'en Windows' : `${d.paused ? '⏸' : '▶'} ${d.index >= 0 && d.total ? (d.index + 1) + '/' + d.total + ' · ' : ''}${d.title || '—'}${d.key ? ' · tecla ' + d.key : ''}${d.muted ? ' · 🔇' : ''}${d.info ? ' · ficha i' : ''}`;
+  el.textContent = 'iPhone Duo físico · en línea: ' + que; el.classList.add('on');
+}
+const sync = crearSync({
+  screen: SCREEN,
+  alOrden: (ev, { duoEnLinea }) => { if (!duoEnLinea) aplicarOrden(ev); },
+  alEstado: (d, { enLinea }) => { pintarDuo(d, enLinea); alinear(d); },
+  log: (m) => window.__duoLog?.push(m),
+});
+setInterval(() => { pintarDuo(sync.duo, sync.enLinea()); alinear(sync.duo); }, 3000);
+
+window.__duo = { st, tecla, canal, escena, sync };
 pintar(); estadoPronto();
