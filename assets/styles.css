@@ -6864,7 +6864,7 @@ body.studio-page .director-menubar button:hover{background:var(--director-menu-h
 body.studio-page .director-cast-window .cast-empty-state [data-start-example]{display:none}
 /* Xperiencia (DeepAgent Neo, 25-nov-2026): ajuste de una Xperiencia viva de otra casa (Vuelta al 95). */
 .xperiencia-window{min-width:420px}.xperiencia-editor{padding:12px;display:grid;gap:10px;overflow:auto;height:calc(100% - 29px);align-content:start}
-.xperiencia-editor .xp-head{display:flex;gap:8px;align-items:center}.xperiencia-editor .xp-head select{flex:1;min-width:0}
+.xperiencia-editor .xp-head{display:flex;gap:8px;align-items:center}.xperiencia-editor .xp-head select{flex:1;min-width:0}.xperiencia-editor .xp-head{flex-wrap:wrap}.xperiencia-editor .xp-link{font-size:11px;color:var(--muted);text-decoration:underline}
 .xperiencia-editor select,.xperiencia-editor input[type=text],.xperiencia-editor input[type=number]{width:100%;min-width:0;border:1px solid var(--director-line,#344052);background:var(--director-panel,#151a22);color:inherit;border-radius:4px;padding:7px 8px;font:12px/1.2 inherit;box-sizing:border-box}
 .xperiencia-editor .xp-status{margin:0;font-size:12px;color:var(--muted)}.xperiencia-editor .xp-status.is-error{color:#ff9d7a}
 .xperiencia-editor .xp-form{display:grid;gap:8px}.xperiencia-editor .xp-group{border:1px solid var(--director-line,#344052);border-radius:6px;padding:6px 10px 10px}

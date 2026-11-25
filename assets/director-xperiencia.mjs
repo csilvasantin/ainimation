@@ -24,9 +24,16 @@ export function mountXperienciaWindow({ doc = document, win = window, abrir } = 
   const selector = el('select');
   selector.setAttribute('aria-label', t('Xperiencia', 'Xperience'));
   for (const x of XPERIENCIAS) { const o = el('option', null, texto(x.nombre, lang())); o.value = x.id; selector.append(o); }
-  selector.onchange = () => { xp = xperiencia(selector.value); cerrarVentana(); };
+  selector.onchange = () => { xp = xperiencia(selector.value); cerrarVentana(); enlace.href = urlVentana(xp, win.location.origin); enlace.target = 'admira-xperiencia-' + xp.id; };
   const btnAbrir = boton(t('Abrir Xperiencia', 'Open Xperience'), abrirVentana, 'button');
-  cabecera.append(selector, btnAbrir);
+  // Enlace de respaldo: un clic en un enlace con target nunca lo bloquea el navegador; rel=opener deja
+  // que la ventana nueva nos hable por window.opener y el Director la adopta con su «hola».
+  const enlace = el('a', 'xp-link', t('o ábrela en una pestaña', 'or open it in a tab'));
+  enlace.target = 'admira-xperiencia-' + xp.id;
+  enlace.rel = 'opener';
+  enlace.href = urlVentana(xp, win.location.origin);
+  enlace.onclick = () => { decir(t('Pestaña abierta. Entra en admira.live si te lo pide; el ajuste llega solo.', 'Tab open. Sign in to admira.live if asked; the settings arrive by themselves.')); };
+  cabecera.append(selector, btnAbrir, enlace);
   const aviso = el('p', 'xp-status', t('Abre la Xperiencia: se enseña en su ventana y aquí aparece su ajuste.', 'Open the Xperience: it shows in its own window and its settings appear here.'));
   aviso.setAttribute('role', 'status');
   const form = el('form', 'xp-form');
@@ -48,8 +55,11 @@ export function mountXperienciaWindow({ doc = document, win = window, abrir } = 
     if (ventana && !ventana.closed) { try { ventana.focus(); } catch {} enviar('estado?', {}); return; }
     const url = urlVentana(xp, win.location.origin);
     ventana = (abrir || ((u, n, f) => win.open(u, n, f)))(url, 'admira-xperiencia-' + xp.id, 'popup=yes,width=1040,height=820');
-    if (!ventana) { decir(t('El navegador bloqueó la ventana. Permite ventanas emergentes para ainimation.studio y vuelve a pulsar.', 'The browser blocked the window. Allow pop-ups for ainimation.studio and try again.'), true); return; }
+    if (!ventana) { decir(t('El navegador bloqueó la ventana: usa el enlace «o ábrela en una pestaña».', 'The browser blocked the window: use the “or open it in a tab” link.'), true); return; }
     decir(t('Ventana abierta. Entra en admira.live si te lo pide; el ajuste llega solo.', 'Window open. Sign in to admira.live if asked; the settings arrive by themselves.'));
+    vigilar();
+  }
+  function vigilar() {
     win.clearInterval(vigilante);
     vigilante = win.setInterval(() => {
       if (ventana && ventana.closed) { win.clearInterval(vigilante); ventana = null; decir(t('Ventana cerrada. Vuelve a abrir la Xperiencia para seguir editando.', 'Window closed. Open the Xperience again to keep editing.')); form.hidden = true; pie.hidden = true; }
@@ -68,7 +78,7 @@ export function mountXperienciaWindow({ doc = document, win = window, abrir } = 
   win.addEventListener('message', (ev) => {
     if (!aceptaMensaje(ev, { ventana, origen: xp.origen, id: xp.id })) return;
     const tipo = tipoMensaje(ev.data);
-    if (tipo === 'hola') { enviar('estado?', {}); return; }
+    if (tipo === 'hola') { if (!ventana || ventana.closed) { ventana = ev.source; vigilar(); } enviar('estado?', {}); return; }
     if (tipo === 'estado') { estado = ev.data; pintar(); decir(resumenEstado(estado, lang())); return; }
     if (tipo === 'aplicando') { decir(t('El 95 se está reiniciando…', 'The 95 is rebooting…')); return; }
     if (tipo === 'guardado') {

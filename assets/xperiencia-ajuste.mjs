@@ -23,10 +23,14 @@ export function urlVentana(xp, origenDirector) {
 
 /** Sólo se escucha a la ventana que abrimos, desde el origen de la Xperiencia, con mensajes de su id. */
 export function aceptaMensaje(event, { ventana, origen, id }) {
-  if (!event || !ventana || event.source !== ventana || event.origin !== origen) return false;
+  if (!event || event.origin !== origen) return false;
   const d = event.data;
   if (!d || typeof d.type !== 'string' || !d.type.startsWith(PREFIJO)) return false;
-  return !d.id || d.id === id;
+  if (d.id && d.id !== id) return false;
+  // Sin ventana propia (la abrió la persona por el enlace, o el navegador bloqueó window.open) sólo se
+  // admite el «hola» de una ventana del origen de la Xperiencia: el Director la adopta como suya.
+  if (!ventana) return d.type === PREFIJO + 'hola' && !!event.source;
+  return event.source === ventana;
 }
 
 export function tipoMensaje(data) {

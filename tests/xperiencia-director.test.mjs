@@ -35,6 +35,10 @@ test('la ventana se abre con director=1 y el origen del Director; sólo se escuc
   const ok = { source: ventana, origin: 'https://www.admira.live', data: { type: PREFIJO + 'estado', id: 'vuelta-al-95' } };
   assert.equal(aceptaMensaje(ok, { ventana, origen: xp.origen, id: xp.id }), true);
   assert.equal(aceptaMensaje({ ...ok, source: {} }, { ventana, origen: xp.origen, id: xp.id }), false);
+  // sin ventana propia sólo se adopta un «hola» del origen bueno
+  assert.equal(aceptaMensaje({ ...ok, source: {}, data: { type: PREFIJO + 'hola', id: 'vuelta-al-95' } }, { ventana: null, origen: xp.origen, id: xp.id }), true);
+  assert.equal(aceptaMensaje({ ...ok, source: {} }, { ventana: null, origen: xp.origen, id: xp.id }), false);
+  assert.equal(aceptaMensaje({ ...ok, source: {}, origin: 'https://evil.example', data: { type: PREFIJO + 'hola' } }, { ventana: null, origen: xp.origen, id: xp.id }), false);
   assert.equal(aceptaMensaje({ ...ok, origin: 'https://evil.example' }, { ventana, origen: xp.origen, id: xp.id }), false);
   assert.equal(aceptaMensaje({ ...ok, data: { type: 'otra:cosa' } }, { ventana, origen: xp.origen, id: xp.id }), false);
   assert.equal(aceptaMensaje({ ...ok, data: { type: PREFIJO + 'estado', id: 'otra' } }, { ventana, origen: xp.origen, id: xp.id }), false);
@@ -114,5 +118,20 @@ test('mensajes de otra ventana u origen no tocan el formulario; Deshacer vuelve 
   f.qa('.xp-foot button')[2].click(); // Deshacer
   assert.equal(f.q('[data-ruta="visitor"]').value, '');
   assert.equal(f.enviados.filter((m) => m.data.type === PREFIJO + 'aplicar').length, 0);
+  f.panel.cerrar(); f.win.close();
+});
+
+test('si la persona abre la Xperiencia por el enlace (o el navegador bloquea la ventana), el Director adopta la ventana que saluda', () => {
+  const f = montar();
+  const enlace = f.q('.xp-link');
+  assert.match(enlace.href, /windows95\?director=1&origen=https%3A%2F%2Fwww\.ainimation\.studio/);
+  assert.equal(enlace.rel, 'opener');
+  const otra = { closed: false, postMessage: (data, origen) => f.enviados.push({ data, origen, otra: true }) };
+  f.mensaje({ type: PREFIJO + 'estado', id: 'vuelta-al-95', esquema: ESQUEMA, fabrica: FABRICA, ajuste: {}, at: null }, { source: otra });
+  assert.equal(f.q('.xp-form').hidden, true);
+  f.mensaje({ type: PREFIJO + 'hola', id: 'vuelta-al-95' }, { source: otra });
+  assert.deepEqual(f.enviados.at(-1), { data: { type: PREFIJO + 'estado?', id: 'vuelta-al-95' }, origen: 'https://www.admira.live', otra: true });
+  f.mensaje({ type: PREFIJO + 'estado', id: 'vuelta-al-95', esquema: ESQUEMA, fabrica: FABRICA, ajuste: {}, at: null }, { source: otra });
+  assert.equal(f.q('.xp-form').hidden, false);
   f.panel.cerrar(); f.win.close();
 });
