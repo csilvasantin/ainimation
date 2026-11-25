@@ -6862,3 +6862,18 @@ body.studio-page .director-menubar [class$="-menu-list"]{background:var(--direct
 body.studio-page .director-menubar button:hover{background:var(--director-menu-hover);color:var(--director-menu-ink)}
 
 body.studio-page .director-cast-window .cast-empty-state [data-start-example]{display:none}
+/* Xperiencia (DeepAgent Neo, 25-nov-2026): ajuste de una Xperiencia viva de otra casa (Vuelta al 95). */
+.xperiencia-window{min-width:420px}.xperiencia-editor{padding:12px;display:grid;gap:10px;overflow:auto;height:calc(100% - 29px);align-content:start}
+.xperiencia-editor .xp-head{display:flex;gap:8px;align-items:center}.xperiencia-editor .xp-head select{flex:1;min-width:0}
+.xperiencia-editor select,.xperiencia-editor input[type=text],.xperiencia-editor input[type=number]{width:100%;min-width:0;border:1px solid var(--director-line,#344052);background:var(--director-panel,#151a22);color:inherit;border-radius:4px;padding:7px 8px;font:12px/1.2 inherit;box-sizing:border-box}
+.xperiencia-editor .xp-status{margin:0;font-size:12px;color:var(--muted)}.xperiencia-editor .xp-status.is-error{color:#ff9d7a}
+.xperiencia-editor .xp-form{display:grid;gap:8px}.xperiencia-editor .xp-group{border:1px solid var(--director-line,#344052);border-radius:6px;padding:6px 10px 10px}
+.xperiencia-editor .xp-group>summary{cursor:pointer;font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin:0 0 6px}
+.xperiencia-editor .xp-group>label{display:grid;gap:4px;margin:6px 0;color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.05em}
+.xperiencia-editor .xp-group>label small{text-transform:none;letter-spacing:0;font-size:10px;line-height:1.3}
+.xperiencia-editor .xp-switch{display:flex;grid-auto-flow:column;justify-content:start;align-items:center;gap:6px;text-transform:none;font-size:12px;color:inherit}.xperiencia-editor .xp-switch input{width:auto}
+.xperiencia-editor .xp-list{border:1px dashed var(--director-line,#344052);border-radius:6px;padding:6px 8px;margin:6px 0;min-width:0}.xperiencia-editor .xp-list legend{font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
+.xperiencia-editor .xp-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(90px,1fr)) auto;gap:6px;align-items:end;padding:6px 0;border-bottom:1px solid var(--director-line,#344052)}
+.xperiencia-editor .xp-row label{display:grid;gap:3px;font-size:10px;color:var(--muted)}.xperiencia-editor .xp-row .xp-remove{min-width:0;padding:4px 8px}
+.xperiencia-editor .xp-foot{display:flex;flex-wrap:wrap;gap:6px}.xperiencia-editor .xp-note{margin:0;color:var(--muted);font-size:10px;line-height:1.4}
+@media(max-width:700px){.xperiencia-window{min-width:0}}

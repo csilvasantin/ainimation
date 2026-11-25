@@ -728,7 +728,7 @@ function initDirectorWindowManager() {
 // flotantes de siempre (la preferencia se guarda en el navegador).
 const layoutStorageKey = "ainimation-layout";
 const inspectorStorageKey = "ainimation-inspector";
-const dockedSideWindows = ["inspector", "prompt", "script", "payment"];
+const dockedSideWindows = ["inspector", "prompt", "script", "payment", "xperiencia"];
 function loadLayoutMode() {
   try { return localStorage.getItem(layoutStorageKey) === "floating" ? "floating" : "docked"; } catch { return "docked"; }
 }
