@@ -248,3 +248,6 @@ export function crearEscena({ host, panel, alPulsar, alTvWin, alPerderContexto }
     get angulo() { return angulo; },
   };
 }
+
+// Para el gemelo del iPhone Duo físico (../iphone-duo-fisico/phone3d.mjs): mismo atlas de rótulos e iconos de las teclas.
+export { pintarCelda, atlasTex, LADO, rotulo, textura };

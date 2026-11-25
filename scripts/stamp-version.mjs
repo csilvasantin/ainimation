@@ -28,6 +28,12 @@ const git = (...args) => execFileSync("git", args, { cwd: root, encoding: "utf8"
 let version = git("log", "-1", "--format=%h", "--", "assets");
 if (!version) version = "dev";
 if (git("status", "--porcelain", "--", "assets")) version += "-dirty";
+// Gemelos digitales (24-nov-2026): su JS/CSS vive en digital-twins/, no en assets/, así que con el sha de assets/
+// el ?v= no cambiaba nunca (692590f) y Chrome podía quedarse con piezas viejas. Token propio: sha del último
+// commit que tocó algo de digital-twins/ que NO sea .html (el sello sólo toca .html → sin bucle).
+const TWIN_SPEC = ["--", "digital-twins", ":(exclude,glob)digital-twins/**/*.html", ":(exclude)digital-twins/index.html"];
+let twinVersion = git("log", "-1", "--format=%h", ...TWIN_SPEC) || version;
+if (git("status", "--porcelain", ...TWIN_SPEC)) twinVersion += "-dirty";
 
 // La galería vive en subcarpeta y referencia los assets con ruta absoluta
 // (/assets/…): entra en el mismo token único. Las PIEZAS (xperiencias/<slug>/)
@@ -45,7 +51,7 @@ try {
 try {
   if (readdirSync(join(root, "capsulas")).includes("index.html")) htmlFiles.push("capsulas/index.html");
 } catch {}
-for (const directory of ['presentaciones', 'presentaciones/editor', 'presentaciones/reproductor', 'sites', 'digital-twins', 'digital-twins/help', 'digital-twins/galleon-100', 'digital-twins/apple-watch-ultra', 'digital-twins/iphone-pro-max', 'digital-twins/eink-sy11-ab', 'digital-twins/samsung-fold', 'digital-twins/iphone-duo', 'digital-twins/trio', 'digital-twins/stream-deck', 'digital-twins/admiranext01', 'digital-twins/admiranext05']) {
+for (const directory of ['presentaciones', 'presentaciones/editor', 'presentaciones/reproductor', 'sites', 'digital-twins', 'digital-twins/help', 'digital-twins/galleon-100', 'digital-twins/apple-watch-ultra', 'digital-twins/iphone-pro-max', 'digital-twins/eink-sy11-ab', 'digital-twins/samsung-fold', 'digital-twins/iphone-duo', 'digital-twins/iphone-duo-fisico', 'digital-twins/trio', 'digital-twins/stream-deck', 'digital-twins/admiranext01', 'digital-twins/admiranext05']) {
   try { if (readdirSync(join(root, directory)).includes('index.html')) htmlFiles.push(directory + '/index.html'); } catch {}
 }
 let changed = 0;
@@ -70,8 +76,8 @@ for (const file of htmlFiles) {
     (_m, head) => `${head}?v=${version}`,
   );
   if (file.startsWith('digital-twins/')) {
-    after = after.replace(/(\b(?:href|src)="\/digital-twins\/[^"?]+\.(?:mjs|js|css))(?:\?v=[^"]*)?"/g, (_m, head) => `${head}?v=${version}"`);
-    if (file === 'digital-twins/galleon-100/index.html' || file === 'digital-twins/apple-watch-ultra/index.html' || file === 'digital-twins/iphone-pro-max/index.html' || file === 'digital-twins/eink-sy11-ab/index.html' || file === 'digital-twins/samsung-fold/index.html' || file === 'digital-twins/iphone-duo/index.html' || file === 'digital-twins/trio/index.html') after = after.replace(/(\bsrc="\.\/twin\.mjs)(?:\?v=[^"]*)?"/g, (_m, head) => `${head}?v=${version}"`);
+    after = after.replace(/(\b(?:href|src)="\/digital-twins\/[^"?]+\.(?:mjs|js|css))(?:\?v=[^"]*)?"/g, (_m, head) => `${head}?v=${twinVersion}"`);
+    if (file === 'digital-twins/galleon-100/index.html' || file === 'digital-twins/apple-watch-ultra/index.html' || file === 'digital-twins/iphone-pro-max/index.html' || file === 'digital-twins/eink-sy11-ab/index.html' || file === 'digital-twins/samsung-fold/index.html' || file === 'digital-twins/iphone-duo/index.html' || file === 'digital-twins/iphone-duo-fisico/index.html' || file === 'digital-twins/trio/index.html') after = after.replace(/(\bsrc="\.\/twin\.mjs)(?:\?v=[^"]*)?"/g, (_m, head) => `${head}?v=${twinVersion}"`);
   }
   if (file === 'index.html') after = stampPageRevision(after);
   if (after === before) continue;
