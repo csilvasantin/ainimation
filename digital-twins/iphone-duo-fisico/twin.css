@@ -17,15 +17,35 @@ html, body { margin: 0; background: #070b15; color: #e8edf5; font: 14px/1.45 sys
 .duo-controls small { color: #8fa6c2; flex-basis: 100%; }
 /* Pantalla del monitor (1280 px de ancho, la escala la pone CSS3D) */
 .panel { position: relative; background: #000; overflow: hidden; container-type: inline-size; border-radius: 4px; }
-.panel iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; background: #000; }
-.win { position: absolute; inset: 0; background: radial-gradient(120% 90% at 30% 110%, #0a5bd8 0%, #0a2a6c 38%, #071434 70%, #050a1c 100%); }
-.win-note { position: absolute; left: 8%; top: 9%; width: 56%; height: 58%; background: #1f1f23ee; border: 1px solid #ffffff22; border-radius: 1cqw; display: flex; flex-direction: column; overflow: hidden; }
-.win-note header { font: 1.6cqw/1 "Segoe UI", system-ui; padding: 1cqw 1.4cqw; background: #2b2b30; color: #ddd; }
+.panel iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; background: #000; pointer-events: none; }  /* el foco nunca se va al iframe: Esc y las demás teclas llegan siempre al gemelo */
+.win { position: absolute; inset: 0; overflow: hidden; background: radial-gradient(70% 60% at 50% 62%, #8fc4ff 0%, #2f7ae6 30%, #0d3d9e 62%, #061c58 100%); font-family: "Segoe UI Variable", "Segoe UI", system-ui, sans-serif; color: #fff; }
+/* Fondo «Bloom» de Windows 11: pétalos azules translúcidos */
+.win-wall { position: absolute; left: 50%; top: 58%; width: 0; height: 0; }
+.win-wall i { position: absolute; left: -22cqw; top: -11cqw; width: 44cqw; height: 22cqw; border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%; background: linear-gradient(180deg, #d9ecffcc 0%, #5aa2ff99 45%, #0b4fd033 100%); mix-blend-mode: screen; transform-origin: 50% 100%; filter: blur(.15cqw); box-shadow: inset 0 .6cqw 2cqw #ffffff55; }
+.win-wall i:nth-child(1) { transform: rotate(-62deg) translateY(-6cqw); }
+.win-wall i:nth-child(2) { transform: rotate(-30deg) translateY(-8cqw); }
+.win-wall i:nth-child(3) { transform: rotate(0deg) translateY(-9cqw); }
+.win-wall i:nth-child(4) { transform: rotate(30deg) translateY(-8cqw); }
+.win-wall i:nth-child(5) { transform: rotate(62deg) translateY(-6cqw); }
+.win-icons { position: absolute; left: 1.2cqw; top: 1.4cqw; margin: 0; padding: 0; list-style: none; display: grid; gap: 1.1cqw; }
+.win-icons li { width: 8.2cqw; display: flex; flex-direction: column; align-items: center; gap: .35cqw; text-align: center; font-size: 1.05cqw; line-height: 1.2; text-shadow: 0 .1cqw .3cqw #000c; }
+.win-icons svg { width: 3.9cqw; height: 3.9cqw; filter: drop-shadow(0 .15cqw .25cqw #0006); }
+.win-note { position: absolute; left: 14%; top: 8%; width: 56%; height: 58%; background: #202020f2; border: 1px solid #ffffff26; border-radius: .9cqw; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 1.5cqw 4cqw #0008; }
+.win-note[hidden] { display: none; }
+.win-note header { font: 1.25cqw/1 "Segoe UI", system-ui; padding: 1cqw 1.4cqw; background: #2b2b2b; color: #ddd; }
 .win-note pre { flex: 1; margin: 0; padding: 1.2cqw 1.4cqw; font: 1.8cqw/1.35 Consolas, ui-monospace, monospace; color: #f2f2f2; white-space: pre-wrap; word-break: break-all; overflow: hidden; }
-.win-bar { position: absolute; left: 0; right: 0; bottom: 0; height: 5.2cqw; background: #1c1f2bdd; display: flex; align-items: center; justify-content: center; gap: 2cqw; font: 1.6cqw/1 "Segoe UI", system-ui; color: #e8e8e8; }
-.win-start { font-size: 2.6cqw; color: #4cc2ff; }
-.win-search { background: #ffffff18; border-radius: 3cqw; padding: .8cqw 6cqw .8cqw 2cqw; color: #ffffffa0; }
-.win-clock { position: absolute; right: 2cqw; font-size: 1.4cqw; }
+.win-bar { position: absolute; left: 0; right: 0; bottom: 0; height: 4.6cqw; background: #1b1f2ae6; backdrop-filter: blur(1.5cqw); border-top: 1px solid #ffffff1a; display: flex; align-items: center; justify-content: center; font-size: 1.1cqw; color: #f2f2f2; }
+.win-apps { display: flex; align-items: center; gap: .9cqw; }
+.win-apps > span { height: 3.6cqw; min-width: 3.6cqw; display: grid; place-items: center; border-radius: .5cqw; position: relative; }
+.win-apps svg { width: 2.2cqw; height: 2.2cqw; }
+.win-apps .activa { background: #ffffff14; }
+.win-apps .activa::after { content: ""; position: absolute; bottom: .25cqw; left: 50%; width: 1.2cqw; height: .25cqw; margin-left: -.6cqw; border-radius: .2cqw; background: #4cc2ff; }
+.win-search { display: flex !important; gap: .7cqw; padding: 0 9cqw 0 1.2cqw; background: #ffffff1a; border-radius: 1.8cqw !important; color: #ffffffb3; }
+.win-search svg { width: 1.5cqw; height: 1.5cqw; }
+.win-tray { position: absolute; right: 1.2cqw; top: 0; bottom: 0; display: flex; align-items: center; gap: .9cqw; font-size: 1.05cqw; }
+.win-clock { display: flex; flex-direction: column; align-items: flex-end; line-height: 1.25; }
+.win-clock b { font-weight: 400; }
+.win-clock small { font-size: 1cqw; }
 /* Ficha de la tecla i: verde fósforo sobre negro, como en la app */
 .ficha { position: absolute; inset: 0; background: #000000db; color: #fff; font: 1.55cqw/1.35 ui-monospace, Menlo, Consolas, monospace; padding: 2.2cqw; display: grid; grid-template-columns: minmax(0, 1fr) 40%; gap: 2.2cqw; box-sizing: border-box; }
 .ficha[hidden], .win[hidden] { display: none; }
