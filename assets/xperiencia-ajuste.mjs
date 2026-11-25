@@ -96,13 +96,16 @@ export function normalizar(campo, bruto) {
 
 const igual = (a, b) => JSON.stringify(a ?? null) === JSON.stringify(b ?? null);
 
-/** Lo que de verdad cambia respecto a fábrica: eso es el ajuste que se aplica y se guarda. */
+/** Lo que de verdad cambia respecto a fábrica: eso es el ajuste que se aplica y se guarda. Fábrica se compara
+ *  normalizada por el mismo camino que el formulario (las pistas de fábrica llevan parámetros de síntesis y
+ *  los contactos pueden no tener «status»): si la persona no toca una lista, no viaja. */
 export function diferencia(valores, fabrica, esquema) {
   const out = {};
   for (const c of campos(esquema)) {
     const v = leerRuta(valores, c.ruta);
     if (v === undefined) continue;
-    if (!igual(v, leerRuta(fabrica, c.ruta))) escribirRuta(out, c.ruta, v);
+    const f = leerRuta(fabrica, c.ruta);
+    if (!igual(v, f === undefined ? undefined : normalizar(c, f))) escribirRuta(out, c.ruta, v);
   }
   return out;
 }
