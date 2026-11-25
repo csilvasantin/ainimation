@@ -1,0 +1,5 @@
+25-Nov-2026 · Official generator https://www.admiranext.com/tiktok/
+
+Two tutorials were prepared and exported in MP4 and the supported WebM fallback. Verification rejected every output: some files contained only audio or no bytes; others had only 3–11 seconds of video frames despite approximately 15 seconds of audio. The exports have not been published as finished videos. The scripts are preserved alongside this file. A valid complete export, frame-by-frame QA and a durable verified video link are still needed.
+
+These are animated explanations, not recordings of the physical Fold5 or its screen. The generator's local animation exporter leaves narration in the script. No external social-network publication was requested or performed.

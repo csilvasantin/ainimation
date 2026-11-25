@@ -67,6 +67,21 @@
       "model": "digital-twins/eink-sy11-ab/sy11-ab.glb (Blender 5.2, model/sy11-ab.py). Medidas del cuerpo aproximadas; la resolución 480×800 sale del firmware."
     },
     {
+      "id": "galaxy-z-fold5",
+      "name": "Samsung Galaxy Z Fold5",
+      "url": "https://www.ainimation.studio/digital-twins/galaxy-z-fold5/",
+      "mode": "articulated-object-and-external-observation",
+      "screen": {
+        "width": 1812,
+        "height": 2176
+      },
+      "state": "https://api.admira.store/signage/now?screen=fold-carlos-pruebas",
+      "registry": "https://api.admira.store/locations/devices/fold-carlos-pruebas",
+      "physical": "Native Android tv.admira.player · screen fold-carlos-pruebas · optional read-only USB observer",
+      "model": "digital-twins/galaxy-z-fold5/galaxy-z-fold5.glb (editable Blender source in model/)",
+      "limitations": "Local 3D controls. Content preview is neither a screen capture nor frame-synchronised. No native cover-screen continuation."
+    },
+    {
       "id": "samsung-fold",
       "name": "Samsung Galaxy Fold",
       "url": "https://www.ainimation.studio/digital-twins/samsung-fold/",
