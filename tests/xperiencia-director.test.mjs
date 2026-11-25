@@ -57,6 +57,12 @@ test('valores, normalización y diferencia respecto a fábrica', () => {
   assert.deepEqual(normalizar(ESQUEMA.grupos[1].campos[0], [{ title: ' A ', style: 'house', bpm: '120' }]), [{ title: 'A', style: 'house', bpm: 120 }]);
   const d = diferencia({ visitor: 'Carlos', idleSeconds: 60, names: { player: 'Winamp' }, mediaPlayer: { tags: ['win95', 'genero95'] }, icqgram: { enabled: false }, tracks: FABRICA.tracks }, FABRICA, ESQUEMA);
   assert.deepEqual(d, { visitor: 'Carlos', icqgram: { enabled: false } });
+  // listas sin tocar: fábrica con claves de más (síntesis) o de menos (status) no cuenta como cambio
+  const fab = { tracks: [{ title: 'Ambient', style: 'chill', bpm: 92, root: 50, scale: 'minor', prog: [0, 5, 3, 4], bars: 32 }] };
+  const form = normalizar(ESQUEMA.grupos[1].campos[0], fab.tracks);
+  assert.deepEqual(form, [{ title: 'Ambient', style: 'chill', bpm: 92 }]);
+  assert.deepEqual(diferencia({ tracks: form }, fab, ESQUEMA), {});
+  assert.deepEqual(diferencia({ tracks: [{ ...form[0], bpm: 100 }] }, fab, ESQUEMA), { tracks: [{ title: 'Ambient', style: 'chill', bpm: 100 }] });
   assert.match(resumenEstado({ at: null }, 'es'), /fábrica/);
   assert.match(resumenEstado({ at: '2026-11-25T18:00:00Z', by: 'Carlos', borrador: true }, 'en'), /Saved by Carlos .* draft/);
 });
