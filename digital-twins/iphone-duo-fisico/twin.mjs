@@ -83,6 +83,7 @@ function pintar() {
   localStorage.setItem(LS.stop, st.detenido ? '1' : '0');
   escena?.refrescar(st);                                                // Fn/Caps encendidas e iconos ⏭ ⏮ ⏯ 🔇 de las teclas
   $('winText').textContent = st.winText + '▌';
+  $('winNote').hidden = !st.winText;                                     // el Bloc de notas sólo aparece al teclear en Windows
 }
 frame.addEventListener('load', () => {
   if (!st.on || frame.src === 'about:blank') return;
@@ -95,6 +96,12 @@ async function pausa() {
   pitido(r.paused ? 'pausa' : 'reanuda'); st.pausado = !!r.paused; setTimeout(estado, 200);
 }
 function salir() { st.info = null; ficha.hidden = true; st.detenido = false; st.on = false; pintar(); }
+// Desde el escritorio de Windows (tras Esc): Esc otra vez, TV·WIN, 0 o 1–9 devuelven el player a la tapa, como en el Duo.
+function volver() { cerrarFicha(); st.detenido = false; st.on = true; pintar(); estadoPronto(); }
+async function volverA(n) {                                             // espera a que el canal conteste (hasta 15 s) y pone la pieza de la tecla
+  for (let i = 0; i < 15 && n > 0 && !listaBase.length && st.on; i++) await new Promise(r => setTimeout(r, 1000));
+  if (st.on) pulsar(n);
+}
 function quitar() {
   st.info = null; ficha.hidden = true; st.tecla = null; st.url = canalURL();
   pitido('quit'); st.detenido = true; st.on = false; pintar(); estado('Player parado con Q · otra Q lo arranca');
@@ -174,7 +181,7 @@ function cerrarFicha() { st.info = null; ficha.hidden = true; ficha.innerHTML = 
 
 async function estado(texto) {
   if (texto) { now.textContent = texto; return; }
-  if (!st.on) { now.textContent = st.detenido ? 'Player parado con Q · otra Q lo arranca' : 'Windows · TV·WIN vuelve al player'; return; }
+  if (!st.on) { now.textContent = st.detenido ? 'Player parado con Q · otra Q lo arranca' : 'Escritorio de Windows 11 · Esc, TV·WIN o 1–9 vuelven al player'; return; }
   const s = await canal('state');
   if (!s.ok || !s.state) return false;
   const S = s.state, it = S.items[S.cur];
@@ -200,6 +207,10 @@ function tecla(k, ch) {
   if (k === 'caps') { st.caps = !st.caps; pintar(); return; }
   const player = st.on && !st.fn;
   if (!st.on && !st.fn && st.detenido && k === 'q') { arrancar(); return; }
+  if (!st.on && !st.fn && !st.detenido) {
+    if (k === 'escape') { volver(); return; }
+    if (/^[0-9]$/.test(k)) { const n = Number(k); volver(); volverA(n); return; }
+  }
   if (player) {
     if (/^[0-9]$/.test(k)) { pulsar(Number(k)); return; }
     switch (k) {
@@ -273,7 +284,7 @@ window.addEventListener('keydown', (e) => {
 });
 
 // Reloj de la barra de tareas simulada
-const reloj = () => { $('winClock').textContent = new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }); };
+const reloj = () => { const d = new Date(); $('winClock').textContent = d.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }); $('winDate').textContent = d.toLocaleDateString('es-ES'); };
 reloj(); setInterval(reloj, 30000);
 
 window.__duo = { st, tecla, canal, escena };
