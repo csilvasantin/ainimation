@@ -9,7 +9,8 @@ test('articulation uses symmetric pivots and clamps local input', () => {
 test('stale or missing USB observations never claim current playback', () => {
   const now=1_000_000,state={lastSeen:now-15000,health:{status:'opened'},item:{title:'A'},device:{display:{playbackPaused:false}}};
   assert.equal(physicalView(state,now).playing,true); assert.equal(physicalView(state,now).angle,180);
-  assert.equal(physicalView(state,now+61000).playing,false); assert.equal(physicalView(null,now).fresh,false);
+  assert.equal(physicalView(state,now+230000).fresh,true);
+  assert.equal(physicalView(state,now+310000).playing,false); assert.equal(physicalView(null,now).fresh,false);
   assert.equal(physicalView({...state,health:{status:'half-opened'}},now).angle,90);
   const closed=physicalView({...state,item:null,health:{status:'closed-audio'}},now);
   assert.equal(closed.angle,0);assert.match(closed.detail,/audio continúa/);
