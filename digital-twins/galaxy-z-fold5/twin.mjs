@@ -11,7 +11,7 @@ const scene = new THREE.Scene();
 scene.background = new THREE.Color('#10182b');
 addObjectFloor(scene, -.07, .5);
 const camera = new THREE.PerspectiveCamera(33, 1, .1, 60);
-camera.position.set(-4.1, 5.5, -5.2);
+camera.position.set(-4.1, 5.5, 5.2);
 const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
 renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
 renderer.outputColorSpace = THREE.SRGBColorSpace;
@@ -84,8 +84,8 @@ new GLTFLoader().load('./galaxy-z-fold5.glb', gltf => {
 $('hinge').addEventListener('input', event => setPose(event.target.value, true));
 for (const button of document.querySelectorAll('[data-angle]')) button.onclick = () => setPose(button.dataset.angle, true);
 $('follow').onchange = () => updatePhysical();
-$('front').onclick = () => { camera.position.set(-4.1, 5.5, -5.2); orbit.target.set(0, .55, 0); };
-$('back').onclick = () => { camera.position.set(4.1, -3.8, 5.2); orbit.target.set(0, .55, 0); };
+$('front').onclick = () => { camera.position.set(-4.1, 5.5, 5.2); orbit.target.set(0, .55, 0); };
+$('back').onclick = () => { camera.position.set(4.1, -3.8, -5.2); orbit.target.set(0, .55, 0); };
 
 function updatePhysical() {
   const view = physicalView(lastState);
