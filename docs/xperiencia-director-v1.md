@@ -27,6 +27,9 @@ ventana propia, recibe el esquema y el ajuste vigente, pinta el formulario y dev
 4. **Guardar en admira.live**: la página guarda el ajuste en `/api/win95/ajuste` con la sesión de
    la persona. Desde ese momento el 95 arranca con ese ajuste en cualquier navegador que entre.
 5. **Deshacer** vuelve a lo recibido; **Valores de fábrica** borra lo guardado (pide confirmación).
+6. Si el navegador bloquea la ventana (o prefieres una pestaña), el enlace **«o ábrela en una pestaña»**
+   abre la misma URL con `rel=opener`; el Director adopta la ventana que le saluda con `hola` desde el
+   origen de la Xperiencia.
 
 Sólo viaja lo que difiere de fábrica: lo que no tocas sigue mandando el HTML de la Xperiencia.
 
