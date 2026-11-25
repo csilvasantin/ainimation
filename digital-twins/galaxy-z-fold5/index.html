@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Samsung Galaxy Z Fold5 · Digital Twin · AInimation Studio</title>
+  <meta name="description" content="Gemelo articulado del Galaxy Z Fold5, modelado con Blender: pantalla interior, cubierta, bisagra y observación del player Android.">
+  <link rel="canonical" href="https://www.ainimation.studio/digital-twins/galaxy-z-fold5/">
+  <link rel="stylesheet" href="/digital-twins/twin-nav.css?v=223a560">
+  <link rel="stylesheet" href="/digital-twins/galaxy-z-fold5/twin.css?v=223a560">
+  <script defer src="/digital-twins/twin-nav.js?v=223a560"></script>
+  <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}</script>
+</head>
+<body>
+<main>
+  <header class="heading">
+    <div><p class="eyebrow">DIGITAL TWINS / SAMSUNG</p><h1>Galaxy Z Fold5<span>Android player</span></h1><p class="intro">Dos pantallas. Una bisagra. El mismo objeto, abierto a sus posibilidades.</p></div>
+    <a class="back" href="/digital-twins/">Todos los gemelos ↗</a>
+  </header>
+  <div class="workspace">
+    <section class="scene-card" aria-label="Modelo articulado del Galaxy Z Fold5">
+      <div class="scene-caption"><span><i class="dot" id="connection-dot"></i><span id="connection">Consultando dispositivo</span></span><span>BLENDER / GLB</span></div>
+      <canvas id="fold" aria-label="Modelo 3D del Fold5. Arrastra para girar; usa los controles inferiores para plegarlo."></canvas>
+      <p id="model-error" role="alert" hidden></p>
+      <div class="pose-controls">
+        <div class="pose-heading"><label for="hinge">Apertura</label><output id="angle" for="hinge">180°</output></div>
+        <input id="hinge" type="range" min="0" max="180" value="180" step="1" aria-label="Ángulo de apertura de la bisagra">
+        <div class="presets"><button data-angle="180" aria-pressed="true">Abierto</button><button data-angle="90" aria-pressed="false">Flex 90°</button><button data-angle="0" aria-pressed="false">Cerrado</button><span></span><button id="front">Frente</button><button id="back">Trasera</button></div>
+        <label class="follow"><input id="follow" type="checkbox" checked> Seguir el estado del dispositivo</label>
+        <p class="hint" id="pose-hint">La pose sigue la observación disponible. Puedes explorar el modelo sin mover el teléfono.</p>
+      </div>
+    </section>
+    <aside>
+      <section class="panel live-panel">
+        <p class="eyebrow">DISPOSITIVO FÍSICO</p><h2 id="physical-state">Esperando observación</h2><p id="physical-detail">El gemelo mostrará el último estado disponible del Fold5.</p>
+        <dl><div><dt>Player</dt><dd id="player">Android nativo</dd></div><div><dt>Identidad</dt><dd><code>fold-carlos-pruebas</code></dd></div><div><dt>Fuente</dt><dd id="observation-source">Observador externo</dd></div><div><dt>Actualizado</dt><dd id="last-seen">Sin observación reciente</dd></div></dl>
+        <p class="notice" id="continuity" hidden>En la prueba física, plegar el teléfono apaga la app en la cubierta y termina cortando el audio. Al abrirlo se recupera.</p>
+      </section>
+      <section class="panel preview-panel">
+        <div class="section-heading"><p class="eyebrow">PREVIO DEL CONTENIDO</p><span id="preview-badge">SIN SEÑAL</span></div>
+        <div class="preview-frame"><canvas id="face-output" width="1812" height="2176" aria-label="Previo del contenido identificado en el Fold5"></canvas></div>
+        <h3 id="piece-title">Esperando contenido</h3><p class="hint" id="preview-note">El previo reproduce el contenido identificado; no es una captura ni garantiza sincronía de fotogramas.</p>
+        <div class="preview-controls"><button id="preview-play" disabled>Pausar previo</button><button id="preview-sound" aria-pressed="false" disabled>Activar sonido del previo</button></div>
+      </section>
+      <section class="panel destinations"><p class="eyebrow">DESTINOS DEL INVENTARIO</p><div id="routing-tags" class="tags"><span>Consultando registro</span></div><p class="hint">Grupos y etiquetas se administran en AdmiraNeXT. El player conserva su identidad.</p><a href="https://www.admiranext.com/" target="_blank" rel="noopener noreferrer" id="device-manager">Abrir AdmiraNeXT ↗</a></section>
+    </aside>
+  </div>
+  <footer class="specs"><span><strong>7,6″</strong> interior · 1812 × 2176</span><span><strong>6,2″</strong> cubierta · 904 × 2316</span><span><strong>253 g</strong> · SM-F946B</span><a href="./model/galaxy-z-fold5.blend" download>Fuente Blender ↓</a><a href="./galaxy-z-fold5.glb" download>Modelo GLB ↓</a></footer>
+  <p class="provenance">Modelo procedural a escala. <a href="https://news.samsung.com/global/samsung-galaxy-z-flip5-and-galaxy-z-fold5-delivering-flexibility-and-versatility-without-compromise" target="_blank" rel="noopener noreferrer">Medidas de Samsung</a>. La exploración 3D y los controles del previo actúan sobre este gemelo.</p>
+</main>
+<video id="media" crossorigin="anonymous" muted playsinline loop preload="auto" hidden></video>
+<script type="module" src="./twin.mjs?v=223a560"></script>
+</body>
+</html>
