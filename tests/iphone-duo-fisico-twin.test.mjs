@@ -31,7 +31,7 @@ test('misma lógica y teclas que el gemelo ThinkPad, con su propia máquina y el
   assert.match(js, /const SCREEN = 'iphone-duo'/);
   assert.match(js, /const MACHINE = 'gemelo-iphone-duo-fisico-ainimation'/);
   assert.match(js, /fit: 'contain'/);
-  assert.match(js, /case 'space': pausa\(\); return;/);
+  assert.match(js, /case 'space': (tx\('togglepause'\); )?pausa\(\); return;/);
   assert.match(js, /alPerderContexto: \(\) => vistaPlana\(/);
 });
 

@@ -8,7 +8,7 @@ for (const d of ['iphone-duo', 'iphone-duo-fisico']) {
   const html = leer('index.html'), js = leer('twin.mjs'), css = leer('twin.css');
 
   test(`${d}: Esc quita el player y enseña el escritorio de Windows 11`, () => {
-    assert.match(js, /case 'escape': salir\(\); estado\(\); return;/);
+    assert.match(js, /case 'escape': tx\('win'\); salir\(\); estado\(\); return;/);
     assert.match(js, /frame\.hidden = !st\.on; win\.hidden = st\.on;/);
     assert.match(html, /class="win-wall"/);                       // fondo Bloom
     assert.match(html, /class="win-icons"/);                      // iconos del escritorio
@@ -18,8 +18,8 @@ for (const d of ['iphone-duo', 'iphone-duo-fisico']) {
   });
 
   test(`${d}: Esc otra vez, 0 o 1–9 devuelven el player; Fn sigue mandando las teclas a Windows`, () => {
-    assert.match(js, /if \(!st\.on && !st\.fn && !st\.detenido\) \{\s*if \(k === 'escape'\) \{ volver\(\); return; \}/);
-    assert.match(js, /if \(\/\^\[0-9\]\$\/\.test\(k\)\) \{ const n = Number\(k\); volver\(\); volverA\(n\); return; \}/);
+    assert.match(js, /if \(!st\.on && !st\.fn && !st\.detenido\) \{\s*if \(k === 'escape'\) \{ tx\('tv'\); volver\(\); return; \}/);
+    assert.match(js, /if \(\/\^\[0-9\]\$\/\.test\(k\)\) \{ const n = Number\(k\); tx\('key', n\); volver\(\); volverA\(n\); return; \}/);
     assert.match(js, /function volver\(\) \{ cerrarFicha\(\); st\.detenido = false; st\.on = true;/);
   });
 

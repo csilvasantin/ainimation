@@ -27,7 +27,7 @@ test('mismos pitidos de 8 bits que la app del Duo (N, P, i)', () => {
 });
 
 test('con la ficha i abierta cualquier tecla sólo la cierra; Fn manda las teclas a Windows', () => {
-  assert.match(js, /if \(st\.info\) \{ cerrarFicha\(\); return; \}/);
+  assert.match(js, /if \(st\.info\) \{ cerrarFicha\(\); (tx\('infoclose'\); )?return; \}/);
   assert.match(js, /const player = st\.on && !st\.fn;/);
 });
 
@@ -42,7 +42,7 @@ test('modelo 3D como el resto de gemelos: three.js, órbita, bisagra y pantalla 
 
 test('barra espaciadora larga de ThinkPad (5,40) y ⏯ pausa / reanuda con pitido', () => {
   assert.match(deck, /\['space', '', 5\.4\]/);
-  assert.match(js, /case 'space': pausa\(\); return;/);
+  assert.match(js, /case 'space': (tx\('togglepause'\); )?pausa\(\); return;/);
   assert.match(js, /canal\('togglepause'\)/);
   assert.match(js, /pausa: \[\[440, \.05\], \[0, \.03\], \[440, \.05\]\]/);
 });

@@ -81,3 +81,7 @@ html, body { margin: 0; background: #070b15; color: #e8edf5; font: 14px/1.45 sys
 .otro-gemelo { margin: 14px 0 6px; }
 .otro-gemelo a { display: inline-block; padding: 8px 12px; border-radius: 10px; background: #1b2747; color: #cfe0ff; text-decoration: none; font-weight: 600; border: 1px solid #ffffff22; }
 .otro-gemelo a:hover, .otro-gemelo a:focus-visible { background: #263764; color: #fff; }
+
+/* Telemetría con el iPhone Duo físico: estado del aparato real (verde en línea) */
+.duo-fisico { margin: -4px 0 12px; padding: 8px 10px; border-radius: 8px; background: #121a2c; border: 1px solid #26344a; color: #9fb0c7; font: 12px/1.4 ui-monospace, Menlo, Consolas, monospace; }
+.duo-fisico.on { color: #b9ffc4; border-color: #2f7a45; }
