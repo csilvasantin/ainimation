@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="admira-scene" content="hackeo-playback">
+<meta name="referrer" content="no-referrer">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<title>Hackeo · Reproducción · Admira Live</title>
+<style>
+html,body{margin:0;background:#000}
+.hack-overlay{display:none;position:fixed;inset:0;z-index:2147483646;background:rgba(0,0,0,.96);padding:1rem;overflow:hidden;box-sizing:border-box;flex-direction:column}
+.hack-overlay.visible{display:flex}
+.hack-topbar{display:flex;align-items:center;gap:12px;padding:8px 10px;margin-bottom:.5rem;border-bottom:1px solid #1a3a1a;color:#00ff41;font-family:'Courier New',monospace;font-size:13px;flex:none}
+.hack-topbar .spacer{flex:1}
+.hack-topbar #hkLineCount{font-size:12px;font-weight:700;color:#000;background:#00ff41;border-radius:6px;padding:4px 9px;letter-spacing:1px;font-variant-numeric:tabular-nums;white-space:nowrap}
+.hack-terminal-header{white-space:nowrap;gap:6px;min-width:0}
+.hack-terminal-header>span{overflow:hidden;text-overflow:ellipsis;min-width:0}
+.hack-terminal-header>span:first-child{flex:0 1 auto;max-width:40%}
+.hack-terminal-header>.hack-role{flex:1 1 auto;text-align:right}
+.hack-terminal-header>.hk-num{flex:none;margin-left:6px;padding:0 5px;border:1px solid currentColor;border-radius:4px;font-size:10px;font-weight:700;letter-spacing:1px;font-variant-numeric:tabular-nums}
+.hack-terminal-header>.hk-num:empty{display:none}
+#hackBody{flex:1;min-height:0;display:flex}
+.hack-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));grid-auto-rows:1fr;gap:.5rem;flex:1 1 auto;min-height:0;width:100%;box-sizing:border-box}
+.hack-grid>.hack-terminal{min-height:0;min-width:0}
+.hack-terminal{border-radius:6px;padding:.5rem;overflow:hidden;position:relative;font-size:.55rem;line-height:1.3;display:flex;flex-direction:column;background:#0a0a0a;border:1px solid #00ff41;font-family:'Courier New',monospace;color:#00ff41}
+.hack-terminal-header{font-size:.6rem;font-weight:700;margin-bottom:.3rem;padding-bottom:.3rem;display:flex;justify-content:space-between;flex-shrink:0}
+.hack-style-0{background:#0a0a0a;border-color:#00ff41;color:#00ff41;font-family:'Courier New',monospace}
+.hack-style-0 .hack-terminal-header{color:#ff3333;border-bottom:1px solid #1a3a1a}
+.hack-style-0 .hack-role{color:#00ff41}
+.hack-style-1{background:#1a0f00;border-color:#ff9900;color:#ffaa00;font-family:'Monaco','Menlo',monospace}
+.hack-style-1 .hack-terminal-header{color:#ff6600;border-bottom:1px solid #3a2a00}
+.hack-style-1 .hack-role{color:#ffcc00}
+.hack-style-2{background:#0a0a1e;border-color:#00ccff;color:#00ddff;font-family:'Andale Mono',monospace}
+.hack-style-2 .hack-terminal-header{color:#ff66aa;border-bottom:1px solid #0a1a3a}
+.hack-style-2 .hack-role{color:#00ffff}
+.hack-style-3{background:#0d0b1a;border-color:#bd93f9;color:#f8f8f2;font-family:'Courier New',monospace}
+.hack-style-3 .hack-terminal-header{color:#ff5555;border-bottom:1px solid #2a1a3a}
+.hack-style-3 .hack-role{color:#bd93f9}
+.hack-style-4{background:#001100;border-color:#33ff33;color:#33ff33;font-family:'Lucida Console',monospace;text-shadow:0 0 3px #33ff33}
+.hack-style-4 .hack-terminal-header{color:#ffff33;border-bottom:1px solid #003300}
+.hack-style-4 .hack-role{color:#66ff66}
+.hack-style-5{background:#002b36;border-color:#268bd2;color:#839496;font-family:'Menlo','Monaco',monospace}
+.hack-style-5 .hack-terminal-header{color:#cb4b16;border-bottom:1px solid #073642}
+.hack-style-5 .hack-role{color:#2aa198}
+.hack-style-6{background:#0a0000;border-color:#cc0000;color:#ff3333;font-family:'Courier New',monospace}
+.hack-style-6 .hack-terminal-header{color:#ff0000;border-bottom:1px solid #3a0000}
+.hack-style-6 .hack-role{color:#ff6666}
+.hack-style-7{background:#050a14;border-color:#00d4ff;color:#6fefff;font-family:'Andale Mono','Monaco',monospace;text-shadow:0 0 2px #00d4ff}
+.hack-style-7 .hack-terminal-header{color:#ff8800;border-bottom:1px solid #0a1a2a}
+.hack-style-7 .hack-role{color:#00d4ff}
+.hack-terminal-body{flex:1;overflow:hidden;white-space:pre;opacity:.9}
+@media (max-width:768px){.hack-grid{grid-template-columns:repeat(2,1fr)}}
+.hack-topbar .hack-title{letter-spacing:2px;font-weight:700}
+</style>
+</head>
+<body>
+<main class="hack-overlay visible">
+<header class="hack-topbar">
+<span class="hack-title">HACKEO</span><span>ADMIRA LIVE · REPRODUCCIÓN</span>
+<span class="spacer"></span><span id="hkLineCount">0 líneas</span>
+</header>
+<div id="hackBody"><div class="hack-grid"></div></div>
+</main>
+<script>
+
+const grid = document.querySelector('.hack-grid');
+const counter = document.querySelector('#hkLineCount');
+const roles = ['Dirección', 'Tecnología', 'Producción', 'Diseño', 'Ingeniería', 'Arte', 'Operaciones', 'Montaje', 'Control'];
+const sources = [
+  ['director.mjs', [
+    'const escenas = cargarGuion();', 'for (const escena of escenas) {',
+    '  await prepararEscena(escena);', '  marcarContinuidad(escena);', '}', 'reproducirMontaje(escenas);'
+  ]],
+  ['proyeccion.css', [
+    '.plano { display: grid; }', '.secuencia { overflow: hidden; }', '.luz { color: var(--fosforo); }',
+    '@media (orientation: portrait) {', '  .plano { grid-template-columns: 1fr; }', '}'
+  ]],
+  ['reloj.mjs', [
+    'const ahora = performance.now();', 'const intervalo = 16;', 'const fase = calcularFase(ahora);',
+    'sincronizarFotograma(fase);', 'marcarPulso(intervalo);', 'requestAnimationFrame(actualizar);'
+  ]],
+  ['montaje.json', [
+    '{', '  "modo": "reproduccion",', '  "pista": "Admira Live",', '  "escena": "Hackeo",',
+    '  "capas": ["consola", "mosaico", "pulso"]', '}'
+  ]]
+];
+// Ritmo y desfase por terminal del renderizador original de Fleet Control.
+const speeds = [15, 35, 8, 50, 22, 12, 45, 28, 18];
+const offsets = [0, 7, 14, 3, 21, 10, 5, 18, 12];
+const terminals = roles.map((role, index) => {
+  const [file, lines] = sources[index % sources.length];
+  const panel = document.createElement('section');
+  panel.className = 'hack-terminal hack-style-' + (index % 8);
+  const header = document.createElement('div');
+  header.className = 'hack-terminal-header';
+  const title = document.createElement('span');
+  title.textContent = 'ADMIRA LIVE — ' + String(index + 1).padStart(2, '0');
+  const label = document.createElement('span');
+  label.className = 'hack-role';
+  label.textContent = role + ' · ' + file;
+  header.append(title, label);
+  const body = document.createElement('div');
+  body.className = 'hack-terminal-body';
+  panel.append(header, body);
+  grid.append(panel);
+  return {body, lines, interval: speeds[index], line: offsets[index], column: 0, credit: 0, count: 0, done: []};
+});
+const number = value => String(value * 10).padStart(6, ' ') + ' ';
+let previous = performance.now(), total = 0;
+function frame() {
+  const now = performance.now();
+  const delta = Math.min(now - previous, 250);
+  previous = now;
+  for (const terminal of terminals) {
+    terminal.credit += delta;
+    let chars = Math.floor(terminal.credit / terminal.interval);
+    if (!chars) continue;
+    terminal.credit -= chars * terminal.interval;
+    const {lines} = terminal;
+    let line = lines[terminal.line % lines.length];
+    while (chars > 0) {
+      const rest = line.length + 1 - terminal.column;
+      if (chars < rest) { terminal.column += chars; break; }
+      chars -= rest;
+      terminal.count++;
+      total++;
+      terminal.done.push(number(terminal.count) + line);
+      if (terminal.done.length > 160) terminal.done.shift();
+      terminal.line++;
+      terminal.column = 0;
+      line = lines[terminal.line % lines.length];
+    }
+    const rows = Math.max(1, Math.floor(terminal.body.clientHeight / 11));
+    terminal.body.textContent = (rows > 1 ? terminal.done.slice(-(rows - 1)) : [])
+      .concat(number(terminal.count + 1) + line.slice(0, terminal.column) + '█').join('\n');
+  }
+  counter.textContent = total.toLocaleString('es-ES') + ' líneas';
+}
+frame();
+setInterval(frame, 50);
+</script>
+</body>
+</html>
