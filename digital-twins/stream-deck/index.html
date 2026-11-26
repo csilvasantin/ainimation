@@ -77,6 +77,7 @@ body{background:radial-gradient(ellipse at 50% 0,#14234a,#04060d 62%);color:var(
   <div class="kv"><span>Arte activo</span><b id="arteInfo">face-live · 8×4 foto AdmiraNeXT01</b></div>
   <div class="kv"><span>Perfil</span><b id="perfilInfo">—</b></div>
   <div class="kv"><span>Página</span><b id="paginaInfo">—</b></div>
+  <p class="desc" id="admiradeskAviso" hidden>Página <b>AdmiraDesk</b>: sus teclas las pinta el plugin de la lanzadera y este gemelo público no las ve. La cara exacta, y el control, están en el <a href="https://www.admira.store/control/admiradesk/" rel="noopener">gemelo de control</a> (con login).</p>
   <div class="kv"><span>Visto</span><b id="vistoInfo">—</b></div>
   <div class="kv"><span>Reposo</span><b id="reposoInfo">—</b></div>
   <div class="kv"><span>Silueta</span><b>v2 · stand ~42°</b></div>
@@ -513,6 +514,8 @@ function pintarFicha(st){
   $('arteInfo').className=vivo?'vivo':'';
   $('perfilInfo').textContent=st&&st.profileName?st.profileName:'—';
   const pag=st&&(st.pageName||(st.pages>0?`página ${st.pageIndex+1}/${st.pages}`:''));
+  // AdmiraDesk (26-nov-2026): este gemelo es solo para mirar; la lanzadera se controla con login en admira.store.
+  $('admiradeskAviso').hidden=!(st&&st.pageName==='AdmiraDesk');
   $('paginaInfo').textContent=st&&st.keyCount?`${st.folder?'carpeta · ':''}${pag||'activa'} · ${st.keyCount} acciones`:'—';
 }
 function pintarVisto(){
