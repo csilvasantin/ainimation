@@ -77,12 +77,13 @@ body{background:radial-gradient(ellipse at 50% 0,#14234a,#04060d 62%);color:var(
   <div class="kv"><span>Arte activo</span><b id="arteInfo">face-live · 8×4 foto AdmiraNeXT01</b></div>
   <div class="kv"><span>Perfil</span><b id="perfilInfo">—</b></div>
   <div class="kv"><span>Página</span><b id="paginaInfo">—</b></div>
+  <button type="button" id="conectarXL">Conectar mando local</button><p id="controlXL" role="status"></p>
   <p class="desc" id="admiradeskAviso" hidden>Página <b>AdmiraDesk</b>: sus teclas las pinta el plugin de la lanzadera y este gemelo público no las ve. La cara exacta, y el control, están en el <a href="https://www.admira.store/control/admiradesk/" rel="noopener">gemelo de control</a> (con login).</p>
   <div class="kv"><span>Visto</span><b id="vistoInfo">—</b></div>
   <div class="kv"><span>Reposo</span><b id="reposoInfo">—</b></div>
   <div class="kv"><span>Silueta</span><b>v2 · stand ~42°</b></div>
   <div class="kv"><span>Tecla</span><b id="keyInfo">— (clic en una tecla)</b></div>
-  <p class="desc">Arrastra para orbitar · rueda para zoom. Pasa el ratón por una tecla para ver su título y clic para fijar su ficha: fila, columna, título y acción del perfil Elgato (Hotkey, Open, Website, carpeta…). Con el puente encendido, las teclas siguen EN VIVO la página activa del perfil Elgato de AdmiraNeXT01 (iconos y títulos del perfil ProfilesV3, cada ~3 s). Cuando el deck entra en salvapantallas (3 min sin tocarlo), el puente avisa y el gemelo muestra <b>REPOSO · playlist</b> con la pieza en emisión de la playlist <code>admira-tv-streamdeck</code> de admira.tv. Sin puente: recorte 8×4 de la foto del escritorio de AdmiraNeXT01, antes METAHUMAN (<code>face-live.png</code>), con Indiana Jones como en el deck físico. Honestidad: es un puente de perfil Elgato, no lectura HID cruda; imágenes dinámicas de plugins (Key Creator, contadores) no salen y las pulsaciones físicas no se ven.</p>
+  <p class="desc">Arrastra para orbitar · rueda para zoom. Pasa el ratón por una tecla para ver su título y clic para fijar su ficha o pulsar cuando el mando esté conectado: fila, columna, título y acción del perfil Elgato (Hotkey, Open, Website, carpeta…). Con el puente encendido, las teclas siguen EN VIVO la página activa del perfil Elgato de AdmiraNeXT01 (iconos y títulos del perfil ProfilesV3, cada ~3 s). Cuando el deck entra en salvapantallas (3 min sin tocarlo), el puente avisa y el gemelo muestra <b>REPOSO · playlist</b> con la pieza en emisión de la playlist <code>admira-tv-streamdeck</code> de admira.tv. Sin puente: recorte 8×4 de la foto del escritorio de AdmiraNeXT01, antes METAHUMAN (<code>face-live.png</code>), con Indiana Jones como en el deck físico. Honestidad: es un puente de perfil Elgato, no lectura HID cruda; imágenes dinámicas de plugins (Key Creator, contadores) no salen y las pulsaciones físicas no se ven.</p>
   <div class="fotos">
     <img class="foto" src="perfil-metahuman.png" alt="Perfil AdmiraNeXT01 (antes METAHUMAN): slab + stand cuña + teclas claras">
     <img class="foto" src="metahuman-desk.jpg" alt="Stream Deck XL en el escritorio de AdmiraNeXT01 (antes METAHUMAN) con Indiana Jones">
@@ -455,7 +456,20 @@ function teclaBajo(e){
   let o=hit.object;while(o&&o.userData.col==null)o=o.parent;
   return o||null;
 }
-canvas.addEventListener('pointerdown',e=>{selectKey(teclaBajo(e));});
+let inicioPulsacion;
+canvas.addEventListener('pointerdown',e=>{
+  inicioPulsacion=e.button===0?{key:teclaBajo(e),x:e.clientX,y:e.clientY}:null;
+});
+canvas.addEventListener('pointercancel',()=>{inicioPulsacion=null;});
+canvas.addEventListener('pointerup',e=>{
+  const inicio=inicioPulsacion;
+  inicioPulsacion=null;
+  if(!inicio||Math.hypot(e.clientX-inicio.x,e.clientY-inicio.y)>6)return;
+  const k=teclaBajo(e);
+  if(k!==inicio.key)return;
+  selectKey(k);
+  if(k)pulsarXL(k.userData.col+','+k.userData.row);
+});
 // Tooltip al pasar el ratón: título y acción de la tecla (solo con ficha del puente).
 let tipK=null,tipT=0;
 canvas.addEventListener('pointermove',e=>{
@@ -514,7 +528,7 @@ function pintarFicha(st){
   $('arteInfo').className=vivo?'vivo':'';
   $('perfilInfo').textContent=st&&st.profileName?st.profileName:'—';
   const pag=st&&(st.pageName||(st.pages>0?`página ${st.pageIndex+1}/${st.pages}`:''));
-  // AdmiraDesk (26-nov-2026): este gemelo es solo para mirar; la lanzadera se controla con login en admira.store.
+  // La lanzadera AdmiraDesk conserva su panel autenticado propio.
   $('admiradeskAviso').hidden=!(st&&st.pageName==='AdmiraDesk');
   $('paginaInfo').textContent=st&&st.keyCount?`${st.folder?'carpeta · ':''}${pag||'activa'} · ${st.keyCount} acciones`:'—';
 }
@@ -560,6 +574,80 @@ function pintarReposo(r){
   info.textContent=`playlist${n?' · '+n:''}${r.desde?' · '+haceCuanto(r.desde,ahora):''}`;info.className='reposo';
   card.classList.add('show');
 }
+const MANDO_LOCAL='http://127.0.0.1:18742';
+let ventanaXL, puertoXL, estadoXL, revisionCaraXL, secuenciaXL=0, enviandoXL=false;
+const peticionesXL=new Map();
+$('conectarXL').addEventListener('click',()=>{
+  if(puertoXL){
+    puertoXL.close();
+    puertoXL=null;
+    estadoXL=null;
+    revisionCaraXL=null;
+    liveEtag=null;
+    $('controlXL').textContent='';
+    $('conectarXL').textContent='Conectar mando local';
+    return;
+  }
+  ventanaXL=window.open(MANDO_LOCAL+'/#ainimation','admira-local-xl','popup,width=700,height=650');
+  $('controlXL').textContent=ventanaXL?'Autoriza el control en el panel local.':'Permite abrir el panel local.';
+});
+window.addEventListener('message',e=>{
+  if(e.origin!==MANDO_LOCAL||e.source!==ventanaXL||e.data?.type!=='admira-stream-deck-control'||e.ports.length!==1||puertoXL)return;
+  puertoXL=e.ports[0];
+  puertoXL.onmessage=({data})=>{
+    const pendiente=peticionesXL.get(data?.id);
+    if(!pendiente)return;
+    peticionesXL.delete(data.id);
+    clearTimeout(pendiente.timeout);
+    if(data.error)pendiente.reject(new Error(data.error));
+    else pendiente.resolve(data.image||data.result);
+  };
+  $('conectarXL').textContent='Desconectar mando local';
+});
+function pedirXL(route, datos={}){
+  return new Promise((resolve,reject)=>{
+    const id=++secuenciaXL;
+    const timeout=setTimeout(()=>{
+      peticionesXL.delete(id);
+      reject(new Error('El panel local no responde'));
+    },2200);
+    peticionesXL.set(id,{resolve,reject,timeout});
+    puertoXL.postMessage({id,route,...datos});
+  });
+}
+async function actualizarXL(){
+  const puerto=puertoXL;
+  const estado=await pedirXL('estado');
+  if(puertoXL!==puerto)return;
+  if(estado.revision!==revisionCaraXL){
+    estadoXL=null;
+    const bytes=await pedirXL('cara',{revision:estado.revision});
+    const bmp=await createImageBitmap(new Blob([bytes],{type:'image/png'}));
+    try{
+      if(puertoXL!==puerto)return;
+      aplicarCara(bmp);
+    }finally{bmp.close();}
+    revisionCaraXL=estado.revision;
+  }
+  estadoXL=estado;
+  liveEtag=null;
+  keysMeta=estado.teclas||{};
+  pintarEstado(true,estado.reposo?{playlist:{screen:'admira-tv-streamdeck',name:'admira.tv player'}}:null);
+  pintarFicha({enLinea:true,pageName:estado.pagina,keyCount:Object.keys(keysMeta).length});
+  $('controlXL').textContent=estado.reposo?'XL en reposo':'Mando local conectado';
+}
+async function pulsarXL(pos){
+  if(enviandoXL||!puertoXL||!estadoXL?.habilitadas.includes(pos))return;
+  enviandoXL=true;
+  try{
+    const respuesta=await pedirXL('pulsar',{pos,revision:estadoXL.revision});
+    if(respuesta.confirmar){
+      $('controlXL').textContent='Pulsa Liberar todos de nuevo en 4 segundos para confirmar.';
+      toast($('controlXL').textContent);
+    }else toast('Pulsación enviada al XL');
+  }catch(e){toast(e.message);}
+  finally{enviandoXL=false;}
+}
 async function bajarCara(){
   const h={};if(liveEtag)h['If-None-Match']=liveEtag;
   const r=await fetch(LIVE_URL+'?t='+Date.now(),{headers:h,cache:'no-store'});
@@ -572,6 +660,21 @@ async function bajarCara(){
   return true;
 }
 async function vivo(){
+  if(puertoXL){
+    try{await actualizarXL();}
+    catch(e){
+      estadoXL=null;
+      $('controlXL').textContent=e.message;
+      if(ventanaXL?.closed){
+        puertoXL.close();
+        puertoXL=null;
+        revisionCaraXL=null;
+        $('conectarXL').textContent='Conectar mando local';
+      }
+    }
+    setTimeout(vivo,750);
+    return;
+  }
   try{
     const r=await fetch(ESTADO_URL+'?t='+Date.now(),{cache:'no-store'});
     const st=r.ok?await r.json():null;
