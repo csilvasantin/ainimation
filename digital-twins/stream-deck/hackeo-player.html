@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Hackeo · Admira Live</title>
+<style>
+  :root{color-scheme:dark;--green:#7cffaa;--amber:#ffcf82;--dim:#459668}
+  *{box-sizing:border-box}
+  body{min-height:100vh;margin:0;display:grid;place-items:center;background:#050a09;color:var(--green);font:clamp(11px,2.4vw,28px)/1.6 ui-monospace,Consolas,monospace;overflow:hidden}
+  body::before{content:"";position:fixed;inset:0;background:repeating-linear-gradient(0deg,#fff0 0 3px,#8affb60b 3px 4px);pointer-events:none}
+  main{width:min(86vw,1200px);padding:clamp(14px,4vw,50px);border:1px solid #2a6948;background:#07140e;box-shadow:0 0 9vw #32ff6022}
+  header{display:flex;flex-wrap:wrap;gap:.6em 2em;justify-content:space-between;border-bottom:1px solid #2a6948;color:var(--dim)}
+  h1{font-size:clamp(25px,7vw,96px);line-height:1;margin:.4em 0;color:var(--green);text-shadow:0 0 18px #16ff6a66}
+  #terminal{min-height:8em;white-space:pre-wrap;margin:0}
+  #fase{color:var(--amber)}
+  .cursor{animation:pulso 1s steps(1) infinite}
+  @keyframes pulso{50%{opacity:0}}
+  @media(prefers-reduced-motion:reduce){.cursor{animation:none}}
+</style>
+</head>
+<body>
+<main>
+  <header><span>ADMIRA LIVE</span><span>ESCENA SIMULADA</span></header>
+  <h1>HACKEO</h1>
+  <pre id="terminal"></pre>
+  <div><span id="fase"></span><span class="cursor" aria-hidden="true"> █</span></div>
+</main>
+<script>
+  const secuencia = [
+    '[escena] iniciando consola de simulación',
+    '[ok] canal de exhibición sincronizado',
+    '[ok] secuencia de diagnóstico preparada',
+    '[alerta] anomalía detectada en el entorno ficticio',
+    '[simulación] comprobando integridad visual',
+    '[ok] modo demostración activo'
+  ];
+  const terminal = document.getElementById('terminal');
+  const fase = document.getElementById('fase');
+  function pintar() {
+    const paso = Math.floor(Date.now() / 1250) % 12;
+    terminal.textContent = secuencia.slice(0, Math.min(paso + 1, secuencia.length))
+      .map(texto => '> ' + texto).join('\n');
+    fase.textContent = paso < 4 ? 'PREPARANDO ESCENA' : paso < 7 ? 'DIAGNÓSTICO SIMULADO' : 'DEMOSTRACIÓN EN CURSO';
+  }
+  pintar();
+  setInterval(pintar, 250);
+</script>
+</body>
+</html>
