@@ -2,6 +2,9 @@
   "name": "AInimation Digital Twins",
   "authoring": "https://www.ainimation.studio/studio.html",
   "help": "https://www.ainimation.studio/digital-twins/help/",
+  "index": "https://www.ainimation.studio/digital-twins/",
+  "updated": "2026-11-27",
+  "count": 13,
   "objects": [
     {
       "id": "galleon-100",
@@ -22,7 +25,22 @@
           ]
         },
         "hardwareWrite": false
-      }
+      },
+      "screen": {
+        "lcd": [
+          720,
+          384
+        ],
+        "keys": [
+          480,
+          640
+        ]
+      },
+      "physical": "Corsair Galleon 100 SD en el MacStudio · consola con sesión en https://www.admira.store/objeto/galleon-100/ (pantalla LCD y 12 teclas capturadas, flechas y pausa con confirmación física)",
+      "tests": [
+        "tests/director-twin.test.mjs"
+      ],
+      "help": "https://www.ainimation.studio/digital-twins/help/#galleon-100"
     },
     {
       "id": "apple-watch-ultra",
@@ -36,7 +54,11 @@
       "player": "https://admira.tv/apple-watch.html",
       "state": "https://admira.tv/api/apple-watch-state",
       "physical": "watchOS app · admira-tv/tools/apple-watch-player",
-      "model": "digital-twins/apple-watch-ultra/apple-watch-ultra.glb (Blender 5.2, model/apple-watch-ultra.py)"
+      "model": "digital-twins/apple-watch-ultra/apple-watch-ultra.glb (Blender 5.2, model/apple-watch-ultra.py)",
+      "tests": [
+        "tests/apple-watch-twin.test.mjs"
+      ],
+      "help": "https://www.ainimation.studio/digital-twins/help/#apple-watch-ultra"
     },
     {
       "id": "iphone-pro-max",
@@ -50,7 +72,11 @@
       "player": "https://admira.tv/iphone.html",
       "state": "https://admira.tv/api/device-state?screen=iphone-pro-max",
       "physical": "iOS app · admira-tv/tools/apple-watch-player (target AdmiraPhonePlayer)",
-      "model": "digital-twins/iphone-pro-max/iphone-pro-max.glb (Blender 5.2, model/iphone-pro-max.py)"
+      "model": "digital-twins/iphone-pro-max/iphone-pro-max.glb (Blender 5.2, model/iphone-pro-max.py)",
+      "tests": [
+        "tests/iphone-twin.test.mjs"
+      ],
+      "help": "https://www.ainimation.studio/digital-twins/help/#iphone-pro-max"
     },
     {
       "id": "eink-sy11-ab",
@@ -64,7 +90,11 @@
       "player": "https://admira.tv/eink/",
       "state": "https://api.admira.store/signage/now?screen=eink-sy11-ab",
       "physical": "puente MacStudio · tv.admira.eink.player (admira-tv/tools/eink-bridge), firmware SY11-014, BLE",
-      "model": "digital-twins/eink-sy11-ab/sy11-ab.glb (Blender 5.2, model/sy11-ab.py). Medidas del cuerpo aproximadas; la resolución 480×800 sale del firmware."
+      "model": "digital-twins/eink-sy11-ab/sy11-ab.glb (Blender 5.2, model/sy11-ab.py). Medidas del cuerpo aproximadas; la resolución 480×800 sale del firmware.",
+      "tests": [
+        "tests/eink-sy11-twin.test.mjs"
+      ],
+      "help": "https://www.ainimation.studio/digital-twins/help/#eink-sy11-ab"
     },
     {
       "id": "galaxy-z-fold5",
@@ -79,7 +109,12 @@
       "registry": "https://api.admira.store/locations/devices/fold-carlos-pruebas",
       "physical": "Native Android tv.admira.player · screen fold-carlos-pruebas · optional read-only USB observer",
       "model": "digital-twins/galaxy-z-fold5/galaxy-z-fold5.glb (editable Blender source in model/)",
-      "limitations": "Local 3D controls. Content preview is neither a screen capture nor frame-synchronised. No native cover-screen continuation."
+      "limitations": "Local 3D controls. Content preview is neither a screen capture nor frame-synchronised. No native cover-screen continuation.",
+      "tests": [
+        "tests/fold5-controls.test.mjs",
+        "tests/test_fold5_usb_observer.py"
+      ],
+      "help": "https://www.ainimation.studio/digital-twins/help/#galaxy-z-fold5"
     },
     {
       "id": "samsung-fold",
@@ -93,7 +128,11 @@
       "player": "https://admira.tv/fold.html",
       "state": "https://admira.tv/api/device-state?screen=samsung-fold",
       "physical": "web app instalada en el Fold · https://admira.tv/fold.html?device=1 (pseudostreaming y sin internet por service worker)",
-      "model": "digital-twins/samsung-fold/samsung-fold.glb (Blender 5.2, model/samsung-fold.py)"
+      "model": "digital-twins/samsung-fold/samsung-fold.glb (Blender 5.2, model/samsung-fold.py)",
+      "tests": [
+        "tests/samsung-fold-twin.test.mjs"
+      ],
+      "help": "https://www.ainimation.studio/digital-twins/help/#samsung-fold"
     },
     {
       "id": "iphone-duo",
@@ -107,7 +146,14 @@
       "player": "https://admira.tv/canal?screen=iphone-duo&fit=contain",
       "physical": "iPhone Duo plegado · app WindowsiOS «Windows 11» (tapa = monitor ThinkPad con admira.tv, base = teclado)",
       "keys": "1–9/0, N ⏭ / P ⏮, Espacio ⏯, i, M 🔊/🔇, Q, Esc, TV·WIN, flechas ±10 s / última / primera, Fn",
-      "related": "https://www.ainimation.studio/digital-twins/iphone-duo-fisico/"
+      "related": "https://www.ainimation.studio/digital-twins/iphone-duo-fisico/",
+      "state": "https://admira.tv/api/twin-sync?screen=iphone-duo",
+      "tests": [
+        "tests/iphone-duo-twin.test.mjs",
+        "tests/iphone-duo-esc-windows.test.mjs",
+        "tests/iphone-duo-telemetria.test.mjs"
+      ],
+      "help": "https://www.ainimation.studio/digital-twins/help/#iphone-duo"
     },
     {
       "id": "iphone-duo-fisico",
@@ -121,7 +167,13 @@
       "player": "https://admira.tv/canal?screen=iphone-duo&fit=contain",
       "physical": "iPhone Duo físico · plegable de dos pantallas (exterior pequeña, interior grande) abierto como mini portátil: mitad de arriba = app WindowsiOS «Windows 11» con el monitor Lenovo y admira.tv; mitad de abajo = teclado táctil (LaptopDeckView)",
       "keys": "1–9/0, N ⏭ / P ⏮, Espacio ⏯, i, M 🔊/🔇, Q, Esc, TV·WIN, flechas ±10 s / última / primera, Fn",
-      "related": "https://www.ainimation.studio/digital-twins/iphone-duo/"
+      "related": "https://www.ainimation.studio/digital-twins/iphone-duo/",
+      "state": "https://admira.tv/api/twin-sync?screen=iphone-duo",
+      "tests": [
+        "tests/iphone-duo-fisico-twin.test.mjs",
+        "tests/iphone-duo-telemetria.test.mjs"
+      ],
+      "help": "https://www.ainimation.studio/digital-twins/help/#iphone-duo-fisico"
     },
     {
       "id": "trio",
@@ -135,31 +187,74 @@
       ],
       "wall": "https://admira.tv/api/wall?group=trio",
       "player": "https://admira.tv/mando?embed=galleon&screen=trio",
-      "physical": "los tres aparatos físicos leen /api/wall: sync = misma playlist al fotograma; extended = una composición repartida entre las tres pantallas (mm reales)"
+      "physical": "los tres aparatos físicos leen /api/wall: sync = misma playlist al fotograma; extended = una composición repartida entre las tres pantallas (mm reales)",
+      "tests": [
+        "tests/trio-twin.test.mjs"
+      ],
+      "help": "https://www.ainimation.studio/digital-twins/help/#trio"
     },
     {
       "id": "stream-deck",
       "name": "Stream Deck XL",
       "url": "https://www.ainimation.studio/digital-twins/stream-deck/",
-      "mode": "live-with-image-fallback"
+      "mode": "live-with-image-fallback",
+      "screen": {
+        "keys": 32,
+        "columns": 8,
+        "rows": 4
+      },
+      "face": "https://www.admira.store/objeto/stream-deck/api/face.png",
+      "state": "https://www.admira.store/objeto/stream-deck/api/estado",
+      "physical": "Elgato Stream Deck XL (VID_0FD9 · PID_006C · serial CL37J1A02733) en AdmiraNeXT01 · control con sesión en https://www.admira.store/control/admiradesk/ · pulsar teclas desde el gemelo solo con el panel local del mando autorizado",
+      "limitations": "Lectura pública del espejo cuando el puente está despierto; en salvapantallas, REPOSO con la playlist admira-tv-streamdeck; foto fija si el puente duerme. La página AdmiraDesk la pinta el plugin de la lanzadera y el gemelo público no la ve.",
+      "tests": [
+        "tests/stream-deck-control.test.mjs"
+      ],
+      "help": "https://www.ainimation.studio/digital-twins/help/#stream-deck"
     },
     {
       "id": "admiranext01",
       "name": "AdmiraNeXT01",
       "url": "https://www.ainimation.studio/digital-twins/admiranext01/",
-      "mode": "local-simulation"
+      "mode": "live-or-local-simulation",
+      "screen": {
+        "fans": 7,
+        "lcd": "circular"
+      },
+      "state": "https://www.admira.store/supercomputer/api/estado",
+      "pass": "https://www.admira.store/supercomputer/api/enlace",
+      "physical": "PC METAHUMAN (AdmiraNeXT01) · 7 ventiladores con pantalla LCD (admira-tv/tools/player-ventiladores) · consola con sesión en https://www.admira.store/supercomputer/",
+      "limitations": "En vivo cuando el PC está en línea y admira.store abre su API a este dominio (mirar público + pase para mandar, como PC-Cocina); mientras esa puerta no esté desplegada para METAHUMAN, el gemelo arranca y sigue en simulación local.",
+      "tests": [
+        "tests/digital-twins-inventario.test.mjs"
+      ],
+      "help": "https://www.ainimation.studio/digital-twins/help/#admiranext01"
     },
     {
       "id": "admiranext05",
       "name": "AdmiraNeXT05",
       "url": "https://www.ainimation.studio/digital-twins/admiranext05/",
-      "mode": "local-simulation"
+      "mode": "live-or-local-simulation",
+      "screen": {
+        "fans": 7,
+        "lcd": "circular"
+      },
+      "state": "https://www.admira.store/supercomputer/pc-cocina/api/estado",
+      "pass": "https://www.admira.store/supercomputer/pc-cocina/api/enlace",
+      "physical": "PC-Cocina (AdmiraNeXT05) · 7 ventiladores con pantalla LCD · consola con sesión en https://www.admira.store/supercomputer/pc-cocina/",
+      "limitations": "Mirar es público; mandar escena o luz pide un pase de 1 h que entrega admira.store en una ventana (sesión allí). Sin el PC en línea, simulación local desde lo último que hacía la máquina.",
+      "tests": [
+        "tests/digital-twins-inventario.test.mjs"
+      ],
+      "help": "https://www.ainimation.studio/digital-twins/help/#admiranext05"
     },
     {
       "id": "taza",
       "name": "PlayerTaza",
       "url": "https://www.ainimation.studio/taza/",
-      "mode": "existing-player"
+      "mode": "existing-player",
+      "physical": "Taza con display integrado · player propio en /taza/ con su configuración y su ayuda",
+      "help": "https://www.ainimation.studio/digital-twins/help/#taza"
     }
   ]
 }

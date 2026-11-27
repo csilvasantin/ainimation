@@ -14,6 +14,21 @@ an open-source agentic video system.
   behaviours). `?play=1` runs it as a projector, without the authoring chrome.
 - `studio-live.html` — **Produce**: a brief in, a real 1080p video out.
 - `capsulas/` — opens an existing capsule in its editor from a Stock link or asset ID.
+- `digital-twins/` — **Digital twins**: thirteen screen-bearing objects as 3D
+  twins tied to their physical counterparts (see below).
+
+## Digital twins
+
+`/digital-twins/` holds one folder per object plus `catalogue.json` (machine-readable,
+one entry per twin with `url`, `mode`, `screen`, `player`/`state`, `physical`, `help`
+and `tests`) and `help/` (ES + EN tutorial, one anchored section per twin, e.g.
+`/digital-twins/help/#iphone-duo`). The shared bar `twin-nav.js` links every twin to
+its own help section. Objects: Corsair Galleon 100 SD, Apple Watch Ultra, iPhone Pro
+Max, SY11-ab e-ink, Galaxy Z Fold5, Galaxy Fold, iPhone Duo (ThinkPad lid and physical
+foldable), the Trio wall, Stream Deck XL, AdmiraNeXT01, AdmiraNeXT05 and PlayerTaza.
+Inventory and closing notes: `docs/digital-twins.md`.
+
+Validation: `node --test tests/digital-twins-inventario.test.mjs tests/*twin*.test.mjs tests/fold5-controls.test.mjs tests/stream-deck-control.test.mjs tests/iphone-duo-*.test.mjs`.
 
 Before Google sign-in, the home navigation shows Interactives, Presentations,
 Sites, Capsules and Login, alongside the language control. Other links appear

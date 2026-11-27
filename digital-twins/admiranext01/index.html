@@ -90,8 +90,7 @@ input[type=range]{width:100%;accent-color:var(--ice)}
 <header class="hud top">
   <div class="brand"><b>AdmiraNeXT01</b><small>LA STORE DE METAHUMAN · 7 VENTILADORES · ADMIRA.TV</small></div>
   <span class="spacer"></span>
-  <div class="estadoCol"><span class="estado" id="estado"><i></i><span id="estadoTxt">Conectando…</span></span>
-  <label class="simbox" title="Prueba el gemelo digital sin METAHUMAN encendido"><input type="checkbox" id="simMode"> Solo gemelo · simulación <small>Digital twin only · sim</small></label></div>
+  <span class="estado" id="estado"><i></i><span id="estadoTxt">Conectando…</span></span>
 </header>
 
 <section class="hud panel izq" aria-label="Pantallas">
@@ -140,7 +139,12 @@ input[type=range]{width:100%;accent-color:var(--ice)}
 import * as THREE from "three";
 import {OrbitControls} from "three/addons/controls/OrbitControls.js";
 
-const API='/supercomputer/api';
+// La API vive en admira.store (este sitio es estático): mirar es público desde este dominio; mandar pide un pase
+// que entrega admira.store tras comprobar la sesión (functions/supercomputer/api · GET enlace), igual que el gemelo
+// de AdmiraNeXT05. Mientras admira.store no abra esa puerta para METAHUMAN, api('estado') falla y el gemelo sigue en
+// simulación: nada se rompe, solo no está en vivo.
+const ORIGEN_API='https://www.admira.store';
+const API=ORIGEN_API+'/supercomputer/api';
 const STOCK='https://api.admira.store/stock/list?limit=300';
 const $=id=>document.getElementById(id);
 
@@ -170,7 +174,53 @@ const DISPOSICION={
 let estado=null, escena={modo:'independiente',ids:{},piezas:[],paso:4,ajuste:'cubrir',columnas:7}, luz={efecto:'fijo',color:'#00d26a',brillo:4,velocidad:2,sigueVideo:false,ventiladores:{}};
 // ── Modo «solo gemelo» (simulación): el gemelo funciona sin el PC real (Carlos, 4-nov-2026) ──
 const SIM_KEY='admira.supercomputer.sim';
-const SIM=true; let simInforme=null;
+// En vivo (Carlos, 26-nov-2026: «lo que pasa en el virtual tiene reflejo en el real y viceversa»): SIM solo vale
+// mientras METAHUMAN no está en línea o la nube no contesta. Lo decide api('estado') en cada refresco.
+let SIM=true, simInforme=null;
+// Pase para mandar (escena y luz): solo en esta pestaña, caduca solo.
+const PASE_KEY='admira.supercomputer.metahuman.pase';
+let pase=null, paseExp=0, paseEmail='';
+try{const g=JSON.parse(sessionStorage.getItem(PASE_KEY)||'null');if(g&&g.pase&&g.exp*1000>Date.now()){pase=g.pase;paseExp=g.exp;paseEmail=g.email||'';}}catch{}
+const paseVigente=()=>!!pase&&paseExp*1000>Date.now()+5000;
+function guardarPase(){try{if(pase)sessionStorage.setItem(PASE_KEY,JSON.stringify({pase,exp:paseExp,email:paseEmail}));else sessionStorage.removeItem(PASE_KEY);}catch{}}
+// Abre la ventana de admira.store que entrega el pase. Hay que llamarla dentro del clic (sin await antes),
+// o el navegador bloquea la ventana.
+function pedirPase(){
+  if(pedirPase.p)return pedirPase.p;
+  const w=window.open(API+'/enlace?o='+encodeURIComponent(location.origin),'admira-enlace','popup,width=460,height=660');
+  return pedirPase.p=new Promise((res,rej)=>{
+    if(!w){pedirPase.p=null;rej(new Error('permite la ventana emergente de admira.store para conectar'));return;}
+    const fin=(f,v)=>{removeEventListener('message',on);clearInterval(vigia);pedirPase.p=null;f(v);};
+    const on=ev=>{
+      if(ev.origin!==ORIGEN_API||ev.source!==w||ev.data?.type!=='admira:supercomputer:pase'||ev.data.maquina!=='metahuman')return;
+      if(ev.data.error){soloLectura=ev.data.error==='read_only';fin(rej,new Error(ev.data.error));return;}
+      if(typeof ev.data.pase!=='string'||!(Number(ev.data.exp)>0)){fin(rej,new Error('pase inválido'));return;}
+      pase=ev.data.pase;paseExp=Number(ev.data.exp);paseEmail=String(ev.data.email||'');soloLectura=false;guardarPase();fin(res,pase);
+    };
+    addEventListener('message',on);
+    const vigia=setInterval(()=>{if(w.closed)fin(rej,new Error('conexión cancelada'));},700);
+  });
+}
+async function apiReal(ruta,cuerpo){
+  const init={cache:'no-store'};
+  if(cuerpo){
+    if(!paseVigente())await pedirPase();   // sin await antes: sigue dentro del clic
+    init.method='POST';init.headers={'Content-Type':'application/json',Authorization:'Bearer '+pase};init.body=JSON.stringify(cuerpo);
+  }
+  const r=await fetch(API+'/'+ruta,init);
+  const d=await r.json().catch(()=>({}));
+  if(r.status===401&&cuerpo){pase=null;guardarPase();throw new Error('el pase caducó: vuelve a pulsar para conectar');}
+  if(!r.ok||d.ok===false)throw new Error(d.error||('HTTP '+r.status));
+  return d;
+}
+let ultimoReal=null;
+function ponerSim(valor){
+  if(SIM===valor)return;
+  SIM=valor;
+  // Al caer a simulación, el gemelo sigue desde lo último que hacía la máquina.
+  if(SIM&&ultimoReal?.escena)simInforme={...(simInforme||{}),escena:ultimoReal.escena,...(ultimoReal.luz?{luz:ultimoReal.luz}:{})};
+  try{actualizarTexturas();}catch{}
+}
 function simAplicar(parte,valor){
   simInforme={...(simInforme||{}),[parte]:parte==='escena'?{...valor,epoch:valor.epoch||Date.now()}:JSON.parse(JSON.stringify(valor))};
   estado={...(estado||{}),informe:{...(estado?.informe||{}),...simInforme}};
@@ -256,7 +306,17 @@ let stock=[], editandoEscena=false, editandoLuz=false, seleccionado=null, soloLe
 const hex=c=>Array.isArray(c)?'#'+c.map(v=>Number(v).toString(16).padStart(2,'0')).join(''):(c||'#ffffff');
 function toast(t,error){const el=$('toast');el.textContent=t;el.className='hud toast show'+(error?' error':'');clearTimeout(toast.t);toast.t=setTimeout(()=>el.className='hud toast',2600);}
 async function api(ruta,cuerpo){
-  if(cuerpo){simAplicar(ruta,cuerpo);return {ok:true};}
+  if(cuerpo){
+    if(SIM){simAplicar(ruta,cuerpo);return {ok:true,sim:true};}
+    return apiReal(ruta,cuerpo);
+  }
+  try{
+    const d=await apiReal('estado');
+    if(d.enLinea){ultimoReal=d.informe||null;ponerSim(false);return d;}
+    // La nube contesta pero el PC está apagado: la simulación arranca de lo último que se pidió.
+    if(!simInforme&&d.deseado?.escena)simInforme={escena:{...d.deseado.escena,epoch:Date.now()},...(d.deseado.luz?{luz:d.deseado.luz}:{})};
+  }catch{}
+  ponerSim(true);
   return {ok:true,enLinea:false,ahora:Date.now(),informe:simInforme||{},deseado:simInforme||{}};
 }
 
@@ -301,8 +361,7 @@ $('aplicarEscena').onclick=async()=>{
   if(escena.modo==='sincro')e.paso=escena.paso;
   if(escena.modo==='identificar')delete e.piezas;
   else if(escena.modo!=='independiente'&&!e.piezas.length){toast('Elige al menos una pieza',true);return;}
-  if(SIM){simAplicar('escena',e);editandoEscena=false;pintarModos();actualizarTexturas();toast('Aplicado en gemelo (sim)');api('escena',e).catch(()=>{});return;}
-  try{$('aplicarEscena').disabled=true;await api('escena',e);editandoEscena=false;toast('Escena enviada a METAHUMAN');refrescar();}
+  try{$('aplicarEscena').disabled=true;await api('escena',e);editandoEscena=false;pintarModos();actualizarTexturas();toast(SIM?'Aplicado en gemelo (sim)':'Escena enviada a METAHUMAN');refrescar();}
   catch(err){toast(soloLectura?'Tu acceso es de solo lectura':'No se pudo enviar: '+err.message,true);}
   finally{$('aplicarEscena').disabled=false;}
 };
@@ -324,11 +383,10 @@ $('sigue').onchange=e=>{luz.sigueVideo=e.target.checked;editandoLuz=true;};
 async function enviarLuz(){
   const ventiladores=Object.fromEntries(Object.entries(luz.ventiladores||{}).map(([n,v])=>[n,{efecto:v.efecto,color:hex((v.colores&&v.colores[0])||v.color),brillo:v.brillo,velocidad:v.velocidad}]));
   const cuerpo={efecto:luz.efecto,color:hex(luz.color),brillo:luz.brillo,velocidad:luz.velocidad,sigueVideo:luz.sigueVideo,ventiladores};
-  if(SIM){simAplicar('luz',cuerpo);api('luz',cuerpo).catch(()=>{});return;}
   await api('luz',cuerpo);
 }
 $('aplicarLuz').onclick=async()=>{
-  try{$('aplicarLuz').disabled=true;await enviarLuz();editandoLuz=false;toast(SIM?'Aplicado en gemelo (sim)':'Iluminación aplicada al gemelo');refrescar();}
+  try{$('aplicarLuz').disabled=true;await enviarLuz();editandoLuz=false;toast(SIM?'Aplicado en gemelo (sim)':'Iluminación enviada a METAHUMAN');refrescar();}
   catch(err){toast(soloLectura?'Tu acceso es de solo lectura':'No se pudo enviar: '+err.message,true);}
   finally{$('aplicarLuz').disabled=false;}
 };
@@ -347,7 +405,8 @@ function pintarDetalle(){
   if(!seleccionado)return;
   const n=seleccionado,f=(estado?.informe?.fans||[]).find(x=>x.n===n)||{},e=estado?.informe?.escena;
   $('dTit').textContent='Ventilador '+n;
-  $('dImg').onerror=()=>{if(SIM){$('dImg').onerror=null;$('dImg').src=simPlaceholder(n).toDataURL();}};$('dImg').src=SIM?simPlaceholder(n).toDataURL():API+'/miniatura/'+n+'.jpg?t='+Date.now();
+  $('dImg').onerror=()=>{$('dImg').onerror=null;$('dImg').src=simPlaceholder(n).toDataURL();};
+  if(SIM)$('dImg').src=simPlaceholder(n).toDataURL();else{$('dImg').crossOrigin='anonymous';$('dImg').src=API+'/miniatura/'+n+'.jpg?t='+Date.now();}
   const pieza=e?(e.modo==='independiente'?(e.ids?.[n]||[])[0]:e.piezas?.[0]):null;
   const filas=[['Puerto · posición',f.port!=null?`${f.port} · ${f.index}`:'—'],['RPM',f.rpm??'—'],['Fotogramas/s',f.fps??'—'],['Enviados',f.sent??'—'],['Errores USB',f.errors??'—'],['Modo',e?.modo||'—'],['Pieza',pieza?piezaTxt(pieza):'Playlist del canal']];
   $('dKv').innerHTML=filas.map(([k,v])=>`<div class="kv"><span>${k}</span><b>${String(v).replace(/[<&]/g,'')}</b></div>`).join('');
@@ -387,7 +446,7 @@ const aio=new THREE.Mesh(new THREE.CylinderGeometry(.42,.42,.3,40),new THREE.Mes
 const radiador=new THREE.Mesh(new THREE.BoxGeometry(1.5,.22,4.4),new THREE.MeshStandardMaterial({color:0x0d1322,roughness:.5,metalness:.6}));radiador.position.set(-.2,H-.3,-.2);caja.add(radiador);
 for(const z of [-1.65,-.2,1.25]){const r=new THREE.Mesh(new THREE.TorusGeometry(.6,.03,8,48),new THREE.MeshBasicMaterial({color:0x4a3a8a}));r.rotation.x=Math.PI/2;r.position.set(-.2,H-.43,z);caja.add(r);}
 // Ventiladores
-const loader=new THREE.TextureLoader();loader.setCrossOrigin('use-credentials');
+const loader=new THREE.TextureLoader();loader.setCrossOrigin('anonymous');   // la API es pública para mirar: sin cookies entre dominios
 const vents={};
 function crearVentilador(n){
   const g=new THREE.Group(),d=DISPOSICION[n];
@@ -410,10 +469,10 @@ function actualizarTexturas(){
   for(let n=1;n<=7;n++){
     const v=vents[n];
     if(SIM){const tex=new THREE.CanvasTexture(simPlaceholder(n));tex.colorSpace=THREE.SRGBColorSpace;v.tex?.dispose();v.tex=tex;v.lcdMat.map=tex;v.lcdMat.color.set(0xffffff);v.lcdMat.needsUpdate=true;const im=document.querySelector(`img[data-mini="${n}"]`);if(im){im.onerror=null;im.src=simPlaceholder(n).toDataURL();}continue;}
-    loader.load(API+'/miniatura/'+n+'.jpg?t='+Date.now(),tex=>{tex.colorSpace=THREE.SRGBColorSpace;v.tex?.dispose();v.tex=tex;v.lcdMat.map=tex;v.lcdMat.color.set(0xffffff);v.lcdMat.needsUpdate=true;},undefined,()=>{if(!SIM)return;const tex=new THREE.CanvasTexture(simPlaceholder(n));tex.colorSpace=THREE.SRGBColorSpace;v.tex?.dispose();v.tex=tex;v.lcdMat.map=tex;v.lcdMat.color.set(0xffffff);v.lcdMat.needsUpdate=true;});
-    const img=document.querySelector(`img[data-mini="${n}"]`);if(img){img.onerror=()=>{if(SIM){img.onerror=null;img.src=simPlaceholder(n).toDataURL();}};img.src=API+'/miniatura/'+n+'.jpg?t='+Date.now();}
+    loader.load(API+'/miniatura/'+n+'.jpg?t='+Date.now(),tex=>{tex.colorSpace=THREE.SRGBColorSpace;v.tex?.dispose();v.tex=tex;v.lcdMat.map=tex;v.lcdMat.color.set(0xffffff);v.lcdMat.needsUpdate=true;},undefined,()=>{const tex=new THREE.CanvasTexture(simPlaceholder(n));tex.colorSpace=THREE.SRGBColorSpace;v.tex?.dispose();v.tex=tex;v.lcdMat.map=tex;v.lcdMat.color.set(0xffffff);v.lcdMat.needsUpdate=true;});
+    const img=document.querySelector(`img[data-mini="${n}"]`);if(img){img.crossOrigin='anonymous';img.onerror=()=>{img.onerror=null;img.src=simPlaceholder(n).toDataURL();};img.src=API+'/miniatura/'+n+'.jpg?t='+Date.now();}
   }
-  if(seleccionado)$('dImg').src=SIM?simPlaceholder(seleccionado).toDataURL():API+'/miniatura/'+seleccionado+'.jpg?t='+Date.now();
+  if(seleccionado){if(SIM)$('dImg').src=simPlaceholder(seleccionado).toDataURL();else{$('dImg').crossOrigin='anonymous';$('dImg').onerror=()=>{$('dImg').onerror=null;$('dImg').src=simPlaceholder(seleccionado).toDataURL();};$('dImg').src=API+'/miniatura/'+seleccionado+'.jpg?t='+Date.now();}}
 }
 // Clic en un ventilador 3D → detalle
 const ray=new THREE.Raycaster(),ptr=new THREE.Vector2();
@@ -462,11 +521,9 @@ bucle();
 async function refrescar(){
   try{
     estado=await api('estado');
-    if(SIM&&!estado.enLinea&&simInforme)estado.informe={...(estado.informe||{}),...simInforme};
-    const on=estado.enLinea,visto=estado.visto?Math.round((estado.ahora-estado.visto)/1000):null;
-    $('estado').className='estado sim';
-    $('estadoTxt').textContent=on?'Vista previa local':(visto==null?'Vista previa local':'Vista previa local · simulación');
-    if(SIM&&!on){$('estado').className='estado sim';$('estadoTxt').textContent='Vista previa local · simulación';}
+    const on=estado.enLinea;
+    $('estado').className=on?'estado on':'estado sim';
+    $('estadoTxt').textContent=on?('En vivo · AdmiraNeXT01'+(paseVigente()?' · control'+(paseEmail?' · '+paseEmail:''):' · mirando')):'Simulación · AdmiraNeXT01 no está en línea';
     const d=estado.deseado||{},inf=estado.informe||{};
     // Hora de METAHUMAN vista desde aquí: su reloj no tiene por qué coincidir con el del navegador.
     if(inf.at&&estado.visto)desfasePC=(inf.at-estado.visto)-(Date.now()-estado.ahora);
@@ -491,9 +548,7 @@ async function cargarStock(){
   catch{stock=[];}
   pintarModos();
 }
-$('simMode').checked=SIM;
-$('simMode').disabled=true;
-if(SIM){simAplicar('luz',luz);simAplicar('escena',escena);}
+simAplicar('luz',luz);simAplicar('escena',escena);
 pintarModos();pintarLuz();cargarStock();refrescar();
 setInterval(refrescar,2500);setInterval(actualizarTexturas,3000);actualizarTexturas();
 </script>
