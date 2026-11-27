@@ -9,8 +9,10 @@ test('el gemelo conserva la consulta pública y limita el control al panel local
   assert.doesNotMatch(html, /lanzadera\/|api\/pulsar|control\/admiradesk\/api/);
   for (const m of html.matchAll(/fetch\(([^,)]+)/g)) assert.match(m[1], /LIVE_URL|ESTADO_URL/);
   assert.match(html, /e.origin!==MANDO_LOCAL\|\|e.source!==ventanaXL/);
-  assert.match(html, /estadoXL\?\.habilitadas.includes\(pos\)/);
-  assert.match(html, /pedirXL\('pulsar',\{pos,revision:estadoXL.revision\}\)/);
+  // Desde #191/#192 la página visible (perfil o sala Terminator) decide qué teclas se pueden pulsar, y la pulsación
+  // lleva la revisión del mando para que una doble pulsación no se cuele.
+  assert.match(html, /visible\.habilitadas\.includes\(pos\)/);
+  assert.match(html, /pedirXL\(sala\?'terminator':'pulsar',\{\s*pos,revision:sala\?\.revision\|\|visible\.revision,revisionMando:visible\.terminator\?\.revision\s*\}\)/);
 });
 
 test('con la página AdmiraDesk activa remite al gemelo de control con login', () => {
