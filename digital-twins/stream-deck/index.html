@@ -697,7 +697,9 @@ async function pulsarXL(pos,desdeSala=false){
   if(desdeSala?!sala?.teclas[pos]?.action:sala||!visible.habilitadas.includes(pos))return;
   enviandoXL=true;
   try{
-    const respuesta=await pedirXL(sala?'terminator':'pulsar',{pos,revision:sala?.revision||visible.revision});
+    const respuesta=await pedirXL(sala?'terminator':'pulsar',{
+      pos,revision:sala?.revision||visible.revision,revisionMando:visible.terminator?.revision
+    });
     if(estadoXL===visible&&respuesta.terminator){
       estadoXL={...visible,terminator:respuesta.terminator};
       pintarSala(estadoXL);
