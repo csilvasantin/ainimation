@@ -48,6 +48,14 @@ body{background:radial-gradient(ellipse at 50% 0,#14234a,#04060d 62%);color:var(
 .fotos{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
 .foto{width:100%;border-radius:10px;border:1px solid var(--line);display:block;aspect-ratio:4/3;object-fit:cover;background:#0a0e16}
 .fotos .foto:first-child{aspect-ratio:3/4}
+.sala{top:calc(70px + var(--xs-bar-h,0px));right:16px;width:min(690px,calc(100% - 32px));z-index:7}
+.sala h2{color:var(--ink);font:700 18px/1.2 system-ui,sans-serif;letter-spacing:0}
+.sala-grid{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:4px}
+.sala-grid button{aspect-ratio:1;min-width:0;overflow-wrap:anywhere;padding:2px;color:#f5f2ff;background:#17152a;border:1px solid #625d7a;border-radius:7px;font:600 clamp(.51rem,1.4vw,.78rem)/1.13 system-ui,sans-serif}
+.sala-grid button:enabled{cursor:pointer;border-color:#b8a9ff}
+.sala-grid button:focus-visible{outline:2px solid var(--ice);outline-offset:2px}
+.sala-grid button:empty{visibility:hidden}
+.sala-grid small{display:block;color:#d4cbf7;font-size:.92em;font-weight:400;margin-top:3px}
 @media(max-width:800px){.izq{left:8px;right:8px;width:auto;max-height:34vh}.brand small,.hint{display:none}}
 </style>
 <script>window.XPACE_SHELL={section:{es:'Objeto · Stream Deck',en:'Object · Stream Deck'},options:[{href:'https://admira.tv/',es:'admira.tv',en:'admira.tv'},{href:'/admira-xp/',es:'Gemelo Admira XP',en:'Admira XP twin'},{href:'/objeto/',es:'Objetos',en:'Objects'}]};</script>
@@ -78,6 +86,7 @@ body{background:radial-gradient(ellipse at 50% 0,#14234a,#04060d 62%);color:var(
   <div class="kv"><span>Perfil</span><b id="perfilInfo">—</b></div>
   <div class="kv"><span>Página</span><b id="paginaInfo">—</b></div>
   <button type="button" id="conectarXL">Conectar mando local</button><p id="controlXL" role="status"></p>
+  <button type="button" id="abrirSala" hidden>Abrir Terminator</button>
   <p class="desc" id="admiradeskAviso" hidden>Página <b>AdmiraDesk</b>: sus teclas las pinta el plugin de la lanzadera y este gemelo público no las ve. La cara exacta, y el control, están en el <a href="https://www.admira.store/control/admiradesk/" rel="noopener">gemelo de control</a> (con login).</p>
   <div class="kv"><span>Visto</span><b id="vistoInfo">—</b></div>
   <div class="kv"><span>Reposo</span><b id="reposoInfo">—</b></div>
@@ -88,6 +97,12 @@ body{background:radial-gradient(ellipse at 50% 0,#14234a,#04060d 62%);color:var(
     <img class="foto" src="perfil-metahuman.png" alt="Perfil AdmiraNeXT01 (antes METAHUMAN): slab + stand cuña + teclas claras">
     <img class="foto" src="metahuman-desk.jpg" alt="Stream Deck XL en el escritorio de AdmiraNeXT01 (antes METAHUMAN) con Indiana Jones">
   </div>
+</section>
+<section class="hud panel sala" id="salaPanel" hidden aria-labelledby="salaTitulo">
+  <h2 id="salaTitulo">Terminator · Planeta 7</h2>
+  <p id="salaMando" role="status"></p>
+  <div class="sala-grid" id="salaTeclas" role="group" aria-label="Teclas Terminator"></div>
+  <p id="salaRespuesta" role="status"></p>
 </section>
 <aside class="hud reposoCard" id="reposoCard" aria-live="polite" aria-label="Pieza en emisión en reposo">
   <img id="reposoPoster" alt="" hidden>
@@ -577,11 +592,49 @@ function pintarReposo(r){
 const MANDO_LOCAL='http://127.0.0.1:18742';
 let ventanaXL, puertoXL, estadoXL, revisionCaraXL, secuenciaXL=0, enviandoXL=false;
 const peticionesXL=new Map();
+const botonesSala=new Map();
+let revisionSala=null;
+for(let fila=0;fila<4;fila++){
+  for(let col=0;col<8;col++){
+    const pos=col+','+fila;
+    const boton=document.createElement('button');
+    boton.type='button';
+    boton.addEventListener('click',()=>pulsarXL(pos,true));
+    botonesSala.set(pos,boton);
+    $('salaTeclas').append(boton);
+  }
+}
+function entradaSala(estado){
+  return estado?.habilitadas.find(pos=>estado.teclas[pos]?.t==='Terminator');
+}
+function pintarSala(estado){
+  const sala=estado?.terminator;
+  const abierta=Boolean(sala?.abierta&&!estado?.reposo);
+  $('salaPanel').hidden=!abierta;
+  $('abrirSala').hidden=abierta||!entradaSala(estado);
+  if(!abierta||revisionSala===sala.revision)return;
+  revisionSala=sala.revision;
+  $('salaMando').textContent=(sala.operador||'Mando libre')+(sala.curso?' · '+sala.curso.etiqueta:'');
+  for(const [pos,boton] of botonesSala){
+    const tecla=sala.teclas[pos];
+    boton.disabled=!tecla?.action;
+    boton.replaceChildren();
+    if(!tecla)continue;
+    const detalle=document.createElement('small');
+    detalle.textContent=tecla.result||tecla.detail||'';
+    boton.append(tecla.label,detalle);
+  }
+}
+$('abrirSala').addEventListener('click',()=>{
+  const pos=entradaSala(estadoXL);
+  if(pos)pulsarXL(pos);
+});
 $('conectarXL').addEventListener('click',()=>{
   if(puertoXL){
     puertoXL.close();
     puertoXL=null;
     estadoXL=null;
+    pintarSala(null);
     revisionCaraXL=null;
     liveEtag=null;
     $('controlXL').textContent='';
@@ -630,22 +683,34 @@ async function actualizarXL(){
     revisionCaraXL=estado.revision;
   }
   estadoXL=estado;
+  pintarSala(estado);
   liveEtag=null;
   keysMeta=estado.teclas||{};
   pintarEstado(true,estado.reposo?{playlist:{screen:'admira-tv-streamdeck',name:'admira.tv player'}}:null);
   pintarFicha({enLinea:true,pageName:estado.pagina,keyCount:Object.keys(keysMeta).length});
   $('controlXL').textContent=estado.reposo?'XL en reposo':'Mando local conectado';
 }
-async function pulsarXL(pos){
-  if(enviandoXL||!puertoXL||!estadoXL?.habilitadas.includes(pos))return;
+async function pulsarXL(pos,desdeSala=false){
+  if(enviandoXL||!puertoXL||!estadoXL)return;
+  const visible=estadoXL;
+  const sala=desdeSala&&visible.terminator?.abierta?visible.terminator:null;
+  if(desdeSala?!sala?.teclas[pos]?.action:sala||!visible.habilitadas.includes(pos))return;
   enviandoXL=true;
   try{
-    const respuesta=await pedirXL('pulsar',{pos,revision:estadoXL.revision});
+    const respuesta=await pedirXL(sala?'terminator':'pulsar',{pos,revision:sala?.revision||visible.revision});
+    if(estadoXL===visible&&respuesta.terminator){
+      estadoXL={...visible,terminator:respuesta.terminator};
+      pintarSala(estadoXL);
+    }
     if(respuesta.confirmar){
       $('controlXL').textContent='Pulsa Liberar todos de nuevo en 4 segundos para confirmar.';
       toast($('controlXL').textContent);
-    }else toast('Pulsación enviada al XL');
-  }catch(e){toast(e.message);}
+      $('salaRespuesta').textContent=$('controlXL').textContent;
+    }else{
+      $('salaRespuesta').textContent='';
+      toast('Pulsación enviada al XL');
+    }
+  }catch(e){$('salaRespuesta').textContent=e.message;toast(e.message);}
   finally{enviandoXL=false;}
 }
 async function bajarCara(){
